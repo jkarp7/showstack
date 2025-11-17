@@ -17,6 +17,7 @@ interface ProjectStore {
   currentProject: Project | null;
   loadProjects: () => Promise<void>;
   createProject: (name: string, description?: string, logoPath?: string, enabledModules?: string[]) => Promise<Project>;
+  deleteProject: (projectId: string) => Promise<void>;
   setCurrentProject: (projectId: string) => void;
 }
 
@@ -59,6 +60,24 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       return project;
     } catch (error) {
       console.error('Failed to create project:', error);
+      throw error;
+    }
+  },
+
+  deleteProject: async (projectId: string) => {
+    if (!hasAPI()) {
+      console.warn('API not available');
+      throw new Error('API not available');
+    }
+
+    try {
+      await window.api.projects.delete(projectId);
+      set((state) => ({
+        projects: state.projects.filter((p) => p.id !== projectId),
+        currentProject: state.currentProject?.id === projectId ? null : state.currentProject,
+      }));
+    } catch (error) {
+      console.error('Failed to delete project:', error);
       throw error;
     }
   },

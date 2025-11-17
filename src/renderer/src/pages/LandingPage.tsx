@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { ModuleCard } from '../components/ModuleCard';
 import { ProjectCard } from '../components/ProjectCard';
 import { NewProjectDialog } from '../components/NewProjectDialog';
-import { useProjectStore } from '../store/projectStore';
+import { DeleteProjectDialog } from '../components/DeleteProjectDialog';
+import { useProjectStore, Project } from '../store/projectStore';
 
 export function LandingPage() {
   const navigate = useNavigate();
-  const { projects, loadProjects, createProject, setCurrentProject } = useProjectStore();
+  const { projects, loadProjects, createProject, deleteProject, setCurrentProject } = useProjectStore();
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
 
   useEffect(() => {
     loadProjects();
@@ -26,6 +28,16 @@ export function LandingPage() {
     setCurrentProject(projectId);
     // Navigate to the last used module or default to production
     navigate('/modules/production');
+  };
+
+  const handleDeleteProject = async () => {
+    if (projectToDelete) {
+      try {
+        await deleteProject(projectToDelete.id);
+      } catch (error) {
+        console.error('Failed to delete project:', error);
+      }
+    }
   };
 
   return (
@@ -83,6 +95,7 @@ export function LandingPage() {
                     key={project.id}
                     project={project}
                     onClick={() => handleOpenProject(project.id)}
+                    onDelete={() => setProjectToDelete(project)}
                   />
                 ))}
               </div>
@@ -150,6 +163,14 @@ export function LandingPage() {
         isOpen={isNewProjectDialogOpen}
         onClose={() => setIsNewProjectDialogOpen(false)}
         onCreate={handleCreateProject}
+      />
+
+      {/* Delete Project Dialog */}
+      <DeleteProjectDialog
+        isOpen={projectToDelete !== null}
+        project={projectToDelete}
+        onClose={() => setProjectToDelete(null)}
+        onConfirm={handleDeleteProject}
       />
     </div>
   );
