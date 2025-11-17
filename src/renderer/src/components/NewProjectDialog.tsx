@@ -3,21 +3,26 @@ import { useState } from 'react';
 interface NewProjectDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (name: string, description: string) => void;
+  onCreate: (name: string, description: string, logoPath: string, enabledModules: string[]) => void;
 }
 
 export function NewProjectDialog({ isOpen, onClose, onCreate }: NewProjectDialogProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [logoPath, setLogoPath] = useState('');
+  const [enabledModules, setEnabledModules] = useState<string[]>(['production']); // Production is default/unlocked
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
-      onCreate(name.trim(), description.trim());
+      onCreate(name.trim(), description.trim(), logoPath, enabledModules);
+      // Reset form
       setName('');
       setDescription('');
+      setLogoPath('');
+      setEnabledModules(['production']);
       onClose();
     }
   };
@@ -25,15 +30,33 @@ export function NewProjectDialog({ isOpen, onClose, onCreate }: NewProjectDialog
   const handleCancel = () => {
     setName('');
     setDescription('');
+    setLogoPath('');
+    setEnabledModules(['production']);
     onClose();
+  };
+
+  const handleLogoUpload = () => {
+    // TODO: Implement actual file picker via Electron dialog
+    // For now, just placeholder
+    const fakePath = `/path/to/logo-${Date.now()}.png`;
+    setLogoPath(fakePath);
+  };
+
+  const toggleModule = (module: string) => {
+    if (enabledModules.includes(module)) {
+      setEnabledModules(enabledModules.filter(m => m !== module));
+    } else {
+      setEnabledModules([...enabledModules, module]);
+    }
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-lg p-6">
+      <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-2xl p-6">
         <h2 className="text-2xl font-bold mb-6">Create New Project</h2>
 
         <form onSubmit={handleSubmit}>
+          {/* Project Name */}
           <div className="mb-4">
             <label htmlFor="project-name" className="block text-sm font-medium text-gray-300 mb-2">
               Project Name <span className="text-red-500">*</span>
@@ -50,7 +73,8 @@ export function NewProjectDialog({ isOpen, onClose, onCreate }: NewProjectDialog
             />
           </div>
 
-          <div className="mb-6">
+          {/* Description */}
+          <div className="mb-4">
             <label htmlFor="project-description" className="block text-sm font-medium text-gray-300 mb-2">
               Description
             </label>
@@ -64,6 +88,94 @@ export function NewProjectDialog({ isOpen, onClose, onCreate }: NewProjectDialog
             />
           </div>
 
+          {/* Logo Upload */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Show Logo
+            </label>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleLogoUpload}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition"
+              >
+                {logoPath ? 'Change Logo' : 'Upload Logo'}
+              </button>
+              {logoPath && (
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <span>✓</span>
+                  <span className="truncate max-w-xs">{logoPath}</span>
+                  <button
+                    type="button"
+                    onClick={() => setLogoPath('')}
+                    className="text-red-500 hover:text-red-400"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Used as project preview image (JPG, PNG recommended)
+            </p>
+          </div>
+
+          {/* Module Selection */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-300 mb-3">
+              Modules to Use
+            </label>
+            <div className="space-y-2">
+              <label className="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-650">
+                <input
+                  type="checkbox"
+                  checked={enabledModules.includes('design')}
+                  onChange={() => toggleModule('design')}
+                  disabled={true}
+                  className="w-4 h-4"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">ShowStack:Design</span>
+                    <span className="px-2 py-0.5 bg-gray-600 text-xs rounded">Locked</span>
+                  </div>
+                  <p className="text-xs text-gray-400">Lighting design & visualization</p>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-650">
+                <input
+                  type="checkbox"
+                  checked={enabledModules.includes('production')}
+                  onChange={() => toggleModule('production')}
+                  className="w-4 h-4"
+                />
+                <div className="flex-1">
+                  <div className="font-medium">ShowStack:Production</div>
+                  <p className="text-xs text-gray-400">Fixture management & technical planning</p>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-650">
+                <input
+                  type="checkbox"
+                  checked={enabledModules.includes('tour')}
+                  onChange={() => toggleModule('tour')}
+                  disabled={true}
+                  className="w-4 h-4"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">ShowStack:Tour</span>
+                    <span className="px-2 py-0.5 bg-gray-600 text-xs rounded">Locked</span>
+                  </div>
+                  <p className="text-xs text-gray-400">Tour scheduling & logistics</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {/* Buttons */}
           <div className="flex justify-end gap-3">
             <button
               type="button"
@@ -75,7 +187,7 @@ export function NewProjectDialog({ isOpen, onClose, onCreate }: NewProjectDialog
             <button
               type="submit"
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-medium transition"
-              disabled={!name.trim()}
+              disabled={!name.trim() || enabledModules.length === 0}
             >
               Create Project
             </button>

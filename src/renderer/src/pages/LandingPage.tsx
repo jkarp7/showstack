@@ -14,9 +14,9 @@ export function LandingPage() {
     loadProjects();
   }, [loadProjects]);
 
-  const handleCreateProject = async (name: string, description: string) => {
+  const handleCreateProject = async (name: string, description: string, logoPath: string, enabledModules: string[]) => {
     try {
-      await createProject(name, description);
+      await createProject(name, description, logoPath, enabledModules);
     } catch (error) {
       console.error('Failed to create project:', error);
     }

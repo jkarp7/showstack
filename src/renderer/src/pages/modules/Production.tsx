@@ -25,7 +25,7 @@ export function Production() {
               onClick={() => navigate('/modules')}
               className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
             >
-              ← Back to Modules
+              ← Home
             </button>
             <div>
               <h1 className="text-2xl font-bold">ShowStack:Production</h1>

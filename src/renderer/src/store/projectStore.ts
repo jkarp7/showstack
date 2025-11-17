@@ -6,6 +6,8 @@ export interface Project {
   description?: string;
   venue?: string;
   designer?: string;
+  logo_path?: string;
+  enabled_modules?: string[]; // ['design', 'production', 'tour']
   created_at: number;
   updated_at: number;
 }
@@ -14,7 +16,7 @@ interface ProjectStore {
   projects: Project[];
   currentProject: Project | null;
   loadProjects: () => Promise<void>;
-  createProject: (name: string, description?: string) => Promise<Project>;
+  createProject: (name: string, description?: string, logoPath?: string, enabledModules?: string[]) => Promise<Project>;
   setCurrentProject: (projectId: string) => void;
 }
 
@@ -34,23 +36,22 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     }
 
     try {
-      // TODO: Implement projects.getAll IPC handler
-      // For now, get the default project
+      const allProjects = await window.api.projects.getAll();
       const currentProject = await window.api.projects.getCurrent();
-      set({ currentProject, projects: [currentProject] });
+      set({ currentProject, projects: allProjects });
     } catch (error) {
       console.error('Failed to load projects:', error);
     }
   },
 
-  createProject: async (name: string, description?: string) => {
+  createProject: async (name: string, description?: string, logoPath?: string, enabledModules?: string[]) => {
     if (!hasAPI()) {
       console.warn('API not available');
       throw new Error('API not available');
     }
 
     try {
-      const project = await window.api.projects.create(name);
+      const project = await window.api.projects.create(name, description, logoPath, enabledModules);
       set((state) => ({
         projects: [project, ...state.projects],
         currentProject: project,

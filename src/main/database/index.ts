@@ -29,6 +29,9 @@ export async function initDatabase(): Promise<void> {
   // Create tables
   db.exec(SCHEMA);
 
+  // Run migrations for existing databases
+  runMigrations(db);
+
   // Create default project if none exists
   const result = db.exec('SELECT COUNT(*) as count FROM projects');
   const projectCount = result[0]?.values[0]?.[0] || 0;
@@ -45,6 +48,22 @@ export async function initDatabase(): Promise<void> {
   saveDatabase();
 
   console.log('✅ Database initialized:', dbPath);
+}
+
+function runMigrations(db: Database): void {
+  // Check if logo_path column exists
+  const tableInfo = db.exec("PRAGMA table_info(projects)");
+  const columns = tableInfo[0]?.values.map(row => row[1]) || [];
+
+  if (!columns.includes('logo_path')) {
+    console.log('Running migration: Adding logo_path to projects');
+    db.run('ALTER TABLE projects ADD COLUMN logo_path TEXT');
+  }
+
+  if (!columns.includes('enabled_modules')) {
+    console.log('Running migration: Adding enabled_modules to projects');
+    db.run('ALTER TABLE projects ADD COLUMN enabled_modules TEXT');
+  }
 }
 
 export function getDatabase(): Database {

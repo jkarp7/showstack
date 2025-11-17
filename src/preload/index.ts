@@ -35,7 +35,8 @@ contextBridge.exposeInMainWorld('api', {
     getAll: () => ipcRenderer.invoke('projects:getAll'),
     getCurrent: () => ipcRenderer.invoke('projects:getCurrent'),
     getById: (id: string) => ipcRenderer.invoke('projects:getById', id),
-    create: (name: string, description?: string) => ipcRenderer.invoke('projects:create', name, description),
+    create: (name: string, description?: string, logoPath?: string, enabledModules?: string[]) =>
+      ipcRenderer.invoke('projects:create', name, description, logoPath, enabledModules),
     update: (id: string, updates: any) => ipcRenderer.invoke('projects:update', id, updates),
     delete: (id: string) => ipcRenderer.invoke('projects:delete', id)
   }
@@ -54,7 +55,7 @@ export interface ElectronAPI {
     getAll: () => Promise<any[]>;
     getCurrent: () => Promise<any>;
     getById: (id: string) => Promise<any>;
-    create: (name: string, description?: string) => Promise<any>;
+    create: (name: string, description?: string, logoPath?: string, enabledModules?: string[]) => Promise<any>;
     update: (id: string, updates: any) => Promise<any>;
     delete: (id: string) => Promise<void>;
   };

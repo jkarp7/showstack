@@ -12,7 +12,7 @@ export function Tour() {
               onClick={() => navigate('/modules')}
               className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
             >
-              ← Back to Modules
+              ← Home
             </button>
             <h1 className="text-2xl font-bold">ShowStack:Tour</h1>
           </div>

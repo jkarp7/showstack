@@ -20,9 +20,17 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
       onClick={onClick}
       className="relative p-6 rounded-lg border-2 border-gray-700 bg-gray-800 hover:border-blue-500 hover:bg-gray-750 transition-all text-left group"
     >
-      {/* Project Icon/Preview */}
-      <div className="mb-4 flex items-center justify-center h-32 bg-gray-700 rounded-lg group-hover:bg-gray-650 transition">
-        <span className="text-4xl">📁</span>
+      {/* Project Logo/Preview */}
+      <div className="mb-4 flex items-center justify-center h-32 bg-gray-700 rounded-lg group-hover:bg-gray-650 transition overflow-hidden">
+        {project.logo_path ? (
+          <img
+            src={project.logo_path}
+            alt={`${project.name} logo`}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <span className="text-4xl">📁</span>
+        )}
       </div>
 
       {/* Project Info */}

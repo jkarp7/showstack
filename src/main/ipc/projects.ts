@@ -37,9 +37,9 @@ export function registerProjectHandlers(): void {
     }
   });
 
-  ipcMain.handle('projects:create', async (_event, name: string, description?: string) => {
+  ipcMain.handle('projects:create', async (_event, name: string, description?: string, logoPath?: string, enabledModules?: string[]) => {
     try {
-      return createProject(name, description);
+      return createProject(name, description, logoPath, enabledModules);
     } catch (error) {
       console.error('Error creating project:', error);
       throw error;

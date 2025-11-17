@@ -6,6 +6,8 @@ export const SCHEMA = `
     description TEXT,
     venue TEXT,
     designer TEXT,
+    logo_path TEXT,
+    enabled_modules TEXT, -- JSON array of module names
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL
   );
