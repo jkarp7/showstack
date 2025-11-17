@@ -94,8 +94,8 @@ export function VirtualDataGrid({
   return (
     <div className="h-full flex flex-col bg-gray-900">
       {/* Column Headers */}
-      <div className="flex items-center bg-gray-800 border-b border-gray-700" style={{ height: HEADER_HEIGHT }}>
-        <div className="w-12 flex items-center justify-center">
+      <div className="flex items-center bg-gray-800 border-b border-gray-700 overflow-y-scroll" style={{ height: HEADER_HEIGHT }}>
+        <div className="w-12 flex items-center justify-center flex-shrink-0">
           <input
             type="checkbox"
             checked={selectedRows.size === fixtures.length && fixtures.length > 0}
@@ -109,22 +109,22 @@ export function VirtualDataGrid({
             className="w-4 h-4"
           />
         </div>
-        <div className="w-16 px-2 font-semibold text-sm text-gray-300">Pos</div>
-        <div className="w-16 px-2 font-semibold text-sm text-gray-300">Unit#</div>
-        <div className="w-64 px-2 font-semibold text-sm text-gray-300">Type</div>
-        <div className="w-48 px-2 font-semibold text-sm text-gray-300">Purpose</div>
-        <div className="w-20 px-2 font-semibold text-sm text-gray-300">Chan</div>
-        <div className="w-20 px-2 font-semibold text-sm text-gray-300">Dim</div>
-        <div className="w-20 px-2 font-semibold text-sm text-gray-300">Ckt</div>
-        <div className="w-24 px-2 font-semibold text-sm text-gray-300">Color</div>
-        <div className="w-24 px-2 font-semibold text-sm text-gray-300">Location</div>
+        <div className="w-16 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Position</div>
+        <div className="w-16 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Unit#</div>
+        <div className="w-64 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Type</div>
+        <div className="w-48 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Purpose</div>
+        <div className="w-20 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Chan</div>
+        <div className="w-20 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Dim</div>
+        <div className="w-20 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Ckt</div>
+        <div className="w-24 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Color</div>
+        <div className="w-24 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Location</div>
         <div className="flex-1 px-2 font-semibold text-sm text-gray-300">Notes</div>
       </div>
 
       {/* Virtual Scrolling Container */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-auto"
+        className="flex-1 overflow-y-scroll"
         onScroll={handleScroll}
       >
         <div style={{ height: totalHeight, position: 'relative' }}>

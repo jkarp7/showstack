@@ -21,7 +21,7 @@ export const VirtualRow = memo(function VirtualRow({
 
   return (
     <div className={rowClass} onClick={onClick}>
-      <div className="w-12 flex items-center justify-center">
+      <div className="w-12 flex items-center justify-center flex-shrink-0">
         <input
           type="checkbox"
           checked={isSelected}
@@ -33,47 +33,47 @@ export const VirtualRow = memo(function VirtualRow({
       <EditableCell
         value={fixture.position || ''}
         onChange={(val) => onCellEdit(fixture.id, 'position', val)}
-        className="w-16"
+        className="w-16 flex-shrink-0"
       />
       <EditableCell
         value={fixture.unit?.toString() || ''}
         onChange={(val) => onCellEdit(fixture.id, 'unit', val)}
-        className="w-16"
+        className="w-16 flex-shrink-0"
       />
       <EditableCell
         value={fixture.type || ''}
         onChange={(val) => onCellEdit(fixture.id, 'type', val)}
-        className="w-64"
+        className="w-64 flex-shrink-0"
       />
       <EditableCell
         value={fixture.purpose || ''}
         onChange={(val) => onCellEdit(fixture.id, 'purpose', val)}
-        className="w-48"
+        className="w-48 flex-shrink-0"
       />
       <EditableCell
         value={fixture.channel || ''}
         onChange={(val) => onCellEdit(fixture.id, 'channel', val)}
-        className="w-20"
+        className="w-20 flex-shrink-0"
       />
       <EditableCell
         value={fixture.dimmer || ''}
         onChange={(val) => onCellEdit(fixture.id, 'dimmer', val)}
-        className="w-20"
+        className="w-20 flex-shrink-0"
       />
       <EditableCell
         value={fixture.circuit || ''}
         onChange={(val) => onCellEdit(fixture.id, 'circuit', val)}
-        className="w-20"
+        className="w-20 flex-shrink-0"
       />
       <EditableCell
         value={fixture.color || ''}
         onChange={(val) => onCellEdit(fixture.id, 'color', val)}
-        className="w-24"
+        className="w-24 flex-shrink-0"
       />
       <EditableCell
         value={fixture.location || ''}
         onChange={(val) => onCellEdit(fixture.id, 'location', val)}
-        className="w-24"
+        className="w-24 flex-shrink-0"
       />
       <EditableCell
         value={fixture.notes || ''}
