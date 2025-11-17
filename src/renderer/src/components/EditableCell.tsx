@@ -9,11 +9,11 @@ interface EditableCellProps {
 
 export function EditableCell({ value, onChange, className }: EditableCellProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(value);
+  const [editValue, setEditValue] = useState(value || '');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setEditValue(value);
+    setEditValue(value || '');
   }, [value]);
 
   useEffect(() => {

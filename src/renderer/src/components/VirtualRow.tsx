@@ -31,7 +31,7 @@ export const VirtualRow = memo(function VirtualRow({
         />
       </div>
       <EditableCell
-        value={fixture.position}
+        value={fixture.position || ''}
         onChange={(val) => onCellEdit(fixture.id, 'position', val)}
         className="w-16"
       />
@@ -41,7 +41,7 @@ export const VirtualRow = memo(function VirtualRow({
         className="w-16"
       />
       <EditableCell
-        value={fixture.type}
+        value={fixture.type || ''}
         onChange={(val) => onCellEdit(fixture.id, 'type', val)}
         className="w-64"
       />
