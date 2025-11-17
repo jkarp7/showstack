@@ -19,26 +19,33 @@ export const VirtualRow = memo(function VirtualRow({
     isSelected ? 'bg-blue-900 hover:bg-blue-800' : ''
   }`;
 
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    // Let the click propagate to the row for selection logic
+    onClick(e);
+  };
+
   return (
-    <div className={rowClass} onClick={onClick}>
-      <div className="w-12 flex items-center justify-center flex-shrink-0">
+    <div className={rowClass}>
+      <div
+        className="w-12 flex items-center justify-center flex-shrink-0 cursor-pointer"
+        onClick={handleCheckboxClick}
+      >
         <input
           type="checkbox"
           checked={isSelected}
-          onChange={() => {}} // Handled by row click
-          onClick={(e) => e.stopPropagation()}
-          className="w-4 h-4"
+          onChange={() => {}} // Handled by click
+          className="w-4 h-4 pointer-events-none"
         />
       </div>
       <EditableCell
         value={fixture.position || ''}
         onChange={(val) => onCellEdit(fixture.id, 'position', val)}
-        className="w-16 flex-shrink-0"
+        className="w-32 flex-shrink-0"
       />
       <EditableCell
         value={fixture.unit?.toString() || ''}
         onChange={(val) => onCellEdit(fixture.id, 'unit', val)}
-        className="w-16 flex-shrink-0"
+        className="w-20 flex-shrink-0"
       />
       <EditableCell
         value={fixture.type || ''}
@@ -73,12 +80,12 @@ export const VirtualRow = memo(function VirtualRow({
       <EditableCell
         value={fixture.location || ''}
         onChange={(val) => onCellEdit(fixture.id, 'location', val)}
-        className="w-24 flex-shrink-0"
+        className="w-32 flex-shrink-0"
       />
       <EditableCell
         value={fixture.notes || ''}
         onChange={(val) => onCellEdit(fixture.id, 'notes', val)}
-        className="flex-1"
+        className="flex-1 min-w-48"
       />
     </div>
   );
