@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { VirtualDataGrid } from '../../components/fixture/VirtualDataGrid';
 import { Toolbar } from '../../components/fixture/Toolbar';
 import { FilterBar } from '../../components/fixture/FilterBar';
+import { AddFixtureDialog } from '../../components/fixture/AddFixtureDialog';
 import { useFixtureStore } from '../../store/fixtureStore';
 
 export function Production() {
   const navigate = useNavigate();
-  const { fixtures, loadFixtures, addFixture, deleteMultiple, updateFixture } = useFixtureStore();
+  const { fixtures, loadFixtures, addMultipleFixtures, deleteMultiple, updateFixture } = useFixtureStore();
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+  const [isAddFixtureDialogOpen, setIsAddFixtureDialogOpen] = useState(false);
 
   // Load fixtures from database on mount
   useEffect(() => {
@@ -43,13 +45,7 @@ export function Production() {
       {/* Toolbar */}
       <Toolbar
         selectedCount={selectedRows.size}
-        onAddFixture={() => {
-          addFixture({
-            position: '', // User enters hanging position (e.g., "1st Electric", "FOH")
-            type: 'Source Four 26°',
-            channel: String(101 + fixtures.length),
-          });
-        }}
+        onAddFixture={() => setIsAddFixtureDialogOpen(true)}
         onDeleteSelected={async () => {
           await deleteMultiple(Array.from(selectedRows));
           setSelectedRows(new Set());
@@ -74,6 +70,14 @@ export function Production() {
         <div>Ready</div>
         <div>ShowStack:Production v0.1.0-alpha</div>
       </footer>
+
+      {/* Add Fixture Dialog */}
+      <AddFixtureDialog
+        isOpen={isAddFixtureDialogOpen}
+        onClose={() => setIsAddFixtureDialogOpen(false)}
+        onAdd={addMultipleFixtures}
+        existingFixturesCount={fixtures.length}
+      />
     </div>
   );
 }

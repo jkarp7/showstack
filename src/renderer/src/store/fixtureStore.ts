@@ -40,6 +40,26 @@ export const useFixtureStore = create<FixtureStore>((set, get) => ({
     }
   },
 
+  addMultipleFixtures: async (fixtures) => {
+    if (!hasAPI()) {
+      console.warn('API not available');
+      return;
+    }
+
+    try {
+      const newFixtures = [];
+      for (const fixture of fixtures) {
+        const newFixture = await window.api.fixtures.create(fixture);
+        newFixtures.push(newFixture);
+      }
+      set((state) => ({
+        fixtures: [...state.fixtures, ...newFixtures],
+      }));
+    } catch (error) {
+      console.error('Failed to add fixtures:', error);
+    }
+  },
+
   updateFixture: async (id, updates) => {
     if (!hasAPI()) {
       console.warn('API not available');

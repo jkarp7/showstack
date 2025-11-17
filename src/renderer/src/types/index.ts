@@ -21,6 +21,7 @@ export interface FixtureStore {
   fixtures: Fixture[];
   loadFixtures: () => Promise<void>;
   addFixture: (fixture: Partial<Fixture>) => Promise<void>;
+  addMultipleFixtures: (fixtures: Partial<Fixture>[]) => Promise<void>;
   updateFixture: (id: string, updates: Partial<Fixture>) => Promise<void>;
   deleteFixture: (id: string) => Promise<void>;
   deleteMultiple: (ids: string[]) => Promise<void>;
