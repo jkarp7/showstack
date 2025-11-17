@@ -1,45 +1,70 @@
-import Database from 'better-sqlite3';
+import initSqlJs, { Database } from 'sql.js';
 import { app } from 'electron';
 import { join } from 'path';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { SCHEMA } from './schema';
 
-let db: Database.Database | null = null;
+let db: Database | null = null;
+let dbPath: string = '';
 
 export async function initDatabase(): Promise<void> {
-  const dbPath = join(app.getPath('userData'), 'showstack.db');
+  dbPath = join(app.getPath('userData'), 'showstack.db');
 
-  db = new Database(dbPath, {
-    verbose: process.env.NODE_ENV === 'development' ? console.log : undefined
-  });
+  // Initialize sql.js
+  const SQL = await initSqlJs();
+
+  // Load existing database or create new one
+  if (existsSync(dbPath)) {
+    const buffer = readFileSync(dbPath);
+    db = new SQL.Database(buffer);
+    console.log('✅ Loaded existing database:', dbPath);
+  } else {
+    db = new SQL.Database();
+    console.log('✅ Created new database:', dbPath);
+  }
 
   // Enable foreign keys
-  db.pragma('foreign_keys = ON');
+  db.run('PRAGMA foreign_keys = ON');
 
   // Create tables
   db.exec(SCHEMA);
 
   // Create default project if none exists
-  const projectCount = db.prepare('SELECT COUNT(*) as count FROM projects').get() as { count: number };
-  if (projectCount.count === 0) {
-    db.prepare(`
-      INSERT INTO projects (id, name, created_at, updated_at)
-      VALUES (?, ?, ?, ?)
-    `).run('default-project', 'Untitled Project', Date.now(), Date.now());
+  const result = db.exec('SELECT COUNT(*) as count FROM projects');
+  const projectCount = result[0]?.values[0]?.[0] || 0;
+
+  if (projectCount === 0) {
+    db.run(
+      'INSERT INTO projects (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)',
+      ['default-project', 'Untitled Project', Date.now(), Date.now()]
+    );
     console.log('✅ Created default project');
   }
+
+  // Save database to disk
+  saveDatabase();
 
   console.log('✅ Database initialized:', dbPath);
 }
 
-export function getDatabase(): Database.Database {
+export function getDatabase(): Database {
   if (!db) {
     throw new Error('Database not initialized');
   }
   return db;
 }
 
+export function saveDatabase(): void {
+  if (!db) {
+    throw new Error('Database not initialized');
+  }
+  const data = db.export();
+  writeFileSync(dbPath, data);
+}
+
 export function closeDatabase(): void {
   if (db) {
+    saveDatabase();
     db.close();
     db = null;
   }

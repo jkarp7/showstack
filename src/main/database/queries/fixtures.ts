@@ -1,4 +1,4 @@
-import { getDatabase } from '../index';
+import { getDatabase, saveDatabase } from '../index';
 import { v4 as uuidv4 } from 'uuid';
 
 // Extended Fixture interface matching database schema
@@ -57,18 +57,32 @@ export interface Fixture {
 export function getAllFixtures(projectId: string = 'default-project'): Fixture[] {
   const db = getDatabase();
 
-  const rows = db.prepare(`
+  const result = db.exec(`
     SELECT * FROM fixtures
     WHERE project_id = ?
     ORDER BY CAST(position AS INTEGER), position
-  `).all(projectId) as any[];
+  `, [projectId]);
 
-  return rows.map(row => ({
-    ...row,
-    unit: row.unit_number, // Compatibility alias
-    accessories: row.accessories ? JSON.parse(row.accessories) : [],
-    custom_fields: row.custom_fields ? JSON.parse(row.custom_fields) : {}
-  })) as Fixture[];
+  if (!result[0]) {
+    return [];
+  }
+
+  const columns = result[0].columns;
+  const values = result[0].values;
+
+  return values.map(row => {
+    const fixture: any = {};
+    columns.forEach((col, idx) => {
+      fixture[col] = row[idx];
+    });
+
+    return {
+      ...fixture,
+      unit: fixture.unit_number, // Compatibility alias
+      accessories: fixture.accessories ? JSON.parse(fixture.accessories) : [],
+      custom_fields: fixture.custom_fields ? JSON.parse(fixture.custom_fields) : {}
+    } as Fixture;
+  });
 }
 
 export function createFixture(
@@ -79,15 +93,13 @@ export function createFixture(
   const id = uuidv4();
   const now = Date.now();
 
-  const stmt = db.prepare(`
+  db.run(`
     INSERT INTO fixtures (
       id, project_id, position, unit_number, type, purpose,
       channel, dimmer, circuit, color, location, wattage,
       status, notes, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-
-  stmt.run(
+  `, [
     id,
     projectId,
     fixture.position || '',
@@ -104,8 +116,9 @@ export function createFixture(
     fixture.notes || '',
     now,
     now
-  );
+  ]);
 
+  saveDatabase();
   return getFixtureById(id);
 }
 
@@ -144,20 +157,20 @@ export function updateFixture(id: string, updates: Partial<Fixture>): Fixture {
     .filter(f => f !== 'unit')
     .map(f => f === 'unit_number' ? mappedUpdates.unit_number : mappedUpdates[f]);
 
-  const stmt = db.prepare(`
+  db.run(`
     UPDATE fixtures
     SET ${setClause}, updated_at = ?
     WHERE id = ?
-  `);
+  `, [...values, now, id]);
 
-  stmt.run(...values, now, id);
-
+  saveDatabase();
   return getFixtureById(id);
 }
 
 export function deleteFixture(id: string): void {
   const db = getDatabase();
-  db.prepare('DELETE FROM fixtures WHERE id = ?').run(id);
+  db.run('DELETE FROM fixtures WHERE id = ?', [id]);
+  saveDatabase();
 }
 
 export function deleteMultipleFixtures(ids: string[]): void {
@@ -165,21 +178,30 @@ export function deleteMultipleFixtures(ids: string[]): void {
   if (ids.length === 0) return;
 
   const placeholders = ids.map(() => '?').join(',');
-  db.prepare(`DELETE FROM fixtures WHERE id IN (${placeholders})`).run(...ids);
+  db.run(`DELETE FROM fixtures WHERE id IN (${placeholders})`, ids);
+  saveDatabase();
 }
 
 function getFixtureById(id: string): Fixture {
   const db = getDatabase();
-  const row = db.prepare('SELECT * FROM fixtures WHERE id = ?').get(id) as any;
+  const result = db.exec('SELECT * FROM fixtures WHERE id = ?', [id]);
 
-  if (!row) {
+  if (!result[0] || result[0].values.length === 0) {
     throw new Error(`Fixture with id ${id} not found`);
   }
 
+  const columns = result[0].columns;
+  const values = result[0].values[0];
+
+  const fixture: any = {};
+  columns.forEach((col, idx) => {
+    fixture[col] = values[idx];
+  });
+
   return {
-    ...row,
-    unit: row.unit_number,
-    accessories: row.accessories ? JSON.parse(row.accessories) : [],
-    custom_fields: row.custom_fields ? JSON.parse(row.custom_fields) : {}
+    ...fixture,
+    unit: fixture.unit_number,
+    accessories: fixture.accessories ? JSON.parse(fixture.accessories) : [],
+    custom_fields: fixture.custom_fields ? JSON.parse(fixture.custom_fields) : {}
   };
 }
