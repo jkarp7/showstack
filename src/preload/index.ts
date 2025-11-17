@@ -39,6 +39,12 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.invoke('projects:create', name, description, logoPath, enabledModules),
     update: (id: string, updates: any) => ipcRenderer.invoke('projects:update', id, updates),
     delete: (id: string) => ipcRenderer.invoke('projects:delete', id)
+  },
+
+  // Dialog operations
+  dialog: {
+    openImage: () => ipcRenderer.invoke('dialog:openImage'),
+    openProject: () => ipcRenderer.invoke('dialog:openProject')
   }
 });
 
@@ -58,6 +64,10 @@ export interface ElectronAPI {
     create: (name: string, description?: string, logoPath?: string, enabledModules?: string[]) => Promise<any>;
     update: (id: string, updates: any) => Promise<any>;
     delete: (id: string) => Promise<void>;
+  };
+  dialog: {
+    openImage: () => Promise<string | null>;
+    openProject: () => Promise<string | null>;
   };
 }
 

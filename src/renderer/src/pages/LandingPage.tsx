@@ -40,6 +40,19 @@ export function LandingPage() {
     }
   };
 
+  const handleOpenFile = async () => {
+    if (typeof window !== 'undefined' && window.api?.dialog) {
+      const filePath = await window.api.dialog.openProject();
+      if (filePath) {
+        // TODO: Implement project file loading
+        console.log('Selected project file:', filePath);
+        alert(`Project file selection coming soon!\nSelected: ${filePath}`);
+      }
+    } else {
+      console.warn('Dialog API not available');
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col bg-gray-900 text-white">
       {/* Header */}
@@ -81,7 +94,10 @@ export function LandingPage() {
                   <span className="text-xl">+</span>
                   New Project
                 </button>
-                <button className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition">
+                <button
+                  onClick={handleOpenFile}
+                  className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition"
+                >
                   Open File...
                 </button>
               </div>

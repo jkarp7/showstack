@@ -35,11 +35,15 @@ export function NewProjectDialog({ isOpen, onClose, onCreate }: NewProjectDialog
     onClose();
   };
 
-  const handleLogoUpload = () => {
-    // TODO: Implement actual file picker via Electron dialog
-    // For now, just placeholder
-    const fakePath = `/path/to/logo-${Date.now()}.png`;
-    setLogoPath(fakePath);
+  const handleLogoUpload = async () => {
+    if (typeof window !== 'undefined' && window.api?.dialog) {
+      const filePath = await window.api.dialog.openImage();
+      if (filePath) {
+        setLogoPath(filePath);
+      }
+    } else {
+      console.warn('Dialog API not available');
+    }
   };
 
   const toggleModule = (module: string) => {
