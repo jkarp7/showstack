@@ -30,10 +30,14 @@ contextBridge.exposeInMainWorld('api', {
     deleteMultiple: (ids: string[]) => ipcRenderer.invoke('fixtures:deleteMultiple', ids)
   },
 
-  // Project operations (future)
+  // Project operations
   projects: {
+    getAll: () => ipcRenderer.invoke('projects:getAll'),
     getCurrent: () => ipcRenderer.invoke('projects:getCurrent'),
-    create: (name: string) => ipcRenderer.invoke('projects:create', name)
+    getById: (id: string) => ipcRenderer.invoke('projects:getById', id),
+    create: (name: string, description?: string) => ipcRenderer.invoke('projects:create', name, description),
+    update: (id: string, updates: any) => ipcRenderer.invoke('projects:update', id, updates),
+    delete: (id: string) => ipcRenderer.invoke('projects:delete', id)
   }
 });
 
@@ -47,8 +51,12 @@ export interface ElectronAPI {
     deleteMultiple: (ids: string[]) => Promise<void>;
   };
   projects: {
+    getAll: () => Promise<any[]>;
     getCurrent: () => Promise<any>;
-    create: (name: string) => Promise<any>;
+    getById: (id: string) => Promise<any>;
+    create: (name: string, description?: string) => Promise<any>;
+    update: (id: string, updates: any) => Promise<any>;
+    delete: (id: string) => Promise<void>;
   };
 }
 

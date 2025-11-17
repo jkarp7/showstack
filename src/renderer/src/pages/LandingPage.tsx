@@ -1,6 +1,33 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ModuleCard } from '../components/ModuleCard';
+import { ProjectCard } from '../components/ProjectCard';
+import { NewProjectDialog } from '../components/NewProjectDialog';
+import { useProjectStore } from '../store/projectStore';
 
 export function LandingPage() {
+  const navigate = useNavigate();
+  const { projects, loadProjects, createProject, setCurrentProject } = useProjectStore();
+  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
+
+  useEffect(() => {
+    loadProjects();
+  }, [loadProjects]);
+
+  const handleCreateProject = async (name: string, description: string) => {
+    try {
+      await createProject(name, description);
+    } catch (error) {
+      console.error('Failed to create project:', error);
+    }
+  };
+
+  const handleOpenProject = (projectId: string) => {
+    setCurrentProject(projectId);
+    // Navigate to the last used module or default to production
+    navigate('/modules/production');
+  };
+
   return (
     <div className="h-screen flex flex-col bg-gray-900 text-white">
       {/* Header */}
@@ -27,45 +54,87 @@ export function LandingPage() {
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto p-8">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-2">Select a Module</h2>
-            <p className="text-gray-400">Choose which tool you'd like to work with</p>
+          {/* Projects Section */}
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold mb-2">Projects</h2>
+                <p className="text-gray-400">Create or open a project to get started</p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsNewProjectDialogOpen(true)}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition flex items-center gap-2"
+                >
+                  <span className="text-xl">+</span>
+                  New Project
+                </button>
+                <button className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition">
+                  Open File...
+                </button>
+              </div>
+            </div>
+
+            {/* Recent Projects Grid */}
+            {projects.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {projects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    onClick={() => handleOpenProject(project.id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="bg-gray-800 rounded-lg border border-gray-700 p-12 text-center">
+                <div className="text-6xl mb-4">📂</div>
+                <p className="text-gray-400 text-lg mb-4">No projects yet</p>
+                <p className="text-gray-500 text-sm mb-6">
+                  Create your first project to start working with ShowStack
+                </p>
+                <button
+                  onClick={() => setIsNewProjectDialogOpen(true)}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition inline-flex items-center gap-2"
+                >
+                  <span className="text-xl">+</span>
+                  Create Your First Project
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Module Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <ModuleCard
-              name="ShowStack:Design"
-              description="Lighting design, visualization, and plot creation"
-              icon="✏️"
-              route="/modules/design"
-              isLocked={true}
-            />
+          {/* Modules Section */}
+          <div>
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-2">Modules</h2>
+              <p className="text-gray-400">Available tools in your subscription</p>
+            </div>
 
-            <ModuleCard
-              name="ShowStack:Production"
-              description="Production management, fixtures, and technical planning"
-              icon="🎬"
-              route="/modules/production"
-              isLocked={false}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <ModuleCard
+                name="ShowStack:Design"
+                description="Lighting design, visualization, and plot creation"
+                icon="✏️"
+                route="/modules/design"
+                isLocked={true}
+              />
 
-            <ModuleCard
-              name="ShowStack:Tour"
-              description="Tour management, scheduling, and logistics"
-              icon="🚐"
-              route="/modules/tour"
-              isLocked={true}
-            />
-          </div>
+              <ModuleCard
+                name="ShowStack:Production"
+                description="Production management, fixtures, and technical planning"
+                icon="🎬"
+                route="/modules/production"
+                isLocked={false}
+              />
 
-          {/* Quick Actions */}
-          <div className="mt-12">
-            <h3 className="text-xl font-bold mb-4">Recent Projects</h3>
-            <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-              <p className="text-gray-400 text-center py-8">
-                No recent projects. Create a new project to get started.
-              </p>
+              <ModuleCard
+                name="ShowStack:Tour"
+                description="Tour management, scheduling, and logistics"
+                icon="🚐"
+                route="/modules/tour"
+                isLocked={true}
+              />
             </div>
           </div>
         </div>
@@ -75,6 +144,13 @@ export function LandingPage() {
       <footer className="bg-gray-800 border-t border-gray-700 px-6 py-4 text-center text-sm text-gray-400">
         ShowStack v0.1.0-alpha | © 2025 Lytrix
       </footer>
+
+      {/* New Project Dialog */}
+      <NewProjectDialog
+        isOpen={isNewProjectDialogOpen}
+        onClose={() => setIsNewProjectDialogOpen(false)}
+        onCreate={handleCreateProject}
+      />
     </div>
   );
 }

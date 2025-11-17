@@ -3,6 +3,7 @@ import { join } from 'path';
 import { createWindow } from './window';
 import { initDatabase } from './database';
 import { registerFixtureHandlers } from './ipc/fixtures';
+import { registerProjectHandlers } from './ipc/projects';
 
 // Disable hardware acceleration on Linux
 if (process.platform === 'linux') {
@@ -24,6 +25,7 @@ app.on('ready', async () => {
 
   // Register IPC handlers
   registerFixtureHandlers();
+  registerProjectHandlers();
 
   // Create main window
   mainWindow = createWindow();
