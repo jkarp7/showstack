@@ -12,12 +12,16 @@ export interface Fixture {
   location?: string;
   wattage?: number;
   notes?: string;
+  status?: string;
+  created_at?: number;
+  updated_at?: number;
 }
 
 export interface FixtureStore {
   fixtures: Fixture[];
-  addFixture: (fixture: Partial<Fixture>) => void;
-  updateFixture: (id: string, updates: Partial<Fixture>) => void;
-  deleteFixture: (id: string) => void;
-  deleteMultiple: (ids: string[]) => void;
+  loadFixtures: () => Promise<void>;
+  addFixture: (fixture: Partial<Fixture>) => Promise<void>;
+  updateFixture: (id: string, updates: Partial<Fixture>) => Promise<void>;
+  deleteFixture: (id: string) => Promise<void>;
+  deleteMultiple: (ids: string[]) => Promise<void>;
 }

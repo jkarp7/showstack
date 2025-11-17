@@ -1,12 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { VirtualDataGrid } from './components/VirtualDataGrid';
 import { Toolbar } from './components/Toolbar';
 import { FilterBar } from './components/FilterBar';
 import { useFixtureStore } from './store/fixtureStore';
 
 export default function App() {
-  const { fixtures, addFixture, deleteFixture, updateFixture } = useFixtureStore();
+  const { fixtures, loadFixtures, addFixture, deleteFixture, deleteMultiple, updateFixture } = useFixtureStore();
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+
+  // Load fixtures from database on mount
+  useEffect(() => {
+    loadFixtures();
+  }, [loadFixtures]);
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white">
@@ -35,8 +40,8 @@ export default function App() {
             channel: String(101 + fixtures.length),
           });
         }}
-        onDeleteSelected={() => {
-          selectedRows.forEach(id => deleteFixture(id));
+        onDeleteSelected={async () => {
+          await deleteMultiple(Array.from(selectedRows));
           setSelectedRows(new Set());
         }}
       />

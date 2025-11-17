@@ -2,6 +2,7 @@ import { app, BrowserWindow } from 'electron';
 import { join } from 'path';
 import { createWindow } from './window';
 import { initDatabase } from './database';
+import { registerFixtureHandlers } from './ipc/fixtures';
 
 // Disable hardware acceleration on Linux
 if (process.platform === 'linux') {
@@ -20,6 +21,9 @@ let mainWindow: BrowserWindow | null = null;
 app.on('ready', async () => {
   // Initialize database
   await initDatabase();
+
+  // Register IPC handlers
+  registerFixtureHandlers();
 
   // Create main window
   mainWindow = createWindow();
