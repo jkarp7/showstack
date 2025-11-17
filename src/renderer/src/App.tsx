@@ -35,7 +35,7 @@ export default function App() {
         selectedCount={selectedRows.size}
         onAddFixture={() => {
           addFixture({
-            position: String(fixtures.length + 1),
+            position: '', // User enters hanging position (e.g., "1st Electric", "FOH")
             type: 'Source Four 26°',
             channel: String(101 + fixtures.length),
           });
