@@ -40,19 +40,6 @@ export function LandingPage() {
     }
   };
 
-  const handleOpenFile = async () => {
-    if (typeof window !== 'undefined' && window.api?.dialog) {
-      const filePath = await window.api.dialog.openProject();
-      if (filePath) {
-        // TODO: Implement project file loading
-        console.log('Selected project file:', filePath);
-        alert(`Project file selection coming soon!\nSelected: ${filePath}`);
-      }
-    } else {
-      console.warn('Dialog API not available');
-    }
-  };
-
   return (
     <div className="h-screen flex flex-col bg-gray-900 text-white">
       {/* Header */}
@@ -84,23 +71,15 @@ export function LandingPage() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl font-bold mb-2">Projects</h2>
-                <p className="text-gray-400">Create or open a project to get started</p>
+                <p className="text-gray-400">Create or select a project to get started</p>
               </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setIsNewProjectDialogOpen(true)}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition flex items-center gap-2"
-                >
-                  <span className="text-xl">+</span>
-                  New Project
-                </button>
-                <button
-                  onClick={handleOpenFile}
-                  className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition"
-                >
-                  Open File...
-                </button>
-              </div>
+              <button
+                onClick={() => setIsNewProjectDialogOpen(true)}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition flex items-center gap-2"
+              >
+                <span className="text-xl">+</span>
+                New Project
+              </button>
             </div>
 
             {/* Recent Projects Grid */}
