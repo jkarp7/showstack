@@ -67,30 +67,26 @@ export function VirtualDataGrid({
   // Handle row selection
   const handleRowClick = useCallback((id: string, e: React.MouseEvent) => {
     const newSelected = new Set(selectedRows);
-    
+
     if (e.shiftKey && selectedRows.size > 0) {
-      // Shift+Click: Select range
+      // Shift+Click: Select range from last selected to current
       const lastSelected = Array.from(selectedRows)[selectedRows.size - 1];
       const lastIndex = fixtures.findIndex(f => f.id === lastSelected);
       const currentIndex = fixtures.findIndex(f => f.id === id);
       const [start, end] = [Math.min(lastIndex, currentIndex), Math.max(lastIndex, currentIndex)];
-      
+
       for (let i = start; i <= end; i++) {
         newSelected.add(fixtures[i].id);
       }
-    } else if (e.metaKey || e.ctrlKey) {
-      // Cmd/Ctrl+Click: Toggle selection
+    } else {
+      // Regular click: Toggle this row (keep other selections)
       if (newSelected.has(id)) {
         newSelected.delete(id);
       } else {
         newSelected.add(id);
       }
-    } else {
-      // Regular click: Select only this row
-      newSelected.clear();
-      newSelected.add(id);
     }
-    
+
     onSelectRows(newSelected);
   }, [fixtures, selectedRows, onSelectRows]);
 
