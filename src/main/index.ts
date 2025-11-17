@@ -1,0 +1,38 @@
+import { app, BrowserWindow } from 'electron';
+import { join } from 'path';
+import { createWindow } from './window';
+import { initDatabase } from './database';
+
+// Disable hardware acceleration on Linux
+if (process.platform === 'linux') {
+  app.disableHardwareAcceleration();
+}
+
+// Single instance lock
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+  process.exit(0);
+}
+
+let mainWindow: BrowserWindow | null = null;
+
+app.on('ready', async () => {
+  // Initialize database
+  await initDatabase();
+
+  // Create main window
+  mainWindow = createWindow();
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    mainWindow = createWindow();
+  }
+});
