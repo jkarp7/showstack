@@ -23,10 +23,17 @@ export function createWindow(): BrowserWindow {
   window.show();
 
   // Load renderer
-  if (process.env.VITE_DEV_SERVER_URL) {
-    window.loadURL(process.env.VITE_DEV_SERVER_URL);
+  const isDev = process.env.NODE_ENV === 'development';
+
+  if (isDev) {
+    // In development, load from Vite dev server
+    const devServerUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173';
+    console.log('Loading from dev server:', devServerUrl);
+    window.loadURL(devServerUrl);
     window.webContents.openDevTools();
   } else {
+    // In production, load from built files
+    console.log('Loading from file:', join(__dirname, '../renderer/index.html'));
     window.loadFile(join(__dirname, '../renderer/index.html'));
   }
 
