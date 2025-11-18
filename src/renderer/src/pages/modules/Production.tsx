@@ -55,6 +55,7 @@ export function Production() {
 
   // Function to reload all data (for file operations)
   const handleDataReload = async () => {
+    console.log('📋 handleDataReload called');
     await loadFixtures();
 
     if (!window.api) return;
@@ -65,8 +66,12 @@ export function Production() {
       // Load project name
       if (window.api.projects) {
         const project = await window.api.projects.getById(projectId);
+        console.log('📋 Loaded project:', project);
         if (project?.name) {
+          console.log('📋 Setting project name to:', project.name);
           setProjectName(project.name);
+        } else {
+          console.log('📋 No project name found in project data');
         }
       }
     } catch (error) {
