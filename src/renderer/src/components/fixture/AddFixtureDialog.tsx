@@ -13,13 +13,19 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
   const [position, setPosition] = useState('');
   const [unit, setUnit] = useState<string>('');
   const [type, setType] = useState('Source Four 26°');
+  const [manufacturer, setManufacturer] = useState('');
+  const [model, setModel] = useState('');
   const [purpose, setPurpose] = useState('');
   const [channel, setChannel] = useState<string>('');
+  const [address, setAddress] = useState('');
   const [dimmer, setDimmer] = useState('');
   const [circuit, setCircuit] = useState('');
+  const [circuitNumber, setCircuitNumber] = useState('');
   const [color, setColor] = useState('');
   const [gobo, setGobo] = useState('');
+  const [accessories, setAccessories] = useState('');
   const [location, setLocation] = useState('');
+  const [system, setSystem] = useState('');
   const [wattage, setWattage] = useState<string>('');
   const [notes, setNotes] = useState('');
   const [status, setStatus] = useState('Active');
@@ -28,8 +34,10 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
   // Auto-increment options
   const [autoIncrementUnit, setAutoIncrementUnit] = useState(true);
   const [autoIncrementChannel, setAutoIncrementChannel] = useState(true);
+  const [autoIncrementAddress, setAutoIncrementAddress] = useState(false);
   const [autoIncrementDimmer, setAutoIncrementDimmer] = useState(false);
   const [autoIncrementCircuit, setAutoIncrementCircuit] = useState(false);
+  const [autoIncrementCircuitNumber, setAutoIncrementCircuitNumber] = useState(false);
 
   if (!isOpen) return null;
 
@@ -41,13 +49,21 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
       const fixture: Partial<Fixture> = {
         position: position || undefined,
         type: type || undefined,
+        manufacturer: manufacturer || undefined,
+        model: model || undefined,
         purpose: purpose || undefined,
         color: color || undefined,
         gobo: gobo || undefined,
         location: location || undefined,
+        system: system || undefined,
         notes: notes || undefined,
         status: notOnPlot ? 'Not on Plot' : status || undefined,
       };
+
+      // Handle accessories (comma-separated to array)
+      if (accessories) {
+        fixture.accessories = accessories.split(',').map(a => a.trim()).filter(Boolean);
+      }
 
       // Handle unit with auto-increment
       if (unit) {
@@ -65,6 +81,51 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
         }
       }
 
+      // Handle address with auto-increment and DMX calculation
+      if (address) {
+        let currentAddress = address;
+
+        // If auto-incrementing, calculate new address for this fixture
+        if (autoIncrementAddress && i > 0) {
+          // Parse the base address to get starting raw address
+          let rawAddress: number;
+          if (address.includes('/')) {
+            const parts = address.split('/');
+            const baseUniverse = parseInt(parts[0]);
+            const baseDmx = parseInt(parts[1]);
+            rawAddress = (baseUniverse - 1) * 512 + baseDmx;
+          } else {
+            rawAddress = parseInt(address);
+          }
+
+          if (!isNaN(rawAddress)) {
+            rawAddress += i;
+            const universe = Math.ceil(rawAddress / 512);
+            const dmx = ((rawAddress - 1) % 512) + 1;
+            currentAddress = `${universe}/${dmx}`;
+          }
+        }
+
+        // Parse and set universe/dmx_address
+        if (currentAddress.includes('/')) {
+          const parts = currentAddress.split('/');
+          if (parts.length === 2) {
+            const universe = parseInt(parts[0]);
+            const dmx = parseInt(parts[1]);
+            if (!isNaN(universe) && !isNaN(dmx)) {
+              fixture.universe = universe;
+              fixture.dmx_address = dmx;
+            }
+          }
+        } else {
+          const rawAddress = parseInt(currentAddress);
+          if (!isNaN(rawAddress) && rawAddress > 0) {
+            fixture.universe = Math.ceil(rawAddress / 512);
+            fixture.dmx_address = ((rawAddress - 1) % 512) + 1;
+          }
+        }
+      }
+
       // Handle dimmer with auto-increment
       if (dimmer) {
         const dimmerNum = parseInt(dimmer);
@@ -75,13 +136,23 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
         }
       }
 
-      // Handle circuit with auto-increment
+      // Handle circuit name with auto-increment
       if (circuit) {
         const circuitNum = parseInt(circuit);
         if (!isNaN(circuitNum)) {
           fixture.circuit = String(autoIncrementCircuit ? circuitNum + i : circuitNum);
         } else {
           fixture.circuit = circuit;
+        }
+      }
+
+      // Handle circuit number with auto-increment
+      if (circuitNumber) {
+        const circuitNum = parseInt(circuitNumber);
+        if (!isNaN(circuitNum)) {
+          fixture.circuit_number = String(autoIncrementCircuitNumber ? circuitNum + i : circuitNum);
+        } else {
+          fixture.circuit_number = circuitNumber;
         }
       }
 
@@ -106,21 +177,29 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
     setPosition('');
     setUnit('');
     setType('Source Four 26°');
+    setManufacturer('');
+    setModel('');
     setPurpose('');
     setChannel('');
+    setAddress('');
     setDimmer('');
     setCircuit('');
+    setCircuitNumber('');
     setColor('');
     setGobo('');
+    setAccessories('');
     setLocation('');
+    setSystem('');
     setWattage('');
     setNotes('');
     setStatus('Active');
     setNotOnPlot(false);
     setAutoIncrementUnit(true);
     setAutoIncrementChannel(true);
+    setAutoIncrementAddress(false);
     setAutoIncrementDimmer(false);
     setAutoIncrementCircuit(false);
+    setAutoIncrementCircuitNumber(false);
     onClose();
   };
 
@@ -129,13 +208,16 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-3xl p-4">
-        <h2 className="text-xl font-bold mb-4">Add Fixture(s)</h2>
+      <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-4xl max-h-[90vh] flex flex-col">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-gray-700">
+          <h2 className="text-xl font-bold">Add Fixture(s)</h2>
+        </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-[1fr_240px] gap-6">
-            {/* Left Side: Input Fields Table */}
-            <div className="space-y-2">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-hidden flex flex-col">
+          <div className="grid grid-cols-[1fr_240px] gap-6 p-6 overflow-y-auto">
+            {/* Left Side: Input Fields */}
+            <div className="space-y-3">
               {/* Position & Unit */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -197,7 +279,31 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                 </div>
               </div>
 
-              {/* Channel & Dimmer */}
+              {/* Manufacturer & Model */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className={labelClass}>Manufacturer</label>
+                  <input
+                    type="text"
+                    value={manufacturer}
+                    onChange={(e) => setManufacturer(e.target.value)}
+                    className={inputClass}
+                    placeholder="e.g., ETC"
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Model</label>
+                  <input
+                    type="text"
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                    className={inputClass}
+                    placeholder="Model"
+                  />
+                </div>
+              </div>
+
+              {/* Channel & Address */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className={labelClass}>
@@ -224,6 +330,33 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                 </div>
                 <div>
                   <label className={labelClass}>
+                    Address
+                    {quantity > 1 && (
+                      <label className="ml-2 inline-flex items-center gap-1">
+                        <input
+                          type="checkbox"
+                          checked={autoIncrementAddress}
+                          onChange={(e) => setAutoIncrementAddress(e.target.checked)}
+                          className="w-3 h-3"
+                        />
+                        <span className="text-[10px]">Auto</span>
+                      </label>
+                    )}
+                  </label>
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className={inputClass}
+                    placeholder="1/1 or 1"
+                  />
+                </div>
+              </div>
+
+              {/* Dimmer & Circuit Name */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className={labelClass}>
                     Dimmer
                     {quantity > 1 && (
                       <label className="ml-2 inline-flex items-center gap-1">
@@ -245,13 +378,9 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                     placeholder="Dimmer"
                   />
                 </div>
-              </div>
-
-              {/* Circuit & Wattage */}
-              <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className={labelClass}>
-                    Circuit
+                    Circuit Name
                     {quantity > 1 && (
                       <label className="ml-2 inline-flex items-center gap-1">
                         <input
@@ -272,6 +401,33 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                     placeholder="Circuit"
                   />
                 </div>
+              </div>
+
+              {/* Circuit # & Wattage */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className={labelClass}>
+                    Circuit #
+                    {quantity > 1 && (
+                      <label className="ml-2 inline-flex items-center gap-1">
+                        <input
+                          type="checkbox"
+                          checked={autoIncrementCircuitNumber}
+                          onChange={(e) => setAutoIncrementCircuitNumber(e.target.checked)}
+                          className="w-3 h-3"
+                        />
+                        <span className="text-[10px]">Auto</span>
+                      </label>
+                    )}
+                  </label>
+                  <input
+                    type="text"
+                    value={circuitNumber}
+                    onChange={(e) => setCircuitNumber(e.target.value)}
+                    className={inputClass}
+                    placeholder="Circuit #"
+                  />
+                </div>
                 <div>
                   <label className={labelClass}>Wattage</label>
                   <input
@@ -284,7 +440,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                 </div>
               </div>
 
-              {/* Color, Gobo, Location */}
+              {/* Color, Gobo, Accessories */}
               <div className="grid grid-cols-3 gap-2">
                 <div>
                   <label className={labelClass}>Color</label>
@@ -307,6 +463,20 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                   />
                 </div>
                 <div>
+                  <label className={labelClass}>Accessories</label>
+                  <input
+                    type="text"
+                    value={accessories}
+                    onChange={(e) => setAccessories(e.target.value)}
+                    className={inputClass}
+                    placeholder="comma,separated"
+                  />
+                </div>
+              </div>
+
+              {/* Location & System */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
                   <label className={labelClass}>Location</label>
                   <input
                     type="text"
@@ -314,6 +484,16 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                     onChange={(e) => setLocation(e.target.value)}
                     className={inputClass}
                     placeholder="Location"
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>System</label>
+                  <input
+                    type="text"
+                    value={system}
+                    onChange={(e) => setSystem(e.target.value)}
+                    className={inputClass}
+                    placeholder="System"
                   />
                 </div>
               </div>
@@ -428,8 +608,8 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
             </div>
           </div>
 
-          {/* Buttons */}
-          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-700">
+          {/* Footer - Buttons */}
+          <div className="px-6 py-4 border-t border-gray-700 flex justify-end gap-3">
             <button
               type="button"
               onClick={handleClose}
