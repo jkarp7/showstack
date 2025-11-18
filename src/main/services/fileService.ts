@@ -2,7 +2,7 @@ import { dialog, app } from 'electron';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, basename } from 'path';
 import initSqlJs, { Database } from 'sql.js';
-import { getDatabase, saveDatabase } from '../database';
+import { getDatabase, saveDatabase, reloadDatabase } from '../database';
 
 export interface ProjectImportResult {
   success: boolean;
@@ -144,6 +144,9 @@ class FileService {
       // Write the imported data to the main database file
       const dbPath = join(app.getPath('userData'), 'showstack.db');
       writeFileSync(dbPath, buffer);
+
+      // Reload the in-memory database to reflect the imported data
+      await reloadDatabase();
 
       console.log('✅ Project imported from:', filePath);
 

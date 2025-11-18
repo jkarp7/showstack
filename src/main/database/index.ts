@@ -111,3 +111,25 @@ export function closeDatabase(): void {
     db = null;
   }
 }
+
+export async function reloadDatabase(): Promise<void> {
+  // Close current database
+  if (db) {
+    db.close();
+    db = null;
+  }
+
+  // Reload from disk
+  if (!dbPath) {
+    throw new Error('Database path not initialized');
+  }
+
+  const SQL = await initSqlJs();
+  const buffer = readFileSync(dbPath);
+  db = new SQL.Database(buffer);
+
+  // Enable foreign keys
+  db.run('PRAGMA foreign_keys = ON');
+
+  console.log('✅ Database reloaded from:', dbPath);
+}
