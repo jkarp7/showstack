@@ -8,6 +8,9 @@ interface FilterBarProps {
   statusFilter: string;
   onStatusChange: (status: string) => void;
   onClearFilters: () => void;
+  availableLocations: string[];
+  availableTypes: string[];
+  availableStatuses: string[];
 }
 
 export function FilterBar({
@@ -20,6 +23,9 @@ export function FilterBar({
   statusFilter,
   onStatusChange,
   onClearFilters,
+  availableLocations,
+  availableTypes,
+  availableStatuses,
 }: FilterBarProps) {
   const hasActiveFilters = searchQuery || locationFilter !== 'all' || typeFilter !== 'all' || statusFilter !== 'all';
 
@@ -39,11 +45,11 @@ export function FilterBar({
         className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
       >
         <option value="all">All Locations</option>
-        <option value="FOH">FOH</option>
-        <option value="1st Electric">1st Electric</option>
-        <option value="2nd Electric">2nd Electric</option>
-        <option value="3rd Electric">3rd Electric</option>
-        <option value="Box Boom">Box Boom</option>
+        {availableLocations.map((location) => (
+          <option key={location} value={location}>
+            {location}
+          </option>
+        ))}
       </select>
 
       <select
@@ -52,10 +58,11 @@ export function FilterBar({
         className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
       >
         <option value="all">All Types</option>
-        <option value="Source Four">Source Four</option>
-        <option value="PAR">PAR</option>
-        <option value="Moving Light">Moving Light</option>
-        <option value="LED">LED</option>
+        {availableTypes.map((type) => (
+          <option key={type} value={type}>
+            {type}
+          </option>
+        ))}
       </select>
 
       <select
@@ -64,11 +71,11 @@ export function FilterBar({
         className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
       >
         <option value="all">All Status</option>
-        <option value="Active">Active</option>
-        <option value="Spare">Spare</option>
-        <option value="Rental">Rental</option>
-        <option value="Needs Repair">Needs Repair</option>
-        <option value="Not on Plot">Not on Plot</option>
+        {availableStatuses.map((status) => (
+          <option key={status} value={status}>
+            {status}
+          </option>
+        ))}
       </select>
 
       {hasActiveFilters && (

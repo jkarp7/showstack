@@ -47,6 +47,37 @@ export function Production() {
     setStatusFilter('all');
   };
 
+  // Compute unique values for filter dropdowns
+  const availableLocations = useMemo(() => {
+    const locations = new Set<string>();
+    fixtures.forEach((fixture) => {
+      if (fixture.location) {
+        locations.add(fixture.location);
+      }
+    });
+    return Array.from(locations).sort();
+  }, [fixtures]);
+
+  const availableTypes = useMemo(() => {
+    const types = new Set<string>();
+    fixtures.forEach((fixture) => {
+      if (fixture.type) {
+        types.add(fixture.type);
+      }
+    });
+    return Array.from(types).sort();
+  }, [fixtures]);
+
+  const availableStatuses = useMemo(() => {
+    const statuses = new Set<string>();
+    fixtures.forEach((fixture) => {
+      if (fixture.status) {
+        statuses.add(fixture.status);
+      }
+    });
+    return Array.from(statuses).sort();
+  }, [fixtures]);
+
   // Filtered and sorted fixtures
   const processedFixtures = useMemo(() => {
     let result = [...fixtures];
@@ -154,6 +185,9 @@ export function Production() {
         statusFilter={statusFilter}
         onStatusChange={setStatusFilter}
         onClearFilters={handleClearFilters}
+        availableLocations={availableLocations}
+        availableTypes={availableTypes}
+        availableStatuses={availableStatuses}
       />
 
       {/* Main Content - Virtual Data Grid */}
