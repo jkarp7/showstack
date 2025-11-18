@@ -174,7 +174,7 @@ class FileService {
 
       // Clear all data
       db.run('DELETE FROM fixtures');
-      db.run('DELETE FROM preferences');
+      db.run('DELETE FROM user_preferences');
       db.run('DELETE FROM projects');
 
       // Create new default project
@@ -229,7 +229,7 @@ class FileService {
 
       // Check if it has the required tables
       const tables = db.exec(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('projects', 'fixtures', 'preferences')"
+        "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('projects', 'fixtures', 'user_preferences')"
       );
 
       if (!tables[0] || tables[0].values.length < 3) {
