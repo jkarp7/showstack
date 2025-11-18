@@ -148,9 +148,10 @@ class FileService {
       // Reload the in-memory database to reflect the imported data
       await reloadDatabase();
 
-      // If the project name is "Untitled Project", update it to match the filename
-      if (projectName === 'Untitled Project') {
-        const filename = this.getFileName(filePath);
+      // Always update project name to match the filename (filename is source of truth)
+      const filename = this.getFileName(filePath);
+      if (projectName !== filename) {
+        console.log(`📝 Updating project name from "${projectName}" to "${filename}"`);
         projectName = filename;
 
         // Update the project name in the database
@@ -161,8 +162,6 @@ class FileService {
           projectId
         ]);
         saveDatabase();
-
-        console.log('✅ Updated project name from filename:', projectName);
       }
 
       console.log('✅ Project imported from:', filePath);
