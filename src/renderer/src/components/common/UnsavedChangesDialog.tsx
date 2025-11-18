@@ -106,8 +106,8 @@ export function useUnsavedChangesDialog() {
       setDialogState({
         isOpen: true,
         action,
-        onSave: () => {
-          onSave();
+        onSave: async () => {
+          await onSave();
           setDialogState((prev) => ({ ...prev, isOpen: false }));
         },
         onDiscard: () => {
