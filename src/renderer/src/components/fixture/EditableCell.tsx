@@ -5,10 +5,11 @@ interface EditableCellProps {
   value: string;
   onChange: (value: string) => void;
   className?: string;
+  style?: React.CSSProperties;
   readOnly?: boolean;
 }
 
-export function EditableCell({ value, onChange, className, readOnly = false }: EditableCellProps) {
+export function EditableCell({ value, onChange, className, style, readOnly = false }: EditableCellProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value || '');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -42,7 +43,7 @@ export function EditableCell({ value, onChange, className, readOnly = false }: E
   };
 
   return (
-    <div className={clsx('px-2 text-sm', className)} onClick={(e) => e.stopPropagation()}>
+    <div className={clsx('px-2 text-sm', className)} style={style} onClick={(e) => e.stopPropagation()}>
       {isEditing ? (
         <input
           ref={inputRef}

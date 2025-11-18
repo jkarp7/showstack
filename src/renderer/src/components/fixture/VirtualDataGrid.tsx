@@ -11,6 +11,8 @@ interface VirtualDataGridProps {
   columnVisibility: ColumnVisibility;
   columnOrder: ColumnKey[];
   onColumnOrderChange: (order: ColumnKey[]) => void;
+  columnWidths: Partial<Record<ColumnKey, number>>;
+  onColumnWidthChange: (widths: Partial<Record<ColumnKey, number>>) => void;
 }
 
 const ROW_HEIGHT = 40; // pixels
@@ -25,12 +27,17 @@ export function VirtualDataGrid({
   columnVisibility,
   columnOrder,
   onColumnOrderChange,
+  columnWidths,
+  onColumnWidthChange,
 }: VirtualDataGridProps) {
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(0);
   const [draggedColumn, setDraggedColumn] = useState<ColumnKey | null>(null);
+  const [resizingColumn, setResizingColumn] = useState<ColumnKey | null>(null);
+  const [resizeStartX, setResizeStartX] = useState(0);
+  const [resizeStartWidth, setResizeStartWidth] = useState(0);
 
   // Update container height on resize
   useEffect(() => {
@@ -197,6 +204,52 @@ export function VirtualDataGrid({
     setDraggedColumn(null);
   }, [draggedColumn, columnOrder, onColumnOrderChange]);
 
+  // Column resize handlers
+  const handleResizeStart = useCallback((e: React.MouseEvent, columnKey: ColumnKey, currentWidth: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setResizingColumn(columnKey);
+    setResizeStartX(e.clientX);
+    setResizeStartWidth(currentWidth);
+  }, []);
+
+  useEffect(() => {
+    if (!resizingColumn) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const delta = e.clientX - resizeStartX;
+      const newWidth = Math.max(50, resizeStartWidth + delta); // Min width 50px
+      onColumnWidthChange({
+        ...columnWidths,
+        [resizingColumn]: newWidth,
+      });
+    };
+
+    const handleMouseUp = () => {
+      setResizingColumn(null);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [resizingColumn, resizeStartX, resizeStartWidth, columnWidths, onColumnWidthChange]);
+
+  // Helper to get column width (custom or default)
+  const getColumnWidth = useCallback((col: typeof COLUMN_CONFIGS[0]): number => {
+    if (columnWidths[col.key]) {
+      return columnWidths[col.key]!;
+    }
+    // Parse Tailwind width to pixels (approximate)
+    if (col.width.includes('flex-1')) return 200; // Default for flex columns
+    const match = col.width.match(/w-(\d+)/);
+    if (match) return parseInt(match[1], 10) * 4; // Tailwind w-X is X * 0.25rem, 1rem = 16px
+    return 100; // Fallback
+  }, [columnWidths]);
+
   // Get ordered column configs
   const orderedColumns = getOrderedColumns(columnOrder);
 
@@ -223,21 +276,32 @@ export function VirtualDataGrid({
             className="w-4 h-4"
           />
         </div>
-        {orderedColumns.filter(col => columnVisibility[col.key]).map(col => (
-          <div
-            key={col.key}
-            draggable
-            onDragStart={(e) => handleDragStart(e, col.key)}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, col.key)}
-            className={`${col.width} px-2 font-semibold text-sm text-gray-300 flex-shrink-0 cursor-move hover:bg-gray-700 transition ${
-              draggedColumn === col.key ? 'opacity-50' : ''
-            }`}
-            title="Drag to reorder"
-          >
-            {col.label}
-          </div>
-        ))}
+        {orderedColumns.filter(col => columnVisibility[col.key]).map(col => {
+          const colWidth = getColumnWidth(col);
+          return (
+            <div
+              key={col.key}
+              draggable
+              onDragStart={(e) => handleDragStart(e, col.key)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, col.key)}
+              className={`px-2 font-semibold text-sm text-gray-300 flex-shrink-0 cursor-move hover:bg-gray-700 transition relative ${
+                draggedColumn === col.key ? 'opacity-50' : ''
+              }`}
+              style={{ width: `${colWidth}px` }}
+              title="Drag to reorder"
+            >
+              {col.label}
+              {/* Resize handle */}
+              <div
+                className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500 hover:w-1.5 transition-all"
+                onMouseDown={(e) => handleResizeStart(e, col.key, colWidth)}
+                onClick={(e) => e.stopPropagation()}
+                title="Drag to resize"
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* Virtual Scrolling Container */}
@@ -257,6 +321,8 @@ export function VirtualDataGrid({
                 onCellEdit={handleCellEdit}
                 columnVisibility={columnVisibility}
                 columnOrder={columnOrder}
+                columnWidths={columnWidths}
+                getColumnWidth={getColumnWidth}
               />
             ))}
           </div>

@@ -10,6 +10,8 @@ interface VirtualRowProps {
   onCellEdit: (fixtureId: string, field: keyof Fixture, value: string) => void;
   columnVisibility: ColumnVisibility;
   columnOrder: ColumnKey[];
+  columnWidths: Partial<Record<ColumnKey, number>>;
+  getColumnWidth: (col: any) => number;
 }
 
 export const VirtualRow = memo(function VirtualRow({
@@ -19,6 +21,8 @@ export const VirtualRow = memo(function VirtualRow({
   onCellEdit,
   columnVisibility,
   columnOrder,
+  columnWidths,
+  getColumnWidth,
 }: VirtualRowProps) {
   // Get ordered column configs
   const orderedColumns = getOrderedColumns(columnOrder);
@@ -79,15 +83,19 @@ export const VirtualRow = memo(function VirtualRow({
           className="w-4 h-4 pointer-events-none"
         />
       </div>
-      {orderedColumns.filter(col => columnVisibility[col.key]).map(col => (
-        <EditableCell
-          key={col.key}
-          value={getCellValue(col.key)}
-          onChange={(val) => onCellEdit(fixture.id, col.key, val)}
-          className={`${col.width} flex-shrink-0`}
-          readOnly={isFieldReadOnly(col.key)}
-        />
-      ))}
+      {orderedColumns.filter(col => columnVisibility[col.key]).map(col => {
+        const colWidth = getColumnWidth(col);
+        return (
+          <EditableCell
+            key={col.key}
+            value={getCellValue(col.key)}
+            onChange={(val) => onCellEdit(fixture.id, col.key, val)}
+            className="flex-shrink-0"
+            style={{ width: `${colWidth}px` }}
+            readOnly={isFieldReadOnly(col.key)}
+          />
+        );
+      })}
     </div>
   );
 });

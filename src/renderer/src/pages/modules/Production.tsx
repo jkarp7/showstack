@@ -31,6 +31,9 @@ export function Production() {
   // Column order state
   const [columnOrder, setColumnOrder] = useState<ColumnKey[]>(DEFAULT_COLUMN_ORDER);
 
+  // Column widths state (in pixels, null means use default from config)
+  const [columnWidths, setColumnWidths] = useState<Partial<Record<ColumnKey, number>>>({});
+
   // Load fixtures from database on mount
   useEffect(() => {
     loadFixtures();
@@ -224,6 +227,8 @@ export function Production() {
           columnVisibility={columnVisibility}
           columnOrder={columnOrder}
           onColumnOrderChange={setColumnOrder}
+          columnWidths={columnWidths}
+          onColumnWidthChange={setColumnWidths}
         />
       </main>
 
