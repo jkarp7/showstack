@@ -5,6 +5,7 @@ import { initDatabase } from './database';
 import { registerFixtureHandlers } from './ipc/fixtures';
 import { registerProjectHandlers } from './ipc/projects';
 import { registerDialogHandlers } from './ipc/dialogs';
+import { registerPreferencesHandlers } from './ipc/preferences';
 
 // Disable hardware acceleration on Linux
 if (process.platform === 'linux') {
@@ -28,6 +29,7 @@ app.on('ready', async () => {
   registerFixtureHandlers();
   registerProjectHandlers();
   registerDialogHandlers();
+  registerPreferencesHandlers();
 
   // Create main window
   mainWindow = createWindow();

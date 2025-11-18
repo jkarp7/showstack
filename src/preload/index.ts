@@ -45,6 +45,13 @@ contextBridge.exposeInMainWorld('api', {
   dialog: {
     openImage: () => ipcRenderer.invoke('dialog:openImage'),
     openProject: () => ipcRenderer.invoke('dialog:openProject')
+  },
+
+  // User preferences
+  preferences: {
+    get: (projectId: string, key: string) => ipcRenderer.invoke('preferences:get', projectId, key),
+    set: (projectId: string, key: string, value: any) => ipcRenderer.invoke('preferences:set', projectId, key, value),
+    getAll: (projectId: string) => ipcRenderer.invoke('preferences:getAll', projectId)
   }
 });
 
@@ -68,6 +75,11 @@ export interface ElectronAPI {
   dialog: {
     openImage: () => Promise<string | null>;
     openProject: () => Promise<string | null>;
+  };
+  preferences: {
+    get: (projectId: string, key: string) => Promise<any | null>;
+    set: (projectId: string, key: string, value: any) => Promise<void>;
+    getAll: (projectId: string) => Promise<Record<string, any>>;
   };
 }
 

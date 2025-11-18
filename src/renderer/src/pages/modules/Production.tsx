@@ -34,10 +34,80 @@ export function Production() {
   // Column widths state (in pixels, null means use default from config)
   const [columnWidths, setColumnWidths] = useState<Partial<Record<ColumnKey, number>>>({});
 
-  // Load fixtures from database on mount
+  // Load fixtures and preferences from database on mount
   useEffect(() => {
     loadFixtures();
+
+    // Load column preferences
+    const loadPreferences = async () => {
+      if (!window.api?.preferences) return;
+
+      try {
+        const projectId = 'default-project'; // TODO: Get from current project
+
+        const savedVisibility = await window.api.preferences.get(projectId, 'columnVisibility');
+        if (savedVisibility) {
+          setColumnVisibility(savedVisibility);
+        }
+
+        const savedOrder = await window.api.preferences.get(projectId, 'columnOrder');
+        if (savedOrder) {
+          setColumnOrder(savedOrder);
+        }
+
+        const savedWidths = await window.api.preferences.get(projectId, 'columnWidths');
+        if (savedWidths) {
+          setColumnWidths(savedWidths);
+        }
+      } catch (error) {
+        console.error('Failed to load preferences:', error);
+      }
+    };
+
+    loadPreferences();
   }, [loadFixtures]);
+
+  // Save column visibility when it changes
+  useEffect(() => {
+    const savePreference = async () => {
+      if (!window.api?.preferences) return;
+      try {
+        const projectId = 'default-project'; // TODO: Get from current project
+        await window.api.preferences.set(projectId, 'columnVisibility', columnVisibility);
+      } catch (error) {
+        console.error('Failed to save column visibility:', error);
+      }
+    };
+    savePreference();
+  }, [columnVisibility]);
+
+  // Save column order when it changes
+  useEffect(() => {
+    const savePreference = async () => {
+      if (!window.api?.preferences) return;
+      try {
+        const projectId = 'default-project'; // TODO: Get from current project
+        await window.api.preferences.set(projectId, 'columnOrder', columnOrder);
+      } catch (error) {
+        console.error('Failed to save column order:', error);
+      }
+    };
+    savePreference();
+  }, [columnOrder]);
+
+  // Save column widths when they change
+  useEffect(() => {
+    const savePreference = async () => {
+      if (!window.api?.preferences) return;
+      try {
+        const projectId = 'default-project'; // TODO: Get from current project
+        await window.api.preferences.set(projectId, 'columnWidths', columnWidths);
+      } catch (error) {
+        console.error('Failed to save column widths:', error);
+      }
+    };
+    savePreference();
+  }, [columnWidths]);
 
   // Sort handler - toggle direction if same field, otherwise set new field
   const handleSort = (field: string) => {

@@ -116,4 +116,18 @@ export const SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_fixtures_position ON fixtures(project_id, position);
   CREATE INDEX IF NOT EXISTS idx_fixtures_channel ON fixtures(project_id, channel);
   CREATE INDEX IF NOT EXISTS idx_fixtures_location ON fixtures(project_id, location);
+
+  -- User Preferences table (per-project column settings, etc.)
+  CREATE TABLE IF NOT EXISTS user_preferences (
+    id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL,
+    preference_key TEXT NOT NULL,
+    preference_value TEXT NOT NULL, -- JSON
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    UNIQUE(project_id, preference_key),
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_preferences_project ON user_preferences(project_id);
 `;
