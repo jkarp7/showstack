@@ -51,18 +51,41 @@ export async function initDatabase(): Promise<void> {
 }
 
 function runMigrations(db: Database): void {
-  // Check if logo_path column exists
-  const tableInfo = db.exec("PRAGMA table_info(projects)");
-  const columns = tableInfo[0]?.values.map(row => row[1]) || [];
+  // Projects table migrations
+  const projectsTableInfo = db.exec("PRAGMA table_info(projects)");
+  const projectsColumns = projectsTableInfo[0]?.values.map(row => row[1]) || [];
 
-  if (!columns.includes('logo_path')) {
+  if (!projectsColumns.includes('logo_path')) {
     console.log('Running migration: Adding logo_path to projects');
     db.run('ALTER TABLE projects ADD COLUMN logo_path TEXT');
   }
 
-  if (!columns.includes('enabled_modules')) {
+  if (!projectsColumns.includes('enabled_modules')) {
     console.log('Running migration: Adding enabled_modules to projects');
     db.run('ALTER TABLE projects ADD COLUMN enabled_modules TEXT');
+  }
+
+  // Fixtures table migrations - add LightWright parity columns
+  const fixturesTableInfo = db.exec("PRAGMA table_info(fixtures)");
+  const fixturesColumns = fixturesTableInfo[0]?.values.map(row => row[1]) || [];
+
+  const requiredColumns = [
+    { name: 'manufacturer', type: 'TEXT' },
+    { name: 'model', type: 'TEXT' },
+    { name: 'universe', type: 'INTEGER' },
+    { name: 'dmx_address', type: 'INTEGER' },
+    { name: 'circuit_number', type: 'TEXT' },
+    { name: 'gobo', type: 'TEXT' },
+    { name: 'accessories', type: 'TEXT' },
+    { name: 'system', type: 'TEXT' },
+    { name: 'custom_fields', type: 'TEXT' },
+  ];
+
+  for (const column of requiredColumns) {
+    if (!fixturesColumns.includes(column.name)) {
+      console.log(`Running migration: Adding ${column.name} to fixtures`);
+      db.run(`ALTER TABLE fixtures ADD COLUMN ${column.name} ${column.type}`);
+    }
   }
 }
 

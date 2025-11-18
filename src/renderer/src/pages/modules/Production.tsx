@@ -303,6 +303,7 @@ export function Production() {
         onUserColumnSettings={() => setIsUserColumnSettingsOpen(true)}
         columnVisibility={columnVisibility}
         onColumnVisibilityChange={setColumnVisibility}
+        userColumnDefinitions={userColumnDefinitions}
       />
 
       {/* Sort Bar */}
@@ -340,6 +341,7 @@ export function Production() {
           onColumnOrderChange={setColumnOrder}
           columnWidths={columnWidths}
           onColumnWidthChange={setColumnWidths}
+          userColumnDefinitions={userColumnDefinitions}
         />
       </main>
 

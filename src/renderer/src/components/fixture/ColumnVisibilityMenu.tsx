@@ -1,15 +1,21 @@
-import { useState, useRef, useEffect } from 'react';
-import { COLUMN_CONFIGS, ColumnVisibility } from '../../types/columns';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { COLUMN_CONFIGS, ColumnVisibility, applyUserColumnLabels } from '../../types/columns';
 
 interface ColumnVisibilityMenuProps {
   visibility: ColumnVisibility;
   onVisibilityChange: (visibility: ColumnVisibility) => void;
+  userColumnDefinitions?: Record<string, string>;
 }
 
-export function ColumnVisibilityMenu({ visibility, onVisibilityChange }: ColumnVisibilityMenuProps) {
+export function ColumnVisibilityMenu({ visibility, onVisibilityChange, userColumnDefinitions = {} }: ColumnVisibilityMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Apply user column labels
+  const columns = useMemo(() => {
+    return applyUserColumnLabels(COLUMN_CONFIGS, userColumnDefinitions);
+  }, [userColumnDefinitions]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -43,7 +49,7 @@ export function ColumnVisibilityMenu({ visibility, onVisibilityChange }: ColumnV
   };
 
   // Group columns by their group property
-  const groupedColumns = COLUMN_CONFIGS.reduce((acc, column) => {
+  const groupedColumns = columns.reduce((acc, column) => {
     const groupKey = column.group || 'ungrouped';
     if (!acc[groupKey]) {
       acc[groupKey] = [];

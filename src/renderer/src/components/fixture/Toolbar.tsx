@@ -9,9 +9,10 @@ interface ToolbarProps {
   onUserColumnSettings: () => void;
   columnVisibility: ColumnVisibility;
   onColumnVisibilityChange: (visibility: ColumnVisibility) => void;
+  userColumnDefinitions?: Record<string, string>;
 }
 
-export function Toolbar({ selectedCount, onAddFixture, onBulkEdit, onDeleteSelected, onUserColumnSettings, columnVisibility, onColumnVisibilityChange }: ToolbarProps) {
+export function Toolbar({ selectedCount, onAddFixture, onBulkEdit, onDeleteSelected, onUserColumnSettings, columnVisibility, onColumnVisibilityChange, userColumnDefinitions }: ToolbarProps) {
   return (
     <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center gap-2">
       <button
@@ -62,6 +63,7 @@ export function Toolbar({ selectedCount, onAddFixture, onBulkEdit, onDeleteSelec
         <ColumnVisibilityMenu
           visibility={columnVisibility}
           onVisibilityChange={onColumnVisibilityChange}
+          userColumnDefinitions={userColumnDefinitions}
         />
       </div>
     </div>
