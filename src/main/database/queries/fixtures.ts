@@ -151,27 +151,41 @@ export function createFixture(
   const id = uuidv4();
   const now = Date.now();
 
+  // Serialize arrays and objects
+  const accessories = fixture.accessories ? JSON.stringify(fixture.accessories) : null;
+  const customFields = fixture.custom_fields ? JSON.stringify(fixture.custom_fields) : null;
+
   db.run(`
     INSERT INTO fixtures (
-      id, project_id, position, unit_number, type, purpose,
-      channel, dimmer, circuit, color, location, wattage,
-      status, notes, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      id, project_id, position, unit_number, type, manufacturer, model, purpose,
+      channel, universe, dmx_address, dimmer, circuit, circuit_number,
+      color, gobo, accessories, location, system, wattage,
+      status, notes, custom_fields, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
     id,
     projectId,
     fixture.position || '',
     fixture.unit_number || fixture.unit || null,
     fixture.type || '',
+    fixture.manufacturer || null,
+    fixture.model || null,
     fixture.purpose || '',
     fixture.channel || '',
+    fixture.universe || null,
+    fixture.dmx_address || null,
     fixture.dimmer || '',
     fixture.circuit || '',
+    fixture.circuit_number || null,
     fixture.color || '',
+    fixture.gobo || '',
+    accessories,
     fixture.location || '',
+    fixture.system || null,
     fixture.wattage || null,
     fixture.status || 'active',
     fixture.notes || '',
+    customFields,
     now,
     now
   ]);
@@ -186,9 +200,10 @@ export function updateFixture(id: string, updates: Partial<Fixture>): Fixture {
 
   // Filter out fields that shouldn't be updated
   const allowedFields = [
-    'position', 'unit_number', 'type', 'purpose', 'channel', 'dimmer',
-    'circuit', 'color', 'location', 'wattage', 'status', 'notes',
-    'gobo', 'manufacturer', 'model', 'universe', 'dmx_address'
+    'position', 'unit_number', 'type', 'manufacturer', 'model', 'purpose',
+    'channel', 'universe', 'dmx_address', 'dimmer', 'circuit', 'circuit_number',
+    'color', 'gobo', 'accessories', 'location', 'system', 'wattage',
+    'status', 'notes', 'custom_fields'
   ];
 
   const fields = Object.keys(updates).filter(k =>
@@ -204,6 +219,14 @@ export function updateFixture(id: string, updates: Partial<Fixture>): Fixture {
   if ('unit' in mappedUpdates) {
     mappedUpdates.unit_number = mappedUpdates.unit;
     delete mappedUpdates.unit;
+  }
+
+  // Serialize arrays and objects for database storage
+  if ('accessories' in mappedUpdates && Array.isArray(mappedUpdates.accessories)) {
+    mappedUpdates.accessories = JSON.stringify(mappedUpdates.accessories) as any;
+  }
+  if ('custom_fields' in mappedUpdates && typeof mappedUpdates.custom_fields === 'object') {
+    mappedUpdates.custom_fields = JSON.stringify(mappedUpdates.custom_fields) as any;
   }
 
   const setClause = fields

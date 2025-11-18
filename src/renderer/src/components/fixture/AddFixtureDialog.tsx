@@ -8,6 +8,13 @@ interface AddFixtureDialogProps {
   existingFixturesCount: number;
 }
 
+interface QueuedBatch {
+  id: string;
+  quantity: number;
+  description: string;
+  fixtures: Partial<Fixture>[];
+}
+
 export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount }: AddFixtureDialogProps) {
   const [quantity, setQuantity] = useState(1);
   const [position, setPosition] = useState('');
@@ -39,11 +46,13 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
   const [autoIncrementCircuit, setAutoIncrementCircuit] = useState(false);
   const [autoIncrementCircuitNumber, setAutoIncrementCircuitNumber] = useState(false);
 
+  // Batch queue
+  const [queue, setQueue] = useState<QueuedBatch[]>([]);
+
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
+  // Build fixtures array from current form values
+  const buildFixtures = (): Partial<Fixture>[] => {
     const fixtures: Partial<Fixture>[] = [];
     for (let i = 0; i < quantity; i++) {
       const fixture: Partial<Fixture> = {
@@ -167,12 +176,54 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
       fixtures.push(fixture);
     }
 
+    return fixtures;
+  };
+
+  // Generate description for a batch
+  const generateDescription = (): string => {
+    const parts: string[] = [`${quantity}x`];
+    if (type) parts.push(type);
+    if (position) parts.push(`@ ${position}`);
+    if (unit) parts.push(`#${unit}${autoIncrementUnit && quantity > 1 ? '+' : ''}`);
+    if (channel) parts.push(`Ch ${channel}${autoIncrementChannel && quantity > 1 ? '+' : ''}`);
+    return parts.join(' ');
+  };
+
+  // Add current form to queue
+  const handleAddToQueue = () => {
+    const fixtures = buildFixtures();
+    const batch: QueuedBatch = {
+      id: `${Date.now()}-${Math.random()}`,
+      quantity,
+      description: generateDescription(),
+      fixtures,
+    };
+    setQueue([...queue, batch]);
+
+    // Reset form for next batch
+    resetForm();
+  };
+
+  // Add all queued batches to worksheet
+  const handleAddAll = () => {
+    const allFixtures = queue.flatMap(batch => batch.fixtures);
+    onAdd(allFixtures);
+    handleClose();
+  };
+
+  // Add current batch directly (skip queue)
+  const handleAddNow = () => {
+    const fixtures = buildFixtures();
     onAdd(fixtures);
     handleClose();
   };
 
-  const handleClose = () => {
-    // Reset form
+  // Remove batch from queue
+  const handleRemoveBatch = (batchId: string) => {
+    setQueue(queue.filter(b => b.id !== batchId));
+  };
+
+  const resetForm = () => {
     setQuantity(1);
     setPosition('');
     setUnit('');
@@ -194,28 +245,42 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
     setNotes('');
     setStatus('Active');
     setNotOnPlot(false);
+  };
+
+  const handleClose = () => {
+    // Reset form
+    resetForm();
     setAutoIncrementUnit(true);
     setAutoIncrementChannel(true);
     setAutoIncrementAddress(false);
     setAutoIncrementDimmer(false);
     setAutoIncrementCircuit(false);
     setAutoIncrementCircuitNumber(false);
+    // Clear queue
+    setQueue([]);
     onClose();
   };
 
   const inputClass = "w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm focus:outline-none focus:border-blue-500";
   const labelClass = "text-xs font-medium text-gray-300 mb-1";
 
+  const totalFixturesInQueue = queue.reduce((sum, batch) => sum + batch.quantity, 0);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-4xl max-h-[90vh] flex flex-col">
+      <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-6xl max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-700">
+        <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
           <h2 className="text-xl font-bold">Add Fixture(s)</h2>
+          {queue.length > 0 && (
+            <span className="text-sm text-gray-400">
+              {queue.length} {queue.length === 1 ? 'batch' : 'batches'} ({totalFixturesInQueue} fixtures) in queue
+            </span>
+          )}
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-hidden flex flex-col">
-          <div className="grid grid-cols-[1fr_240px] gap-6 p-6 overflow-y-auto">
+        <div className="flex-1 overflow-hidden flex flex-col">
+          <div className="grid grid-cols-[1fr_200px_280px] gap-6 p-6 overflow-y-auto">
             {/* Left Side: Input Fields */}
             <div className="space-y-3">
               {/* Position & Unit */}
@@ -606,10 +671,59 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                 </label>
               </div>
             </div>
+
+            {/* Right Side: Batch Queue */}
+            <div className="border-l border-gray-700 pl-6 flex flex-col">
+              <h3 className="text-sm font-medium text-gray-300 mb-3">Batch Queue</h3>
+
+              {queue.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center text-gray-500 text-sm text-center p-4">
+                  No batches queued.<br />
+                  Fill out the form and click<br />
+                  "Add to Queue" to queue fixtures.
+                </div>
+              ) : (
+                <div className="flex-1 overflow-y-auto space-y-2 mb-3">
+                  {queue.map((batch) => (
+                    <div
+                      key={batch.id}
+                      className="bg-gray-700 rounded p-2 text-xs group hover:bg-gray-650 transition"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-white truncate">
+                            {batch.description}
+                          </div>
+                          <div className="text-gray-400 mt-0.5">
+                            {batch.quantity} {batch.quantity === 1 ? 'fixture' : 'fixtures'}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleRemoveBatch(batch.id)}
+                          className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition"
+                          title="Remove from queue"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {queue.length > 0 && (
+                <button
+                  onClick={handleAddAll}
+                  className="w-full px-3 py-2 bg-green-600 hover:bg-green-700 rounded text-sm font-medium transition"
+                >
+                  Add All to Worksheet ({totalFixturesInQueue})
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Footer - Buttons */}
-          <div className="px-6 py-4 border-t border-gray-700 flex justify-end gap-3">
+          <div className="px-6 py-4 border-t border-gray-700 flex justify-between">
             <button
               type="button"
               onClick={handleClose}
@@ -617,14 +731,25 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-medium transition"
-            >
-              Add {quantity > 1 ? `${quantity} Fixtures` : 'Fixture'}
-            </button>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={handleAddToQueue}
+                className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded font-medium transition"
+              >
+                Add to Queue
+              </button>
+              <button
+                type="button"
+                onClick={handleAddNow}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-medium transition"
+              >
+                Add Now ({quantity})
+              </button>
+            </div>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
