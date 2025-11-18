@@ -1,10 +1,15 @@
+import { ColumnVisibilityMenu } from './ColumnVisibilityMenu';
+import { ColumnVisibility } from '../../types/columns';
+
 interface ToolbarProps {
   selectedCount: number;
   onAddFixture: () => void;
   onDeleteSelected: () => void;
+  columnVisibility: ColumnVisibility;
+  onColumnVisibilityChange: (visibility: ColumnVisibility) => void;
 }
 
-export function Toolbar({ selectedCount, onAddFixture, onDeleteSelected }: ToolbarProps) {
+export function Toolbar({ selectedCount, onAddFixture, onDeleteSelected, columnVisibility, onColumnVisibilityChange }: ToolbarProps) {
   return (
     <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center gap-2">
       <button
@@ -34,6 +39,14 @@ export function Toolbar({ selectedCount, onAddFixture, onDeleteSelected }: Toolb
           </button>
         </>
       )}
+
+      {/* Column Visibility Menu - Always visible */}
+      <div className="ml-auto">
+        <ColumnVisibilityMenu
+          visibility={columnVisibility}
+          onVisibilityChange={onColumnVisibilityChange}
+        />
+      </div>
     </div>
   );
 }

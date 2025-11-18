@@ -1,12 +1,14 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Fixture } from '../types';
 import { VirtualRow } from './VirtualRow';
+import { COLUMN_CONFIGS, ColumnVisibility } from '../../types/columns';
 
 interface VirtualDataGridProps {
   fixtures: Fixture[];
   selectedRows: Set<string>;
   onSelectRows: (selected: Set<string>) => void;
   onUpdateFixture: (id: string, updates: Partial<Fixture>) => void;
+  columnVisibility: ColumnVisibility;
 }
 
 const ROW_HEIGHT = 40; // pixels
@@ -18,6 +20,7 @@ export function VirtualDataGrid({
   selectedRows,
   onSelectRows,
   onUpdateFixture,
+  columnVisibility,
 }: VirtualDataGridProps) {
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -122,16 +125,11 @@ export function VirtualDataGrid({
             className="w-4 h-4"
           />
         </div>
-        <div className="w-32 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Position</div>
-        <div className="w-20 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Unit#</div>
-        <div className="w-64 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Type</div>
-        <div className="w-48 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Purpose</div>
-        <div className="w-20 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Chan</div>
-        <div className="w-20 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Dim</div>
-        <div className="w-20 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Ckt</div>
-        <div className="w-24 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Color</div>
-        <div className="w-32 px-2 font-semibold text-sm text-gray-300 flex-shrink-0">Location</div>
-        <div className="flex-1 px-2 font-semibold text-sm text-gray-300 min-w-48">Notes</div>
+        {COLUMN_CONFIGS.filter(col => columnVisibility[col.key]).map(col => (
+          <div key={col.key} className={`${col.width} px-2 font-semibold text-sm text-gray-300 flex-shrink-0`}>
+            {col.label}
+          </div>
+        ))}
       </div>
 
       {/* Virtual Scrolling Container */}
@@ -149,6 +147,7 @@ export function VirtualDataGrid({
                 isSelected={selectedRows.has(fixture.id)}
                 onClick={(e) => handleRowClick(fixture.id, e)}
                 onCellEdit={handleCellEdit}
+                columnVisibility={columnVisibility}
               />
             ))}
           </div>

@@ -7,6 +7,7 @@ import { SortBar } from '../../components/fixture/SortBar';
 import { AddFixtureDialog } from '../../components/fixture/AddFixtureDialog';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { Fixture } from '../../types';
+import { DEFAULT_COLUMN_VISIBILITY, ColumnVisibility } from '../../types/columns';
 
 export function Production() {
   const navigate = useNavigate();
@@ -23,6 +24,9 @@ export function Production() {
   const [locationFilter, setLocationFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  // Column visibility state
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(DEFAULT_COLUMN_VISIBILITY);
 
   // Load fixtures from database on mount
   useEffect(() => {
@@ -165,6 +169,8 @@ export function Production() {
           await deleteMultiple(Array.from(selectedRows));
           setSelectedRows(new Set());
         }}
+        columnVisibility={columnVisibility}
+        onColumnVisibilityChange={setColumnVisibility}
       />
 
       {/* Sort Bar */}
@@ -197,6 +203,7 @@ export function Production() {
           selectedRows={selectedRows}
           onSelectRows={setSelectedRows}
           onUpdateFixture={updateFixture}
+          columnVisibility={columnVisibility}
         />
       </main>
 
