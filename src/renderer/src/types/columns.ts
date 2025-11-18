@@ -21,6 +21,7 @@ export type ColumnKey =
   | 'mark'
   | 'universe'         // Auto-populates from address
   | 'dmx_address'      // DMX # - Auto-populates from address
+  | 'mode'             // LED/Moving Light mode
   | 'system'
   | 'scenery'
   | 'focus_lr'
@@ -93,6 +94,7 @@ export const COLUMN_CONFIGS: ColumnConfig[] = [
   { key: 'mark', label: 'Mark', width: 'w-20' },
   { key: 'universe', label: 'Universe', width: 'w-20' }, // Can be edited directly or via Address
   { key: 'dmx_address', label: 'DMX #', width: 'w-20' }, // Can be edited directly or via Address
+  { key: 'mode', label: 'Mode', width: 'w-24' }, // LED/Moving Light mode
   { key: 'system', label: 'System', width: 'w-24' },
   { key: 'scenery', label: 'Scenery', width: 'w-32' },
   { key: 'focus_lr', label: 'Focus L/R', width: 'w-24' },
@@ -213,6 +215,7 @@ export const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = {
   mark: false,
   universe: false,
   dmx_address: false,
+  mode: false,
   system: false,
   scenery: false,
   focus_lr: false,

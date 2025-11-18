@@ -1,7 +1,7 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { Fixture } from '../types';
 import { VirtualRow } from './VirtualRow';
-import { COLUMN_CONFIGS, ColumnVisibility, ColumnKey, getOrderedColumns } from '../../types/columns';
+import { COLUMN_CONFIGS, ColumnVisibility, ColumnKey, getOrderedColumns, applyUserColumnLabels } from '../../types/columns';
 
 interface VirtualDataGridProps {
   fixtures: Fixture[];
@@ -13,6 +13,7 @@ interface VirtualDataGridProps {
   onColumnOrderChange: (order: ColumnKey[]) => void;
   columnWidths: Partial<Record<ColumnKey, number>>;
   onColumnWidthChange: (widths: Partial<Record<ColumnKey, number>>) => void;
+  userColumnDefinitions?: Record<string, string>;
 }
 
 const ROW_HEIGHT = 40; // pixels
@@ -29,6 +30,7 @@ export function VirtualDataGrid({
   onColumnOrderChange,
   columnWidths,
   onColumnWidthChange,
+  userColumnDefinitions = {},
 }: VirtualDataGridProps) {
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -251,7 +253,11 @@ export function VirtualDataGrid({
   }, [columnWidths]);
 
   // Get ordered column configs
-  const orderedColumns = getOrderedColumns(columnOrder);
+  // Get ordered columns and apply user-defined labels
+  const orderedColumns = useMemo(() => {
+    const cols = getOrderedColumns(columnOrder);
+    return applyUserColumnLabels(cols, userColumnDefinitions);
+  }, [columnOrder, userColumnDefinitions]);
 
   return (
     <div className="h-full flex flex-col bg-gray-900">
