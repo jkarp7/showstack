@@ -4,16 +4,13 @@ export interface RecentFile {
   lastOpened: number;
 }
 
-const RECENT_FILES_KEY = 'recentFiles';
-const GLOBAL_PROJECT_ID = '_global';
+const RECENT_FILES_KEY = 'showstack_recentFiles';
 const MAX_RECENT_FILES = 10;
 
 /**
  * Add a file to the recent files list
  */
 export async function addRecentFile(filePath: string, projectName: string): Promise<void> {
-  if (!window.api?.preferences) return;
-
   try {
     // Get current recent files
     const recentFiles = await getRecentFiles();
@@ -34,8 +31,8 @@ export async function addRecentFile(filePath: string, projectName: string): Prom
     // Keep only the most recent MAX_RECENT_FILES
     const trimmed = updated.slice(0, MAX_RECENT_FILES);
 
-    // Save to preferences
-    await window.api.preferences.set(GLOBAL_PROJECT_ID, RECENT_FILES_KEY, trimmed);
+    // Save to localStorage
+    localStorage.setItem(RECENT_FILES_KEY, JSON.stringify(trimmed));
 
     console.log('✅ Added to recent files:', filePath);
   } catch (error) {
@@ -47,11 +44,10 @@ export async function addRecentFile(filePath: string, projectName: string): Prom
  * Get the list of recent files
  */
 export async function getRecentFiles(): Promise<RecentFile[]> {
-  if (!window.api?.preferences) return [];
-
   try {
-    const recentFiles = await window.api.preferences.get(GLOBAL_PROJECT_ID, RECENT_FILES_KEY);
-    return recentFiles || [];
+    const stored = localStorage.getItem(RECENT_FILES_KEY);
+    if (!stored) return [];
+    return JSON.parse(stored) as RecentFile[];
   } catch (error) {
     console.error('Failed to get recent files:', error);
     return [];
@@ -62,12 +58,10 @@ export async function getRecentFiles(): Promise<RecentFile[]> {
  * Remove a file from the recent files list
  */
 export async function removeRecentFile(filePath: string): Promise<void> {
-  if (!window.api?.preferences) return;
-
   try {
     const recentFiles = await getRecentFiles();
     const filtered = recentFiles.filter(f => f.filePath !== filePath);
-    await window.api.preferences.set(GLOBAL_PROJECT_ID, RECENT_FILES_KEY, filtered);
+    localStorage.setItem(RECENT_FILES_KEY, JSON.stringify(filtered));
 
     console.log('✅ Removed from recent files:', filePath);
   } catch (error) {
@@ -79,10 +73,8 @@ export async function removeRecentFile(filePath: string): Promise<void> {
  * Clear all recent files
  */
 export async function clearRecentFiles(): Promise<void> {
-  if (!window.api?.preferences) return;
-
   try {
-    await window.api.preferences.set(GLOBAL_PROJECT_ID, RECENT_FILES_KEY, []);
+    localStorage.removeItem(RECENT_FILES_KEY);
     console.log('✅ Cleared recent files');
   } catch (error) {
     console.error('Failed to clear recent files:', error);

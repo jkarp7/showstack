@@ -136,7 +136,7 @@ class FileService {
       // Query project info
       const projectResult = importedDb.exec('SELECT id, name FROM projects LIMIT 1');
       const projectId = projectResult[0]?.values[0]?.[0] as string || 'default-project';
-      const projectName = projectResult[0]?.values[0]?.[1] as string || 'Untitled Project';
+      let projectName = projectResult[0]?.values[0]?.[1] as string || 'Untitled Project';
 
       // Close the temporary database
       importedDb.close();
@@ -147,6 +147,23 @@ class FileService {
 
       // Reload the in-memory database to reflect the imported data
       await reloadDatabase();
+
+      // If the project name is "Untitled Project", update it to match the filename
+      if (projectName === 'Untitled Project') {
+        const filename = this.getFileName(filePath);
+        projectName = filename;
+
+        // Update the project name in the database
+        const db = getDatabase();
+        db.run('UPDATE projects SET name = ?, updated_at = ? WHERE id = ?', [
+          projectName,
+          Date.now(),
+          projectId
+        ]);
+        saveDatabase();
+
+        console.log('✅ Updated project name from filename:', projectName);
+      }
 
       console.log('✅ Project imported from:', filePath);
 
