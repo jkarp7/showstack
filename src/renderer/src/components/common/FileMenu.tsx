@@ -1,5 +1,5 @@
+import { useEffect } from 'react';
 import { useFileStore } from '../../store/fileStore';
-import { useKeyPress } from '../../hooks/useKeyPress';
 
 interface FileMenuProps {
   className?: string;
@@ -20,31 +20,6 @@ export function FileMenu({ className = '' }: FileMenuProps) {
   const currentFileName = getCurrentFileName();
   const isLoading = isSaving || isOpening;
 
-  // Keyboard shortcuts
-  useKeyPress(['n'], (e) => {
-    if (e.metaKey || e.ctrlKey) {
-      e.preventDefault();
-      handleNew();
-    }
-  });
-
-  useKeyPress(['o'], (e) => {
-    if (e.metaKey || e.ctrlKey) {
-      e.preventDefault();
-      handleOpen();
-    }
-  });
-
-  useKeyPress(['s'], (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.shiftKey) {
-      e.preventDefault();
-      handleSaveAs();
-    } else if (e.metaKey || e.ctrlKey) {
-      e.preventDefault();
-      handleSave();
-    }
-  });
-
   const handleNew = async () => {
     await newFile();
   };
@@ -60,6 +35,35 @@ export function FileMenu({ className = '' }: FileMenuProps) {
   const handleSaveAs = async () => {
     await saveFileAs();
   };
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd/Ctrl+N - New
+      if ((e.metaKey || e.ctrlKey) && e.key === 'n' && !e.shiftKey) {
+        e.preventDefault();
+        handleNew();
+      }
+      // Cmd/Ctrl+O - Open
+      else if ((e.metaKey || e.ctrlKey) && e.key === 'o' && !e.shiftKey) {
+        e.preventDefault();
+        handleOpen();
+      }
+      // Cmd/Ctrl+Shift+S - Save As
+      else if ((e.metaKey || e.ctrlKey) && e.key === 's' && e.shiftKey) {
+        e.preventDefault();
+        handleSaveAs();
+      }
+      // Cmd/Ctrl+S - Save
+      else if ((e.metaKey || e.ctrlKey) && e.key === 's' && !e.shiftKey) {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDirty, isSaving, isOpening]);
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
