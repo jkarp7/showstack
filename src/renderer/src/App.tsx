@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from './pages/Login';
 import { LandingPage } from './pages/LandingPage';
-import { Design } from './pages/modules/Design';
+import { Prep } from './pages/modules/Prep';
 import { Production } from './pages/modules/Production';
-import { Tour } from './pages/modules/Tour';
+import { Manager } from './pages/modules/Manager';
 
 export default function App() {
   return (
@@ -19,9 +19,9 @@ export default function App() {
         <Route path="/modules" element={<LandingPage />} />
 
         {/* Individual Modules */}
-        <Route path="/modules/design" element={<Design />} />
+        <Route path="/modules/prep" element={<Prep />} />
         <Route path="/modules/production" element={<Production />} />
-        <Route path="/modules/tour" element={<Tour />} />
+        <Route path="/modules/manager" element={<Manager />} />
 
         {/* Catch all - redirect to login */}
         <Route path="*" element={<Navigate to="/login" replace />} />

@@ -133,14 +133,14 @@ export function NewProjectDialog({ isOpen, onClose, onCreate }: NewProjectDialog
               <label className="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-650">
                 <input
                   type="checkbox"
-                  checked={enabledModules.includes('design')}
-                  onChange={() => toggleModule('design')}
+                  checked={enabledModules.includes('prep')}
+                  onChange={() => toggleModule('prep')}
                   disabled={true}
                   className="w-4 h-4"
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">ShowStack:Design</span>
+                    <span className="font-medium">ShowStack:Prep</span>
                     <span className="px-2 py-0.5 bg-gray-600 text-xs rounded">Locked</span>
                   </div>
                   <p className="text-xs text-gray-400">Lighting design & visualization</p>
@@ -163,14 +163,14 @@ export function NewProjectDialog({ isOpen, onClose, onCreate }: NewProjectDialog
               <label className="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-650">
                 <input
                   type="checkbox"
-                  checked={enabledModules.includes('tour')}
-                  onChange={() => toggleModule('tour')}
+                  checked={enabledModules.includes('manager')}
+                  onChange={() => toggleModule('manager')}
                   disabled={true}
                   className="w-4 h-4"
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">ShowStack:Tour</span>
+                    <span className="font-medium">ShowStack:Manager</span>
                     <span className="px-2 py-0.5 bg-gray-600 text-xs rounded">Locked</span>
                   </div>
                   <p className="text-xs text-gray-400">Tour scheduling & logistics</p>
