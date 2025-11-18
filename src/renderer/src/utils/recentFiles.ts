@@ -2,6 +2,7 @@ export interface RecentFile {
   filePath: string;
   projectName: string;
   lastOpened: number;
+  created: number; // When first added to recent files
 }
 
 const RECENT_FILES_KEY = 'showstack_recentFiles';
@@ -15,6 +16,10 @@ export async function addRecentFile(filePath: string, projectName: string): Prom
     // Get current recent files
     const recentFiles = await getRecentFiles();
 
+    // Check if this file already exists
+    const existingFile = recentFiles.find(f => f.filePath === filePath);
+    const created = existingFile?.created || Date.now();
+
     // Remove this file if it already exists
     const filtered = recentFiles.filter(f => f.filePath !== filePath);
 
@@ -23,7 +28,8 @@ export async function addRecentFile(filePath: string, projectName: string): Prom
       {
         filePath,
         projectName,
-        lastOpened: Date.now()
+        lastOpened: Date.now(),
+        created // Keep original creation date if it existed
       },
       ...filtered
     ];

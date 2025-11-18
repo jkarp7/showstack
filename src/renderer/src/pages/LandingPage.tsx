@@ -125,7 +125,7 @@ export function LandingPage() {
                   Open File...
                 </button>
                 <button
-                  onClick={() => navigate('/modules/production')}
+                  onClick={() => setIsNewProjectDialogOpen(true)}
                   className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition flex items-center gap-2"
                 >
                   <span className="text-xl">+</span>
@@ -159,11 +159,11 @@ export function LandingPage() {
                         </button>
                       </div>
                       <h3 className="text-lg font-semibold mb-2 truncate">{file.projectName}</h3>
-                      <p className="text-sm text-gray-400 mb-1 truncate" title={file.filePath}>
-                        {file.filePath}
+                      <p className="text-xs text-gray-500">
+                        Created: {new Date(file.created).toLocaleDateString()}
                       </p>
                       <p className="text-xs text-gray-500">
-                        Last opened: {new Date(file.lastOpened).toLocaleString()}
+                        Last opened: {new Date(file.lastOpened).toLocaleDateString()}
                       </p>
                     </div>
                   ))}
@@ -178,7 +178,7 @@ export function LandingPage() {
                           Project Name
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                          File Path
+                          Date Created
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                           Last Opened
@@ -201,11 +201,11 @@ export function LandingPage() {
                               <span className="font-medium">{file.projectName}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-400 max-w-md truncate" title={file.filePath}>
-                            {file.filePath}
+                          <td className="px-6 py-4 text-sm text-gray-400 whitespace-nowrap">
+                            {new Date(file.created).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-400 whitespace-nowrap">
-                            {new Date(file.lastOpened).toLocaleString()}
+                            {new Date(file.lastOpened).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 text-right">
                             <button
@@ -246,7 +246,7 @@ export function LandingPage() {
                     Open File...
                   </button>
                   <button
-                    onClick={() => navigate('/modules/production')}
+                    onClick={() => setIsNewProjectDialogOpen(true)}
                     className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition inline-flex items-center gap-2"
                   >
                     <span className="text-xl">+</span>
