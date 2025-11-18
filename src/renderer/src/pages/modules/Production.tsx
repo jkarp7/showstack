@@ -22,9 +22,15 @@ export function Production() {
   // User column definitions
   const [userColumnDefinitions, setUserColumnDefinitions] = useState<Record<string, string>>({});
 
-  // Sort state
-  const [sortField, setSortField] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  // Project name state
+  const [projectName, setProjectName] = useState<string>('Untitled Project');
+
+  // Sort state - now supports multi-column sort
+  interface SortConfig {
+    field: string;
+    direction: 'asc' | 'desc';
+  }
+  const [sortConfigs, setSortConfigs] = useState<SortConfig[]>([]);
 
   // Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,39 +51,117 @@ export function Production() {
   useEffect(() => {
     loadFixtures();
 
-    // Load column preferences
-    const loadPreferences = async () => {
-      if (!window.api?.preferences) return;
+    // Load project info and column preferences
+    const loadProjectAndPreferences = async () => {
+      if (!window.api) return;
 
       try {
         const projectId = 'default-project'; // TODO: Get from current project
 
-        const savedVisibility = await window.api.preferences.get(projectId, 'columnVisibility');
-        if (savedVisibility) {
-          setColumnVisibility(savedVisibility);
+        // Load project name
+        if (window.api.projects) {
+          const project = await window.api.projects.getById(projectId);
+          if (project?.name) {
+            setProjectName(project.name);
+          }
         }
 
-        const savedOrder = await window.api.preferences.get(projectId, 'columnOrder');
-        if (savedOrder) {
-          setColumnOrder(savedOrder);
-        }
+        // Load column preferences
+        if (window.api.preferences) {
+          const savedVisibility = await window.api.preferences.get(projectId, 'columnVisibility');
+          if (savedVisibility) {
+            setColumnVisibility(savedVisibility);
+          }
 
-        const savedWidths = await window.api.preferences.get(projectId, 'columnWidths');
-        if (savedWidths) {
-          setColumnWidths(savedWidths);
-        }
+          const savedOrder = await window.api.preferences.get(projectId, 'columnOrder');
+          if (savedOrder) {
+            setColumnOrder(savedOrder);
+          }
 
-        const savedUserColumns = await window.api.preferences.get(projectId, 'userColumnDefinitions');
-        if (savedUserColumns) {
-          setUserColumnDefinitions(savedUserColumns);
+          const savedWidths = await window.api.preferences.get(projectId, 'columnWidths');
+          if (savedWidths) {
+            setColumnWidths(savedWidths);
+          }
+
+          const savedUserColumns = await window.api.preferences.get(projectId, 'userColumnDefinitions');
+          if (savedUserColumns) {
+            setUserColumnDefinitions(savedUserColumns);
+          }
         }
       } catch (error) {
-        console.error('Failed to load preferences:', error);
+        console.error('Failed to load project and preferences:', error);
       }
     };
 
-    loadPreferences();
+    loadProjectAndPreferences();
   }, [loadFixtures]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const modKey = isMac ? e.metaKey : e.ctrlKey;
+
+      // Cmd/Ctrl + N - New Fixture
+      if (modKey && e.key === 'n') {
+        e.preventDefault();
+        setIsAddFixtureDialogOpen(true);
+      }
+
+      // Cmd/Ctrl + S - Save (placeholder for future file operations)
+      if (modKey && e.key === 's') {
+        e.preventDefault();
+        // TODO: Implement save functionality
+        console.log('Save shortcut triggered (not yet implemented)');
+      }
+
+      // Delete/Backspace - Delete selected fixtures
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedRows.size > 0) {
+        // Only delete if not typing in an input field
+        const target = e.target as HTMLElement;
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          if (confirm(`Delete ${selectedRows.size} selected fixture(s)?`)) {
+            deleteMultiple(Array.from(selectedRows));
+            setSelectedRows(new Set());
+          }
+        }
+      }
+
+      // Escape - Clear selection or close dialogs
+      if (e.key === 'Escape') {
+        if (isAddFixtureDialogOpen) {
+          setIsAddFixtureDialogOpen(false);
+        } else if (isBulkEditDialogOpen) {
+          setIsBulkEditDialogOpen(false);
+        } else if (isUserColumnSettingsOpen) {
+          setIsUserColumnSettingsOpen(false);
+        } else if (selectedRows.size > 0) {
+          setSelectedRows(new Set());
+        }
+      }
+
+      // Cmd/Ctrl + A - Select all visible fixtures
+      if (modKey && e.key === 'a') {
+        const target = e.target as HTMLElement;
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          const allIds = new Set(processedFixtures.map(f => f.id));
+          setSelectedRows(allIds);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    isAddFixtureDialogOpen,
+    isBulkEditDialogOpen,
+    isUserColumnSettingsOpen,
+    selectedRows,
+    processedFixtures,
+    deleteMultiple
+  ]);
 
   // Save column visibility when it changes
   useEffect(() => {
@@ -121,13 +205,38 @@ export function Production() {
     savePreference();
   }, [columnWidths]);
 
-  // Sort handler - toggle direction if same field, otherwise set new field
-  const handleSort = (field: string) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+  // Sort handler - supports multi-column sort with Shift key
+  const handleSort = (field: string, addToExisting: boolean = false) => {
+    if (addToExisting) {
+      // Multi-column sort (Shift+Click)
+      const existingIndex = sortConfigs.findIndex(s => s.field === field);
+
+      if (existingIndex >= 0) {
+        // Field already in sort chain - toggle direction or remove
+        const config = sortConfigs[existingIndex];
+        if (config.direction === 'asc') {
+          // Change to desc
+          const newConfigs = [...sortConfigs];
+          newConfigs[existingIndex] = { field, direction: 'desc' };
+          setSortConfigs(newConfigs);
+        } else {
+          // Remove from chain
+          setSortConfigs(sortConfigs.filter(s => s.field !== field));
+        }
+      } else {
+        // Add to end of sort chain
+        setSortConfigs([...sortConfigs, { field, direction: 'asc' }]);
+      }
     } else {
-      setSortField(field);
-      setSortDirection('asc');
+      // Single column sort (normal click)
+      const existing = sortConfigs.find(s => s.field === field);
+      if (existing && sortConfigs.length === 1) {
+        // Toggle direction
+        setSortConfigs([{ field, direction: existing.direction === 'asc' ? 'desc' : 'asc' }]);
+      } else {
+        // Replace with new single sort
+        setSortConfigs([{ field, direction: 'asc' }]);
+      }
     }
   };
 
@@ -166,7 +275,7 @@ export function Production() {
     }
   };
 
-  // Compute unique values for filter dropdowns
+  // Compute unique values for filter dropdowns and auto-fill suggestions
   const availableLocations = useMemo(() => {
     const locations = new Set<string>();
     fixtures.forEach((fixture) => {
@@ -197,6 +306,39 @@ export function Production() {
     return Array.from(statuses).sort();
   }, [fixtures]);
 
+  // Auto-fill suggestions - extract unique values for common fields
+  const autoFillSuggestions = useMemo(() => {
+    const positions = new Set<string>();
+    const purposes = new Set<string>();
+    const colors = new Set<string>();
+    const manufacturers = new Set<string>();
+    const models = new Set<string>();
+    const systems = new Set<string>();
+    const gobos = new Set<string>();
+
+    fixtures.forEach((fixture) => {
+      if (fixture.position) positions.add(fixture.position);
+      if (fixture.purpose) purposes.add(fixture.purpose);
+      if (fixture.color) colors.add(fixture.color);
+      if (fixture.manufacturer) manufacturers.add(fixture.manufacturer);
+      if (fixture.model) models.add(fixture.model);
+      if (fixture.system) systems.add(fixture.system);
+      if (fixture.gobo) gobos.add(fixture.gobo);
+    });
+
+    return {
+      positions: Array.from(positions).sort(),
+      purposes: Array.from(purposes).sort(),
+      colors: Array.from(colors).sort(),
+      manufacturers: Array.from(manufacturers).sort(),
+      models: Array.from(models).sort(),
+      systems: Array.from(systems).sort(),
+      gobos: Array.from(gobos).sort(),
+      types: availableTypes,
+      locations: availableLocations,
+    };
+  }, [fixtures, availableTypes, availableLocations]);
+
   // Filtered and sorted fixtures
   const processedFixtures = useMemo(() => {
     let result = [...fixtures];
@@ -223,46 +365,59 @@ export function Production() {
       result = result.filter((fixture) => fixture.status === statusFilter);
     }
 
-    // Apply sorting
-    if (sortField) {
+    // Apply multi-column sorting
+    if (sortConfigs.length > 0) {
       result.sort((a, b) => {
-        // Special handling for address field - sort by universe, then dmx_address
-        if (sortField === 'address') {
-          const aUniverse = a.universe || 0;
-          const bUniverse = b.universe || 0;
-          const aDmx = a.dmx_address || 0;
-          const bDmx = b.dmx_address || 0;
+        // Try each sort config in order until we find a difference
+        for (const { field, direction } of sortConfigs) {
+          let comparison = 0;
 
-          // Sort by universe first
-          if (aUniverse !== bUniverse) {
-            return sortDirection === 'asc' ? aUniverse - bUniverse : bUniverse - aUniverse;
+          // Special handling for address field - sort by universe, then dmx_address
+          if (field === 'address') {
+            const aUniverse = a.universe || 0;
+            const bUniverse = b.universe || 0;
+            const aDmx = a.dmx_address || 0;
+            const bDmx = b.dmx_address || 0;
+
+            // Sort by universe first
+            if (aUniverse !== bUniverse) {
+              comparison = aUniverse - bUniverse;
+            } else {
+              // Then by DMX address within universe
+              comparison = aDmx - bDmx;
+            }
+          } else {
+            const aValue = a[field as keyof Fixture];
+            const bValue = b[field as keyof Fixture];
+
+            // Handle undefined/null values
+            if (aValue === undefined || aValue === null) {
+              comparison = 1;
+            } else if (bValue === undefined || bValue === null) {
+              comparison = -1;
+            } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+              // Numeric comparison
+              comparison = aValue - bValue;
+            } else {
+              // String comparison
+              const aStr = String(aValue).toLowerCase();
+              const bStr = String(bValue).toLowerCase();
+              comparison = aStr.localeCompare(bStr);
+            }
           }
-          // Then by DMX address within universe
-          return sortDirection === 'asc' ? aDmx - bDmx : bDmx - aDmx;
+
+          // Apply direction and return if we found a difference
+          if (comparison !== 0) {
+            return direction === 'asc' ? comparison : -comparison;
+          }
         }
 
-        const aValue = a[sortField as keyof Fixture];
-        const bValue = b[sortField as keyof Fixture];
-
-        // Handle undefined/null values
-        if (aValue === undefined || aValue === null) return 1;
-        if (bValue === undefined || bValue === null) return -1;
-
-        // Numeric comparison for numbers
-        if (typeof aValue === 'number' && typeof bValue === 'number') {
-          return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-        }
-
-        // String comparison for everything else
-        const aStr = String(aValue).toLowerCase();
-        const bStr = String(bValue).toLowerCase();
-        const comparison = aStr.localeCompare(bStr);
-        return sortDirection === 'asc' ? comparison : -comparison;
+        return 0; // All sort fields are equal
       });
     }
 
     return result;
-  }, [fixtures, searchQuery, locationFilter, typeFilter, statusFilter, sortField, sortDirection]);
+  }, [fixtures, searchQuery, locationFilter, typeFilter, statusFilter, sortConfigs]);
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white">
@@ -277,7 +432,11 @@ export function Production() {
               ← Home
             </button>
             <div>
-              <h1 className="text-2xl font-bold">ShowStack:Production</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold">{projectName}</h1>
+                <span className="text-gray-500">•</span>
+                <span className="text-lg text-gray-400">ShowStack:Production</span>
+              </div>
               <p className="text-sm text-gray-400">Fixture Schedule</p>
             </div>
           </div>
@@ -308,9 +467,9 @@ export function Production() {
 
       {/* Sort Bar */}
       <SortBar
-        sortField={sortField}
-        sortDirection={sortDirection}
+        sortConfigs={sortConfigs}
         onSort={handleSort}
+        onClearSort={() => setSortConfigs([])}
       />
 
       {/* Filter Bar */}
@@ -357,6 +516,7 @@ export function Production() {
         onClose={() => setIsAddFixtureDialogOpen(false)}
         onAdd={addMultipleFixtures}
         existingFixturesCount={fixtures.length}
+        autoFillSuggestions={autoFillSuggestions}
       />
 
       {/* Bulk Edit Dialog */}

@@ -1,11 +1,24 @@
 import { useState } from 'react';
 import { Fixture } from '../../types';
 
+interface AutoFillSuggestions {
+  positions: string[];
+  purposes: string[];
+  colors: string[];
+  manufacturers: string[];
+  models: string[];
+  systems: string[];
+  gobos: string[];
+  types: string[];
+  locations: string[];
+}
+
 interface AddFixtureDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (fixtures: Partial<Fixture>[]) => void;
   existingFixturesCount: number;
+  autoFillSuggestions?: AutoFillSuggestions;
 }
 
 interface QueuedBatch {
@@ -15,7 +28,7 @@ interface QueuedBatch {
   fixtures: Partial<Fixture>[];
 }
 
-export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount }: AddFixtureDialogProps) {
+export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount, autoFillSuggestions }: AddFixtureDialogProps) {
   const [quantity, setQuantity] = useState(1);
   const [position, setPosition] = useState('');
   const [unit, setUnit] = useState<string>('');
@@ -293,6 +306,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                     onChange={(e) => setPosition(e.target.value)}
                     className={inputClass}
                     placeholder="e.g., 1st Electric"
+                    list="position-suggestions"
                   />
                 </div>
                 <div>
@@ -330,6 +344,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                     onChange={(e) => setType(e.target.value)}
                     className={inputClass}
                     placeholder="Fixture type"
+                    list="type-suggestions"
                   />
                 </div>
                 <div>
@@ -340,6 +355,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                     onChange={(e) => setPurpose(e.target.value)}
                     className={inputClass}
                     placeholder="Purpose"
+                    list="purpose-suggestions"
                   />
                 </div>
               </div>
@@ -354,6 +370,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                     onChange={(e) => setManufacturer(e.target.value)}
                     className={inputClass}
                     placeholder="e.g., ETC"
+                    list="manufacturer-suggestions"
                   />
                 </div>
                 <div>
@@ -364,6 +381,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                     onChange={(e) => setModel(e.target.value)}
                     className={inputClass}
                     placeholder="Model"
+                    list="model-suggestions"
                   />
                 </div>
               </div>
@@ -515,6 +533,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                     onChange={(e) => setColor(e.target.value)}
                     className={inputClass}
                     placeholder="R80"
+                    list="color-suggestions"
                   />
                 </div>
                 <div>
@@ -525,6 +544,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                     onChange={(e) => setGobo(e.target.value)}
                     className={inputClass}
                     placeholder="Gobo"
+                    list="gobo-suggestions"
                   />
                 </div>
                 <div>
@@ -549,6 +569,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                     onChange={(e) => setLocation(e.target.value)}
                     className={inputClass}
                     placeholder="Location"
+                    list="location-suggestions"
                   />
                 </div>
                 <div>
@@ -559,6 +580,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                     onChange={(e) => setSystem(e.target.value)}
                     className={inputClass}
                     placeholder="System"
+                    list="system-suggestions"
                   />
                 </div>
               </div>
@@ -750,6 +772,57 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
             </div>
           </div>
         </div>
+
+        {/* Datalist elements for auto-fill suggestions */}
+        {autoFillSuggestions && (
+          <>
+            <datalist id="position-suggestions">
+              {autoFillSuggestions.positions.map(pos => (
+                <option key={pos} value={pos} />
+              ))}
+            </datalist>
+            <datalist id="type-suggestions">
+              {autoFillSuggestions.types.map(type => (
+                <option key={type} value={type} />
+              ))}
+            </datalist>
+            <datalist id="purpose-suggestions">
+              {autoFillSuggestions.purposes.map(purpose => (
+                <option key={purpose} value={purpose} />
+              ))}
+            </datalist>
+            <datalist id="manufacturer-suggestions">
+              {autoFillSuggestions.manufacturers.map(mfr => (
+                <option key={mfr} value={mfr} />
+              ))}
+            </datalist>
+            <datalist id="model-suggestions">
+              {autoFillSuggestions.models.map(model => (
+                <option key={model} value={model} />
+              ))}
+            </datalist>
+            <datalist id="color-suggestions">
+              {autoFillSuggestions.colors.map(color => (
+                <option key={color} value={color} />
+              ))}
+            </datalist>
+            <datalist id="gobo-suggestions">
+              {autoFillSuggestions.gobos.map(gobo => (
+                <option key={gobo} value={gobo} />
+              ))}
+            </datalist>
+            <datalist id="location-suggestions">
+              {autoFillSuggestions.locations.map(loc => (
+                <option key={loc} value={loc} />
+              ))}
+            </datalist>
+            <datalist id="system-suggestions">
+              {autoFillSuggestions.systems.map(sys => (
+                <option key={sys} value={sys} />
+              ))}
+            </datalist>
+          </>
+        )}
       </div>
     </div>
   );
