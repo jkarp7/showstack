@@ -17,7 +17,7 @@ interface FileStore {
   setError: (error: string | null) => void;
   openFile: (onSuccess?: () => Promise<void>) => Promise<boolean>;
   saveFile: () => Promise<boolean>;
-  saveFileAs: (projectName?: string) => Promise<boolean>;
+  saveFileAs: (projectName?: string, onSuccess?: () => Promise<void>) => Promise<boolean>;
   newFile: (onSuccess?: () => Promise<void>) => Promise<boolean>;
   getCurrentFileName: () => string;
 }
@@ -161,7 +161,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
   },
 
   // Save file as (always show dialog)
-  saveFileAs: async (projectName) => {
+  saveFileAs: async (projectName, onSuccess) => {
     const defaultName = projectName || 'Untitled Project';
 
     try {
@@ -175,6 +175,20 @@ export const useFileStore = create<FileStore>((set, get) => ({
         return false;
       }
 
+      // Extract new filename and update project name in database
+      const parts = filePath.replace(/\\/g, '/').split('/');
+      const filename = parts[parts.length - 1];
+      const newProjectName = filename.replace(/\.showstack$/, '');
+
+      // Update project name in database
+      if (window.api?.projects) {
+        try {
+          await window.api.projects.update('default-project', { name: newProjectName });
+        } catch (error) {
+          console.error('Failed to update project name:', error);
+        }
+      }
+
       // Update state
       set({
         currentFilePath: filePath,
@@ -182,6 +196,11 @@ export const useFileStore = create<FileStore>((set, get) => ({
         isSaving: false,
         lastSavedAt: Date.now()
       });
+
+      // Call success callback to reload project name
+      if (onSuccess) {
+        await onSuccess();
+      }
 
       return true;
     } catch (error) {

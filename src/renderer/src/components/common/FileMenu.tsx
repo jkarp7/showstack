@@ -35,7 +35,7 @@ export function FileMenu({ className = '', onDataReload, projectName }: FileMenu
   };
 
   const handleSaveAs = async () => {
-    await saveFileAs(projectName);
+    await saveFileAs(projectName, onDataReload);
   };
 
   // Keyboard shortcuts
@@ -65,7 +65,7 @@ export function FileMenu({ className = '', onDataReload, projectName }: FileMenu
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isDirty, isSaving, isOpening]);
+  }, [handleNew, handleOpen, handleSave, handleSaveAs]);
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
