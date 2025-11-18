@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ModuleCard } from '../components/ModuleCard';
-import { ProjectCard } from '../components/ProjectCard';
-import { NewProjectDialog } from '../components/NewProjectDialog';
-import { DeleteProjectDialog } from '../components/DeleteProjectDialog';
+import { ModuleCard } from '../components/common/ModuleCard';
+import { ProjectCard } from '../components/common/ProjectCard';
+import { NewProjectDialog } from '../components/common/NewProjectDialog';
+import { DeleteProjectDialog } from '../components/common/DeleteProjectDialog';
 import { useProjectStore, Project } from '../store/projectStore';
 
 export function LandingPage() {
