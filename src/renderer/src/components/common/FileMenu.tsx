@@ -3,9 +3,11 @@ import { useFileStore } from '../../store/fileStore';
 
 interface FileMenuProps {
   className?: string;
+  onDataReload?: () => Promise<void>;
+  projectName?: string;
 }
 
-export function FileMenu({ className = '' }: FileMenuProps) {
+export function FileMenu({ className = '', onDataReload, projectName }: FileMenuProps) {
   const {
     isDirty,
     isSaving,
@@ -21,11 +23,11 @@ export function FileMenu({ className = '' }: FileMenuProps) {
   const isLoading = isSaving || isOpening;
 
   const handleNew = async () => {
-    await newFile();
+    await newFile(onDataReload);
   };
 
   const handleOpen = async () => {
-    await openFile();
+    await openFile(onDataReload);
   };
 
   const handleSave = async () => {
@@ -33,7 +35,7 @@ export function FileMenu({ className = '' }: FileMenuProps) {
   };
 
   const handleSaveAs = async () => {
-    await saveFileAs();
+    await saveFileAs(projectName);
   };
 
   // Keyboard shortcuts

@@ -1,6 +1,4 @@
 import { create } from 'zustand';
-import { useProjectStore } from './projectStore';
-import { useFixtureStore } from './fixtureStore';
 
 interface FileStore {
   // State
@@ -17,10 +15,10 @@ interface FileStore {
   setSaving: (saving: boolean) => void;
   setOpening: (opening: boolean) => void;
   setError: (error: string | null) => void;
-  openFile: () => Promise<boolean>;
+  openFile: (onSuccess?: () => Promise<void>) => Promise<boolean>;
   saveFile: () => Promise<boolean>;
-  saveFileAs: () => Promise<boolean>;
-  newFile: () => Promise<boolean>;
+  saveFileAs: (projectName?: string) => Promise<boolean>;
+  newFile: (onSuccess?: () => Promise<void>) => Promise<boolean>;
   getCurrentFileName: () => string;
 }
 
@@ -62,7 +60,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
   },
 
   // Open file
-  openFile: async () => {
+  openFile: async (onSuccess) => {
     const state = get();
 
     // Check for unsaved changes
@@ -112,11 +110,10 @@ export const useFileStore = create<FileStore>((set, get) => ({
         lastSavedAt: Date.now()
       });
 
-      // Reload fixtures from the newly loaded database
-      await useFixtureStore.getState().loadFixtures();
-
-      // Reload current project info
-      await useProjectStore.getState().loadCurrentProject();
+      // Call success callback to reload data
+      if (onSuccess) {
+        await onSuccess();
+      }
 
       return true;
     } catch (error) {
@@ -164,10 +161,8 @@ export const useFileStore = create<FileStore>((set, get) => ({
   },
 
   // Save file as (always show dialog)
-  saveFileAs: async () => {
-    const projectStore = useProjectStore.getState();
-    const currentProject = projectStore.currentProject;
-    const defaultName = currentProject?.name || 'Untitled Project';
+  saveFileAs: async (projectName) => {
+    const defaultName = projectName || 'Untitled Project';
 
     try {
       set({ isSaving: true, error: null });
@@ -197,7 +192,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
   },
 
   // Create new file
-  newFile: async () => {
+  newFile: async (onSuccess) => {
     const state = get();
 
     // Check for unsaved changes
@@ -235,11 +230,10 @@ export const useFileStore = create<FileStore>((set, get) => ({
         lastSavedAt: null
       });
 
-      // Reload fixtures (should be empty now)
-      await useFixtureStore.getState().loadFixtures();
-
-      // Reload current project
-      await useProjectStore.getState().loadCurrentProject();
+      // Call success callback to reload data
+      if (onSuccess) {
+        await onSuccess();
+      }
 
       return true;
     } catch (error) {

@@ -53,6 +53,27 @@ export function Production() {
   // Column widths state (in pixels, null means use default from config)
   const [columnWidths, setColumnWidths] = useState<Partial<Record<ColumnKey, number>>>({});
 
+  // Function to reload all data (for file operations)
+  const handleDataReload = async () => {
+    await loadFixtures();
+
+    if (!window.api) return;
+
+    try {
+      const projectId = 'default-project';
+
+      // Load project name
+      if (window.api.projects) {
+        const project = await window.api.projects.getById(projectId);
+        if (project?.name) {
+          setProjectName(project.name);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to reload project data:', error);
+    }
+  };
+
   // Load fixtures and preferences from database on mount
   useEffect(() => {
     loadFixtures();
@@ -456,7 +477,7 @@ export function Production() {
         </div>
 
         {/* File Menu */}
-        <FileMenu />
+        <FileMenu onDataReload={handleDataReload} projectName={projectName} />
       </header>
 
       {/* Toolbar */}
