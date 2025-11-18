@@ -123,73 +123,6 @@ export function Production() {
     loadProjectAndPreferences();
   }, [loadFixtures]);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-      const modKey = isMac ? e.metaKey : e.ctrlKey;
-
-      // Cmd/Ctrl + N - New Fixture
-      if (modKey && e.key === 'n') {
-        e.preventDefault();
-        setIsAddFixtureDialogOpen(true);
-      }
-
-      // Cmd/Ctrl + S - Save (placeholder for future file operations)
-      if (modKey && e.key === 's') {
-        e.preventDefault();
-        // TODO: Implement save functionality
-        console.log('Save shortcut triggered (not yet implemented)');
-      }
-
-      // Delete/Backspace - Delete selected fixtures
-      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedRows.size > 0) {
-        // Only delete if not typing in an input field
-        const target = e.target as HTMLElement;
-        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
-          e.preventDefault();
-          if (confirm(`Delete ${selectedRows.size} selected fixture(s)?`)) {
-            deleteMultiple(Array.from(selectedRows));
-            setSelectedRows(new Set());
-          }
-        }
-      }
-
-      // Escape - Clear selection or close dialogs
-      if (e.key === 'Escape') {
-        if (isAddFixtureDialogOpen) {
-          setIsAddFixtureDialogOpen(false);
-        } else if (isBulkEditDialogOpen) {
-          setIsBulkEditDialogOpen(false);
-        } else if (isUserColumnSettingsOpen) {
-          setIsUserColumnSettingsOpen(false);
-        } else if (selectedRows.size > 0) {
-          setSelectedRows(new Set());
-        }
-      }
-
-      // Cmd/Ctrl + A - Select all visible fixtures
-      if (modKey && e.key === 'a') {
-        const target = e.target as HTMLElement;
-        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
-          e.preventDefault();
-          const allIds = new Set(processedFixtures.map(f => f.id));
-          setSelectedRows(allIds);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [
-    isAddFixtureDialogOpen,
-    isBulkEditDialogOpen,
-    isUserColumnSettingsOpen,
-    selectedRows,
-    processedFixtures,
-    deleteMultiple
-  ]);
-
   // Save column visibility when it changes
   useEffect(() => {
     const savePreference = async () => {
@@ -445,6 +378,69 @@ export function Production() {
 
     return result;
   }, [fixtures, searchQuery, locationFilter, typeFilter, statusFilter, sortConfigs]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const modKey = isMac ? e.metaKey : e.ctrlKey;
+
+      // Cmd/Ctrl + N - New Fixture
+      if (modKey && e.key === 'n') {
+        e.preventDefault();
+        setIsAddFixtureDialogOpen(true);
+      }
+
+      // Cmd/Ctrl + S - Save (handled by FileMenu component now)
+      // Removed to avoid conflicts with FileMenu keyboard shortcuts
+
+      // Delete/Backspace - Delete selected fixtures
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedRows.size > 0) {
+        // Only delete if not typing in an input field
+        const target = e.target as HTMLElement;
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          if (confirm(`Delete ${selectedRows.size} selected fixture(s)?`)) {
+            deleteMultiple(Array.from(selectedRows));
+            setSelectedRows(new Set());
+          }
+        }
+      }
+
+      // Escape - Clear selection or close dialogs
+      if (e.key === 'Escape') {
+        if (isAddFixtureDialogOpen) {
+          setIsAddFixtureDialogOpen(false);
+        } else if (isBulkEditDialogOpen) {
+          setIsBulkEditDialogOpen(false);
+        } else if (isUserColumnSettingsOpen) {
+          setIsUserColumnSettingsOpen(false);
+        } else if (selectedRows.size > 0) {
+          setSelectedRows(new Set());
+        }
+      }
+
+      // Cmd/Ctrl + A - Select all visible fixtures
+      if (modKey && e.key === 'a') {
+        const target = e.target as HTMLElement;
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          const allIds = new Set(processedFixtures.map(f => f.id));
+          setSelectedRows(allIds);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    isAddFixtureDialogOpen,
+    isBulkEditDialogOpen,
+    isUserColumnSettingsOpen,
+    selectedRows,
+    processedFixtures,
+    deleteMultiple
+  ]);
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white">
