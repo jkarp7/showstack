@@ -7,7 +7,10 @@ import { SortBar } from '../../components/fixture/SortBar';
 import { AddFixtureDialog } from '../../components/fixture/AddFixtureDialog';
 import { BulkEditDialog } from '../../components/fixture/BulkEditDialog';
 import { UserColumnSettingsDialog } from '../../components/fixture/UserColumnSettingsDialog';
+import { FileMenu } from '../../components/common/FileMenu';
+import { UnsavedChangesDialog, useUnsavedChangesDialog } from '../../components/common/UnsavedChangesDialog';
 import { useFixtureStore } from '../../store/fixtureStore';
+import { useFileStore } from '../../store/fileStore';
 import { Fixture } from '../../types';
 import { DEFAULT_COLUMN_VISIBILITY, ColumnVisibility, DEFAULT_COLUMN_ORDER, ColumnKey } from '../../types/columns';
 
@@ -18,6 +21,9 @@ export function Production() {
   const [isAddFixtureDialogOpen, setIsAddFixtureDialogOpen] = useState(false);
   const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = useState(false);
   const [isUserColumnSettingsOpen, setIsUserColumnSettingsOpen] = useState(false);
+
+  // Unsaved changes dialog
+  const unsavedChangesDialog = useUnsavedChangesDialog();
 
   // User column definitions
   const [userColumnDefinitions, setUserColumnDefinitions] = useState<Record<string, string>>({});
@@ -423,7 +429,7 @@ export function Production() {
     <div className="flex flex-col h-screen bg-gray-900 text-white">
       {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700 p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/modules')}
@@ -448,6 +454,9 @@ export function Production() {
             <span className="text-sm text-gray-400">{selectedRows.size} selected</span>
           </div>
         </div>
+
+        {/* File Menu */}
+        <FileMenu />
       </header>
 
       {/* Toolbar */}
@@ -534,6 +543,9 @@ export function Production() {
         onSave={handleSaveUserColumnDefinitions}
         initialDefinitions={userColumnDefinitions}
       />
+
+      {/* Unsaved Changes Dialog */}
+      <UnsavedChangesDialog {...unsavedChangesDialog} />
     </div>
   );
 }

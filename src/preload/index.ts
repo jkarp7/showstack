@@ -52,6 +52,16 @@ contextBridge.exposeInMainWorld('api', {
     get: (projectId: string, key: string) => ipcRenderer.invoke('preferences:get', projectId, key),
     set: (projectId: string, key: string, value: any) => ipcRenderer.invoke('preferences:set', projectId, key, value),
     getAll: (projectId: string) => ipcRenderer.invoke('preferences:getAll', projectId)
+  },
+
+  // File operations
+  files: {
+    open: () => ipcRenderer.invoke('file:open'),
+    save: (filePath?: string) => ipcRenderer.invoke('file:save', filePath),
+    saveAs: (defaultName?: string) => ipcRenderer.invoke('file:saveAs', defaultName),
+    new: () => ipcRenderer.invoke('file:new'),
+    validate: (filePath: string) => ipcRenderer.invoke('file:validate', filePath),
+    getFileName: (filePath: string) => ipcRenderer.invoke('file:getFileName', filePath)
   }
 });
 
@@ -80,6 +90,14 @@ export interface ElectronAPI {
     get: (projectId: string, key: string) => Promise<any | null>;
     set: (projectId: string, key: string, value: any) => Promise<void>;
     getAll: (projectId: string) => Promise<Record<string, any>>;
+  };
+  files: {
+    open: () => Promise<any>;
+    save: (filePath?: string) => Promise<string | null>;
+    saveAs: (defaultName?: string) => Promise<string | null>;
+    new: () => Promise<string>;
+    validate: (filePath: string) => Promise<any>;
+    getFileName: (filePath: string) => Promise<string>;
   };
 }
 
