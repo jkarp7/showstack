@@ -32,6 +32,27 @@ export function registerFileHandlers(): void {
   });
 
   /**
+   * Open a specific file by path (without showing dialog)
+   */
+  ipcMain.handle('file:openByPath', async (_, filePath: string): Promise<ProjectImportResult> => {
+    try {
+      const result = await fileService.importProject(filePath);
+
+      // Include the file path in the result
+      return {
+        ...result,
+        filePath: result.success ? filePath : undefined
+      } as ProjectImportResult & { filePath?: string };
+    } catch (error) {
+      console.error('Error in file:openByPath handler:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to open file'
+      };
+    }
+  });
+
+  /**
    * Save project to file
    * If filePath is provided, save to that path
    * Otherwise, show save dialog

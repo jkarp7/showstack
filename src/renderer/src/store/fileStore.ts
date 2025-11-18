@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { addRecentFile } from '../utils/recentFiles';
 
 interface FileStore {
   // State
@@ -16,6 +17,7 @@ interface FileStore {
   setOpening: (opening: boolean) => void;
   setError: (error: string | null) => void;
   openFile: (onSuccess?: () => Promise<void>) => Promise<boolean>;
+  openFileByPath: (filePath: string, onSuccess?: () => Promise<void>) => Promise<boolean>;
   saveFile: () => Promise<boolean>;
   saveFileAs: (projectName?: string, onSuccess?: () => Promise<void>) => Promise<boolean>;
   newFile: (onSuccess?: () => Promise<void>) => Promise<boolean>;
@@ -127,6 +129,11 @@ export const useFileStore = create<FileStore>((set, get) => ({
         lastSavedAt: Date.now()
       });
 
+      // Add to recent files
+      if (result.filePath && result.projectName) {
+        await addRecentFile(result.filePath, result.projectName);
+      }
+
       // Call success callback to reload data
       if (onSuccess) {
         console.log('🔵 Calling onSuccess callback');
@@ -138,6 +145,87 @@ export const useFileStore = create<FileStore>((set, get) => ({
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to open file';
       console.error('🔴 Error in openFile:', error);
+      set({ error: errorMessage, isOpening: false });
+      return false;
+    }
+  },
+
+  // Open file by path (without showing dialog)
+  openFileByPath: async (filePath, onSuccess) => {
+    const state = get();
+
+    console.log('🔵 openFileByPath called with:', filePath);
+
+    // Check for unsaved changes
+    if (state.isDirty) {
+      console.log('🔵 Has unsaved changes, showing dialog');
+      const shouldContinue = await new Promise<boolean>((resolve) => {
+        const event = new CustomEvent('showUnsavedChangesDialog', {
+          detail: {
+            action: 'open',
+            onSave: async () => {
+              console.log('🔵 User clicked Save in dialog');
+              await state.saveFile();
+              resolve(true);
+            },
+            onDiscard: () => {
+              console.log('🔵 User clicked Don\'t Save in dialog');
+              resolve(true);
+            },
+            onCancel: () => {
+              console.log('🔵 User clicked Cancel in dialog');
+              resolve(false);
+            }
+          }
+        });
+        window.dispatchEvent(event);
+      });
+
+      console.log('🔵 Dialog resolved, shouldContinue:', shouldContinue);
+      if (!shouldContinue) {
+        return false;
+      }
+    }
+
+    try {
+      set({ isOpening: true, error: null });
+      console.log('🔵 Calling window.api.files.openByPath()');
+
+      const result = await window.api.files.openByPath(filePath);
+      console.log('🔵 OpenByPath result:', result);
+
+      if (!result.success) {
+        console.error('🔴 Open failed:', result.error);
+        set({ error: result.error || 'Failed to open file', isOpening: false });
+        return false;
+      }
+
+      console.log('🔵 File opened successfully by path, reloading data');
+
+      // Update file state
+      set({
+        currentFilePath: filePath,
+        isDirty: false,
+        isOpening: false,
+        lastSavedAt: Date.now()
+      });
+
+      // Add to recent files
+      if (result.projectName) {
+        await addRecentFile(filePath, result.projectName);
+      }
+
+      // Call success callback to reload data
+      if (onSuccess) {
+        console.log('🔵 Calling onSuccess callback');
+        await onSuccess();
+      }
+
+      console.log('✅ openFileByPath completed successfully');
+      return true;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to open file';
+      console.error('🔴 Error in openFileByPath:', error);
       set({ error: errorMessage, isOpening: false });
       return false;
     }
@@ -171,6 +259,10 @@ export const useFileStore = create<FileStore>((set, get) => ({
         isSaving: false,
         lastSavedAt: Date.now()
       });
+
+      // Update recent files timestamp
+      const filename = filePath.replace(/\\/g, '/').split('/').pop()?.replace(/\.showstack$/, '') || 'Untitled Project';
+      await addRecentFile(filePath, filename);
 
       return true;
     } catch (error) {
@@ -216,6 +308,9 @@ export const useFileStore = create<FileStore>((set, get) => ({
         isSaving: false,
         lastSavedAt: Date.now()
       });
+
+      // Add to recent files
+      await addRecentFile(filePath, newProjectName);
 
       // Call success callback to reload project name
       if (onSuccess) {
