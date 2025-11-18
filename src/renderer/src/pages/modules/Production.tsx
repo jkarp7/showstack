@@ -5,6 +5,7 @@ import { Toolbar } from '../../components/fixture/Toolbar';
 import { FilterBar } from '../../components/fixture/FilterBar';
 import { SortBar } from '../../components/fixture/SortBar';
 import { AddFixtureDialog } from '../../components/fixture/AddFixtureDialog';
+import { BulkEditDialog } from '../../components/fixture/BulkEditDialog';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { Fixture } from '../../types';
 import { DEFAULT_COLUMN_VISIBILITY, ColumnVisibility, DEFAULT_COLUMN_ORDER, ColumnKey } from '../../types/columns';
@@ -14,6 +15,7 @@ export function Production() {
   const { fixtures, loadFixtures, addMultipleFixtures, deleteMultiple, updateFixture } = useFixtureStore();
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [isAddFixtureDialogOpen, setIsAddFixtureDialogOpen] = useState(false);
+  const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = useState(false);
 
   // Sort state
   const [sortField, setSortField] = useState<string | null>(null);
@@ -125,6 +127,19 @@ export function Production() {
     setLocationFilter('all');
     setTypeFilter('all');
     setStatusFilter('all');
+  };
+
+  // Handle bulk edit submission
+  const handleBulkEdit = async (updates: Partial<Fixture>) => {
+    // Update all selected fixtures
+    const updatePromises = Array.from(selectedRows).map(fixtureId =>
+      updateFixture(fixtureId, updates)
+    );
+
+    await Promise.all(updatePromises);
+
+    // Clear selection after bulk edit
+    setSelectedRows(new Set());
   };
 
   // Compute unique values for filter dropdowns
@@ -256,6 +271,7 @@ export function Production() {
       <Toolbar
         selectedCount={selectedRows.size}
         onAddFixture={() => setIsAddFixtureDialogOpen(true)}
+        onBulkEdit={() => setIsBulkEditDialogOpen(true)}
         onDeleteSelected={async () => {
           await deleteMultiple(Array.from(selectedRows));
           setSelectedRows(new Set());
@@ -314,6 +330,14 @@ export function Production() {
         onClose={() => setIsAddFixtureDialogOpen(false)}
         onAdd={addMultipleFixtures}
         existingFixturesCount={fixtures.length}
+      />
+
+      {/* Bulk Edit Dialog */}
+      <BulkEditDialog
+        isOpen={isBulkEditDialogOpen}
+        selectedCount={selectedRows.size}
+        onClose={() => setIsBulkEditDialogOpen(false)}
+        onSubmit={handleBulkEdit}
       />
     </div>
   );
