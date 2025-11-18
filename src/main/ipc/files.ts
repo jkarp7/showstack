@@ -80,9 +80,9 @@ export function registerFileHandlers(): void {
   /**
    * Show save as dialog and save project
    */
-  ipcMain.handle('file:saveAs', async (_, defaultName?: string): Promise<string | null> => {
+  ipcMain.handle('file:saveAs', async (_, defaultName?: string, module: string = 'PRODUCTION'): Promise<string | null> => {
     try {
-      const filePath = await fileService.showSaveDialog(defaultName);
+      const filePath = await fileService.showSaveDialog(defaultName, module as any);
       if (!filePath) {
         return null; // User canceled
       }

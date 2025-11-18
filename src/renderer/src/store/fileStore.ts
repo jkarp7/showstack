@@ -57,8 +57,8 @@ export const useFileStore = create<FileStore>((set, get) => ({
     // Extract filename from path locally (works cross-platform)
     const parts = currentFilePath.replace(/\\/g, '/').split('/');
     const filename = parts[parts.length - 1];
-    // Remove .showstack extension
-    return filename.replace(/\.showstack$/, '');
+    // Remove any ShowStack extension (.ssp, .ssm, .ssd, or legacy .showstack)
+    return filename.replace(/\.(ssp|ssm|ssd|showstack)$/, '');
   },
 
   // Open file
@@ -279,7 +279,8 @@ export const useFileStore = create<FileStore>((set, get) => ({
     try {
       set({ isSaving: true, error: null });
 
-      const filePath = await window.api.files.saveAs(defaultName);
+      // Default to PRODUCTION module (can be made dynamic in the future)
+      const filePath = await window.api.files.saveAs(defaultName, 'PRODUCTION');
 
       if (!filePath) {
         // User canceled
@@ -290,7 +291,8 @@ export const useFileStore = create<FileStore>((set, get) => ({
       // Extract new filename and update project name in database
       const parts = filePath.replace(/\\/g, '/').split('/');
       const filename = parts[parts.length - 1];
-      const newProjectName = filename.replace(/\.showstack$/, '');
+      // Remove any ShowStack extension (.ssp, .ssm, .ssd, or legacy .showstack)
+      const newProjectName = filename.replace(/\.(ssp|ssm|ssd|showstack)$/, '');
 
       // Update project name in database
       if (window.api?.projects) {

@@ -19,19 +19,47 @@ export interface FileValidationResult {
   projectName?: string;
 }
 
+// Module-specific file extensions
+export const FILE_EXTENSIONS = {
+  PRODUCTION: 'ssp',    // ShowStack:Production
+  MANAGER: 'ssm',       // ShowStack:Manager
+  DESIGN: 'ssd'         // ShowStack:Design (Prep)
+} as const;
+
+export type ModuleType = keyof typeof FILE_EXTENSIONS;
+
 class FileService {
   private readonly SHOWSTACK_VERSION = '1.0.0';
   private readonly APP_VERSION = '0.1.0-alpha';
+
+  /**
+   * Get all ShowStack file extensions
+   */
+  private getAllExtensions(): string[] {
+    return Object.values(FILE_EXTENSIONS);
+  }
+
+  /**
+   * Get extension for a specific module
+   */
+  getExtensionForModule(module: ModuleType): string {
+    return FILE_EXTENSIONS[module];
+  }
 
   /**
    * Show open file dialog
    * @returns File path or null if canceled
    */
   async showOpenDialog(): Promise<string | null> {
+    const extensions = this.getAllExtensions();
+
     const result = await dialog.showOpenDialog({
       title: 'Open ShowStack Project',
       filters: [
-        { name: 'ShowStack Projects', extensions: ['showstack'] },
+        { name: 'ShowStack Projects', extensions },
+        { name: 'Production Files', extensions: [FILE_EXTENSIONS.PRODUCTION] },
+        { name: 'Manager Files', extensions: [FILE_EXTENSIONS.MANAGER] },
+        { name: 'Design Files', extensions: [FILE_EXTENSIONS.DESIGN] },
         { name: 'All Files', extensions: ['*'] }
       ],
       properties: ['openFile']
@@ -47,14 +75,19 @@ class FileService {
   /**
    * Show save file dialog
    * @param defaultName Default filename
+   * @param module Module type (defaults to PRODUCTION)
    * @returns File path or null if canceled
    */
-  async showSaveDialog(defaultName?: string): Promise<string | null> {
+  async showSaveDialog(defaultName?: string, module: ModuleType = 'PRODUCTION'): Promise<string | null> {
+    const extension = FILE_EXTENSIONS[module];
+    const extensions = this.getAllExtensions();
+
     const result = await dialog.showSaveDialog({
       title: 'Save ShowStack Project',
       defaultPath: defaultName || 'Untitled Project',
       filters: [
-        { name: 'ShowStack Projects', extensions: ['showstack'] },
+        { name: `ShowStack ${module} File`, extensions: [extension] },
+        { name: 'ShowStack Projects', extensions },
         { name: 'All Files', extensions: ['*'] }
       ]
     });
@@ -63,17 +96,19 @@ class FileService {
       return null;
     }
 
-    // Ensure .showstack extension
+    // Ensure correct extension
     let filePath = result.filePath;
-    if (!filePath.endsWith('.showstack')) {
-      filePath += '.showstack';
+    const hasValidExtension = extensions.some(ext => filePath.endsWith(`.${ext}`));
+
+    if (!hasValidExtension) {
+      filePath += `.${extension}`;
     }
 
     return filePath;
   }
 
   /**
-   * Export current database to .showstack file
+   * Export current database to ShowStack file (.ssp, .ssm, or .ssd)
    * @param filePath Destination file path
    */
   async exportProject(filePath: string): Promise<void> {
@@ -103,7 +138,7 @@ class FileService {
   }
 
   /**
-   * Import .showstack file and replace current database
+   * Import ShowStack file (.ssp, .ssm, or .ssd) and replace current database
    * @param filePath Source file path
    * @returns Import result
    */
@@ -213,7 +248,7 @@ class FileService {
   }
 
   /**
-   * Validate .showstack file format
+   * Validate ShowStack file format (.ssp, .ssm, or .ssd)
    * @param filePath File to validate
    * @returns Validation result
    */
@@ -281,12 +316,23 @@ class FileService {
   }
 
   /**
-   * Get the filename from a file path
+   * Get the filename from a file path (without extension)
    * @param filePath Full file path
-   * @returns Just the filename
+   * @returns Just the filename without extension
    */
   getFileName(filePath: string): string {
-    return basename(filePath, '.showstack');
+    const filename = basename(filePath);
+    const extensions = this.getAllExtensions();
+
+    // Remove any ShowStack extension
+    for (const ext of extensions) {
+      if (filename.endsWith(`.${ext}`)) {
+        return filename.slice(0, -(ext.length + 1));
+      }
+    }
+
+    // If no ShowStack extension found, just return the basename
+    return filename;
   }
 
   /**

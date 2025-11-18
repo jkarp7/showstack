@@ -59,7 +59,7 @@ contextBridge.exposeInMainWorld('api', {
     open: () => ipcRenderer.invoke('file:open'),
     openByPath: (filePath: string) => ipcRenderer.invoke('file:openByPath', filePath),
     save: (filePath?: string) => ipcRenderer.invoke('file:save', filePath),
-    saveAs: (defaultName?: string) => ipcRenderer.invoke('file:saveAs', defaultName),
+    saveAs: (defaultName?: string, module?: string) => ipcRenderer.invoke('file:saveAs', defaultName, module),
     new: () => ipcRenderer.invoke('file:new'),
     validate: (filePath: string) => ipcRenderer.invoke('file:validate', filePath),
     getFileName: (filePath: string) => ipcRenderer.invoke('file:getFileName', filePath)
@@ -96,7 +96,7 @@ export interface ElectronAPI {
     open: () => Promise<any>;
     openByPath: (filePath: string) => Promise<any>;
     save: (filePath?: string) => Promise<string | null>;
-    saveAs: (defaultName?: string) => Promise<string | null>;
+    saveAs: (defaultName?: string, module?: string) => Promise<string | null>;
     new: () => Promise<string>;
     validate: (filePath: string) => Promise<any>;
     getFileName: (filePath: string) => Promise<string>;
