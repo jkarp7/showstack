@@ -6,11 +6,12 @@ interface ToolbarProps {
   onAddFixture: () => void;
   onBulkEdit: () => void;
   onDeleteSelected: () => void;
+  onUserColumnSettings: () => void;
   columnVisibility: ColumnVisibility;
   onColumnVisibilityChange: (visibility: ColumnVisibility) => void;
 }
 
-export function Toolbar({ selectedCount, onAddFixture, onBulkEdit, onDeleteSelected, columnVisibility, onColumnVisibilityChange }: ToolbarProps) {
+export function Toolbar({ selectedCount, onAddFixture, onBulkEdit, onDeleteSelected, onUserColumnSettings, columnVisibility, onColumnVisibilityChange }: ToolbarProps) {
   return (
     <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center gap-2">
       <button
@@ -48,8 +49,16 @@ export function Toolbar({ selectedCount, onAddFixture, onBulkEdit, onDeleteSelec
         </>
       )}
 
-      {/* Column Visibility Menu - Always visible */}
-      <div className="ml-auto">
+      {/* Right side buttons */}
+      <div className="ml-auto flex items-center gap-2">
+        <button
+          onClick={onUserColumnSettings}
+          className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+          title="Define User Columns"
+        >
+          User Columns...
+        </button>
+
         <ColumnVisibilityMenu
           visibility={columnVisibility}
           onVisibilityChange={onColumnVisibilityChange}

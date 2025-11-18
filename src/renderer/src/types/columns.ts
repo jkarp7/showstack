@@ -156,6 +156,23 @@ export const COLUMN_CONFIGS: ColumnConfig[] = [
 
 export type ColumnVisibility = Record<ColumnKey, boolean>;
 
+// Helper function to apply custom user column labels
+export function applyUserColumnLabels(
+  configs: typeof COLUMN_CONFIGS,
+  userDefinitions: Record<string, string>
+): typeof COLUMN_CONFIGS {
+  return configs.map(config => {
+    // Check if this is a user column and has a custom definition
+    if (config.key.startsWith('user') && userDefinitions[config.key]) {
+      return {
+        ...config,
+        label: userDefinitions[config.key],
+      };
+    }
+    return config;
+  });
+}
+
 // Helper function to get ordered columns based on custom order array
 export function getOrderedColumns(order?: ColumnKey[]): typeof COLUMN_CONFIGS {
   if (!order || order.length === 0) {

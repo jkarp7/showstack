@@ -6,6 +6,7 @@ import { FilterBar } from '../../components/fixture/FilterBar';
 import { SortBar } from '../../components/fixture/SortBar';
 import { AddFixtureDialog } from '../../components/fixture/AddFixtureDialog';
 import { BulkEditDialog } from '../../components/fixture/BulkEditDialog';
+import { UserColumnSettingsDialog } from '../../components/fixture/UserColumnSettingsDialog';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { Fixture } from '../../types';
 import { DEFAULT_COLUMN_VISIBILITY, ColumnVisibility, DEFAULT_COLUMN_ORDER, ColumnKey } from '../../types/columns';
@@ -16,6 +17,10 @@ export function Production() {
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [isAddFixtureDialogOpen, setIsAddFixtureDialogOpen] = useState(false);
   const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = useState(false);
+  const [isUserColumnSettingsOpen, setIsUserColumnSettingsOpen] = useState(false);
+
+  // User column definitions
+  const [userColumnDefinitions, setUserColumnDefinitions] = useState<Record<string, string>>({});
 
   // Sort state
   const [sortField, setSortField] = useState<string | null>(null);
@@ -60,6 +65,11 @@ export function Production() {
         const savedWidths = await window.api.preferences.get(projectId, 'columnWidths');
         if (savedWidths) {
           setColumnWidths(savedWidths);
+        }
+
+        const savedUserColumns = await window.api.preferences.get(projectId, 'userColumnDefinitions');
+        if (savedUserColumns) {
+          setUserColumnDefinitions(savedUserColumns);
         }
       } catch (error) {
         console.error('Failed to load preferences:', error);
@@ -140,6 +150,20 @@ export function Production() {
 
     // Clear selection after bulk edit
     setSelectedRows(new Set());
+  };
+
+  // Handle user column definitions save
+  const handleSaveUserColumnDefinitions = async (definitions: Record<string, string>) => {
+    setUserColumnDefinitions(definitions);
+
+    // Save to preferences
+    if (!window.api?.preferences) return;
+    try {
+      const projectId = 'default-project';
+      await window.api.preferences.set(projectId, 'userColumnDefinitions', definitions);
+    } catch (error) {
+      console.error('Failed to save user column definitions:', error);
+    }
   };
 
   // Compute unique values for filter dropdowns
@@ -276,6 +300,7 @@ export function Production() {
           await deleteMultiple(Array.from(selectedRows));
           setSelectedRows(new Set());
         }}
+        onUserColumnSettings={() => setIsUserColumnSettingsOpen(true)}
         columnVisibility={columnVisibility}
         onColumnVisibilityChange={setColumnVisibility}
       />
@@ -338,6 +363,14 @@ export function Production() {
         selectedCount={selectedRows.size}
         onClose={() => setIsBulkEditDialogOpen(false)}
         onSubmit={handleBulkEdit}
+      />
+
+      {/* User Column Settings Dialog */}
+      <UserColumnSettingsDialog
+        isOpen={isUserColumnSettingsOpen}
+        onClose={() => setIsUserColumnSettingsOpen(false)}
+        onSave={handleSaveUserColumnDefinitions}
+        initialDefinitions={userColumnDefinitions}
       />
     </div>
   );
