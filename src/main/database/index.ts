@@ -131,5 +131,8 @@ export async function reloadDatabase(): Promise<void> {
   // Enable foreign keys
   db.run('PRAGMA foreign_keys = ON');
 
+  // Run migrations to ensure all tables exist
+  runMigrations(db);
+
   console.log('✅ Database reloaded from:', dbPath);
 }
