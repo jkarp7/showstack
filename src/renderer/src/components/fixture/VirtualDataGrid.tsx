@@ -99,8 +99,51 @@ export function VirtualDataGrid({
     field: keyof Fixture,
     value: string
   ) => {
-    onUpdateFixture(fixtureId, { [field]: value });
-  }, [onUpdateFixture]);
+    const updates: Partial<Fixture> = {};
+
+    // Handle user columns stored in custom_fields
+    if (typeof field === 'string' && field.startsWith('user')) {
+      const fixture = fixtures.find(f => f.id === fixtureId);
+      updates.custom_fields = {
+        ...fixture?.custom_fields,
+        [field]: value
+      };
+    }
+    // Handle Address field - parse "universe/dmx_address" format
+    else if (field === 'address') {
+      const parts = value.split('/');
+      if (parts.length === 2) {
+        const universe = parseInt(parts[0], 10);
+        const dmx_address = parseInt(parts[1], 10);
+        if (!isNaN(universe) && !isNaN(dmx_address)) {
+          updates.universe = universe;
+          updates.dmx_address = dmx_address;
+        }
+      }
+    }
+    // Handle arrays (like accessories) - parse comma-separated string
+    else if (field === 'accessories') {
+      updates[field] = value.split(',').map(s => s.trim()).filter(Boolean);
+    }
+    // Handle boolean fields
+    else if (field === 'on_light_plot') {
+      updates[field] = value === '✓' || value.toLowerCase() === 'true' || value === '1';
+    }
+    // Handle numeric fields
+    else if (['unit', 'unit_number', 'universe', 'dmx_address', 'wattage', 'amperage',
+              'position_x', 'position_y', 'position_z',
+              'vw_x_coordinate', 'vw_y_coordinate', 'vw_z_coordinate', 'vw_symbol_rotation',
+              'changed_at', 'created_at', 'updated_at'].includes(field as string)) {
+      const num = parseFloat(value);
+      updates[field] = isNaN(num) ? undefined : num;
+    }
+    // Regular string fields
+    else {
+      updates[field] = value;
+    }
+
+    onUpdateFixture(fixtureId, updates);
+  }, [fixtures, onUpdateFixture]);
 
   return (
     <div className="h-full flex flex-col bg-gray-900">

@@ -5,9 +5,10 @@ interface EditableCellProps {
   value: string;
   onChange: (value: string) => void;
   className?: string;
+  readOnly?: boolean;
 }
 
-export function EditableCell({ value, onChange, className }: EditableCellProps) {
+export function EditableCell({ value, onChange, className, readOnly = false }: EditableCellProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value || '');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -54,8 +55,13 @@ export function EditableCell({ value, onChange, className }: EditableCellProps) 
         />
       ) : (
         <div
-          onClick={() => setIsEditing(true)}
-          className="cursor-text hover:bg-gray-700 rounded px-1 py-0.5 truncate"
+          onClick={() => !readOnly && setIsEditing(true)}
+          className={clsx(
+            'rounded px-1 py-0.5 truncate',
+            readOnly
+              ? 'cursor-default text-gray-400 italic'
+              : 'cursor-text hover:bg-gray-700'
+          )}
         >
           {value || <span className="text-gray-500">—</span>}
         </div>

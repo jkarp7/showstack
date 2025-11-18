@@ -24,38 +24,85 @@ export const SCHEMA = `
     manufacturer TEXT,
     model TEXT,
     purpose TEXT,
+    mark TEXT,
 
-    -- Control
+    -- Control (LightWright: Address, Channel, Universe, DMX #)
     channel TEXT,
     universe INTEGER,
     dmx_address INTEGER,
     mode TEXT,
+    console_level TEXT,
 
-    -- Power
+    -- Power (LightWright: Dimmer, Circuit Name, Circuit #, Load/Wattage, Dimmer Phase)
     dimmer TEXT,
-    circuit TEXT,
+    circuit TEXT,           -- Circuit name
+    circuit_number TEXT,    -- Circuit #
     phase TEXT CHECK(phase IN ('A', 'B', 'C')),
-    wattage REAL,
+    wattage REAL,          -- Load
     amperage REAL,
 
-    -- Color & Accessories
+    -- Color & Accessories (LightWright: Color, Gobo, Gobo Size, Accessory, Color Frame)
     color TEXT,
+    color_frame TEXT,
     gobo TEXT,
+    gobo_size TEXT,
     template_size TEXT,
-    accessories TEXT, -- JSON array
+    accessories TEXT,      -- JSON array
 
-    -- Location
+    -- Cables (LightWright: Cable, Data Cable)
+    cable TEXT,
+    data_cable TEXT,
+
+    -- Location (LightWright: Position, Location for VW coordinates)
     location TEXT,
     position_x REAL,
     position_y REAL,
     position_z REAL,
 
-    -- Status
+    -- Focus (LightWright: Focus L/R, U/D, Note, Cut, Status)
+    focus_lr TEXT,
+    focus_ud TEXT,
+    focus_note TEXT,
+    focus_cut_us TEXT,
+    focus_cut_ds TEXT,
+    focus_cut_sr TEXT,
+    focus_cut_sl TEXT,
+    focus_cut_top TEXT,
+    focus_cut_bottom TEXT,
+    focus_status TEXT,
+
+    -- System & Scenery (LightWright: System, Scenery)
+    system TEXT,
+    scenery TEXT,
+
+    -- Vectorworks Integration (LightWright: Vectorworks submenu)
+    vw_layer TEXT,
+    vw_label_legend TEXT,
+    vw_class TEXT,
+    vw_x_coordinate REAL,
+    vw_y_coordinate REAL,
+    vw_z_coordinate REAL,
+    vw_symbol_rotation REAL,
+    vw_focus_point TEXT,
+    on_light_plot INTEGER DEFAULT 0, -- Boolean
+    vw_uid TEXT,
+    vw_symbol TEXT,
+
+    -- ShowStack ID (LightWright: Lightwright ID)
+    showstack_id TEXT,
+
+    -- Status & Notes
     status TEXT DEFAULT 'active',
     notes TEXT,
+    work_note_status TEXT,
 
-    -- Custom fields (JSON)
+    -- Custom fields (JSON) - LightWright: User Columns (24)
     custom_fields TEXT,
+
+    -- Audit Trail (LightWright: When, What, and Who Changed)
+    changed_at INTEGER,
+    changed_what TEXT,
+    changed_who TEXT,
 
     -- Metadata
     created_at INTEGER NOT NULL,

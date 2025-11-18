@@ -28,9 +28,38 @@ export const VirtualRow = memo(function VirtualRow({
   };
 
   const getCellValue = (key: ColumnKey): string => {
+    // Handle user columns stored in custom_fields
+    if (key.startsWith('user')) {
+      const userValue = fixture.custom_fields?.[key];
+      if (userValue === undefined || userValue === null) return '';
+      return String(userValue);
+    }
+
     const value = fixture[key];
     if (value === undefined || value === null) return '';
+
+    // Handle arrays (like accessories)
+    if (Array.isArray(value)) {
+      return value.join(', ');
+    }
+
+    // Handle booleans (like on_light_plot)
+    if (typeof value === 'boolean') {
+      return value ? '✓' : '';
+    }
+
+    // Handle timestamps (like changed_at, created_at)
+    if ((key === 'changed_at' || key === 'created_at' || key === 'updated_at') && typeof value === 'number') {
+      return new Date(value).toLocaleString();
+    }
+
     return String(value);
+  };
+
+  const isFieldReadOnly = (key: ColumnKey): boolean => {
+    // Computed fields are read-only
+    const config = COLUMN_CONFIGS.find(c => c.key === key);
+    return config?.isComputed || false;
   };
 
   return (
@@ -52,6 +81,7 @@ export const VirtualRow = memo(function VirtualRow({
           value={getCellValue(col.key)}
           onChange={(val) => onCellEdit(fixture.id, col.key, val)}
           className={`${col.width} flex-shrink-0`}
+          readOnly={isFieldReadOnly(col.key)}
         />
       ))}
     </div>
