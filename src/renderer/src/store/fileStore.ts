@@ -65,27 +65,21 @@ export const useFileStore = create<FileStore>((set, get) => ({
   openFile: async (onSuccess) => {
     const state = get();
 
-    console.log('🔵 openFile called, isDirty:', state.isDirty);
-
     // Check for unsaved changes
     if (state.isDirty) {
-      console.log('🔵 Has unsaved changes, showing dialog');
       const shouldContinue = await new Promise<boolean>((resolve) => {
         // This will be handled by the UnsavedChangesDialog component
         const event = new CustomEvent('showUnsavedChangesDialog', {
           detail: {
             action: 'open',
             onSave: async () => {
-              console.log('🔵 User clicked Save in dialog');
               await state.saveFile();
               resolve(true);
             },
             onDiscard: () => {
-              console.log('🔵 User clicked Don\'t Save in dialog');
               resolve(true);
             },
             onCancel: () => {
-              console.log('🔵 User clicked Cancel in dialog');
               resolve(false);
             }
           }
@@ -93,7 +87,6 @@ export const useFileStore = create<FileStore>((set, get) => ({
         window.dispatchEvent(event);
       });
 
-      console.log('🔵 Dialog resolved, shouldContinue:', shouldContinue);
       if (!shouldContinue) {
         return false;
       }
@@ -101,25 +94,20 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
     try {
       set({ isOpening: true, error: null });
-      console.log('🔵 Calling window.api.files.open()');
 
       const result = await window.api.files.open();
-      console.log('🔵 Open result:', result);
 
       if (!result) {
         // User canceled
-        console.log('🔵 User canceled file picker');
         set({ isOpening: false });
         return false;
       }
 
       if (!result.success) {
-        console.error('🔴 Open failed:', result.error);
+        console.error('Open failed:', result.error);
         set({ error: result.error || 'Failed to open file', isOpening: false });
         return false;
       }
-
-      console.log('🔵 File opened successfully, reloading data');
 
       // Update file state
       set({
@@ -136,15 +124,13 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
       // Call success callback to reload data
       if (onSuccess) {
-        console.log('🔵 Calling onSuccess callback');
         await onSuccess();
       }
 
-      console.log('✅ openFile completed successfully');
       return true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to open file';
-      console.error('🔴 Error in openFile:', error);
+      console.error('Error in openFile:', error);
       set({ error: errorMessage, isOpening: false });
       return false;
     }
@@ -154,26 +140,20 @@ export const useFileStore = create<FileStore>((set, get) => ({
   openFileByPath: async (filePath, onSuccess) => {
     const state = get();
 
-    console.log('🔵 openFileByPath called with:', filePath);
-
     // Check for unsaved changes
     if (state.isDirty) {
-      console.log('🔵 Has unsaved changes, showing dialog');
       const shouldContinue = await new Promise<boolean>((resolve) => {
         const event = new CustomEvent('showUnsavedChangesDialog', {
           detail: {
             action: 'open',
             onSave: async () => {
-              console.log('🔵 User clicked Save in dialog');
               await state.saveFile();
               resolve(true);
             },
             onDiscard: () => {
-              console.log('🔵 User clicked Don\'t Save in dialog');
               resolve(true);
             },
             onCancel: () => {
-              console.log('🔵 User clicked Cancel in dialog');
               resolve(false);
             }
           }
@@ -181,7 +161,6 @@ export const useFileStore = create<FileStore>((set, get) => ({
         window.dispatchEvent(event);
       });
 
-      console.log('🔵 Dialog resolved, shouldContinue:', shouldContinue);
       if (!shouldContinue) {
         return false;
       }
@@ -189,18 +168,14 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
     try {
       set({ isOpening: true, error: null });
-      console.log('🔵 Calling window.api.files.openByPath()');
 
       const result = await window.api.files.openByPath(filePath);
-      console.log('🔵 OpenByPath result:', result);
 
       if (!result.success) {
-        console.error('🔴 Open failed:', result.error);
+        console.error('Open failed:', result.error);
         set({ error: result.error || 'Failed to open file', isOpening: false });
         return false;
       }
-
-      console.log('🔵 File opened successfully by path, reloading data');
 
       // Update file state
       set({
@@ -217,15 +192,13 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
       // Call success callback to reload data
       if (onSuccess) {
-        console.log('🔵 Calling onSuccess callback');
         await onSuccess();
       }
 
-      console.log('✅ openFileByPath completed successfully');
       return true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to open file';
-      console.error('🔴 Error in openFileByPath:', error);
+      console.error('Error in openFileByPath:', error);
       set({ error: errorMessage, isOpening: false });
       return false;
     }
@@ -331,26 +304,20 @@ export const useFileStore = create<FileStore>((set, get) => ({
   newFile: async (onSuccess) => {
     const state = get();
 
-    console.log('🟢 newFile called, isDirty:', state.isDirty);
-
     // Check for unsaved changes
     if (state.isDirty) {
-      console.log('🟢 Has unsaved changes, showing dialog');
       const shouldContinue = await new Promise<boolean>((resolve) => {
         const event = new CustomEvent('showUnsavedChangesDialog', {
           detail: {
             action: 'new',
             onSave: async () => {
-              console.log('🟢 User clicked Save in dialog');
               await state.saveFile();
               resolve(true);
             },
             onDiscard: () => {
-              console.log('🟢 User clicked Don\'t Save in dialog');
               resolve(true);
             },
             onCancel: () => {
-              console.log('🟢 User clicked Cancel in dialog');
               resolve(false);
             }
           }
@@ -358,7 +325,6 @@ export const useFileStore = create<FileStore>((set, get) => ({
         window.dispatchEvent(event);
       });
 
-      console.log('🟢 Dialog resolved, shouldContinue:', shouldContinue);
       if (!shouldContinue) {
         return false;
       }
@@ -366,11 +332,9 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
     try {
       set({ error: null });
-      console.log('🟢 Calling window.api.files.new()');
 
       // Create new project in database
       await window.api.files.new();
-      console.log('🟢 New project created in database');
 
       // Reset file state
       set({
@@ -381,15 +345,13 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
       // Call success callback to reload data
       if (onSuccess) {
-        console.log('🟢 Calling onSuccess callback');
         await onSuccess();
       }
 
-      console.log('✅ newFile completed successfully');
       return true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create new file';
-      console.error('🔴 Error in newFile:', error);
+      console.error('Error in newFile:', error);
       set({ error: errorMessage });
       return false;
     }

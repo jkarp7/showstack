@@ -39,8 +39,6 @@ export async function addRecentFile(filePath: string, projectName: string): Prom
 
     // Save to localStorage
     localStorage.setItem(RECENT_FILES_KEY, JSON.stringify(trimmed));
-
-    console.log('✅ Added to recent files:', filePath);
   } catch (error) {
     console.error('Failed to add recent file:', error);
   }
@@ -68,8 +66,6 @@ export async function removeRecentFile(filePath: string): Promise<void> {
     const recentFiles = await getRecentFiles();
     const filtered = recentFiles.filter(f => f.filePath !== filePath);
     localStorage.setItem(RECENT_FILES_KEY, JSON.stringify(filtered));
-
-    console.log('✅ Removed from recent files:', filePath);
   } catch (error) {
     console.error('Failed to remove recent file:', error);
   }
@@ -81,7 +77,6 @@ export async function removeRecentFile(filePath: string): Promise<void> {
 export async function clearRecentFiles(): Promise<void> {
   try {
     localStorage.removeItem(RECENT_FILES_KEY);
-    console.log('✅ Cleared recent files');
   } catch (error) {
     console.error('Failed to clear recent files:', error);
   }

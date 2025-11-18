@@ -129,10 +129,8 @@ class FileService {
 
       // Save to current working database as well
       saveDatabase();
-
-      console.log('✅ Project exported to:', filePath);
     } catch (error) {
-      console.error('❌ Error exporting project:', error);
+      console.error('Error exporting project:', error);
       throw new Error(`Failed to export project: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -186,7 +184,6 @@ class FileService {
       // Always update project name to match the filename (filename is source of truth)
       const filename = this.getFileName(filePath);
       if (projectName !== filename) {
-        console.log(`📝 Updating project name from "${projectName}" to "${filename}"`);
         projectName = filename;
 
         // Update the project name in the database
@@ -198,8 +195,6 @@ class FileService {
         ]);
         saveDatabase();
       }
-
-      console.log('✅ Project imported from:', filePath);
 
       return {
         success: true,
@@ -238,11 +233,9 @@ class FileService {
       // Save to disk
       saveDatabase();
 
-      console.log('✅ Created new project:', projectId);
-
       return projectId;
     } catch (error) {
-      console.error('❌ Error creating new project:', error);
+      console.error('Error creating new project:', error);
       throw new Error(`Failed to create new project: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }

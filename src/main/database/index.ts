@@ -17,10 +17,8 @@ export async function initDatabase(): Promise<void> {
   if (existsSync(dbPath)) {
     const buffer = readFileSync(dbPath);
     db = new SQL.Database(buffer);
-    console.log('✅ Loaded existing database:', dbPath);
   } else {
     db = new SQL.Database();
-    console.log('✅ Created new database:', dbPath);
   }
 
   // Enable foreign keys
@@ -41,13 +39,10 @@ export async function initDatabase(): Promise<void> {
       'INSERT INTO projects (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)',
       ['default-project', 'Untitled Project', Date.now(), Date.now()]
     );
-    console.log('✅ Created default project');
   }
 
   // Save database to disk
   saveDatabase();
-
-  console.log('✅ Database initialized:', dbPath);
 }
 
 function runMigrations(db: Database): void {
@@ -133,6 +128,4 @@ export async function reloadDatabase(): Promise<void> {
 
   // Run migrations to ensure all tables exist
   runMigrations(db);
-
-  console.log('✅ Database reloaded from:', dbPath);
 }
