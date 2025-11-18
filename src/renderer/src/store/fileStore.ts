@@ -54,7 +54,11 @@ export const useFileStore = create<FileStore>((set, get) => ({
     if (!currentFilePath) {
       return 'Untitled Project';
     }
-    return window.api.files.getFileName(currentFilePath);
+    // Extract filename from path locally (works cross-platform)
+    const parts = currentFilePath.replace(/\\/g, '/').split('/');
+    const filename = parts[parts.length - 1];
+    // Remove .showstack extension
+    return filename.replace(/\.showstack$/, '');
   },
 
   // Open file
