@@ -7,7 +7,7 @@ import { SortBar } from '../../components/fixture/SortBar';
 import { AddFixtureDialog } from '../../components/fixture/AddFixtureDialog';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { Fixture } from '../../types';
-import { DEFAULT_COLUMN_VISIBILITY, ColumnVisibility } from '../../types/columns';
+import { DEFAULT_COLUMN_VISIBILITY, ColumnVisibility, DEFAULT_COLUMN_ORDER, ColumnKey } from '../../types/columns';
 
 export function Production() {
   const navigate = useNavigate();
@@ -27,6 +27,9 @@ export function Production() {
 
   // Column visibility state
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(DEFAULT_COLUMN_VISIBILITY);
+
+  // Column order state
+  const [columnOrder, setColumnOrder] = useState<ColumnKey[]>(DEFAULT_COLUMN_ORDER);
 
   // Load fixtures from database on mount
   useEffect(() => {
@@ -111,6 +114,21 @@ export function Production() {
     // Apply sorting
     if (sortField) {
       result.sort((a, b) => {
+        // Special handling for address field - sort by universe, then dmx_address
+        if (sortField === 'address') {
+          const aUniverse = a.universe || 0;
+          const bUniverse = b.universe || 0;
+          const aDmx = a.dmx_address || 0;
+          const bDmx = b.dmx_address || 0;
+
+          // Sort by universe first
+          if (aUniverse !== bUniverse) {
+            return sortDirection === 'asc' ? aUniverse - bUniverse : bUniverse - aUniverse;
+          }
+          // Then by DMX address within universe
+          return sortDirection === 'asc' ? aDmx - bDmx : bDmx - aDmx;
+        }
+
         const aValue = a[sortField as keyof Fixture];
         const bValue = b[sortField as keyof Fixture];
 
@@ -204,6 +222,8 @@ export function Production() {
           onSelectRows={setSelectedRows}
           onUpdateFixture={updateFixture}
           columnVisibility={columnVisibility}
+          columnOrder={columnOrder}
+          onColumnOrderChange={setColumnOrder}
         />
       </main>
 

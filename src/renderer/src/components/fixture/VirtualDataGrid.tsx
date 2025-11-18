@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Fixture } from '../types';
 import { VirtualRow } from './VirtualRow';
-import { COLUMN_CONFIGS, ColumnVisibility } from '../../types/columns';
+import { COLUMN_CONFIGS, ColumnVisibility, ColumnKey, getOrderedColumns } from '../../types/columns';
 
 interface VirtualDataGridProps {
   fixtures: Fixture[];
@@ -9,6 +9,8 @@ interface VirtualDataGridProps {
   onSelectRows: (selected: Set<string>) => void;
   onUpdateFixture: (id: string, updates: Partial<Fixture>) => void;
   columnVisibility: ColumnVisibility;
+  columnOrder: ColumnKey[];
+  onColumnOrderChange: (order: ColumnKey[]) => void;
 }
 
 const ROW_HEIGHT = 40; // pixels
@@ -21,11 +23,14 @@ export function VirtualDataGrid({
   onSelectRows,
   onUpdateFixture,
   columnVisibility,
+  columnOrder,
+  onColumnOrderChange,
 }: VirtualDataGridProps) {
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(0);
+  const [draggedColumn, setDraggedColumn] = useState<ColumnKey | null>(null);
 
   // Update container height on resize
   useEffect(() => {
@@ -109,15 +114,28 @@ export function VirtualDataGrid({
         [field]: value
       };
     }
-    // Handle Address field - parse "universe/dmx_address" format
+    // Handle Address field - parse "universe/dmx_address" format OR raw address number
     else if (field === 'address') {
-      const parts = value.split('/');
-      if (parts.length === 2) {
-        const universe = parseInt(parts[0], 10);
-        const dmx_address = parseInt(parts[1], 10);
-        if (!isNaN(universe) && !isNaN(dmx_address)) {
-          updates.universe = universe;
-          updates.dmx_address = dmx_address;
+      // Check if it's in "universe/address" format
+      if (value.includes('/')) {
+        const parts = value.split('/');
+        if (parts.length === 2) {
+          const universe = parseInt(parts[0], 10);
+          const dmx_address = parseInt(parts[1], 10);
+          if (!isNaN(universe) && !isNaN(dmx_address)) {
+            updates.universe = universe;
+            updates.dmx_address = dmx_address;
+          }
+        }
+      }
+      // Otherwise treat it as a raw DMX address and calculate universe (512 addresses per universe)
+      else {
+        const rawAddress = parseInt(value, 10);
+        if (!isNaN(rawAddress) && rawAddress > 0) {
+          // Calculate universe and address within universe
+          // DMX universes have 512 addresses each (1-512)
+          updates.universe = Math.ceil(rawAddress / 512);
+          updates.dmx_address = ((rawAddress - 1) % 512) + 1;
         }
       }
     }
@@ -145,6 +163,43 @@ export function VirtualDataGrid({
     onUpdateFixture(fixtureId, updates);
   }, [fixtures, onUpdateFixture]);
 
+  // Drag and drop handlers for column reordering
+  const handleDragStart = useCallback((e: React.DragEvent, columnKey: ColumnKey) => {
+    setDraggedColumn(columnKey);
+    e.dataTransfer.effectAllowed = 'move';
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent, targetColumnKey: ColumnKey) => {
+    e.preventDefault();
+
+    if (!draggedColumn || draggedColumn === targetColumnKey) {
+      setDraggedColumn(null);
+      return;
+    }
+
+    const newOrder = [...columnOrder];
+    const draggedIndex = newOrder.indexOf(draggedColumn);
+    const targetIndex = newOrder.indexOf(targetColumnKey);
+
+    if (draggedIndex !== -1 && targetIndex !== -1) {
+      // Remove the dragged column
+      newOrder.splice(draggedIndex, 1);
+      // Insert it at the target position
+      newOrder.splice(targetIndex, 0, draggedColumn);
+      onColumnOrderChange(newOrder);
+    }
+
+    setDraggedColumn(null);
+  }, [draggedColumn, columnOrder, onColumnOrderChange]);
+
+  // Get ordered column configs
+  const orderedColumns = getOrderedColumns(columnOrder);
+
   return (
     <div className="h-full flex flex-col bg-gray-900">
       {/* Column Headers */}
@@ -168,8 +223,18 @@ export function VirtualDataGrid({
             className="w-4 h-4"
           />
         </div>
-        {COLUMN_CONFIGS.filter(col => columnVisibility[col.key]).map(col => (
-          <div key={col.key} className={`${col.width} px-2 font-semibold text-sm text-gray-300 flex-shrink-0`}>
+        {orderedColumns.filter(col => columnVisibility[col.key]).map(col => (
+          <div
+            key={col.key}
+            draggable
+            onDragStart={(e) => handleDragStart(e, col.key)}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, col.key)}
+            className={`${col.width} px-2 font-semibold text-sm text-gray-300 flex-shrink-0 cursor-move hover:bg-gray-700 transition ${
+              draggedColumn === col.key ? 'opacity-50' : ''
+            }`}
+            title="Drag to reorder"
+          >
             {col.label}
           </div>
         ))}
@@ -191,6 +256,7 @@ export function VirtualDataGrid({
                 onClick={(e) => handleRowClick(fixture.id, e)}
                 onCellEdit={handleCellEdit}
                 columnVisibility={columnVisibility}
+                columnOrder={columnOrder}
               />
             ))}
           </div>

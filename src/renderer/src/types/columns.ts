@@ -156,6 +156,22 @@ export const COLUMN_CONFIGS: ColumnConfig[] = [
 
 export type ColumnVisibility = Record<ColumnKey, boolean>;
 
+// Helper function to get ordered columns based on custom order array
+export function getOrderedColumns(order?: ColumnKey[]): typeof COLUMN_CONFIGS {
+  if (!order || order.length === 0) {
+    return COLUMN_CONFIGS;
+  }
+
+  // Create a map for quick lookup
+  const configMap = new Map(COLUMN_CONFIGS.map(c => [c.key, c]));
+
+  // Return columns in the specified order
+  return order.map(key => configMap.get(key)).filter(Boolean) as typeof COLUMN_CONFIGS;
+}
+
+// Default column order (matches COLUMN_CONFIGS order)
+export const DEFAULT_COLUMN_ORDER: ColumnKey[] = COLUMN_CONFIGS.map(c => c.key);
+
 // Default visibility matching LightWright defaults
 export const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = {
   // DISPLAYED BY DEFAULT in LightWright

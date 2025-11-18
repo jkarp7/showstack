@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Fixture } from '../types';
 import { EditableCell } from './EditableCell';
-import { COLUMN_CONFIGS, ColumnVisibility, ColumnKey } from '../../types/columns';
+import { COLUMN_CONFIGS, ColumnVisibility, ColumnKey, getOrderedColumns } from '../../types/columns';
 
 interface VirtualRowProps {
   fixture: Fixture;
@@ -9,6 +9,7 @@ interface VirtualRowProps {
   onClick: (e: React.MouseEvent) => void;
   onCellEdit: (fixtureId: string, field: keyof Fixture, value: string) => void;
   columnVisibility: ColumnVisibility;
+  columnOrder: ColumnKey[];
 }
 
 export const VirtualRow = memo(function VirtualRow({
@@ -17,7 +18,10 @@ export const VirtualRow = memo(function VirtualRow({
   onClick,
   onCellEdit,
   columnVisibility,
+  columnOrder,
 }: VirtualRowProps) {
+  // Get ordered column configs
+  const orderedColumns = getOrderedColumns(columnOrder);
   const rowClass = `flex items-center h-10 border-b border-gray-800 hover:bg-gray-800 ${
     isSelected ? 'bg-blue-900 hover:bg-blue-800' : ''
   }`;
@@ -75,7 +79,7 @@ export const VirtualRow = memo(function VirtualRow({
           className="w-4 h-4 pointer-events-none"
         />
       </div>
-      {COLUMN_CONFIGS.filter(col => columnVisibility[col.key]).map(col => (
+      {orderedColumns.filter(col => columnVisibility[col.key]).map(col => (
         <EditableCell
           key={col.key}
           value={getCellValue(col.key)}

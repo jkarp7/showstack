@@ -7,11 +7,11 @@ interface SortBarProps {
 export function SortBar({ sortField, sortDirection, onSort }: SortBarProps) {
   const sortButtons = [
     { field: 'position', label: 'Position' },
+    { field: 'address', label: 'Address' },
     { field: 'channel', label: 'Channel' },
     { field: 'dimmer', label: 'Dimmer' },
-    { field: 'circuit', label: 'Circuit' },
-    { field: 'type', label: 'Type' },
-    { field: 'unit', label: 'Unit #' },
+    { field: 'circuit', label: 'Circuit Name' },
+    { field: 'circuit_number', label: 'Circuit #' },
   ];
 
   return (
