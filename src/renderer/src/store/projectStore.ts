@@ -1,13 +1,42 @@
 import { create } from 'zustand';
 
+export interface ShowDates {
+  load_in?: string;
+  tech?: string;
+  previews?: string;
+  opening?: string;
+  closing?: string;
+  load_out?: string;
+}
+
 export interface Project {
   id: string;
   name: string;
   description?: string;
-  venue?: string;
-  designer?: string;
   logo_path?: string;
-  enabled_modules?: string[]; // ['design', 'production', 'tour']
+
+  // Design Team
+  lighting_designer?: string;
+  lighting_associates?: string[]; // JSON array
+  audio_designer?: string;
+  audio_associates?: string[]; // JSON array
+  video_designer?: string;
+  video_associates?: string[]; // JSON array
+
+  // Production Staff
+  electrician?: string;
+  audio_tech?: string;
+  video_tech?: string;
+  production_manager?: string;
+  production_manager_company?: string;
+  general_manager?: string;
+  general_manager_company?: string;
+
+  // Venue & Dates
+  venue?: string;
+  show_dates?: ShowDates;
+
+  enabled_modules?: string[]; // ['production', 'manager', 'design']
   created_at: number;
   updated_at: number;
 }
