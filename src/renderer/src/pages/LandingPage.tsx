@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ModuleCard } from '../components/common/ModuleCard';
-import { ProjectCard } from '../components/common/ProjectCard';
 import { NewProjectDialog } from '../components/common/NewProjectDialog';
 import { DeleteProjectDialog } from '../components/common/DeleteProjectDialog';
 import { useProjectStore, Project } from '../store/projectStore';
-import { getRecentFiles, removeRecentFile, RecentFile } from '../utils/recentFiles';
 import { useFileStore } from '../store/fileStore';
 
 export function LandingPage() {
@@ -14,17 +12,10 @@ export function LandingPage() {
   const { openFileByPath } = useFileStore();
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
-  const [recentFiles, setRecentFiles] = useState<RecentFile[]>([]);
 
   useEffect(() => {
     loadProjects();
-    loadRecentFiles();
   }, [loadProjects]);
-
-  const loadRecentFiles = async () => {
-    const files = await getRecentFiles();
-    setRecentFiles(files);
-  };
 
   const handleCreateProject = async (name: string, description: string, logoPath: string, enabledModules: string[]) => {
     try {
@@ -36,8 +27,7 @@ export function LandingPage() {
 
   const handleOpenProject = (projectId: string) => {
     setCurrentProject(projectId);
-    // Navigate to the last used module or default to production
-    navigate('/modules/production');
+    navigate(`/project/${projectId}`);
   };
 
   const handleDeleteProject = async () => {
@@ -48,34 +38,6 @@ export function LandingPage() {
         console.error('Failed to delete project:', error);
       }
     }
-  };
-
-  const handleOpenRecentFile = async (filePath: string) => {
-    try {
-      // Open the file by path (this will import the database)
-      const success = await openFileByPath(filePath, async () => {
-        // After successful open, navigate to production module
-        await loadProjects();
-      });
-
-      if (success) {
-        navigate('/modules/production');
-      } else {
-        // File open failed, remove from recent files
-        await removeRecentFile(filePath);
-        await loadRecentFiles();
-      }
-    } catch (error) {
-      console.error('Failed to open recent file:', error);
-      // Remove invalid file from recent list
-      await removeRecentFile(filePath);
-      await loadRecentFiles();
-    }
-  };
-
-  const handleRemoveRecentFile = async (filePath: string) => {
-    await removeRecentFile(filePath);
-    await loadRecentFiles();
   };
 
   return (
@@ -104,12 +66,12 @@ export function LandingPage() {
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto p-8">
-          {/* Recent Files Section */}
+          {/* Projects Section */}
           <div className="mb-12">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-bold mb-2">Recent Projects</h2>
-                <p className="text-gray-400">Quick access to your recent ShowStack files</p>
+                <h2 className="text-2xl font-bold mb-2">Projects</h2>
+                <p className="text-gray-400">Your ShowStack projects</p>
               </div>
               <div className="flex gap-3">
                 <button
@@ -134,42 +96,52 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Recent Files Display */}
-            {recentFiles.length > 0 ? (
-              recentFiles.length <= 3 ? (
-                /* Tile view for 3 or fewer files */
+            {/* Projects Display */}
+            {projects.length > 0 ? (
+              projects.length <= 3 ? (
+                /* Tile view for 3 or fewer projects */
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {recentFiles.map((file) => (
+                  {projects.map((project) => (
                     <div
-                      key={file.filePath}
+                      key={project.id}
                       className="bg-gray-800 rounded-lg border border-gray-700 p-6 hover:border-blue-500 transition cursor-pointer group"
-                      onClick={() => handleOpenRecentFile(file.filePath)}
+                      onClick={() => handleOpenProject(project.id)}
                     >
                       <div className="flex items-start justify-between mb-3">
-                        <div className="text-4xl">📄</div>
+                        {project.logo_path ? (
+                          <img
+                            src={project.logo_path}
+                            alt={project.name}
+                            className="w-16 h-16 rounded-lg object-cover bg-gray-700"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center text-3xl">
+                            📁
+                          </div>
+                        )}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleRemoveRecentFile(file.filePath);
+                            setProjectToDelete(project);
                           }}
                           className="text-gray-500 hover:text-red-500 transition opacity-0 group-hover:opacity-100"
-                          title="Remove from recent"
+                          title="Delete project"
                         >
                           ×
                         </button>
                       </div>
-                      <h3 className="text-lg font-semibold mb-2 truncate">{file.projectName}</h3>
+                      <h3 className="text-lg font-semibold mb-2 truncate">{project.name}</h3>
+                      {project.description && (
+                        <p className="text-sm text-gray-400 mb-2 line-clamp-2">{project.description}</p>
+                      )}
                       <p className="text-xs text-gray-500">
-                        Created: {new Date(file.created).toLocaleDateString()}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Last opened: {new Date(file.lastOpened).toLocaleDateString()}
+                        Created: {new Date(project.created_at).toLocaleDateString()}
                       </p>
                     </div>
                   ))}
                 </div>
               ) : (
-                /* Table view for more than 3 files */
+                /* Table view for more than 3 projects */
                 <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
                   <table className="w-full">
                     <thead className="bg-gray-750 border-b border-gray-700">
@@ -178,10 +150,10 @@ export function LandingPage() {
                           Project Name
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                          Date Created
+                          Description
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                          Last Opened
+                          Date Created
                         </th>
                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
                           Actions
@@ -189,33 +161,41 @@ export function LandingPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-700">
-                      {recentFiles.map((file) => (
+                      {projects.map((project) => (
                         <tr
-                          key={file.filePath}
+                          key={project.id}
                           className="hover:bg-gray-750 cursor-pointer transition"
-                          onClick={() => handleOpenRecentFile(file.filePath)}
+                          onClick={() => handleOpenProject(project.id)}
                         >
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
-                              <span className="text-2xl mr-3">📄</span>
-                              <span className="font-medium">{file.projectName}</span>
+                              {project.logo_path ? (
+                                <img
+                                  src={project.logo_path}
+                                  alt={project.name}
+                                  className="w-10 h-10 rounded-lg object-cover bg-gray-700 mr-3"
+                                />
+                              ) : (
+                                <span className="text-2xl mr-3">📁</span>
+                              )}
+                              <span className="font-medium">{project.name}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-400 whitespace-nowrap">
-                            {new Date(file.created).toLocaleDateString()}
+                          <td className="px-6 py-4 text-sm text-gray-400 max-w-xs truncate">
+                            {project.description || '-'}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-400 whitespace-nowrap">
-                            {new Date(file.lastOpened).toLocaleDateString()}
+                            {new Date(project.created_at).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 text-right">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleRemoveRecentFile(file.filePath);
+                                setProjectToDelete(project);
                               }}
                               className="text-gray-500 hover:text-red-500 transition text-sm"
                             >
-                              Remove
+                              Delete
                             </button>
                           </td>
                         </tr>
@@ -227,32 +207,17 @@ export function LandingPage() {
             ) : (
               <div className="bg-gray-800 rounded-lg border border-gray-700 p-12 text-center">
                 <div className="text-6xl mb-4">📂</div>
-                <p className="text-gray-400 text-lg mb-4">No recent files</p>
+                <p className="text-gray-400 text-lg mb-4">No projects yet</p>
                 <p className="text-gray-500 text-sm mb-6">
-                  Open an existing ShowStack file or create a new project to get started
+                  Create a new project to get started with ShowStack
                 </p>
-                <div className="flex gap-4 justify-center">
-                  <button
-                    onClick={async () => {
-                      const { openFile } = useFileStore.getState();
-                      await openFile(async () => {
-                        await loadProjects();
-                        await loadRecentFiles();
-                        navigate('/modules/production');
-                      });
-                    }}
-                    className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition inline-flex items-center gap-2"
-                  >
-                    Open File...
-                  </button>
-                  <button
-                    onClick={() => setIsNewProjectDialogOpen(true)}
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition inline-flex items-center gap-2"
-                  >
-                    <span className="text-xl">+</span>
-                    Create New Project
-                  </button>
-                </div>
+                <button
+                  onClick={() => setIsNewProjectDialogOpen(true)}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition inline-flex items-center gap-2"
+                >
+                  <span className="text-xl">+</span>
+                  Create New Project
+                </button>
               </div>
             )}
           </div>
