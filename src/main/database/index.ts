@@ -113,10 +113,14 @@ function runMigrations(db: Database): void {
     db.run('ALTER TABLE projects ADD COLUMN general_manager_phone TEXT');
   }
 
-  // Venue and dates
+  // Venue and dates - separate checks
   if (!projectsColumns.includes('venue')) {
-    console.log('Running migration: Adding venue and show_dates to projects');
+    console.log('Running migration: Adding venue to projects');
     db.run('ALTER TABLE projects ADD COLUMN venue TEXT');
+  }
+
+  if (!projectsColumns.includes('show_dates')) {
+    console.log('Running migration: Adding show_dates to projects');
     db.run('ALTER TABLE projects ADD COLUMN show_dates TEXT'); // JSON object
   }
 
