@@ -142,6 +142,9 @@ export function Paperwork() {
   const [saveReportName, setSaveReportName] = useState('');
   const [saveReportDescription, setSaveReportDescription] = useState('');
 
+  // Power calculation voltage
+  const [voltage, setVoltage] = useState<number>(120);
+
   // Load fixtures, project info, and custom reports
   useEffect(() => {
     loadFixtures();
@@ -269,58 +272,53 @@ export function Paperwork() {
       }));
   }, [fixtures]);
 
-  // Generate Color Schedule data
+  // Generate Color Schedule data (gel calculations)
   const colorScheduleData = useMemo(() => {
     const grouped = fixtures.reduce((acc, fixture) => {
       const color = fixture.color || 'No Color';
-      if (!acc[color]) acc[color] = [];
-      acc[color].push(fixture);
+      if (!acc[color]) acc[color] = 0;
+      acc[color]++;
       return acc;
-    }, {} as Record<string, Fixture[]>);
+    }, {} as Record<string, number>);
 
     return Object.entries(grouped)
+      .filter(([color]) => color !== 'No Color') // Exclude fixtures with no color
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([color, fixtures]) => ({
+      .map(([color, cuts]) => ({
         color,
-        count: fixtures.length,
-        fixtures: fixtures.map(f => ({
-          position: f.position || '-',
-          type: f.type || '-',
-          channel: f.channel || '-',
-          purpose: f.purpose || '-',
-          location: f.location || '-'
-        }))
+        cuts,
+        sheets: Math.ceil(cuts / 10) // Assuming ~10 cuts per 20"x24" gel sheet
       }));
   }, [fixtures]);
 
-  // Generate Gobo Schedule data
+  // Generate Gobo Schedule data (gobo inventory)
   const goboScheduleData = useMemo(() => {
     const grouped = fixtures.reduce((acc, fixture) => {
       const gobo = fixture.gobo || 'No Gobo';
-      if (!acc[gobo]) acc[gobo] = [];
-      acc[gobo].push(fixture);
+      if (!acc[gobo]) {
+        acc[gobo] = {
+          count: 0,
+          size: fixture.type || '-' // Using fixture type as proxy for gobo size
+        };
+      }
+      acc[gobo].count++;
       return acc;
-    }, {} as Record<string, Fixture[]>);
+    }, {} as Record<string, { count: number; size: string }>);
 
     return Object.entries(grouped)
+      .filter(([gobo]) => gobo !== 'No Gobo') // Exclude fixtures with no gobo
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([gobo, fixtures]) => ({
+      .map(([gobo, data]) => ({
         gobo,
-        count: fixtures.length,
-        fixtures: fixtures.map(f => ({
-          position: f.position || '-',
-          type: f.type || '-',
-          channel: f.channel || '-',
-          color: f.color || '-',
-          purpose: f.purpose || '-'
-        }))
+        count: data.count,
+        size: data.size
       }));
   }, [fixtures]);
 
   // Generate Power Summary data
   const powerSummaryData = useMemo(() => {
     const totalWattage = fixtures.reduce((sum, f) => sum + (f.wattage || 0), 0);
-    const totalAmperage = totalWattage / 120; // Assuming 120V
+    const totalAmperage = totalWattage / voltage;
     const fixturesByWattage = fixtures
       .filter(f => f.wattage)
       .reduce((acc, f) => {
@@ -333,6 +331,7 @@ export function Paperwork() {
       totalFixtures: fixtures.length,
       totalWattage: totalWattage.toFixed(0),
       totalAmperage: totalAmperage.toFixed(2),
+      voltage,
       breakdown: Object.entries(fixturesByWattage)
         .sort(([a], [b]) => Number(b) - Number(a))
         .map(([wattage, count]) => ({
@@ -341,7 +340,7 @@ export function Paperwork() {
           totalWattage: (Number(wattage) * count).toFixed(0)
         }))
     };
-  }, [fixtures]);
+  }, [fixtures, voltage]);
 
   const handleSaveReport = () => {
     const report: CustomReport = {
@@ -557,83 +556,79 @@ export function Paperwork() {
 
       case 'color-schedule':
         return (
-          <div className="space-y-6">
-            {colorScheduleData.map((group, i) => (
-              <div key={i} className="bg-gray-800 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-blue-400">
-                    Color: {group.color}
-                  </h3>
-                  <span className="text-sm text-gray-400">{group.count} fixture{group.count !== 1 ? 's' : ''}</span>
-                </div>
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-700">
-                    <tr>
-                      <th className="px-3 py-2 text-left">Position</th>
-                      <th className="px-3 py-2 text-left">Type</th>
-                      <th className="px-3 py-2 text-left">Channel</th>
-                      <th className="px-3 py-2 text-left">Purpose</th>
-                      <th className="px-3 py-2 text-left">Location</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {group.fixtures.map((fixture, j) => (
-                      <tr key={j} className="border-b border-gray-700">
-                        <td className="px-3 py-2">{fixture.position}</td>
-                        <td className="px-3 py-2">{fixture.type}</td>
-                        <td className="px-3 py-2">{fixture.channel}</td>
-                        <td className="px-3 py-2">{fixture.purpose}</td>
-                        <td className="px-3 py-2">{fixture.location}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ))}
+          <div className="bg-gray-800 rounded-lg p-6">
+            <h3 className="text-lg font-semibold mb-4">Gel Requirements</h3>
+            <table className="w-full text-sm">
+              <thead className="bg-gray-700">
+                <tr>
+                  <th className="px-3 py-2 text-left">Color</th>
+                  <th className="px-3 py-2 text-left">Cuts Needed</th>
+                  <th className="px-3 py-2 text-left">Sheets Required</th>
+                </tr>
+              </thead>
+              <tbody>
+                {colorScheduleData.map((row, i) => (
+                  <tr key={i} className="border-b border-gray-700 hover:bg-gray-750">
+                    <td className="px-3 py-2 font-medium">{row.color}</td>
+                    <td className="px-3 py-2">{row.cuts}</td>
+                    <td className="px-3 py-2">{row.sheets}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="mt-4 text-xs text-gray-400">
+              * Based on ~10 cuts per 20"×24" gel sheet
+            </div>
           </div>
         );
 
       case 'gobo-schedule':
         return (
-          <div className="space-y-6">
-            {goboScheduleData.map((group, i) => (
-              <div key={i} className="bg-gray-800 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-blue-400">
-                    Gobo: {group.gobo}
-                  </h3>
-                  <span className="text-sm text-gray-400">{group.count} fixture{group.count !== 1 ? 's' : ''}</span>
-                </div>
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-700">
-                    <tr>
-                      <th className="px-3 py-2 text-left">Position</th>
-                      <th className="px-3 py-2 text-left">Type</th>
-                      <th className="px-3 py-2 text-left">Channel</th>
-                      <th className="px-3 py-2 text-left">Color</th>
-                      <th className="px-3 py-2 text-left">Purpose</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {group.fixtures.map((fixture, j) => (
-                      <tr key={j} className="border-b border-gray-700">
-                        <td className="px-3 py-2">{fixture.position}</td>
-                        <td className="px-3 py-2">{fixture.type}</td>
-                        <td className="px-3 py-2">{fixture.channel}</td>
-                        <td className="px-3 py-2">{fixture.color}</td>
-                        <td className="px-3 py-2">{fixture.purpose}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ))}
+          <div className="bg-gray-800 rounded-lg p-6">
+            <h3 className="text-lg font-semibold mb-4">Gobo Requirements</h3>
+            <table className="w-full text-sm">
+              <thead className="bg-gray-700">
+                <tr>
+                  <th className="px-3 py-2 text-left">Gobo/Template</th>
+                  <th className="px-3 py-2 text-left">Quantity Needed</th>
+                  <th className="px-3 py-2 text-left">Size</th>
+                </tr>
+              </thead>
+              <tbody>
+                {goboScheduleData.map((row, i) => (
+                  <tr key={i} className="border-b border-gray-700 hover:bg-gray-750">
+                    <td className="px-3 py-2 font-medium">{row.gobo}</td>
+                    <td className="px-3 py-2">{row.count}</td>
+                    <td className="px-3 py-2">{row.size}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="mt-4 text-xs text-gray-400">
+              * Size based on fixture type
+            </div>
           </div>
         );
 
       case 'power-summary':
         return (
           <div className="space-y-6">
+            {/* Voltage Selection */}
+            <div className="bg-gray-800 rounded-lg p-4 flex items-center gap-4">
+              <label className="text-sm font-medium text-gray-400">System Voltage:</label>
+              <select
+                value={voltage}
+                onChange={(e) => setVoltage(Number(e.target.value))}
+                className="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+              >
+                <option value={120}>120V (US Standard)</option>
+                <option value={208}>208V (US 3-Phase)</option>
+                <option value={220}>220V (International)</option>
+                <option value={230}>230V (EU Standard)</option>
+                <option value={240}>240V (UK/AU Standard)</option>
+              </select>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-gray-800 rounded-lg p-6">
                 <div className="text-gray-400 text-sm mb-2">Total Fixtures</div>
@@ -644,7 +639,7 @@ export function Paperwork() {
                 <div className="text-3xl font-bold text-yellow-400">{powerSummaryData.totalWattage}W</div>
               </div>
               <div className="bg-gray-800 rounded-lg p-6">
-                <div className="text-gray-400 text-sm mb-2">Total Amperage (120V)</div>
+                <div className="text-gray-400 text-sm mb-2">Total Amperage ({voltage}V)</div>
                 <div className="text-3xl font-bold text-red-400">{powerSummaryData.totalAmperage}A</div>
               </div>
             </div>

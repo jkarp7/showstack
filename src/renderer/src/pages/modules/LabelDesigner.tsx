@@ -473,6 +473,181 @@ export function LabelDesigner() {
     setSelectedGraphic(null);
   };
 
+  const handleUseTemplate = (templateType: LabelType) => {
+    const template = LABEL_TEMPLATES.find(t => t.type === templateType);
+    if (!template) return;
+
+    let newGraphics: LabelGraphic[] = [];
+
+    // Create pre-designed templates based on type
+    switch (templateType) {
+      case 'cable':
+        newGraphics = [
+          {
+            id: `text-${Date.now()}-1`,
+            type: 'text',
+            x: labelWidth / 2,
+            y: labelHeight * 0.25,
+            text: 'CABLE NAME',
+            fontSize: 16,
+            fontWeight: 'bold'
+          },
+          {
+            id: `line-${Date.now()}-1`,
+            type: 'line',
+            x: 10,
+            y: labelHeight * 0.45,
+            width: labelWidth - 20,
+            height: 0,
+            strokeWidth: 2
+          },
+          {
+            id: `text-${Date.now()}-2`,
+            type: 'text',
+            x: labelWidth / 2,
+            y: labelHeight * 0.65,
+            text: 'Circuits 1-12',
+            fontSize: 12,
+            fontWeight: 'normal'
+          },
+          {
+            id: `text-${Date.now()}-3`,
+            type: 'text',
+            x: labelWidth / 2,
+            y: labelHeight * 0.85,
+            text: 'To: Location',
+            fontSize: 10,
+            fontWeight: 'normal'
+          }
+        ];
+        break;
+
+      case 'circuit':
+        newGraphics = [
+          {
+            id: `rect-${Date.now()}-1`,
+            type: 'rectangle',
+            x: 5,
+            y: 5,
+            width: labelWidth - 10,
+            height: labelHeight - 10,
+            stroke: true,
+            strokeWidth: 2
+          },
+          {
+            id: `text-${Date.now()}-1`,
+            type: 'text',
+            x: labelWidth / 2,
+            y: labelHeight * 0.3,
+            text: 'CKT 24',
+            fontSize: 18,
+            fontWeight: 'bold'
+          },
+          {
+            id: `text-${Date.now()}-2`,
+            type: 'text',
+            x: labelWidth / 2,
+            y: labelHeight * 0.55,
+            text: 'Dimmer 3/6',
+            fontSize: 12,
+            fontWeight: 'normal'
+          },
+          {
+            id: `text-${Date.now()}-3`,
+            type: 'text',
+            x: labelWidth / 2,
+            y: labelHeight * 0.75,
+            text: '1.2kW',
+            fontSize: 10,
+            fontWeight: 'normal'
+          }
+        ];
+        break;
+
+      case 'fixture':
+        newGraphics = [
+          {
+            id: `text-${Date.now()}-1`,
+            type: 'text',
+            x: labelWidth / 2,
+            y: labelHeight * 0.25,
+            text: 'POS 12',
+            fontSize: 14,
+            fontWeight: 'bold'
+          },
+          {
+            id: `text-${Date.now()}-2`,
+            type: 'text',
+            x: labelWidth / 2,
+            y: labelHeight * 0.5,
+            text: 'CH 112',
+            fontSize: 14,
+            fontWeight: 'bold'
+          },
+          {
+            id: `text-${Date.now()}-3`,
+            type: 'text',
+            x: labelWidth / 2,
+            y: labelHeight * 0.75,
+            text: 'R80 • Purpose',
+            fontSize: 10,
+            fontWeight: 'normal'
+          }
+        ];
+        break;
+
+      case 'dimmer':
+        newGraphics = [
+          {
+            id: `rect-${Date.now()}-1`,
+            type: 'rectangle',
+            x: 5,
+            y: 5,
+            width: labelWidth - 10,
+            height: labelHeight - 10,
+            stroke: true,
+            strokeWidth: 3
+          },
+          {
+            id: `text-${Date.now()}-1`,
+            type: 'text',
+            x: labelWidth / 2,
+            y: labelHeight * 0.3,
+            text: 'DIMMER 3/6',
+            fontSize: 16,
+            fontWeight: 'bold'
+          },
+          {
+            id: `text-${Date.now()}-2`,
+            type: 'text',
+            x: labelWidth / 2,
+            y: labelHeight * 0.55,
+            text: 'Circuit 24',
+            fontSize: 12,
+            fontWeight: 'normal'
+          },
+          {
+            id: `text-${Date.now()}-3`,
+            type: 'text',
+            x: labelWidth / 2,
+            y: labelHeight * 0.75,
+            text: '1200W • Phase A',
+            fontSize: 10,
+            fontWeight: 'normal'
+          }
+        ];
+        break;
+
+      default:
+        // Custom - start blank
+        newGraphics = [];
+    }
+
+    setGraphics(newGraphics);
+    setSelectedGraphic(null);
+    setSelectedTemplate(templateType);
+  };
+
   const handleSaveDesign = () => {
     const design: CustomLabelDesign = {
       id: currentDesign?.id || `design-${Date.now()}`,
@@ -741,6 +916,23 @@ export function LabelDesigner() {
                 )}
               </div>
             )}
+
+            {/* Quick Templates */}
+            <div>
+              <h3 className="text-sm font-semibold mb-3 text-gray-400 uppercase">Quick Templates</h3>
+              <div className="space-y-2">
+                {LABEL_TEMPLATES.filter(t => t.type !== 'custom').map(template => (
+                  <button
+                    key={template.type}
+                    onClick={() => handleUseTemplate(template.type)}
+                    className="w-full px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition flex items-center gap-2"
+                  >
+                    <span>{template.icon}</span>
+                    <span>{template.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Quick Actions */}
             <div>
