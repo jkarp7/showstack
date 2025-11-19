@@ -64,10 +64,16 @@ function runMigrations(db: Database): void {
   if (!projectsColumns.includes('lighting_designer')) {
     console.log('Running migration: Adding design team fields to projects');
     db.run('ALTER TABLE projects ADD COLUMN lighting_designer TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN lighting_designer_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN lighting_designer_phone TEXT');
     db.run('ALTER TABLE projects ADD COLUMN lighting_associates TEXT'); // JSON array
     db.run('ALTER TABLE projects ADD COLUMN audio_designer TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN audio_designer_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN audio_designer_phone TEXT');
     db.run('ALTER TABLE projects ADD COLUMN audio_associates TEXT'); // JSON array
     db.run('ALTER TABLE projects ADD COLUMN video_designer TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN video_designer_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN video_designer_phone TEXT');
     db.run('ALTER TABLE projects ADD COLUMN video_associates TEXT'); // JSON array
   }
 
@@ -75,11 +81,21 @@ function runMigrations(db: Database): void {
   if (!projectsColumns.includes('electrician')) {
     console.log('Running migration: Adding production staff fields to projects');
     db.run('ALTER TABLE projects ADD COLUMN electrician TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN electrician_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN electrician_phone TEXT');
     db.run('ALTER TABLE projects ADD COLUMN audio_tech TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN audio_tech_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN audio_tech_phone TEXT');
     db.run('ALTER TABLE projects ADD COLUMN video_tech TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN video_tech_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN video_tech_phone TEXT');
     db.run('ALTER TABLE projects ADD COLUMN production_manager TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN production_manager_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN production_manager_phone TEXT');
     db.run('ALTER TABLE projects ADD COLUMN production_manager_company TEXT');
     db.run('ALTER TABLE projects ADD COLUMN general_manager TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN general_manager_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN general_manager_phone TEXT');
     db.run('ALTER TABLE projects ADD COLUMN general_manager_company TEXT');
   }
 

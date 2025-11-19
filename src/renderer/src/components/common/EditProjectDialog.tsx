@@ -16,16 +16,32 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
 
   // Design team
   const [lightingDesigner, setLightingDesigner] = useState('');
+  const [lightingDesignerEmail, setLightingDesignerEmail] = useState('');
+  const [lightingDesignerPhone, setLightingDesignerPhone] = useState('');
   const [audioDesigner, setAudioDesigner] = useState('');
+  const [audioDesignerEmail, setAudioDesignerEmail] = useState('');
+  const [audioDesignerPhone, setAudioDesignerPhone] = useState('');
   const [videoDesigner, setVideoDesigner] = useState('');
+  const [videoDesignerEmail, setVideoDesignerEmail] = useState('');
+  const [videoDesignerPhone, setVideoDesignerPhone] = useState('');
 
   // Production staff
   const [electrician, setElectrician] = useState('');
+  const [electricianEmail, setElectricianEmail] = useState('');
+  const [electricianPhone, setElectricianPhone] = useState('');
   const [audioTech, setAudioTech] = useState('');
+  const [audioTechEmail, setAudioTechEmail] = useState('');
+  const [audioTechPhone, setAudioTechPhone] = useState('');
   const [videoTech, setVideoTech] = useState('');
+  const [videoTechEmail, setVideoTechEmail] = useState('');
+  const [videoTechPhone, setVideoTechPhone] = useState('');
   const [productionManager, setProductionManager] = useState('');
+  const [productionManagerEmail, setProductionManagerEmail] = useState('');
+  const [productionManagerPhone, setProductionManagerPhone] = useState('');
   const [productionManagerCompany, setProductionManagerCompany] = useState('');
   const [generalManager, setGeneralManager] = useState('');
+  const [generalManagerEmail, setGeneralManagerEmail] = useState('');
+  const [generalManagerPhone, setGeneralManagerPhone] = useState('');
   const [generalManagerCompany, setGeneralManagerCompany] = useState('');
 
   // Show dates
@@ -47,15 +63,31 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
       setVenue(project.venue || '');
 
       setLightingDesigner(project.lighting_designer || '');
+      setLightingDesignerEmail(project.lighting_designer_email || '');
+      setLightingDesignerPhone(project.lighting_designer_phone || '');
       setAudioDesigner(project.audio_designer || '');
+      setAudioDesignerEmail(project.audio_designer_email || '');
+      setAudioDesignerPhone(project.audio_designer_phone || '');
       setVideoDesigner(project.video_designer || '');
+      setVideoDesignerEmail(project.video_designer_email || '');
+      setVideoDesignerPhone(project.video_designer_phone || '');
 
       setElectrician(project.electrician || '');
+      setElectricianEmail(project.electrician_email || '');
+      setElectricianPhone(project.electrician_phone || '');
       setAudioTech(project.audio_tech || '');
+      setAudioTechEmail(project.audio_tech_email || '');
+      setAudioTechPhone(project.audio_tech_phone || '');
       setVideoTech(project.video_tech || '');
+      setVideoTechEmail(project.video_tech_email || '');
+      setVideoTechPhone(project.video_tech_phone || '');
       setProductionManager(project.production_manager || '');
+      setProductionManagerEmail(project.production_manager_email || '');
+      setProductionManagerPhone(project.production_manager_phone || '');
       setProductionManagerCompany(project.production_manager_company || '');
       setGeneralManager(project.general_manager || '');
+      setGeneralManagerEmail(project.general_manager_email || '');
+      setGeneralManagerPhone(project.general_manager_phone || '');
       setGeneralManagerCompany(project.general_manager_company || '');
 
       setLoadIn(project.show_dates?.load_in || '');
@@ -90,15 +122,33 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
         description: description.trim() || null,
         logo_path: logoPath || null,
         venue: venue.trim() || null,
+        // Design team
         lighting_designer: lightingDesigner.trim() || null,
+        lighting_designer_email: lightingDesignerEmail.trim() || null,
+        lighting_designer_phone: lightingDesignerPhone.trim() || null,
         audio_designer: audioDesigner.trim() || null,
+        audio_designer_email: audioDesignerEmail.trim() || null,
+        audio_designer_phone: audioDesignerPhone.trim() || null,
         video_designer: videoDesigner.trim() || null,
+        video_designer_email: videoDesignerEmail.trim() || null,
+        video_designer_phone: videoDesignerPhone.trim() || null,
+        // Production staff
         electrician: electrician.trim() || null,
+        electrician_email: electricianEmail.trim() || null,
+        electrician_phone: electricianPhone.trim() || null,
         audio_tech: audioTech.trim() || null,
+        audio_tech_email: audioTechEmail.trim() || null,
+        audio_tech_phone: audioTechPhone.trim() || null,
         video_tech: videoTech.trim() || null,
+        video_tech_email: videoTechEmail.trim() || null,
+        video_tech_phone: videoTechPhone.trim() || null,
         production_manager: productionManager.trim() || null,
+        production_manager_email: productionManagerEmail.trim() || null,
+        production_manager_phone: productionManagerPhone.trim() || null,
         production_manager_company: productionManagerCompany.trim() || null,
         general_manager: generalManager.trim() || null,
+        general_manager_email: generalManagerEmail.trim() || null,
+        general_manager_phone: generalManagerPhone.trim() || null,
         general_manager_company: generalManagerCompany.trim() || null,
         show_dates: showDates,
         enabled_modules: enabledModules
@@ -214,46 +264,86 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-4 text-blue-400">Design Team</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label htmlFor="lighting-designer" className="block text-sm font-medium text-gray-300 mb-2">
-                  Lighting Designer
-                </label>
+            {/* Lighting Designer */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-400 mb-2">Lighting Designer</label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <input
-                  id="lighting-designer"
                   type="text"
                   value={lightingDesigner}
                   onChange={(e) => setLightingDesigner(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Name"
                 />
-              </div>
-
-              <div>
-                <label htmlFor="audio-designer" className="block text-sm font-medium text-gray-300 mb-2">
-                  Audio Designer
-                </label>
                 <input
-                  id="audio-designer"
+                  type="email"
+                  value={lightingDesignerEmail}
+                  onChange={(e) => setLightingDesignerEmail(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Email"
+                />
+                <input
+                  type="tel"
+                  value={lightingDesignerPhone}
+                  onChange={(e) => setLightingDesignerPhone(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Phone"
+                />
+              </div>
+            </div>
+
+            {/* Audio Designer */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-400 mb-2">Audio Designer</label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <input
                   type="text"
                   value={audioDesigner}
                   onChange={(e) => setAudioDesigner(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Name"
                 />
-              </div>
-
-              <div>
-                <label htmlFor="video-designer" className="block text-sm font-medium text-gray-300 mb-2">
-                  Video Designer
-                </label>
                 <input
-                  id="video-designer"
+                  type="email"
+                  value={audioDesignerEmail}
+                  onChange={(e) => setAudioDesignerEmail(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Email"
+                />
+                <input
+                  type="tel"
+                  value={audioDesignerPhone}
+                  onChange={(e) => setAudioDesignerPhone(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Phone"
+                />
+              </div>
+            </div>
+
+            {/* Video Designer */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-400 mb-2">Video Designer</label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <input
                   type="text"
                   value={videoDesigner}
                   onChange={(e) => setVideoDesigner(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Name"
+                />
+                <input
+                  type="email"
+                  value={videoDesignerEmail}
+                  onChange={(e) => setVideoDesignerEmail(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Email"
+                />
+                <input
+                  type="tel"
+                  value={videoDesignerPhone}
+                  onChange={(e) => setVideoDesignerPhone(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Phone"
                 />
               </div>
             </div>
@@ -263,90 +353,160 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-4 text-blue-400">Production Staff</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div>
-                <label htmlFor="electrician" className="block text-sm font-medium text-gray-300 mb-2">
-                  Electrician
-                </label>
+            {/* Electrician */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-400 mb-2">Electrician</label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <input
-                  id="electrician"
                   type="text"
                   value={electrician}
                   onChange={(e) => setElectrician(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Name"
                 />
-              </div>
-
-              <div>
-                <label htmlFor="audio-tech" className="block text-sm font-medium text-gray-300 mb-2">
-                  Audio Tech
-                </label>
                 <input
-                  id="audio-tech"
-                  type="text"
-                  value={audioTech}
-                  onChange={(e) => setAudioTech(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
-                  placeholder="Name"
+                  type="email"
+                  value={electricianEmail}
+                  onChange={(e) => setElectricianEmail(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Email"
                 />
-              </div>
-
-              <div>
-                <label htmlFor="video-tech" className="block text-sm font-medium text-gray-300 mb-2">
-                  Video Tech
-                </label>
                 <input
-                  id="video-tech"
-                  type="text"
-                  value={videoTech}
-                  onChange={(e) => setVideoTech(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
-                  placeholder="Name"
+                  type="tel"
+                  value={electricianPhone}
+                  onChange={(e) => setElectricianPhone(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Phone"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="production-manager" className="block text-sm font-medium text-gray-300 mb-2">
-                  Production Manager
-                </label>
+            {/* Audio Tech */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-400 mb-2">Audio Tech</label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <input
-                  id="production-manager"
+                  type="text"
+                  value={audioTech}
+                  onChange={(e) => setAudioTech(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Name"
+                />
+                <input
+                  type="email"
+                  value={audioTechEmail}
+                  onChange={(e) => setAudioTechEmail(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Email"
+                />
+                <input
+                  type="tel"
+                  value={audioTechPhone}
+                  onChange={(e) => setAudioTechPhone(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Phone"
+                />
+              </div>
+            </div>
+
+            {/* Video Tech */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-400 mb-2">Video Tech</label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <input
+                  type="text"
+                  value={videoTech}
+                  onChange={(e) => setVideoTech(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Name"
+                />
+                <input
+                  type="email"
+                  value={videoTechEmail}
+                  onChange={(e) => setVideoTechEmail(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Email"
+                />
+                <input
+                  type="tel"
+                  value={videoTechPhone}
+                  onChange={(e) => setVideoTechPhone(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Phone"
+                />
+              </div>
+            </div>
+
+            {/* Production Manager */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-400 mb-2">Production Manager</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                <input
                   type="text"
                   value={productionManager}
                   onChange={(e) => setProductionManager(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 mb-2"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Name"
                 />
                 <input
                   type="text"
                   value={productionManagerCompany}
                   onChange={(e) => setProductionManagerCompany(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Company (optional)"
                 />
               </div>
-
-              <div>
-                <label htmlFor="general-manager" className="block text-sm font-medium text-gray-300 mb-2">
-                  General Manager
-                </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <input
-                  id="general-manager"
+                  type="email"
+                  value={productionManagerEmail}
+                  onChange={(e) => setProductionManagerEmail(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Email"
+                />
+                <input
+                  type="tel"
+                  value={productionManagerPhone}
+                  onChange={(e) => setProductionManagerPhone(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Phone"
+                />
+              </div>
+            </div>
+
+            {/* General Manager */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-400 mb-2">General Manager</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                <input
                   type="text"
                   value={generalManager}
                   onChange={(e) => setGeneralManager(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 mb-2"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Name"
                 />
                 <input
                   type="text"
                   value={generalManagerCompany}
                   onChange={(e) => setGeneralManagerCompany(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Company (optional)"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <input
+                  type="email"
+                  value={generalManagerEmail}
+                  onChange={(e) => setGeneralManagerEmail(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Email"
+                />
+                <input
+                  type="tel"
+                  value={generalManagerPhone}
+                  onChange={(e) => setGeneralManagerPhone(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="Phone"
                 />
               </div>
             </div>

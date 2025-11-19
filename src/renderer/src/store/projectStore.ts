@@ -17,19 +17,35 @@ export interface Project {
 
   // Design Team
   lighting_designer?: string;
+  lighting_designer_email?: string;
+  lighting_designer_phone?: string;
   lighting_associates?: string[]; // JSON array
   audio_designer?: string;
+  audio_designer_email?: string;
+  audio_designer_phone?: string;
   audio_associates?: string[]; // JSON array
   video_designer?: string;
+  video_designer_email?: string;
+  video_designer_phone?: string;
   video_associates?: string[]; // JSON array
 
   // Production Staff
   electrician?: string;
+  electrician_email?: string;
+  electrician_phone?: string;
   audio_tech?: string;
+  audio_tech_email?: string;
+  audio_tech_phone?: string;
   video_tech?: string;
+  video_tech_email?: string;
+  video_tech_phone?: string;
   production_manager?: string;
+  production_manager_email?: string;
+  production_manager_phone?: string;
   production_manager_company?: string;
   general_manager?: string;
+  general_manager_email?: string;
+  general_manager_phone?: string;
   general_manager_company?: string;
 
   // Venue & Dates
