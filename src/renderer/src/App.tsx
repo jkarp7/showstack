@@ -5,6 +5,8 @@ import { ProjectPage } from './pages/ProjectPage';
 import { ModuleLanding } from './pages/ModuleLanding';
 import { Prep } from './pages/modules/Prep';
 import { EquipmentManager } from './pages/modules/EquipmentManager';
+import { Paperwork } from './pages/modules/Paperwork';
+import { LabelDesigner } from './pages/modules/LabelDesigner';
 import { Manager } from './pages/modules/Manager';
 
 export default function App() {
@@ -21,12 +23,16 @@ export default function App() {
         <Route path="/project/:projectId" element={<ProjectPage />} />
         <Route path="/project/:projectId/module/:moduleType" element={<ModuleLanding />} />
         <Route path="/project/:projectId/module/production/equipment" element={<EquipmentManager />} />
+        <Route path="/project/:projectId/module/production/paperwork" element={<Paperwork />} />
+        <Route path="/project/:projectId/module/production/labels" element={<LabelDesigner />} />
         <Route path="/project/:projectId/module/design/prep" element={<Prep />} />
         <Route path="/project/:projectId/module/manager" element={<Manager />} />
 
         {/* Direct module access (no project) */}
         <Route path="/module/:moduleType" element={<ModuleLanding />} />
         <Route path="/module/production/equipment" element={<EquipmentManager />} />
+        <Route path="/module/production/paperwork" element={<Paperwork />} />
+        <Route path="/module/production/labels" element={<LabelDesigner />} />
         <Route path="/module/design/prep" element={<Prep />} />
         <Route path="/module/manager" element={<Manager />} />
 

@@ -23,6 +23,20 @@ const MODULE_TOOLS: Record<ModuleType, ToolCard[]> = {
       isLocked: false
     },
     {
+      name: 'Paperwork',
+      description: 'Generate channel hookups, dimmer schedules, and production paperwork',
+      icon: '📋',
+      route: 'paperwork',
+      isLocked: false
+    },
+    {
+      name: 'Label Designer',
+      description: 'Design and export labels for cables, circuits, and equipment',
+      icon: '🏷️',
+      route: 'labels',
+      isLocked: false
+    },
+    {
       name: 'Plot Tool',
       description: 'Create and manage lighting plots and diagrams',
       icon: '📐',
