@@ -75,7 +75,7 @@ const REPORT_TEMPLATES: ReportTemplate[] = [
   {
     id: 'color-schedule',
     name: 'Color Schedule',
-    description: 'List fixtures grouped by color',
+    description: 'Calculate gel requirements by color and fixture size',
     icon: '🎨'
   },
   {
@@ -178,6 +178,61 @@ export function Paperwork() {
     loadCustomReports();
   }, [loadFixtures, currentProjectId]);
 
+  // Helper function to determine gel size and cuts per sheet based on fixture type
+  const getGelInfo = (fixtureType: string): { size: string; cutsPerSheet: number } => {
+    const type = fixtureType.toLowerCase();
+
+    // Par16 "Birdie" - 2-7/8x2-7/8 - 30 cuts
+    if (type.includes('par16') || type.includes('birdie')) {
+      return { size: '2-7/8" × 2-7/8"', cutsPerSheet: 30 };
+    }
+
+    // 3" Fresnel "Inky" - 3-1/4x3-1/4 - 30 cuts
+    if (type.includes('inky') || (type.includes('3') && type.includes('fresnel'))) {
+      return { size: '3-1/4" × 3-1/4"', cutsPerSheet: 30 };
+    }
+
+    // Source 4 5° / XDLT 10° - 14x14 - 1 cut
+    if ((type.includes('source') && type.includes('5')) ||
+        (type.includes('s4') && type.includes('5')) ||
+        (type.includes('xdlt') && type.includes('10'))) {
+      return { size: '14" × 14"', cutsPerSheet: 1 };
+    }
+
+    // XDLT 5° - 17-1/2x17-1/2 - 1 cut
+    if (type.includes('xdlt') && type.includes('5')) {
+      return { size: '17-1/2" × 17-1/2"', cutsPerSheet: 1 };
+    }
+
+    // Source 4 10° - 12x12 - 2 cuts
+    if ((type.includes('source') && type.includes('10')) ||
+        (type.includes('s4') && type.includes('10'))) {
+      return { size: '12" × 12"', cutsPerSheet: 2 };
+    }
+
+    // PAR 64 / 8" Fresnel / XDLT 14° + 19° - 10x10 - 4 cuts
+    if (type.includes('par') && type.includes('64') ||
+        (type.includes('8') && type.includes('fresnel')) ||
+        (type.includes('xdlt') && (type.includes('14') || type.includes('19')))) {
+      return { size: '10" × 10"', cutsPerSheet: 4 };
+    }
+
+    // Source 4 PAR / XDLT 26° + 36° + 50° + 70° - 7.5x7.5 - 6 cuts
+    if ((type.includes('source') || type.includes('s4') || type.includes('xdlt')) &&
+        (type.includes('par') || type.includes('26') || type.includes('36') ||
+         type.includes('50') || type.includes('70'))) {
+      return { size: '7-1/2" × 7-1/2"', cutsPerSheet: 6 };
+    }
+
+    // Source 4 (standard) - 6.25x6.25 - 9 cuts
+    if (type.includes('source') || type.includes('s4') || type.includes('eos')) {
+      return { size: '6-1/4" × 6-1/4"', cutsPerSheet: 9 };
+    }
+
+    // Default - assume medium fixture (6.25x6.25) - 9 cuts
+    return { size: '6-1/4" × 6-1/4" (estimated)', cutsPerSheet: 9 };
+  };
+
   // Sort fixtures by position for reports
   const sortedFixtures = useMemo(() => {
     return [...fixtures].sort((a, b) => {
@@ -272,22 +327,39 @@ export function Paperwork() {
       }));
   }, [fixtures]);
 
-  // Generate Color Schedule data (gel calculations)
+  // Generate Color Schedule data (gel calculations with real size-based calculations)
   const colorScheduleData = useMemo(() => {
+    // Group by color and gel size
     const grouped = fixtures.reduce((acc, fixture) => {
       const color = fixture.color || 'No Color';
-      if (!acc[color]) acc[color] = 0;
-      acc[color]++;
-      return acc;
-    }, {} as Record<string, number>);
+      if (color === 'No Color') return acc;
 
-    return Object.entries(grouped)
-      .filter(([color]) => color !== 'No Color') // Exclude fixtures with no color
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([color, cuts]) => ({
-        color,
-        cuts,
-        sheets: Math.ceil(cuts / 10) // Assuming ~10 cuts per 20"x24" gel sheet
+      const gelInfo = getGelInfo(fixture.type || '');
+      const key = `${color}|||${gelInfo.size}|||${gelInfo.cutsPerSheet}`;
+
+      if (!acc[key]) {
+        acc[key] = {
+          color,
+          size: gelInfo.size,
+          cutsPerSheet: gelInfo.cutsPerSheet,
+          count: 0
+        };
+      }
+      acc[key].count++;
+      return acc;
+    }, {} as Record<string, { color: string; size: string; cutsPerSheet: number; count: number }>);
+
+    return Object.values(grouped)
+      .sort((a, b) => {
+        // Sort by color first, then by size
+        if (a.color !== b.color) return a.color.localeCompare(b.color);
+        return a.size.localeCompare(b.size);
+      })
+      .map(item => ({
+        color: item.color,
+        size: item.size,
+        cuts: item.count,
+        sheets: Math.ceil(item.count / item.cutsPerSheet)
       }));
   }, [fixtures]);
 
@@ -562,6 +634,7 @@ export function Paperwork() {
               <thead className="bg-gray-700">
                 <tr>
                   <th className="px-3 py-2 text-left">Color</th>
+                  <th className="px-3 py-2 text-left">Gel Size</th>
                   <th className="px-3 py-2 text-left">Cuts Needed</th>
                   <th className="px-3 py-2 text-left">Sheets Required</th>
                 </tr>
@@ -570,6 +643,7 @@ export function Paperwork() {
                 {colorScheduleData.map((row, i) => (
                   <tr key={i} className="border-b border-gray-700 hover:bg-gray-750">
                     <td className="px-3 py-2 font-medium">{row.color}</td>
+                    <td className="px-3 py-2 text-gray-400">{row.size}</td>
                     <td className="px-3 py-2">{row.cuts}</td>
                     <td className="px-3 py-2">{row.sheets}</td>
                   </tr>
@@ -577,7 +651,7 @@ export function Paperwork() {
               </tbody>
             </table>
             <div className="mt-4 text-xs text-gray-400">
-              * Based on ~10 cuts per 20"×24" gel sheet
+              * Calculations based on actual color frame sizes for fixture types
             </div>
           </div>
         );
