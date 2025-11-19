@@ -19,7 +19,7 @@ const MODULE_TOOLS: Record<ModuleType, ToolCard[]> = {
       name: 'System Docs',
       description: 'Equipment Manager, Paperwork Generator, and Label Designer - Lightwright parity tool',
       icon: '📊',
-      route: '',
+      route: 'system-docs',
       isLocked: false
     },
     {
