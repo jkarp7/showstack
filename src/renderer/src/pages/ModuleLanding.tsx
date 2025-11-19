@@ -144,12 +144,23 @@ export function ModuleLanding() {
       {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700 p-6">
         <div className="max-w-7xl mx-auto">
-          <button
-            onClick={handleBackClick}
-            className="text-gray-400 hover:text-white mb-4 flex items-center gap-2"
-          >
-            ← Back to {projectId ? 'Project' : 'Home'}
-          </button>
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={handleBackClick}
+              className="text-gray-400 hover:text-white flex items-center gap-2"
+            >
+              ← Back to {projectId ? 'Project' : 'Home'}
+            </button>
+            {projectId && (
+              <button
+                onClick={() => navigate('/')}
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+                title="Home (Projects)"
+              >
+                🏠
+              </button>
+            )}
+          </div>
           <div>
             <h1 className="text-3xl font-bold">{moduleName}</h1>
             <p className="text-gray-400 text-sm mt-1">Choose a tool or open a recent file</p>

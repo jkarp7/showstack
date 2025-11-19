@@ -17,17 +17,32 @@ export function Production() {
     { id: 'labels' as ProductionTab, name: 'Labels', icon: '🏷️' }
   ];
 
+  const handleBackClick = () => {
+    if (routeProjectId) {
+      // Go back to project (list of modules)
+      navigate(`/project/${routeProjectId}`);
+    } else {
+      // Go to shell (list of projects)
+      navigate('/');
+    }
+  };
+
+  const handleHomeClick = () => {
+    // Always go to shell
+    navigate('/');
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white">
       {/* Tab Navigation */}
       <div className="bg-gray-800 border-b border-gray-700">
         <div className="flex items-center">
           <button
-            onClick={() => navigate('/modules')}
+            onClick={handleBackClick}
             className="px-4 py-3 bg-gray-700 hover:bg-gray-600 border-r border-gray-700 transition"
-            title="Back to Modules"
+            title={routeProjectId ? "Back to Project" : "Back to Projects"}
           >
-            ← Home
+            ← Back
           </button>
           <div className="flex flex-1">
             {tabs.map(tab => (
@@ -45,6 +60,13 @@ export function Production() {
               </button>
             ))}
           </div>
+          <button
+            onClick={handleHomeClick}
+            className="px-4 py-3 bg-gray-700 hover:bg-gray-600 border-l border-gray-700 transition text-xl"
+            title="Home (Projects)"
+          >
+            🏠
+          </button>
         </div>
       </div>
 
