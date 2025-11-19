@@ -46,6 +46,7 @@ interface ProjectStore {
   currentProject: Project | null;
   loadProjects: () => Promise<void>;
   createProject: (name: string, description?: string, logoPath?: string, enabledModules?: string[]) => Promise<Project>;
+  updateProject: (projectId: string, updates: Partial<Project>) => Promise<void>;
   deleteProject: (projectId: string) => Promise<void>;
   setCurrentProject: (projectId: string) => void;
 }
@@ -89,6 +90,29 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       return project;
     } catch (error) {
       console.error('Failed to create project:', error);
+      throw error;
+    }
+  },
+
+  updateProject: async (projectId: string, updates: Partial<Project>) => {
+    if (!hasAPI()) {
+      console.warn('API not available');
+      throw new Error('API not available');
+    }
+
+    try {
+      await window.api.projects.update(projectId, updates);
+      // Reload projects to get updated data
+      const allProjects = await window.api.projects.getAll();
+      const currentProject = get().currentProject;
+      set({
+        projects: allProjects,
+        currentProject: currentProject?.id === projectId
+          ? allProjects.find((p) => p.id === projectId) || null
+          : currentProject
+      });
+    } catch (error) {
+      console.error('Failed to update project:', error);
       throw error;
     }
   },
