@@ -114,23 +114,41 @@ export function ProjectPage() {
               {(project.lighting_designer || project.audio_designer || project.video_designer) && (
                 <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
                   <h2 className="text-xl font-bold mb-4 text-blue-400">Design Team</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {project.lighting_designer && (
-                      <div>
-                        <span className="text-gray-500">Lighting Designer:</span>{' '}
-                        <span className="text-gray-300">{project.lighting_designer}</span>
+                      <div className="space-y-1">
+                        <div className="text-gray-500 text-xs font-medium uppercase">Lighting Designer</div>
+                        <div className="text-gray-200 font-medium">{project.lighting_designer}</div>
+                        {project.lighting_designer_email && (
+                          <div className="text-gray-400 text-sm">{project.lighting_designer_email}</div>
+                        )}
+                        {project.lighting_designer_phone && (
+                          <div className="text-gray-400 text-sm">{project.lighting_designer_phone}</div>
+                        )}
                       </div>
                     )}
                     {project.audio_designer && (
-                      <div>
-                        <span className="text-gray-500">Audio Designer:</span>{' '}
-                        <span className="text-gray-300">{project.audio_designer}</span>
+                      <div className="space-y-1">
+                        <div className="text-gray-500 text-xs font-medium uppercase">Audio Designer</div>
+                        <div className="text-gray-200 font-medium">{project.audio_designer}</div>
+                        {project.audio_designer_email && (
+                          <div className="text-gray-400 text-sm">{project.audio_designer_email}</div>
+                        )}
+                        {project.audio_designer_phone && (
+                          <div className="text-gray-400 text-sm">{project.audio_designer_phone}</div>
+                        )}
                       </div>
                     )}
                     {project.video_designer && (
-                      <div>
-                        <span className="text-gray-500">Video Designer:</span>{' '}
-                        <span className="text-gray-300">{project.video_designer}</span>
+                      <div className="space-y-1">
+                        <div className="text-gray-500 text-xs font-medium uppercase">Video Designer</div>
+                        <div className="text-gray-200 font-medium">{project.video_designer}</div>
+                        {project.video_designer_email && (
+                          <div className="text-gray-400 text-sm">{project.video_designer_email}</div>
+                        )}
+                        {project.video_designer_phone && (
+                          <div className="text-gray-400 text-sm">{project.video_designer_phone}</div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -142,41 +160,79 @@ export function ProjectPage() {
                 project.production_manager || project.general_manager) && (
                 <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
                   <h2 className="text-xl font-bold mb-4 text-blue-400">Production Staff</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {project.electrician && (
-                      <div>
-                        <span className="text-gray-500">Electrician:</span>{' '}
-                        <span className="text-gray-300">{project.electrician}</span>
+                      <div className="space-y-1">
+                        <div className="text-gray-500 text-xs font-medium uppercase">Electrician</div>
+                        <div className="text-gray-200 font-medium">{project.electrician}</div>
+                        {project.electrician_email && (
+                          <div className="text-gray-400 text-sm">{project.electrician_email}</div>
+                        )}
+                        {project.electrician_phone && (
+                          <div className="text-gray-400 text-sm">{project.electrician_phone}</div>
+                        )}
                       </div>
                     )}
                     {project.audio_tech && (
-                      <div>
-                        <span className="text-gray-500">Audio Tech:</span>{' '}
-                        <span className="text-gray-300">{project.audio_tech}</span>
+                      <div className="space-y-1">
+                        <div className="text-gray-500 text-xs font-medium uppercase">Audio Tech</div>
+                        <div className="text-gray-200 font-medium">{project.audio_tech}</div>
+                        {project.audio_tech_email && (
+                          <div className="text-gray-400 text-sm">{project.audio_tech_email}</div>
+                        )}
+                        {project.audio_tech_phone && (
+                          <div className="text-gray-400 text-sm">{project.audio_tech_phone}</div>
+                        )}
                       </div>
                     )}
                     {project.video_tech && (
-                      <div>
-                        <span className="text-gray-500">Video Tech:</span>{' '}
-                        <span className="text-gray-300">{project.video_tech}</span>
+                      <div className="space-y-1">
+                        <div className="text-gray-500 text-xs font-medium uppercase">Video Tech</div>
+                        <div className="text-gray-200 font-medium">{project.video_tech}</div>
+                        {project.video_tech_email && (
+                          <div className="text-gray-400 text-sm">{project.video_tech_email}</div>
+                        )}
+                        {project.video_tech_phone && (
+                          <div className="text-gray-400 text-sm">{project.video_tech_phone}</div>
+                        )}
                       </div>
                     )}
                     {project.production_manager && (
-                      <div>
-                        <span className="text-gray-500">Production Manager:</span>{' '}
-                        <span className="text-gray-300">
+                      <div className="space-y-1">
+                        <div className="text-gray-500 text-xs font-medium uppercase">Production Manager</div>
+                        <div className="text-gray-200 font-medium">
                           {project.production_manager}
-                          {project.production_manager_company && ` (${project.production_manager_company})`}
-                        </span>
+                          {project.production_manager_company && (
+                            <span className="text-gray-400 text-sm block mt-0.5">
+                              {project.production_manager_company}
+                            </span>
+                          )}
+                        </div>
+                        {project.production_manager_email && (
+                          <div className="text-gray-400 text-sm">{project.production_manager_email}</div>
+                        )}
+                        {project.production_manager_phone && (
+                          <div className="text-gray-400 text-sm">{project.production_manager_phone}</div>
+                        )}
                       </div>
                     )}
                     {project.general_manager && (
-                      <div>
-                        <span className="text-gray-500">General Manager:</span>{' '}
-                        <span className="text-gray-300">
+                      <div className="space-y-1">
+                        <div className="text-gray-500 text-xs font-medium uppercase">General Manager</div>
+                        <div className="text-gray-200 font-medium">
                           {project.general_manager}
-                          {project.general_manager_company && ` (${project.general_manager_company})`}
-                        </span>
+                          {project.general_manager_company && (
+                            <span className="text-gray-400 text-sm block mt-0.5">
+                              {project.general_manager_company}
+                            </span>
+                          )}
+                        </div>
+                        {project.general_manager_email && (
+                          <div className="text-gray-400 text-sm">{project.general_manager_email}</div>
+                        )}
+                        {project.general_manager_phone && (
+                          <div className="text-gray-400 text-sm">{project.general_manager_phone}</div>
+                        )}
                       </div>
                     )}
                   </div>
