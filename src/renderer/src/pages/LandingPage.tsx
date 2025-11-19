@@ -5,6 +5,7 @@ import { NewProjectDialog } from '../components/common/NewProjectDialog';
 import { DeleteProjectDialog } from '../components/common/DeleteProjectDialog';
 import { useProjectStore, Project } from '../store/projectStore';
 import { useFileStore } from '../store/fileStore';
+import { migrateLegacyRecentFiles } from '../utils/recentFiles';
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -14,6 +15,8 @@ export function LandingPage() {
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
 
   useEffect(() => {
+    // Migrate legacy recent files on first load
+    migrateLegacyRecentFiles();
     loadProjects();
   }, [loadProjects]);
 

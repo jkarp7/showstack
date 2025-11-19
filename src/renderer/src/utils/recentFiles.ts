@@ -117,3 +117,33 @@ export function getModuleTypeFromPath(filePath: string): ModuleType | undefined 
   if (filePath.endsWith('.ssd')) return 'design';
   return undefined;
 }
+
+/**
+ * Migrate legacy recent files to module-specific storage
+ * This should be called once on app startup to migrate old data
+ */
+export async function migrateLegacyRecentFiles(): Promise<void> {
+  try {
+    // Check if legacy recent files exist
+    const legacyStored = localStorage.getItem(RECENT_FILES_KEY_PREFIX);
+    if (!legacyStored) {
+      return; // No legacy files to migrate
+    }
+
+    const legacyFiles = JSON.parse(legacyStored) as RecentFile[];
+
+    // Migrate each file to its module-specific storage
+    for (const file of legacyFiles) {
+      const moduleType = getModuleTypeFromPath(file.filePath);
+      if (moduleType) {
+        await addRecentFile(file.filePath, file.projectName, moduleType);
+      }
+    }
+
+    // Remove legacy storage after successful migration
+    localStorage.removeItem(RECENT_FILES_KEY_PREFIX);
+    console.log(`Migrated ${legacyFiles.length} legacy recent files to module-specific storage`);
+  } catch (error) {
+    console.error('Failed to migrate legacy recent files:', error);
+  }
+}
