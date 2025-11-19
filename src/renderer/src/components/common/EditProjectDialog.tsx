@@ -74,42 +74,35 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
-      // Build show dates object, filtering out empty values
-      const showDates: ShowDates = {};
-      if (loadIn) showDates.load_in = loadIn;
-      if (tech) showDates.tech = tech;
-      if (previews) showDates.previews = previews;
-      if (opening) showDates.opening = opening;
-      if (closing) showDates.closing = closing;
-      if (loadOut) showDates.load_out = loadOut;
-
-      // Build updates object, only including fields with values
-      const updates: Partial<Project> = {
-        name: name.trim(),
-        enabled_modules: enabledModules
+      // Build show dates object, including all fields (empty dates will be undefined to clear them)
+      const showDates: ShowDates = {
+        load_in: loadIn || undefined,
+        tech: tech || undefined,
+        previews: previews || undefined,
+        opening: opening || undefined,
+        closing: closing || undefined,
+        load_out: loadOut || undefined
       };
 
-      // Add optional fields only if they have values
-      if (description.trim()) updates.description = description.trim();
-      if (logoPath) updates.logo_path = logoPath;
-      if (venue.trim()) updates.venue = venue.trim();
-
-      if (lightingDesigner.trim()) updates.lighting_designer = lightingDesigner.trim();
-      if (audioDesigner.trim()) updates.audio_designer = audioDesigner.trim();
-      if (videoDesigner.trim()) updates.video_designer = videoDesigner.trim();
-
-      if (electrician.trim()) updates.electrician = electrician.trim();
-      if (audioTech.trim()) updates.audio_tech = audioTech.trim();
-      if (videoTech.trim()) updates.video_tech = videoTech.trim();
-      if (productionManager.trim()) updates.production_manager = productionManager.trim();
-      if (productionManagerCompany.trim()) updates.production_manager_company = productionManagerCompany.trim();
-      if (generalManager.trim()) updates.general_manager = generalManager.trim();
-      if (generalManagerCompany.trim()) updates.general_manager_company = generalManagerCompany.trim();
-
-      // Add show_dates if there are any dates
-      if (Object.keys(showDates).length > 0) {
-        updates.show_dates = showDates;
-      }
+      // Build updates object - always include all fields so we can clear them
+      const updates: Partial<Project> = {
+        name: name.trim(),
+        description: description.trim() || null,
+        logo_path: logoPath || null,
+        venue: venue.trim() || null,
+        lighting_designer: lightingDesigner.trim() || null,
+        audio_designer: audioDesigner.trim() || null,
+        video_designer: videoDesigner.trim() || null,
+        electrician: electrician.trim() || null,
+        audio_tech: audioTech.trim() || null,
+        video_tech: videoTech.trim() || null,
+        production_manager: productionManager.trim() || null,
+        production_manager_company: productionManagerCompany.trim() || null,
+        general_manager: generalManager.trim() || null,
+        general_manager_company: generalManagerCompany.trim() || null,
+        show_dates: showDates,
+        enabled_modules: enabledModules
+      };
 
       onSave(project.id, updates);
       onClose();

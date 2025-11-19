@@ -28,7 +28,19 @@ export function getAllProjects(): Project[] {
   return values.map(row => {
     const project: any = {};
     columns.forEach((col, idx) => {
-      project[col] = row[idx];
+      const value = row[idx];
+      // Parse JSON fields
+      if ((col === 'enabled_modules' || col === 'show_dates' ||
+           col === 'lighting_associates' || col === 'audio_associates' ||
+           col === 'video_associates') && value && typeof value === 'string') {
+        try {
+          project[col] = JSON.parse(value);
+        } catch {
+          project[col] = value;
+        }
+      } else {
+        project[col] = value;
+      }
     });
     return project as Project;
   });
@@ -47,7 +59,19 @@ export function getProjectById(id: string): Project | null {
 
   const project: any = {};
   columns.forEach((col, idx) => {
-    project[col] = values[idx];
+    const value = values[idx];
+    // Parse JSON fields
+    if ((col === 'enabled_modules' || col === 'show_dates' ||
+         col === 'lighting_associates' || col === 'audio_associates' ||
+         col === 'video_associates') && value && typeof value === 'string') {
+      try {
+        project[col] = JSON.parse(value);
+      } catch {
+        project[col] = value;
+      }
+    } else {
+      project[col] = value;
+    }
   });
 
   return project as Project;
@@ -90,7 +114,32 @@ export function updateProject(id: string, updates: Partial<Project>): Project {
   const db = getDatabase();
   const now = Date.now();
 
-  const allowedFields = ['name', 'description', 'venue', 'designer', 'logo_path', 'enabled_modules'];
+  const allowedFields = [
+    'name',
+    'description',
+    'venue',
+    'designer',
+    'logo_path',
+    'enabled_modules',
+    // Design team
+    'lighting_designer',
+    'lighting_associates',
+    'audio_designer',
+    'audio_associates',
+    'video_designer',
+    'video_associates',
+    // Production staff
+    'electrician',
+    'audio_tech',
+    'video_tech',
+    'production_manager',
+    'production_manager_company',
+    'general_manager',
+    'general_manager_company',
+    // Show dates
+    'show_dates'
+  ];
+
   const fields = Object.keys(updates).filter(k => allowedFields.includes(k));
 
   if (fields.length === 0) {
@@ -102,7 +151,18 @@ export function updateProject(id: string, updates: Partial<Project>): Project {
   }
 
   const setClause = fields.map(f => `${f} = ?`).join(', ');
-  const values = fields.map(f => updates[f as keyof Project]);
+  const values = fields.map(f => {
+    const value = updates[f as keyof Project];
+    // Convert show_dates object to JSON string
+    if (f === 'show_dates' && value && typeof value === 'object') {
+      return JSON.stringify(value);
+    }
+    // Convert enabled_modules array to JSON string
+    if (f === 'enabled_modules' && Array.isArray(value)) {
+      return JSON.stringify(value);
+    }
+    return value;
+  });
 
   db.run(
     `UPDATE projects SET ${setClause}, updated_at = ? WHERE id = ?`,
@@ -141,7 +201,19 @@ export function getCurrentProject(): Project {
 
   const project: any = {};
   columns.forEach((col, idx) => {
-    project[col] = values[idx];
+    const value = values[idx];
+    // Parse JSON fields
+    if ((col === 'enabled_modules' || col === 'show_dates' ||
+         col === 'lighting_associates' || col === 'audio_associates' ||
+         col === 'video_associates') && value && typeof value === 'string') {
+      try {
+        project[col] = JSON.parse(value);
+      } catch {
+        project[col] = value;
+      }
+    } else {
+      project[col] = value;
+    }
   });
 
   return project as Project;
