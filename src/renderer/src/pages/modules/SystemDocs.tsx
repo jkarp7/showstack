@@ -4,17 +4,17 @@ import { EquipmentManager } from './EquipmentManager';
 import { Paperwork } from './Paperwork';
 import { LabelDesigner } from './LabelDesigner';
 
-type ProductionTab = 'equipment' | 'paperwork' | 'labels';
+type SystemDocsTab = 'equipment' | 'paperwork' | 'labels';
 
-export function Production() {
+export function SystemDocs() {
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId?: string }>();
-  const [activeTab, setActiveTab] = useState<ProductionTab>('equipment');
+  const [activeTab, setActiveTab] = useState<SystemDocsTab>('equipment');
 
   const tabs = [
-    { id: 'equipment' as ProductionTab, name: 'Equipment Manager', icon: '📊' },
-    { id: 'paperwork' as ProductionTab, name: 'Paperwork', icon: '📋' },
-    { id: 'labels' as ProductionTab, name: 'Labels', icon: '🏷️' }
+    { id: 'equipment' as SystemDocsTab, name: 'Equipment Manager', icon: '📊' },
+    { id: 'paperwork' as SystemDocsTab, name: 'Paperwork', icon: '📋' },
+    { id: 'labels' as SystemDocsTab, name: 'Labels', icon: '🏷️' }
   ];
 
   const handleBackClick = () => {

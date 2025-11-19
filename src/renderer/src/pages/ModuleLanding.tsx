@@ -16,17 +16,17 @@ interface ToolCard {
 const MODULE_TOOLS: Record<ModuleType, ToolCard[]> = {
   production: [
     {
-      name: 'Production',
-      description: 'Equipment Manager, Paperwork Generator, and Label Designer - all in one tabbed interface',
+      name: 'System Docs',
+      description: 'Equipment Manager, Paperwork Generator, and Label Designer - Lightwright parity tool',
       icon: '📊',
       route: '',
       isLocked: false
     },
     {
-      name: 'Plot Tool',
-      description: 'Create and manage lighting plots and diagrams',
+      name: 'Blueprint',
+      description: 'System drawings and rack elevations - Omnigraffle parity tool (Coming Soon)',
       icon: '📐',
-      route: 'plot',
+      route: 'blueprint',
       isLocked: true
     }
   ],

@@ -4,7 +4,7 @@ import { LandingPage } from './pages/LandingPage';
 import { ProjectPage } from './pages/ProjectPage';
 import { ModuleLanding } from './pages/ModuleLanding';
 import { Prep } from './pages/modules/Prep';
-import { Production } from './pages/modules/Production';
+import { SystemDocs } from './pages/modules/SystemDocs';
 import { Manager } from './pages/modules/Manager';
 
 export default function App() {
@@ -20,13 +20,13 @@ export default function App() {
         {/* Project-based routes */}
         <Route path="/project/:projectId" element={<ProjectPage />} />
         <Route path="/project/:projectId/module/:moduleType" element={<ModuleLanding />} />
-        <Route path="/project/:projectId/module/production" element={<Production />} />
+        <Route path="/project/:projectId/module/production" element={<SystemDocs />} />
         <Route path="/project/:projectId/module/design/prep" element={<Prep />} />
         <Route path="/project/:projectId/module/manager" element={<Manager />} />
 
         {/* Direct module access (no project) */}
         <Route path="/module/:moduleType" element={<ModuleLanding />} />
-        <Route path="/module/production" element={<Production />} />
+        <Route path="/module/production" element={<SystemDocs />} />
         <Route path="/module/design/prep" element={<Prep />} />
         <Route path="/module/manager" element={<Manager />} />
 
