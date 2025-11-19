@@ -3,18 +3,31 @@ export interface RecentFile {
   projectName: string;
   lastOpened: number;
   created: number; // When first added to recent files
+  moduleType?: string; // production, manager, design
 }
 
-const RECENT_FILES_KEY = 'showstack_recentFiles';
+type ModuleType = 'production' | 'manager' | 'design';
+
+const RECENT_FILES_KEY_PREFIX = 'showstack_recentFiles';
 const MAX_RECENT_FILES = 10;
 
 /**
- * Add a file to the recent files list
+ * Get the storage key for a specific module type
  */
-export async function addRecentFile(filePath: string, projectName: string): Promise<void> {
+function getStorageKey(moduleType?: ModuleType): string {
+  if (!moduleType) {
+    return RECENT_FILES_KEY_PREFIX; // Legacy key
+  }
+  return `${RECENT_FILES_KEY_PREFIX}_${moduleType}`;
+}
+
+/**
+ * Add a file to the recent files list for a specific module
+ */
+export async function addRecentFile(filePath: string, projectName: string, moduleType?: ModuleType): Promise<void> {
   try {
-    // Get current recent files
-    const recentFiles = await getRecentFiles();
+    // Get current recent files for this module
+    const recentFiles = await getRecentFiles(moduleType);
 
     // Check if this file already exists
     const existingFile = recentFiles.find(f => f.filePath === filePath);
@@ -29,7 +42,8 @@ export async function addRecentFile(filePath: string, projectName: string): Prom
         filePath,
         projectName,
         lastOpened: Date.now(),
-        created // Keep original creation date if it existed
+        created, // Keep original creation date if it existed
+        moduleType
       },
       ...filtered
     ];
@@ -37,19 +51,21 @@ export async function addRecentFile(filePath: string, projectName: string): Prom
     // Keep only the most recent MAX_RECENT_FILES
     const trimmed = updated.slice(0, MAX_RECENT_FILES);
 
-    // Save to localStorage
-    localStorage.setItem(RECENT_FILES_KEY, JSON.stringify(trimmed));
+    // Save to localStorage with module-specific key
+    const storageKey = getStorageKey(moduleType);
+    localStorage.setItem(storageKey, JSON.stringify(trimmed));
   } catch (error) {
     console.error('Failed to add recent file:', error);
   }
 }
 
 /**
- * Get the list of recent files
+ * Get the list of recent files for a specific module
  */
-export async function getRecentFiles(): Promise<RecentFile[]> {
+export async function getRecentFiles(moduleType?: ModuleType): Promise<RecentFile[]> {
   try {
-    const stored = localStorage.getItem(RECENT_FILES_KEY);
+    const storageKey = getStorageKey(moduleType);
+    const stored = localStorage.getItem(storageKey);
     if (!stored) return [];
     return JSON.parse(stored) as RecentFile[];
   } catch (error) {
@@ -59,25 +75,45 @@ export async function getRecentFiles(): Promise<RecentFile[]> {
 }
 
 /**
- * Remove a file from the recent files list
+ * Remove a file from the recent files list for a specific module
  */
-export async function removeRecentFile(filePath: string): Promise<void> {
+export async function removeRecentFile(filePath: string, moduleType?: ModuleType): Promise<void> {
   try {
-    const recentFiles = await getRecentFiles();
+    const recentFiles = await getRecentFiles(moduleType);
     const filtered = recentFiles.filter(f => f.filePath !== filePath);
-    localStorage.setItem(RECENT_FILES_KEY, JSON.stringify(filtered));
+    const storageKey = getStorageKey(moduleType);
+    localStorage.setItem(storageKey, JSON.stringify(filtered));
   } catch (error) {
     console.error('Failed to remove recent file:', error);
   }
 }
 
 /**
- * Clear all recent files
+ * Clear all recent files for a specific module (or all if no module specified)
  */
-export async function clearRecentFiles(): Promise<void> {
+export async function clearRecentFiles(moduleType?: ModuleType): Promise<void> {
   try {
-    localStorage.removeItem(RECENT_FILES_KEY);
+    if (moduleType) {
+      const storageKey = getStorageKey(moduleType);
+      localStorage.removeItem(storageKey);
+    } else {
+      // Clear all module-specific keys
+      localStorage.removeItem(getStorageKey('production'));
+      localStorage.removeItem(getStorageKey('manager'));
+      localStorage.removeItem(getStorageKey('design'));
+      localStorage.removeItem(RECENT_FILES_KEY_PREFIX); // Legacy key
+    }
   } catch (error) {
     console.error('Failed to clear recent files:', error);
   }
+}
+
+/**
+ * Determine module type from file extension
+ */
+export function getModuleTypeFromPath(filePath: string): ModuleType | undefined {
+  if (filePath.endsWith('.ssp')) return 'production';
+  if (filePath.endsWith('.ssm')) return 'manager';
+  if (filePath.endsWith('.ssd')) return 'design';
+  return undefined;
 }

@@ -71,7 +71,8 @@ export function ModuleLanding() {
   }, [moduleType]);
 
   const loadRecentFiles = async () => {
-    const files = await getRecentFiles();
+    // Load recent files for this specific module type
+    const files = await getRecentFiles(module as any);
     setRecentFiles(files);
   };
 
@@ -92,18 +93,18 @@ export function ModuleLanding() {
         }
       } else {
         // File open failed, remove from recent files
-        await removeRecentFile(filePath);
+        await removeRecentFile(filePath, module as any);
         await loadRecentFiles();
       }
     } catch (error) {
       console.error('Failed to open recent file:', error);
-      await removeRecentFile(filePath);
+      await removeRecentFile(filePath, module as any);
       await loadRecentFiles();
     }
   };
 
   const handleRemoveRecentFile = async (filePath: string) => {
-    await removeRecentFile(filePath);
+    await removeRecentFile(filePath, module as any);
     await loadRecentFiles();
   };
 
