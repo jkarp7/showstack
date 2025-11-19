@@ -173,8 +173,10 @@ export function updateProject(id: string, updates: Partial<Project>): Project {
     if (f === 'show_dates' && value && typeof value === 'object') {
       return JSON.stringify(value);
     }
-    // Convert enabled_modules array to JSON string
-    if (f === 'enabled_modules' && Array.isArray(value)) {
+    // Convert arrays to JSON string (enabled_modules and all associates arrays)
+    if ((f === 'enabled_modules' || f === 'lighting_associates' ||
+         f === 'audio_associates' || f === 'video_associates') &&
+        Array.isArray(value)) {
       return JSON.stringify(value);
     }
     return value;
