@@ -50,10 +50,6 @@ function runMigrations(db: Database): void {
   const projectsTableInfo = db.exec("PRAGMA table_info(projects)");
   const projectsColumns = projectsTableInfo[0]?.values.map(row => row[1]) || [];
 
-  console.log('=== DATABASE MIGRATION DEBUG ===');
-  console.log('Existing columns in projects table:', projectsColumns);
-  console.log('================================');
-
   if (!projectsColumns.includes('logo_path')) {
     console.log('Running migration: Adding logo_path to projects');
     db.run('ALTER TABLE projects ADD COLUMN logo_path TEXT');
