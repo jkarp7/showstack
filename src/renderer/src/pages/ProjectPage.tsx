@@ -104,27 +104,141 @@ export function ProjectPage() {
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto p-8">
-          {/* Project Metadata Section - Placeholder for Phase 2 */}
-          {project.lighting_designer && (
-            <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-8">
-              <h2 className="text-xl font-bold mb-4">Project Team</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                {project.lighting_designer && (
-                  <div>
-                    <span className="text-gray-500">Lighting Designer:</span>{' '}
-                    <span className="text-gray-300">{project.lighting_designer}</span>
+          {/* Project Metadata Section */}
+          {(project.lighting_designer || project.audio_designer || project.video_designer ||
+            project.electrician || project.audio_tech || project.video_tech ||
+            project.production_manager || project.general_manager ||
+            project.show_dates) && (
+            <div className="mb-8 space-y-6">
+              {/* Design Team */}
+              {(project.lighting_designer || project.audio_designer || project.video_designer) && (
+                <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
+                  <h2 className="text-xl font-bold mb-4 text-blue-400">Design Team</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    {project.lighting_designer && (
+                      <div>
+                        <span className="text-gray-500">Lighting Designer:</span>{' '}
+                        <span className="text-gray-300">{project.lighting_designer}</span>
+                      </div>
+                    )}
+                    {project.audio_designer && (
+                      <div>
+                        <span className="text-gray-500">Audio Designer:</span>{' '}
+                        <span className="text-gray-300">{project.audio_designer}</span>
+                      </div>
+                    )}
+                    {project.video_designer && (
+                      <div>
+                        <span className="text-gray-500">Video Designer:</span>{' '}
+                        <span className="text-gray-300">{project.video_designer}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-                {project.production_manager && (
-                  <div>
-                    <span className="text-gray-500">Production Manager:</span>{' '}
-                    <span className="text-gray-300">
-                      {project.production_manager}
-                      {project.production_manager_company && ` (${project.production_manager_company})`}
-                    </span>
+                </div>
+              )}
+
+              {/* Production Staff */}
+              {(project.electrician || project.audio_tech || project.video_tech ||
+                project.production_manager || project.general_manager) && (
+                <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
+                  <h2 className="text-xl font-bold mb-4 text-blue-400">Production Staff</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    {project.electrician && (
+                      <div>
+                        <span className="text-gray-500">Electrician:</span>{' '}
+                        <span className="text-gray-300">{project.electrician}</span>
+                      </div>
+                    )}
+                    {project.audio_tech && (
+                      <div>
+                        <span className="text-gray-500">Audio Tech:</span>{' '}
+                        <span className="text-gray-300">{project.audio_tech}</span>
+                      </div>
+                    )}
+                    {project.video_tech && (
+                      <div>
+                        <span className="text-gray-500">Video Tech:</span>{' '}
+                        <span className="text-gray-300">{project.video_tech}</span>
+                      </div>
+                    )}
+                    {project.production_manager && (
+                      <div>
+                        <span className="text-gray-500">Production Manager:</span>{' '}
+                        <span className="text-gray-300">
+                          {project.production_manager}
+                          {project.production_manager_company && ` (${project.production_manager_company})`}
+                        </span>
+                      </div>
+                    )}
+                    {project.general_manager && (
+                      <div>
+                        <span className="text-gray-500">General Manager:</span>{' '}
+                        <span className="text-gray-300">
+                          {project.general_manager}
+                          {project.general_manager_company && ` (${project.general_manager_company})`}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
+
+              {/* Show Dates */}
+              {project.show_dates && Object.keys(project.show_dates).length > 0 && (
+                <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
+                  <h2 className="text-xl font-bold mb-4 text-blue-400">Show Dates</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-sm">
+                    {project.show_dates.load_in && (
+                      <div>
+                        <span className="text-gray-500 block">Load In</span>
+                        <span className="text-gray-300">
+                          {new Date(project.show_dates.load_in).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {project.show_dates.tech && (
+                      <div>
+                        <span className="text-gray-500 block">Tech</span>
+                        <span className="text-gray-300">
+                          {new Date(project.show_dates.tech).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {project.show_dates.previews && (
+                      <div>
+                        <span className="text-gray-500 block">Previews</span>
+                        <span className="text-gray-300">
+                          {new Date(project.show_dates.previews).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {project.show_dates.opening && (
+                      <div>
+                        <span className="text-gray-500 block">Opening</span>
+                        <span className="text-gray-300">
+                          {new Date(project.show_dates.opening).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {project.show_dates.closing && (
+                      <div>
+                        <span className="text-gray-500 block">Closing</span>
+                        <span className="text-gray-300">
+                          {new Date(project.show_dates.closing).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {project.show_dates.load_out && (
+                      <div>
+                        <span className="text-gray-500 block">Load Out</span>
+                        <span className="text-gray-300">
+                          {new Date(project.show_dates.load_out).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

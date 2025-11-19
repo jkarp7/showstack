@@ -74,33 +74,42 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
-      const showDates: ShowDates = {
-        load_in: loadIn || undefined,
-        tech: tech || undefined,
-        previews: previews || undefined,
-        opening: opening || undefined,
-        closing: closing || undefined,
-        load_out: loadOut || undefined
-      };
+      // Build show dates object, filtering out empty values
+      const showDates: ShowDates = {};
+      if (loadIn) showDates.load_in = loadIn;
+      if (tech) showDates.tech = tech;
+      if (previews) showDates.previews = previews;
+      if (opening) showDates.opening = opening;
+      if (closing) showDates.closing = closing;
+      if (loadOut) showDates.load_out = loadOut;
 
+      // Build updates object, only including fields with values
       const updates: Partial<Project> = {
         name: name.trim(),
-        description: description.trim() || undefined,
-        logo_path: logoPath || undefined,
-        venue: venue.trim() || undefined,
-        lighting_designer: lightingDesigner.trim() || undefined,
-        audio_designer: audioDesigner.trim() || undefined,
-        video_designer: videoDesigner.trim() || undefined,
-        electrician: electrician.trim() || undefined,
-        audio_tech: audioTech.trim() || undefined,
-        video_tech: videoTech.trim() || undefined,
-        production_manager: productionManager.trim() || undefined,
-        production_manager_company: productionManagerCompany.trim() || undefined,
-        general_manager: generalManager.trim() || undefined,
-        general_manager_company: generalManagerCompany.trim() || undefined,
-        show_dates: showDates,
         enabled_modules: enabledModules
       };
+
+      // Add optional fields only if they have values
+      if (description.trim()) updates.description = description.trim();
+      if (logoPath) updates.logo_path = logoPath;
+      if (venue.trim()) updates.venue = venue.trim();
+
+      if (lightingDesigner.trim()) updates.lighting_designer = lightingDesigner.trim();
+      if (audioDesigner.trim()) updates.audio_designer = audioDesigner.trim();
+      if (videoDesigner.trim()) updates.video_designer = videoDesigner.trim();
+
+      if (electrician.trim()) updates.electrician = electrician.trim();
+      if (audioTech.trim()) updates.audio_tech = audioTech.trim();
+      if (videoTech.trim()) updates.video_tech = videoTech.trim();
+      if (productionManager.trim()) updates.production_manager = productionManager.trim();
+      if (productionManagerCompany.trim()) updates.production_manager_company = productionManagerCompany.trim();
+      if (generalManager.trim()) updates.general_manager = generalManager.trim();
+      if (generalManagerCompany.trim()) updates.general_manager_company = generalManagerCompany.trim();
+
+      // Add show_dates if there are any dates
+      if (Object.keys(showDates).length > 0) {
+        updates.show_dates = showDates;
+      }
 
       onSave(project.id, updates);
       onClose();
