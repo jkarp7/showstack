@@ -13,7 +13,11 @@
     "dev:poc": "cd proof-of-concept && npm run dev",
     "build:poc": "cd proof-of-concept && npm run build",
     "test:poc": "cd proof-of-concept && npm test",
-    "install:all": "npm install && cd proof-of-concept && npm install"
+    "dev:manager:frontend": "cd manager/frontend && npm run dev",
+    "dev:manager:backend": "cd manager/backend && npm run dev",
+    "build:manager:frontend": "cd manager/frontend && npm run build",
+    "build:manager:backend": "cd manager/backend && npm run build",
+    "install:all": "npm install && cd proof-of-concept && npm install && cd ../manager/frontend && npm install && cd ../backend && npm install"
   },
   "keywords": [
     "lighting",
@@ -21,7 +25,11 @@
     "theater",
     "entertainment",
     "lightwright",
-    "electron"
+    "electron",
+    "tour-management",
+    "financial-tracking",
+    "plaid",
+    "budget-management"
   ],
   "engines": {
     "node": ">=20.0.0",
