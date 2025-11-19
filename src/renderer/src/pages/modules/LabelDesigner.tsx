@@ -171,7 +171,11 @@ const PRINTERS = {
   'avery-sheet': 'Avery Sheet Labels (Standard Printer)'
 };
 
-export function LabelDesigner() {
+interface LabelDesignerProps {
+  embedded?: boolean;
+}
+
+export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId?: string }>();
   const currentProjectId = routeProjectId || 'default-project';
@@ -717,17 +721,23 @@ export function LabelDesigner() {
       <header className="bg-gray-800 border-b border-gray-700 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/modules')}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
-            >
-              ← Home
-            </button>
+            {!embedded && (
+              <button
+                onClick={() => navigate('/modules')}
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              >
+                ← Home
+              </button>
+            )}
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold">{projectName}</h1>
-                <span className="text-gray-500">•</span>
-                <span className="text-lg text-gray-400">Label Designer</span>
+                {!embedded && (
+                  <>
+                    <span className="text-gray-500">•</span>
+                    <span className="text-lg text-gray-400">Label Designer</span>
+                  </>
+                )}
               </div>
               <p className="text-sm text-gray-400">
                 {currentDesign ? `Editing: ${currentDesign.name}` : 'Design professional labels'}

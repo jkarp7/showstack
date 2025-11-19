@@ -119,7 +119,11 @@ const DEFAULT_METADATA: MetadataOptions = {
   showGeneratedDate: true
 };
 
-export function Paperwork() {
+interface PaperworkProps {
+  embedded?: boolean;
+}
+
+export function Paperwork({ embedded = false }: PaperworkProps = {}) {
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId?: string }>();
   const currentProjectId = routeProjectId || 'default-project';
@@ -627,31 +631,70 @@ export function Paperwork() {
         );
 
       case 'color-schedule':
+        // Calculate totals by color
+        const colorTotals = colorScheduleData.reduce((acc, row) => {
+          if (!acc[row.color]) acc[row.color] = 0;
+          acc[row.color] += row.sheets;
+          return acc;
+        }, {} as Record<string, number>);
+
         return (
-          <div className="bg-gray-800 rounded-lg p-6">
-            <h3 className="text-lg font-semibold mb-4">Gel Requirements</h3>
-            <table className="w-full text-sm">
-              <thead className="bg-gray-700">
-                <tr>
-                  <th className="px-3 py-2 text-left">Color</th>
-                  <th className="px-3 py-2 text-left">Gel Size</th>
-                  <th className="px-3 py-2 text-left">Cuts Needed</th>
-                  <th className="px-3 py-2 text-left">Sheets Required</th>
-                </tr>
-              </thead>
-              <tbody>
-                {colorScheduleData.map((row, i) => (
-                  <tr key={i} className="border-b border-gray-700 hover:bg-gray-750">
-                    <td className="px-3 py-2 font-medium">{row.color}</td>
-                    <td className="px-3 py-2 text-gray-400">{row.size}</td>
-                    <td className="px-3 py-2">{row.cuts}</td>
-                    <td className="px-3 py-2">{row.sheets}</td>
+          <div className="space-y-6">
+            {/* Detailed breakdown by size */}
+            <div className="bg-gray-800 rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-4">Gel Requirements - Detailed Breakdown</h3>
+              <table className="w-full text-sm">
+                <thead className="bg-gray-700">
+                  <tr>
+                    <th className="px-3 py-2 text-left">Color</th>
+                    <th className="px-3 py-2 text-left">Gel Size</th>
+                    <th className="px-3 py-2 text-left">Cuts Needed</th>
+                    <th className="px-3 py-2 text-left">Sheets Required</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <div className="mt-4 text-xs text-gray-400">
-              * Calculations based on actual color frame sizes for fixture types
+                </thead>
+                <tbody>
+                  {colorScheduleData.map((row, i) => (
+                    <tr key={i} className="border-b border-gray-700 hover:bg-gray-750">
+                      <td className="px-3 py-2 font-medium">{row.color}</td>
+                      <td className="px-3 py-2 text-gray-400">{row.size}</td>
+                      <td className="px-3 py-2">{row.cuts}</td>
+                      <td className="px-3 py-2">{row.sheets}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="mt-4 text-xs text-gray-400">
+                * Calculations based on actual color frame sizes for fixture types
+              </div>
+            </div>
+
+            {/* Summary by color */}
+            <div className="bg-gray-800 rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-4">Total Sheets by Color</h3>
+              <table className="w-full text-sm">
+                <thead className="bg-gray-700">
+                  <tr>
+                    <th className="px-3 py-2 text-left">Color</th>
+                    <th className="px-3 py-2 text-left">Total Sheets</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(colorTotals)
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([color, sheets], i) => (
+                      <tr key={i} className="border-b border-gray-700 hover:bg-gray-750">
+                        <td className="px-3 py-2 font-medium">{color}</td>
+                        <td className="px-3 py-2 font-bold text-yellow-400">{sheets}</td>
+                      </tr>
+                    ))}
+                  <tr className="bg-gray-700 font-bold">
+                    <td className="px-3 py-2">TOTAL</td>
+                    <td className="px-3 py-2 text-yellow-400">
+                      {Object.values(colorTotals).reduce((sum, n) => sum + n, 0)} sheets
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         );
@@ -753,17 +796,23 @@ export function Paperwork() {
       <header className="bg-gray-800 border-b border-gray-700 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/modules')}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
-            >
-              ← Home
-            </button>
+            {!embedded && (
+              <button
+                onClick={() => navigate('/modules')}
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              >
+                ← Home
+              </button>
+            )}
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold">{projectName}</h1>
-                <span className="text-gray-500">•</span>
-                <span className="text-lg text-gray-400">Paperwork Generator</span>
+                {!embedded && (
+                  <>
+                    <span className="text-gray-500">•</span>
+                    <span className="text-lg text-gray-400">Paperwork Generator</span>
+                  </>
+                )}
               </div>
               <p className="text-sm text-gray-400">
                 {currentReport ? `${currentReport.name} • ` : ''}{fixtures.length} fixtures

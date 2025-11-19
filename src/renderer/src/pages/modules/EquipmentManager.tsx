@@ -14,7 +14,11 @@ import { useFileStore } from '../../store/fileStore';
 import { Fixture } from '../../types';
 import { DEFAULT_COLUMN_VISIBILITY, ColumnVisibility, DEFAULT_COLUMN_ORDER, ColumnKey } from '../../types/columns';
 
-export function EquipmentManager() {
+interface EquipmentManagerProps {
+  embedded?: boolean;
+}
+
+export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {}) {
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId?: string; moduleType?: string }>();
   const { fixtures, loadFixtures, addMultipleFixtures, deleteMultiple, updateFixture } = useFixtureStore();
@@ -444,17 +448,23 @@ export function EquipmentManager() {
       <header className="bg-gray-800 border-b border-gray-700 p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/modules')}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
-            >
-              ← Home
-            </button>
+            {!embedded && (
+              <button
+                onClick={() => navigate('/modules')}
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              >
+                ← Home
+              </button>
+            )}
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold">{projectName}</h1>
-                <span className="text-gray-500">•</span>
-                <span className="text-lg text-gray-400">ShowStack:Production</span>
+                {!embedded && (
+                  <>
+                    <span className="text-gray-500">•</span>
+                    <span className="text-lg text-gray-400">ShowStack:Production</span>
+                  </>
+                )}
               </div>
               <p className="text-sm text-gray-400">Fixture Schedule</p>
             </div>

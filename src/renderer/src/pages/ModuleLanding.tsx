@@ -16,24 +16,10 @@ interface ToolCard {
 const MODULE_TOOLS: Record<ModuleType, ToolCard[]> = {
   production: [
     {
-      name: 'Equipment Manager',
-      description: 'Manage lighting fixtures, channel hookup, and equipment details',
-      icon: '💡',
-      route: 'equipment',
-      isLocked: false
-    },
-    {
-      name: 'Paperwork',
-      description: 'Generate channel hookups, dimmer schedules, and production paperwork',
-      icon: '📋',
-      route: 'paperwork',
-      isLocked: false
-    },
-    {
-      name: 'Label Designer',
-      description: 'Design and export labels for cables, circuits, and equipment',
-      icon: '🏷️',
-      route: 'labels',
+      name: 'Production',
+      description: 'Equipment Manager, Paperwork Generator, and Label Designer - all in one tabbed interface',
+      icon: '📊',
+      route: '',
       isLocked: false
     },
     {
