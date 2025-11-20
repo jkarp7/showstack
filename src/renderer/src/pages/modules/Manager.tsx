@@ -1,7 +1,20 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export function Manager() {
   const navigate = useNavigate();
+  const { projectId: routeProjectId } = useParams<{ projectId?: string }>();
+
+  const handleBackClick = () => {
+    if (routeProjectId) {
+      navigate(`/project/${routeProjectId}`);
+    } else {
+      navigate('/');
+    }
+  };
+
+  const handleHomeClick = () => {
+    navigate('/');
+  };
 
   return (
     <div className="h-screen flex flex-col bg-gray-900 text-white">
@@ -9,13 +22,21 @@ export function Manager() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate('/modules')}
+              onClick={handleBackClick}
               className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              title={routeProjectId ? "Back to Project" : "Back to Projects"}
             >
-              ← Home
+              ← Back
             </button>
             <h1 className="text-2xl font-bold">ShowStack:Manager</h1>
           </div>
+          <button
+            onClick={handleHomeClick}
+            className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+            title="Home (Projects)"
+          >
+            🏠
+          </button>
         </div>
       </header>
 

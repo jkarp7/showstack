@@ -1,18 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ModuleCard } from '../components/common/ModuleCard';
-import { ProjectCard } from '../components/common/ProjectCard';
 import { NewProjectDialog } from '../components/common/NewProjectDialog';
 import { DeleteProjectDialog } from '../components/common/DeleteProjectDialog';
 import { useProjectStore, Project } from '../store/projectStore';
+import { useFileStore } from '../store/fileStore';
+import { migrateLegacyRecentFiles } from '../utils/recentFiles';
 
 export function LandingPage() {
   const navigate = useNavigate();
   const { projects, loadProjects, createProject, deleteProject, setCurrentProject } = useProjectStore();
+  const { openFileByPath } = useFileStore();
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
 
   useEffect(() => {
+    // Migrate legacy recent files on first load
+    migrateLegacyRecentFiles();
     loadProjects();
   }, [loadProjects]);
 
@@ -26,8 +30,7 @@ export function LandingPage() {
 
   const handleOpenProject = (projectId: string) => {
     setCurrentProject(projectId);
-    // Navigate to the last used module or default to production
-    navigate('/modules/production');
+    navigate(`/project/${projectId}`);
   };
 
   const handleDeleteProject = async () => {
@@ -71,42 +74,152 @@ export function LandingPage() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl font-bold mb-2">Projects</h2>
-                <p className="text-gray-400">Create or select a project to get started</p>
+                <p className="text-gray-400">Your ShowStack projects</p>
               </div>
-              <button
-                onClick={() => setIsNewProjectDialogOpen(true)}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition flex items-center gap-2"
-              >
-                <span className="text-xl">+</span>
-                New Project
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={async () => {
+                    const { openFile } = useFileStore.getState();
+                    await openFile(async () => {
+                      await loadProjects();
+                      navigate('/modules/production');
+                    });
+                  }}
+                  className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition flex items-center gap-2"
+                >
+                  Open File...
+                </button>
+                <button
+                  onClick={() => setIsNewProjectDialogOpen(true)}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition flex items-center gap-2"
+                >
+                  <span className="text-xl">+</span>
+                  New Project
+                </button>
+              </div>
             </div>
 
-            {/* Recent Projects Grid */}
+            {/* Projects Display */}
             {projects.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {projects.map((project) => (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                    onClick={() => handleOpenProject(project.id)}
-                    onDelete={() => setProjectToDelete(project)}
-                  />
-                ))}
-              </div>
+              projects.length <= 3 ? (
+                /* Tile view for 3 or fewer projects */
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {projects.map((project) => (
+                    <div
+                      key={project.id}
+                      className="bg-gray-800 rounded-lg border border-gray-700 p-6 hover:border-blue-500 transition cursor-pointer group"
+                      onClick={() => handleOpenProject(project.id)}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        {project.logo_path ? (
+                          <img
+                            src={project.logo_path}
+                            alt={project.name}
+                            className="w-16 h-16 rounded-lg object-cover bg-gray-700"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center text-3xl">
+                            📁
+                          </div>
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setProjectToDelete(project);
+                          }}
+                          className="text-gray-500 hover:text-red-500 transition opacity-0 group-hover:opacity-100"
+                          title="Delete project"
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2 truncate">{project.name}</h3>
+                      {project.description && (
+                        <p className="text-sm text-gray-400 mb-2 line-clamp-2">{project.description}</p>
+                      )}
+                      <p className="text-xs text-gray-500">
+                        Created: {new Date(project.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* Table view for more than 3 projects */
+                <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-gray-750 border-b border-gray-700">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                          Project Name
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                          Description
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                          Date Created
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-700">
+                      {projects.map((project) => (
+                        <tr
+                          key={project.id}
+                          className="hover:bg-gray-750 cursor-pointer transition"
+                          onClick={() => handleOpenProject(project.id)}
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              {project.logo_path ? (
+                                <img
+                                  src={project.logo_path}
+                                  alt={project.name}
+                                  className="w-10 h-10 rounded-lg object-cover bg-gray-700 mr-3"
+                                />
+                              ) : (
+                                <span className="text-2xl mr-3">📁</span>
+                              )}
+                              <span className="font-medium">{project.name}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-400 max-w-xs truncate">
+                            {project.description || '-'}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-400 whitespace-nowrap">
+                            {new Date(project.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setProjectToDelete(project);
+                              }}
+                              className="text-gray-500 hover:text-red-500 transition text-sm"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )
             ) : (
               <div className="bg-gray-800 rounded-lg border border-gray-700 p-12 text-center">
                 <div className="text-6xl mb-4">📂</div>
                 <p className="text-gray-400 text-lg mb-4">No projects yet</p>
                 <p className="text-gray-500 text-sm mb-6">
-                  Create your first project to start working with ShowStack
+                  Create a new project to get started with ShowStack
                 </p>
                 <button
                   onClick={() => setIsNewProjectDialogOpen(true)}
                   className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition inline-flex items-center gap-2"
                 >
                   <span className="text-xl">+</span>
-                  Create Your First Project
+                  Create New Project
                 </button>
               </div>
             )}

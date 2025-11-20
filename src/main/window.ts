@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, dialog } from 'electron';
 import { join } from 'path';
 
 export function createWindow(): BrowserWindow {
@@ -36,6 +36,47 @@ export function createWindow(): BrowserWindow {
     console.log('Loading from file:', join(__dirname, '../renderer/index.html'));
     window.loadFile(join(__dirname, '../renderer/index.html'));
   }
+
+  // Handle window close event - check for unsaved changes
+  window.on('close', async (event) => {
+    // Get isDirty state from renderer via executeJavaScript
+    try {
+      const isDirty = await window.webContents.executeJavaScript(
+        'window.api && window.__fileStore ? window.__fileStore.isDirty : false'
+      );
+
+      if (isDirty) {
+        event.preventDefault();
+
+        const response = await dialog.showMessageBox(window, {
+          type: 'question',
+          buttons: ['Save', "Don't Save", 'Cancel'],
+          defaultId: 0,
+          cancelId: 2,
+          title: 'Unsaved Changes',
+          message: 'Do you want to save changes before closing?',
+          detail: 'Your changes will be lost if you don\'t save them.'
+        });
+
+        if (response.response === 0) {
+          // Save
+          const saved = await window.webContents.executeJavaScript(
+            'window.api && window.__fileStore ? window.__fileStore.saveFile() : false'
+          );
+          if (saved) {
+            window.destroy();
+          }
+        } else if (response.response === 1) {
+          // Don't Save
+          window.destroy();
+        }
+        // Cancel - do nothing, window stays open
+      }
+    } catch (error) {
+      console.error('Error checking for unsaved changes:', error);
+      // If there's an error, allow closing
+    }
+  });
 
   return window;
 }

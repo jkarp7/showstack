@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { VirtualDataGrid } from '../../components/fixture/VirtualDataGrid';
 import { Toolbar } from '../../components/fixture/Toolbar';
 import { FilterBar } from '../../components/fixture/FilterBar';
@@ -7,17 +7,31 @@ import { SortBar } from '../../components/fixture/SortBar';
 import { AddFixtureDialog } from '../../components/fixture/AddFixtureDialog';
 import { BulkEditDialog } from '../../components/fixture/BulkEditDialog';
 import { UserColumnSettingsDialog } from '../../components/fixture/UserColumnSettingsDialog';
+import { FileMenu } from '../../components/common/FileMenu';
+import { UnsavedChangesDialog, useUnsavedChangesDialog } from '../../components/common/UnsavedChangesDialog';
 import { useFixtureStore } from '../../store/fixtureStore';
+import { useFileStore } from '../../store/fileStore';
 import { Fixture } from '../../types';
 import { DEFAULT_COLUMN_VISIBILITY, ColumnVisibility, DEFAULT_COLUMN_ORDER, ColumnKey } from '../../types/columns';
 
-export function Production() {
+interface EquipmentManagerProps {
+  embedded?: boolean;
+}
+
+export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {}) {
   const navigate = useNavigate();
+  const { projectId: routeProjectId } = useParams<{ projectId?: string; moduleType?: string }>();
   const { fixtures, loadFixtures, addMultipleFixtures, deleteMultiple, updateFixture } = useFixtureStore();
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [isAddFixtureDialogOpen, setIsAddFixtureDialogOpen] = useState(false);
   const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = useState(false);
   const [isUserColumnSettingsOpen, setIsUserColumnSettingsOpen] = useState(false);
+
+  // Get current project ID - use route param or fall back to default-project
+  const currentProjectId = routeProjectId || 'default-project';
+
+  // Unsaved changes dialog
+  const unsavedChangesDialog = useUnsavedChangesDialog();
 
   // User column definitions
   const [userColumnDefinitions, setUserColumnDefinitions] = useState<Record<string, string>>({});
@@ -47,6 +61,25 @@ export function Production() {
   // Column widths state (in pixels, null means use default from config)
   const [columnWidths, setColumnWidths] = useState<Partial<Record<ColumnKey, number>>>({});
 
+  // Function to reload all data (for file operations)
+  const handleDataReload = async () => {
+    await loadFixtures();
+
+    if (!window.api) return;
+
+    try {
+      // Load project name
+      if (window.api.projects) {
+        const project = await window.api.projects.getById(currentProjectId);
+        if (project?.name) {
+          setProjectName(project.name);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to reload project data:', error);
+    }
+  };
+
   // Load fixtures and preferences from database on mount
   useEffect(() => {
     loadFixtures();
@@ -56,11 +89,9 @@ export function Production() {
       if (!window.api) return;
 
       try {
-        const projectId = 'default-project'; // TODO: Get from current project
-
         // Load project name
         if (window.api.projects) {
-          const project = await window.api.projects.getById(projectId);
+          const project = await window.api.projects.getById(currentProjectId);
           if (project?.name) {
             setProjectName(project.name);
           }
@@ -68,22 +99,22 @@ export function Production() {
 
         // Load column preferences
         if (window.api.preferences) {
-          const savedVisibility = await window.api.preferences.get(projectId, 'columnVisibility');
+          const savedVisibility = await window.api.preferences.get(currentProjectId, 'columnVisibility');
           if (savedVisibility) {
             setColumnVisibility(savedVisibility);
           }
 
-          const savedOrder = await window.api.preferences.get(projectId, 'columnOrder');
+          const savedOrder = await window.api.preferences.get(currentProjectId, 'columnOrder');
           if (savedOrder) {
             setColumnOrder(savedOrder);
           }
 
-          const savedWidths = await window.api.preferences.get(projectId, 'columnWidths');
+          const savedWidths = await window.api.preferences.get(currentProjectId, 'columnWidths');
           if (savedWidths) {
             setColumnWidths(savedWidths);
           }
 
-          const savedUserColumns = await window.api.preferences.get(projectId, 'userColumnDefinitions');
+          const savedUserColumns = await window.api.preferences.get(currentProjectId, 'userColumnDefinitions');
           if (savedUserColumns) {
             setUserColumnDefinitions(savedUserColumns);
           }
@@ -94,116 +125,46 @@ export function Production() {
     };
 
     loadProjectAndPreferences();
-  }, [loadFixtures]);
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-      const modKey = isMac ? e.metaKey : e.ctrlKey;
-
-      // Cmd/Ctrl + N - New Fixture
-      if (modKey && e.key === 'n') {
-        e.preventDefault();
-        setIsAddFixtureDialogOpen(true);
-      }
-
-      // Cmd/Ctrl + S - Save (placeholder for future file operations)
-      if (modKey && e.key === 's') {
-        e.preventDefault();
-        // TODO: Implement save functionality
-        console.log('Save shortcut triggered (not yet implemented)');
-      }
-
-      // Delete/Backspace - Delete selected fixtures
-      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedRows.size > 0) {
-        // Only delete if not typing in an input field
-        const target = e.target as HTMLElement;
-        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
-          e.preventDefault();
-          if (confirm(`Delete ${selectedRows.size} selected fixture(s)?`)) {
-            deleteMultiple(Array.from(selectedRows));
-            setSelectedRows(new Set());
-          }
-        }
-      }
-
-      // Escape - Clear selection or close dialogs
-      if (e.key === 'Escape') {
-        if (isAddFixtureDialogOpen) {
-          setIsAddFixtureDialogOpen(false);
-        } else if (isBulkEditDialogOpen) {
-          setIsBulkEditDialogOpen(false);
-        } else if (isUserColumnSettingsOpen) {
-          setIsUserColumnSettingsOpen(false);
-        } else if (selectedRows.size > 0) {
-          setSelectedRows(new Set());
-        }
-      }
-
-      // Cmd/Ctrl + A - Select all visible fixtures
-      if (modKey && e.key === 'a') {
-        const target = e.target as HTMLElement;
-        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
-          e.preventDefault();
-          const allIds = new Set(processedFixtures.map(f => f.id));
-          setSelectedRows(allIds);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [
-    isAddFixtureDialogOpen,
-    isBulkEditDialogOpen,
-    isUserColumnSettingsOpen,
-    selectedRows,
-    processedFixtures,
-    deleteMultiple
-  ]);
+  }, [loadFixtures, currentProjectId]);
 
   // Save column visibility when it changes
   useEffect(() => {
     const savePreference = async () => {
       if (!window.api?.preferences) return;
       try {
-        const projectId = 'default-project'; // TODO: Get from current project
-        await window.api.preferences.set(projectId, 'columnVisibility', columnVisibility);
+        await window.api.preferences.set(currentProjectId, 'columnVisibility', columnVisibility);
       } catch (error) {
         console.error('Failed to save column visibility:', error);
       }
     };
     savePreference();
-  }, [columnVisibility]);
+  }, [columnVisibility, currentProjectId]);
 
   // Save column order when it changes
   useEffect(() => {
     const savePreference = async () => {
       if (!window.api?.preferences) return;
       try {
-        const projectId = 'default-project'; // TODO: Get from current project
-        await window.api.preferences.set(projectId, 'columnOrder', columnOrder);
+        await window.api.preferences.set(currentProjectId, 'columnOrder', columnOrder);
       } catch (error) {
         console.error('Failed to save column order:', error);
       }
     };
     savePreference();
-  }, [columnOrder]);
+  }, [columnOrder, currentProjectId]);
 
   // Save column widths when they change
   useEffect(() => {
     const savePreference = async () => {
       if (!window.api?.preferences) return;
       try {
-        const projectId = 'default-project'; // TODO: Get from current project
-        await window.api.preferences.set(projectId, 'columnWidths', columnWidths);
+        await window.api.preferences.set(currentProjectId, 'columnWidths', columnWidths);
       } catch (error) {
         console.error('Failed to save column widths:', error);
       }
     };
     savePreference();
-  }, [columnWidths]);
+  }, [columnWidths, currentProjectId]);
 
   // Sort handler - supports multi-column sort with Shift key
   const handleSort = (field: string, addToExisting: boolean = false) => {
@@ -268,8 +229,7 @@ export function Production() {
     // Save to preferences
     if (!window.api?.preferences) return;
     try {
-      const projectId = 'default-project';
-      await window.api.preferences.set(projectId, 'userColumnDefinitions', definitions);
+      await window.api.preferences.set(currentProjectId, 'userColumnDefinitions', definitions);
     } catch (error) {
       console.error('Failed to save user column definitions:', error);
     }
@@ -419,23 +379,92 @@ export function Production() {
     return result;
   }, [fixtures, searchQuery, locationFilter, typeFilter, statusFilter, sortConfigs]);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const modKey = isMac ? e.metaKey : e.ctrlKey;
+
+      // Cmd/Ctrl + N - New Fixture
+      if (modKey && e.key === 'n') {
+        e.preventDefault();
+        setIsAddFixtureDialogOpen(true);
+      }
+
+      // Cmd/Ctrl + S - Save (handled by FileMenu component now)
+      // Removed to avoid conflicts with FileMenu keyboard shortcuts
+
+      // Delete/Backspace - Delete selected fixtures
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedRows.size > 0) {
+        // Only delete if not typing in an input field
+        const target = e.target as HTMLElement;
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          if (confirm(`Delete ${selectedRows.size} selected fixture(s)?`)) {
+            deleteMultiple(Array.from(selectedRows));
+            setSelectedRows(new Set());
+          }
+        }
+      }
+
+      // Escape - Clear selection or close dialogs
+      if (e.key === 'Escape') {
+        if (isAddFixtureDialogOpen) {
+          setIsAddFixtureDialogOpen(false);
+        } else if (isBulkEditDialogOpen) {
+          setIsBulkEditDialogOpen(false);
+        } else if (isUserColumnSettingsOpen) {
+          setIsUserColumnSettingsOpen(false);
+        } else if (selectedRows.size > 0) {
+          setSelectedRows(new Set());
+        }
+      }
+
+      // Cmd/Ctrl + A - Select all visible fixtures
+      if (modKey && e.key === 'a') {
+        const target = e.target as HTMLElement;
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          const allIds = new Set(processedFixtures.map(f => f.id));
+          setSelectedRows(allIds);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    isAddFixtureDialogOpen,
+    isBulkEditDialogOpen,
+    isUserColumnSettingsOpen,
+    selectedRows,
+    processedFixtures,
+    deleteMultiple
+  ]);
+
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white">
       {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700 p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/modules')}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
-            >
-              ← Home
-            </button>
+            {!embedded && (
+              <button
+                onClick={() => navigate('/modules')}
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              >
+                ← Home
+              </button>
+            )}
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold">{projectName}</h1>
-                <span className="text-gray-500">•</span>
-                <span className="text-lg text-gray-400">ShowStack:Production</span>
+                {!embedded && (
+                  <>
+                    <span className="text-gray-500">•</span>
+                    <span className="text-lg text-gray-400">ShowStack:Production</span>
+                  </>
+                )}
               </div>
               <p className="text-sm text-gray-400">Fixture Schedule</p>
             </div>
@@ -448,6 +477,9 @@ export function Production() {
             <span className="text-sm text-gray-400">{selectedRows.size} selected</span>
           </div>
         </div>
+
+        {/* File Menu */}
+        <FileMenu onDataReload={handleDataReload} projectName={projectName} />
       </header>
 
       {/* Toolbar */}
@@ -534,6 +566,9 @@ export function Production() {
         onSave={handleSaveUserColumnDefinitions}
         initialDefinitions={userColumnDefinitions}
       />
+
+      {/* Unsaved Changes Dialog */}
+      <UnsavedChangesDialog {...unsavedChangesDialog} />
     </div>
   );
 }

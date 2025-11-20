@@ -17,10 +17,8 @@ export async function initDatabase(): Promise<void> {
   if (existsSync(dbPath)) {
     const buffer = readFileSync(dbPath);
     db = new SQL.Database(buffer);
-    console.log('✅ Loaded existing database:', dbPath);
   } else {
     db = new SQL.Database();
-    console.log('✅ Created new database:', dbPath);
   }
 
   // Enable foreign keys
@@ -41,13 +39,10 @@ export async function initDatabase(): Promise<void> {
       'INSERT INTO projects (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)',
       ['default-project', 'Untitled Project', Date.now(), Date.now()]
     );
-    console.log('✅ Created default project');
   }
 
   // Save database to disk
   saveDatabase();
-
-  console.log('✅ Database initialized:', dbPath);
 }
 
 function runMigrations(db: Database): void {
@@ -63,6 +58,66 @@ function runMigrations(db: Database): void {
   if (!projectsColumns.includes('enabled_modules')) {
     console.log('Running migration: Adding enabled_modules to projects');
     db.run('ALTER TABLE projects ADD COLUMN enabled_modules TEXT');
+  }
+
+  // Design team fields - name columns
+  if (!projectsColumns.includes('lighting_designer')) {
+    console.log('Running migration: Adding design team name fields to projects');
+    db.run('ALTER TABLE projects ADD COLUMN lighting_designer TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN lighting_associates TEXT'); // JSON array
+    db.run('ALTER TABLE projects ADD COLUMN audio_designer TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN audio_associates TEXT'); // JSON array
+    db.run('ALTER TABLE projects ADD COLUMN video_designer TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN video_associates TEXT'); // JSON array
+  }
+
+  // Design team fields - contact info
+  if (!projectsColumns.includes('lighting_designer_email')) {
+    console.log('Running migration: Adding design team contact fields to projects');
+    db.run('ALTER TABLE projects ADD COLUMN lighting_designer_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN lighting_designer_phone TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN audio_designer_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN audio_designer_phone TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN video_designer_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN video_designer_phone TEXT');
+  }
+
+  // Production staff fields - name columns
+  if (!projectsColumns.includes('electrician')) {
+    console.log('Running migration: Adding production staff name fields to projects');
+    db.run('ALTER TABLE projects ADD COLUMN electrician TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN audio_tech TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN video_tech TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN production_manager TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN production_manager_company TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN general_manager TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN general_manager_company TEXT');
+  }
+
+  // Production staff fields - contact info
+  if (!projectsColumns.includes('electrician_email')) {
+    console.log('Running migration: Adding production staff contact fields to projects');
+    db.run('ALTER TABLE projects ADD COLUMN electrician_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN electrician_phone TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN audio_tech_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN audio_tech_phone TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN video_tech_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN video_tech_phone TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN production_manager_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN production_manager_phone TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN general_manager_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN general_manager_phone TEXT');
+  }
+
+  // Venue and dates - separate checks
+  if (!projectsColumns.includes('venue')) {
+    console.log('Running migration: Adding venue to projects');
+    db.run('ALTER TABLE projects ADD COLUMN venue TEXT');
+  }
+
+  if (!projectsColumns.includes('show_dates')) {
+    console.log('Running migration: Adding show_dates to projects');
+    db.run('ALTER TABLE projects ADD COLUMN show_dates TEXT'); // JSON object
   }
 
   // Fixtures table migrations - add LightWright parity columns
@@ -110,4 +165,27 @@ export function closeDatabase(): void {
     db.close();
     db = null;
   }
+}
+
+export async function reloadDatabase(): Promise<void> {
+  // Close current database
+  if (db) {
+    db.close();
+    db = null;
+  }
+
+  // Reload from disk
+  if (!dbPath) {
+    throw new Error('Database path not initialized');
+  }
+
+  const SQL = await initSqlJs();
+  const buffer = readFileSync(dbPath);
+  db = new SQL.Database(buffer);
+
+  // Enable foreign keys
+  db.run('PRAGMA foreign_keys = ON');
+
+  // Run migrations to ensure all tables exist
+  runMigrations(db);
 }

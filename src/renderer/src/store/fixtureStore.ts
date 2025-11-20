@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { Fixture, FixtureStore } from '../types';
+import { useFileStore } from './fileStore';
 
 // Type guard for window.api
 const hasAPI = (): boolean => {
@@ -35,6 +36,9 @@ export const useFixtureStore = create<FixtureStore>((set, get) => ({
       set((state) => ({
         fixtures: [...state.fixtures, newFixture],
       }));
+
+      // Mark file as dirty
+      useFileStore.getState().setDirty(true);
     } catch (error) {
       console.error('Failed to add fixture:', error);
     }
@@ -55,6 +59,9 @@ export const useFixtureStore = create<FixtureStore>((set, get) => ({
       set((state) => ({
         fixtures: [...state.fixtures, ...newFixtures],
       }));
+
+      // Mark file as dirty
+      useFileStore.getState().setDirty(true);
     } catch (error) {
       console.error('Failed to add fixtures:', error);
     }
@@ -73,6 +80,9 @@ export const useFixtureStore = create<FixtureStore>((set, get) => ({
           f.id === id ? updatedFixture : f
         ),
       }));
+
+      // Mark file as dirty
+      useFileStore.getState().setDirty(true);
     } catch (error) {
       console.error('Failed to update fixture:', error);
     }
@@ -89,6 +99,9 @@ export const useFixtureStore = create<FixtureStore>((set, get) => ({
       set((state) => ({
         fixtures: state.fixtures.filter((f) => f.id !== id),
       }));
+
+      // Mark file as dirty
+      useFileStore.getState().setDirty(true);
     } catch (error) {
       console.error('Failed to delete fixture:', error);
     }
@@ -105,6 +118,9 @@ export const useFixtureStore = create<FixtureStore>((set, get) => ({
       set((state) => ({
         fixtures: state.fixtures.filter((f) => !ids.includes(f.id)),
       }));
+
+      // Mark file as dirty
+      useFileStore.getState().setDirty(true);
     } catch (error) {
       console.error('Failed to delete multiple fixtures:', error);
     }

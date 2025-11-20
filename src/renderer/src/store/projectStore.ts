@@ -1,13 +1,58 @@
 import { create } from 'zustand';
 
+export interface ShowDates {
+  load_in?: string;
+  tech?: string;
+  previews?: string;
+  opening?: string;
+  closing?: string;
+  load_out?: string;
+}
+
 export interface Project {
   id: string;
   name: string;
   description?: string;
-  venue?: string;
-  designer?: string;
   logo_path?: string;
-  enabled_modules?: string[]; // ['design', 'production', 'tour']
+
+  // Design Team
+  lighting_designer?: string;
+  lighting_designer_email?: string;
+  lighting_designer_phone?: string;
+  lighting_associates?: string[]; // JSON array
+  audio_designer?: string;
+  audio_designer_email?: string;
+  audio_designer_phone?: string;
+  audio_associates?: string[]; // JSON array
+  video_designer?: string;
+  video_designer_email?: string;
+  video_designer_phone?: string;
+  video_associates?: string[]; // JSON array
+
+  // Production Staff
+  electrician?: string;
+  electrician_email?: string;
+  electrician_phone?: string;
+  audio_tech?: string;
+  audio_tech_email?: string;
+  audio_tech_phone?: string;
+  video_tech?: string;
+  video_tech_email?: string;
+  video_tech_phone?: string;
+  production_manager?: string;
+  production_manager_email?: string;
+  production_manager_phone?: string;
+  production_manager_company?: string;
+  general_manager?: string;
+  general_manager_email?: string;
+  general_manager_phone?: string;
+  general_manager_company?: string;
+
+  // Venue & Dates
+  venue?: string;
+  show_dates?: ShowDates;
+
+  enabled_modules?: string[]; // ['production', 'manager', 'design']
   created_at: number;
   updated_at: number;
 }
@@ -17,6 +62,7 @@ interface ProjectStore {
   currentProject: Project | null;
   loadProjects: () => Promise<void>;
   createProject: (name: string, description?: string, logoPath?: string, enabledModules?: string[]) => Promise<Project>;
+  updateProject: (projectId: string, updates: Partial<Project>) => Promise<void>;
   deleteProject: (projectId: string) => Promise<void>;
   setCurrentProject: (projectId: string) => void;
 }
@@ -60,6 +106,29 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       return project;
     } catch (error) {
       console.error('Failed to create project:', error);
+      throw error;
+    }
+  },
+
+  updateProject: async (projectId: string, updates: Partial<Project>) => {
+    if (!hasAPI()) {
+      console.warn('API not available');
+      throw new Error('API not available');
+    }
+
+    try {
+      await window.api.projects.update(projectId, updates);
+      // Reload projects to get updated data
+      const allProjects = await window.api.projects.getAll();
+      const currentProject = get().currentProject;
+      set({
+        projects: allProjects,
+        currentProject: currentProject?.id === projectId
+          ? allProjects.find((p) => p.id === projectId) || null
+          : currentProject
+      });
+    } catch (error) {
+      console.error('Failed to update project:', error);
       throw error;
     }
   },
