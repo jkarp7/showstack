@@ -69,8 +69,9 @@ export function Prep() {
   };
 
   // Inline editing helpers
-  const handleFieldClick = (field: string, value: string | undefined, isLinked: boolean) => {
-    if (isLinked) return; // Read-only if linked to parent
+  const handleFieldClick = (field: string, value: string | undefined, isReadOnly: boolean) => {
+    console.log('Field clicked:', field, 'isReadOnly:', isReadOnly, 'value:', value);
+    if (isReadOnly) return; // Read-only if linked to parent
     setEditingField(field);
     setEditValue(value || '');
   };
