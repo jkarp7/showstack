@@ -636,6 +636,19 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
               <label className="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-650">
                 <input
                   type="checkbox"
+                  checked={enabledModules.includes('prep')}
+                  onChange={() => toggleModule('prep')}
+                  className="w-4 h-4"
+                />
+                <div className="flex-1">
+                  <div className="font-medium">ShowStack:Prep</div>
+                  <p className="text-xs text-gray-400">Equipment orders & specifications for rental houses</p>
+                </div>
+              </label>
+
+              <label className="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-650">
+                <input
+                  type="checkbox"
                   checked={enabledModules.includes('manager')}
                   onChange={() => toggleModule('manager')}
                   disabled={true}

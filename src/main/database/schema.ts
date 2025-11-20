@@ -139,6 +139,7 @@ export const SCHEMA = `
   CREATE TABLE IF NOT EXISTS prep_projects (
     id TEXT PRIMARY KEY,
     user_id TEXT,
+    parent_project_id TEXT, -- Optional link to parent ShowStack project
 
     -- Production Information
     production_name TEXT NOT NULL,

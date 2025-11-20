@@ -142,6 +142,17 @@ function runMigrations(db: Database): void {
       db.run(`ALTER TABLE fixtures ADD COLUMN ${column.name} ${column.type}`);
     }
   }
+
+  // Prep Projects table migrations
+  const prepProjectsTableInfo = db.exec("PRAGMA table_info(prep_projects)");
+  if (prepProjectsTableInfo[0]) {
+    const prepProjectsColumns = prepProjectsTableInfo[0].values.map(row => row[1]) || [];
+
+    if (!prepProjectsColumns.includes('parent_project_id')) {
+      console.log('Running migration: Adding parent_project_id to prep_projects');
+      db.run('ALTER TABLE prep_projects ADD COLUMN parent_project_id TEXT');
+    }
+  }
 }
 
 export function getDatabase(): Database {

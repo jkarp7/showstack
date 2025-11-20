@@ -93,7 +93,7 @@ export function createPrepProject(data: Partial<PrepProject>): PrepProject {
   db.run(
     `
     INSERT INTO prep_projects (
-      id, user_id, production_name, venue, venue_city, venue_state,
+      id, user_id, parent_project_id, production_name, venue, venue_city, venue_state,
       order_date, original_order_date,
       gm_name, gm_email, gm_phone,
       pm_name, pm_email, pm_phone,
@@ -102,11 +102,12 @@ export function createPrepProject(data: Partial<PrepProject>): PrepProject {
       pe_name, pe_email, pe_phone,
       additional_contacts, logo_url, logo_storage_path,
       disciplines, current_revision, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
     [
       id,
       data.user_id || null,
+      data.parent_project_id || null,
       data.production_name || 'Untitled Shop Order',
       data.venue || null,
       data.venue_city || null,
@@ -147,6 +148,7 @@ export function updatePrepProject(id: string, updates: Partial<PrepProject>): Pr
   const now = Date.now();
 
   const allowedFields = [
+    'parent_project_id',
     'production_name',
     'venue',
     'venue_city',

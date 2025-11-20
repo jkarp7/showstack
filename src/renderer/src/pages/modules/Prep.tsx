@@ -10,7 +10,7 @@ import type { PrepSection, Discipline } from '../../types/prep';
 
 export function Prep() {
   const navigate = useNavigate();
-  const { projectId: routeProjectId } = useParams<{ projectId?: string }>();
+  const { projectId: parentProjectId } = useParams<{ projectId?: string }>();
   const { allProjects, currentProject, sections, loadAllProjects, loadProject, clearCurrentProject } =
     usePrepStore();
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
@@ -19,8 +19,8 @@ export function Prep() {
   const [sectionToEdit, setSectionToEdit] = useState<PrepSection | null>(null);
 
   const handleBackClick = () => {
-    if (routeProjectId) {
-      navigate(`/project/${routeProjectId}`);
+    if (parentProjectId) {
+      navigate(`/project/${parentProjectId}`);
     } else {
       navigate('/');
     }
@@ -221,6 +221,7 @@ export function Prep() {
         isOpen={showNewProjectDialog}
         onClose={() => setShowNewProjectDialog(false)}
         onProjectCreated={handleProjectCreated}
+        parentProjectId={parentProjectId}
       />
     </div>
   );

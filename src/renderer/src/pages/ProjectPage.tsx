@@ -331,6 +331,16 @@ export function ProjectPage() {
                   isLocked={true}
                 />
               )}
+
+              {enabledModules.includes('prep') && (
+                <ModuleCard
+                  name="ShowStack:Prep"
+                  description="Equipment orders and specifications for rental houses"
+                  icon="📋"
+                  route={`/project/${projectId}/module/prep`}
+                  isLocked={false}
+                />
+              )}
             </div>
           </div>
         </div>

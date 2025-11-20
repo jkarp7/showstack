@@ -28,6 +28,7 @@ export interface AdditionalContact extends Contact {
 export interface PrepProject {
   id: string;
   user_id?: string;
+  parent_project_id?: string; // Optional link to parent ShowStack project
 
   // Production Information
   production_name: string;
