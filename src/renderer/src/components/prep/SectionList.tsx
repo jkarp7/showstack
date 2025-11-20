@@ -13,13 +13,15 @@ interface SectionListProps {
 }
 
 export function SectionList({ projectId, sections, onAddSection, onEditSection }: SectionListProps) {
-  const { deleteSection, items } = usePrepStore();
+  const { deleteSection, updateSection, items } = usePrepStore();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [showAddItemDialog, setShowAddItemDialog] = useState(false);
   const [showEditItemDialog, setShowEditItemDialog] = useState(false);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [itemToEdit, setItemToEdit] = useState<PrepEquipmentItem | null>(null);
+  const [draggedSection, setDraggedSection] = useState<PrepSection | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const handleDelete = async (sectionId: string) => {
     if (window.confirm('Delete this section? All equipment items in this section will also be deleted.')) {
@@ -61,6 +63,51 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
     return items.filter((item) => item.section_id === sectionId);
   };
 
+  // Drag and drop handlers for sections
+  const handleSectionDragStart = (e: React.DragEvent, section: PrepSection) => {
+    setDraggedSection(section);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleSectionDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+  };
+
+  const handleSectionDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleSectionDrop = async (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    setDragOverIndex(null);
+
+    if (!draggedSection) return;
+
+    const sourceIndex = sortedSections.findIndex((s) => s.id === draggedSection.id);
+    if (sourceIndex === targetIndex) return;
+
+    // Reorder sections
+    const reordered = [...sortedSections];
+    const [removed] = reordered.splice(sourceIndex, 1);
+    reordered.splice(targetIndex, 0, removed);
+
+    // Update sort_order for all affected sections
+    for (let i = 0; i < reordered.length; i++) {
+      if (reordered[i].sort_order !== i) {
+        await updateSection(reordered[i].id, { sort_order: i });
+      }
+    }
+
+    setDraggedSection(null);
+  };
+
+  const handleSectionDragEnd = () => {
+    setDraggedSection(null);
+    setDragOverIndex(null);
+  };
+
   const sortedSections = [...sections].sort((a, b) => a.sort_order - b.sort_order);
   const selectedSection = selectedSectionId
     ? sections.find((s) => s.id === selectedSectionId)
@@ -94,14 +141,25 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
         </div>
       ) : (
         <div className="divide-y divide-gray-700">
-          {sortedSections.map((section) => {
+          {sortedSections.map((section, index) => {
             const sectionItems = getItemsForSection(section.id);
             const isExpanded = expandedSections.has(section.id);
 
             return (
-              <div key={section.id} className="group">
+              <div
+                key={section.id}
+                draggable
+                onDragStart={(e) => handleSectionDragStart(e, section)}
+                onDragOver={(e) => handleSectionDragOver(e, index)}
+                onDragLeave={handleSectionDragLeave}
+                onDrop={(e) => handleSectionDrop(e, index)}
+                onDragEnd={handleSectionDragEnd}
+                className={`group ${dragOverIndex === index ? 'border-t-2 border-blue-500' : ''} ${
+                  draggedSection?.id === section.id ? 'opacity-50' : ''
+                }`}
+              >
                 {/* Section Header */}
-                <div className="p-4 hover:bg-gray-750 transition flex items-center justify-between">
+                <div className="p-4 hover:bg-gray-750 transition flex items-center justify-between cursor-move">
                   <div className="flex items-center gap-4 flex-1">
                     {/* Expand/Collapse Button */}
                     <button

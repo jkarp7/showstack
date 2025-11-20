@@ -31,6 +31,10 @@ export function EquipmentItemTable({
     field: 'active_qty' | 'spare_qty' | 'venue_qty';
     value: string;
   } | null>(null);
+  const [editingNotes, setEditingNotes] = useState<{
+    itemId: string;
+    value: string;
+  } | null>(null);
   const [isAddingRow, setIsAddingRow] = useState(false);
   const [newRow, setNewRow] = useState<NewItemRow>({
     description: '',
@@ -93,6 +97,38 @@ export function EquipmentItemTable({
       handleQtyBlur();
     } else if (e.key === 'Escape') {
       setEditingQty(null);
+    }
+  };
+
+  const handleNotesClick = (itemId: string, currentNotes: string) => {
+    setEditingNotes({ itemId, value: currentNotes || '' });
+  };
+
+  const handleNotesChange = (value: string) => {
+    if (editingNotes) {
+      setEditingNotes({ ...editingNotes, value });
+    }
+  };
+
+  const handleNotesBlur = async () => {
+    if (!editingNotes) return;
+
+    const item = items.find((i) => i.id === editingNotes.itemId);
+    if (item && item.notes !== editingNotes.value) {
+      await updateItem(editingNotes.itemId, {
+        notes: editingNotes.value.trim() || undefined,
+      });
+    }
+
+    setEditingNotes(null);
+  };
+
+  const handleNotesKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleNotesBlur();
+    } else if (e.key === 'Escape') {
+      setEditingNotes(null);
     }
   };
 
@@ -223,6 +259,68 @@ export function EquipmentItemTable({
     setDragOverIndex(null);
   };
 
+  const handleMergeDuplicates = async () => {
+    // Find items with duplicate descriptions (case-insensitive)
+    const descriptionGroups = new Map<string, PrepEquipmentItem[]>();
+
+    sortedItems.forEach((item) => {
+      const normalizedDesc = item.description.trim().toLowerCase();
+      if (!descriptionGroups.has(normalizedDesc)) {
+        descriptionGroups.set(normalizedDesc, []);
+      }
+      descriptionGroups.get(normalizedDesc)!.push(item);
+    });
+
+    // Find groups with duplicates
+    const duplicateGroups = Array.from(descriptionGroups.values()).filter(
+      (group) => group.length > 1
+    );
+
+    if (duplicateGroups.length === 0) {
+      alert('No duplicate items found to merge.');
+      return;
+    }
+
+    const totalDuplicates = duplicateGroups.reduce((sum, group) => sum + group.length - 1, 0);
+    const confirmMessage = `Found ${duplicateGroups.length} set(s) of duplicates (${totalDuplicates} items will be merged).\n\nMerge all duplicate items?`;
+
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    // Merge each group
+    for (const group of duplicateGroups) {
+      // Sort by sort_order to keep the first one
+      const sorted = [...group].sort((a, b) => a.sort_order - b.sort_order);
+      const primary = sorted[0];
+      const duplicates = sorted.slice(1);
+
+      // Sum up all quantities
+      const totalActive = sorted.reduce((sum, item) => sum + item.active_qty, 0);
+      const totalSpare = sorted.reduce((sum, item) => sum + item.spare_qty, 0);
+      const totalVenue = sorted.reduce((sum, item) => sum + item.venue_qty, 0);
+
+      // Combine notes (if any)
+      const allNotes = sorted
+        .map((item) => item.notes)
+        .filter((note) => note && note.trim())
+        .join(' | ');
+
+      // Update the primary item with combined quantities
+      await updateItem(primary.id, {
+        active_qty: totalActive,
+        spare_qty: totalSpare,
+        venue_qty: totalVenue,
+        notes: allNotes || undefined,
+      });
+
+      // Delete duplicates
+      for (const duplicate of duplicates) {
+        await deleteItem(duplicate.id);
+      }
+    }
+  };
+
   if (sortedItems.length === 0 && !isAddingRow) {
     return (
       <div className="bg-gray-750 rounded p-4 text-center">
@@ -283,9 +381,26 @@ export function EquipmentItemTable({
               >
                 <td className="px-3 py-2 text-white">
                   <div>
-                    {item.description}
-                    {item.notes && (
-                      <p className="text-xs text-gray-500 mt-1">{item.notes}</p>
+                    <div>{item.description}</div>
+                    {/* Inline editable notes */}
+                    {editingNotes?.itemId === item.id ? (
+                      <input
+                        type="text"
+                        value={editingNotes.value}
+                        onChange={(e) => handleNotesChange(e.target.value)}
+                        onBlur={handleNotesBlur}
+                        onKeyDown={handleNotesKeyDown}
+                        placeholder="Add notes..."
+                        className="w-full mt-1 px-2 py-1 bg-gray-600 border border-blue-500 rounded text-xs text-white placeholder-gray-400 focus:outline-none"
+                        autoFocus
+                      />
+                    ) : (
+                      <div
+                        onClick={() => handleNotesClick(item.id, item.notes || '')}
+                        className="mt-1 text-xs text-gray-400 italic cursor-pointer hover:text-gray-300 hover:bg-gray-700 rounded px-1 py-0.5 transition"
+                      >
+                        {item.notes || '+ Add notes...'}
+                      </div>
                     )}
                   </div>
                 </td>
@@ -470,12 +585,23 @@ export function EquipmentItemTable({
       <div className="px-3 py-2 border-t border-gray-700 flex justify-between items-center">
         <div className="flex gap-2">
           {!isAddingRow && (
-            <button
-              onClick={handleStartAddingRow}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm transition"
-            >
-              + Add Item
-            </button>
+            <>
+              <button
+                onClick={handleStartAddingRow}
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm transition"
+              >
+                + Add Item
+              </button>
+              {sortedItems.length > 1 && (
+                <button
+                  onClick={handleMergeDuplicates}
+                  className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 rounded text-white text-sm transition"
+                  title="Merge items with identical descriptions"
+                >
+                  Merge Duplicates
+                </button>
+              )}
+            </>
           )}
           {isAddingRow && (
             <div className="text-xs text-blue-400">
