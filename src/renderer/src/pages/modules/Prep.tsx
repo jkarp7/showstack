@@ -3,13 +3,20 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { usePrepStore } from '../../store/prepStore';
 import { NewPrepProjectDialog } from '../../components/prep/NewPrepProjectDialog';
 import { PrepProjectCard } from '../../components/prep/PrepProjectCard';
+import { SectionList } from '../../components/prep/SectionList';
+import { AddSectionDialog } from '../../components/prep/AddSectionDialog';
+import { EditSectionDialog } from '../../components/prep/EditSectionDialog';
+import type { PrepSection, Discipline } from '../../types/prep';
 
 export function Prep() {
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId?: string }>();
-  const { allProjects, currentProject, loadAllProjects, loadProject, clearCurrentProject } =
+  const { allProjects, currentProject, sections, loadAllProjects, loadProject, clearCurrentProject } =
     usePrepStore();
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
+  const [showAddSectionDialog, setShowAddSectionDialog] = useState(false);
+  const [showEditSectionDialog, setShowEditSectionDialog] = useState(false);
+  const [sectionToEdit, setSectionToEdit] = useState<PrepSection | null>(null);
 
   const handleBackClick = () => {
     if (routeProjectId) {
@@ -44,6 +51,16 @@ export function Prep() {
     await loadProject(projectId);
   };
 
+  const handleEditSection = (section: PrepSection) => {
+    setSectionToEdit(section);
+    setShowEditSectionDialog(true);
+  };
+
+  const handleCloseEditDialog = () => {
+    setShowEditSectionDialog(false);
+    setSectionToEdit(null);
+  };
+
   // If a project is loaded, show the project view
   if (currentProject) {
     return (
@@ -75,7 +92,8 @@ export function Prep() {
         </header>
 
         <main className="flex-1 overflow-auto p-6">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl mx-auto space-y-6">
+            {/* Project Details */}
             <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
               <h2 className="text-xl font-bold mb-4">Project Details</h2>
               <div className="space-y-3 text-gray-300">
@@ -99,14 +117,32 @@ export function Prep() {
                     .join(', ')}
                 </div>
               </div>
-
-              <div className="mt-6 p-4 bg-gray-700/50 rounded border border-gray-600">
-                <p className="text-gray-400 text-sm">
-                  Equipment sections, items, and revision tracking coming soon...
-                </p>
-              </div>
             </div>
+
+            {/* Sections List */}
+            <SectionList
+              projectId={currentProject.id}
+              sections={sections}
+              onAddSection={() => setShowAddSectionDialog(true)}
+              onEditSection={handleEditSection}
+            />
           </div>
+
+          {/* Add Section Dialog */}
+          <AddSectionDialog
+            isOpen={showAddSectionDialog}
+            onClose={() => setShowAddSectionDialog(false)}
+            projectId={currentProject.id}
+            projectDisciplines={JSON.parse(currentProject.disciplines || '[]') as Discipline[]}
+          />
+
+          {/* Edit Section Dialog */}
+          <EditSectionDialog
+            isOpen={showEditSectionDialog}
+            onClose={handleCloseEditDialog}
+            section={sectionToEdit}
+            projectDisciplines={JSON.parse(currentProject.disciplines || '[]') as Discipline[]}
+          />
         </main>
       </div>
     );
