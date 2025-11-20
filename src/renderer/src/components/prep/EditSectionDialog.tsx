@@ -20,7 +20,6 @@ export function EditSectionDialog({
   const [discipline, setDiscipline] = useState<Discipline>('lighting');
   const [pageBreak, setPageBreak] = useState(false);
   const [sortOrder, setSortOrder] = useState(0);
-  const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -29,7 +28,6 @@ export function EditSectionDialog({
       setDiscipline(section.discipline as Discipline);
       setPageBreak(!!section.page_break);
       setSortOrder(section.sort_order);
-      setNotes(section.notes || '');
     }
   }, [section]);
 
@@ -47,7 +45,6 @@ export function EditSectionDialog({
       discipline,
       page_break: pageBreak ? 1 : 0,
       sort_order: sortOrder,
-      notes: notes.trim() || undefined,
     });
 
     setIsSubmitting(false);
@@ -105,19 +102,6 @@ export function EditSectionDialog({
             <p className="text-xs text-gray-500 mt-1">
               Lower numbers appear first in the list
             </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Section Notes (Optional)
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add notes that will display below the section header..."
-              rows={3}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 resize-none"
-            />
           </div>
 
           <div className="flex items-center gap-2">

@@ -19,7 +19,6 @@ export function AddSectionDialog({
   const [name, setName] = useState('');
   const [discipline, setDiscipline] = useState<Discipline>(projectDisciplines[0] || 'lighting');
   const [pageBreak, setPageBreak] = useState(false);
-  const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,14 +40,12 @@ export function AddSectionDialog({
       discipline,
       sort_order: nextSortOrder,
       page_break: pageBreak,
-      notes: notes.trim() || undefined,
     });
 
     setIsSubmitting(false);
     setName('');
     setDiscipline(projectDisciplines[0] || 'lighting');
     setPageBreak(false);
-    setNotes('');
     onClose();
   };
 
@@ -87,19 +84,6 @@ export function AddSectionDialog({
                 </option>
               ))}
             </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Section Notes (Optional)
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add notes that will display below the section header..."
-              rows={3}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 resize-none"
-            />
           </div>
 
           <div className="flex items-center gap-2">

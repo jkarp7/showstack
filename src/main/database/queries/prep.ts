@@ -521,7 +521,10 @@ export function updatePrepEquipmentItem(
 
   const allFields = [...fields, 'total_qty', 'venue_active', 'venue_spare'];
   const setClause = allFields.map((f) => `${f} = ?`).join(', ');
-  const values = allFields.map((f) => finalUpdates[f]);
+  const values = allFields.map((f) => {
+    const value = finalUpdates[f];
+    return value === undefined ? null : value;
+  });
 
   db.run(
     `

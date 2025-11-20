@@ -22,6 +22,10 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
   const [itemToEdit, setItemToEdit] = useState<PrepEquipmentItem | null>(null);
   const [draggedSection, setDraggedSection] = useState<PrepSection | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [editingSectionNotes, setEditingSectionNotes] = useState<{
+    sectionId: string;
+    value: string;
+  } | null>(null);
 
   const handleDelete = async (sectionId: string) => {
     if (window.confirm('Delete this section? All equipment items in this section will also be deleted.')) {
@@ -106,6 +110,38 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
   const handleSectionDragEnd = () => {
     setDraggedSection(null);
     setDragOverIndex(null);
+  };
+
+  const handleSectionNotesClick = (sectionId: string, currentNotes: string) => {
+    setEditingSectionNotes({ sectionId, value: currentNotes || '' });
+  };
+
+  const handleSectionNotesChange = (value: string) => {
+    if (editingSectionNotes) {
+      setEditingSectionNotes({ ...editingSectionNotes, value });
+    }
+  };
+
+  const handleSectionNotesBlur = async () => {
+    if (!editingSectionNotes) return;
+
+    const section = sections.find((s) => s.id === editingSectionNotes.sectionId);
+    if (section && section.notes !== editingSectionNotes.value) {
+      await updateSection(editingSectionNotes.sectionId, {
+        notes: editingSectionNotes.value.trim() || undefined,
+      });
+    }
+
+    setEditingSectionNotes(null);
+  };
+
+  const handleSectionNotesKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSectionNotesBlur();
+    } else if (e.key === 'Escape') {
+      setEditingSectionNotes(null);
+    }
   };
 
   const sortedSections = [...sections].sort((a, b) => a.sort_order - b.sort_order);
@@ -215,10 +251,28 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
                   </div>
                 </div>
 
-                {/* Section Notes */}
-                {isExpanded && section.notes && (
+                {/* Section Notes - Inline Editable */}
+                {isExpanded && (
                   <div className="px-4 py-2 bg-gray-800/50">
-                    <p className="text-sm text-gray-300 italic">{section.notes}</p>
+                    {editingSectionNotes?.sectionId === section.id ? (
+                      <input
+                        type="text"
+                        value={editingSectionNotes.value}
+                        onChange={(e) => handleSectionNotesChange(e.target.value)}
+                        onBlur={handleSectionNotesBlur}
+                        onKeyDown={handleSectionNotesKeyDown}
+                        placeholder="Add section notes..."
+                        className="w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white placeholder-gray-400 focus:outline-none"
+                        autoFocus
+                      />
+                    ) : (
+                      <div
+                        onClick={() => handleSectionNotesClick(section.id, section.notes || '')}
+                        className="text-sm text-gray-300 italic cursor-pointer hover:text-gray-200 hover:bg-gray-700 rounded px-1 py-0.5 transition min-h-[24px]"
+                      >
+                        {section.notes || '+ Add section notes...'}
+                      </div>
+                    )}
                   </div>
                 )}
 
