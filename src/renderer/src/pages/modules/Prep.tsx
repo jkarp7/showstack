@@ -163,10 +163,27 @@ export function Prep() {
       return (currentProject[field] as string) || '';
     };
 
+    // Helper to check if a specific field is read-only (pulling from parent)
+    const isFieldReadOnly = (field: keyof PrepProject): boolean => {
+      if (!isLinked || !parentProject) return false;
+
+      // Only these fields are read-only when linked (fields that pull from parent)
+      const parentFields: (keyof PrepProject)[] = [
+        'gm_name', 'gm_company', 'gm_email', 'gm_phone',
+        'pm_name', 'pm_company', 'pm_email', 'pm_phone',
+        'ld_name', 'ld_email', 'ld_phone',
+        'pe_name', 'pe_email', 'pe_phone',
+        'venue', 'venue_city', 'venue_state'
+      ];
+
+      return parentFields.includes(field);
+    };
+
     // Helper to render an editable field inline (no label wrapper)
     const renderInlineField = (field: keyof PrepProject, placeholder = '+ Add', className = '') => {
       const value = getFieldValue(field);
       const isEditing = editingField === field;
+      const fieldIsReadOnly = isFieldReadOnly(field);
 
       if (isEditing) {
         return (
@@ -184,15 +201,15 @@ export function Prep() {
 
       return (
         <span
-          onClick={() => handleFieldClick(field, value, isLinked)}
+          onClick={() => handleFieldClick(field, value, fieldIsReadOnly)}
           className={`${
-            isLinked
+            fieldIsReadOnly
               ? 'text-gray-400 cursor-default'
               : 'cursor-pointer hover:text-gray-200 hover:bg-gray-700 rounded px-2 py-1 transition'
-          } ${!value && !isLinked ? 'italic text-gray-500' : 'text-gray-300'} ${className}`}
+          } ${!value && !fieldIsReadOnly ? 'italic text-gray-500' : 'text-gray-300'} ${className}`}
         >
           {value || placeholder}
-          {isLinked && value && <span className="ml-2 text-xs text-blue-400">(from parent)</span>}
+          {fieldIsReadOnly && value && <span className="ml-2 text-xs text-blue-400">(from parent)</span>}
         </span>
       );
     };
@@ -201,6 +218,7 @@ export function Prep() {
     const renderField = (label: string, field: keyof PrepProject, placeholder = '+ Add') => {
       const value = getFieldValue(field);
       const isEditing = editingField === field;
+      const fieldIsReadOnly = isFieldReadOnly(field);
 
       return (
         <div>
@@ -217,17 +235,17 @@ export function Prep() {
             />
           ) : (
             <span
-              onClick={() => handleFieldClick(field, value, isLinked)}
+              onClick={() => handleFieldClick(field, value, fieldIsReadOnly)}
               className={`${
-                isLinked
+                fieldIsReadOnly
                   ? 'text-gray-400 cursor-default'
                   : 'text-gray-300 cursor-pointer hover:text-gray-200 hover:bg-gray-700 rounded px-1 py-0.5 transition'
-              } ${!value && !isLinked ? 'italic text-gray-500' : ''}`}
+              } ${!value && !fieldIsReadOnly ? 'italic text-gray-500' : ''}`}
             >
               {value || placeholder}
             </span>
           )}
-          {isLinked && value && (
+          {fieldIsReadOnly && value && (
             <span className="ml-2 text-xs text-blue-400">(from parent)</span>
           )}
         </div>
