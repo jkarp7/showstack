@@ -157,7 +157,7 @@ export function Prep() {
             <button
               onClick={handleBackClick}
               className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
-              title={routeProjectId ? "Back to Project" : "Back to Projects"}
+              title={parentProjectId ? "Back to Project" : "Back to Projects"}
             >
               ← Back
             </button>
