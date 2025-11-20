@@ -91,13 +91,19 @@ export function Prep() {
   };
 
   const handleFieldBlur = async () => {
-    if (!editingField || !currentProject) return;
+    console.log('💾 handleFieldBlur called. editingField:', editingField, 'editValue:', editValue);
+    if (!editingField || !currentProject) {
+      console.log('❌ Exiting early - no editingField or currentProject');
+      return;
+    }
 
     let finalValue = editValue.trim();
+    console.log('📝 finalValue after trim:', finalValue);
 
     // Format phone numbers
     if (editingField.includes('_phone') && finalValue) {
       finalValue = formatPhoneNumber(finalValue);
+      console.log('📞 Formatted phone:', finalValue);
     }
 
     // Validate email
@@ -109,10 +115,16 @@ export function Prep() {
     }
 
     const currentValue = (currentProject as any)[editingField];
+    console.log('🔍 Comparing - currentValue:', currentValue, 'finalValue:', finalValue);
+
     if (currentValue !== finalValue) {
+      console.log('✨ Values differ - calling updateProject');
       await updateProject(currentProject.id, {
         [editingField]: finalValue || undefined,
       });
+      console.log('✅ updateProject complete');
+    } else {
+      console.log('⏭️ Values same - skipping update');
     }
 
     setEditingField(null);
