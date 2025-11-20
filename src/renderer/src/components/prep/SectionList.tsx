@@ -136,9 +136,15 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
   };
 
   const handleSectionNotesKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSectionNotesBlur();
+    if (e.key === 'Enter') {
+      if (e.shiftKey) {
+        // SHIFT+ENTER: Allow line break (default textarea behavior)
+        return;
+      } else {
+        // Regular ENTER: Save
+        e.preventDefault();
+        handleSectionNotesBlur();
+      }
     } else if (e.key === 'Escape') {
       setEditingSectionNotes(null);
     }
@@ -255,20 +261,20 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
                 {isExpanded && (
                   <div className="px-4 py-2 bg-gray-800/50">
                     {editingSectionNotes?.sectionId === section.id ? (
-                      <input
-                        type="text"
+                      <textarea
                         value={editingSectionNotes.value}
                         onChange={(e) => handleSectionNotesChange(e.target.value)}
                         onBlur={handleSectionNotesBlur}
                         onKeyDown={handleSectionNotesKeyDown}
-                        placeholder="Add section notes..."
-                        className="w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white placeholder-gray-400 focus:outline-none"
+                        placeholder="Add section notes... (SHIFT+ENTER for new line, ENTER to save)"
+                        rows={3}
+                        className="w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white placeholder-gray-400 focus:outline-none resize-none"
                         autoFocus
                       />
                     ) : (
                       <div
                         onClick={() => handleSectionNotesClick(section.id, section.notes || '')}
-                        className="text-sm text-gray-300 italic cursor-pointer hover:text-gray-200 hover:bg-gray-700 rounded px-1 py-0.5 transition min-h-[24px]"
+                        className="text-sm text-gray-300 italic cursor-pointer hover:text-gray-200 hover:bg-gray-700 rounded px-1 py-0.5 transition min-h-[24px] whitespace-pre-wrap"
                       >
                         {section.notes || '+ Add section notes...'}
                       </div>

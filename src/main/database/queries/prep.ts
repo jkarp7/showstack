@@ -287,7 +287,8 @@ export function updatePrepSection(id: string, updates: Partial<PrepSection>): Pr
     if (f === 'page_break') {
       return updates[f] ? 1 : 0;
     }
-    return updates[f];
+    const value = updates[f];
+    return value === undefined ? null : value;
   });
 
   db.run(
