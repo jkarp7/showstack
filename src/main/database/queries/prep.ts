@@ -19,10 +19,19 @@ export interface PrepProject {
   venue_state?: string;
   order_date: number;
   original_order_date?: number;
+  prep_start_date?: string;
+  prep_end_date?: string;
+  load_in_date?: string;
+  first_preview_date?: string;
+  opening_night_date?: string;
+  closing_date?: string;
+  load_out_date?: string;
   gm_name?: string;
+  gm_company?: string;
   gm_email?: string;
   gm_phone?: string;
   pm_name?: string;
+  pm_company?: string;
   pm_email?: string;
   pm_phone?: string;
   ld_name?: string;
@@ -95,14 +104,15 @@ export function createPrepProject(data: Partial<PrepProject>): PrepProject {
     INSERT INTO prep_projects (
       id, user_id, parent_project_id, production_name, venue, venue_city, venue_state,
       order_date, original_order_date,
-      gm_name, gm_email, gm_phone,
-      pm_name, pm_email, pm_phone,
+      prep_start_date, prep_end_date, load_in_date, first_preview_date, opening_night_date, closing_date, load_out_date,
+      gm_name, gm_company, gm_email, gm_phone,
+      pm_name, pm_company, pm_email, pm_phone,
       ld_name, ld_email, ld_phone,
       ald_name, ald_email, ald_phone,
       pe_name, pe_email, pe_phone,
       additional_contacts, logo_url, logo_storage_path,
       disciplines, current_revision, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
     [
       id,
@@ -114,10 +124,19 @@ export function createPrepProject(data: Partial<PrepProject>): PrepProject {
       data.venue_state || null,
       data.order_date || now,
       data.original_order_date || null,
+      data.prep_start_date || null,
+      data.prep_end_date || null,
+      data.load_in_date || null,
+      data.first_preview_date || null,
+      data.opening_night_date || null,
+      data.closing_date || null,
+      data.load_out_date || null,
       data.gm_name || null,
+      data.gm_company || null,
       data.gm_email || null,
       data.gm_phone || null,
       data.pm_name || null,
+      data.pm_company || null,
       data.pm_email || null,
       data.pm_phone || null,
       data.ld_name || null,
@@ -156,9 +175,11 @@ export function updatePrepProject(id: string, updates: Partial<PrepProject>): Pr
     'order_date',
     'original_order_date',
     'gm_name',
+    'gm_company',
     'gm_email',
     'gm_phone',
     'pm_name',
+    'pm_company',
     'pm_email',
     'pm_phone',
     'ld_name',
@@ -175,6 +196,13 @@ export function updatePrepProject(id: string, updates: Partial<PrepProject>): Pr
     'logo_storage_path',
     'disciplines',
     'current_revision',
+    'prep_start_date',
+    'prep_end_date',
+    'load_in_date',
+    'first_preview_date',
+    'opening_night_date',
+    'closing_date',
+    'load_out_date',
   ];
 
   const fields = Object.keys(updates).filter((k) => allowedFields.includes(k));

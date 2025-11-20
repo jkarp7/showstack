@@ -172,11 +172,20 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
     }
 
     try {
+      console.log('🔧 prepStore.updateProject called with id:', id, 'updates:', updates);
       const updated = await window.api.prep.projects.update(id, updates);
+      console.log('📦 API returned updated project:', updated);
+
+      // Check specific fields that were updated
+      Object.keys(updates).forEach(key => {
+        console.log(`🔍 Field ${key}: sent="${updates[key]}" received="${updated[key]}"`);
+      });
+
       set((state) => ({
         currentProject: state.currentProject?.id === id ? updated : state.currentProject,
         allProjects: state.allProjects.map((p) => (p.id === id ? updated : p)),
       }));
+      console.log('✅ State updated. New currentProject:', get().currentProject);
     } catch (error) {
       console.error('Failed to update prep project:', error);
     }
