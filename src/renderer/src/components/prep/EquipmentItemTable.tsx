@@ -39,6 +39,8 @@ export function EquipmentItemTable({
     venue_qty: 0,
   });
   const [isSubmittingNewRow, setIsSubmittingNewRow] = useState(false);
+  const [draggedItem, setDraggedItem] = useState<PrepEquipmentItem | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const sortedItems = [...items].sort((a, b) => a.sort_order - b.sort_order);
 
@@ -176,6 +178,51 @@ export function EquipmentItemTable({
     return { total, rental };
   };
 
+  // Drag and drop handlers
+  const handleDragStart = (e: React.DragEvent, item: PrepEquipmentItem) => {
+    setDraggedItem(item);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    setDragOverIndex(null);
+
+    if (!draggedItem) return;
+
+    const sourceIndex = sortedItems.findIndex((item) => item.id === draggedItem.id);
+    if (sourceIndex === targetIndex) return;
+
+    // Reorder items
+    const reordered = [...sortedItems];
+    const [removed] = reordered.splice(sourceIndex, 1);
+    reordered.splice(targetIndex, 0, removed);
+
+    // Update sort_order for all affected items
+    for (let i = 0; i < reordered.length; i++) {
+      if (reordered[i].sort_order !== i) {
+        await updateItem(reordered[i].id, { sort_order: i });
+      }
+    }
+
+    setDraggedItem(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+    setDragOverIndex(null);
+  };
+
   if (sortedItems.length === 0 && !isAddingRow) {
     return (
       <div className="bg-gray-750 rounded p-4 text-center">
@@ -221,8 +268,19 @@ export function EquipmentItemTable({
           </thead>
           <tbody className="divide-y divide-gray-700">
             {/* Existing Items */}
-            {sortedItems.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-800 transition group">
+            {sortedItems.map((item, index) => (
+              <tr
+                key={item.id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, item)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, index)}
+                onDragEnd={handleDragEnd}
+                className={`hover:bg-gray-800 transition group cursor-move ${
+                  dragOverIndex === index ? 'border-t-2 border-blue-500' : ''
+                } ${draggedItem?.id === item.id ? 'opacity-50' : ''}`}
+              >
                 <td className="px-3 py-2 text-white">
                   <div>
                     {item.description}
