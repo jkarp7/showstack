@@ -63,6 +63,45 @@ contextBridge.exposeInMainWorld('api', {
     new: () => ipcRenderer.invoke('file:new'),
     validate: (filePath: string) => ipcRenderer.invoke('file:validate', filePath),
     getFileName: (filePath: string) => ipcRenderer.invoke('file:getFileName', filePath)
+  },
+
+  // ShowStack:Prep operations
+  prep: {
+    // Projects
+    projects: {
+      getAll: () => ipcRenderer.invoke('prep:projects:getAll'),
+      getById: (id: string) => ipcRenderer.invoke('prep:projects:getById', id),
+      create: (data: any) => ipcRenderer.invoke('prep:projects:create', data),
+      update: (id: string, updates: any) => ipcRenderer.invoke('prep:projects:update', id, updates),
+      delete: (id: string) => ipcRenderer.invoke('prep:projects:delete', id)
+    },
+    // Sections
+    sections: {
+      getByProjectId: (projectId: string) => ipcRenderer.invoke('prep:sections:getByProjectId', projectId),
+      create: (data: any) => ipcRenderer.invoke('prep:sections:create', data),
+      update: (id: string, updates: any) => ipcRenderer.invoke('prep:sections:update', id, updates),
+      delete: (id: string) => ipcRenderer.invoke('prep:sections:delete', id)
+    },
+    // Equipment Items
+    items: {
+      getBySectionId: (sectionId: string) => ipcRenderer.invoke('prep:items:getBySectionId', sectionId),
+      getByProjectId: (projectId: string) => ipcRenderer.invoke('prep:items:getByProjectId', projectId),
+      create: (data: any) => ipcRenderer.invoke('prep:items:create', data),
+      update: (id: string, updates: any) => ipcRenderer.invoke('prep:items:update', id, updates),
+      delete: (id: string) => ipcRenderer.invoke('prep:items:delete', id)
+    },
+    // Revisions
+    revisions: {
+      getByProjectId: (projectId: string) => ipcRenderer.invoke('prep:revisions:getByProjectId', projectId),
+      create: (data: any) => ipcRenderer.invoke('prep:revisions:create', data)
+    },
+    // Notes
+    notes: {
+      getByProjectId: (projectId: string, type?: string) => ipcRenderer.invoke('prep:notes:getByProjectId', projectId, type),
+      create: (data: any) => ipcRenderer.invoke('prep:notes:create', data),
+      update: (id: string, content: string) => ipcRenderer.invoke('prep:notes:update', id, content),
+      delete: (id: string) => ipcRenderer.invoke('prep:notes:delete', id)
+    }
   }
 });
 
@@ -100,6 +139,38 @@ export interface ElectronAPI {
     new: () => Promise<string>;
     validate: (filePath: string) => Promise<any>;
     getFileName: (filePath: string) => Promise<string>;
+  };
+  prep: {
+    projects: {
+      getAll: () => Promise<any[]>;
+      getById: (id: string) => Promise<any | null>;
+      create: (data: any) => Promise<any>;
+      update: (id: string, updates: any) => Promise<any>;
+      delete: (id: string) => Promise<void>;
+    };
+    sections: {
+      getByProjectId: (projectId: string) => Promise<any[]>;
+      create: (data: any) => Promise<any>;
+      update: (id: string, updates: any) => Promise<any>;
+      delete: (id: string) => Promise<void>;
+    };
+    items: {
+      getBySectionId: (sectionId: string) => Promise<any[]>;
+      getByProjectId: (projectId: string) => Promise<any[]>;
+      create: (data: any) => Promise<any>;
+      update: (id: string, updates: any) => Promise<any>;
+      delete: (id: string) => Promise<void>;
+    };
+    revisions: {
+      getByProjectId: (projectId: string) => Promise<any[]>;
+      create: (data: any) => Promise<any>;
+    };
+    notes: {
+      getByProjectId: (projectId: string, type?: string) => Promise<any[]>;
+      create: (data: any) => Promise<any>;
+      update: (id: string, content: string) => Promise<any>;
+      delete: (id: string) => Promise<void>;
+    };
   };
 }
 
