@@ -70,8 +70,9 @@ export function Prep() {
 
   // Inline editing helpers
   const handleFieldClick = (field: string, value: string | undefined, isReadOnly: boolean) => {
-    console.log('Field clicked:', field, 'isReadOnly:', isReadOnly, 'value:', value);
+    console.log('✅ Field clicked:', field, 'isReadOnly:', isReadOnly, 'value:', value);
     if (isReadOnly) return; // Read-only if linked to parent
+    console.log('⚡ Setting editingField to:', field, 'and editValue to:', value || '');
     setEditingField(field);
     setEditValue(value || '');
   };
@@ -105,6 +106,7 @@ export function Prep() {
     if (editingField.includes('_email') && finalValue && !isValidEmail(finalValue)) {
       alert('Please enter a valid email address');
       setEditingField(null);
+      setEditValue('');
       return;
     }
 
@@ -116,6 +118,7 @@ export function Prep() {
     }
 
     setEditingField(null);
+    setEditValue('');
   };
 
   const handleFieldKeyDown = (e: React.KeyboardEvent) => {
@@ -124,6 +127,7 @@ export function Prep() {
       handleFieldBlur();
     } else if (e.key === 'Escape') {
       setEditingField(null);
+      setEditValue('');
     }
   };
 
