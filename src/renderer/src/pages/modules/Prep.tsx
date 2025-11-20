@@ -70,9 +70,7 @@ export function Prep() {
 
   // Inline editing helpers
   const handleFieldClick = (field: string, value: string | undefined, isReadOnly: boolean) => {
-    console.log('✅ Field clicked:', field, 'isReadOnly:', isReadOnly, 'value:', value);
     if (isReadOnly) return; // Read-only if linked to parent
-    console.log('⚡ Setting editingField to:', field, 'and editValue to:', value || '');
     setEditingField(field);
     setEditValue(value || '');
   };
@@ -133,8 +131,6 @@ export function Prep() {
 
   // If a project is loaded, show the project view
   if (currentProject) {
-    console.log('🔄 Prep component rendering. editingField:', editingField, 'editValue:', editValue);
-
     // Find parent project if linked
     const parentProject = currentProject.parent_project_id
       ? projects.find((p) => p.id === currentProject.parent_project_id)
@@ -192,10 +188,7 @@ export function Prep() {
       const isEditing = editingField === field;
       const fieldIsReadOnly = isFieldReadOnly(field);
 
-      console.log('renderInlineField:', field, 'editingField:', editingField, 'isEditing:', isEditing);
-
       if (isEditing) {
-        console.log('Rendering INPUT for field:', field);
         return (
           <input
             type="text"
@@ -203,7 +196,7 @@ export function Prep() {
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={handleFieldBlur}
             onKeyDown={handleFieldKeyDown}
-            className={`px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white focus:outline-none ${className}`}
+            className={`w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white focus:outline-none ${className}`}
             autoFocus
           />
         );
