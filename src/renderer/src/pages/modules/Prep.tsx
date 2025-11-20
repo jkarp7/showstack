@@ -75,13 +75,42 @@ export function Prep() {
     setEditValue(value || '');
   };
 
+  // Format phone number (US format)
+  const formatPhoneNumber = (value: string): string => {
+    const digits = value.replace(/\D/g, '');
+    if (digits.length === 10) {
+      return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+    return value;
+  };
+
+  // Validate email format
+  const isValidEmail = (email: string): boolean => {
+    if (!email) return true; // Empty is OK
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const handleFieldBlur = async () => {
     if (!editingField || !currentProject) return;
 
+    let finalValue = editValue.trim();
+
+    // Format phone numbers
+    if (editingField.includes('_phone') && finalValue) {
+      finalValue = formatPhoneNumber(finalValue);
+    }
+
+    // Validate email
+    if (editingField.includes('_email') && finalValue && !isValidEmail(finalValue)) {
+      alert('Please enter a valid email address');
+      setEditingField(null);
+      return;
+    }
+
     const currentValue = (currentProject as any)[editingField];
-    if (currentValue !== editValue) {
+    if (currentValue !== finalValue) {
       await updateProject(currentProject.id, {
-        [editingField]: editValue.trim() || undefined,
+        [editingField]: finalValue || undefined,
       });
     }
 
@@ -131,14 +160,48 @@ export function Prep() {
       return (currentProject[field] as string) || '';
     };
 
-    // Helper to render an editable field
+    // Helper to render an editable field inline (no label wrapper)
+    const renderInlineField = (field: keyof PrepProject, placeholder = '+ Add', className = '') => {
+      const value = getFieldValue(field);
+      const isEditing = editingField === field;
+
+      if (isEditing) {
+        return (
+          <input
+            type="text"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={handleFieldBlur}
+            onKeyDown={handleFieldKeyDown}
+            className={`px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white focus:outline-none ${className}`}
+            autoFocus
+          />
+        );
+      }
+
+      return (
+        <span
+          onClick={() => handleFieldClick(field, value, isLinked)}
+          className={`${
+            isLinked
+              ? 'text-gray-400 cursor-default'
+              : 'cursor-pointer hover:text-gray-200 hover:bg-gray-700 rounded px-2 py-1 transition'
+          } ${!value && !isLinked ? 'italic text-gray-500' : 'text-gray-300'} ${className}`}
+        >
+          {value || placeholder}
+          {isLinked && value && <span className="ml-2 text-xs text-blue-400">(from parent)</span>}
+        </span>
+      );
+    };
+
+    // Helper to render an editable field with label (for backwards compatibility)
     const renderField = (label: string, field: keyof PrepProject, placeholder = '+ Add') => {
       const value = getFieldValue(field);
       const isEditing = editingField === field;
 
       return (
         <div>
-          <span className="text-gray-500 text-sm">{label}:</span>{' '}
+          {label && <span className="text-gray-500 text-sm">{label}:</span>}{' '}
           {isEditing ? (
             <input
               type="text"
@@ -223,26 +286,24 @@ export function Prep() {
 
               <div className="space-y-4">
                 {/* Production Info - 1 Row */}
-                <div className="flex items-center gap-6 text-sm pb-3 border-b border-gray-700">
-                  <div>
-                    <span className="text-gray-500">Show:</span>{' '}
-                    <span className="text-gray-300 font-medium">{currentProject.production_name}</span>
-                  </div>
-                  {currentProject.venue && (
+                <div className="flex items-center justify-between pb-3 border-b border-gray-700">
+                  <div className="flex items-center gap-8">
                     <div>
-                      <span className="text-gray-500">Venue:</span>{' '}
-                      <span className="text-gray-300">
-                        {currentProject.venue}
+                      <span className="text-gray-500 text-sm">Show:</span>{' '}
+                      <span className="text-gray-300 font-medium text-base">{currentProject.production_name}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 text-sm">Venue:</span>{' '}
+                      <span className="text-gray-300 text-base">
+                        {currentProject.venue || 'Not specified'}
                         {currentProject.venue_city && `, ${currentProject.venue_city}`}
                         {currentProject.venue_state && `, ${currentProject.venue_state}`}
                       </span>
                     </div>
-                  )}
-                  <div>
+                  </div>
+                  <div className="text-xs text-gray-400">
                     <span className="text-gray-500">Disciplines:</span>{' '}
-                    <span className="text-gray-300">
-                      {disciplines.map((d) => d.charAt(0).toUpperCase()).join('/')}
-                    </span>
+                    {disciplines.map((d) => d.charAt(0).toUpperCase()).join('/')}
                   </div>
                 </div>
 
@@ -253,15 +314,15 @@ export function Prep() {
                     {/* GM Row */}
                     <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
                       <span className="text-gray-500">General Manager</span>
-                      <div className="flex gap-2">
-                        {renderField('', 'gm_name', '+ Name')}
+                      <div>
+                        {renderInlineField('gm_name', '+ Name')}
                       </div>
                       <div className="flex gap-4">
-                        {renderField('', 'gm_company', '+ Company')}
+                        {renderInlineField('gm_company', '+ Company')}
                         {getFieldValue('gm_name') && (
                           <>
-                            {renderField('', 'gm_email', '+ Email')}
-                            {renderField('', 'gm_phone', '+ Phone')}
+                            {renderInlineField('gm_email', '+ Email')}
+                            {renderInlineField('gm_phone', '+ Phone')}
                           </>
                         )}
                       </div>
@@ -269,15 +330,15 @@ export function Prep() {
                     {/* PM Row */}
                     <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
                       <span className="text-gray-500">Production Manager</span>
-                      <div className="flex gap-2">
-                        {renderField('', 'pm_name', '+ Name')}
+                      <div>
+                        {renderInlineField('pm_name', '+ Name')}
                       </div>
                       <div className="flex gap-4">
-                        {renderField('', 'pm_company', '+ Company')}
+                        {renderInlineField('pm_company', '+ Company')}
                         {getFieldValue('pm_name') && (
                           <>
-                            {renderField('', 'pm_email', '+ Email')}
-                            {renderField('', 'pm_phone', '+ Phone')}
+                            {renderInlineField('pm_email', '+ Email')}
+                            {renderInlineField('pm_phone', '+ Phone')}
                           </>
                         )}
                       </div>
@@ -294,14 +355,14 @@ export function Prep() {
                         {/* LD Row */}
                         <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
                           <span className="text-gray-500">Lighting Designer</span>
-                          <div className="flex gap-2">
-                            {renderField('', 'ld_name', '+ Name')}
+                          <div>
+                            {renderInlineField('ld_name', '+ Name')}
                           </div>
                           <div className="flex gap-4">
                             {getFieldValue('ld_name') && (
                               <>
-                                {renderField('', 'ld_email', '+ Email')}
-                                {renderField('', 'ld_phone', '+ Phone')}
+                                {renderInlineField('ld_email', '+ Email')}
+                                {renderInlineField('ld_phone', '+ Phone')}
                               </>
                             )}
                           </div>
@@ -309,14 +370,14 @@ export function Prep() {
                         {/* ALD Row */}
                         <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
                           <span className="text-gray-500">Associate LD</span>
-                          <div className="flex gap-2">
-                            {renderField('', 'ald_name', '+ Name')}
+                          <div>
+                            {renderInlineField('ald_name', '+ Name')}
                           </div>
                           <div className="flex gap-4">
                             {getFieldValue('ald_name') && (
                               <>
-                                {renderField('', 'ald_email', '+ Email')}
-                                {renderField('', 'ald_phone', '+ Phone')}
+                                {renderInlineField('ald_email', '+ Email')}
+                                {renderInlineField('ald_phone', '+ Phone')}
                               </>
                             )}
                           </div>
@@ -324,14 +385,14 @@ export function Prep() {
                         {/* PE Row */}
                         <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
                           <span className="text-gray-500">Production Elec.</span>
-                          <div className="flex gap-2">
-                            {renderField('', 'pe_name', '+ Name')}
+                          <div>
+                            {renderInlineField('pe_name', '+ Name')}
                           </div>
                           <div className="flex gap-4">
                             {getFieldValue('pe_name') && (
                               <>
-                                {renderField('', 'pe_email', '+ Email')}
-                                {renderField('', 'pe_phone', '+ Phone')}
+                                {renderInlineField('pe_email', '+ Email')}
+                                {renderInlineField('pe_phone', '+ Phone')}
                               </>
                             )}
                           </div>
@@ -377,13 +438,13 @@ export function Prep() {
                     <div className="text-gray-500 font-medium">Load Out</div>
 
                     {/* Values Row */}
-                    {renderField('', 'prep_start_date', '—')}
-                    {renderField('', 'prep_end_date', '—')}
-                    {renderField('', 'load_in_date', '—')}
-                    {renderField('', 'first_preview_date', '—')}
-                    {renderField('', 'opening_night_date', '—')}
-                    {renderField('', 'closing_date', '—')}
-                    {renderField('', 'load_out_date', '—')}
+                    {renderInlineField('prep_start_date', '—')}
+                    {renderInlineField('prep_end_date', '—')}
+                    {renderInlineField('load_in_date', '—')}
+                    {renderInlineField('first_preview_date', '—')}
+                    {renderInlineField('opening_night_date', '—')}
+                    {renderInlineField('closing_date', '—')}
+                    {renderInlineField('load_out_date', '—')}
                   </div>
                 </div>
               </div>
