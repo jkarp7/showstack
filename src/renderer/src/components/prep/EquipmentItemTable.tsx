@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { PrepEquipmentItem } from '../../types/prep';
 import { usePrepStore } from '../../store/prepStore';
 
@@ -7,6 +7,7 @@ interface EquipmentItemTableProps {
   items: PrepEquipmentItem[];
   onAddItem: () => void;
   onEditItem: (item: PrepEquipmentItem) => void;
+  triggerAdd?: boolean; // Trigger to start adding a new row
 }
 
 interface NewItemRow {
@@ -21,6 +22,7 @@ export function EquipmentItemTable({
   items,
   onAddItem,
   onEditItem,
+  triggerAdd,
 }: EquipmentItemTableProps) {
   const { updateItem, deleteItem, createItem } = usePrepStore();
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -39,6 +41,13 @@ export function EquipmentItemTable({
   const [isSubmittingNewRow, setIsSubmittingNewRow] = useState(false);
 
   const sortedItems = [...items].sort((a, b) => a.sort_order - b.sort_order);
+
+  // Watch for external trigger to start adding a row
+  useEffect(() => {
+    if (triggerAdd) {
+      handleStartAddingRow();
+    }
+  }, [triggerAdd]);
 
   const handleDelete = async (itemId: string) => {
     if (window.confirm('Delete this equipment item?')) {
@@ -109,7 +118,7 @@ export function EquipmentItemTable({
     });
   };
 
-  const handleSaveNewRow = async () => {
+  const handleSaveNewRow = async (continueAdding = false) => {
     if (!newRow.description.trim()) {
       return;
     }
@@ -130,18 +139,32 @@ export function EquipmentItemTable({
     });
 
     setIsSubmittingNewRow(false);
-    setIsAddingRow(false);
+
+    // Reset the form
     setNewRow({
       description: '',
       active_qty: 0,
       spare_qty: 0,
       venue_qty: 0,
     });
+
+    if (!continueAdding) {
+      setIsAddingRow(false);
+    }
+    // If continuing, keep isAddingRow true and form will be reset for next entry
   };
 
   const handleNewRowKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSaveNewRow();
+      if (e.shiftKey) {
+        // SHIFT+ENTER: Save and create another
+        e.preventDefault();
+        handleSaveNewRow(true);
+      } else {
+        // Regular ENTER: Save and close
+        e.preventDefault();
+        handleSaveNewRow(false);
+      }
     } else if (e.key === 'Escape') {
       handleCancelNewRow();
     }
@@ -197,85 +220,6 @@ export function EquipmentItemTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-700">
-            {/* New Row Entry */}
-            {isAddingRow && (
-              <tr className="bg-blue-900/20 border-2 border-blue-500">
-                <td className="px-3 py-2">
-                  <input
-                    type="text"
-                    value={newRow.description}
-                    onChange={(e) => setNewRow({ ...newRow, description: e.target.value })}
-                    onKeyDown={handleNewRowKeyDown}
-                    placeholder="Enter equipment description..."
-                    className="w-full px-2 py-1 bg-gray-700 border border-blue-500 rounded text-white placeholder-gray-400 focus:outline-none"
-                    autoFocus
-                  />
-                </td>
-                <td className="px-3 py-2">
-                  <input
-                    type="number"
-                    value={newRow.active_qty}
-                    onChange={(e) =>
-                      setNewRow({ ...newRow, active_qty: parseInt(e.target.value) || 0 })
-                    }
-                    onKeyDown={handleNewRowKeyDown}
-                    min="0"
-                    className="w-full px-2 py-1 bg-gray-700 border border-blue-500 rounded text-center text-white focus:outline-none"
-                  />
-                </td>
-                <td className="px-3 py-2">
-                  <input
-                    type="number"
-                    value={newRow.spare_qty}
-                    onChange={(e) =>
-                      setNewRow({ ...newRow, spare_qty: parseInt(e.target.value) || 0 })
-                    }
-                    onKeyDown={handleNewRowKeyDown}
-                    min="0"
-                    className="w-full px-2 py-1 bg-gray-700 border border-blue-500 rounded text-center text-white focus:outline-none"
-                  />
-                </td>
-                <td className="px-3 py-2 text-center">
-                  <span className="text-gray-400 font-medium">{calculateNewRowTotals().total}</span>
-                </td>
-                <td className="px-3 py-2">
-                  <input
-                    type="number"
-                    value={newRow.venue_qty}
-                    onChange={(e) =>
-                      setNewRow({ ...newRow, venue_qty: parseInt(e.target.value) || 0 })
-                    }
-                    onKeyDown={handleNewRowKeyDown}
-                    min="0"
-                    className="w-full px-2 py-1 bg-gray-700 border border-purple-500 rounded text-center text-white focus:outline-none"
-                  />
-                </td>
-                <td className="px-3 py-2 text-center">
-                  <span className="text-blue-400 font-medium">
-                    {calculateNewRowTotals().rental}
-                  </span>
-                </td>
-                <td className="px-3 py-2 text-right">
-                  <div className="flex gap-2 justify-end">
-                    <button
-                      onClick={handleSaveNewRow}
-                      disabled={!newRow.description.trim() || isSubmittingNewRow}
-                      className="px-2 py-1 bg-green-600 hover:bg-green-700 rounded text-xs text-white transition disabled:opacity-50"
-                    >
-                      {isSubmittingNewRow ? '...' : 'Save'}
-                    </button>
-                    <button
-                      onClick={handleCancelNewRow}
-                      disabled={isSubmittingNewRow}
-                      className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs text-white transition disabled:opacity-50"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            )}
-
             {/* Existing Items */}
             {sortedItems.map((item) => (
               <tr key={item.id} className="hover:bg-gray-800 transition group">
@@ -382,6 +326,85 @@ export function EquipmentItemTable({
                 </td>
               </tr>
             ))}
+
+            {/* New Row Entry - at bottom */}
+            {isAddingRow && (
+              <tr className="bg-blue-900/20 border-2 border-blue-500">
+                <td className="px-3 py-2">
+                  <input
+                    type="text"
+                    value={newRow.description}
+                    onChange={(e) => setNewRow({ ...newRow, description: e.target.value })}
+                    onKeyDown={handleNewRowKeyDown}
+                    placeholder="Enter equipment description..."
+                    className="w-full px-2 py-1 bg-gray-700 border border-blue-500 rounded text-white placeholder-gray-400 focus:outline-none"
+                    autoFocus
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <input
+                    type="number"
+                    value={newRow.active_qty}
+                    onChange={(e) =>
+                      setNewRow({ ...newRow, active_qty: parseInt(e.target.value) || 0 })
+                    }
+                    onKeyDown={handleNewRowKeyDown}
+                    min="0"
+                    className="w-full px-2 py-1 bg-gray-700 border border-blue-500 rounded text-center text-white focus:outline-none"
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <input
+                    type="number"
+                    value={newRow.spare_qty}
+                    onChange={(e) =>
+                      setNewRow({ ...newRow, spare_qty: parseInt(e.target.value) || 0 })
+                    }
+                    onKeyDown={handleNewRowKeyDown}
+                    min="0"
+                    className="w-full px-2 py-1 bg-gray-700 border border-blue-500 rounded text-center text-white focus:outline-none"
+                  />
+                </td>
+                <td className="px-3 py-2 text-center">
+                  <span className="text-gray-400 font-medium">{calculateNewRowTotals().total}</span>
+                </td>
+                <td className="px-3 py-2">
+                  <input
+                    type="number"
+                    value={newRow.venue_qty}
+                    onChange={(e) =>
+                      setNewRow({ ...newRow, venue_qty: parseInt(e.target.value) || 0 })
+                    }
+                    onKeyDown={handleNewRowKeyDown}
+                    min="0"
+                    className="w-full px-2 py-1 bg-gray-700 border border-purple-500 rounded text-center text-white focus:outline-none"
+                  />
+                </td>
+                <td className="px-3 py-2 text-center">
+                  <span className="text-blue-400 font-medium">
+                    {calculateNewRowTotals().rental}
+                  </span>
+                </td>
+                <td className="px-3 py-2 text-right">
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={() => handleSaveNewRow(false)}
+                      disabled={!newRow.description.trim() || isSubmittingNewRow}
+                      className="px-2 py-1 bg-green-600 hover:bg-green-700 rounded text-xs text-white transition disabled:opacity-50"
+                    >
+                      {isSubmittingNewRow ? '...' : 'Save'}
+                    </button>
+                    <button
+                      onClick={handleCancelNewRow}
+                      disabled={isSubmittingNewRow}
+                      className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs text-white transition disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -398,7 +421,7 @@ export function EquipmentItemTable({
           )}
           {isAddingRow && (
             <div className="text-xs text-blue-400">
-              Press Enter to save, Escape to cancel
+              Press Enter to save, SHIFT+Enter to save & add another, Escape to cancel
             </div>
           )}
         </div>

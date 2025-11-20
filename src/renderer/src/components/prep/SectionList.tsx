@@ -40,8 +40,16 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
   };
 
   const handleAddItem = (sectionId: string) => {
+    // Expand the section if not already expanded
+    if (!expandedSections.has(sectionId)) {
+      const newExpanded = new Set(expandedSections);
+      newExpanded.add(sectionId);
+      setExpandedSections(newExpanded);
+    }
+    // Set selected section to trigger inline add in table
     setSelectedSectionId(sectionId);
-    setShowAddItemDialog(true);
+    // Clear after a brief moment to allow re-triggering
+    setTimeout(() => setSelectedSectionId(null), 100);
   };
 
   const handleEditItem = (item: PrepEquipmentItem) => {
@@ -157,6 +165,7 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
                       items={sectionItems}
                       onAddItem={() => handleAddItem(section.id)}
                       onEditItem={handleEditItem}
+                      triggerAdd={selectedSectionId === section.id}
                     />
                   </div>
                 )}
