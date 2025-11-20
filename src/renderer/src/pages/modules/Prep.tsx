@@ -112,9 +112,11 @@ export function Prep() {
         // Map prep project fields to parent project fields
         switch (field) {
           case 'gm_name': return parentProject.general_manager || '';
+          case 'gm_company': return parentProject.general_manager_company || '';
           case 'gm_email': return parentProject.general_manager_email || '';
           case 'gm_phone': return parentProject.general_manager_phone || '';
           case 'pm_name': return parentProject.production_manager || '';
+          case 'pm_company': return parentProject.production_manager_company || '';
           case 'pm_email': return parentProject.production_manager_email || '';
           case 'pm_phone': return parentProject.production_manager_phone || '';
           case 'ld_name': return parentProject.lighting_designer || '';
@@ -208,144 +210,180 @@ export function Prep() {
           <div className="max-w-6xl mx-auto space-y-6">
             {/* Project Details */}
             <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-              <h2 className="text-xl font-bold mb-4">Project Details</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left Column */}
-                <div className="space-y-4">
-                  {/* Production Info */}
+              {/* Header with dates on right */}
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold">Project Details</h2>
+                <div className="text-xs text-gray-400">
+                  Created: {new Date(currentProject.created_at).toLocaleDateString()}
+                  {latestRevision && (
+                    <> | Last Revised: {new Date(latestRevision.revision_date).toLocaleDateString()}</>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {/* Production Info - 1 Row */}
+                <div className="flex items-center gap-6 text-sm pb-3 border-b border-gray-700">
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Production</h3>
-                    <div className="space-y-2 pl-2 text-sm">
-                      <div>
-                        <span className="text-gray-500">Name:</span>{' '}
-                        <span className="text-gray-300">{currentProject.production_name}</span>
+                    <span className="text-gray-500">Show:</span>{' '}
+                    <span className="text-gray-300 font-medium">{currentProject.production_name}</span>
+                  </div>
+                  {currentProject.venue && (
+                    <div>
+                      <span className="text-gray-500">Venue:</span>{' '}
+                      <span className="text-gray-300">
+                        {currentProject.venue}
+                        {currentProject.venue_city && `, ${currentProject.venue_city}`}
+                        {currentProject.venue_state && `, ${currentProject.venue_state}`}
+                      </span>
+                    </div>
+                  )}
+                  <div>
+                    <span className="text-gray-500">Disciplines:</span>{' '}
+                    <span className="text-gray-300">
+                      {disciplines.map((d) => d.charAt(0).toUpperCase()).join('/')}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Management - Each Person in a Row */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Management</h3>
+                  <div className="space-y-2">
+                    {/* GM Row */}
+                    <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
+                      <span className="text-gray-500">General Manager</span>
+                      <div className="flex gap-2">
+                        {renderField('', 'gm_name', '+ Name')}
                       </div>
-                      {currentProject.venue && (
-                        <div>
-                          <span className="text-gray-500">Venue:</span>{' '}
-                          <span className="text-gray-300">
-                            {currentProject.venue}
-                            {currentProject.venue_city && `, ${currentProject.venue_city}`}
-                            {currentProject.venue_state && `, ${currentProject.venue_state}`}
-                          </span>
-                        </div>
-                      )}
-                      <div>
-                        <span className="text-gray-500">Disciplines:</span>{' '}
-                        <span className="text-gray-300">
-                          {disciplines.map((d) => d.charAt(0).toUpperCase() + d.slice(1)).join(', ')}
-                        </span>
+                      <div className="flex gap-4">
+                        {renderField('', 'gm_company', '+ Company')}
+                        {getFieldValue('gm_name') && (
+                          <>
+                            {renderField('', 'gm_email', '+ Email')}
+                            {renderField('', 'gm_phone', '+ Phone')}
+                          </>
+                        )}
                       </div>
                     </div>
-                  </div>
-
-                  {/* Management */}
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Management</h3>
-                    <div className="space-y-2 pl-2 text-sm">
-                      {renderField('General Manager', 'gm_name')}
-                      {getFieldValue('gm_name') && (
-                        <>
-                          {renderField('  Email', 'gm_email')}
-                          {renderField('  Phone', 'gm_phone')}
-                        </>
-                      )}
-                      {renderField('Production Manager', 'pm_name')}
-                      {getFieldValue('pm_name') && (
-                        <>
-                          {renderField('  Email', 'pm_email')}
-                          {renderField('  Phone', 'pm_phone')}
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Design Team */}
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Design Team</h3>
-                    <div className="space-y-2 pl-2 text-sm">
-                      {disciplines.includes('lighting') && (
-                        <>
-                          {renderField('Lighting Designer', 'ld_name')}
-                          {getFieldValue('ld_name') && (
-                            <>
-                              {renderField('  Email', 'ld_email')}
-                              {renderField('  Phone', 'ld_phone')}
-                            </>
-                          )}
-                          {renderField('Associate LD', 'ald_name')}
-                          {getFieldValue('ald_name') && (
-                            <>
-                              {renderField('  Email', 'ald_email')}
-                              {renderField('  Phone', 'ald_phone')}
-                            </>
-                          )}
-                          {renderField('Production Electrician', 'pe_name')}
-                          {getFieldValue('pe_name') && (
-                            <>
-                              {renderField('  Email', 'pe_email')}
-                              {renderField('  Phone', 'pe_phone')}
-                            </>
-                          )}
-                        </>
-                      )}
-                      {disciplines.includes('audio') && isLinked && parentProject && (
-                        <>
-                          <div className="text-gray-500 text-xs mt-2">Audio Team</div>
-                          <div>
-                            <span className="text-gray-500 text-sm">Audio Designer:</span>{' '}
-                            <span className="text-gray-400">{parentProject.audio_designer || 'Not specified'}</span>
-                            <span className="ml-2 text-xs text-blue-400">(from parent)</span>
-                          </div>
-                        </>
-                      )}
-                      {disciplines.includes('video') && isLinked && parentProject && (
-                        <>
-                          <div className="text-gray-500 text-xs mt-2">Video Team</div>
-                          <div>
-                            <span className="text-gray-500 text-sm">Video Designer:</span>{' '}
-                            <span className="text-gray-400">{parentProject.video_designer || 'Not specified'}</span>
-                            <span className="ml-2 text-xs text-blue-400">(from parent)</span>
-                          </div>
-                        </>
-                      )}
+                    {/* PM Row */}
+                    <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
+                      <span className="text-gray-500">Production Manager</span>
+                      <div className="flex gap-2">
+                        {renderField('', 'pm_name', '+ Name')}
+                      </div>
+                      <div className="flex gap-4">
+                        {renderField('', 'pm_company', '+ Company')}
+                        {getFieldValue('pm_name') && (
+                          <>
+                            {renderField('', 'pm_email', '+ Email')}
+                            {renderField('', 'pm_phone', '+ Phone')}
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Right Column - Dates */}
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Dates</h3>
-                    <div className="space-y-2 pl-2 text-sm">
-                      <div>
-                        <span className="text-gray-500">Order Created:</span>{' '}
-                        <span className="text-gray-300">
-                          {new Date(currentProject.created_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                      {latestRevision && (
-                        <div>
-                          <span className="text-gray-500">Latest Revision:</span>{' '}
-                          <span className="text-gray-300">
-                            {new Date(latestRevision.revision_date).toLocaleDateString()}
-                          </span>
+                {/* Design Team - Each Person in a Row */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Design Team</h3>
+                  <div className="space-y-2">
+                    {disciplines.includes('lighting') && (
+                      <>
+                        {/* LD Row */}
+                        <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
+                          <span className="text-gray-500">Lighting Designer</span>
+                          <div className="flex gap-2">
+                            {renderField('', 'ld_name', '+ Name')}
+                          </div>
+                          <div className="flex gap-4">
+                            {getFieldValue('ld_name') && (
+                              <>
+                                {renderField('', 'ld_email', '+ Email')}
+                                {renderField('', 'ld_phone', '+ Phone')}
+                              </>
+                            )}
+                          </div>
                         </div>
-                      )}
-                    </div>
+                        {/* ALD Row */}
+                        <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
+                          <span className="text-gray-500">Associate LD</span>
+                          <div className="flex gap-2">
+                            {renderField('', 'ald_name', '+ Name')}
+                          </div>
+                          <div className="flex gap-4">
+                            {getFieldValue('ald_name') && (
+                              <>
+                                {renderField('', 'ald_email', '+ Email')}
+                                {renderField('', 'ald_phone', '+ Phone')}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        {/* PE Row */}
+                        <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
+                          <span className="text-gray-500">Production Elec.</span>
+                          <div className="flex gap-2">
+                            {renderField('', 'pe_name', '+ Name')}
+                          </div>
+                          <div className="flex gap-4">
+                            {getFieldValue('pe_name') && (
+                              <>
+                                {renderField('', 'pe_email', '+ Email')}
+                                {renderField('', 'pe_phone', '+ Phone')}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    {disciplines.includes('audio') && isLinked && parentProject?.audio_designer && (
+                      <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
+                        <span className="text-gray-500">Audio Designer</span>
+                        <span className="text-gray-400">{parentProject.audio_designer}</span>
+                        <div className="text-gray-400">
+                          {parentProject.audio_designer_email && <span>{parentProject.audio_designer_email}</span>}
+                          {parentProject.audio_designer_phone && <span className="ml-4">{parentProject.audio_designer_phone}</span>}
+                          <span className="ml-2 text-xs text-blue-400">(from parent)</span>
+                        </div>
+                      </div>
+                    )}
+                    {disciplines.includes('video') && isLinked && parentProject?.video_designer && (
+                      <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
+                        <span className="text-gray-500">Video Designer</span>
+                        <span className="text-gray-400">{parentProject.video_designer}</span>
+                        <div className="text-gray-400">
+                          {parentProject.video_designer_email && <span>{parentProject.video_designer_email}</span>}
+                          {parentProject.video_designer_phone && <span className="ml-4">{parentProject.video_designer_phone}</span>}
+                          <span className="ml-2 text-xs text-blue-400">(from parent)</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
+                </div>
 
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Show Dates</h3>
-                    <div className="space-y-2 pl-2 text-sm">
-                      {renderField('Prep Start', 'prep_start_date')}
-                      {renderField('Prep End', 'prep_end_date')}
-                      {renderField('Load In', 'load_in_date')}
-                      {renderField('First Preview', 'first_preview_date')}
-                      {renderField('Opening Night', 'opening_night_date')}
-                      {renderField('Closing', 'closing_date')}
-                      {renderField('Load Out', 'load_out_date')}
-                    </div>
+                {/* Show Dates - 2 Rows: Header and Values */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Show Dates</h3>
+                  <div className="grid grid-cols-7 gap-2 text-xs">
+                    {/* Header Row */}
+                    <div className="text-gray-500 font-medium">Prep Start</div>
+                    <div className="text-gray-500 font-medium">Prep End</div>
+                    <div className="text-gray-500 font-medium">Load In</div>
+                    <div className="text-gray-500 font-medium">First Preview</div>
+                    <div className="text-gray-500 font-medium">Opening</div>
+                    <div className="text-gray-500 font-medium">Closing</div>
+                    <div className="text-gray-500 font-medium">Load Out</div>
+
+                    {/* Values Row */}
+                    {renderField('', 'prep_start_date', '—')}
+                    {renderField('', 'prep_end_date', '—')}
+                    {renderField('', 'load_in_date', '—')}
+                    {renderField('', 'first_preview_date', '—')}
+                    {renderField('', 'opening_night_date', '—')}
+                    {renderField('', 'closing_date', '—')}
+                    {renderField('', 'load_out_date', '—')}
                   </div>
                 </div>
               </div>

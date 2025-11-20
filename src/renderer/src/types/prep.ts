@@ -49,9 +49,11 @@ export interface PrepProject {
 
   // Standard Contacts
   gm_name?: string;
+  gm_company?: string;
   gm_email?: string;
   gm_phone?: string;
   pm_name?: string;
+  pm_company?: string;
   pm_email?: string;
   pm_phone?: string;
   ld_name?: string;

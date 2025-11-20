@@ -160,9 +160,11 @@ export const SCHEMA = `
 
     -- Contact Information
     gm_name TEXT,
+    gm_company TEXT,
     gm_email TEXT,
     gm_phone TEXT,
     pm_name TEXT,
+    pm_company TEXT,
     pm_email TEXT,
     pm_phone TEXT,
     ld_name TEXT,

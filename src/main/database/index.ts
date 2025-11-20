@@ -162,6 +162,15 @@ function runMigrations(db: Database): void {
         db.run(`ALTER TABLE prep_projects ADD COLUMN ${field} TEXT`);
       }
     }
+
+    // Add company fields if missing
+    const companyFields = ['gm_company', 'pm_company'];
+    for (const field of companyFields) {
+      if (!prepProjectsColumns.includes(field)) {
+        console.log(`Running migration: Adding ${field} to prep_projects`);
+        db.run(`ALTER TABLE prep_projects ADD COLUMN ${field} TEXT`);
+      }
+    }
   }
 
   // Prep Sections table migrations
