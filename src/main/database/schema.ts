@@ -193,6 +193,7 @@ export const SCHEMA = `
     discipline TEXT NOT NULL,
     sort_order INTEGER NOT NULL,
     page_break INTEGER DEFAULT 0,
+    notes TEXT, -- Optional section notes displayed below section header
 
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,

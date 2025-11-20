@@ -251,8 +251,8 @@ export function createPrepSection(data: Partial<PrepSection>): PrepSection {
   db.run(
     `
     INSERT INTO prep_sections (
-      id, prep_project_id, name, discipline, sort_order, page_break, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      id, prep_project_id, name, discipline, sort_order, page_break, notes, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
     [
       id,
@@ -261,6 +261,7 @@ export function createPrepSection(data: Partial<PrepSection>): PrepSection {
       data.discipline || 'lighting',
       data.sort_order || 0,
       data.page_break ? 1 : 0,
+      data.notes || null,
       now,
       now,
     ]
@@ -274,7 +275,7 @@ export function updatePrepSection(id: string, updates: Partial<PrepSection>): Pr
   const db = getDatabase();
   const now = Date.now();
 
-  const allowedFields = ['name', 'discipline', 'sort_order', 'page_break'];
+  const allowedFields = ['name', 'discipline', 'sort_order', 'page_break', 'notes'];
   const fields = Object.keys(updates).filter((k) => allowedFields.includes(k));
 
   if (fields.length === 0) {

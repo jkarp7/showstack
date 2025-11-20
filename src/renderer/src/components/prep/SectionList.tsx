@@ -157,6 +157,13 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
                   </div>
                 </div>
 
+                {/* Section Notes */}
+                {isExpanded && section.notes && (
+                  <div className="px-4 py-2 bg-gray-800/50">
+                    <p className="text-sm text-gray-300 italic">{section.notes}</p>
+                  </div>
+                )}
+
                 {/* Equipment Items Table (Expanded) */}
                 {isExpanded && (
                   <div className="px-4 pb-4">

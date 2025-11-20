@@ -85,6 +85,7 @@ export interface PrepSection {
   discipline: Discipline;
   sort_order: number;
   page_break: boolean;
+  notes?: string; // Optional section notes displayed below section header
 
   created_at: number;
   updated_at: number;

@@ -153,6 +153,17 @@ function runMigrations(db: Database): void {
       db.run('ALTER TABLE prep_projects ADD COLUMN parent_project_id TEXT');
     }
   }
+
+  // Prep Sections table migrations
+  const prepSectionsTableInfo = db.exec("PRAGMA table_info(prep_sections)");
+  if (prepSectionsTableInfo[0]) {
+    const prepSectionsColumns = prepSectionsTableInfo[0].values.map(row => row[1]) || [];
+
+    if (!prepSectionsColumns.includes('notes')) {
+      console.log('Running migration: Adding notes to prep_sections');
+      db.run('ALTER TABLE prep_sections ADD COLUMN notes TEXT');
+    }
+  }
 }
 
 export function getDatabase(): Database {
