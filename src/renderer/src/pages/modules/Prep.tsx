@@ -154,9 +154,12 @@ export function Prep() {
           case 'pe_name': return parentProject.electrician || '';
           case 'pe_email': return parentProject.electrician_email || '';
           case 'pe_phone': return parentProject.electrician_phone || '';
-          default: return '';
+          case 'venue': return parentProject.venue || '';
+          // For fields not in parent project, fall through to get from currentProject
+          default: break;
         }
       }
+      // Always get from currentProject if not linked or field not in parent
       return (currentProject[field] as string) || '';
     };
 
@@ -292,13 +295,21 @@ export function Prep() {
                       <span className="text-gray-500 text-sm">Show:</span>{' '}
                       <span className="text-gray-300 font-medium text-base">{currentProject.production_name}</span>
                     </div>
-                    <div>
+                    <div className="flex items-center gap-2">
                       <span className="text-gray-500 text-sm">Venue:</span>{' '}
-                      <span className="text-gray-300 text-base">
-                        {currentProject.venue || 'Not specified'}
-                        {currentProject.venue_city && `, ${currentProject.venue_city}`}
-                        {currentProject.venue_state && `, ${currentProject.venue_state}`}
+                      <span className="text-base">
+                        {renderInlineField('venue', '+ Venue Name', 'inline-block min-w-[120px]')}
                       </span>
+                      {getFieldValue('venue') && (
+                        <>
+                          <span className="text-base">
+                            {renderInlineField('venue_city', '+ City', 'inline-block min-w-[80px]')}
+                          </span>
+                          <span className="text-base">
+                            {renderInlineField('venue_state', '+ ST', 'inline-block min-w-[40px]')}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className="text-xs text-gray-400">
