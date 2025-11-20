@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePrepStore } from '../../store/prepStore';
+import { useProjectStore } from '../../store/projectStore';
 import { NewPrepProjectDialog } from '../../components/prep/NewPrepProjectDialog';
 import { PrepProjectCard } from '../../components/prep/PrepProjectCard';
 import { SectionList } from '../../components/prep/SectionList';
 import { AddSectionDialog } from '../../components/prep/AddSectionDialog';
 import { EditSectionDialog } from '../../components/prep/EditSectionDialog';
+import { ProjectMetadataSection } from '../../components/prep/ProjectMetadataSection';
 import type { PrepSection, Discipline } from '../../types/prep';
 
 export function Prep() {
@@ -13,6 +15,7 @@ export function Prep() {
   const { projectId: parentProjectId } = useParams<{ projectId?: string }>();
   const { allProjects, currentProject, sections, loadAllProjects, loadProject, clearCurrentProject } =
     usePrepStore();
+  const { loadProjects } = useProjectStore();
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   const [showAddSectionDialog, setShowAddSectionDialog] = useState(false);
   const [showEditSectionDialog, setShowEditSectionDialog] = useState(false);
@@ -31,8 +34,9 @@ export function Prep() {
   };
 
   useEffect(() => {
-    // Load all projects on mount
+    // Load all prep projects and parent projects on mount
     loadAllProjects();
+    loadProjects();
   }, []);
 
   const handleProjectClick = async (projectId: string) => {
@@ -118,6 +122,9 @@ export function Prep() {
                 </div>
               </div>
             </div>
+
+            {/* Project Metadata */}
+            <ProjectMetadataSection project={currentProject} />
 
             {/* Sections List */}
             <SectionList
