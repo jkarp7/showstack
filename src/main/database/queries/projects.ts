@@ -28,7 +28,19 @@ export function getAllProjects(): Project[] {
   return values.map(row => {
     const project: any = {};
     columns.forEach((col, idx) => {
-      project[col] = row[idx];
+      const value = row[idx];
+      // Parse JSON fields
+      if ((col === 'enabled_modules' || col === 'show_dates' ||
+           col === 'lighting_associates' || col === 'audio_associates' ||
+           col === 'video_associates') && value && typeof value === 'string') {
+        try {
+          project[col] = JSON.parse(value);
+        } catch {
+          project[col] = value;
+        }
+      } else {
+        project[col] = value;
+      }
     });
     return project as Project;
   });
@@ -47,7 +59,19 @@ export function getProjectById(id: string): Project | null {
 
   const project: any = {};
   columns.forEach((col, idx) => {
-    project[col] = values[idx];
+    const value = values[idx];
+    // Parse JSON fields
+    if ((col === 'enabled_modules' || col === 'show_dates' ||
+         col === 'lighting_associates' || col === 'audio_associates' ||
+         col === 'video_associates') && value && typeof value === 'string') {
+      try {
+        project[col] = JSON.parse(value);
+      } catch {
+        project[col] = value;
+      }
+    } else {
+      project[col] = value;
+    }
   });
 
   return project as Project;
@@ -90,7 +114,48 @@ export function updateProject(id: string, updates: Partial<Project>): Project {
   const db = getDatabase();
   const now = Date.now();
 
-  const allowedFields = ['name', 'description', 'venue', 'designer', 'logo_path', 'enabled_modules'];
+  const allowedFields = [
+    'name',
+    'description',
+    'venue',
+    'designer',
+    'logo_path',
+    'enabled_modules',
+    // Design team
+    'lighting_designer',
+    'lighting_designer_email',
+    'lighting_designer_phone',
+    'lighting_associates',
+    'audio_designer',
+    'audio_designer_email',
+    'audio_designer_phone',
+    'audio_associates',
+    'video_designer',
+    'video_designer_email',
+    'video_designer_phone',
+    'video_associates',
+    // Production staff
+    'electrician',
+    'electrician_email',
+    'electrician_phone',
+    'audio_tech',
+    'audio_tech_email',
+    'audio_tech_phone',
+    'video_tech',
+    'video_tech_email',
+    'video_tech_phone',
+    'production_manager',
+    'production_manager_email',
+    'production_manager_phone',
+    'production_manager_company',
+    'general_manager',
+    'general_manager_email',
+    'general_manager_phone',
+    'general_manager_company',
+    // Show dates
+    'show_dates'
+  ];
+
   const fields = Object.keys(updates).filter(k => allowedFields.includes(k));
 
   if (fields.length === 0) {
@@ -102,7 +167,20 @@ export function updateProject(id: string, updates: Partial<Project>): Project {
   }
 
   const setClause = fields.map(f => `${f} = ?`).join(', ');
-  const values = fields.map(f => updates[f as keyof Project]);
+  const values = fields.map(f => {
+    const value = updates[f as keyof Project];
+    // Convert show_dates object to JSON string
+    if (f === 'show_dates' && value && typeof value === 'object') {
+      return JSON.stringify(value);
+    }
+    // Convert arrays to JSON string (enabled_modules and all associates arrays)
+    if ((f === 'enabled_modules' || f === 'lighting_associates' ||
+         f === 'audio_associates' || f === 'video_associates') &&
+        Array.isArray(value)) {
+      return JSON.stringify(value);
+    }
+    return value;
+  });
 
   db.run(
     `UPDATE projects SET ${setClause}, updated_at = ? WHERE id = ?`,
@@ -141,7 +219,19 @@ export function getCurrentProject(): Project {
 
   const project: any = {};
   columns.forEach((col, idx) => {
-    project[col] = values[idx];
+    const value = values[idx];
+    // Parse JSON fields
+    if ((col === 'enabled_modules' || col === 'show_dates' ||
+         col === 'lighting_associates' || col === 'audio_associates' ||
+         col === 'video_associates') && value && typeof value === 'string') {
+      try {
+        project[col] = JSON.parse(value);
+      } catch {
+        project[col] = value;
+      }
+    } else {
+      project[col] = value;
+    }
   });
 
   return project as Project;

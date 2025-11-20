@@ -60,6 +60,66 @@ function runMigrations(db: Database): void {
     db.run('ALTER TABLE projects ADD COLUMN enabled_modules TEXT');
   }
 
+  // Design team fields - name columns
+  if (!projectsColumns.includes('lighting_designer')) {
+    console.log('Running migration: Adding design team name fields to projects');
+    db.run('ALTER TABLE projects ADD COLUMN lighting_designer TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN lighting_associates TEXT'); // JSON array
+    db.run('ALTER TABLE projects ADD COLUMN audio_designer TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN audio_associates TEXT'); // JSON array
+    db.run('ALTER TABLE projects ADD COLUMN video_designer TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN video_associates TEXT'); // JSON array
+  }
+
+  // Design team fields - contact info
+  if (!projectsColumns.includes('lighting_designer_email')) {
+    console.log('Running migration: Adding design team contact fields to projects');
+    db.run('ALTER TABLE projects ADD COLUMN lighting_designer_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN lighting_designer_phone TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN audio_designer_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN audio_designer_phone TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN video_designer_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN video_designer_phone TEXT');
+  }
+
+  // Production staff fields - name columns
+  if (!projectsColumns.includes('electrician')) {
+    console.log('Running migration: Adding production staff name fields to projects');
+    db.run('ALTER TABLE projects ADD COLUMN electrician TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN audio_tech TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN video_tech TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN production_manager TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN production_manager_company TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN general_manager TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN general_manager_company TEXT');
+  }
+
+  // Production staff fields - contact info
+  if (!projectsColumns.includes('electrician_email')) {
+    console.log('Running migration: Adding production staff contact fields to projects');
+    db.run('ALTER TABLE projects ADD COLUMN electrician_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN electrician_phone TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN audio_tech_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN audio_tech_phone TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN video_tech_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN video_tech_phone TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN production_manager_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN production_manager_phone TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN general_manager_email TEXT');
+    db.run('ALTER TABLE projects ADD COLUMN general_manager_phone TEXT');
+  }
+
+  // Venue and dates - separate checks
+  if (!projectsColumns.includes('venue')) {
+    console.log('Running migration: Adding venue to projects');
+    db.run('ALTER TABLE projects ADD COLUMN venue TEXT');
+  }
+
+  if (!projectsColumns.includes('show_dates')) {
+    console.log('Running migration: Adding show_dates to projects');
+    db.run('ALTER TABLE projects ADD COLUMN show_dates TEXT'); // JSON object
+  }
+
   // Fixtures table migrations - add LightWright parity columns
   const fixturesTableInfo = db.exec("PRAGMA table_info(fixtures)");
   const fixturesColumns = fixturesTableInfo[0]?.values.map(row => row[1]) || [];

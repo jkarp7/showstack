@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { VirtualDataGrid } from '../../components/fixture/VirtualDataGrid';
 import { Toolbar } from '../../components/fixture/Toolbar';
 import { FilterBar } from '../../components/fixture/FilterBar';
@@ -14,13 +14,21 @@ import { useFileStore } from '../../store/fileStore';
 import { Fixture } from '../../types';
 import { DEFAULT_COLUMN_VISIBILITY, ColumnVisibility, DEFAULT_COLUMN_ORDER, ColumnKey } from '../../types/columns';
 
-export function Production() {
+interface EquipmentManagerProps {
+  embedded?: boolean;
+}
+
+export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {}) {
   const navigate = useNavigate();
+  const { projectId: routeProjectId } = useParams<{ projectId?: string; moduleType?: string }>();
   const { fixtures, loadFixtures, addMultipleFixtures, deleteMultiple, updateFixture } = useFixtureStore();
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [isAddFixtureDialogOpen, setIsAddFixtureDialogOpen] = useState(false);
   const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = useState(false);
   const [isUserColumnSettingsOpen, setIsUserColumnSettingsOpen] = useState(false);
+
+  // Get current project ID - use route param or fall back to default-project
+  const currentProjectId = routeProjectId || 'default-project';
 
   // Unsaved changes dialog
   const unsavedChangesDialog = useUnsavedChangesDialog();
@@ -60,11 +68,9 @@ export function Production() {
     if (!window.api) return;
 
     try {
-      const projectId = 'default-project';
-
       // Load project name
       if (window.api.projects) {
-        const project = await window.api.projects.getById(projectId);
+        const project = await window.api.projects.getById(currentProjectId);
         if (project?.name) {
           setProjectName(project.name);
         }
@@ -83,11 +89,9 @@ export function Production() {
       if (!window.api) return;
 
       try {
-        const projectId = 'default-project'; // TODO: Get from current project
-
         // Load project name
         if (window.api.projects) {
-          const project = await window.api.projects.getById(projectId);
+          const project = await window.api.projects.getById(currentProjectId);
           if (project?.name) {
             setProjectName(project.name);
           }
@@ -95,22 +99,22 @@ export function Production() {
 
         // Load column preferences
         if (window.api.preferences) {
-          const savedVisibility = await window.api.preferences.get(projectId, 'columnVisibility');
+          const savedVisibility = await window.api.preferences.get(currentProjectId, 'columnVisibility');
           if (savedVisibility) {
             setColumnVisibility(savedVisibility);
           }
 
-          const savedOrder = await window.api.preferences.get(projectId, 'columnOrder');
+          const savedOrder = await window.api.preferences.get(currentProjectId, 'columnOrder');
           if (savedOrder) {
             setColumnOrder(savedOrder);
           }
 
-          const savedWidths = await window.api.preferences.get(projectId, 'columnWidths');
+          const savedWidths = await window.api.preferences.get(currentProjectId, 'columnWidths');
           if (savedWidths) {
             setColumnWidths(savedWidths);
           }
 
-          const savedUserColumns = await window.api.preferences.get(projectId, 'userColumnDefinitions');
+          const savedUserColumns = await window.api.preferences.get(currentProjectId, 'userColumnDefinitions');
           if (savedUserColumns) {
             setUserColumnDefinitions(savedUserColumns);
           }
@@ -121,49 +125,46 @@ export function Production() {
     };
 
     loadProjectAndPreferences();
-  }, [loadFixtures]);
+  }, [loadFixtures, currentProjectId]);
 
   // Save column visibility when it changes
   useEffect(() => {
     const savePreference = async () => {
       if (!window.api?.preferences) return;
       try {
-        const projectId = 'default-project'; // TODO: Get from current project
-        await window.api.preferences.set(projectId, 'columnVisibility', columnVisibility);
+        await window.api.preferences.set(currentProjectId, 'columnVisibility', columnVisibility);
       } catch (error) {
         console.error('Failed to save column visibility:', error);
       }
     };
     savePreference();
-  }, [columnVisibility]);
+  }, [columnVisibility, currentProjectId]);
 
   // Save column order when it changes
   useEffect(() => {
     const savePreference = async () => {
       if (!window.api?.preferences) return;
       try {
-        const projectId = 'default-project'; // TODO: Get from current project
-        await window.api.preferences.set(projectId, 'columnOrder', columnOrder);
+        await window.api.preferences.set(currentProjectId, 'columnOrder', columnOrder);
       } catch (error) {
         console.error('Failed to save column order:', error);
       }
     };
     savePreference();
-  }, [columnOrder]);
+  }, [columnOrder, currentProjectId]);
 
   // Save column widths when they change
   useEffect(() => {
     const savePreference = async () => {
       if (!window.api?.preferences) return;
       try {
-        const projectId = 'default-project'; // TODO: Get from current project
-        await window.api.preferences.set(projectId, 'columnWidths', columnWidths);
+        await window.api.preferences.set(currentProjectId, 'columnWidths', columnWidths);
       } catch (error) {
         console.error('Failed to save column widths:', error);
       }
     };
     savePreference();
-  }, [columnWidths]);
+  }, [columnWidths, currentProjectId]);
 
   // Sort handler - supports multi-column sort with Shift key
   const handleSort = (field: string, addToExisting: boolean = false) => {
@@ -228,8 +229,7 @@ export function Production() {
     // Save to preferences
     if (!window.api?.preferences) return;
     try {
-      const projectId = 'default-project';
-      await window.api.preferences.set(projectId, 'userColumnDefinitions', definitions);
+      await window.api.preferences.set(currentProjectId, 'userColumnDefinitions', definitions);
     } catch (error) {
       console.error('Failed to save user column definitions:', error);
     }
@@ -448,17 +448,23 @@ export function Production() {
       <header className="bg-gray-800 border-b border-gray-700 p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/modules')}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
-            >
-              ← Home
-            </button>
+            {!embedded && (
+              <button
+                onClick={() => navigate('/modules')}
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              >
+                ← Home
+              </button>
+            )}
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold">{projectName}</h1>
-                <span className="text-gray-500">•</span>
-                <span className="text-lg text-gray-400">ShowStack:Production</span>
+                {!embedded && (
+                  <>
+                    <span className="text-gray-500">•</span>
+                    <span className="text-lg text-gray-400">ShowStack:Production</span>
+                  </>
+                )}
               </div>
               <p className="text-sm text-gray-400">Fixture Schedule</p>
             </div>

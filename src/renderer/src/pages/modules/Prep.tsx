@@ -1,14 +1,27 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { usePrepStore } from '../../store/prepStore';
 import { NewPrepProjectDialog } from '../../components/prep/NewPrepProjectDialog';
 import { PrepProjectCard } from '../../components/prep/PrepProjectCard';
 
 export function Prep() {
   const navigate = useNavigate();
+  const { projectId: routeProjectId } = useParams<{ projectId?: string }>();
   const { allProjects, currentProject, loadAllProjects, loadProject, clearCurrentProject } =
     usePrepStore();
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
+
+  const handleBackClick = () => {
+    if (routeProjectId) {
+      navigate(`/project/${routeProjectId}`);
+    } else {
+      navigate('/');
+    }
+  };
+
+  const handleHomeClick = () => {
+    navigate('/');
+  };
 
   useEffect(() => {
     // Load all projects on mount
@@ -51,6 +64,13 @@ export function Prep() {
                 </span>
               )}
             </div>
+            <button
+              onClick={handleHomeClick}
+              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              title="Home (Projects)"
+            >
+              🏠
+            </button>
           </div>
         </header>
 
@@ -99,20 +119,30 @@ export function Prep() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate('/modules')}
+              onClick={handleBackClick}
               className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              title={routeProjectId ? "Back to Project" : "Back to Projects"}
             >
-              ← Home
+              ← Back
             </button>
             <h1 className="text-2xl font-bold">ShowStack:Prep</h1>
             <span className="text-sm text-gray-400">Equipment Orders & Specifications</span>
           </div>
-          <button
-            onClick={handleNewProject}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-medium transition"
-          >
-            + New Shop Order
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleNewProject}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-medium transition"
+            >
+              + New Shop Order
+            </button>
+            <button
+              onClick={handleHomeClick}
+              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              title="Home (Projects)"
+            >
+              🏠
+            </button>
+          </div>
         </div>
       </header>
 

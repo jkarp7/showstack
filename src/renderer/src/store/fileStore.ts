@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { addRecentFile } from '../utils/recentFiles';
+import { addRecentFile, getModuleTypeFromPath } from '../utils/recentFiles';
 
 interface FileStore {
   // State
@@ -119,7 +119,8 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
       // Add to recent files
       if (result.filePath && result.projectName) {
-        await addRecentFile(result.filePath, result.projectName);
+        const moduleType = getModuleTypeFromPath(result.filePath);
+        await addRecentFile(result.filePath, result.projectName, moduleType);
       }
 
       // Call success callback to reload data
@@ -187,7 +188,8 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
       // Add to recent files
       if (result.projectName) {
-        await addRecentFile(filePath, result.projectName);
+        const moduleType = getModuleTypeFromPath(filePath);
+        await addRecentFile(filePath, result.projectName, moduleType);
       }
 
       // Call success callback to reload data
@@ -234,8 +236,9 @@ export const useFileStore = create<FileStore>((set, get) => ({
       });
 
       // Update recent files timestamp
-      const filename = filePath.replace(/\\/g, '/').split('/').pop()?.replace(/\.showstack$/, '') || 'Untitled Project';
-      await addRecentFile(filePath, filename);
+      const filename = filePath.replace(/\\/g, '/').split('/').pop()?.replace(/\.(ssp|ssm|ssd|showstack)$/, '') || 'Untitled Project';
+      const moduleType = getModuleTypeFromPath(filePath);
+      await addRecentFile(filePath, filename, moduleType);
 
       return true;
     } catch (error) {
@@ -285,7 +288,8 @@ export const useFileStore = create<FileStore>((set, get) => ({
       });
 
       // Add to recent files
-      await addRecentFile(filePath, newProjectName);
+      const moduleType = getModuleTypeFromPath(filePath);
+      await addRecentFile(filePath, newProjectName, moduleType);
 
       // Call success callback to reload project name
       if (onSuccess) {
