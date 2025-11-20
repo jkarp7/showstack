@@ -186,7 +186,10 @@ export function Prep() {
       const isEditing = editingField === field;
       const fieldIsReadOnly = isFieldReadOnly(field);
 
+      console.log('renderInlineField:', field, 'editingField:', editingField, 'isEditing:', isEditing);
+
       if (isEditing) {
+        console.log('Rendering INPUT for field:', field);
         return (
           <input
             type="text"
