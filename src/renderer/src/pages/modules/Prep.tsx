@@ -139,13 +139,12 @@ export function Prep() {
     const getFieldValue = (field: keyof PrepProject): string => {
       if (isLinked && parentProject) {
         // Map prep project fields to parent project fields
+        // Company fields are NOT included - they always come from currentProject
         switch (field) {
           case 'gm_name': return parentProject.general_manager || '';
-          case 'gm_company': return parentProject.general_manager_company || '';
           case 'gm_email': return parentProject.general_manager_email || '';
           case 'gm_phone': return parentProject.general_manager_phone || '';
           case 'pm_name': return parentProject.production_manager || '';
-          case 'pm_company': return parentProject.production_manager_company || '';
           case 'pm_email': return parentProject.production_manager_email || '';
           case 'pm_phone': return parentProject.production_manager_phone || '';
           case 'ld_name': return parentProject.lighting_designer || '';
@@ -168,9 +167,10 @@ export function Prep() {
       if (!isLinked || !parentProject) return false;
 
       // Only these fields are read-only when linked (fields that pull from parent)
+      // Company fields are NOT included - they should be editable even when linked
       const parentFields: (keyof PrepProject)[] = [
-        'gm_name', 'gm_company', 'gm_email', 'gm_phone',
-        'pm_name', 'pm_company', 'pm_email', 'pm_phone',
+        'gm_name', 'gm_email', 'gm_phone',
+        'pm_name', 'pm_email', 'pm_phone',
         'ld_name', 'ld_email', 'ld_phone',
         'pe_name', 'pe_email', 'pe_phone',
         'venue', 'venue_city', 'venue_state'
