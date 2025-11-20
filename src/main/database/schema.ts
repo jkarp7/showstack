@@ -149,6 +149,15 @@ export const SCHEMA = `
     order_date INTEGER NOT NULL,
     original_order_date INTEGER,
 
+    -- Show Dates
+    prep_start_date TEXT,
+    prep_end_date TEXT,
+    load_in_date TEXT,
+    first_preview_date TEXT,
+    opening_night_date TEXT,
+    closing_date TEXT,
+    load_out_date TEXT,
+
     -- Contact Information
     gm_name TEXT,
     gm_email TEXT,

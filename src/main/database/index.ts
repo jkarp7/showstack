@@ -164,6 +164,21 @@ function runMigrations(db: Database): void {
       db.run('ALTER TABLE prep_sections ADD COLUMN notes TEXT');
     }
   }
+
+  // Prep Projects table migrations - add show date fields
+  const prepProjectsTableInfo = db.exec("PRAGMA table_info(prep_projects)");
+  if (prepProjectsTableInfo[0]) {
+    const prepProjectsColumns = prepProjectsTableInfo[0].values.map(row => row[1]) || [];
+
+    const dateFields = ['prep_start_date', 'prep_end_date', 'load_in_date', 'first_preview_date', 'opening_night_date', 'closing_date', 'load_out_date'];
+
+    for (const field of dateFields) {
+      if (!prepProjectsColumns.includes(field)) {
+        console.log(`Running migration: Adding ${field} to prep_projects`);
+        db.run(`ALTER TABLE prep_projects ADD COLUMN ${field} TEXT`);
+      }
+    }
+  }
 }
 
 export function getDatabase(): Database {

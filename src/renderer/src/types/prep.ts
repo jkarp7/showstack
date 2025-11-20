@@ -38,6 +38,15 @@ export interface PrepProject {
   order_date: number;
   original_order_date?: number;
 
+  // Show Dates
+  prep_start_date?: string;
+  prep_end_date?: string;
+  load_in_date?: string;
+  first_preview_date?: string;
+  opening_night_date?: string;
+  closing_date?: string;
+  load_out_date?: string;
+
   // Standard Contacts
   gm_name?: string;
   gm_email?: string;
