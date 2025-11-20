@@ -222,7 +222,7 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
                         <span className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded capitalize">
                           {section.discipline}
                         </span>
-                        {section.page_break && (
+                        {Boolean(section.page_break) && (
                           <span className="px-2 py-1 bg-purple-600/20 text-purple-400 text-xs rounded">
                             Page Break
                           </span>

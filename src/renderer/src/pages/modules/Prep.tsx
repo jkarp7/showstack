@@ -129,6 +129,8 @@ export function Prep() {
 
   // If a project is loaded, show the project view
   if (currentProject) {
+    console.log('🔄 Prep component rendering. editingField:', editingField, 'editValue:', editValue);
+
     // Find parent project if linked
     const parentProject = currentProject.parent_project_id
       ? projects.find((p) => p.id === currentProject.parent_project_id)
