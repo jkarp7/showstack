@@ -84,6 +84,38 @@ export function Prep() {
     return value;
   };
 
+  // Format date to mm/dd/yy
+  const formatDate = (value: string): string => {
+    if (!value) return value;
+
+    // Try to parse various date formats
+    const date = new Date(value);
+
+    // Check if valid date
+    if (isNaN(date.getTime())) {
+      // Try manual parsing for mm/dd/yy or mm/dd/yyyy
+      const parts = value.split('/');
+      if (parts.length === 3) {
+        const [month, day, year] = parts;
+        const fullYear = year.length === 2 ? `20${year}` : year;
+        const parsedDate = new Date(`${fullYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+        if (!isNaN(parsedDate.getTime())) {
+          const m = parsedDate.getMonth() + 1;
+          const d = parsedDate.getDate();
+          const y = parsedDate.getFullYear().toString().slice(-2);
+          return `${m.toString().padStart(2, '0')}/${d.toString().padStart(2, '0')}/${y}`;
+        }
+      }
+      return value; // Return as-is if can't parse
+    }
+
+    // Format as mm/dd/yy
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const year = date.getFullYear().toString().slice(-2);
+    return `${month}/${day}/${year}`;
+  };
+
   // Validate email format
   const isValidEmail = (email: string): boolean => {
     if (!email) return true; // Empty is OK
@@ -104,6 +136,12 @@ export function Prep() {
     if (editingField.includes('_phone') && finalValue) {
       finalValue = formatPhoneNumber(finalValue);
       console.log('📞 Formatted phone:', finalValue);
+    }
+
+    // Format dates
+    if (editingField.includes('_date') && finalValue) {
+      finalValue = formatDate(finalValue);
+      console.log('📅 Formatted date:', finalValue);
     }
 
     // Validate email
@@ -362,9 +400,9 @@ export function Prep() {
                         {renderInlineField('gm_name', '+ Name')}
                       </div>
                       <div className="flex gap-4">
-                        {renderInlineField('gm_company', '+ Company')}
                         {getFieldValue('gm_name') && (
                           <>
+                            {renderInlineField('gm_company', '+ Company')}
                             {renderInlineField('gm_email', '+ Email')}
                             {renderInlineField('gm_phone', '+ Phone')}
                           </>
@@ -378,9 +416,9 @@ export function Prep() {
                         {renderInlineField('pm_name', '+ Name')}
                       </div>
                       <div className="flex gap-4">
-                        {renderInlineField('pm_company', '+ Company')}
                         {getFieldValue('pm_name') && (
                           <>
+                            {renderInlineField('pm_company', '+ Company')}
                             {renderInlineField('pm_email', '+ Email')}
                             {renderInlineField('pm_phone', '+ Phone')}
                           </>
