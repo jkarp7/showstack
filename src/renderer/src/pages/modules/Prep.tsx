@@ -203,7 +203,7 @@ export function Prep() {
     if (currentValue !== finalValue) {
       console.log('✨ Values differ - calling updateProject');
       await updateProject(currentProject.id, {
-        [editingField]: finalValue || undefined,
+        [editingField]: finalValue || null,
       });
       console.log('✅ updateProject complete');
     } else {
@@ -356,10 +356,20 @@ export function Prep() {
         }
       }
 
+      const handleClick = (e: React.MouseEvent) => {
+        // Ignore single click if it's part of a double-click
+        if (e.detail === 2) return;
+        handleFieldClick(field, value, false);
+      };
+
+      const handleDoubleClick = () => {
+        handleDateFieldDoubleClick(field, value);
+      };
+
       return (
         <span
-          onClick={() => handleFieldClick(field, value, false)}
-          onDoubleClick={() => handleDateFieldDoubleClick(field, value)}
+          onClick={handleClick}
+          onDoubleClick={handleDoubleClick}
           className={`cursor-pointer hover:text-gray-200 hover:bg-gray-700 rounded px-2 py-1 transition ${!value ? 'italic text-gray-500' : 'text-gray-300'} ${className}`}
         >
           {value || placeholder}
