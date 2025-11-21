@@ -485,18 +485,33 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
         const previousItemsMap = new Map(itemsAtLastRevision.map(item => [item.id, { ...item }]));
 
         // Restore the state at the last revision
-        // For items modified in the last revision, their current DB values may have changed
-        // We need to restore them to their values AS OF that revision
-        for (const change of lastChangeLog) {
-          if (change.change_type === 'modification' && change.new_values) {
-            const item = previousItemsMap.get(change.item_id);
-            if (item) {
-              // Apply new_values from last revision to restore state at that point
-              Object.assign(item, change.new_values);
+        // We need to find the last known state for each item by looking through all revisions
+        // up to and including the last revision
+        const sortedRevisions = revisions
+          .filter(r => r.revision_number <= lastRevisionNumber)
+          .sort((a, b) => a.revision_number - b.revision_number);
+
+        // Build a map of item_id -> last known state
+        const lastKnownStates = new Map();
+        for (const rev of sortedRevisions) {
+          const changeLog = typeof rev.change_log === 'string'
+            ? JSON.parse(rev.change_log)
+            : rev.change_log;
+
+          for (const change of changeLog) {
+            if (change.new_values) {
+              // Update the last known state for this item
+              lastKnownStates.set(change.item_id, change.new_values);
             }
           }
-          // Items added in last revision should stay in the map (they existed at that revision)
-          // Items deleted in last revision shouldn't be in itemsAtLastRevision due to the filter
+        }
+
+        // Apply the last known states to restore items to their state at last revision
+        for (const [itemId, values] of lastKnownStates) {
+          const item = previousItemsMap.get(itemId);
+          if (item) {
+            Object.assign(item, values);
+          }
         }
 
         const previousItems = Array.from(previousItemsMap.values());
