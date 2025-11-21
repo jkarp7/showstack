@@ -23,6 +23,7 @@ export function Prep() {
   // State for inline editing
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [isDatePickerMode, setIsDatePickerMode] = useState(false);
 
   const handleBackClick = () => {
     if (parentProjectId) {
@@ -89,31 +90,69 @@ export function Prep() {
     if (!value) return value;
 
     // Try to parse various date formats
-    const date = new Date(value);
+    const parts = value.split('/');
 
-    // Check if valid date
-    if (isNaN(date.getTime())) {
-      // Try manual parsing for mm/dd/yy or mm/dd/yyyy
-      const parts = value.split('/');
-      if (parts.length === 3) {
-        const [month, day, year] = parts;
-        const fullYear = year.length === 2 ? `20${year}` : year;
-        const parsedDate = new Date(`${fullYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
-        if (!isNaN(parsedDate.getTime())) {
-          const m = parsedDate.getMonth() + 1;
-          const d = parsedDate.getDate();
-          const y = parsedDate.getFullYear().toString().slice(-2);
-          return `${m.toString().padStart(2, '0')}/${d.toString().padStart(2, '0')}/${y}`;
-        }
+    // Handle mm/dd format (no year) - assume current year
+    if (parts.length === 2) {
+      const [month, day] = parts;
+      const currentYear = new Date().getFullYear();
+      const parsedDate = new Date(`${currentYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+      if (!isNaN(parsedDate.getTime())) {
+        const m = parsedDate.getMonth() + 1;
+        const d = parsedDate.getDate();
+        const y = parsedDate.getFullYear().toString().slice(-2);
+        return `${m.toString().padStart(2, '0')}/${d.toString().padStart(2, '0')}/${y}`;
       }
-      return value; // Return as-is if can't parse
     }
 
-    // Format as mm/dd/yy
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    const year = date.getFullYear().toString().slice(-2);
-    return `${month}/${day}/${year}`;
+    // Handle mm/dd/yy or mm/dd/yyyy format
+    if (parts.length === 3) {
+      const [month, day, year] = parts;
+      const fullYear = year.length === 2 ? `20${year}` : year;
+      const parsedDate = new Date(`${fullYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+      if (!isNaN(parsedDate.getTime())) {
+        const m = parsedDate.getMonth() + 1;
+        const d = parsedDate.getDate();
+        const y = parsedDate.getFullYear().toString().slice(-2);
+        return `${m.toString().padStart(2, '0')}/${d.toString().padStart(2, '0')}/${y}`;
+      }
+    }
+
+    // Try ISO format or other standard formats
+    const date = new Date(value);
+    if (!isNaN(date.getTime())) {
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const year = date.getFullYear().toString().slice(-2);
+      return `${month}/${day}/${year}`;
+    }
+
+    return value; // Return as-is if can't parse
+  };
+
+  // Convert mm/dd/yy to YYYY-MM-DD for date input
+  const toDateInputFormat = (value: string): string => {
+    if (!value) return '';
+    const parts = value.split('/');
+    if (parts.length === 3) {
+      const [month, day, year] = parts;
+      const fullYear = year.length === 2 ? `20${year}` : year;
+      return `${fullYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+    return '';
+  };
+
+  // Convert YYYY-MM-DD to mm/dd/yy
+  const fromDateInputFormat = (value: string): string => {
+    if (!value) return '';
+    const date = new Date(value);
+    if (!isNaN(date.getTime())) {
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const year = date.getFullYear().toString().slice(-2);
+      return `${month}/${day}/${year}`;
+    }
+    return value;
   };
 
   // Validate email format
@@ -140,7 +179,12 @@ export function Prep() {
 
     // Format dates
     if (editingField.includes('_date') && finalValue) {
-      finalValue = formatDate(finalValue);
+      // If coming from date picker, convert from YYYY-MM-DD to mm/dd/yy
+      if (isDatePickerMode) {
+        finalValue = fromDateInputFormat(finalValue);
+      } else {
+        finalValue = formatDate(finalValue);
+      }
       console.log('📅 Formatted date:', finalValue);
     }
 
@@ -149,6 +193,7 @@ export function Prep() {
       alert('Please enter a valid email address');
       setEditingField(null);
       setEditValue('');
+      setIsDatePickerMode(false);
       return;
     }
 
@@ -167,6 +212,7 @@ export function Prep() {
 
     setEditingField(null);
     setEditValue('');
+    setIsDatePickerMode(false);
   };
 
   const handleFieldKeyDown = (e: React.KeyboardEvent) => {
@@ -176,7 +222,15 @@ export function Prep() {
     } else if (e.key === 'Escape') {
       setEditingField(null);
       setEditValue('');
+      setIsDatePickerMode(false);
     }
+  };
+
+  // Handler for date field double-click
+  const handleDateFieldDoubleClick = (field: string, value: string) => {
+    setEditingField(field);
+    setEditValue(toDateInputFormat(value));
+    setIsDatePickerMode(true);
   };
 
   // If a project is loaded, show the project view
@@ -263,6 +317,52 @@ export function Prep() {
         >
           {value || placeholder}
           {fieldIsReadOnly && value && <span className="ml-2 text-xs text-blue-400">(from parent)</span>}
+        </span>
+      );
+    };
+
+    // Helper to render a date field with calendar picker on double-click
+    const renderDateField = (field: keyof PrepProject, placeholder = '+ Add', className = '') => {
+      const value = getFieldValue(field);
+      const isEditing = editingField === field;
+
+      if (isEditing) {
+        if (isDatePickerMode) {
+          // Date picker mode
+          return (
+            <input
+              type="date"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={handleFieldBlur}
+              onKeyDown={handleFieldKeyDown}
+              className={`w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white focus:outline-none ${className}`}
+              autoFocus
+            />
+          );
+        } else {
+          // Text input mode
+          return (
+            <input
+              type="text"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={handleFieldBlur}
+              onKeyDown={handleFieldKeyDown}
+              className={`w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white focus:outline-none ${className}`}
+              autoFocus
+            />
+          );
+        }
+      }
+
+      return (
+        <span
+          onClick={() => handleFieldClick(field, value, false)}
+          onDoubleClick={() => handleDateFieldDoubleClick(field, value)}
+          className={`cursor-pointer hover:text-gray-200 hover:bg-gray-700 rounded px-2 py-1 transition ${!value ? 'italic text-gray-500' : 'text-gray-300'} ${className}`}
+        >
+          {value || placeholder}
         </span>
       );
     };
@@ -402,9 +502,9 @@ export function Prep() {
                       <div className="flex gap-4">
                         {getFieldValue('gm_name') && (
                           <>
-                            {renderInlineField('gm_company', '+ Company')}
-                            {renderInlineField('gm_email', '+ Email')}
-                            {renderInlineField('gm_phone', '+ Phone')}
+                            <div className="flex-1">{renderInlineField('gm_company', '+ Company')}</div>
+                            <div className="flex-1">{renderInlineField('gm_email', '+ Email')}</div>
+                            <div className="flex-1">{renderInlineField('gm_phone', '+ Phone')}</div>
                           </>
                         )}
                       </div>
@@ -418,9 +518,9 @@ export function Prep() {
                       <div className="flex gap-4">
                         {getFieldValue('pm_name') && (
                           <>
-                            {renderInlineField('pm_company', '+ Company')}
-                            {renderInlineField('pm_email', '+ Email')}
-                            {renderInlineField('pm_phone', '+ Phone')}
+                            <div className="flex-1">{renderInlineField('pm_company', '+ Company')}</div>
+                            <div className="flex-1">{renderInlineField('pm_email', '+ Email')}</div>
+                            <div className="flex-1">{renderInlineField('pm_phone', '+ Phone')}</div>
                           </>
                         )}
                       </div>
@@ -520,13 +620,13 @@ export function Prep() {
                     <div className="text-gray-500 font-medium">Load Out</div>
 
                     {/* Values Row */}
-                    {renderInlineField('prep_start_date', '—')}
-                    {renderInlineField('prep_end_date', '—')}
-                    {renderInlineField('load_in_date', '—')}
-                    {renderInlineField('first_preview_date', '—')}
-                    {renderInlineField('opening_night_date', '—')}
-                    {renderInlineField('closing_date', '—')}
-                    {renderInlineField('load_out_date', '—')}
+                    {renderDateField('prep_start_date', '—')}
+                    {renderDateField('prep_end_date', '—')}
+                    {renderDateField('load_in_date', '—')}
+                    {renderDateField('first_preview_date', '—')}
+                    {renderDateField('opening_night_date', '—')}
+                    {renderDateField('closing_date', '—')}
+                    {renderDateField('load_out_date', '—')}
                   </div>
                 </div>
               </div>
