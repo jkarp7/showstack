@@ -23,6 +23,7 @@ import {
   // Revisions
   getRevisionsByProjectId,
   createPrepRevision,
+  deletePrepRevision,
   PrepRevision,
   // Notes
   getNotesByProjectId,
@@ -198,6 +199,15 @@ export function registerPrepHandlers(): void {
       return createPrepRevision(data);
     } catch (error) {
       console.error('Error creating prep revision:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('prep:revisions:delete', async (_event, id: string) => {
+    try {
+      deletePrepRevision(id);
+    } catch (error) {
+      console.error('Error deleting prep revision:', error);
       throw error;
     }
   });

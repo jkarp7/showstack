@@ -660,6 +660,12 @@ export function createPrepRevision(data: Partial<PrepRevision>): PrepRevision {
   return getPrepRevisionById(id)!;
 }
 
+export function deletePrepRevision(id: string): void {
+  const db = getDatabase();
+  db.run('DELETE FROM prep_revisions WHERE id = ?', [id]);
+  saveDatabase();
+}
+
 function getPrepRevisionById(id: string): PrepRevision | null {
   const db = getDatabase();
   const result = db.exec(`SELECT * FROM prep_revisions WHERE id = ?`, [id]);

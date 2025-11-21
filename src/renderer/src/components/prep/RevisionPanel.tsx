@@ -5,6 +5,7 @@ interface RevisionPanelProps {
   project: PrepProject;
   revisions: PrepRevision[];
   onGenerateRevision: (notes?: string) => Promise<void>;
+  onDeleteRevision: (revisionId: string) => Promise<void>;
   onCompareRevisions: (rev1: number, rev2: number) => void;
 }
 
@@ -12,12 +13,14 @@ export function RevisionPanel({
   project,
   revisions,
   onGenerateRevision,
+  onDeleteRevision,
   onCompareRevisions
 }: RevisionPanelProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const [revisionNotes, setRevisionNotes] = useState('');
   const [expandedRevision, setExpandedRevision] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleGenerateRevision = async () => {
     if (project.current_revision >= 5) {
@@ -35,6 +38,27 @@ export function RevisionPanel({
       alert('Failed to generate revision');
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleDeleteRevision = async (revisionId: string, revisionNumber: number) => {
+    if (revisionNumber !== project.current_revision) {
+      alert('Can only delete the most recent revision');
+      return;
+    }
+
+    if (!confirm(`Delete Revision ${revisionNumber}? This cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingId(revisionId);
+    try {
+      await onDeleteRevision(revisionId);
+    } catch (error) {
+      console.error('Failed to delete revision:', error);
+      alert('Failed to delete revision');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -132,23 +156,40 @@ export function RevisionPanel({
                 key={revision.id}
                 className="border border-gray-600 rounded-lg overflow-hidden"
               >
-                <button
-                  onClick={() => setExpandedRevision(isExpanded ? null : revision.id)}
-                  className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-650 text-left transition flex items-center justify-between"
-                >
-                  <div>
-                    <div className="font-medium">
-                      Revision {revision.revision_number}
+                <div className="px-4 py-3 bg-gray-700 flex items-center justify-between">
+                  <button
+                    onClick={() => setExpandedRevision(isExpanded ? null : revision.id)}
+                    className="flex-1 text-left hover:bg-gray-650 rounded px-2 py-1 -ml-2 transition"
+                  >
+                    <div>
+                      <div className="font-medium">
+                        Revision {revision.revision_number}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        {new Date(revision.revision_date).toLocaleString()} •{' '}
+                        {changeLog.length} change{changeLog.length !== 1 ? 's' : ''}
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      {new Date(revision.revision_date).toLocaleString()} •{' '}
-                      {changeLog.length} change{changeLog.length !== 1 ? 's' : ''}
-                    </div>
+                  </button>
+                  <div className="flex items-center gap-2">
+                    {revision.revision_number === project.current_revision && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteRevision(revision.id, revision.revision_number);
+                        }}
+                        disabled={deletingId === revision.id}
+                        className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 rounded text-xs text-red-400 transition disabled:opacity-50"
+                        title="Delete this revision"
+                      >
+                        {deletingId === revision.id ? 'Deleting...' : 'Delete'}
+                      </button>
+                    )}
+                    <span className="text-gray-400">
+                      {isExpanded ? '▼' : '▶'}
+                    </span>
                   </div>
-                  <span className="text-gray-400">
-                    {isExpanded ? '▼' : '▶'}
-                  </span>
-                </button>
+                </div>
 
                 {isExpanded && (
                   <div className="p-4 bg-gray-750">
