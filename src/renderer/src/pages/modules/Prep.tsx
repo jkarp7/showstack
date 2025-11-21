@@ -7,12 +7,13 @@ import { PrepProjectCard } from '../../components/prep/PrepProjectCard';
 import { SectionList } from '../../components/prep/SectionList';
 import { AddSectionDialog } from '../../components/prep/AddSectionDialog';
 import { EditSectionDialog } from '../../components/prep/EditSectionDialog';
+import { RevisionPanel } from '../../components/prep/RevisionPanel';
 import type { PrepSection, Discipline, PrepProject } from '../../types/prep';
 
 export function Prep() {
   const navigate = useNavigate();
   const { projectId: parentProjectId } = useParams<{ projectId?: string }>();
-  const { allProjects, currentProject, sections, revisions, loadAllProjects, loadProject, clearCurrentProject, updateProject } =
+  const { allProjects, currentProject, sections, revisions, loadAllProjects, loadProject, clearCurrentProject, updateProject, generateRevision } =
     usePrepStore();
   const { projects, loadProjects } = useProjectStore();
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
@@ -699,6 +700,17 @@ export function Prep() {
                   sections={sections}
                   onAddSection={() => setShowAddSectionDialog(true)}
                   onEditSection={handleEditSection}
+                />
+
+                {/* Revision Panel */}
+                <RevisionPanel
+                  project={currentProject}
+                  revisions={revisions}
+                  onGenerateRevision={(notes) => generateRevision(currentProject.id, notes)}
+                  onCompareRevisions={(rev1, rev2) => {
+                    // TODO: Implement revision comparison
+                    console.log('Compare revisions:', rev1, rev2);
+                  }}
                 />
               </>
             )}

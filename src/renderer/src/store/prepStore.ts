@@ -71,6 +71,7 @@ interface PrepStore {
     revision_number: number;
     notes?: string;
   }) => Promise<void>;
+  generateRevision: (projectId: string, notes?: string) => Promise<void>;
 
   // ===== NOTE ACTIONS =====
   loadNotes: (projectId: string, type?: 'general' | 'equipment' | 'revision') => Promise<void>;
@@ -379,6 +380,113 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
       }));
     } catch (error) {
       console.error('Failed to create prep revision:', error);
+    }
+  },
+
+  generateRevision: async (projectId: string, notes?: string) => {
+    if (!hasAPI()) {
+      console.warn('API not available');
+      return;
+    }
+
+    const { currentProject, items, sections, revisions } = get();
+
+    if (!currentProject || currentProject.id !== projectId) {
+      console.error('No current project loaded');
+      return;
+    }
+
+    if (currentProject.current_revision >= 5) {
+      throw new Error('Maximum of 5 revisions reached');
+    }
+
+    try {
+      // Import change detection utilities
+      const { detectChanges, createSnapshot } = await import('../utils/revisionUtils');
+
+      // Create snapshot of current state
+      const currentSnapshot = createSnapshot(items, sections);
+
+      // Get previous snapshot from the last revision (if any)
+      const sortedRevisions = revisions.sort((a, b) => b.revision_number - a.revision_number);
+      const lastRevision = sortedRevisions[0];
+
+      let changes: any[] = [];
+
+      // If this is not the first revision, detect changes
+      if (lastRevision && lastRevision.change_log) {
+        // For first revision after this one, we'll need to store current state
+        // For now, detect changes by marking all current items as additions
+        // This is a simplified version - in production, we'd store snapshots
+
+        // Create sections map for change detection
+        const sectionsMap = new Map(sections.map(s => [s.id, s]));
+
+        // For the first revision, mark all items as additions
+        if (currentProject.current_revision === 0) {
+          changes = items.map(item => ({
+            item_id: item.id,
+            change_type: 'addition',
+            description: item.description,
+            section_name: sectionsMap.get(item.section_id)?.name,
+            new_values: {
+              description: item.description,
+              active_qty: item.active_qty,
+              spare_qty: item.spare_qty,
+              venue_qty: item.venue_qty,
+            }
+          }));
+        }
+      } else {
+        // First revision - mark all current items as additions
+        const sectionsMap = new Map(sections.map(s => [s.id, s]));
+        changes = items.map(item => ({
+          item_id: item.id,
+          change_type: 'addition',
+          description: item.description,
+          section_name: sectionsMap.get(item.section_id)?.name,
+          new_values: {
+            description: item.description,
+            active_qty: item.active_qty,
+            spare_qty: item.spare_qty,
+            venue_qty: item.venue_qty,
+          }
+        }));
+      }
+
+      const newRevisionNumber = currentProject.current_revision + 1;
+
+      // Create the revision
+      const revision = await window.api.prep.revisions.create({
+        prep_project_id: projectId,
+        revision_number: newRevisionNumber,
+        notes,
+        change_log: JSON.stringify(changes),
+      });
+
+      // Update project's current_revision
+      await window.api.prep.projects.update(projectId, {
+        current_revision: newRevisionNumber,
+      });
+
+      // Update items with revision tracking
+      for (const change of changes) {
+        if (change.change_type === 'addition') {
+          await window.api.prep.items.update(change.item_id, {
+            added_in_revision: newRevisionNumber,
+          });
+        } else if (change.change_type === 'modification') {
+          await window.api.prep.items.update(change.item_id, {
+            modified_in_revision: newRevisionNumber,
+          });
+        }
+      }
+
+      // Reload project data
+      await get().loadProject(projectId);
+    } catch (error) {
+      console.error('Failed to generate revision:', error);
+      throw error;
     }
   },
 
