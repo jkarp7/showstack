@@ -93,7 +93,8 @@ contextBridge.exposeInMainWorld('api', {
     // Revisions
     revisions: {
       getByProjectId: (projectId: string) => ipcRenderer.invoke('prep:revisions:getByProjectId', projectId),
-      create: (data: any) => ipcRenderer.invoke('prep:revisions:create', data)
+      create: (data: any) => ipcRenderer.invoke('prep:revisions:create', data),
+      delete: (id: string) => ipcRenderer.invoke('prep:revisions:delete', id)
     },
     // Notes
     notes: {
@@ -164,6 +165,7 @@ export interface ElectronAPI {
     revisions: {
       getByProjectId: (projectId: string) => Promise<any[]>;
       create: (data: any) => Promise<any>;
+      delete: (id: string) => Promise<void>;
     };
     notes: {
       getByProjectId: (projectId: string, type?: string) => Promise<any[]>;
