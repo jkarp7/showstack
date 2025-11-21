@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePrepStore } from '../../store/prepStore';
 import { useProjectStore } from '../../store/projectStore';
@@ -27,6 +27,9 @@ export function Prep() {
 
   // State for tabs
   const [activeTab, setActiveTab] = useState<'builder' | 'output'>('builder');
+
+  // Ref for click timer (to distinguish single vs double click)
+  const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleBackClick = () => {
     if (parentProjectId) {
@@ -359,13 +362,28 @@ export function Prep() {
         }
       }
 
-      const handleClick = (e: React.MouseEvent) => {
-        // Ignore single click if it's part of a double-click
-        if (e.detail === 2) return;
-        handleFieldClick(field, value, false);
+      const handleClick = () => {
+        // Clear any existing timer
+        if (clickTimerRef.current) {
+          clearTimeout(clickTimerRef.current);
+        }
+
+        // Set a timer for single-click action
+        clickTimerRef.current = setTimeout(() => {
+          // Single-click: open text input
+          handleFieldClick(field, value, false);
+          clickTimerRef.current = null;
+        }, 250); // 250ms delay to detect double-click
       };
 
       const handleDoubleClick = () => {
+        // Cancel the single-click timer
+        if (clickTimerRef.current) {
+          clearTimeout(clickTimerRef.current);
+          clickTimerRef.current = null;
+        }
+
+        // Double-click: open calendar picker
         handleDateFieldDoubleClick(field, value);
       };
 
