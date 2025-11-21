@@ -492,6 +492,7 @@ export function Prep() {
 
     return (
       <div className="h-screen flex flex-col bg-gray-900 text-white">
+        {/* Header with file operations */}
         <header className="bg-gray-800 border-b border-gray-700 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -506,18 +507,6 @@ export function Prep() {
               <PrepFileMenu
                 onNewProject={() => setShowNewProjectDialog(true)}
               />
-
-              <h1 className="text-2xl font-bold">{currentProject.production_name}</h1>
-              {currentProject.current_revision > 0 && (
-                <span className="px-2 py-1 bg-blue-600 text-white text-sm rounded">
-                  Revision {currentProject.current_revision}
-                </span>
-              )}
-              {isLinked && (
-                <span className="px-2 py-1 bg-blue-600/20 text-blue-400 text-xs rounded">
-                  Linked to Parent Project
-                </span>
-              )}
             </div>
             <button
               onClick={handleHomeClick}
@@ -528,6 +517,23 @@ export function Prep() {
             </button>
           </div>
         </header>
+
+        {/* Show name and badges */}
+        <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
+          <div className="flex items-center gap-4">
+            <h1 className="text-3xl font-bold">{currentProject.production_name}</h1>
+            {currentProject.current_revision > 0 && (
+              <span className="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded">
+                Revision {currentProject.current_revision}
+              </span>
+            )}
+            {isLinked && (
+              <span className="px-3 py-1.5 bg-blue-600/20 text-blue-400 text-sm rounded">
+                Linked to Parent Project
+              </span>
+            )}
+          </div>
+        </div>
 
         {/* Tabs */}
         <div className="border-b border-gray-700 bg-gray-800">
