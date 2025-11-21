@@ -124,6 +124,42 @@ export function Prep() {
     }
   };
 
+  const handleLinkToParent = async (parentProjectId: string) => {
+    if (!currentProject) return;
+
+    try {
+      await updateProject(currentProject.id, { parent_project_id: parentProjectId });
+      alert('Successfully linked to parent project');
+
+      // Optionally trigger sync after linking
+      if (confirm('Would you like to sync dates and contacts from the parent project now?')) {
+        const result = await syncFromParent(currentProject.id, parentProjectId);
+        if (result.success) {
+          alert(result.message || 'Successfully synced from parent project');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to link to parent:', error);
+      alert('Failed to link to parent project');
+    }
+  };
+
+  const handleUnlinkFromParent = async () => {
+    if (!currentProject) return;
+
+    if (!confirm('Unlink from parent project? This will not delete any data.')) {
+      return;
+    }
+
+    try {
+      await updateProject(currentProject.id, { parent_project_id: null });
+      alert('Successfully unlinked from parent project');
+    } catch (error) {
+      console.error('Failed to unlink from parent:', error);
+      alert('Failed to unlink from parent project');
+    }
+  };
+
   const handleSyncFromParent = async () => {
     if (!currentProject || !currentProject.parent_project_id) return;
 
@@ -665,6 +701,51 @@ export function Prep() {
                   <div className="text-xs text-gray-400">
                     <span className="text-gray-500">Disciplines:</span>{' '}
                     {disciplines.map((d) => d.charAt(0).toUpperCase()).join('/')}
+                  </div>
+                </div>
+
+                {/* Parent Project Link */}
+                <div className="pb-3 border-b border-gray-700">
+                  <div className="flex items-center gap-4">
+                    <span className="text-gray-500 text-sm">Parent Project:</span>
+                    {currentProject.parent_project_id ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-300">
+                          {projects.find(p => p.id === currentProject.parent_project_id)?.production_name || 'Unknown Project'}
+                        </span>
+                        <button
+                          onClick={handleUnlinkFromParent}
+                          className="text-xs px-2 py-1 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded transition"
+                          title="Unlink from parent project"
+                        >
+                          Unlink
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <select
+                          value=""
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              handleLinkToParent(e.target.value);
+                            }
+                          }}
+                          className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm text-gray-300 hover:bg-gray-600 transition"
+                        >
+                          <option value="">+ Link to Project</option>
+                          {projects
+                            .filter(p => p.id !== currentProject.id) // Don't show current project
+                            .map(project => (
+                              <option key={project.id} value={project.id}>
+                                {project.production_name}
+                              </option>
+                            ))}
+                        </select>
+                        <span className="text-xs text-gray-500">
+                          Link to parent to sync dates and contacts
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
