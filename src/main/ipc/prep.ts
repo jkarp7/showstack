@@ -40,6 +40,7 @@ import {
   deleteNoteTemplate,
   PrepNoteTemplate,
 } from '../database/queries/prep';
+import { prepFileService } from '../services/prepFileService';
 
 export function registerPrepHandlers(): void {
   // ============================================
@@ -319,6 +320,51 @@ export function registerPrepHandlers(): void {
       console.error('Error deleting note template:', error);
       throw error;
     }
+  });
+
+  // ============================================
+  // PREP FILE OPERATIONS
+  // ============================================
+
+  ipcMain.handle('prep:file:showOpenDialog', async () => {
+    try {
+      return await prepFileService.showOpenDialog();
+    } catch (error) {
+      console.error('Error showing open dialog:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('prep:file:showSaveDialog', async (_event, defaultName?: string) => {
+    try {
+      return await prepFileService.showSaveDialog(defaultName);
+    } catch (error) {
+      console.error('Error showing save dialog:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('prep:file:export', async (_event, projectId: string, filePath: string) => {
+    try {
+      await prepFileService.exportProject(projectId, filePath);
+      return { success: true };
+    } catch (error) {
+      console.error('Error exporting prep project:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('prep:file:import', async (_event, filePath: string) => {
+    try {
+      return await prepFileService.importProject(filePath);
+    } catch (error) {
+      console.error('Error importing prep project:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('prep:file:getFileName', (_event, filePath: string) => {
+    return prepFileService.getFileName(filePath);
   });
 
   console.log('✅ Prep IPC handlers registered');
