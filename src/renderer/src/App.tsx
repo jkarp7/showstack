@@ -21,18 +21,18 @@ export default function App() {
         <Route path="/project/:projectId" element={<ProjectPage />} />
         <Route path="/project/:projectId/module/:moduleType" element={<ModuleLanding />} />
         <Route path="/project/:projectId/module/production/system-docs" element={<SystemDocs />} />
-        <Route path="/project/:projectId/module/design/prep" element={<Prep />} />
+        <Route path="/project/:projectId/module/prep" element={<Prep />} />
         <Route path="/project/:projectId/module/manager" element={<Manager />} />
 
         {/* Direct module access (no project) */}
         <Route path="/module/:moduleType" element={<ModuleLanding />} />
         <Route path="/module/production/system-docs" element={<SystemDocs />} />
-        <Route path="/module/design/prep" element={<Prep />} />
+        <Route path="/module/prep" element={<Prep />} />
         <Route path="/module/manager" element={<Manager />} />
 
         {/* Backwards compatibility - redirect old routes */}
         <Route path="/modules" element={<LandingPage />} />
-        <Route path="/modules/prep" element={<Navigate to="/module/design/prep" replace />} />
+        <Route path="/modules/prep" element={<Navigate to="/module/prep" replace />} />
         <Route path="/modules/production" element={<Navigate to="/module/production" replace />} />
         <Route path="/modules/manager" element={<Navigate to="/module/manager" replace />} />
         <Route path="/project/:projectId/module/production/equipment" element={<Navigate to="/project/:projectId/module/production/system-docs" replace />} />

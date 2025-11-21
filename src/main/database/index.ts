@@ -142,6 +142,47 @@ function runMigrations(db: Database): void {
       db.run(`ALTER TABLE fixtures ADD COLUMN ${column.name} ${column.type}`);
     }
   }
+
+  // Prep Projects table migrations
+  const prepProjectsTableInfo = db.exec("PRAGMA table_info(prep_projects)");
+  if (prepProjectsTableInfo[0]) {
+    const prepProjectsColumns = prepProjectsTableInfo[0].values.map(row => row[1]) || [];
+
+    // Add parent_project_id if missing
+    if (!prepProjectsColumns.includes('parent_project_id')) {
+      console.log('Running migration: Adding parent_project_id to prep_projects');
+      db.run('ALTER TABLE prep_projects ADD COLUMN parent_project_id TEXT');
+    }
+
+    // Add show date fields if missing
+    const dateFields = ['prep_start_date', 'prep_end_date', 'load_in_date', 'first_preview_date', 'opening_night_date', 'closing_date', 'load_out_date'];
+    for (const field of dateFields) {
+      if (!prepProjectsColumns.includes(field)) {
+        console.log(`Running migration: Adding ${field} to prep_projects`);
+        db.run(`ALTER TABLE prep_projects ADD COLUMN ${field} TEXT`);
+      }
+    }
+
+    // Add company fields if missing
+    const companyFields = ['gm_company', 'pm_company'];
+    for (const field of companyFields) {
+      if (!prepProjectsColumns.includes(field)) {
+        console.log(`Running migration: Adding ${field} to prep_projects`);
+        db.run(`ALTER TABLE prep_projects ADD COLUMN ${field} TEXT`);
+      }
+    }
+  }
+
+  // Prep Sections table migrations
+  const prepSectionsTableInfo = db.exec("PRAGMA table_info(prep_sections)");
+  if (prepSectionsTableInfo[0]) {
+    const prepSectionsColumns = prepSectionsTableInfo[0].values.map(row => row[1]) || [];
+
+    if (!prepSectionsColumns.includes('notes')) {
+      console.log('Running migration: Adding notes to prep_sections');
+      db.run('ALTER TABLE prep_sections ADD COLUMN notes TEXT');
+    }
+  }
 }
 
 export function getDatabase(): Database {

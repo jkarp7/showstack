@@ -130,4 +130,172 @@ export const SCHEMA = `
   );
 
   CREATE INDEX IF NOT EXISTS idx_preferences_project ON user_preferences(project_id);
+
+  -- ============================================
+  -- SHOWSTACK:PREP TABLES
+  -- ============================================
+
+  -- Prep Projects table (shop orders for equipment rental)
+  CREATE TABLE IF NOT EXISTS prep_projects (
+    id TEXT PRIMARY KEY,
+    user_id TEXT,
+    parent_project_id TEXT, -- Optional link to parent ShowStack project
+
+    -- Production Information
+    production_name TEXT NOT NULL,
+    venue TEXT,
+    venue_city TEXT,
+    venue_state TEXT,
+    order_date INTEGER NOT NULL,
+    original_order_date INTEGER,
+
+    -- Show Dates
+    prep_start_date TEXT,
+    prep_end_date TEXT,
+    load_in_date TEXT,
+    first_preview_date TEXT,
+    opening_night_date TEXT,
+    closing_date TEXT,
+    load_out_date TEXT,
+
+    -- Contact Information
+    gm_name TEXT,
+    gm_company TEXT,
+    gm_email TEXT,
+    gm_phone TEXT,
+    pm_name TEXT,
+    pm_company TEXT,
+    pm_email TEXT,
+    pm_phone TEXT,
+    ld_name TEXT,
+    ld_email TEXT,
+    ld_phone TEXT,
+    ald_name TEXT,
+    ald_email TEXT,
+    ald_phone TEXT,
+    pe_name TEXT,
+    pe_email TEXT,
+    pe_phone TEXT,
+
+    -- Additional discipline contacts (JSON)
+    additional_contacts TEXT,
+
+    -- Logo
+    logo_url TEXT,
+    logo_storage_path TEXT,
+
+    -- Disciplines (JSON array: ["lighting", "audio", "video", etc.])
+    disciplines TEXT NOT NULL DEFAULT '["lighting"]',
+
+    -- Current revision number (1-5)
+    current_revision INTEGER DEFAULT 0,
+
+    -- Metadata
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+
+  -- Prep Sections table (e.g., "Moving Lights", "LED Fixtures")
+  CREATE TABLE IF NOT EXISTS prep_sections (
+    id TEXT PRIMARY KEY,
+    prep_project_id TEXT NOT NULL,
+
+    name TEXT NOT NULL,
+    discipline TEXT NOT NULL,
+    sort_order INTEGER NOT NULL,
+    page_break INTEGER DEFAULT 0,
+    notes TEXT, -- Optional section notes displayed below section header
+
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
+    FOREIGN KEY (prep_project_id) REFERENCES prep_projects(id) ON DELETE CASCADE
+  );
+
+  -- Prep Equipment Items table
+  CREATE TABLE IF NOT EXISTS prep_equipment_items (
+    id TEXT PRIMARY KEY,
+    section_id TEXT NOT NULL,
+
+    description TEXT NOT NULL,
+    active_qty INTEGER DEFAULT 0,
+    spare_qty INTEGER DEFAULT 0,
+    venue_qty INTEGER DEFAULT 0,
+
+    -- Calculated fields (stored for performance)
+    total_qty INTEGER DEFAULT 0,
+    venue_active INTEGER DEFAULT 0,
+    venue_spare INTEGER DEFAULT 0,
+
+    -- Optional fields
+    weight REAL,
+    power REAL,
+    notes TEXT,
+
+    sort_order INTEGER NOT NULL,
+
+    -- Revision tracking
+    added_in_revision INTEGER,
+    removed_in_revision INTEGER,
+    modified_in_revision INTEGER,
+
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
+    FOREIGN KEY (section_id) REFERENCES prep_sections(id) ON DELETE CASCADE
+  );
+
+  -- Prep Revisions table
+  CREATE TABLE IF NOT EXISTS prep_revisions (
+    id TEXT PRIMARY KEY,
+    prep_project_id TEXT NOT NULL,
+
+    revision_number INTEGER NOT NULL,
+    revision_date INTEGER NOT NULL,
+    notes TEXT,
+    change_log TEXT, -- JSON: automatically generated change summary
+
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
+    UNIQUE(prep_project_id, revision_number),
+    FOREIGN KEY (prep_project_id) REFERENCES prep_projects(id) ON DELETE CASCADE
+  );
+
+  -- Prep Notes table (3-tier: general conditions, general notes, fixture notes, revision)
+  CREATE TABLE IF NOT EXISTS prep_notes (
+    id TEXT PRIMARY KEY,
+    prep_project_id TEXT NOT NULL,
+
+    type TEXT NOT NULL CHECK(type IN ('general_conditions', 'general_notes', 'fixture_notes', 'revision')),
+    content TEXT NOT NULL,
+
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
+    FOREIGN KEY (prep_project_id) REFERENCES prep_projects(id) ON DELETE CASCADE
+  );
+
+  -- Prep Note Templates (for standard language)
+  CREATE TABLE IF NOT EXISTS prep_note_templates (
+    id TEXT PRIMARY KEY,
+    user_id TEXT,
+
+    type TEXT NOT NULL CHECK(type IN ('general_conditions', 'general_notes', 'fixture_notes')),
+    name TEXT NOT NULL, -- e.g., "Standard Lighting Conditions"
+    content TEXT NOT NULL,
+    is_default INTEGER DEFAULT 0,
+
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+
+  -- Indexes for Prep tables
+  CREATE INDEX IF NOT EXISTS idx_prep_sections_project ON prep_sections(prep_project_id);
+  CREATE INDEX IF NOT EXISTS idx_prep_items_section ON prep_equipment_items(section_id);
+  CREATE INDEX IF NOT EXISTS idx_prep_revisions_project ON prep_revisions(prep_project_id);
+  CREATE INDEX IF NOT EXISTS idx_prep_notes_project ON prep_notes(prep_project_id);
+  CREATE INDEX IF NOT EXISTS idx_prep_notes_type ON prep_notes(prep_project_id, type);
+  CREATE INDEX IF NOT EXISTS idx_prep_note_templates_type ON prep_note_templates(type);
+  CREATE INDEX IF NOT EXISTS idx_prep_note_templates_default ON prep_note_templates(type, is_default);
 `;

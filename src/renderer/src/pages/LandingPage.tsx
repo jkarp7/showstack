@@ -235,10 +235,10 @@ export function LandingPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <ModuleCard
                 name="ShowStack:Prep"
-                description="Lighting design, visualization, and plot creation"
-                icon="✏️"
+                description="Equipment orders and specifications for rental houses"
+                icon="📋"
                 route="/modules/prep"
-                isLocked={true}
+                isLocked={false}
               />
 
               <ModuleCard

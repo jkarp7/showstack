@@ -7,6 +7,7 @@ import { registerProjectHandlers } from './ipc/projects';
 import { registerDialogHandlers } from './ipc/dialogs';
 import { registerPreferencesHandlers } from './ipc/preferences';
 import { registerFileHandlers } from './ipc/files';
+import { registerPrepHandlers } from './ipc/prep';
 
 // Disable hardware acceleration on Linux
 if (process.platform === 'linux') {
@@ -32,6 +33,7 @@ app.on('ready', async () => {
   registerDialogHandlers();
   registerPreferencesHandlers();
   registerFileHandlers();
+  registerPrepHandlers();
 
   // Create main window
   mainWindow = createWindow();
