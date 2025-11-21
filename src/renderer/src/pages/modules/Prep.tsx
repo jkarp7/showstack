@@ -760,6 +760,26 @@ export function Prep() {
                   )}
                 </div>
 
+                {/* Notes */}
+                <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setNotesExpanded(!notesExpanded)}
+                    className="w-full px-6 py-4 flex items-center gap-4 hover:bg-gray-750 transition"
+                  >
+                    <span className="text-gray-400 text-lg">{notesExpanded ? '▼' : '▶'}</span>
+                    <h2 className="text-xl font-bold">Notes</h2>
+                  </button>
+
+                  {notesExpanded && (
+                    <div className="p-6 pt-0">
+                      <NotesPanel
+                        project={currentProject}
+                        onManageTemplates={() => setShowTemplateManager(true)}
+                      />
+                    </div>
+                  )}
+                </div>
+
                 {/* Revisions */}
                 <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
                   <div className="px-6 py-4 flex items-center justify-between">
@@ -850,26 +870,6 @@ export function Prep() {
                         sections={sections}
                         onAddSection={() => setShowAddSectionDialog(true)}
                         onEditSection={handleEditSection}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Notes */}
-                <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
-                  <button
-                    onClick={() => setNotesExpanded(!notesExpanded)}
-                    className="w-full px-6 py-4 flex items-center gap-4 hover:bg-gray-750 transition"
-                  >
-                    <span className="text-gray-400 text-lg">{notesExpanded ? '▼' : '▶'}</span>
-                    <h2 className="text-xl font-bold">Notes</h2>
-                  </button>
-
-                  {notesExpanded && (
-                    <div className="p-6 pt-0">
-                      <NotesPanel
-                        project={currentProject}
-                        onManageTemplates={() => setShowTemplateManager(true)}
                       />
                     </div>
                   )}
