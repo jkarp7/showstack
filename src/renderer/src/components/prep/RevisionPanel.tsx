@@ -16,30 +16,8 @@ export function RevisionPanel({
   onDeleteRevision,
   onCompareRevisions
 }: RevisionPanelProps) {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [showNotes, setShowNotes] = useState(false);
-  const [revisionNotes, setRevisionNotes] = useState('');
   const [expandedRevision, setExpandedRevision] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  const handleGenerateRevision = async () => {
-    if (project.current_revision >= 5) {
-      alert('Maximum of 5 revisions reached');
-      return;
-    }
-
-    setIsGenerating(true);
-    try {
-      await onGenerateRevision(revisionNotes || undefined);
-      setRevisionNotes('');
-      setShowNotes(false);
-    } catch (error) {
-      console.error('Failed to generate revision:', error);
-      alert('Failed to generate revision');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
 
   const handleDeleteRevision = async (revisionId: string, revisionNumber: number) => {
     if (revisionNumber !== project.current_revision) {
@@ -92,51 +70,6 @@ export function RevisionPanel({
 
   return (
     <div>
-      <div className="flex items-center justify-end mb-4">
-        <button
-          onClick={() => setShowNotes(!showNotes)}
-          disabled={isGenerating || project.current_revision >= 5}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 rounded text-sm font-medium transition"
-        >
-          {isGenerating ? 'Generating...' : 'Generate Revision'}
-        </button>
-      </div>
-
-      {/* Notes input */}
-      {showNotes && (
-        <div className="mb-4 p-4 bg-gray-700 border border-gray-600 rounded">
-          <label className="block text-sm font-medium mb-2">
-            Revision Notes (optional)
-          </label>
-          <textarea
-            value={revisionNotes}
-            onChange={(e) => setRevisionNotes(e.target.value)}
-            placeholder="Describe the changes in this revision..."
-            className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded text-sm text-white focus:outline-none focus:border-blue-500"
-            rows={3}
-          />
-          <div className="flex gap-2 mt-3">
-            <button
-              onClick={handleGenerateRevision}
-              disabled={isGenerating}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 rounded text-sm transition"
-            >
-              Create Revision
-            </button>
-            <button
-              onClick={() => {
-                setShowNotes(false);
-                setRevisionNotes('');
-              }}
-              disabled={isGenerating}
-              className="px-3 py-1.5 bg-gray-600 hover:bg-gray-500 rounded text-sm transition"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Revisions list */}
       <div className="space-y-3">
         {sortedRevisions.length === 0 ? (

@@ -428,21 +428,42 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
         }));
       } else {
         // Subsequent revisions - detect changes from last revision
-        // Reconstruct the state at the last revision
+        // Reconstruct the state at the last revision using the last revision's change log
         const lastRevisionNumber = currentProject.current_revision;
-        const previousItems = items.filter(item => {
-          // Item existed at last revision if:
-          // - It was added in or before last revision AND
-          // - It hasn't been removed, OR was removed after last revision
+
+        // Get items that existed at last revision
+        const itemsAtLastRevision = items.filter(item => {
           const addedBy = item.added_in_revision || 0;
           const removedBy = item.removed_in_revision || Infinity;
           return addedBy <= lastRevisionNumber && removedBy > lastRevisionNumber;
-        }).map(item => {
-          // For modified items, we need the state at last revision
-          // For simplicity, we'll use current state as we don't track historical values
-          return { ...item };
         });
 
+        // Get the last revision's change log to reconstruct state
+        const lastRevision = revisions.find(r => r.revision_number === lastRevisionNumber);
+        const lastChangeLog = lastRevision
+          ? (typeof lastRevision.change_log === 'string'
+              ? JSON.parse(lastRevision.change_log)
+              : lastRevision.change_log)
+          : [];
+
+        // Create a map of items with their state at last revision
+        const previousItemsMap = new Map(itemsAtLastRevision.map(item => [item.id, { ...item }]));
+
+        // Apply the old values from the last revision's change log
+        for (const change of lastChangeLog) {
+          if (change.change_type === 'modification' && change.old_values) {
+            const item = previousItemsMap.get(change.item_id);
+            if (item) {
+              // Restore old values for fields that were modified in the last revision
+              Object.assign(item, change.old_values);
+            }
+          } else if (change.change_type === 'addition') {
+            // Items added in last revision didn't exist before, so remove them from previous state
+            previousItemsMap.delete(change.item_id);
+          }
+        }
+
+        const previousItems = Array.from(previousItemsMap.values());
         const currentSnapshot = createSnapshot(items, sections);
         const previousSnapshot = createSnapshot(previousItems, sections);
 
@@ -520,18 +541,23 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
 
       await Promise.all(
         changeLog.map(async (change: any) => {
-          if (change.change_type === 'addition') {
-            return window.api.prep.items.update(change.item_id, {
-              added_in_revision: null,
-            });
-          } else if (change.change_type === 'modification') {
-            return window.api.prep.items.update(change.item_id, {
-              modified_in_revision: null,
-            });
-          } else if (change.change_type === 'deletion') {
-            return window.api.prep.items.update(change.item_id, {
-              removed_in_revision: null,
-            });
+          try {
+            if (change.change_type === 'addition') {
+              return await window.api.prep.items.update(change.item_id, {
+                added_in_revision: null,
+              });
+            } else if (change.change_type === 'modification') {
+              return await window.api.prep.items.update(change.item_id, {
+                modified_in_revision: null,
+              });
+            } else if (change.change_type === 'deletion') {
+              return await window.api.prep.items.update(change.item_id, {
+                removed_in_revision: null,
+              });
+            }
+          } catch (error) {
+            // Item might not exist anymore, skip it
+            console.warn(`Could not update item ${change.item_id}:`, error);
           }
         })
       );

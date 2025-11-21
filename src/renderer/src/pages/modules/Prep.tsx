@@ -34,6 +34,11 @@ export function Prep() {
   const [revisionsExpanded, setRevisionsExpanded] = useState(true);
   const [equipmentExpanded, setEquipmentExpanded] = useState(true);
 
+  // State for revision generation
+  const [showRevisionNotes, setShowRevisionNotes] = useState(false);
+  const [revisionNotes, setRevisionNotes] = useState('');
+  const [isGeneratingRevision, setIsGeneratingRevision] = useState(false);
+
   // Ref for click timer (to distinguish single vs double click)
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -79,6 +84,26 @@ export function Prep() {
   const handleCloseEditDialog = () => {
     setShowEditSectionDialog(false);
     setSectionToEdit(null);
+  };
+
+  const handleGenerateRevision = async () => {
+    if (!currentProject) return;
+    if (currentProject.current_revision >= 5) {
+      alert('Maximum of 5 revisions reached');
+      return;
+    }
+
+    setIsGeneratingRevision(true);
+    try {
+      await generateRevision(currentProject.id, revisionNotes || undefined);
+      setRevisionNotes('');
+      setShowRevisionNotes(false);
+    } catch (error) {
+      console.error('Failed to generate revision:', error);
+      alert('Failed to generate revision');
+    } finally {
+      setIsGeneratingRevision(false);
+    }
   };
 
   // Inline editing helpers
@@ -518,7 +543,29 @@ export function Prep() {
                     onClick={() => setProjectDetailsExpanded(!projectDetailsExpanded)}
                     className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-750 transition"
                   >
-                    <h2 className="text-xl font-bold">Project Details</h2>
+                    <div className="flex items-center gap-6">
+                      <h2 className="text-xl font-bold">Project Details</h2>
+                      {!projectDetailsExpanded && (
+                        <div className="flex items-center gap-6 text-sm text-gray-400">
+                          <div>
+                            <span className="text-gray-500">Show:</span>{' '}
+                            <span className="text-gray-300">{currentProject.production_name}</span>
+                          </div>
+                          {getFieldValue('venue') && (
+                            <div>
+                              <span className="text-gray-500">Venue:</span>{' '}
+                              <span className="text-gray-300">{getFieldValue('venue')}</span>
+                            </div>
+                          )}
+                          <div>
+                            <span className="text-gray-500">Disciplines:</span>{' '}
+                            <span className="text-gray-300">
+                              {disciplines.map((d) => d.charAt(0).toUpperCase()).join('/')}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     <div className="flex items-center gap-4">
                       <div className="text-xs text-gray-400">
                         Created: {new Date(currentProject.created_at).toLocaleDateString()}
@@ -711,18 +758,60 @@ export function Prep() {
 
                 {/* Revisions */}
                 <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
-                  <button
-                    onClick={() => setRevisionsExpanded(!revisionsExpanded)}
-                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-750 transition"
-                  >
-                    <div className="flex items-center gap-3">
+                  <div className="px-6 py-4 flex items-center justify-between">
+                    <button
+                      onClick={() => setRevisionsExpanded(!revisionsExpanded)}
+                      className="flex items-center gap-3 hover:bg-gray-750 rounded px-2 py-1 -ml-2 transition"
+                    >
                       <h2 className="text-xl font-bold">Revisions</h2>
                       <span className="text-sm text-gray-400">
                         Rev {currentProject.current_revision} | {5 - currentProject.current_revision} remaining
                       </span>
+                      <span className="text-gray-400">{revisionsExpanded ? '▼' : '▶'}</span>
+                    </button>
+                    <button
+                      onClick={() => setShowRevisionNotes(!showRevisionNotes)}
+                      disabled={isGeneratingRevision || currentProject.current_revision >= 5}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 rounded text-sm font-medium transition"
+                    >
+                      {isGeneratingRevision ? 'Generating...' : 'Generate Revision'}
+                    </button>
+                  </div>
+
+                  {/* Notes input */}
+                  {showRevisionNotes && (
+                    <div className="mx-6 mb-4 p-4 bg-gray-700 border border-gray-600 rounded">
+                      <label className="block text-sm font-medium mb-2">
+                        Revision Notes (optional)
+                      </label>
+                      <textarea
+                        value={revisionNotes}
+                        onChange={(e) => setRevisionNotes(e.target.value)}
+                        placeholder="Describe the changes in this revision..."
+                        className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+                        rows={3}
+                      />
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={handleGenerateRevision}
+                          disabled={isGeneratingRevision}
+                          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 rounded text-sm transition"
+                        >
+                          Create Revision
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowRevisionNotes(false);
+                            setRevisionNotes('');
+                          }}
+                          disabled={isGeneratingRevision}
+                          className="px-3 py-1.5 bg-gray-600 hover:bg-gray-500 rounded text-sm transition"
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
-                    <span className="text-gray-400">{revisionsExpanded ? '▼' : '▶'}</span>
-                  </button>
+                  )}
 
                   {revisionsExpanded && (
                     <div className="p-6 pt-0">
