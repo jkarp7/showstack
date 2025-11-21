@@ -35,9 +35,17 @@ interface PrepStore {
   createProject: (data: {
     production_name: string;
     disciplines?: Discipline[];
+    parent_project_id?: string;
+    venue?: string;
   }) => Promise<PrepProject | undefined>;
   updateProject: (id: string, updates: Partial<PrepProject>) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
+  syncFromParent: (projectId: string, parentProjectId: string) => Promise<{
+    success: boolean;
+    syncedFields?: string[];
+    message?: string;
+    error?: string;
+  }>;
 
   // ===== SECTION ACTIONS =====
   loadSections: (projectId: string) => Promise<void>;
@@ -242,6 +250,112 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
       }));
     } catch (error) {
       console.error('Failed to delete prep project:', error);
+    }
+  },
+
+  syncFromParent: async (projectId: string, parentProjectId: string) => {
+    if (!hasAPI()) {
+      console.warn('API not available');
+      return { success: false, error: 'API not available' };
+    }
+
+    try {
+      // Fetch parent project
+      const parentProject = await window.api.projects.getById(parentProjectId);
+      if (!parentProject) {
+        return { success: false, error: 'Parent project not found' };
+      }
+
+      // Build update object with all fields that exist on parent
+      const updates: any = {};
+      const syncedFields: string[] = [];
+
+      // Venue
+      if (parentProject.venue) {
+        updates.venue = parentProject.venue;
+        syncedFields.push('venue');
+      }
+
+      // Dates - try to map from parent project
+      const dateFieldMap: Record<string, string> = {
+        'prep_start': 'prep_start_date',
+        'prep_end': 'prep_end_date',
+        'load_in': 'load_in_date',
+        'first_preview': 'first_preview_date',
+        'opening': 'opening_night_date',
+        'closing': 'closing_date',
+        'load_out': 'load_out_date',
+      };
+
+      for (const [parentField, prepField] of Object.entries(dateFieldMap)) {
+        if ((parentProject as any)[parentField]) {
+          updates[prepField] = (parentProject as any)[parentField];
+          syncedFields.push(prepField);
+        }
+        // Also try with _date suffix
+        const parentFieldWithSuffix = `${parentField}_date`;
+        if ((parentProject as any)[parentFieldWithSuffix]) {
+          updates[prepField] = (parentProject as any)[parentFieldWithSuffix];
+          syncedFields.push(prepField);
+        }
+      }
+
+      // Contacts - try various field name patterns
+      const contactFieldMap: Record<string, string[]> = {
+        // LD
+        ld_name: ['lighting_designer', 'ld_name', 'designer'],
+        ld_email: ['lighting_designer_email', 'ld_email'],
+        ld_phone: ['lighting_designer_phone', 'ld_phone'],
+        // PM
+        pm_name: ['production_manager', 'pm_name'],
+        pm_email: ['production_manager_email', 'pm_email'],
+        pm_phone: ['production_manager_phone', 'pm_phone'],
+        pm_company: ['production_manager_company', 'pm_company'],
+        // GM
+        gm_name: ['general_manager', 'gm_name'],
+        gm_email: ['general_manager_email', 'gm_email'],
+        gm_phone: ['general_manager_phone', 'gm_phone'],
+        gm_company: ['general_manager_company', 'gm_company'],
+        // PE
+        pe_name: ['electrician', 'pe_name', 'production_electrician'],
+        pe_email: ['electrician_email', 'pe_email', 'production_electrician_email'],
+        pe_phone: ['electrician_phone', 'pe_phone', 'production_electrician_phone'],
+      };
+
+      for (const [prepField, parentFieldOptions] of Object.entries(contactFieldMap)) {
+        for (const parentField of parentFieldOptions) {
+          if ((parentProject as any)[parentField]) {
+            updates[prepField] = (parentProject as any)[parentField];
+            syncedFields.push(prepField);
+            break; // Use first match
+          }
+        }
+      }
+
+      // Apply updates
+      if (Object.keys(updates).length > 0) {
+        await window.api.prep.projects.update(projectId, updates);
+
+        // Reload project
+        await get().loadProject(projectId);
+
+        return {
+          success: true,
+          syncedFields,
+          message: `Synced ${syncedFields.length} fields from parent project`
+        };
+      } else {
+        return {
+          success: false,
+          error: 'No matching fields found to sync'
+        };
+      }
+    } catch (error) {
+      console.error('Failed to sync from parent:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to sync from parent'
+      };
     }
   },
 

@@ -17,7 +17,7 @@ import type { PrepSection, Discipline, PrepProject } from '../../types/prep';
 export function Prep() {
   const navigate = useNavigate();
   const { projectId: parentProjectId } = useParams<{ projectId?: string }>();
-  const { allProjects, currentProject, sections, revisions, loadAllProjects, loadProject, clearCurrentProject, updateProject, generateRevision, deleteRevision } =
+  const { allProjects, currentProject, sections, revisions, loadAllProjects, loadProject, clearCurrentProject, updateProject, generateRevision, deleteRevision, syncFromParent } =
     usePrepStore();
   const { projects, loadProjects } = useProjectStore();
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
@@ -121,6 +121,26 @@ export function Prep() {
       alert('Failed to generate revision');
     } finally {
       setIsGeneratingRevision(false);
+    }
+  };
+
+  const handleSyncFromParent = async () => {
+    if (!currentProject || !currentProject.parent_project_id) return;
+
+    if (!confirm('Sync data from parent project? This will overwrite dates and contact information.')) {
+      return;
+    }
+
+    try {
+      const result = await syncFromParent(currentProject.id, currentProject.parent_project_id);
+      if (result.success) {
+        alert(result.message || 'Successfully synced from parent project');
+      } else {
+        alert(result.error || 'Failed to sync from parent project');
+      }
+    } catch (error) {
+      console.error('Failed to sync from parent:', error);
+      alert('Failed to sync from parent project');
     }
   };
 
@@ -528,9 +548,18 @@ export function Prep() {
               </span>
             )}
             {isLinked && (
-              <span className="px-3 py-1.5 bg-blue-600/20 text-blue-400 text-sm rounded">
-                Linked to Parent Project
-              </span>
+              <>
+                <span className="px-3 py-1.5 bg-blue-600/20 text-blue-400 text-sm rounded">
+                  Linked to Parent Project
+                </span>
+                <button
+                  onClick={handleSyncFromParent}
+                  className="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-sm rounded transition"
+                  title="Sync dates and contacts from parent project"
+                >
+                  🔄 Sync from Parent
+                </button>
+              </>
             )}
           </div>
         </div>
