@@ -7,7 +7,7 @@
 export type Discipline = 'lighting' | 'audio' | 'video' | 'rigging' | 'scenic' | 'props';
 
 // Note types for the 3-tier notes system
-export type NoteType = 'general' | 'equipment' | 'revision';
+export type NoteType = 'general_conditions' | 'general_notes' | 'fixture_notes' | 'revision';
 
 // Contact information interface
 export interface Contact {
@@ -176,9 +176,23 @@ export interface PrepNote {
   prep_project_id: string;
 
   type: NoteType;
-  section_id?: string; // For equipment notes
-  revision_num?: number; // For revision notes
   content: string;
+
+  created_at: number;
+  updated_at: number;
+}
+
+/**
+ * Note Template - Reusable standard language for notes
+ */
+export interface PrepNoteTemplate {
+  id: string;
+  user_id?: string;
+
+  type: 'general_conditions' | 'general_notes' | 'fixture_notes';
+  name: string;
+  content: string;
+  is_default: number; // 0 or 1 (boolean as integer for SQLite)
 
   created_at: number;
   updated_at: number;

@@ -8,6 +8,8 @@ import { SectionList } from '../../components/prep/SectionList';
 import { AddSectionDialog } from '../../components/prep/AddSectionDialog';
 import { EditSectionDialog } from '../../components/prep/EditSectionDialog';
 import { RevisionPanel } from '../../components/prep/RevisionPanel';
+import { NotesPanel } from '../../components/prep/NotesPanel';
+import { TemplateManagerDialog } from '../../components/prep/TemplateManagerDialog';
 import type { PrepSection, Discipline, PrepProject } from '../../types/prep';
 
 export function Prep() {
@@ -33,11 +35,15 @@ export function Prep() {
   const [projectDetailsExpanded, setProjectDetailsExpanded] = useState(true);
   const [revisionsExpanded, setRevisionsExpanded] = useState(true);
   const [equipmentExpanded, setEquipmentExpanded] = useState(true);
+  const [notesExpanded, setNotesExpanded] = useState(true);
 
   // State for revision generation
   const [showRevisionNotes, setShowRevisionNotes] = useState(false);
   const [revisionNotes, setRevisionNotes] = useState('');
   const [isGeneratingRevision, setIsGeneratingRevision] = useState(false);
+
+  // State for template manager
+  const [showTemplateManager, setShowTemplateManager] = useState(false);
 
   // Ref for click timer (to distinguish single vs double click)
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -848,6 +854,26 @@ export function Prep() {
                     </div>
                   )}
                 </div>
+
+                {/* Notes */}
+                <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setNotesExpanded(!notesExpanded)}
+                    className="w-full px-6 py-4 flex items-center gap-4 hover:bg-gray-750 transition"
+                  >
+                    <span className="text-gray-400 text-lg">{notesExpanded ? '▼' : '▶'}</span>
+                    <h2 className="text-xl font-bold">Notes</h2>
+                  </button>
+
+                  {notesExpanded && (
+                    <div className="p-6 pt-0">
+                      <NotesPanel
+                        project={currentProject}
+                        onManageTemplates={() => setShowTemplateManager(true)}
+                      />
+                    </div>
+                  )}
+                </div>
               </>
             )}
 
@@ -875,6 +901,12 @@ export function Prep() {
             onClose={handleCloseEditDialog}
             section={sectionToEdit}
             projectDisciplines={JSON.parse(currentProject.disciplines || '[]') as Discipline[]}
+          />
+
+          {/* Template Manager Dialog */}
+          <TemplateManagerDialog
+            isOpen={showTemplateManager}
+            onClose={() => setShowTemplateManager(false)}
           />
         </main>
       </div>
