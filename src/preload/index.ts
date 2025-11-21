@@ -102,6 +102,15 @@ contextBridge.exposeInMainWorld('api', {
       create: (data: any) => ipcRenderer.invoke('prep:notes:create', data),
       update: (id: string, content: string) => ipcRenderer.invoke('prep:notes:update', id, content),
       delete: (id: string) => ipcRenderer.invoke('prep:notes:delete', id)
+    },
+    // Note Templates
+    noteTemplates: {
+      getAll: (type?: string) => ipcRenderer.invoke('prep:noteTemplates:getAll', type),
+      getById: (id: string) => ipcRenderer.invoke('prep:noteTemplates:getById', id),
+      getDefault: (type: string) => ipcRenderer.invoke('prep:noteTemplates:getDefault', type),
+      create: (data: any) => ipcRenderer.invoke('prep:noteTemplates:create', data),
+      update: (id: string, updates: any) => ipcRenderer.invoke('prep:noteTemplates:update', id, updates),
+      delete: (id: string) => ipcRenderer.invoke('prep:noteTemplates:delete', id)
     }
   }
 });
@@ -171,6 +180,14 @@ export interface ElectronAPI {
       getByProjectId: (projectId: string, type?: string) => Promise<any[]>;
       create: (data: any) => Promise<any>;
       update: (id: string, content: string) => Promise<any>;
+      delete: (id: string) => Promise<void>;
+    };
+    noteTemplates: {
+      getAll: (type?: string) => Promise<any[]>;
+      getById: (id: string) => Promise<any | null>;
+      getDefault: (type: string) => Promise<any | null>;
+      create: (data: any) => Promise<any>;
+      update: (id: string, updates: any) => Promise<any>;
       delete: (id: string) => Promise<void>;
     };
   };

@@ -31,6 +31,14 @@ import {
   updatePrepNote,
   deletePrepNote,
   PrepNote,
+  // Note Templates
+  getAllNoteTemplates,
+  getNoteTemplateById,
+  getDefaultNoteTemplate,
+  createNoteTemplate,
+  updateNoteTemplate,
+  deleteNoteTemplate,
+  PrepNoteTemplate,
 } from '../database/queries/prep';
 
 export function registerPrepHandlers(): void {
@@ -251,6 +259,64 @@ export function registerPrepHandlers(): void {
       deletePrepNote(id);
     } catch (error) {
       console.error('Error deleting prep note:', error);
+      throw error;
+    }
+  });
+
+  // ============================================
+  // PREP NOTE TEMPLATES
+  // ============================================
+
+  ipcMain.handle('prep:noteTemplates:getAll', async (_event, type?: string) => {
+    try {
+      return getAllNoteTemplates(type);
+    } catch (error) {
+      console.error('Error getting note templates:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('prep:noteTemplates:getById', async (_event, id: string) => {
+    try {
+      return getNoteTemplateById(id);
+    } catch (error) {
+      console.error('Error getting note template:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('prep:noteTemplates:getDefault', async (_event, type: string) => {
+    try {
+      return getDefaultNoteTemplate(type);
+    } catch (error) {
+      console.error('Error getting default note template:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('prep:noteTemplates:create', async (_event, data: Partial<PrepNoteTemplate>) => {
+    try {
+      return createNoteTemplate(data);
+    } catch (error) {
+      console.error('Error creating note template:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('prep:noteTemplates:update', async (_event, id: string, updates: Partial<PrepNoteTemplate>) => {
+    try {
+      return updateNoteTemplate(id, updates);
+    } catch (error) {
+      console.error('Error updating note template:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('prep:noteTemplates:delete', async (_event, id: string) => {
+    try {
+      deleteNoteTemplate(id);
+    } catch (error) {
+      console.error('Error deleting note template:', error);
       throw error;
     }
   });

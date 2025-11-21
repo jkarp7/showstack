@@ -262,21 +262,32 @@ export const SCHEMA = `
     FOREIGN KEY (prep_project_id) REFERENCES prep_projects(id) ON DELETE CASCADE
   );
 
-  -- Prep Notes table (3-tier: general, equipment, revision)
+  -- Prep Notes table (3-tier: general conditions, general notes, fixture notes, revision)
   CREATE TABLE IF NOT EXISTS prep_notes (
     id TEXT PRIMARY KEY,
     prep_project_id TEXT NOT NULL,
 
-    type TEXT NOT NULL CHECK(type IN ('general', 'equipment', 'revision')),
-    section_id TEXT,
-    revision_num INTEGER,
+    type TEXT NOT NULL CHECK(type IN ('general_conditions', 'general_notes', 'fixture_notes', 'revision')),
     content TEXT NOT NULL,
 
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
 
-    FOREIGN KEY (prep_project_id) REFERENCES prep_projects(id) ON DELETE CASCADE,
-    FOREIGN KEY (section_id) REFERENCES prep_sections(id) ON DELETE CASCADE
+    FOREIGN KEY (prep_project_id) REFERENCES prep_projects(id) ON DELETE CASCADE
+  );
+
+  -- Prep Note Templates (for standard language)
+  CREATE TABLE IF NOT EXISTS prep_note_templates (
+    id TEXT PRIMARY KEY,
+    user_id TEXT,
+
+    type TEXT NOT NULL CHECK(type IN ('general_conditions', 'general_notes', 'fixture_notes')),
+    name TEXT NOT NULL, -- e.g., "Standard Lighting Conditions"
+    content TEXT NOT NULL,
+    is_default INTEGER DEFAULT 0,
+
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
   );
 
   -- Indexes for Prep tables
@@ -285,4 +296,6 @@ export const SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_prep_revisions_project ON prep_revisions(prep_project_id);
   CREATE INDEX IF NOT EXISTS idx_prep_notes_project ON prep_notes(prep_project_id);
   CREATE INDEX IF NOT EXISTS idx_prep_notes_type ON prep_notes(prep_project_id, type);
+  CREATE INDEX IF NOT EXISTS idx_prep_note_templates_type ON prep_note_templates(type);
+  CREATE INDEX IF NOT EXISTS idx_prep_note_templates_default ON prep_note_templates(type, is_default);
 `;

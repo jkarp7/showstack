@@ -799,3 +799,177 @@ function getPrepNoteById(id: string): PrepNote | null {
 
   return note as PrepNote;
 }
+
+// ============================================
+// PREP NOTE TEMPLATES
+// ============================================
+
+export interface PrepNoteTemplate {
+  id: string;
+  user_id?: string;
+  type: 'general_conditions' | 'general_notes' | 'fixture_notes';
+  name: string;
+  content: string;
+  is_default: number;
+  created_at: number;
+  updated_at: number;
+}
+
+export function getAllNoteTemplates(type?: string): PrepNoteTemplate[] {
+  const db = getDatabase();
+
+  let query = `SELECT * FROM prep_note_templates`;
+  const params: any[] = [];
+
+  if (type) {
+    query += ` WHERE type = ?`;
+    params.push(type);
+  }
+
+  query += ` ORDER BY is_default DESC, name ASC`;
+
+  const result = db.exec(query, params);
+
+  if (!result[0]) {
+    return [];
+  }
+
+  const columns = result[0].columns;
+  const values = result[0].values;
+
+  return values.map((row) => {
+    const template: any = {};
+    columns.forEach((col, idx) => {
+      template[col] = row[idx];
+    });
+    return template as PrepNoteTemplate;
+  });
+}
+
+export function getNoteTemplateById(id: string): PrepNoteTemplate | null {
+  const db = getDatabase();
+  const result = db.exec(`SELECT * FROM prep_note_templates WHERE id = ?`, [id]);
+
+  if (!result[0] || result[0].values.length === 0) {
+    return null;
+  }
+
+  const columns = result[0].columns;
+  const values = result[0].values[0];
+
+  const template: any = {};
+  columns.forEach((col, idx) => {
+    template[col] = values[idx];
+  });
+
+  return template as PrepNoteTemplate;
+}
+
+export function getDefaultNoteTemplate(type: string): PrepNoteTemplate | null {
+  const db = getDatabase();
+  const result = db.exec(
+    `SELECT * FROM prep_note_templates WHERE type = ? AND is_default = 1 LIMIT 1`,
+    [type]
+  );
+
+  if (!result[0] || result[0].values.length === 0) {
+    return null;
+  }
+
+  const columns = result[0].columns;
+  const values = result[0].values[0];
+
+  const template: any = {};
+  columns.forEach((col, idx) => {
+    template[col] = values[idx];
+  });
+
+  return template as PrepNoteTemplate;
+}
+
+export function createNoteTemplate(data: Partial<PrepNoteTemplate>): PrepNoteTemplate {
+  const db = getDatabase();
+  const id = uuidv4();
+  const now = Date.now();
+
+  // If setting as default, unset any existing defaults for this type
+  if (data.is_default) {
+    db.run(
+      `UPDATE prep_note_templates SET is_default = 0 WHERE type = ?`,
+      [data.type!]
+    );
+  }
+
+  db.run(
+    `
+    INSERT INTO prep_note_templates (
+      id, user_id, type, name, content, is_default, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `,
+    [
+      id,
+      data.user_id || null,
+      data.type!,
+      data.name!,
+      data.content || '',
+      data.is_default || 0,
+      now,
+      now,
+    ]
+  );
+
+  saveDatabase();
+  return getNoteTemplateById(id)!;
+}
+
+export function updateNoteTemplate(id: string, updates: Partial<PrepNoteTemplate>): PrepNoteTemplate {
+  const db = getDatabase();
+  const now = Date.now();
+
+  const template = getNoteTemplateById(id);
+  if (!template) {
+    throw new Error('Note template not found');
+  }
+
+  // If setting as default, unset any existing defaults for this type
+  if (updates.is_default) {
+    db.run(
+      `UPDATE prep_note_templates SET is_default = 0 WHERE type = ?`,
+      [template.type]
+    );
+  }
+
+  const fields = [];
+  const values = [];
+
+  if (updates.name !== undefined) {
+    fields.push('name = ?');
+    values.push(updates.name);
+  }
+  if (updates.content !== undefined) {
+    fields.push('content = ?');
+    values.push(updates.content);
+  }
+  if (updates.is_default !== undefined) {
+    fields.push('is_default = ?');
+    values.push(updates.is_default);
+  }
+
+  fields.push('updated_at = ?');
+  values.push(now);
+  values.push(id);
+
+  db.run(
+    `UPDATE prep_note_templates SET ${fields.join(', ')} WHERE id = ?`,
+    values
+  );
+
+  saveDatabase();
+  return getNoteTemplateById(id)!;
+}
+
+export function deleteNoteTemplate(id: string): void {
+  const db = getDatabase();
+  db.run('DELETE FROM prep_note_templates WHERE id = ?', [id]);
+  saveDatabase();
+}
