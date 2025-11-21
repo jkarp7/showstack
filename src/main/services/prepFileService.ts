@@ -33,13 +33,13 @@ class PrepFileService {
   private readonly VERSION = '1.0.0';
 
   /**
-   * Show open file dialog for .ssd files
+   * Show open file dialog for ShowStack files (.ss and legacy .ssd)
    */
   async showOpenDialog(): Promise<string | null> {
     const result = await dialog.showOpenDialog({
       title: 'Open Shop Order',
       filters: [
-        { name: 'ShowStack Design Files', extensions: ['ssd'] },
+        { name: 'ShowStack Files', extensions: ['ss', 'ssd'] },
         { name: 'All Files', extensions: ['*'] }
       ],
       properties: ['openFile']
@@ -53,14 +53,14 @@ class PrepFileService {
   }
 
   /**
-   * Show save file dialog for .ssd files
+   * Show save file dialog for ShowStack files (.ss)
    */
   async showSaveDialog(defaultName?: string): Promise<string | null> {
     const result = await dialog.showSaveDialog({
       title: 'Save Shop Order',
       defaultPath: defaultName || 'Shop Order',
       filters: [
-        { name: 'ShowStack Design Files', extensions: ['ssd'] },
+        { name: 'ShowStack Files', extensions: ['ss'] },
         { name: 'All Files', extensions: ['*'] }
       ]
     });
@@ -69,17 +69,17 @@ class PrepFileService {
       return null;
     }
 
-    // Ensure .ssd extension
+    // Ensure .ss extension
     let filePath = result.filePath;
-    if (!filePath.endsWith('.ssd')) {
-      filePath += '.ssd';
+    if (!filePath.endsWith('.ss') && !filePath.endsWith('.ssd')) {
+      filePath += '.ss';
     }
 
     return filePath;
   }
 
   /**
-   * Export prep project to .ssd file
+   * Export prep project to ShowStack file (.ss)
    */
   async exportProject(projectId: string, filePath: string): Promise<void> {
     try {
@@ -114,7 +114,7 @@ class PrepFileService {
   }
 
   /**
-   * Import prep project from .ssd file
+   * Import prep project from ShowStack file (.ss or legacy .ssd)
    */
   async importProject(filePath: string): Promise<PrepFileResult> {
     try {
@@ -215,12 +215,12 @@ class PrepFileService {
   }
 
   /**
-   * Get filename without extension
+   * Get filename without extension (supports .ss and legacy .ssd)
    */
   getFileName(filePath: string): string {
     const parts = filePath.split(/[\\/]/);
     const filename = parts[parts.length - 1];
-    return filename.replace(/\.ssd$/, '');
+    return filename.replace(/\.(ss|ssd)$/, '');
   }
 }
 

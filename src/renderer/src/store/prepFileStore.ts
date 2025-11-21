@@ -53,7 +53,7 @@ export const usePrepFileStore = create<PrepFileStore>((set, get) => ({
       // Extract filename from path
       const parts = currentFilePath.replace(/\\/g, '/').split('/');
       const filename = parts[parts.length - 1];
-      return filename.replace(/\.ssd$/, '');
+      return filename.replace(/\.(ss|ssd)$/, '');
     }
     return currentFileName;
   },
