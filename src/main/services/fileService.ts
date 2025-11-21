@@ -19,31 +19,34 @@ export interface FileValidationResult {
   projectName?: string;
 }
 
-// Module-specific file extensions
-export const FILE_EXTENSIONS = {
-  PRODUCTION: 'ssp',    // ShowStack:Production
-  MANAGER: 'ssm',       // ShowStack:Manager
-  DESIGN: 'ssd'         // ShowStack:Design (Prep)
+// Unified file extension for all ShowStack projects
+export const FILE_EXTENSION = 'ss';
+
+// Legacy file extensions (for backward compatibility)
+export const LEGACY_EXTENSIONS = {
+  PRODUCTION: 'ssp',    // ShowStack:Production (legacy)
+  MANAGER: 'ssm',       // ShowStack:Manager (legacy)
+  DESIGN: 'ssd'         // ShowStack:Design (legacy)
 } as const;
 
-export type ModuleType = keyof typeof FILE_EXTENSIONS;
+export type ModuleType = keyof typeof LEGACY_EXTENSIONS;
 
 class FileService {
   private readonly SHOWSTACK_VERSION = '1.0.0';
   private readonly APP_VERSION = '0.1.0-alpha';
 
   /**
-   * Get all ShowStack file extensions
+   * Get all ShowStack file extensions (current + legacy for backward compatibility)
    */
   private getAllExtensions(): string[] {
-    return Object.values(FILE_EXTENSIONS);
+    return [FILE_EXTENSION, ...Object.values(LEGACY_EXTENSIONS)];
   }
 
   /**
-   * Get extension for a specific module
+   * Get extension for a specific module (always returns unified .ss extension)
    */
   getExtensionForModule(module: ModuleType): string {
-    return FILE_EXTENSIONS[module];
+    return FILE_EXTENSION;
   }
 
   /**
@@ -57,9 +60,6 @@ class FileService {
       title: 'Open ShowStack Project',
       filters: [
         { name: 'ShowStack Projects', extensions },
-        { name: 'Production Files', extensions: [FILE_EXTENSIONS.PRODUCTION] },
-        { name: 'Manager Files', extensions: [FILE_EXTENSIONS.MANAGER] },
-        { name: 'Design Files', extensions: [FILE_EXTENSIONS.DESIGN] },
         { name: 'All Files', extensions: ['*'] }
       ],
       properties: ['openFile']
@@ -75,19 +75,17 @@ class FileService {
   /**
    * Show save file dialog
    * @param defaultName Default filename
-   * @param module Module type (defaults to PRODUCTION)
+   * @param module Module type (for legacy compatibility, no longer used)
    * @returns File path or null if canceled
    */
   async showSaveDialog(defaultName?: string, module: ModuleType = 'PRODUCTION'): Promise<string | null> {
-    const extension = FILE_EXTENSIONS[module];
     const extensions = this.getAllExtensions();
 
     const result = await dialog.showSaveDialog({
       title: 'Save ShowStack Project',
       defaultPath: defaultName || 'Untitled Project',
       filters: [
-        { name: `ShowStack ${module} File`, extensions: [extension] },
-        { name: 'ShowStack Projects', extensions },
+        { name: 'ShowStack Project', extensions: [FILE_EXTENSION] },
         { name: 'All Files', extensions: ['*'] }
       ]
     });
@@ -101,25 +99,41 @@ class FileService {
     const hasValidExtension = extensions.some(ext => filePath.endsWith(`.${ext}`));
 
     if (!hasValidExtension) {
-      filePath += `.${extension}`;
+      filePath += `.${FILE_EXTENSION}`;
     }
 
     return filePath;
   }
 
   /**
-   * Export current database to ShowStack file (.ssp, .ssm, or .ssd)
+   * Export current database to ShowStack file (.ss)
    * @param filePath Destination file path
    */
   async exportProject(filePath: string): Promise<void> {
     try {
       const db = getDatabase();
 
-      // Update project's updated_at timestamp
-      db.run('UPDATE projects SET updated_at = ? WHERE id = ?', [
-        Date.now(),
-        'default-project'
-      ]);
+      // Update project's updated_at timestamp - try both table types
+      try {
+        // Check if there's a prep project
+        const isPrepProject = db.exec('SELECT id FROM prep_projects LIMIT 1')[0]?.values[0]?.[0];
+
+        if (isPrepProject) {
+          // Update prep_projects table
+          db.run('UPDATE prep_projects SET updated_at = ? WHERE id = ?', [
+            Date.now(),
+            isPrepProject
+          ]);
+        } else {
+          // Update projects table
+          db.run('UPDATE projects SET updated_at = ? WHERE id = ?', [
+            Date.now(),
+            'default-project'
+          ]);
+        }
+      } catch (error) {
+        // Ignore update errors, continue with export
+      }
 
       // Export database as binary
       const data = db.export();
@@ -136,7 +150,7 @@ class FileService {
   }
 
   /**
-   * Import ShowStack file (.ssp, .ssm, or .ssd) and replace current database
+   * Import ShowStack file (.ss or legacy formats) and replace current database
    * @param filePath Source file path
    * @returns Import result
    */
@@ -166,10 +180,25 @@ class FileService {
       const SQL = await initSqlJs();
       const importedDb = new SQL.Database(buffer);
 
-      // Query project info
-      const projectResult = importedDb.exec('SELECT id, name FROM projects LIMIT 1');
-      const projectId = projectResult[0]?.values[0]?.[0] as string || 'default-project';
-      let projectName = projectResult[0]?.values[0]?.[1] as string || 'Untitled Project';
+      // Query project info - try both prep_projects and projects tables
+      let projectId = 'default-project';
+      let projectName = 'Untitled Project';
+
+      try {
+        // First try prep_projects table (for Prep module files)
+        const prepResult = importedDb.exec('SELECT id, production_name FROM prep_projects LIMIT 1');
+        if (prepResult[0]?.values[0]?.[0]) {
+          projectId = prepResult[0].values[0][0] as string;
+          projectName = prepResult[0].values[0][1] as string || 'Untitled Project';
+        } else {
+          // Fall back to projects table (for Production/Manager files)
+          const projectResult = importedDb.exec('SELECT id, name FROM projects LIMIT 1');
+          projectId = projectResult[0]?.values[0]?.[0] as string || 'default-project';
+          projectName = projectResult[0]?.values[0]?.[1] as string || 'Untitled Project';
+        }
+      } catch (error) {
+        // Use defaults if we can't get project info
+      }
 
       // Close the temporary database
       importedDb.close();
@@ -188,12 +217,30 @@ class FileService {
 
         // Update the project name in the database
         const db = getDatabase();
-        db.run('UPDATE projects SET name = ?, updated_at = ? WHERE id = ?', [
-          projectName,
-          Date.now(),
-          projectId
-        ]);
-        saveDatabase();
+
+        // Determine if this is a prep project or regular project
+        try {
+          const isPrepProject = db.exec('SELECT id FROM prep_projects LIMIT 1')[0]?.values[0]?.[0];
+
+          if (isPrepProject) {
+            // Update prep_projects table
+            db.run('UPDATE prep_projects SET production_name = ?, updated_at = ? WHERE id = ?', [
+              projectName,
+              Date.now(),
+              projectId
+            ]);
+          } else {
+            // Update projects table
+            db.run('UPDATE projects SET name = ?, updated_at = ? WHERE id = ?', [
+              projectName,
+              Date.now(),
+              projectId
+            ]);
+          }
+          saveDatabase();
+        } catch (error) {
+          // Ignore update errors
+        }
       }
 
       return {
@@ -241,7 +288,7 @@ class FileService {
   }
 
   /**
-   * Validate ShowStack file format (.ssp, .ssm, or .ssd)
+   * Validate ShowStack file format (.ss or legacy formats)
    * @param filePath File to validate
    * @returns Validation result
    */
@@ -284,11 +331,18 @@ class FileService {
         };
       }
 
-      // Get project info
+      // Get project info - try both prep_projects and projects tables
       let projectName = 'Unknown Project';
       try {
-        const projectResult = db.exec('SELECT name FROM projects LIMIT 1');
-        projectName = projectResult[0]?.values[0]?.[0] as string || 'Unknown Project';
+        // First try prep_projects table (for Prep module files)
+        const prepResult = db.exec('SELECT production_name FROM prep_projects LIMIT 1');
+        if (prepResult[0]?.values[0]?.[0]) {
+          projectName = prepResult[0].values[0][0] as string;
+        } else {
+          // Fall back to projects table (for Production/Manager files)
+          const projectResult = db.exec('SELECT name FROM projects LIMIT 1');
+          projectName = projectResult[0]?.values[0]?.[0] as string || 'Unknown Project';
+        }
       } catch (error) {
         // Ignore if we can't get project name
       }

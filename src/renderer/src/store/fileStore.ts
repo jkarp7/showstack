@@ -57,8 +57,8 @@ export const useFileStore = create<FileStore>((set, get) => ({
     // Extract filename from path locally (works cross-platform)
     const parts = currentFilePath.replace(/\\/g, '/').split('/');
     const filename = parts[parts.length - 1];
-    // Remove any ShowStack extension (.ssp, .ssm, .ssd, or legacy .showstack)
-    return filename.replace(/\.(ssp|ssm|ssd|showstack)$/, '');
+    // Remove any ShowStack extension (.ss, or legacy .ssp, .ssm, .ssd, .showstack)
+    return filename.replace(/\.(ss|ssp|ssm|ssd|showstack)$/, '');
   },
 
   // Open file
@@ -267,8 +267,8 @@ export const useFileStore = create<FileStore>((set, get) => ({
       // Extract new filename and update project name in database
       const parts = filePath.replace(/\\/g, '/').split('/');
       const filename = parts[parts.length - 1];
-      // Remove any ShowStack extension (.ssp, .ssm, .ssd, or legacy .showstack)
-      const newProjectName = filename.replace(/\.(ssp|ssm|ssd|showstack)$/, '');
+      // Remove any ShowStack extension (.ss, or legacy .ssp, .ssm, .ssd, .showstack)
+      const newProjectName = filename.replace(/\.(ss|ssp|ssm|ssd|showstack)$/, '');
 
       // Update project name in database
       if (window.api?.projects) {

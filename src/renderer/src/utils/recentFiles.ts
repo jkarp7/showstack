@@ -109,9 +109,13 @@ export async function clearRecentFiles(moduleType?: ModuleType): Promise<void> {
 }
 
 /**
- * Determine module type from file extension
+ * Determine module type from file extension (supports both .ss and legacy extensions)
  */
 export function getModuleTypeFromPath(filePath: string): ModuleType | undefined {
+  // New unified format - module type will be determined from database contents
+  if (filePath.endsWith('.ss')) return undefined;
+
+  // Legacy formats
   if (filePath.endsWith('.ssp')) return 'production';
   if (filePath.endsWith('.ssm')) return 'manager';
   if (filePath.endsWith('.ssd')) return 'design';

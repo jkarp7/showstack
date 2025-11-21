@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ModuleCard } from '../components/common/ModuleCard';
 import { NewProjectDialog } from '../components/common/NewProjectDialog';
 import { DeleteProjectDialog } from '../components/common/DeleteProjectDialog';
 import { useProjectStore, Project } from '../store/projectStore';
@@ -82,7 +81,7 @@ export function LandingPage() {
                     const { openFile } = useFileStore.getState();
                     await openFile(async () => {
                       await loadProjects();
-                      navigate('/modules/production');
+                      // Stay on landing page after opening file
                     });
                   }}
                   className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition flex items-center gap-2"
@@ -223,40 +222,6 @@ export function LandingPage() {
                 </button>
               </div>
             )}
-          </div>
-
-          {/* Modules Section */}
-          <div>
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-2">Modules</h2>
-              <p className="text-gray-400">Available tools in your subscription</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <ModuleCard
-                name="ShowStack:Prep"
-                description="Equipment orders and specifications for rental houses"
-                icon="📋"
-                route="/modules/prep"
-                isLocked={false}
-              />
-
-              <ModuleCard
-                name="ShowStack:Production"
-                description="Production management, fixtures, and technical planning"
-                icon="🎬"
-                route="/modules/production"
-                isLocked={false}
-              />
-
-              <ModuleCard
-                name="ShowStack:Manager"
-                description="Tour management, scheduling, and logistics"
-                icon="🚐"
-                route="/modules/manager"
-                isLocked={true}
-              />
-            </div>
           </div>
         </div>
       </main>

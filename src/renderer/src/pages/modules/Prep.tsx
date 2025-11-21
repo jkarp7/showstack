@@ -711,7 +711,7 @@ export function Prep() {
                     {currentProject.parent_project_id ? (
                       <div className="flex items-center gap-2">
                         <span className="text-gray-300">
-                          {projects.find(p => p.id === currentProject.parent_project_id)?.production_name || 'Unknown Project'}
+                          {projects.find(p => p.id === currentProject.parent_project_id)?.name || 'Unknown Project'}
                         </span>
                         <button
                           onClick={handleUnlinkFromParent}
