@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Login } from './pages/Login';
 import { LandingPage } from './pages/LandingPage';
 import { ProjectPage } from './pages/ProjectPage';
-import { ModuleLanding } from './pages/ModuleLanding';
 import { Prep } from './pages/modules/Prep';
 import { SystemDocs } from './pages/modules/SystemDocs';
 import { Manager } from './pages/modules/Manager';
@@ -19,16 +18,16 @@ export default function App() {
 
         {/* Project-based routes */}
         <Route path="/project/:projectId" element={<ProjectPage />} />
-        <Route path="/project/:projectId/module/:moduleType" element={<ModuleLanding />} />
         <Route path="/project/:projectId/module/production/system-docs" element={<SystemDocs />} />
         <Route path="/project/:projectId/module/prep" element={<Prep />} />
         <Route path="/project/:projectId/module/manager" element={<Manager />} />
 
         {/* Direct module access (no project) */}
-        <Route path="/module/:moduleType" element={<ModuleLanding />} />
         <Route path="/module/production/system-docs" element={<SystemDocs />} />
         <Route path="/module/prep" element={<Prep />} />
         <Route path="/module/manager" element={<Manager />} />
+        <Route path="/module/production" element={<Navigate to="/module/production/system-docs" replace />} />
+        <Route path="/module/design" element={<Navigate to="/module/prep" replace />} />
 
         {/* Backwards compatibility - redirect old routes */}
         <Route path="/modules" element={<LandingPage />} />
