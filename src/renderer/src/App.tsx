@@ -19,6 +19,8 @@ export default function App() {
         {/* Project-based routes */}
         <Route path="/project/:projectId" element={<ProjectPage />} />
         <Route path="/project/:projectId/module/production/system-docs" element={<SystemDocs />} />
+        <Route path="/project/:projectId/module/production" element={<Navigate to="system-docs" replace />} />
+        <Route path="/project/:projectId/module/design" element={<Navigate to="prep" replace />} />
         <Route path="/project/:projectId/module/prep" element={<Prep />} />
         <Route path="/project/:projectId/module/manager" element={<Manager />} />
 
