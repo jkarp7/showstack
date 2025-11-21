@@ -25,6 +25,9 @@ export function Prep() {
   const [editValue, setEditValue] = useState('');
   const [isDatePickerMode, setIsDatePickerMode] = useState(false);
 
+  // State for tabs
+  const [activeTab, setActiveTab] = useState<'builder' | 'output'>('builder');
+
   const handleBackClick = () => {
     if (parentProjectId) {
       navigate(`/project/${parentProjectId}`);
@@ -453,10 +456,40 @@ export function Prep() {
           </div>
         </header>
 
+        {/* Tabs */}
+        <div className="border-b border-gray-700 bg-gray-800">
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="flex gap-4">
+              <button
+                onClick={() => setActiveTab('builder')}
+                className={`px-4 py-3 text-sm font-medium transition border-b-2 ${
+                  activeTab === 'builder'
+                    ? 'border-blue-500 text-blue-400'
+                    : 'border-transparent text-gray-400 hover:text-gray-300'
+                }`}
+              >
+                Shop Order Builder
+              </button>
+              <button
+                onClick={() => setActiveTab('output')}
+                className={`px-4 py-3 text-sm font-medium transition border-b-2 ${
+                  activeTab === 'output'
+                    ? 'border-blue-500 text-blue-400'
+                    : 'border-transparent text-gray-400 hover:text-gray-300'
+                }`}
+              >
+                Print-Ready Output
+              </button>
+            </div>
+          </div>
+        </div>
+
         <main className="flex-1 overflow-auto p-6">
           <div className="max-w-6xl mx-auto space-y-6">
-            {/* Project Details */}
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+            {activeTab === 'builder' && (
+              <>
+                {/* Project Details */}
+                <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
               {/* Header with dates on right */}
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold">Project Details</h2>
@@ -642,13 +675,24 @@ export function Prep() {
               </div>
             </div>
 
-            {/* Sections List */}
-            <SectionList
-              projectId={currentProject.id}
-              sections={sections}
-              onAddSection={() => setShowAddSectionDialog(true)}
-              onEditSection={handleEditSection}
-            />
+                {/* Sections List */}
+                <SectionList
+                  projectId={currentProject.id}
+                  sections={sections}
+                  onAddSection={() => setShowAddSectionDialog(true)}
+                  onEditSection={handleEditSection}
+                />
+              </>
+            )}
+
+            {activeTab === 'output' && (
+              <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+                <h2 className="text-xl font-bold mb-4">Print-Ready Output Editor</h2>
+                <p className="text-gray-400">
+                  Phase 4: Print-ready output editor coming soon...
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Add Section Dialog */}
