@@ -469,20 +469,22 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
         current_revision: newRevisionNumber,
       });
 
-      // Update items with revision tracking
-      for (const change of changes) {
-        if (change.change_type === 'addition') {
-          await window.api.prep.items.update(change.item_id, {
-            added_in_revision: newRevisionNumber,
-          });
-        } else if (change.change_type === 'modification') {
-          await window.api.prep.items.update(change.item_id, {
-            modified_in_revision: newRevisionNumber,
-          });
-        }
-      }
+      // Update items with revision tracking (batch updates without triggering individual store updates)
+      await Promise.all(
+        changes.map(async (change) => {
+          if (change.change_type === 'addition') {
+            return window.api.prep.items.update(change.item_id, {
+              added_in_revision: newRevisionNumber,
+            });
+          } else if (change.change_type === 'modification') {
+            return window.api.prep.items.update(change.item_id, {
+              modified_in_revision: newRevisionNumber,
+            });
+          }
+        })
+      );
 
-      // Reload project data
+      // Reload project data once after all updates
       await get().loadProject(projectId);
     } catch (error) {
       console.error('Failed to generate revision:', error);
