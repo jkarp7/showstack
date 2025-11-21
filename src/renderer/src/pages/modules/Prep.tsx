@@ -29,6 +29,11 @@ export function Prep() {
   // State for tabs
   const [activeTab, setActiveTab] = useState<'builder' | 'output'>('builder');
 
+  // State for collapsible sections
+  const [projectDetailsExpanded, setProjectDetailsExpanded] = useState(true);
+  const [revisionsExpanded, setRevisionsExpanded] = useState(true);
+  const [equipmentExpanded, setEquipmentExpanded] = useState(true);
+
   // Ref for click timer (to distinguish single vs double click)
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -508,17 +513,25 @@ export function Prep() {
             {activeTab === 'builder' && (
               <>
                 {/* Project Details */}
-                <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-              {/* Header with dates on right */}
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold">Project Details</h2>
-                <div className="text-xs text-gray-400">
-                  Created: {new Date(currentProject.created_at).toLocaleDateString()}
-                  {latestRevision && (
-                    <> | Last Revised: {new Date(latestRevision.revision_date).toLocaleDateString()}</>
-                  )}
-                </div>
-              </div>
+                <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setProjectDetailsExpanded(!projectDetailsExpanded)}
+                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-750 transition"
+                  >
+                    <h2 className="text-xl font-bold">Project Details</h2>
+                    <div className="flex items-center gap-4">
+                      <div className="text-xs text-gray-400">
+                        Created: {new Date(currentProject.created_at).toLocaleDateString()}
+                        {latestRevision && (
+                          <> | Last Revised: {new Date(latestRevision.revision_date).toLocaleDateString()}</>
+                        )}
+                      </div>
+                      <span className="text-gray-400">{projectDetailsExpanded ? '▼' : '▶'}</span>
+                    </div>
+                  </button>
+
+                  {projectDetailsExpanded && (
+                    <div className="p-6 pt-0">
 
               <div className="space-y-4">
                 {/* Production Info - 1 Row */}
@@ -692,26 +705,61 @@ export function Prep() {
                   </div>
                 </div>
               </div>
-            </div>
+                    </div>
+                  )}
+                </div>
 
-                {/* Sections List */}
-                <SectionList
-                  projectId={currentProject.id}
-                  sections={sections}
-                  onAddSection={() => setShowAddSectionDialog(true)}
-                  onEditSection={handleEditSection}
-                />
+                {/* Revisions */}
+                <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setRevisionsExpanded(!revisionsExpanded)}
+                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-750 transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-xl font-bold">Revisions</h2>
+                      <span className="text-sm text-gray-400">
+                        Rev {currentProject.current_revision} | {5 - currentProject.current_revision} remaining
+                      </span>
+                    </div>
+                    <span className="text-gray-400">{revisionsExpanded ? '▼' : '▶'}</span>
+                  </button>
 
-                {/* Revision Panel */}
-                <RevisionPanel
-                  project={currentProject}
-                  revisions={revisions}
-                  onGenerateRevision={(notes) => generateRevision(currentProject.id, notes)}
-                  onCompareRevisions={(rev1, rev2) => {
-                    // TODO: Implement revision comparison
-                    console.log('Compare revisions:', rev1, rev2);
-                  }}
-                />
+                  {revisionsExpanded && (
+                    <div className="p-6 pt-0">
+                      <RevisionPanel
+                        project={currentProject}
+                        revisions={revisions}
+                        onGenerateRevision={(notes) => generateRevision(currentProject.id, notes)}
+                        onCompareRevisions={(rev1, rev2) => {
+                          // TODO: Implement revision comparison
+                          console.log('Compare revisions:', rev1, rev2);
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Equipment */}
+                <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setEquipmentExpanded(!equipmentExpanded)}
+                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-750 transition"
+                  >
+                    <h2 className="text-xl font-bold">Equipment</h2>
+                    <span className="text-gray-400">{equipmentExpanded ? '▼' : '▶'}</span>
+                  </button>
+
+                  {equipmentExpanded && (
+                    <div className="p-6 pt-0">
+                      <SectionList
+                        projectId={currentProject.id}
+                        sections={sections}
+                        onAddSection={() => setShowAddSectionDialog(true)}
+                        onEditSection={handleEditSection}
+                      />
+                    </div>
+                  )}
+                </div>
               </>
             )}
 

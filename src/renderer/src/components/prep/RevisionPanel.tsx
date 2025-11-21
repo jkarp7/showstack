@@ -67,14 +67,8 @@ export function RevisionPanel({
   const sortedRevisions = [...revisions].sort((a, b) => b.revision_number - a.revision_number);
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-xl font-bold">Revisions</h2>
-          <p className="text-sm text-gray-400 mt-1">
-            Current: Rev {project.current_revision} | {5 - project.current_revision} remaining
-          </p>
-        </div>
+    <div>
+      <div className="flex items-center justify-end mb-4">
         <button
           onClick={() => setShowNotes(!showNotes)}
           disabled={isGenerating || project.current_revision >= 5}
