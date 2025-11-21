@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePrepStore } from '../../store/prepStore';
 import { useProjectStore } from '../../store/projectStore';
+import { usePrepFileStore } from '../../store/prepFileStore';
 import { NewPrepProjectDialog } from '../../components/prep/NewPrepProjectDialog';
 import { PrepProjectCard } from '../../components/prep/PrepProjectCard';
 import { SectionList } from '../../components/prep/SectionList';
@@ -10,12 +11,13 @@ import { EditSectionDialog } from '../../components/prep/EditSectionDialog';
 import { RevisionPanel } from '../../components/prep/RevisionPanel';
 import { NotesPanel } from '../../components/prep/NotesPanel';
 import { TemplateManagerDialog } from '../../components/prep/TemplateManagerDialog';
+import { PrepFileMenu } from '../../components/prep/PrepFileMenu';
 import type { PrepSection, Discipline, PrepProject } from '../../types/prep';
 
 export function Prep() {
   const navigate = useNavigate();
   const { projectId: parentProjectId } = useParams<{ projectId?: string }>();
-  const { allProjects, currentProject, sections, revisions, loadAllProjects, loadProject, clearCurrentProject, updateProject, generateRevision, deleteRevision } =
+  const { allProjects, currentProject, sections, revisions, loadAllProjects, loadProject, clearCurrentProject, updateProject, generateRevision, deleteRevision, syncFromParent } =
     usePrepStore();
   const { projects, loadProjects } = useProjectStore();
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
@@ -45,6 +47,9 @@ export function Prep() {
   // State for template manager
   const [showTemplateManager, setShowTemplateManager] = useState(false);
 
+  // State for file menu
+  const [showFileMenu, setShowFileMenu] = useState(false);
+
   // Ref for click timer (to distinguish single vs double click)
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -65,6 +70,13 @@ export function Prep() {
     loadAllProjects();
     loadProjects();
   }, []);
+
+  // Update file store when current project changes
+  useEffect(() => {
+    if (currentProject) {
+      usePrepFileStore.getState().setFileName(currentProject.production_name);
+    }
+  }, [currentProject]);
 
   const handleProjectClick = async (projectId: string) => {
     await loadProject(projectId);
@@ -109,6 +121,62 @@ export function Prep() {
       alert('Failed to generate revision');
     } finally {
       setIsGeneratingRevision(false);
+    }
+  };
+
+  const handleLinkToParent = async (parentProjectId: string) => {
+    if (!currentProject) return;
+
+    try {
+      await updateProject(currentProject.id, { parent_project_id: parentProjectId });
+      alert('Successfully linked to parent project');
+
+      // Optionally trigger sync after linking
+      if (confirm('Would you like to sync dates and contacts from the parent project now?')) {
+        const result = await syncFromParent(currentProject.id, parentProjectId);
+        if (result.success) {
+          alert(result.message || 'Successfully synced from parent project');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to link to parent:', error);
+      alert('Failed to link to parent project');
+    }
+  };
+
+  const handleUnlinkFromParent = async () => {
+    if (!currentProject) return;
+
+    if (!confirm('Unlink from parent project? This will not delete any data.')) {
+      return;
+    }
+
+    try {
+      await updateProject(currentProject.id, { parent_project_id: null });
+      alert('Successfully unlinked from parent project');
+    } catch (error) {
+      console.error('Failed to unlink from parent:', error);
+      alert('Failed to unlink from parent project');
+    }
+  };
+
+  const handleSyncFromParent = async () => {
+    if (!currentProject || !currentProject.parent_project_id) return;
+
+    if (!confirm('Sync data from parent project? This will overwrite dates and contact information.')) {
+      return;
+    }
+
+    try {
+      const result = await syncFromParent(currentProject.id, currentProject.parent_project_id);
+      if (result.success) {
+        alert(result.message || 'Successfully synced from parent project');
+      } else {
+        alert(result.error || 'Failed to sync from parent project');
+      }
+    } catch (error) {
+      console.error('Failed to sync from parent:', error);
+      alert('Failed to sync from parent project');
     }
   };
 
@@ -480,6 +548,7 @@ export function Prep() {
 
     return (
       <div className="h-screen flex flex-col bg-gray-900 text-white">
+        {/* Header with file operations */}
         <header className="bg-gray-800 border-b border-gray-700 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -489,17 +558,11 @@ export function Prep() {
               >
                 ← Back to Projects
               </button>
-              <h1 className="text-2xl font-bold">{currentProject.production_name}</h1>
-              {currentProject.current_revision > 0 && (
-                <span className="px-2 py-1 bg-blue-600 text-white text-sm rounded">
-                  Revision {currentProject.current_revision}
-                </span>
-              )}
-              {isLinked && (
-                <span className="px-2 py-1 bg-blue-600/20 text-blue-400 text-xs rounded">
-                  Linked to Parent Project
-                </span>
-              )}
+
+              {/* File Menu */}
+              <PrepFileMenu
+                onNewProject={() => setShowNewProjectDialog(true)}
+              />
             </div>
             <button
               onClick={handleHomeClick}
@@ -510,6 +573,32 @@ export function Prep() {
             </button>
           </div>
         </header>
+
+        {/* Show name and badges */}
+        <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
+          <div className="flex items-center gap-4">
+            <h1 className="text-3xl font-bold">{currentProject.production_name}</h1>
+            {currentProject.current_revision > 0 && (
+              <span className="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded">
+                Revision {currentProject.current_revision}
+              </span>
+            )}
+            {isLinked && (
+              <>
+                <span className="px-3 py-1.5 bg-blue-600/20 text-blue-400 text-sm rounded">
+                  Linked to Parent Project
+                </span>
+                <button
+                  onClick={handleSyncFromParent}
+                  className="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-sm rounded transition"
+                  title="Sync dates and contacts from parent project"
+                >
+                  🔄 Sync from Parent
+                </button>
+              </>
+            )}
+          </div>
+        </div>
 
         {/* Tabs */}
         <div className="border-b border-gray-700 bg-gray-800">
@@ -612,6 +701,51 @@ export function Prep() {
                   <div className="text-xs text-gray-400">
                     <span className="text-gray-500">Disciplines:</span>{' '}
                     {disciplines.map((d) => d.charAt(0).toUpperCase()).join('/')}
+                  </div>
+                </div>
+
+                {/* Parent Project Link */}
+                <div className="pb-3 border-b border-gray-700">
+                  <div className="flex items-center gap-4">
+                    <span className="text-gray-500 text-sm">Parent Project:</span>
+                    {currentProject.parent_project_id ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-300">
+                          {projects.find(p => p.id === currentProject.parent_project_id)?.production_name || 'Unknown Project'}
+                        </span>
+                        <button
+                          onClick={handleUnlinkFromParent}
+                          className="text-xs px-2 py-1 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded transition"
+                          title="Unlink from parent project"
+                        >
+                          Unlink
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <select
+                          value=""
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              handleLinkToParent(e.target.value);
+                            }
+                          }}
+                          className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm text-gray-300 hover:bg-gray-600 transition"
+                        >
+                          <option value="">+ Link to Project</option>
+                          {projects
+                            .filter(p => p.id !== currentProject.id) // Don't show current project
+                            .map(project => (
+                              <option key={project.id} value={project.id}>
+                                {project.production_name}
+                              </option>
+                            ))}
+                        </select>
+                        <span className="text-xs text-gray-500">
+                          Link to parent to sync dates and contacts
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -760,6 +894,26 @@ export function Prep() {
                   )}
                 </div>
 
+                {/* Notes */}
+                <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setNotesExpanded(!notesExpanded)}
+                    className="w-full px-6 py-4 flex items-center gap-4 hover:bg-gray-750 transition"
+                  >
+                    <span className="text-gray-400 text-lg">{notesExpanded ? '▼' : '▶'}</span>
+                    <h2 className="text-xl font-bold">Notes</h2>
+                  </button>
+
+                  {notesExpanded && (
+                    <div className="p-6 pt-0">
+                      <NotesPanel
+                        project={currentProject}
+                        onManageTemplates={() => setShowTemplateManager(true)}
+                      />
+                    </div>
+                  )}
+                </div>
+
                 {/* Revisions */}
                 <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
                   <div className="px-6 py-4 flex items-center justify-between">
@@ -850,26 +1004,6 @@ export function Prep() {
                         sections={sections}
                         onAddSection={() => setShowAddSectionDialog(true)}
                         onEditSection={handleEditSection}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Notes */}
-                <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
-                  <button
-                    onClick={() => setNotesExpanded(!notesExpanded)}
-                    className="w-full px-6 py-4 flex items-center gap-4 hover:bg-gray-750 transition"
-                  >
-                    <span className="text-gray-400 text-lg">{notesExpanded ? '▼' : '▶'}</span>
-                    <h2 className="text-xl font-bold">Notes</h2>
-                  </button>
-
-                  {notesExpanded && (
-                    <div className="p-6 pt-0">
-                      <NotesPanel
-                        project={currentProject}
-                        onManageTemplates={() => setShowTemplateManager(true)}
                       />
                     </div>
                   )}

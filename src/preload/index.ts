@@ -111,6 +111,14 @@ contextBridge.exposeInMainWorld('api', {
       create: (data: any) => ipcRenderer.invoke('prep:noteTemplates:create', data),
       update: (id: string, updates: any) => ipcRenderer.invoke('prep:noteTemplates:update', id, updates),
       delete: (id: string) => ipcRenderer.invoke('prep:noteTemplates:delete', id)
+    },
+    // File Operations
+    file: {
+      showOpenDialog: () => ipcRenderer.invoke('prep:file:showOpenDialog'),
+      showSaveDialog: (defaultName?: string) => ipcRenderer.invoke('prep:file:showSaveDialog', defaultName),
+      export: (projectId: string, filePath: string) => ipcRenderer.invoke('prep:file:export', projectId, filePath),
+      import: (filePath: string) => ipcRenderer.invoke('prep:file:import', filePath),
+      getFileName: (filePath: string) => ipcRenderer.invoke('prep:file:getFileName', filePath)
     }
   }
 });
@@ -189,6 +197,13 @@ export interface ElectronAPI {
       create: (data: any) => Promise<any>;
       update: (id: string, updates: any) => Promise<any>;
       delete: (id: string) => Promise<void>;
+    };
+    file: {
+      showOpenDialog: () => Promise<string | null>;
+      showSaveDialog: (defaultName?: string) => Promise<string | null>;
+      export: (projectId: string, filePath: string) => Promise<{ success: boolean }>;
+      import: (filePath: string) => Promise<any>;
+      getFileName: (filePath: string) => Promise<string>;
     };
   };
 }
