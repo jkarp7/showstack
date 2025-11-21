@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePrepStore } from '../../store/prepStore';
 import { useProjectStore } from '../../store/projectStore';
+import { usePrepFileStore } from '../../store/prepFileStore';
 import { NewPrepProjectDialog } from '../../components/prep/NewPrepProjectDialog';
 import { PrepProjectCard } from '../../components/prep/PrepProjectCard';
 import { SectionList } from '../../components/prep/SectionList';
@@ -10,6 +11,7 @@ import { EditSectionDialog } from '../../components/prep/EditSectionDialog';
 import { RevisionPanel } from '../../components/prep/RevisionPanel';
 import { NotesPanel } from '../../components/prep/NotesPanel';
 import { TemplateManagerDialog } from '../../components/prep/TemplateManagerDialog';
+import { PrepFileMenu } from '../../components/prep/PrepFileMenu';
 import type { PrepSection, Discipline, PrepProject } from '../../types/prep';
 
 export function Prep() {
@@ -69,6 +71,13 @@ export function Prep() {
     loadProjects();
   }, []);
 
+  // Update file store when current project changes
+  useEffect(() => {
+    if (currentProject) {
+      usePrepFileStore.getState().setFileName(currentProject.production_name);
+    }
+  }, [currentProject]);
+
   const handleProjectClick = async (projectId: string) => {
     await loadProject(projectId);
   };
@@ -112,44 +121,6 @@ export function Prep() {
       alert('Failed to generate revision');
     } finally {
       setIsGeneratingRevision(false);
-    }
-  };
-
-  // File operations
-  const handleSave = async () => {
-    if (!currentProject) return;
-
-    try {
-      const filePath = await window.api.prep.file.showSaveDialog(currentProject.production_name);
-      if (!filePath) return; // User canceled
-
-      await window.api.prep.file.export(currentProject.id, filePath);
-      alert('Shop order saved successfully!');
-    } catch (error) {
-      console.error('Failed to save:', error);
-      alert('Failed to save shop order');
-    }
-  };
-
-  const handleOpen = async () => {
-    if (!confirm('Opening a file will load a new project. Any unsaved changes will be lost. Continue?')) {
-      return;
-    }
-
-    try {
-      const filePath = await window.api.prep.file.showOpenDialog();
-      if (!filePath) return; // User canceled
-
-      const result = await window.api.prep.file.import(filePath);
-      if (result.success && result.projectId) {
-        await loadProject(result.projectId);
-        alert(`Loaded: ${result.projectName}`);
-      } else {
-        alert(result.error || 'Failed to open file');
-      }
-    } catch (error) {
-      console.error('Failed to open:', error);
-      alert('Failed to open shop order');
     }
   };
 
@@ -531,23 +502,10 @@ export function Prep() {
                 ← Back to Projects
               </button>
 
-              {/* File menu buttons */}
-              <div className="flex items-center gap-2 border-l border-gray-700 pl-4">
-                <button
-                  onClick={handleOpen}
-                  className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
-                  title="Open shop order (.ssd)"
-                >
-                  📂 Open
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
-                  title="Save shop order as .ssd file"
-                >
-                  💾 Save As
-                </button>
-              </div>
+              {/* File Menu */}
+              <PrepFileMenu
+                onNewProject={() => setShowNewProjectDialog(true)}
+              />
 
               <h1 className="text-2xl font-bold">{currentProject.production_name}</h1>
               {currentProject.current_revision > 0 && (
