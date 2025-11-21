@@ -543,10 +543,11 @@ export function Prep() {
                     onClick={() => setProjectDetailsExpanded(!projectDetailsExpanded)}
                     className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-750 transition"
                   >
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4">
+                      <span className="text-gray-400 text-lg">{projectDetailsExpanded ? '▼' : '▶'}</span>
                       <h2 className="text-xl font-bold">Project Details</h2>
                       {!projectDetailsExpanded && (
-                        <div className="flex items-center gap-6 text-sm text-gray-400">
+                        <div className="flex items-center gap-6 text-sm text-gray-400 ml-4">
                           <div>
                             <span className="text-gray-500">Show:</span>{' '}
                             <span className="text-gray-300">{currentProject.production_name}</span>
@@ -566,14 +567,11 @@ export function Prep() {
                         </div>
                       )}
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-xs text-gray-400">
-                        Created: {new Date(currentProject.created_at).toLocaleDateString()}
-                        {latestRevision && (
-                          <> | Last Revised: {new Date(latestRevision.revision_date).toLocaleDateString()}</>
-                        )}
-                      </div>
-                      <span className="text-gray-400">{projectDetailsExpanded ? '▼' : '▶'}</span>
+                    <div className="text-xs text-gray-400">
+                      Created: {new Date(currentProject.created_at).toLocaleDateString()}
+                      {latestRevision && (
+                        <> | Last Revised: {new Date(latestRevision.revision_date).toLocaleDateString()}</>
+                      )}
                     </div>
                   </button>
 
@@ -763,11 +761,11 @@ export function Prep() {
                       onClick={() => setRevisionsExpanded(!revisionsExpanded)}
                       className="flex items-center gap-3 hover:bg-gray-750 rounded px-2 py-1 -ml-2 transition"
                     >
+                      <span className="text-gray-400 text-lg">{revisionsExpanded ? '▼' : '▶'}</span>
                       <h2 className="text-xl font-bold">Revisions</h2>
                       <span className="text-sm text-gray-400">
                         Rev {currentProject.current_revision} | {5 - currentProject.current_revision} remaining
                       </span>
-                      <span className="text-gray-400">{revisionsExpanded ? '▼' : '▶'}</span>
                     </button>
                     <button
                       onClick={() => setShowRevisionNotes(!showRevisionNotes)}
@@ -833,10 +831,10 @@ export function Prep() {
                 <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
                   <button
                     onClick={() => setEquipmentExpanded(!equipmentExpanded)}
-                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-750 transition"
+                    className="w-full px-6 py-4 flex items-center gap-4 hover:bg-gray-750 transition"
                   >
+                    <span className="text-gray-400 text-lg">{equipmentExpanded ? '▼' : '▶'}</span>
                     <h2 className="text-xl font-bold">Equipment</h2>
-                    <span className="text-gray-400">{equipmentExpanded ? '▼' : '▶'}</span>
                   </button>
 
                   {equipmentExpanded && (

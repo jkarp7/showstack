@@ -149,11 +149,46 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
     }
 
     try {
+      // If linked to parent project, fetch parent data to populate fields
+      let parentData = {};
+      if (data.parent_project_id) {
+        try {
+          const parentProject = await window.api.projects.getById(data.parent_project_id);
+          if (parentProject) {
+            // Map parent project fields to prep project fields
+            parentData = {
+              parent_project_id: data.parent_project_id,
+              venue: parentProject.venue,
+              // Map designers
+              ld_name: parentProject.lighting_designer,
+              ld_email: parentProject.lighting_designer_email,
+              ld_phone: parentProject.lighting_designer_phone,
+              // Map production staff
+              pm_name: parentProject.production_manager,
+              pm_email: parentProject.production_manager_email,
+              pm_phone: parentProject.production_manager_phone,
+              pm_company: parentProject.production_manager_company,
+              gm_name: parentProject.general_manager,
+              gm_email: parentProject.general_manager_email,
+              gm_phone: parentProject.general_manager_phone,
+              gm_company: parentProject.general_manager_company,
+              pe_name: parentProject.electrician,
+              pe_email: parentProject.electrician_email,
+              pe_phone: parentProject.electrician_phone,
+            };
+          }
+        } catch (error) {
+          console.error('Failed to load parent project:', error);
+        }
+      }
+
       const project = await window.api.prep.projects.create({
         production_name: data.production_name,
+        venue: data.venue,
         disciplines: JSON.stringify(data.disciplines || ['lighting']),
         order_date: Date.now(),
         current_revision: 0,
+        ...parentData, // Merge in parent project data
       });
 
       set((state) => ({
@@ -449,18 +484,19 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
         // Create a map of items with their state at last revision
         const previousItemsMap = new Map(itemsAtLastRevision.map(item => [item.id, { ...item }]));
 
-        // Apply the old values from the last revision's change log
+        // Restore the state at the last revision
+        // For items modified in the last revision, their current DB values may have changed
+        // We need to restore them to their values AS OF that revision
         for (const change of lastChangeLog) {
-          if (change.change_type === 'modification' && change.old_values) {
+          if (change.change_type === 'modification' && change.new_values) {
             const item = previousItemsMap.get(change.item_id);
             if (item) {
-              // Restore old values for fields that were modified in the last revision
-              Object.assign(item, change.old_values);
+              // Apply new_values from last revision to restore state at that point
+              Object.assign(item, change.new_values);
             }
-          } else if (change.change_type === 'addition') {
-            // Items added in last revision didn't exist before, so remove them from previous state
-            previousItemsMap.delete(change.item_id);
           }
+          // Items added in last revision should stay in the map (they existed at that revision)
+          // Items deleted in last revision shouldn't be in itemsAtLastRevision due to the filter
         }
 
         const previousItems = Array.from(previousItemsMap.values());
