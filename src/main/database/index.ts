@@ -54,7 +54,7 @@ export async function initDatabase(): Promise<void> {
   }
 
   // Enable foreign keys
-  projectDb.run('PRAGMA foreign keys = ON');
+  projectDb.run('PRAGMA foreign_keys = ON');
 
   // Create project tables
   projectDb.exec(PROJECT_SCHEMA);
@@ -492,7 +492,7 @@ export async function reloadDatabase(): Promise<void> {
   projectDb = new SQL.Database(buffer);
 
   // Enable foreign keys
-  projectDb.run('PRAGMA foreign keys = ON');
+  projectDb.run('PRAGMA foreign_keys = ON');
 
   // Run migrations to ensure all tables exist
   runProjectMigrations(projectDb);
