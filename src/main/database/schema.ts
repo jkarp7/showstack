@@ -4,9 +4,47 @@ export const SCHEMA = `
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
-    venue TEXT,
-    designer TEXT,
     logo_path TEXT,
+
+    -- Design Team
+    lighting_designer TEXT,
+    lighting_designer_email TEXT,
+    lighting_designer_phone TEXT,
+    lighting_associates TEXT, -- JSON array
+    audio_designer TEXT,
+    audio_designer_email TEXT,
+    audio_designer_phone TEXT,
+    audio_associates TEXT, -- JSON array
+    video_designer TEXT,
+    video_designer_email TEXT,
+    video_designer_phone TEXT,
+    video_associates TEXT, -- JSON array
+
+    -- Production Staff
+    electrician TEXT,
+    electrician_email TEXT,
+    electrician_phone TEXT,
+    audio_tech TEXT,
+    audio_tech_email TEXT,
+    audio_tech_phone TEXT,
+    video_tech TEXT,
+    video_tech_email TEXT,
+    video_tech_phone TEXT,
+    production_manager TEXT,
+    production_manager_email TEXT,
+    production_manager_phone TEXT,
+    production_manager_company TEXT,
+    general_manager TEXT,
+    general_manager_email TEXT,
+    general_manager_phone TEXT,
+    general_manager_company TEXT,
+
+    -- Venue & Dates
+    venue TEXT,
+    venue_city TEXT,
+    venue_state TEXT,
+    show_dates TEXT, -- JSON object: {load_in, tech, previews, opening, closing, load_out}
+
     enabled_modules TEXT, -- JSON array of module names
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL

@@ -286,28 +286,42 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
         updates.venue = parentProject.venue;
         syncedFields.push('venue');
       }
+      if (parentProject.venue_city) {
+        updates.venue_city = parentProject.venue_city;
+        syncedFields.push('venue_city');
+      }
+      if (parentProject.venue_state) {
+        updates.venue_state = parentProject.venue_state;
+        syncedFields.push('venue_state');
+      }
 
-      // Dates - try to map from parent project
-      const dateFieldMap: Record<string, string> = {
-        'prep_start': 'prep_start_date',
-        'prep_end': 'prep_end_date',
-        'load_in': 'load_in_date',
-        'first_preview': 'first_preview_date',
-        'opening': 'opening_night_date',
-        'closing': 'closing_date',
-        'load_out': 'load_out_date',
-      };
+      // Dates - map from parent project's show_dates object
+      if (parentProject.show_dates) {
+        const showDates = parentProject.show_dates;
 
-      for (const [parentField, prepField] of Object.entries(dateFieldMap)) {
-        if ((parentProject as any)[parentField]) {
-          updates[prepField] = (parentProject as any)[parentField];
-          syncedFields.push(prepField);
+        if (showDates.load_in) {
+          updates.load_in_date = showDates.load_in;
+          syncedFields.push('load_in_date');
         }
-        // Also try with _date suffix
-        const parentFieldWithSuffix = `${parentField}_date`;
-        if ((parentProject as any)[parentFieldWithSuffix]) {
-          updates[prepField] = (parentProject as any)[parentFieldWithSuffix];
-          syncedFields.push(prepField);
+        if (showDates.tech) {
+          updates.first_preview_date = showDates.tech; // Map tech to first_preview
+          syncedFields.push('first_preview_date');
+        }
+        if (showDates.previews) {
+          updates.first_preview_date = showDates.previews;
+          syncedFields.push('first_preview_date');
+        }
+        if (showDates.opening) {
+          updates.opening_night_date = showDates.opening;
+          syncedFields.push('opening_night_date');
+        }
+        if (showDates.closing) {
+          updates.closing_date = showDates.closing;
+          syncedFields.push('closing_date');
+        }
+        if (showDates.load_out) {
+          updates.load_out_date = showDates.load_out;
+          syncedFields.push('load_out_date');
         }
       }
 

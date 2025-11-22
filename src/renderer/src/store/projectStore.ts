@@ -50,6 +50,8 @@ export interface Project {
 
   // Venue & Dates
   venue?: string;
+  venue_city?: string;
+  venue_state?: string;
   show_dates?: ShowDates;
 
   enabled_modules?: string[]; // ['production', 'manager', 'design']
