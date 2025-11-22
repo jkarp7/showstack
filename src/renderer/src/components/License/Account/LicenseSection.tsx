@@ -22,6 +22,16 @@ export function LicenseSection() {
   React.useEffect(() => {
     console.log('LicenseSection - license:', license);
     console.log('LicenseSection - loading:', loading);
+    if (license) {
+      console.log('License properties:', {
+        tier: license.tier,
+        status: license.status,
+        expirationDate: license.expirationDate,
+        licenseKey: license.licenseKey,
+        email: license.email,
+        modules: license.modules
+      });
+    }
   }, [license, loading]);
 
   async function handleActivate() {
