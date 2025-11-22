@@ -299,6 +299,14 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
       if (parentProject.show_dates) {
         const showDates = parentProject.show_dates;
 
+        if (showDates.prep_start) {
+          updates.prep_start_date = showDates.prep_start;
+          syncedFields.push('prep_start_date');
+        }
+        if (showDates.prep_end) {
+          updates.prep_end_date = showDates.prep_end;
+          syncedFields.push('prep_end_date');
+        }
         if (showDates.load_in) {
           updates.load_in_date = showDates.load_in;
           syncedFields.push('load_in_date');

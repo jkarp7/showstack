@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 
 export interface ShowDates {
+  prep_start?: string;
+  prep_end?: string;
   load_in?: string;
   tech?: string;
   previews?: string;

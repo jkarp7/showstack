@@ -13,6 +13,8 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
   const [description, setDescription] = useState('');
   const [logoPath, setLogoPath] = useState('');
   const [venue, setVenue] = useState('');
+  const [venueCity, setVenueCity] = useState('');
+  const [venueState, setVenueState] = useState('');
 
   // Design team
   const [lightingDesigner, setLightingDesigner] = useState('');
@@ -45,6 +47,8 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
   const [generalManagerCompany, setGeneralManagerCompany] = useState('');
 
   // Show dates
+  const [prepStart, setPrepStart] = useState('');
+  const [prepEnd, setPrepEnd] = useState('');
   const [loadIn, setLoadIn] = useState('');
   const [tech, setTech] = useState('');
   const [previews, setPreviews] = useState('');
@@ -61,6 +65,8 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
       setDescription(project.description || '');
       setLogoPath(project.logo_path || '');
       setVenue(project.venue || '');
+      setVenueCity(project.venue_city || '');
+      setVenueState(project.venue_state || '');
 
       setLightingDesigner(project.lighting_designer || '');
       setLightingDesignerEmail(project.lighting_designer_email || '');
@@ -90,6 +96,8 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
       setGeneralManagerPhone(project.general_manager_phone || '');
       setGeneralManagerCompany(project.general_manager_company || '');
 
+      setPrepStart(project.show_dates?.prep_start || '');
+      setPrepEnd(project.show_dates?.prep_end || '');
       setLoadIn(project.show_dates?.load_in || '');
       setTech(project.show_dates?.tech || '');
       setPreviews(project.show_dates?.previews || '');
@@ -108,6 +116,8 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
     if (name.trim()) {
       // Build show dates object, including all fields (empty dates will be undefined to clear them)
       const showDates: ShowDates = {
+        prep_start: prepStart || undefined,
+        prep_end: prepEnd || undefined,
         load_in: loadIn || undefined,
         tech: tech || undefined,
         previews: previews || undefined,
@@ -122,6 +132,8 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
         description: description.trim() || null,
         logo_path: logoPath || null,
         venue: venue.trim() || null,
+        venue_city: venueCity.trim() || null,
+        venue_state: venueState.trim() || null,
         // Design team
         lighting_designer: lightingDesigner.trim() || null,
         lighting_designer_email: lightingDesignerEmail.trim() || null,
@@ -230,6 +242,35 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                 className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
                 placeholder="e.g., Richard Rodgers Theatre"
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label htmlFor="venue-city" className="block text-sm font-medium text-gray-300 mb-2">
+                  Venue City
+                </label>
+                <input
+                  id="venue-city"
+                  type="text"
+                  value={venueCity}
+                  onChange={(e) => setVenueCity(e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                  placeholder="e.g., New York"
+                />
+              </div>
+              <div>
+                <label htmlFor="venue-state" className="block text-sm font-medium text-gray-300 mb-2">
+                  Venue State
+                </label>
+                <input
+                  id="venue-state"
+                  type="text"
+                  value={venueState}
+                  onChange={(e) => setVenueState(e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                  placeholder="e.g., NY"
+                />
+              </div>
             </div>
 
             <div className="mb-4">
@@ -517,7 +558,33 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-4 text-blue-400">Show Dates</h3>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <label htmlFor="prep-start" className="block text-sm font-medium text-gray-300 mb-2">
+                  Prep Start
+                </label>
+                <input
+                  id="prep-start"
+                  type="date"
+                  value={prepStart}
+                  onChange={(e) => setPrepStart(e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="prep-end" className="block text-sm font-medium text-gray-300 mb-2">
+                  Prep End
+                </label>
+                <input
+                  id="prep-end"
+                  type="date"
+                  value={prepEnd}
+                  onChange={(e) => setPrepEnd(e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
               <div>
                 <label htmlFor="load-in" className="block text-sm font-medium text-gray-300 mb-2">
                   Load In
