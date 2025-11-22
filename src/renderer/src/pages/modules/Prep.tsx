@@ -12,12 +12,13 @@ import { RevisionPanel } from '../../components/prep/RevisionPanel';
 import { NotesPanel } from '../../components/prep/NotesPanel';
 import { TemplateManagerDialog } from '../../components/prep/TemplateManagerDialog';
 import { PrepFileMenu } from '../../components/prep/PrepFileMenu';
+import { PrintBuilder } from '../../components/prep/PrintBuilder';
 import type { PrepSection, Discipline, PrepProject } from '../../types/prep';
 
 export function Prep() {
   const navigate = useNavigate();
   const { projectId: parentProjectId } = useParams<{ projectId?: string }>();
-  const { allProjects, currentProject, sections, revisions, loadAllProjects, loadProject, clearCurrentProject, updateProject, generateRevision, deleteRevision, syncFromParent } =
+  const { allProjects, currentProject, sections, revisions, currentTemplate, setCurrentTemplate, saveTemplate, loadAllProjects, loadProject, clearCurrentProject, updateProject, generateRevision, deleteRevision, syncFromParent } =
     usePrepStore();
   const { projects, loadProjects } = useProjectStore();
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
@@ -1012,12 +1013,12 @@ export function Prep() {
             )}
 
             {activeTab === 'output' && (
-              <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-                <h2 className="text-xl font-bold mb-4">Print-Ready Output Editor</h2>
-                <p className="text-gray-400">
-                  Phase 4: Print-ready output editor coming soon...
-                </p>
-              </div>
+              <PrintBuilder
+                currentProject={currentProject}
+                template={currentTemplate}
+                onTemplateChange={setCurrentTemplate}
+                onSaveTemplate={saveTemplate}
+              />
             )}
           </div>
 

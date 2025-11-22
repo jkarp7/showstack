@@ -6,6 +6,7 @@ import type {
   PrepRevision,
   PrepNote,
   Discipline,
+  PrintTemplate,
 } from '../types/prep';
 
 // Type guard for window.api
@@ -22,6 +23,8 @@ interface PrepStore {
   items: PrepEquipmentItem[];
   revisions: PrepRevision[];
   notes: PrepNote[];
+  printTemplates: PrintTemplate[];
+  currentTemplate: PrintTemplate | null;
 
   // All projects (for project list view)
   allProjects: PrepProject[];
@@ -94,6 +97,12 @@ interface PrepStore {
   updateNote: (id: string, content: string) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
 
+  // ===== PRINT TEMPLATE ACTIONS =====
+  loadPrintTemplates: (projectId: string) => Promise<void>;
+  setCurrentTemplate: (template: PrintTemplate | null) => void;
+  saveTemplate: (template: PrintTemplate) => Promise<void>;
+  deleteTemplate: (templateId: string) => Promise<void>;
+
   // ===== UTILITY ACTIONS =====
   clearCurrentProject: () => void;
 }
@@ -104,6 +113,8 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
   items: [],
   revisions: [],
   notes: [],
+  printTemplates: [],
+  currentTemplate: null,
   allProjects: [],
   isLoading: false,
 
@@ -806,6 +817,70 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
     }
   },
 
+  // ===== PRINT TEMPLATE ACTIONS =====
+  loadPrintTemplates: async (projectId: string) => {
+    if (!hasAPI()) {
+      console.warn('API not available - using default template');
+      return;
+    }
+
+    try {
+      const templates = await window.api.prep.printTemplates?.getByProjectId(projectId);
+      set({ printTemplates: templates || [] });
+    } catch (error) {
+      console.error('Failed to load print templates:', error);
+      set({ printTemplates: [] });
+    }
+  },
+
+  setCurrentTemplate: (template: PrintTemplate | null) => {
+    set({ currentTemplate: template });
+  },
+
+  saveTemplate: async (template: PrintTemplate) => {
+    if (!hasAPI()) {
+      console.warn('API not available - storing template locally');
+      set((state) => ({
+        printTemplates: [...state.printTemplates, template],
+        currentTemplate: template,
+      }));
+      return;
+    }
+
+    try {
+      const saved = await window.api.prep.printTemplates?.save(template);
+      if (saved) {
+        set((state) => ({
+          printTemplates: [...state.printTemplates.filter(t => t.id !== saved.id), saved],
+          currentTemplate: saved,
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to save print template:', error);
+    }
+  },
+
+  deleteTemplate: async (templateId: string) => {
+    if (!hasAPI()) {
+      console.warn('API not available');
+      set((state) => ({
+        printTemplates: state.printTemplates.filter(t => t.id !== templateId),
+        currentTemplate: state.currentTemplate?.id === templateId ? null : state.currentTemplate,
+      }));
+      return;
+    }
+
+    try {
+      await window.api.prep.printTemplates?.delete(templateId);
+      set((state) => ({
+        printTemplates: state.printTemplates.filter(t => t.id !== templateId),
+        currentTemplate: state.currentTemplate?.id === templateId ? null : state.currentTemplate,
+      }));
+    } catch (error) {
+      console.error('Failed to delete print template:', error);
+    }
+  },
+
   // ===== UTILITY ACTIONS =====
   clearCurrentProject: () => {
     set({
@@ -814,6 +889,8 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
       items: [],
       revisions: [],
       notes: [],
+      printTemplates: [],
+      currentTemplate: null,
     });
   },
 }));

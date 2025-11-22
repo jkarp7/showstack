@@ -260,3 +260,102 @@ export interface EquipmentSortOptions {
   field: keyof PrepEquipmentItem;
   direction: 'asc' | 'desc';
 }
+
+/**
+ * Print Template System for Shop Order Output
+ */
+
+export type PrintSectionType =
+  | 'cover'
+  | 'project-details'
+  | 'venue-info'
+  | 'schedule'
+  | 'contacts'
+  | 'equipment-by-section'
+  | 'equipment-summary'
+  | 'notes'
+  | 'revision-summary'
+  | 'custom-text'
+  | 'page-break';
+
+export interface PrintSection {
+  id: string;
+  type: PrintSectionType;
+  order: number;
+  enabled: boolean;
+  config: PrintSectionConfig;
+}
+
+export interface PrintSectionConfig {
+  // Cover page
+  title?: string;
+  subtitle?: string;
+  showLogo?: boolean;
+  showDate?: boolean;
+
+  // Project details
+  includeFields?: string[];
+
+  // Venue info
+  includeContact?: boolean;
+  includeAddress?: boolean;
+
+  // Schedule
+  dateFormat?: string;
+  includeDates?: string[];
+
+  // Contacts
+  contactTypes?: string[]; // 'gm', 'pm', 'ld', 'ald', 'pe', 'additional'
+
+  // Equipment
+  groupBy?: 'section' | 'discipline' | 'none';
+  showVenueColumn?: boolean;
+  showWeightColumn?: boolean;
+  showPowerColumn?: boolean;
+  showRevisionMarkers?: boolean;
+
+  // Notes
+  noteType?: NoteType;
+  customText?: string;
+
+  // Revision summary
+  showRevisionDetails?: boolean;
+  includeChangelog?: boolean;
+  onlyShowIfRevisions?: boolean; // Only render if currentProject.current_revision > 0
+
+  // Custom text
+  fontSize?: number;
+  fontWeight?: 'normal' | 'bold';
+  alignment?: 'left' | 'center' | 'right';
+
+  // Page break
+  pageBreakBefore?: boolean;
+}
+
+export interface PrintTemplate {
+  id: string;
+  prep_project_id?: string; // null if global template
+  name: string;
+  description?: string;
+  sections: PrintSection[];
+  pageSettings: PrintPageSettings;
+  isDefault?: boolean;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface PrintPageSettings {
+  pageSize: 'letter' | 'legal' | 'a4' | 'tabloid';
+  orientation: 'portrait' | 'landscape';
+  margins: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+  headerText?: string;
+  footerText?: string;
+  showPageNumbers?: boolean;
+  fontSize?: number;
+  fontFamily?: string;
+}
