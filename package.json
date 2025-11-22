@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "lucide-react": "^0.460.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^6.28.0",
