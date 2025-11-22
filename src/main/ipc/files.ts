@@ -1,5 +1,5 @@
 import { ipcMain, BrowserWindow } from 'electron';
-import { fileService, ProjectImportResult } from '../services/fileService';
+import { fileService, ProjectImportResult, ProjectConflictResolution } from '../services/fileService';
 
 /**
  * Register file operation IPC handlers
@@ -48,6 +48,25 @@ export function registerFileHandlers(): void {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to open file'
+      };
+    }
+  });
+
+  /**
+   * Resolve import conflict
+   */
+  ipcMain.handle('file:resolveConflict', async (_, filePath: string, resolution: ProjectConflictResolution): Promise<ProjectImportResult> => {
+    try {
+      const result = await fileService.resolveImportConflict(filePath, resolution);
+      return {
+        ...result,
+        filePath: result.success ? filePath : undefined
+      } as ProjectImportResult & { filePath?: string };
+    } catch (error) {
+      console.error('Error in file:resolveConflict handler:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to resolve conflict'
       };
     }
   });
