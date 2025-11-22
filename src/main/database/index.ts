@@ -24,24 +24,38 @@ export async function initDatabase(): Promise<void> {
   // ============================================
   // Initialize App Database (licenses, settings)
   // ============================================
+  console.log('📊 Initializing app database at:', appDbPath);
+  console.log('📊 App database exists:', existsSync(appDbPath));
+
   if (existsSync(appDbPath)) {
     const buffer = readFileSync(appDbPath);
     appDb = new SQL.Database(buffer);
+    console.log('📊 Loaded existing app database');
   } else {
     appDb = new SQL.Database();
+    console.log('📊 Created new app database');
   }
 
   // Enable foreign keys
   appDb.run('PRAGMA foreign_keys = ON');
+  console.log('📊 Enabled foreign keys');
 
   // Create app tables
+  console.log('📊 Executing APP_SCHEMA...');
+  console.log('📊 APP_SCHEMA length:', APP_SCHEMA.length);
   appDb.exec(APP_SCHEMA);
+  console.log('📊 APP_SCHEMA executed successfully');
+
+  // Verify tables were created
+  const tables = appDb.exec("SELECT name FROM sqlite_master WHERE type='table'");
+  console.log('📊 Tables in app database:', tables[0]?.values || []);
 
   // Run app database migrations
   runAppMigrations(appDb);
 
   // Save app database
   saveAppDatabase();
+  console.log('📊 App database saved');
 
   // ============================================
   // Initialize Project Database (all project data)
