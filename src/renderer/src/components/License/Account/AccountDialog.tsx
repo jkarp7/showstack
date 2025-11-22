@@ -34,6 +34,20 @@ interface AccountDialogProps {
 export function AccountDialog({ isOpen, onClose }: AccountDialogProps) {
   const [activeTab, setActiveTab] = useState<AccountTab>('license');
 
+  // Handle escape key
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const tabs = [
@@ -43,16 +57,24 @@ export function AccountDialog({ isOpen, onClose }: AccountDialogProps) {
   ] as const;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl h-[500px] flex flex-col">
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-lg shadow-xl w-full max-w-3xl h-[500px] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold">Account</h2>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
+            className="px-3 py-1 hover:bg-gray-100 rounded transition-colors text-gray-600 hover:text-gray-900 font-semibold"
+            title="Close (Esc)"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 inline" />
+            <span className="ml-1">Close</span>
           </button>
         </div>
 

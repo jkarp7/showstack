@@ -18,6 +18,12 @@ export function LicenseSection() {
   const [activating, setActivating] = useState(false);
   const [error, setError] = useState('');
 
+  // Debug logging
+  React.useEffect(() => {
+    console.log('LicenseSection - license:', license);
+    console.log('LicenseSection - loading:', loading);
+  }, [license, loading]);
+
   async function handleActivate() {
     if (!licenseKey || !email) return;
 
@@ -40,7 +46,8 @@ export function LicenseSection() {
     return <div className="text-gray-600">Loading...</div>;
   }
 
-  if (!license) {
+  // Check if license is truly valid with all required fields
+  if (!license || !license.email || !license.licenseKey || !license.modules || license.modules.length === 0) {
     return (
       <div className="space-y-6">
         <h3 className="text-lg font-semibold">Activate License</h3>
@@ -129,29 +136,31 @@ export function LicenseSection() {
         </ul>
       </div>
 
-      <div>
-        <h4 className="font-medium mb-2">Features</h4>
-        <ul className="space-y-1">
-          <li className="flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-green-500" />
-            <span>Max Revisions: {license.modules[0]?.features.maxRevisions}</span>
-          </li>
-          <li className="flex items-center gap-2">
-            {license.modules[0]?.features.multiDiscipline ?
-              <CheckCircle className="w-4 h-4 text-green-500" /> :
-              <XCircle className="w-4 h-4 text-gray-400" />
-            }
-            <span>Multi-Discipline Support</span>
-          </li>
-          <li className="flex items-center gap-2">
-            {license.modules[0]?.features.advancedExport ?
-              <CheckCircle className="w-4 h-4 text-green-500" /> :
-              <XCircle className="w-4 h-4 text-gray-400" />
-            }
-            <span>Advanced Export Options</span>
-          </li>
-        </ul>
-      </div>
+      {license.modules && license.modules.length > 0 && license.modules[0]?.features && (
+        <div>
+          <h4 className="font-medium mb-2">Features</h4>
+          <ul className="space-y-1">
+            <li className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-green-500" />
+              <span>Max Revisions: {license.modules[0].features.maxRevisions ?? 'Unlimited'}</span>
+            </li>
+            <li className="flex items-center gap-2">
+              {license.modules[0].features.multiDiscipline ?
+                <CheckCircle className="w-4 h-4 text-green-500" /> :
+                <XCircle className="w-4 h-4 text-gray-400" />
+              }
+              <span>Multi-Discipline Support</span>
+            </li>
+            <li className="flex items-center gap-2">
+              {license.modules[0].features.advancedExport ?
+                <CheckCircle className="w-4 h-4 text-green-500" /> :
+                <XCircle className="w-4 h-4 text-gray-400" />
+              }
+              <span>Advanced Export Options</span>
+            </li>
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
