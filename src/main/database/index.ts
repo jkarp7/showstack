@@ -380,7 +380,7 @@ function runProjectMigrations(db: Database): void {
         content TEXT NOT NULL,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
-        FOREIGN KEY (prep_project_id) REFERENCES prep_notes(id) ON DELETE CASCADE
+        FOREIGN KEY (prep_project_id) REFERENCES prep_projects(id) ON DELETE CASCADE
       )
     `);
     db.run('CREATE INDEX IF NOT EXISTS idx_prep_notes_project ON prep_notes(prep_project_id)');
