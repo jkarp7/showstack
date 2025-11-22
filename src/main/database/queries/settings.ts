@@ -1,11 +1,11 @@
-import { getDatabase, saveDatabase } from '../index';
+import { getAppDatabase, saveAppDatabase } from '../index';
 import type { AppSettings } from '../../../shared/types/settings.types';
 
 /**
  * Get application settings
  */
 export function getSettings(): AppSettings | null {
-  const db = getDatabase();
+  const db = getAppDatabase();
 
   const result = db.exec(`
     SELECT data FROM app_settings WHERE id = 1
@@ -23,7 +23,7 @@ export function getSettings(): AppSettings | null {
  * Save application settings
  */
 export function saveSettings(settings: AppSettings): void {
-  const db = getDatabase();
+  const db = getAppDatabase();
   const now = Date.now();
   const data = JSON.stringify(settings);
 
@@ -45,7 +45,7 @@ export function saveSettings(settings: AppSettings): void {
     `, [data, now]);
   }
 
-  saveDatabase();
+  saveAppDatabase();
 }
 
 /**
