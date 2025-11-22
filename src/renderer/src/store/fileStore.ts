@@ -1,6 +1,19 @@
 import { create } from 'zustand';
 import { addRecentFile, getModuleTypeFromPath } from '../utils/recentFiles';
 
+export interface ConflictInfo {
+  existingProject: {
+    id: string;
+    name: string;
+    updated_at: number;
+  };
+  importedProject: {
+    id: string;
+    name: string;
+    updated_at: number;
+  };
+}
+
 interface FileStore {
   // State
   currentFilePath: string | null;
@@ -9,6 +22,8 @@ interface FileStore {
   isOpening: boolean;
   lastSavedAt: number | null;
   error: string | null;
+  conflictInfo: ConflictInfo | null;
+  conflictFilePath: string | null;
 
   // Actions
   setFilePath: (path: string | null) => void;
@@ -16,8 +31,10 @@ interface FileStore {
   setSaving: (saving: boolean) => void;
   setOpening: (opening: boolean) => void;
   setError: (error: string | null) => void;
+  setConflict: (conflict: ConflictInfo | null, filePath: string | null) => void;
   openFile: (onSuccess?: () => Promise<void>) => Promise<boolean>;
   openFileByPath: (filePath: string, onSuccess?: () => Promise<void>) => Promise<boolean>;
+  resolveConflict: (action: 'replace' | 'keep-both' | 'cancel', onSuccess?: () => Promise<void>) => Promise<boolean>;
   saveFile: () => Promise<boolean>;
   saveFileAs: (projectName?: string, onSuccess?: () => Promise<void>) => Promise<boolean>;
   newFile: (onSuccess?: () => Promise<void>) => Promise<boolean>;
@@ -32,6 +49,8 @@ export const useFileStore = create<FileStore>((set, get) => ({
   isOpening: false,
   lastSavedAt: null,
   error: null,
+  conflictInfo: null,
+  conflictFilePath: null,
 
   // Set file path
   setFilePath: (path) => set({ currentFilePath: path }),
@@ -47,6 +66,9 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
   // Set error
   setError: (error) => set({ error }),
+
+  // Set conflict
+  setConflict: (conflict, filePath) => set({ conflictInfo: conflict, conflictFilePath: filePath }),
 
   // Get current filename (without path and extension)
   getCurrentFileName: () => {
@@ -93,7 +115,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
     }
 
     try {
-      set({ isOpening: true, error: null });
+      set({ isOpening: true, error: null, conflictInfo: null, conflictFilePath: null });
 
       const result = await window.api.files.open();
 
@@ -101,6 +123,20 @@ export const useFileStore = create<FileStore>((set, get) => ({
         // User canceled
         set({ isOpening: false });
         return false;
+      }
+
+      // Check for conflict
+      if (!result.success && result.conflict?.exists) {
+        console.log('Import conflict detected:', result.conflict);
+        set({
+          conflictInfo: {
+            existingProject: result.conflict.existingProject,
+            importedProject: result.conflict.importedProject
+          },
+          conflictFilePath: result.filePath,
+          isOpening: false
+        });
+        return false; // Conflict needs resolution
       }
 
       if (!result.success) {
@@ -168,9 +204,23 @@ export const useFileStore = create<FileStore>((set, get) => ({
     }
 
     try {
-      set({ isOpening: true, error: null });
+      set({ isOpening: true, error: null, conflictInfo: null, conflictFilePath: null });
 
       const result = await window.api.files.openByPath(filePath);
+
+      // Check for conflict
+      if (!result.success && result.conflict?.exists) {
+        console.log('Import conflict detected:', result.conflict);
+        set({
+          conflictInfo: {
+            existingProject: result.conflict.existingProject,
+            importedProject: result.conflict.importedProject
+          },
+          conflictFilePath: filePath,
+          isOpening: false
+        });
+        return false; // Conflict needs resolution
+      }
 
       if (!result.success) {
         console.error('Open failed:', result.error);
@@ -201,6 +251,67 @@ export const useFileStore = create<FileStore>((set, get) => ({
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to open file';
       console.error('Error in openFileByPath:', error);
+      set({ error: errorMessage, isOpening: false });
+      return false;
+    }
+  },
+
+  // Resolve import conflict
+  resolveConflict: async (action, onSuccess) => {
+    const state = get();
+
+    if (!state.conflictFilePath || !state.conflictInfo) {
+      console.error('No conflict to resolve');
+      return false;
+    }
+
+    if (action === 'cancel') {
+      set({ conflictInfo: null, conflictFilePath: null });
+      return false;
+    }
+
+    try {
+      set({ isOpening: true, error: null });
+
+      const result = await window.api.files.resolveConflict(
+        state.conflictFilePath,
+        {
+          action,
+          projectId: state.conflictInfo.importedProject.id
+        }
+      );
+
+      if (!result.success) {
+        console.error('Conflict resolution failed:', result.error);
+        set({ error: result.error || 'Failed to resolve conflict', isOpening: false });
+        return false;
+      }
+
+      // Clear conflict state
+      set({
+        conflictInfo: null,
+        conflictFilePath: null,
+        currentFilePath: result.filePath || null,
+        isDirty: false,
+        isOpening: false,
+        lastSavedAt: Date.now()
+      });
+
+      // Add to recent files
+      if (result.filePath && result.projectName) {
+        const moduleType = getModuleTypeFromPath(result.filePath);
+        await addRecentFile(result.filePath, result.projectName, moduleType);
+      }
+
+      // Call success callback to reload data
+      if (onSuccess) {
+        await onSuccess();
+      }
+
+      return true;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to resolve conflict';
+      console.error('Error in resolveConflict:', error);
       set({ error: errorMessage, isOpening: false });
       return false;
     }

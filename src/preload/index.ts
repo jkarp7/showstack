@@ -58,6 +58,7 @@ contextBridge.exposeInMainWorld('api', {
   files: {
     open: () => ipcRenderer.invoke('file:open'),
     openByPath: (filePath: string) => ipcRenderer.invoke('file:openByPath', filePath),
+    resolveConflict: (filePath: string, resolution: any) => ipcRenderer.invoke('file:resolveConflict', filePath, resolution),
     save: (filePath?: string) => ipcRenderer.invoke('file:save', filePath),
     saveAs: (defaultName?: string, module?: string) => ipcRenderer.invoke('file:saveAs', defaultName, module),
     new: () => ipcRenderer.invoke('file:new'),
@@ -173,6 +174,7 @@ export interface ElectronAPI {
   files: {
     open: () => Promise<any>;
     openByPath: (filePath: string) => Promise<any>;
+    resolveConflict: (filePath: string, resolution: any) => Promise<any>;
     save: (filePath?: string) => Promise<string | null>;
     saveAs: (defaultName?: string, module?: string) => Promise<string | null>;
     new: () => Promise<string>;
