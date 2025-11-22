@@ -120,6 +120,27 @@ contextBridge.exposeInMainWorld('api', {
       import: (filePath: string) => ipcRenderer.invoke('prep:file:import', filePath),
       getFileName: (filePath: string) => ipcRenderer.invoke('prep:file:getFileName', filePath)
     }
+  },
+
+  // License operations
+  license: {
+    getStatus: () => ipcRenderer.invoke('license:getStatus'),
+    getCurrent: () => ipcRenderer.invoke('license:getCurrent'),
+    hasModule: (module: string) => ipcRenderer.invoke('license:hasModule', module),
+    getModuleFeatures: (module: string) => ipcRenderer.invoke('license:getModuleFeatures', module),
+    getAvailableModules: () => ipcRenderer.invoke('license:getAvailableModules'),
+    canUseFeature: (module: string, feature: string) => ipcRenderer.invoke('license:canUseFeature', module, feature),
+    activate: (licenseKey: string, email: string, modules: string[]) =>
+      ipcRenderer.invoke('license:activate', licenseKey, email, modules),
+    verifyOnline: () => ipcRenderer.invoke('license:verifyOnline')
+  },
+
+  // Settings operations
+  settings: {
+    get: () => ipcRenderer.invoke('settings:get'),
+    save: (settings: any) => ipcRenderer.invoke('settings:save', settings),
+    update: (updates: any) => ipcRenderer.invoke('settings:update', updates),
+    reset: () => ipcRenderer.invoke('settings:reset')
   }
 });
 
@@ -205,6 +226,22 @@ export interface ElectronAPI {
       import: (filePath: string) => Promise<any>;
       getFileName: (filePath: string) => Promise<string>;
     };
+  };
+  license: {
+    getStatus: () => Promise<any>;
+    getCurrent: () => Promise<any>;
+    hasModule: (module: string) => Promise<boolean>;
+    getModuleFeatures: (module: string) => Promise<any>;
+    getAvailableModules: () => Promise<string[]>;
+    canUseFeature: (module: string, feature: string) => Promise<boolean>;
+    activate: (licenseKey: string, email: string, modules: string[]) => Promise<any>;
+    verifyOnline: () => Promise<boolean>;
+  };
+  settings: {
+    get: () => Promise<any>;
+    save: (settings: any) => Promise<{ success: boolean }>;
+    update: (updates: any) => Promise<{ success: boolean }>;
+    reset: () => Promise<{ success: boolean }>;
   };
 }
 

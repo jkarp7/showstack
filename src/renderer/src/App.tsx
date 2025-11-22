@@ -5,10 +5,17 @@ import { ProjectPage } from './pages/ProjectPage';
 import { Prep } from './pages/modules/Prep';
 import { SystemDocs } from './pages/modules/SystemDocs';
 import { Manager } from './pages/modules/Manager';
+import { LicenseBanner } from './components/License/LicenseBanner';
+import { useUser } from './hooks/useUser';
 
 export default function App() {
+  const { status } = useUser();
+
   return (
     <Router>
+      {/* License Status Banner - shows warnings for expiration/offline */}
+      {status && <LicenseBanner status={status} />}
+
       <Routes>
         {/* Default route - show landing page (projects) */}
         <Route path="/" element={<LandingPage />} />

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NewProjectDialog } from '../components/common/NewProjectDialog';
 import { DeleteProjectDialog } from '../components/common/DeleteProjectDialog';
+import { AccountDialog } from '../components/License/Account/AccountDialog';
 import { useProjectStore, Project } from '../store/projectStore';
 import { useFileStore } from '../store/fileStore';
 import { migrateLegacyRecentFiles } from '../utils/recentFiles';
@@ -12,6 +13,7 @@ export function LandingPage() {
   const { openFileByPath } = useFileStore();
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false);
 
   useEffect(() => {
     // Migrate legacy recent files on first load
@@ -52,7 +54,10 @@ export function LandingPage() {
             <p className="text-gray-400 text-sm mt-1">Production Management Suite</p>
           </div>
           <div className="flex items-center gap-4">
-            <button className="px-4 py-2 text-gray-300 hover:text-white transition">
+            <button
+              onClick={() => setIsAccountDialogOpen(true)}
+              className="px-4 py-2 text-gray-300 hover:text-white transition"
+            >
               Account
             </button>
             <button className="px-4 py-2 text-gray-300 hover:text-white transition">
@@ -244,6 +249,12 @@ export function LandingPage() {
         project={projectToDelete}
         onClose={() => setProjectToDelete(null)}
         onConfirm={handleDeleteProject}
+      />
+
+      {/* Account Dialog */}
+      <AccountDialog
+        isOpen={isAccountDialogOpen}
+        onClose={() => setIsAccountDialogOpen(false)}
       />
     </div>
   );
