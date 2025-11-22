@@ -115,6 +115,16 @@ function runMigrations(db: Database): void {
     db.run('ALTER TABLE projects ADD COLUMN venue TEXT');
   }
 
+  if (!projectsColumns.includes('venue_city')) {
+    console.log('Running migration: Adding venue_city to projects');
+    db.run('ALTER TABLE projects ADD COLUMN venue_city TEXT');
+  }
+
+  if (!projectsColumns.includes('venue_state')) {
+    console.log('Running migration: Adding venue_state to projects');
+    db.run('ALTER TABLE projects ADD COLUMN venue_state TEXT');
+  }
+
   if (!projectsColumns.includes('show_dates')) {
     console.log('Running migration: Adding show_dates to projects');
     db.run('ALTER TABLE projects ADD COLUMN show_dates TEXT'); // JSON object
@@ -152,6 +162,17 @@ function runMigrations(db: Database): void {
     if (!prepProjectsColumns.includes('parent_project_id')) {
       console.log('Running migration: Adding parent_project_id to prep_projects');
       db.run('ALTER TABLE prep_projects ADD COLUMN parent_project_id TEXT');
+    }
+
+    // Add venue fields if missing
+    if (!prepProjectsColumns.includes('venue_city')) {
+      console.log('Running migration: Adding venue_city to prep_projects');
+      db.run('ALTER TABLE prep_projects ADD COLUMN venue_city TEXT');
+    }
+
+    if (!prepProjectsColumns.includes('venue_state')) {
+      console.log('Running migration: Adding venue_state to prep_projects');
+      db.run('ALTER TABLE prep_projects ADD COLUMN venue_state TEXT');
     }
 
     // Add show date fields if missing
