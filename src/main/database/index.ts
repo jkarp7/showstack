@@ -2,50 +2,94 @@ import initSqlJs, { Database } from 'sql.js';
 import { app } from 'electron';
 import { join } from 'path';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { SCHEMA } from './schema';
+import { APP_SCHEMA } from './appSchema';
+import { PROJECT_SCHEMA } from './projectSchema';
 
-let db: Database | null = null;
-let dbPath: string = '';
+// Two separate databases
+let appDb: Database | null = null;
+let projectDb: Database | null = null;
+let appDbPath: string = '';
+let projectDbPath: string = '';
 
+/**
+ * Initialize both app-level and project-level databases
+ */
 export async function initDatabase(): Promise<void> {
-  dbPath = join(app.getPath('userData'), 'showstack.db');
+  appDbPath = join(app.getPath('userData'), 'showstack-app.db');
+  projectDbPath = join(app.getPath('userData'), 'showstack-projects.db');
 
   // Initialize sql.js
   const SQL = await initSqlJs();
 
-  // Load existing database or create new one
-  if (existsSync(dbPath)) {
-    const buffer = readFileSync(dbPath);
-    db = new SQL.Database(buffer);
+  // ============================================
+  // Initialize App Database (licenses, settings)
+  // ============================================
+  if (existsSync(appDbPath)) {
+    const buffer = readFileSync(appDbPath);
+    appDb = new SQL.Database(buffer);
   } else {
-    db = new SQL.Database();
+    appDb = new SQL.Database();
   }
 
   // Enable foreign keys
-  db.run('PRAGMA foreign_keys = ON');
+  appDb.run('PRAGMA foreign_keys = ON');
 
-  // Create tables
-  db.exec(SCHEMA);
+  // Create app tables
+  appDb.exec(APP_SCHEMA);
 
-  // Run migrations for existing databases
-  runMigrations(db);
+  // Run app database migrations
+  runAppMigrations(appDb);
+
+  // Save app database
+  saveAppDatabase();
+
+  // ============================================
+  // Initialize Project Database (all project data)
+  // ============================================
+  if (existsSync(projectDbPath)) {
+    const buffer = readFileSync(projectDbPath);
+    projectDb = new SQL.Database(buffer);
+  } else {
+    projectDb = new SQL.Database();
+  }
+
+  // Enable foreign keys
+  projectDb.run('PRAGMA foreign keys = ON');
+
+  // Create project tables
+  projectDb.exec(PROJECT_SCHEMA);
+
+  // Run project database migrations
+  runProjectMigrations(projectDb);
 
   // Create default project if none exists
-  const result = db.exec('SELECT COUNT(*) as count FROM projects');
+  const result = projectDb.exec('SELECT COUNT(*) as count FROM projects');
   const projectCount = result[0]?.values[0]?.[0] || 0;
 
   if (projectCount === 0) {
-    db.run(
+    projectDb.run(
       'INSERT INTO projects (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)',
       ['default-project', 'Untitled Project', Date.now(), Date.now()]
     );
   }
 
-  // Save database to disk
-  saveDatabase();
+  // Save project database
+  saveProjectDatabase();
 }
 
-function runMigrations(db: Database): void {
+/**
+ * Migrations for app-level database
+ */
+function runAppMigrations(db: Database): void {
+  // App database migrations (for licenses and settings)
+  // Currently no migrations needed - schema is stable
+  console.log('✅ App database migrations complete');
+}
+
+/**
+ * Migrations for project-level database
+ */
+function runProjectMigrations(db: Database): void {
   // Projects table migrations
   const projectsTableInfo = db.exec("PRAGMA table_info(projects)");
   const projectsColumns = projectsTableInfo[0]?.values.map(row => row[1]) || [];
@@ -336,7 +380,7 @@ function runMigrations(db: Database): void {
         content TEXT NOT NULL,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
-        FOREIGN KEY (prep_project_id) REFERENCES prep_projects(id) ON DELETE CASCADE
+        FOREIGN KEY (prep_project_id) REFERENCES prep_notes(id) ON DELETE CASCADE
       )
     `);
     db.run('CREATE INDEX IF NOT EXISTS idx_prep_notes_project ON prep_notes(prep_project_id)');
@@ -363,50 +407,111 @@ function runMigrations(db: Database): void {
     db.run('CREATE INDEX IF NOT EXISTS idx_prep_note_templates_type ON prep_note_templates(type)');
     db.run('CREATE INDEX IF NOT EXISTS idx_prep_note_templates_default ON prep_note_templates(type, is_default)');
   }
+
+  console.log('✅ Project database migrations complete');
 }
 
+/**
+ * Get the app-level database (licenses, settings)
+ */
+export function getAppDatabase(): Database {
+  if (!appDb) {
+    throw new Error('App database not initialized');
+  }
+  return appDb;
+}
+
+/**
+ * Get the project-level database (all project data)
+ */
 export function getDatabase(): Database {
-  if (!db) {
-    throw new Error('Database not initialized');
+  if (!projectDb) {
+    throw new Error('Project database not initialized');
   }
-  return db;
+  return projectDb;
 }
 
+/**
+ * Save app database to disk
+ */
+export function saveAppDatabase(): void {
+  if (!appDb) {
+    throw new Error('App database not initialized');
+  }
+  const data = appDb.export();
+  writeFileSync(appDbPath, data);
+}
+
+/**
+ * Save project database to disk
+ */
 export function saveDatabase(): void {
-  if (!db) {
-    throw new Error('Database not initialized');
+  if (!projectDb) {
+    throw new Error('Project database not initialized');
   }
-  const data = db.export();
-  writeFileSync(dbPath, data);
+  const data = projectDb.export();
+  writeFileSync(projectDbPath, data);
 }
 
+// Alias for backwards compatibility
+export const saveProjectDatabase = saveDatabase;
+
+/**
+ * Close both databases
+ */
 export function closeDatabase(): void {
-  if (db) {
-    saveDatabase();
-    db.close();
-    db = null;
+  if (appDb) {
+    saveAppDatabase();
+    appDb.close();
+    appDb = null;
+  }
+  if (projectDb) {
+    saveProjectDatabase();
+    projectDb.close();
+    projectDb = null;
   }
 }
 
+/**
+ * Reload project database from disk
+ */
 export async function reloadDatabase(): Promise<void> {
-  // Close current database
-  if (db) {
-    db.close();
-    db = null;
+  // Close current project database
+  if (projectDb) {
+    projectDb.close();
+    projectDb = null;
   }
 
   // Reload from disk
-  if (!dbPath) {
+  if (!projectDbPath) {
     throw new Error('Database path not initialized');
   }
 
   const SQL = await initSqlJs();
-  const buffer = readFileSync(dbPath);
-  db = new SQL.Database(buffer);
+  const buffer = readFileSync(projectDbPath);
+  projectDb = new SQL.Database(buffer);
 
   // Enable foreign keys
-  db.run('PRAGMA foreign_keys = ON');
+  projectDb.run('PRAGMA foreign keys = ON');
 
   // Run migrations to ensure all tables exist
-  runMigrations(db);
+  runProjectMigrations(projectDb);
+}
+
+/**
+ * Replace project database with imported file
+ * IMPORTANT: Only replaces PROJECT database, never touches APP database
+ */
+export async function replaceProjectDatabase(importedData: Uint8Array): Promise<void> {
+  // Close current project database
+  if (projectDb) {
+    projectDb.close();
+    projectDb = null;
+  }
+
+  // Write imported data to project database file
+  writeFileSync(projectDbPath, importedData);
+
+  // Reload the project database
+  await reloadDatabase();
 }

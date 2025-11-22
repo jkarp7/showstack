@@ -2,7 +2,7 @@ import { dialog, app } from 'electron';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, basename } from 'path';
 import initSqlJs, { Database } from 'sql.js';
-import { getDatabase, saveDatabase, reloadDatabase } from '../database';
+import { getDatabase, saveDatabase, replaceProjectDatabase } from '../database';
 
 export interface ProjectImportResult {
   success: boolean;
@@ -106,12 +106,13 @@ class FileService {
   }
 
   /**
-   * Export current database to ShowStack file (.ss)
+   * Export current PROJECT database to ShowStack file (.ss)
+   * IMPORTANT: Only exports project data, never exports app data (licenses, settings)
    * @param filePath Destination file path
    */
   async exportProject(filePath: string): Promise<void> {
     try {
-      const db = getDatabase();
+      const db = getDatabase(); // Gets project database only
 
       // Update project's updated_at timestamp - try both table types
       try {
@@ -135,14 +136,16 @@ class FileService {
         // Ignore update errors, continue with export
       }
 
-      // Export database as binary
+      // Export ONLY project database as binary
       const data = db.export();
 
       // Write to file
       writeFileSync(filePath, data);
 
-      // Save to current working database as well
+      // Save to current working project database as well
       saveDatabase();
+
+      console.log('✅ Project exported successfully (app data preserved separately)');
     } catch (error) {
       console.error('Error exporting project:', error);
       throw new Error(`Failed to export project: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -150,7 +153,8 @@ class FileService {
   }
 
   /**
-   * Import ShowStack file (.ss or legacy formats) and replace current database
+   * Import ShowStack file (.ss or legacy formats) and replace PROJECT database
+   * IMPORTANT: Only replaces project data, NEVER touches app data (licenses, settings)
    * @param filePath Source file path
    * @returns Import result
    */
@@ -203,12 +207,10 @@ class FileService {
       // Close the temporary database
       importedDb.close();
 
-      // Write the imported data to the main database file
-      const dbPath = join(app.getPath('userData'), 'showstack.db');
-      writeFileSync(dbPath, buffer);
+      // Replace ONLY the project database (app database stays untouched)
+      await replaceProjectDatabase(buffer);
 
-      // Reload the in-memory database to reflect the imported data
-      await reloadDatabase();
+      console.log('✅ Project imported successfully (app data preserved)');
 
       // Always update project name to match the filename (filename is source of truth)
       const filename = this.getFileName(filePath);
@@ -258,17 +260,30 @@ class FileService {
   }
 
   /**
-   * Create a new empty project (reset database)
+   * Create a new empty project (clear all project data)
+   * IMPORTANT: Only clears project data, NEVER touches app data (licenses, settings)
    * @returns New project ID
    */
   async createNewProject(): Promise<string> {
     try {
-      const db = getDatabase();
+      const db = getDatabase(); // Gets project database only
 
-      // Clear all data
+      // Clear all PROJECT data (app data is in separate database)
       db.run('DELETE FROM fixtures');
       db.run('DELETE FROM user_preferences');
       db.run('DELETE FROM projects');
+
+      // Also clear prep module data if it exists
+      try {
+        db.run('DELETE FROM prep_equipment_items');
+        db.run('DELETE FROM prep_revisions');
+        db.run('DELETE FROM prep_notes');
+        db.run('DELETE FROM prep_sections');
+        db.run('DELETE FROM prep_projects');
+        db.run('DELETE FROM prep_note_templates');
+      } catch (error) {
+        // Ignore errors if prep tables don't exist
+      }
 
       // Create new default project
       const projectId = 'default-project';
@@ -279,6 +294,8 @@ class FileService {
 
       // Save to disk
       saveDatabase();
+
+      console.log('✅ New project created (app data preserved)');
 
       return projectId;
     } catch (error) {
