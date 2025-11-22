@@ -30,9 +30,14 @@ export function LandingPage() {
     }
   };
 
-  const handleOpenProject = (projectId: string) => {
-    setCurrentProject(projectId);
-    navigate(`/project/${projectId}`);
+  const handleOpenProject = async (projectId: string) => {
+    try {
+      setCurrentProject(projectId);
+      // Open project in a new window
+      await window.api.windows.openProject(projectId);
+    } catch (error) {
+      console.error('Failed to open project window:', error);
+    }
   };
 
   const handleDeleteProject = async () => {

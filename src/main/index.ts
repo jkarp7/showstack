@@ -1,12 +1,13 @@
 import { app, BrowserWindow } from 'electron';
 import { join } from 'path';
-import { createWindow } from './window';
 import { initDatabase } from './database';
+import { windowManager } from './services/WindowManager';
 import { registerFixtureHandlers } from './ipc/fixtures';
 import { registerProjectHandlers } from './ipc/projects';
 import { registerDialogHandlers } from './ipc/dialogs';
 import { registerPreferencesHandlers } from './ipc/preferences';
 import { registerFileHandlers } from './ipc/files';
+import { registerWindowHandlers } from './ipc/windows';
 import { registerPrepHandlers } from './ipc/prep';
 import { registerLicenseHandlers } from './ipc/license';
 import { backgroundVerifier } from './services/BackgroundVerifier';
@@ -24,8 +25,6 @@ if (!gotTheLock) {
   process.exit(0);
 }
 
-let mainWindow: BrowserWindow | null = null;
-
 app.on('ready', async () => {
   // Initialize database
   await initDatabase();
@@ -36,6 +35,7 @@ app.on('ready', async () => {
   registerDialogHandlers();
   registerPreferencesHandlers();
   registerFileHandlers();
+  registerWindowHandlers();
   registerPrepHandlers();
   registerLicenseHandlers();
 
@@ -47,8 +47,8 @@ app.on('ready', async () => {
     console.log('Initial license verification skipped (offline mode)');
   });
 
-  // Create main window
-  mainWindow = createWindow();
+  // Create landing window
+  windowManager.createLandingWindow();
 });
 
 app.on('window-all-closed', () => {
@@ -59,7 +59,7 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
-    mainWindow = createWindow();
+    windowManager.createLandingWindow();
   }
 });
 

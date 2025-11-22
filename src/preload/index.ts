@@ -142,6 +142,12 @@ contextBridge.exposeInMainWorld('api', {
     save: (settings: any) => ipcRenderer.invoke('settings:save', settings),
     update: (updates: any) => ipcRenderer.invoke('settings:update', updates),
     reset: () => ipcRenderer.invoke('settings:reset')
+  },
+
+  // Window operations
+  windows: {
+    openProject: (projectId: string) => ipcRenderer.invoke('window:openProject', projectId),
+    getCurrentProjectId: () => ipcRenderer.invoke('window:getCurrentProjectId')
   }
 });
 
@@ -244,6 +250,10 @@ export interface ElectronAPI {
     save: (settings: any) => Promise<{ success: boolean }>;
     update: (updates: any) => Promise<{ success: boolean }>;
     reset: () => Promise<{ success: boolean }>;
+  };
+  windows: {
+    openProject: (projectId: string) => Promise<void>;
+    getCurrentProjectId: () => Promise<string | null>;
   };
 }
 
