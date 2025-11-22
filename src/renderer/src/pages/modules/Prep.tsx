@@ -373,6 +373,8 @@ export function Prep() {
           case 'pe_email': return parentProject.electrician_email || '';
           case 'pe_phone': return parentProject.electrician_phone || '';
           case 'venue': return parentProject.venue || '';
+          case 'venue_city': return parentProject.venue_city || '';
+          case 'venue_state': return parentProject.venue_state || '';
           // For fields not in parent project, fall through to get from currentProject
           default: break;
         }

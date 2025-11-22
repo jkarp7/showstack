@@ -92,14 +92,16 @@ export function ProjectPage() {
                 <p className="text-gray-400 mb-3">{project.description}</p>
               )}
               {project.venue && (
-                <p className="text-gray-300">
-                  <span className="text-gray-500">Venue:</span> {project.venue}
+                <div>
+                  <p className="text-gray-300">
+                    <span className="text-gray-500">Venue:</span> {project.venue}
+                  </p>
                   {(project.venue_city || project.venue_state) && (
-                    <span className="text-gray-400">
-                      {' '}({project.venue_city}{project.venue_city && project.venue_state ? ', ' : ''}{project.venue_state})
-                    </span>
+                    <p className="text-gray-400 text-sm ml-12">
+                      {project.venue_city}{project.venue_city && project.venue_state ? ', ' : ''}{project.venue_state}
+                    </p>
                   )}
-                </p>
+                </div>
               )}
             </div>
           </div>
