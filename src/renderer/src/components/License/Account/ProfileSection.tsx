@@ -11,25 +11,25 @@ export function ProfileSection() {
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold">Profile</h3>
+      <h3 className="text-lg font-semibold text-gray-900">Profile</h3>
 
       <div>
-        <label className="block font-medium mb-2">Email</label>
+        <label className="block font-medium mb-2 text-gray-900">Email</label>
         <input
           type="email"
           value={license?.email || ''}
           disabled
-          className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50"
+          className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 text-gray-900"
         />
       </div>
 
       <div>
-        <label className="block font-medium mb-2">Name</label>
+        <label className="block font-medium mb-2 text-gray-900">Name</label>
         <input
           type="text"
           value={license?.name || ''}
           disabled
-          className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50"
+          className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 text-gray-900"
         />
       </div>
 
