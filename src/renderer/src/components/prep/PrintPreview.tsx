@@ -244,16 +244,16 @@ export function PrintPreview({
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-auto space-y-3">
+        <div className="mt-auto flex gap-2">
           <button
             onClick={handleExportPDF}
-            className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded transition font-medium"
+            className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition text-sm"
           >
             Export PDF
           </button>
           <button
             onClick={handlePrint}
-            className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded transition font-medium"
+            className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition text-sm"
           >
             Print
           </button>
