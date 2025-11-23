@@ -347,6 +347,20 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
           </div>
           <div className="flex gap-3">
             <button
+              onClick={async () => {
+                try {
+                  await window.api.prep.layoutTemplates.seedDefaults();
+                  alert('Default page layouts created successfully! You can now edit layouts for each section.');
+                } catch (error) {
+                  console.error('Error seeding defaults:', error);
+                  alert('Failed to create default layouts.');
+                }
+              }}
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition text-sm"
+            >
+              Create Default Page Layouts
+            </button>
+            <button
               onClick={() => {
                 const defaultTemplate = createDefaultTemplate(currentProject.id);
                 onTemplateChange(defaultTemplate);

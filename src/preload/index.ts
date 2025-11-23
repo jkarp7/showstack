@@ -121,7 +121,8 @@ contextBridge.exposeInMainWorld('api', {
       getDefault: (projectId: string, pageType: string) => ipcRenderer.invoke('prep:layoutTemplates:getDefault', projectId, pageType),
       create: (data: any, elements: any[]) => ipcRenderer.invoke('prep:layoutTemplates:create', data, elements),
       update: (id: string, updates: any, elements?: any[]) => ipcRenderer.invoke('prep:layoutTemplates:update', id, updates, elements),
-      delete: (id: string) => ipcRenderer.invoke('prep:layoutTemplates:delete', id)
+      delete: (id: string) => ipcRenderer.invoke('prep:layoutTemplates:delete', id),
+      seedDefaults: () => ipcRenderer.invoke('prep:layoutTemplates:seedDefaults')
     },
     // File Operations
     file: {
@@ -245,6 +246,7 @@ export interface ElectronAPI {
       create: (data: any, elements: any[]) => Promise<any>;
       update: (id: string, updates: any, elements?: any[]) => Promise<any>;
       delete: (id: string) => Promise<void>;
+      seedDefaults: () => Promise<{ success: boolean; message: string }>;
     };
     file: {
       showOpenDialog: () => Promise<string | null>;
