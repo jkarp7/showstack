@@ -308,17 +308,17 @@ export function LayoutDesigner({
             </button>
           )}
           <button
-            onClick={handleClose}
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition"
-          >
-            Cancel
-          </button>
-          <button
             onClick={handleSave}
             disabled={!hasChanges}
             className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Save Layout
+            Save
+          </button>
+          <button
+            onClick={handleClose}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition font-medium"
+          >
+            Done
           </button>
         </div>
       </div>
