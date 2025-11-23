@@ -139,43 +139,46 @@ export function PrintPreview({
   if (!template) return null;
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header with Page Settings */}
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 mb-4">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-lg font-semibold text-white">Print Preview</h3>
-            <p className="text-sm text-gray-400">
-              {template.name}
-              {template.isDefault && <span className="ml-2 text-blue-400">• System Default</span>}
+    <div className="flex h-full gap-4">
+      {/* Left Side - Preview Area */}
+      <div className="flex-1 bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center p-12">
+            <div className="w-24 h-24 mx-auto mb-4 bg-gray-700 rounded-lg flex items-center justify-center">
+              <svg className="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h4 className="text-lg font-semibold text-gray-300 mb-2">Preview Coming Soon</h4>
+            <p className="text-sm text-gray-500 max-w-md">
+              Live page rendering with navigation and thumbnails will be available in the next update.
+              Use "Arrange Sections" to configure your print template.
             </p>
+            <div className="mt-6">
+              <p className="text-xs text-gray-600 mb-2">Current Template:</p>
+              <p className="text-sm text-gray-400">
+                {template.sections.filter(s => s.enabled).length} sections enabled
+              </p>
+            </div>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setShowSectionEditor(true)}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition"
-            >
-              Arrange Sections
-            </button>
-            <button
-              onClick={handleExportPDF}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition"
-            >
-              Export PDF
-            </button>
-            <button
-              onClick={handlePrint}
-              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition"
-            >
-              Print
-            </button>
-          </div>
+        </div>
+      </div>
+
+      {/* Right Side - Settings Panel */}
+      <div className="w-96 bg-gray-800 border border-gray-700 rounded-lg p-6 flex flex-col" style={{ maxHeight: 'calc(100vh - 300px)' }}>
+        {/* Header */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-white">Print Settings</h3>
+          <p className="text-sm text-gray-400 mt-1">
+            {template.name}
+            {template.isDefault && <span className="ml-2 text-blue-400">• Default</span>}
+          </p>
         </div>
 
         {/* Page Settings */}
-        <div className="border-t border-gray-700 pt-4">
-          <h4 className="text-sm font-semibold text-gray-300 uppercase mb-4">Page Settings</h4>
-          <div className="grid grid-cols-3 gap-4">
+        <div className="mb-6">
+          <h4 className="text-sm font-semibold text-gray-300 uppercase mb-3">Page Settings</h4>
+          <div className="space-y-4">
             <div>
               <label className="block text-sm text-gray-400 mb-1">Page Size</label>
               <select
@@ -208,7 +211,7 @@ export function PrintPreview({
                 <option value="landscape">Landscape</option>
               </select>
             </div>
-            <div className="flex items-end">
+            <div>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -225,29 +228,35 @@ export function PrintPreview({
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Preview Area - Placeholder for Phase 2 */}
-      <div className="flex-1 bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center p-12">
-            <div className="w-24 h-24 mx-auto mb-4 bg-gray-700 rounded-lg flex items-center justify-center">
-              <svg className="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <h4 className="text-lg font-semibold text-gray-300 mb-2">Preview Coming Soon</h4>
-            <p className="text-sm text-gray-500 max-w-md">
-              Live page rendering with navigation and thumbnails will be available in the next update.
-              Use "Arrange Sections" to configure your print template.
-            </p>
-            <div className="mt-6">
-              <p className="text-xs text-gray-600 mb-2">Current Template:</p>
-              <p className="text-sm text-gray-400">
-                {template.sections.filter(s => s.enabled).length} sections enabled
-              </p>
-            </div>
-          </div>
+        {/* Section Info */}
+        <div className="mb-6 pb-6 border-b border-gray-700">
+          <h4 className="text-sm font-semibold text-gray-300 uppercase mb-2">Sections</h4>
+          <p className="text-sm text-gray-400">
+            {template.sections.filter(s => s.enabled).length} sections enabled
+          </p>
+          <button
+            onClick={() => setShowSectionEditor(true)}
+            className="mt-3 w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition text-sm"
+          >
+            Arrange Sections
+          </button>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-auto space-y-3">
+          <button
+            onClick={handleExportPDF}
+            className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded transition font-medium"
+          >
+            Export PDF
+          </button>
+          <button
+            onClick={handlePrint}
+            className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded transition font-medium"
+          >
+            Print
+          </button>
         </div>
       </div>
 
