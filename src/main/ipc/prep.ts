@@ -39,6 +39,16 @@ import {
   updateNoteTemplate,
   deleteNoteTemplate,
   PrepNoteTemplate,
+  // Layout Templates
+  getLayoutTemplatesByProjectId,
+  getLayoutTemplateById,
+  getLayoutElementsByTemplateId,
+  createLayoutTemplate,
+  updateLayoutTemplate,
+  deleteLayoutTemplate,
+  getDefaultLayoutTemplate,
+  PageLayoutTemplate,
+  LayoutElement,
 } from '../database/queries/prep';
 import { prepFileService } from '../services/prepFileService';
 
@@ -365,6 +375,90 @@ export function registerPrepHandlers(): void {
 
   ipcMain.handle('prep:file:getFileName', (_event, filePath: string) => {
     return prepFileService.getFileName(filePath);
+  });
+
+  // ============================================
+  // LAYOUT TEMPLATES
+  // ============================================
+
+  ipcMain.handle(
+    'prep:layoutTemplates:getByProjectId',
+    async (_event, projectId: string, pageType?: string) => {
+      try {
+        return getLayoutTemplatesByProjectId(projectId, pageType);
+      } catch (error) {
+        console.error('Error getting layout templates:', error);
+        throw error;
+      }
+    }
+  );
+
+  ipcMain.handle('prep:layoutTemplates:getById', async (_event, id: string) => {
+    try {
+      return getLayoutTemplateById(id);
+    } catch (error) {
+      console.error('Error getting layout template:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('prep:layoutTemplates:getElements', async (_event, templateId: string) => {
+    try {
+      return getLayoutElementsByTemplateId(templateId);
+    } catch (error) {
+      console.error('Error getting layout elements:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle(
+    'prep:layoutTemplates:getDefault',
+    async (_event, projectId: string, pageType: string) => {
+      try {
+        return getDefaultLayoutTemplate(projectId, pageType);
+      } catch (error) {
+        console.error('Error getting default layout template:', error);
+        throw error;
+      }
+    }
+  );
+
+  ipcMain.handle(
+    'prep:layoutTemplates:create',
+    async (_event, data: Partial<PageLayoutTemplate>, elements: Partial<LayoutElement>[]) => {
+      try {
+        return createLayoutTemplate(data, elements);
+      } catch (error) {
+        console.error('Error creating layout template:', error);
+        throw error;
+      }
+    }
+  );
+
+  ipcMain.handle(
+    'prep:layoutTemplates:update',
+    async (
+      _event,
+      id: string,
+      updates: Partial<PageLayoutTemplate>,
+      elements?: Partial<LayoutElement>[]
+    ) => {
+      try {
+        return updateLayoutTemplate(id, updates, elements);
+      } catch (error) {
+        console.error('Error updating layout template:', error);
+        throw error;
+      }
+    }
+  );
+
+  ipcMain.handle('prep:layoutTemplates:delete', async (_event, id: string) => {
+    try {
+      deleteLayoutTemplate(id);
+    } catch (error) {
+      console.error('Error deleting layout template:', error);
+      throw error;
+    }
   });
 
   console.log('✅ Prep IPC handlers registered');

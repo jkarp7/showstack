@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { PrintTemplate, PrintSection, PrintSectionType, PrepProject } from '../../types/prep';
+import { LayoutDesigner } from './layout/LayoutDesigner';
 
 interface PrintBuilderProps {
   currentProject: PrepProject;
@@ -103,6 +104,7 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [templateName, setTemplateName] = useState('');
+  const [editingLayoutFor, setEditingLayoutFor] = useState<PrintSectionType | null>(null);
 
   // Initialize with default template if none provided
   useEffect(() => {
@@ -227,6 +229,11 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
     return availableSections.find(s => s.type === type)?.label || type;
   };
 
+  // Check if section supports visual layout editing
+  const supportsLayoutEditing = (type: PrintSectionType): boolean => {
+    return ['cover', 'contacts', 'notes', 'project-details', 'venue-info', 'schedule'].includes(type);
+  };
+
   if (!template) return null;
 
   return (
@@ -317,6 +324,18 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
                     </div>
 
                     <div className="flex items-center space-x-2">
+                      {supportsLayoutEditing(section.type) && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingLayoutFor(section.type);
+                          }}
+                          className="px-3 py-1 text-xs rounded-md bg-blue-600/20 text-blue-400 border border-blue-600/30 hover:bg-blue-600/30 transition"
+                          title="Customize page layout"
+                        >
+                          Edit Layout
+                        </button>
+                      )}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -436,6 +455,15 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
             </div>
           </div>
         </div>
+      )}
+
+      {/* Layout Designer Modal */}
+      {editingLayoutFor && (
+        <LayoutDesigner
+          projectId={currentProject.id}
+          pageType={editingLayoutFor}
+          onClose={() => setEditingLayoutFor(null)}
+        />
       )}
     </div>
   );
