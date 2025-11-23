@@ -40,7 +40,6 @@ export function LayoutDesigner({
     const now = Date.now();
     return {
       id: `temp-${uuidv4()}`,
-      prep_project_id: projectId,
       name: `${pageType} Layout`,
       page_type: pageType,
       grid_columns: 12,
@@ -190,10 +189,9 @@ export function LayoutDesigner({
       const isNew = !template.id || template.id.startsWith('temp-');
 
       if (isNew) {
-        // Create new template
+        // Create new template (app-level user preference)
         const result = await window.api.prep.layoutTemplates.create(
           {
-            prep_project_id: projectId,
             name: template.name,
             description: template.description,
             page_type: pageType,

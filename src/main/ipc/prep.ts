@@ -39,8 +39,10 @@ import {
   updateNoteTemplate,
   deleteNoteTemplate,
   PrepNoteTemplate,
-  // Layout Templates
-  getLayoutTemplatesByProjectId,
+} from '../database/queries/prep';
+import {
+  // Layout Templates (app-level user preferences)
+  getAllLayoutTemplates,
   getLayoutTemplateById,
   getLayoutElementsByTemplateId,
   createLayoutTemplate,
@@ -49,7 +51,7 @@ import {
   getDefaultLayoutTemplate,
   PageLayoutTemplate,
   LayoutElement,
-} from '../database/queries/prep';
+} from '../database/queries/layoutTemplates';
 import { prepFileService } from '../services/prepFileService';
 
 export function registerPrepHandlers(): void {
@@ -383,9 +385,10 @@ export function registerPrepHandlers(): void {
 
   ipcMain.handle(
     'prep:layoutTemplates:getByProjectId',
-    async (_event, projectId: string, pageType?: string) => {
+    async (_event, _projectId: string, pageType?: string) => {
       try {
-        return getLayoutTemplatesByProjectId(projectId, pageType);
+        // Note: projectId is ignored since templates are now app-level user preferences
+        return getAllLayoutTemplates(pageType);
       } catch (error) {
         console.error('Error getting layout templates:', error);
         throw error;
@@ -413,9 +416,10 @@ export function registerPrepHandlers(): void {
 
   ipcMain.handle(
     'prep:layoutTemplates:getDefault',
-    async (_event, projectId: string, pageType: string) => {
+    async (_event, _projectId: string, pageType: string) => {
       try {
-        return getDefaultLayoutTemplate(projectId, pageType);
+        // Note: projectId is ignored since templates are now app-level user preferences
+        return getDefaultLayoutTemplate(pageType);
       } catch (error) {
         console.error('Error getting default layout template:', error);
         throw error;

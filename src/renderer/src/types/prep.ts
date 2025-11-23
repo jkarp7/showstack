@@ -506,10 +506,10 @@ export interface LayoutElement {
   updated_at: number;
 }
 
-// Page layout template
+// Page layout template (app-level user preference)
 export interface PageLayoutTemplate {
   id: string;
-  prep_project_id: string;
+  user_id?: string; // Optional user identifier
   name: string;
   description?: string;
   page_type: PrintSectionType;
