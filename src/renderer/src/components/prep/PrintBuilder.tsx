@@ -273,11 +273,68 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
           </button>
         </div>
 
-        <div
-          onDragOver={handleDragOver}
-          onDrop={(e) => handleDropOnBuilder(e)}
-          className="min-h-96 space-y-2"
-        >
+        {/* Page Settings - Moved to top */}
+        <div className="mb-6 pb-6 border-b border-gray-700">
+          <h4 className="text-sm font-semibold text-gray-300 uppercase mb-4">Page Settings</h4>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Page Size</label>
+              <select
+                value={template.pageSettings.pageSize}
+                onChange={(e) => onTemplateChange({
+                  ...template,
+                  pageSettings: { ...template.pageSettings, pageSize: e.target.value as any },
+                  updated_at: Date.now()
+                })}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+              >
+                <option value="letter">Letter</option>
+                <option value="legal">Legal</option>
+                <option value="a4">A4</option>
+                <option value="tabloid">Tabloid</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Orientation</label>
+              <select
+                value={template.pageSettings.orientation}
+                onChange={(e) => onTemplateChange({
+                  ...template,
+                  pageSettings: { ...template.pageSettings, orientation: e.target.value as any },
+                  updated_at: Date.now()
+                })}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+              >
+                <option value="portrait">Portrait</option>
+                <option value="landscape">Landscape</option>
+              </select>
+            </div>
+            <div className="flex items-end">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={template.pageSettings.showPageNumbers ?? true}
+                  onChange={(e) => onTemplateChange({
+                    ...template,
+                    pageSettings: { ...template.pageSettings, showPageNumbers: e.target.checked },
+                    updated_at: Date.now()
+                  })}
+                  className="w-4 h-4 bg-gray-700 border-gray-600 rounded"
+                />
+                <span className="text-sm text-gray-300">Show page numbers</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Sections Builder */}
+        <div>
+          <h4 className="text-sm font-semibold text-gray-300 uppercase mb-4">Print Sections</h4>
+          <div
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDropOnBuilder(e)}
+            className="min-h-96 space-y-2"
+          >
           {template.sections.length === 0 ? (
             <div className="border-2 border-dashed border-gray-600 rounded-lg p-12 text-center text-gray-500">
               Drag sections here to build your print layout
@@ -365,59 +422,6 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
                 </div>
               ))
           )}
-        </div>
-
-        {/* Page Settings */}
-        <div className="mt-8 pt-6 border-t border-gray-700">
-          <h4 className="text-sm font-semibold text-gray-300 uppercase mb-4">Page Settings</h4>
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Page Size</label>
-              <select
-                value={template.pageSettings.pageSize}
-                onChange={(e) => onTemplateChange({
-                  ...template,
-                  pageSettings: { ...template.pageSettings, pageSize: e.target.value as any },
-                  updated_at: Date.now()
-                })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
-              >
-                <option value="letter">Letter</option>
-                <option value="legal">Legal</option>
-                <option value="a4">A4</option>
-                <option value="tabloid">Tabloid</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Orientation</label>
-              <select
-                value={template.pageSettings.orientation}
-                onChange={(e) => onTemplateChange({
-                  ...template,
-                  pageSettings: { ...template.pageSettings, orientation: e.target.value as any },
-                  updated_at: Date.now()
-                })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
-              >
-                <option value="portrait">Portrait</option>
-                <option value="landscape">Landscape</option>
-              </select>
-            </div>
-            <div className="flex items-end">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={template.pageSettings.showPageNumbers ?? true}
-                  onChange={(e) => onTemplateChange({
-                    ...template,
-                    pageSettings: { ...template.pageSettings, showPageNumbers: e.target.checked },
-                    updated_at: Date.now()
-                  })}
-                  className="w-4 h-4 bg-gray-700 border-gray-600 rounded"
-                />
-                <span className="text-sm text-gray-300">Show page numbers</span>
-              </label>
-            </div>
           </div>
         </div>
       </div>
