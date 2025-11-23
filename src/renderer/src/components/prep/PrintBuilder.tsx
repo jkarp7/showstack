@@ -461,6 +461,7 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
       {editingLayoutFor && (
         <LayoutDesigner
           projectId={currentProject.id}
+          currentProject={currentProject}
           pageType={editingLayoutFor}
           onClose={() => setEditingLayoutFor(null)}
         />

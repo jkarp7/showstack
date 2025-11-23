@@ -16,7 +16,8 @@ import type {
 } from '../../../types/prep';
 
 interface LayoutDesignerProps {
-  projectId: string;
+  projectId: string; // Used for identifying which project is being previewed
+  currentProject?: PrepProject; // Optional: actual project data for live preview
   pageType: PrintSectionType;
   onSave?: (template: PageLayoutTemplate) => void;
   onClose: () => void;
@@ -25,6 +26,7 @@ interface LayoutDesignerProps {
 
 export function LayoutDesigner({
   projectId,
+  currentProject,
   pageType,
   onSave,
   onClose,
@@ -332,6 +334,7 @@ export function LayoutDesigner({
         {/* Center: Canvas */}
         <LayoutCanvas
           template={template}
+          currentProject={currentProject}
           selectedElementId={selectedElementId}
           onElementSelect={setSelectedElementId}
           onElementDrop={handleElementDrop}

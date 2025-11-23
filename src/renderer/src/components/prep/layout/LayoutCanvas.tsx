@@ -1,8 +1,114 @@
 import { useState, useRef } from 'react';
-import type { LayoutElement, PageLayoutTemplate } from '../../../types/prep';
+import type { LayoutElement, PageLayoutTemplate, PrepProject, DataFieldType } from '../../../types/prep';
+
+/**
+ * Helper function to get actual data value from PrepProject based on field type
+ */
+function getDataFieldValue(project: PrepProject | undefined, fieldType: DataFieldType): string {
+  if (!project) {
+    return `{${fieldType}}`;
+  }
+
+  // Format dates nicely
+  const formatDate = (timestamp?: string | number): string => {
+    if (!timestamp) return 'Not set';
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return String(timestamp);
+    }
+  };
+
+  switch (fieldType) {
+    // Production info
+    case 'production_name':
+      return project.production_name || 'Untitled Production';
+    case 'venue':
+      return project.venue || 'TBD';
+    case 'venue_city':
+      return project.venue_city || '';
+    case 'venue_state':
+      return project.venue_state || '';
+
+    // Dates
+    case 'order_date':
+      return formatDate(project.order_date);
+    case 'prep_start_date':
+      return formatDate(project.prep_start_date);
+    case 'prep_end_date':
+      return formatDate(project.prep_end_date);
+    case 'load_in_date':
+      return formatDate(project.load_in_date);
+    case 'opening_night_date':
+      return formatDate(project.opening_night_date);
+    case 'closing_date':
+      return formatDate(project.closing_date);
+    case 'load_out_date':
+      return formatDate(project.load_out_date);
+
+    // Contacts - GM
+    case 'gm_name':
+      return project.gm_name || '';
+    case 'gm_company':
+      return project.gm_company || '';
+    case 'gm_email':
+      return project.gm_email || '';
+    case 'gm_phone':
+      return project.gm_phone || '';
+
+    // Contacts - PM
+    case 'pm_name':
+      return project.pm_name || '';
+    case 'pm_company':
+      return project.pm_company || '';
+    case 'pm_email':
+      return project.pm_email || '';
+    case 'pm_phone':
+      return project.pm_phone || '';
+
+    // Contacts - LD
+    case 'ld_name':
+      return project.ld_name || '';
+    case 'ld_email':
+      return project.ld_email || '';
+    case 'ld_phone':
+      return project.ld_phone || '';
+
+    // Contacts - ALD
+    case 'ald_name':
+      return project.ald_name || '';
+    case 'ald_email':
+      return project.ald_email || '';
+    case 'ald_phone':
+      return project.ald_phone || '';
+
+    // Contacts - PE
+    case 'pe_name':
+      return project.pe_name || '';
+    case 'pe_email':
+      return project.pe_email || '';
+    case 'pe_phone':
+      return project.pe_phone || '';
+
+    // Other
+    case 'current_revision':
+      return `Revision ${project.current_revision}`;
+    case 'disciplines':
+      return Array.isArray(project.disciplines)
+        ? project.disciplines.map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ')
+        : 'Not specified';
+    case 'logo':
+      return project.logo_url || 'No logo';
+
+    default:
+      return `{${fieldType}}`;
+  }
+}
 
 interface LayoutCanvasProps {
   template: PageLayoutTemplate;
+  currentProject?: PrepProject; // Optional: actual project data for live preview
   selectedElementId: string | null;
   onElementSelect: (elementId: string | null) => void;
   onElementDrop: (gridColumn: number, gridRow: number) => void;
@@ -13,6 +119,7 @@ interface LayoutCanvasProps {
 
 export function LayoutCanvas({
   template,
+  currentProject,
   selectedElementId,
   onElementSelect,
   onElementDrop,
@@ -282,8 +389,11 @@ export function LayoutCanvas({
                   {/* Element Content Preview */}
                   <div className="w-full h-full flex items-center justify-center overflow-hidden">
                     {element.element_type === 'dataField' && (
-                      <div className="text-xs text-gray-500 italic">
-                        {'{' + (element.config as any).fieldType + '}'}
+                      <div className={currentProject ? '' : 'text-gray-500 italic'}>
+                        {(element.config as any).showLabel && (element.config as any).label && (
+                          <span className="font-semibold">{(element.config as any).label}: </span>
+                        )}
+                        {getDataFieldValue(currentProject, (element.config as any).fieldType)}
                       </div>
                     )}
                     {element.element_type === 'text' && (
