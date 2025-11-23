@@ -347,4 +347,66 @@ export const PROJECT_SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_prep_notes_type ON prep_notes(prep_project_id, type);
   CREATE INDEX IF NOT EXISTS idx_prep_note_templates_type ON prep_note_templates(type);
   CREATE INDEX IF NOT EXISTS idx_prep_note_templates_default ON prep_note_templates(type, is_default);
+
+  -- ============================================
+  -- PAGE LAYOUT TEMPLATES
+  -- ============================================
+
+  -- Page Layout Templates (visual design for each page type)
+  CREATE TABLE IF NOT EXISTS page_layout_templates (
+    id TEXT PRIMARY KEY,
+    prep_project_id TEXT NOT NULL,
+
+    name TEXT NOT NULL,
+    description TEXT,
+    page_type TEXT NOT NULL, -- 'cover', 'contacts', 'notes', etc.
+
+    -- Grid configuration
+    grid_columns INTEGER NOT NULL DEFAULT 12,
+    grid_rows INTEGER NOT NULL DEFAULT 20,
+    grid_gap INTEGER NOT NULL DEFAULT 8, -- pixels
+
+    -- Page settings
+    page_width INTEGER NOT NULL DEFAULT 816, -- 8.5" at 96 DPI
+    page_height INTEGER NOT NULL DEFAULT 1056, -- 11" at 96 DPI
+
+    is_default INTEGER DEFAULT 0,
+
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
+    FOREIGN KEY (prep_project_id) REFERENCES prep_projects(id) ON DELETE CASCADE
+  );
+
+  -- Layout Elements (items placed on the canvas)
+  CREATE TABLE IF NOT EXISTS page_layout_elements (
+    id TEXT PRIMARY KEY,
+    template_id TEXT NOT NULL,
+
+    -- Element type and configuration
+    element_type TEXT NOT NULL CHECK(element_type IN ('dataField', 'text', 'image', 'table', 'shape')),
+    config TEXT NOT NULL, -- JSON: type-specific configuration
+
+    -- Grid position
+    grid_column INTEGER NOT NULL,
+    grid_row INTEGER NOT NULL,
+    column_span INTEGER NOT NULL DEFAULT 1,
+    row_span INTEGER NOT NULL DEFAULT 1,
+
+    -- Layer (z-index)
+    layer INTEGER NOT NULL DEFAULT 0,
+
+    -- Styling
+    style TEXT NOT NULL, -- JSON: font, color, alignment, borders, etc.
+
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
+    FOREIGN KEY (template_id) REFERENCES page_layout_templates(id) ON DELETE CASCADE
+  );
+
+  -- Indexes for Page Layout tables
+  CREATE INDEX IF NOT EXISTS idx_layout_templates_project ON page_layout_templates(prep_project_id);
+  CREATE INDEX IF NOT EXISTS idx_layout_templates_type ON page_layout_templates(prep_project_id, page_type);
+  CREATE INDEX IF NOT EXISTS idx_layout_elements_template ON page_layout_elements(template_id);
 `;

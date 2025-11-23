@@ -359,3 +359,180 @@ export interface PrintPageSettings {
   fontSize?: number;
   fontFamily?: string;
 }
+
+/**
+ * Visual Page Layout Designer System
+ */
+
+// Element types that can be placed on the canvas
+export type LayoutElementType = 'dataField' | 'text' | 'image' | 'table' | 'shape';
+
+// Data fields that can be displayed
+export type DataFieldType =
+  | 'production_name'
+  | 'venue'
+  | 'venue_city'
+  | 'venue_state'
+  | 'order_date'
+  | 'prep_start_date'
+  | 'prep_end_date'
+  | 'load_in_date'
+  | 'opening_night_date'
+  | 'closing_date'
+  | 'load_out_date'
+  | 'gm_name'
+  | 'gm_company'
+  | 'gm_email'
+  | 'gm_phone'
+  | 'pm_name'
+  | 'pm_company'
+  | 'pm_email'
+  | 'pm_phone'
+  | 'ld_name'
+  | 'ld_email'
+  | 'ld_phone'
+  | 'ald_name'
+  | 'ald_email'
+  | 'ald_phone'
+  | 'pe_name'
+  | 'pe_email'
+  | 'pe_phone'
+  | 'current_revision'
+  | 'disciplines'
+  | 'logo';
+
+// Shape types for visual elements
+export type ShapeType = 'rectangle' | 'line' | 'divider';
+
+// Configuration for data field elements
+export interface DataFieldConfig {
+  fieldType: DataFieldType;
+  label?: string; // Optional label to show before the value
+  showLabel?: boolean;
+  dateFormat?: string; // For date fields
+}
+
+// Configuration for text elements
+export interface TextConfig {
+  content: string;
+  placeholder?: string;
+}
+
+// Configuration for image elements
+export interface ImageConfig {
+  src?: string; // URL or base64
+  altText?: string;
+  objectFit?: 'contain' | 'cover' | 'fill';
+}
+
+// Configuration for table elements
+export interface TableConfig {
+  contactTypes: string[]; // Which contacts to include
+  showHeaders?: boolean;
+  columns: {
+    field: string;
+    label: string;
+    width?: number;
+  }[];
+}
+
+// Configuration for shape elements
+export interface ShapeConfig {
+  shapeType: ShapeType;
+  thickness?: number;
+  color?: string;
+}
+
+// Union type for all element configurations
+export type ElementConfig =
+  | DataFieldConfig
+  | TextConfig
+  | ImageConfig
+  | TableConfig
+  | ShapeConfig;
+
+// Styling options for elements
+export interface ElementStyle {
+  // Typography
+  fontFamily?: string;
+  fontSize?: number;
+  fontWeight?: 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
+  fontStyle?: 'normal' | 'italic';
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
+  textDecoration?: 'none' | 'underline' | 'line-through';
+  lineHeight?: number;
+  letterSpacing?: number;
+
+  // Colors
+  color?: string;
+  backgroundColor?: string;
+
+  // Borders
+  borderWidth?: number;
+  borderStyle?: 'none' | 'solid' | 'dashed' | 'dotted';
+  borderColor?: string;
+  borderRadius?: number;
+
+  // Spacing
+  padding?: number;
+  paddingTop?: number;
+  paddingRight?: number;
+  paddingBottom?: number;
+  paddingLeft?: number;
+
+  // Display
+  opacity?: number;
+}
+
+// Layout element placed on the canvas
+export interface LayoutElement {
+  id: string;
+  element_type: LayoutElementType;
+  config: ElementConfig;
+
+  // Grid position
+  grid_column: number;
+  grid_row: number;
+  column_span: number;
+  row_span: number;
+
+  // Layer (z-index)
+  layer: number;
+
+  // Styling
+  style: ElementStyle;
+
+  created_at: number;
+  updated_at: number;
+}
+
+// Page layout template
+export interface PageLayoutTemplate {
+  id: string;
+  prep_project_id: string;
+  name: string;
+  description?: string;
+  page_type: PrintSectionType;
+
+  // Grid configuration
+  grid_columns: number;
+  grid_rows: number;
+  grid_gap: number; // pixels
+
+  // Page settings
+  page_width: number; // pixels
+  page_height: number; // pixels
+
+  elements: LayoutElement[];
+
+  is_default: boolean;
+  created_at: number;
+  updated_at: number;
+}
+
+// Helper types for creating/updating
+export type CreateLayoutTemplate = Omit<PageLayoutTemplate, 'id' | 'created_at' | 'updated_at' | 'elements'>;
+export type UpdateLayoutTemplate = Partial<Omit<PageLayoutTemplate, 'id' | 'created_at' | 'updated_at'>>;
+
+export type CreateLayoutElement = Omit<LayoutElement, 'id' | 'created_at' | 'updated_at'>;
+export type UpdateLayoutElement = Partial<Omit<LayoutElement, 'id' | 'created_at' | 'updated_at'>>;
