@@ -291,8 +291,16 @@ export function LayoutDesigner({
         style: JSON.parse(el.style)
       }));
 
+      // Mark this template as the default so it persists
+      await window.api.prep.layoutTemplates.update(
+        templateId,
+        { is_default: true },
+        undefined // Don't update elements, just metadata
+      );
+
       setTemplate({
         ...loadedTemplate,
+        is_default: true,
         elements: parsedElements
       });
 
