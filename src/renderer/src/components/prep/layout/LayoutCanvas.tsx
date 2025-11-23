@@ -32,11 +32,13 @@ export function LayoutCanvas({
 
   const handleDragOver = (e: React.DragEvent, col: number, row: number) => {
     e.preventDefault(); // Always prevent default to allow drop
+    e.stopPropagation();
     setDragOverCell({ col, row });
   };
 
   const handleDrop = (e: React.DragEvent, col: number, row: number) => {
     e.preventDefault();
+    e.stopPropagation();
     console.log('Canvas drop:', { col, row, draggedElement });
     setDragOverCell(null);
 
@@ -142,6 +144,14 @@ export function LayoutCanvas({
             ref={canvasRef}
             tabIndex={0}
             onKeyDown={handleKeyDown}
+            onDragOver={(e) => {
+              e.preventDefault();
+              console.log('Canvas container dragOver');
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              console.log('Canvas container drop - fallback');
+            }}
             className="relative bg-white shadow-2xl outline-none"
             style={{
               width: `${template.page_width * (zoom / 100)}px`,
@@ -186,7 +196,13 @@ export function LayoutCanvas({
                     <div
                       key={`cell-${rowIndex}-${colIndex}`}
                       onDragOver={(e) => handleDragOver(e, colIndex, rowIndex)}
-                      onDrop={(e) => !isOccupied && handleDrop(e, colIndex, rowIndex)}
+                      onDrop={(e) => {
+                        if (!isOccupied) {
+                          handleDrop(e, colIndex, rowIndex);
+                        } else {
+                          e.preventDefault(); // Still need to prevent default even if occupied
+                        }
+                      }}
                       className={`border-gray-200 transition-colors ${
                         isDragOver && !isOccupied
                           ? 'bg-blue-100 border-2 border-blue-400'
@@ -195,7 +211,8 @@ export function LayoutCanvas({
                       style={{
                         gridColumn: isOccupied ? `span ${element.column_span}` : undefined,
                         gridRow: isOccupied ? `span ${element.row_span}` : undefined,
-                        cursor: isOccupied ? 'default' : 'crosshair'
+                        cursor: isOccupied ? 'default' : 'crosshair',
+                        minHeight: isOccupied ? undefined : '20px'
                       }}
                     />
                   );
