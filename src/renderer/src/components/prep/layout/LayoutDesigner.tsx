@@ -84,6 +84,12 @@ export function LayoutDesigner({
     setDraggedPaletteElement(element);
   }, []);
 
+  // Handle drag end from palette (cleanup)
+  const handlePaletteDragEnd = useCallback(() => {
+    // Clear dragged element after a brief delay to allow drop to process
+    setTimeout(() => setDraggedPaletteElement(null), 100);
+  }, []);
+
   // Handle drop on canvas
   const handleElementDrop = useCallback((gridColumn: number, gridRow: number) => {
     if (!draggedPaletteElement) return;
@@ -319,7 +325,10 @@ export function LayoutDesigner({
       {/* Main Content */}
       <div className="flex-1 flex gap-4 p-4 overflow-hidden">
         {/* Left: Element Palette */}
-        <ElementPalette onDragStart={handlePaletteDragStart} />
+        <ElementPalette
+          onDragStart={handlePaletteDragStart}
+          onDragEnd={handlePaletteDragEnd}
+        />
 
         {/* Center: Canvas */}
         <LayoutCanvas

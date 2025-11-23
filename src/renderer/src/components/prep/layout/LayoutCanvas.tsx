@@ -31,7 +31,7 @@ export function LayoutCanvas({
   const cellHeight = template.page_height / template.grid_rows;
 
   const handleDragOver = (e: React.DragEvent, col: number, row: number) => {
-    e.preventDefault();
+    e.preventDefault(); // Always prevent default to allow drop
     setDragOverCell({ col, row });
   };
 
@@ -182,7 +182,7 @@ export function LayoutCanvas({
                   return (
                     <div
                       key={`cell-${rowIndex}-${colIndex}`}
-                      onDragOver={(e) => !isOccupied && handleDragOver(e, colIndex, rowIndex)}
+                      onDragOver={(e) => handleDragOver(e, colIndex, rowIndex)}
                       onDrop={(e) => !isOccupied && handleDrop(e, colIndex, rowIndex)}
                       className={`border-gray-200 transition-colors ${
                         isDragOver && !isOccupied
@@ -191,7 +191,8 @@ export function LayoutCanvas({
                       }`}
                       style={{
                         gridColumn: isOccupied ? `span ${element.column_span}` : undefined,
-                        gridRow: isOccupied ? `span ${element.row_span}` : undefined
+                        gridRow: isOccupied ? `span ${element.row_span}` : undefined,
+                        cursor: isOccupied ? 'default' : 'crosshair'
                       }}
                     />
                   );

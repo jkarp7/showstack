@@ -161,9 +161,10 @@ const paletteElements: PaletteElement[] = [
 
 interface ElementPaletteProps {
   onDragStart: (element: PaletteElement) => void;
+  onDragEnd?: () => void;
 }
 
-export function ElementPalette({ onDragStart }: ElementPaletteProps) {
+export function ElementPalette({ onDragStart, onDragEnd }: ElementPaletteProps) {
   const [activeCategory, setActiveCategory] = useState<'all' | 'data' | 'content' | 'visual'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -252,6 +253,7 @@ export function ElementPalette({ onDragStart }: ElementPaletteProps) {
                 key={`${element.type}-${element.subType || index}`}
                 draggable
                 onDragStart={() => onDragStart(element)}
+                onDragEnd={() => onDragEnd?.()}
                 className="p-3 bg-gray-700 border border-gray-600 rounded cursor-move hover:bg-gray-650 hover:border-blue-500 transition-all group"
               >
                 <div className="flex items-start gap-3">
