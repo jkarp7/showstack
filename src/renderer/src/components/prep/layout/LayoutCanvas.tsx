@@ -37,14 +37,17 @@ export function LayoutCanvas({
 
   const handleDrop = (e: React.DragEvent, col: number, row: number) => {
     e.preventDefault();
+    console.log('Canvas drop:', { col, row, draggedElement });
     setDragOverCell(null);
 
     if (draggedElement) {
       // Moving existing element
+      console.log('Moving existing element');
       onElementMove(draggedElement, col, row);
       setDraggedElement(null);
     } else {
       // Dropping new element from palette
+      console.log('Dropping new element from palette');
       onElementDrop(col, row);
     }
   };
