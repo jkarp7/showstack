@@ -65,11 +65,7 @@ export function LayoutDesigner({
   useEffect(() => {
     async function loadTemplates() {
       try {
-        const templates = await window.electron.ipcRenderer.invoke(
-          'prep:layoutTemplates:getByProjectId',
-          projectId,
-          pageType
-        );
+        const templates = await window.api.prep.layoutTemplates.getByProjectId(projectId, pageType);
         setAvailableTemplates(templates);
       } catch (error) {
         console.error('Error loading templates:', error);
@@ -188,8 +184,7 @@ export function LayoutDesigner({
 
       if (isNew) {
         // Create new template
-        const result = await window.electron.ipcRenderer.invoke(
-          'prep:layoutTemplates:create',
+        const result = await window.api.prep.layoutTemplates.create(
           {
             prep_project_id: projectId,
             name: template.name,
@@ -206,10 +201,7 @@ export function LayoutDesigner({
         );
 
         // Update template with returned ID
-        const savedElements = await window.electron.ipcRenderer.invoke(
-          'prep:layoutTemplates:getElements',
-          result.id
-        );
+        const savedElements = await window.api.prep.layoutTemplates.getElements(result.id);
 
         const parsedElements = savedElements.map(el => ({
           ...el,
@@ -223,8 +215,7 @@ export function LayoutDesigner({
         });
       } else {
         // Update existing template
-        await window.electron.ipcRenderer.invoke(
-          'prep:layoutTemplates:update',
+        await window.api.prep.layoutTemplates.update(
           template.id,
           {
             name: template.name,
@@ -255,15 +246,8 @@ export function LayoutDesigner({
   // Handle load template
   const handleLoadTemplate = useCallback(async (templateId: string) => {
     try {
-      const loadedTemplate = await window.electron.ipcRenderer.invoke(
-        'prep:layoutTemplates:getById',
-        templateId
-      );
-
-      const loadedElements = await window.electron.ipcRenderer.invoke(
-        'prep:layoutTemplates:getElements',
-        templateId
-      );
+      const loadedTemplate = await window.api.prep.layoutTemplates.getById(templateId);
+      const loadedElements = await window.api.prep.layoutTemplates.getElements(templateId);
 
       // Parse JSON fields
       const parsedElements = loadedElements.map(el => ({
