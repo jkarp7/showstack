@@ -32,13 +32,13 @@ export function LayoutDesigner({
   onClose,
   initialTemplate
 }: LayoutDesignerProps) {
-  // Initialize template
+  // Initialize template with blank template (will be replaced if default exists)
   const [template, setTemplate] = useState<PageLayoutTemplate>(() => {
     if (initialTemplate) {
       return initialTemplate;
     }
 
-    // Create default template with temp ID
+    // Create blank template with temp ID
     const now = Date.now();
     return {
       id: `temp-${uuidv4()}`,
@@ -61,19 +61,45 @@ export function LayoutDesigner({
   const [hasChanges, setHasChanges] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [availableTemplates, setAvailableTemplates] = useState<PageLayoutTemplate[]>([]);
+  const [isLoadingDefault, setIsLoadingDefault] = useState(true);
 
-  // Load available templates on mount
+  // Load default template and available templates on mount
   useEffect(() => {
-    async function loadTemplates() {
+    async function loadTemplatesAndDefault() {
       try {
+        // Load all available templates for this page type
         const templates = await window.api.prep.layoutTemplates.getByProjectId(projectId, pageType);
         setAvailableTemplates(templates);
+
+        // If no initial template was provided, try to load the default template
+        if (!initialTemplate) {
+          const defaultTemplate = await window.api.prep.layoutTemplates.getDefault(projectId, pageType);
+
+          if (defaultTemplate) {
+            // Load the default template with its elements
+            const elements = await window.api.prep.layoutTemplates.getElements(defaultTemplate.id);
+
+            // Parse JSON fields
+            const parsedElements = elements.map(el => ({
+              ...el,
+              config: JSON.parse(el.config),
+              style: JSON.parse(el.style)
+            }));
+
+            setTemplate({
+              ...defaultTemplate,
+              elements: parsedElements
+            });
+          }
+        }
       } catch (error) {
         console.error('Error loading templates:', error);
+      } finally {
+        setIsLoadingDefault(false);
       }
     }
-    loadTemplates();
-  }, [projectId, pageType]);
+    loadTemplatesAndDefault();
+  }, [projectId, pageType, initialTemplate]);
 
   // Get selected element
   const selectedElement = selectedElementId
@@ -192,6 +218,7 @@ export function LayoutDesigner({
 
       if (isNew) {
         // Create new template (app-level user preference)
+        // Always mark as default for this page type so it loads automatically
         const result = await window.api.prep.layoutTemplates.create(
           {
             name: template.name,
@@ -202,7 +229,7 @@ export function LayoutDesigner({
             grid_gap: template.grid_gap,
             page_width: template.page_width,
             page_height: template.page_height,
-            is_default: template.is_default
+            is_default: true
           },
           dbElements
         );
@@ -222,6 +249,7 @@ export function LayoutDesigner({
         });
       } else {
         // Update existing template
+        // Always mark as default for this page type so it loads automatically
         await window.api.prep.layoutTemplates.update(
           template.id,
           {
@@ -232,7 +260,7 @@ export function LayoutDesigner({
             grid_gap: template.grid_gap,
             page_width: template.page_width,
             page_height: template.page_height,
-            is_default: template.is_default
+            is_default: true
           },
           dbElements
         );
