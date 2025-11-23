@@ -12,7 +12,7 @@ import { RevisionPanel } from '../../components/prep/RevisionPanel';
 import { NotesPanel } from '../../components/prep/NotesPanel';
 import { TemplateManagerDialog } from '../../components/prep/TemplateManagerDialog';
 import { PrepFileMenu } from '../../components/prep/PrepFileMenu';
-import { PrintBuilder } from '../../components/prep/PrintBuilder';
+import { PrintPreview } from '../../components/prep/PrintPreview';
 import type { PrepSection, Discipline, PrepProject } from '../../types/prep';
 
 export function Prep() {
@@ -1015,7 +1015,7 @@ export function Prep() {
             )}
 
             {activeTab === 'output' && (
-              <PrintBuilder
+              <PrintPreview
                 currentProject={currentProject}
                 template={currentTemplate}
                 onTemplateChange={setCurrentTemplate}
