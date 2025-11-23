@@ -119,8 +119,8 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
     return {
       id: `template-${now}`,
       prep_project_id: projectId,
-      name: 'Default Shop Order',
-      description: 'Standard shop order with all default sections',
+      name: 'ShowStack Default Template',
+      description: 'Professional shop order with all essential sections',
       isDefault: true,
       created_at: now,
       updated_at: now,
@@ -133,17 +133,82 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
         fontFamily: 'Arial',
       },
       sections: [
-        { id: 's1', type: 'cover', order: 0, enabled: true, config: { showLogo: true, showDate: true } },
+        // Page 1: Cover
+        {
+          id: 's1',
+          type: 'cover',
+          order: 0,
+          enabled: true,
+          config: {
+            showLogo: true,
+            showDate: true,
+            title: 'ELECTRICS SHOP ORDER',
+            subtitle: 'For Bid Only'
+          }
+        },
         { id: 's2', type: 'page-break', order: 1, enabled: true, config: {} },
-        { id: 's3', type: 'project-details', order: 2, enabled: true, config: {} },
-        { id: 's4', type: 'venue-info', order: 3, enabled: true, config: { includeContact: true } },
-        { id: 's5', type: 'schedule', order: 4, enabled: true, config: { includeDates: ['load_in_date', 'opening_night_date'] } },
-        { id: 's6', type: 'page-break', order: 5, enabled: true, config: {} },
-        { id: 's7', type: 'equipment-by-section', order: 6, enabled: true, config: { showVenueColumn: true } },
-        { id: 's8', type: 'page-break', order: 7, enabled: true, config: {} },
-        { id: 's9', type: 'notes', order: 8, enabled: true, config: { noteType: 'general_notes' } },
-        { id: 's10', type: 'page-break', order: 9, enabled: true, config: {} },
-        { id: 's11', type: 'revision-summary', order: 10, enabled: true, config: { onlyShowIfRevisions: true } },
+
+        // Page 2: Contacts & Dates
+        {
+          id: 's3',
+          type: 'contacts',
+          order: 2,
+          enabled: true,
+          config: {
+            contactTypes: ['gm', 'pm', 'ld', 'ald', 'pe']
+          }
+        },
+        {
+          id: 's4',
+          type: 'schedule',
+          order: 3,
+          enabled: true,
+          config: {
+            includeDates: ['prep_start_date', 'prep_end_date', 'load_in_date', 'first_preview_date', 'opening_night_date', 'closing_date']
+          }
+        },
+        { id: 's5', type: 'page-break', order: 4, enabled: true, config: {} },
+
+        // Page 3: General Notes & Conditions
+        {
+          id: 's6',
+          type: 'notes',
+          order: 5,
+          enabled: true,
+          config: {
+            noteType: 'general_conditions'
+          }
+        },
+        { id: 's7', type: 'page-break', order: 6, enabled: true, config: {} },
+
+        // Page 4+: Revision Summary (only if revisions exist)
+        {
+          id: 's8',
+          type: 'revision-summary',
+          order: 7,
+          enabled: true,
+          config: {
+            showRevisionDetails: true,
+            includeChangelog: true,
+            onlyShowIfRevisions: true
+          }
+        },
+        { id: 's9', type: 'page-break', order: 8, enabled: true, config: {} },
+
+        // Main pages: Equipment by Section
+        {
+          id: 's10',
+          type: 'equipment-by-section',
+          order: 9,
+          enabled: true,
+          config: {
+            groupBy: 'section',
+            showVenueColumn: true,
+            showWeightColumn: false,
+            showPowerColumn: false,
+            showRevisionMarkers: true
+          }
+        },
       ],
     };
   };
