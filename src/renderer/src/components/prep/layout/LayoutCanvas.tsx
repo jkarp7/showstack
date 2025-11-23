@@ -146,11 +146,39 @@ export function LayoutCanvas({
             onKeyDown={handleKeyDown}
             onDragOver={(e) => {
               e.preventDefault();
-              console.log('Canvas container dragOver');
+              e.dataTransfer.dropEffect = 'copy';
             }}
             onDrop={(e) => {
               e.preventDefault();
-              console.log('Canvas container drop - fallback');
+              console.log('Canvas container drop - calculating grid position');
+
+              // Get the canvas element's bounding rect
+              const rect = canvasRef.current?.getBoundingClientRect();
+              if (!rect) return;
+
+              // Calculate the position relative to the canvas
+              const x = e.clientX - rect.left;
+              const y = e.clientY - rect.top;
+
+              // Account for zoom
+              const actualX = x / (zoom / 100);
+              const actualY = y / (zoom / 100);
+
+              // Calculate grid column and row
+              const col = Math.floor(actualX / cellWidth);
+              const row = Math.floor(actualY / cellHeight);
+
+              // Clamp to grid bounds
+              const gridCol = Math.max(0, Math.min(col, template.grid_columns - 1));
+              const gridRow = Math.max(0, Math.min(row, template.grid_rows - 1));
+
+              console.log('Calculated drop position:', { gridCol, gridRow });
+
+              // Check if cell is occupied
+              const element = getElementAtPosition(gridCol, gridRow);
+              if (!element) {
+                handleDrop(e, gridCol, gridRow);
+              }
             }}
             className="relative bg-white shadow-2xl outline-none"
             style={{
