@@ -103,8 +103,20 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
   const [draggedFromBuilder, setDraggedFromBuilder] = useState<boolean>(false);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [editingLayoutFor, setEditingLayoutFor] = useState<PrintSectionType | null>(null);
+  const [availableTemplates, setAvailableTemplates] = useState<PrintTemplate[]>([]);
+
+  // Load available templates on mount
+  useEffect(() => {
+    async function loadTemplates() {
+      // For now, we'll just show the current template
+      // In the future, we can load saved templates from the database
+      setAvailableTemplates([]);
+    }
+    loadTemplates();
+  }, []);
 
   // Initialize with default template if none provided
   useEffect(() => {
@@ -328,14 +340,28 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-lg font-semibold text-white">{template.name}</h3>
-            <p className="text-sm text-gray-400">{template.sections.filter(s => s.enabled).length} sections enabled</p>
+            <p className="text-sm text-gray-400">
+              {template.sections.filter(s => s.enabled).length} sections enabled
+              {template.isDefault && <span className="ml-2 text-blue-400">• System Default</span>}
+            </p>
           </div>
-          <button
-            onClick={() => setShowSaveDialog(true)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition"
-          >
-            Save as Template
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => {
+                const defaultTemplate = createDefaultTemplate(currentProject.id);
+                onTemplateChange(defaultTemplate);
+              }}
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition"
+            >
+              Reset to Default
+            </button>
+            <button
+              onClick={() => setShowSaveDialog(true)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition"
+            >
+              Save as Template
+            </button>
+          </div>
         </div>
 
         {/* Page Settings - Moved to top */}
