@@ -81,21 +81,17 @@ export function LayoutDesigner({
 
   // Handle drag start from palette
   const handlePaletteDragStart = useCallback((element: any) => {
-    console.log('Palette drag start:', element);
     setDraggedPaletteElement(element);
   }, []);
 
   // Handle drag end from palette (cleanup)
   const handlePaletteDragEnd = useCallback(() => {
-    console.log('Palette drag end');
     // Don't clear immediately - let the drop handler do it
   }, []);
 
   // Handle drop on canvas
   const handleElementDrop = useCallback((gridColumn: number, gridRow: number) => {
-    console.log('Element drop called:', { gridColumn, gridRow, draggedPaletteElement });
     if (!draggedPaletteElement) {
-      console.log('No dragged palette element!');
       return;
     }
 

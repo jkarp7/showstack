@@ -39,17 +39,14 @@ export function LayoutCanvas({
   const handleDrop = (e: React.DragEvent, col: number, row: number) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Canvas drop:', { col, row, draggedElement });
     setDragOverCell(null);
 
     if (draggedElement) {
       // Moving existing element
-      console.log('Moving existing element');
       onElementMove(draggedElement, col, row);
       setDraggedElement(null);
     } else {
       // Dropping new element from palette
-      console.log('Dropping new element from palette');
       onElementDrop(col, row);
     }
   };
@@ -150,7 +147,6 @@ export function LayoutCanvas({
             }}
             onDrop={(e) => {
               e.preventDefault();
-              console.log('Canvas container drop - calculating grid position');
 
               // Get the canvas element's bounding rect
               const rect = canvasRef.current?.getBoundingClientRect();
@@ -171,8 +167,6 @@ export function LayoutCanvas({
               // Clamp to grid bounds
               const gridCol = Math.max(0, Math.min(col, template.grid_columns - 1));
               const gridRow = Math.max(0, Math.min(row, template.grid_rows - 1));
-
-              console.log('Calculated drop position:', { gridCol, gridRow });
 
               // Check if cell is occupied
               const element = getElementAtPosition(gridCol, gridRow);
