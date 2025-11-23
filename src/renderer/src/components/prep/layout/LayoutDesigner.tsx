@@ -63,20 +63,20 @@ export function LayoutDesigner({
   const [availableTemplates, setAvailableTemplates] = useState<PageLayoutTemplate[]>([]);
   const [isLoadingDefault, setIsLoadingDefault] = useState(true);
 
-  // Load default template and available templates on mount
+  // Load default layout and available layouts on mount
   useEffect(() => {
     async function loadTemplatesAndDefault() {
       try {
-        // Load all available templates for this page type
+        // Load all available layouts for this page type
         const templates = await window.api.prep.layoutTemplates.getByProjectId(projectId, pageType);
         setAvailableTemplates(templates);
 
-        // If no initial template was provided, try to load the default template
+        // If no initial layout was provided, try to load the default layout
         if (!initialTemplate) {
           const defaultTemplate = await window.api.prep.layoutTemplates.getDefault(projectId, pageType);
 
           if (defaultTemplate) {
-            // Load the default template with its elements
+            // Load the default layout with its elements
             const elements = await window.api.prep.layoutTemplates.getElements(defaultTemplate.id);
 
             // Parse JSON fields
@@ -93,7 +93,7 @@ export function LayoutDesigner({
           }
         }
       } catch (error) {
-        console.error('Error loading templates:', error);
+        console.error('Error loading layouts:', error);
       } finally {
         setIsLoadingDefault(false);
       }
@@ -273,8 +273,8 @@ export function LayoutDesigner({
         onSave(template);
       }
     } catch (error) {
-      console.error('Error saving layout template:', error);
-      alert('Failed to save layout template. Please try again.');
+      console.error('Error saving page layout:', error);
+      alert('Failed to save page layout. Please try again.');
     }
   }, [template, projectId, pageType, onSave]);
 
@@ -308,8 +308,8 @@ export function LayoutDesigner({
       setHasChanges(false);
       setShowLoadDialog(false);
     } catch (error) {
-      console.error('Error loading template:', error);
-      alert('Failed to load template. Please try again.');
+      console.error('Error loading layout:', error);
+      alert('Failed to load layout. Please try again.');
     }
   }, []);
 
@@ -340,7 +340,7 @@ export function LayoutDesigner({
               onClick={() => setShowLoadDialog(true)}
               className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition"
             >
-              Load Template
+              Load Layout
             </button>
           )}
           <button
@@ -400,23 +400,23 @@ export function LayoutDesigner({
         </div>
       </div>
 
-      {/* Load Template Dialog */}
+      {/* Load Layout Dialog */}
       {showLoadDialog && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-8">
           <div className="bg-gray-800 rounded-lg border border-gray-700 max-w-2xl w-full max-h-[80vh] flex flex-col">
             {/* Dialog Header */}
             <div className="px-6 py-4 border-b border-gray-700">
-              <h3 className="text-lg font-bold text-white">Load Template</h3>
+              <h3 className="text-lg font-bold text-white">Load Layout</h3>
               <p className="text-sm text-gray-400 mt-1">
-                Select a saved layout template to load
+                Select a saved page layout to load
               </p>
             </div>
 
-            {/* Template List */}
+            {/* Layout List */}
             <div className="flex-1 overflow-y-auto p-6">
               {availableTemplates.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
-                  No saved templates found for this page type
+                  No saved layouts found for this page type
                 </div>
               ) : (
                 <div className="space-y-3">
