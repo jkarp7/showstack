@@ -92,9 +92,9 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       const availableWidth = container.clientWidth - 16; // p-2 = 8px each side
       const availableHeight = container.clientHeight - 16;
 
-      // Calculate scale with some extra margin for safety
-      const scaleX = (availableWidth * 0.95) / pageWidth; // 95% to add margin
-      const scaleY = (availableHeight * 0.95) / pageHeight;
+      // Calculate scale with extra margin for better fit on small screens
+      const scaleX = (availableWidth * 0.90) / pageWidth; // 90% for more aggressive scaling
+      const scaleY = (availableHeight * 0.90) / pageHeight;
 
       // Use the smaller scale to ensure the page fits completely
       const newScale = Math.min(scaleX, scaleY, 1); // Cap at 1 (100%)
