@@ -88,19 +88,24 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       const container = containerRef.current.parentElement;
       if (!container) return;
 
-      const containerWidth = container.clientWidth - 16; // Account for padding (p-2 = 8px on each side)
-      const containerHeight = container.clientHeight - 16;
+      // Get actual available space, accounting for padding
+      const availableWidth = container.clientWidth - 16; // p-2 = 8px each side
+      const availableHeight = container.clientHeight - 16;
 
-      // Calculate scale to fit both width and height with some margin
-      const scaleX = containerWidth / pageWidth;
-      const scaleY = containerHeight / pageHeight;
+      // Calculate scale with some extra margin for safety
+      const scaleX = (availableWidth * 0.95) / pageWidth; // 95% to add margin
+      const scaleY = (availableHeight * 0.95) / pageHeight;
 
       // Use the smaller scale to ensure the page fits completely
       const newScale = Math.min(scaleX, scaleY, 1); // Cap at 1 (100%)
       setScale(newScale);
     };
 
+    // Initial calculation
     calculateScale();
+
+    // Small delay to ensure DOM is ready
+    setTimeout(calculateScale, 100);
 
     // Recalculate on window resize
     window.addEventListener('resize', calculateScale);
@@ -236,6 +241,16 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
     const width = column_span * cellWidth;
     const height = row_span * cellHeight;
 
+    // Map textAlign to justify-content for flexbox
+    const getJustifyContent = (textAlign: string) => {
+      switch (textAlign) {
+        case 'center': return 'center';
+        case 'right': return 'flex-end';
+        case 'left':
+        default: return 'flex-start';
+      }
+    };
+
     const elementStyle: React.CSSProperties = {
       position: 'absolute',
       left: `${left}px`,
@@ -243,15 +258,15 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       width: `${width}px`,
       height: `${height}px`,
       fontFamily: style.fontFamily || pageSettings.fontFamily || 'Arial',
-      fontSize: `${style.fontSize || pageSettings.fontSize || 12}pt`, // Increased default to 12pt
+      fontSize: `${style.fontSize || pageSettings.fontSize || 12}pt`,
       fontWeight: style.fontWeight || 'normal',
-      textAlign: (style.textAlign as any) || 'left',
       color: style.color || '#000',
       backgroundColor: style.backgroundColor || 'transparent',
       padding: `${style.padding || 0}px`,
-      overflow: 'visible', // Changed from 'hidden' to allow text to show
+      overflow: 'visible',
       display: 'flex',
       alignItems: 'center',
+      justifyContent: getJustifyContent(style.textAlign || 'left'),
     };
 
     if (element.element_type === 'dataField') {
@@ -268,9 +283,12 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
     }
 
     if (element.element_type === 'text') {
+      // Don't render empty text elements
+      if (!config.text) return null;
+
       return (
         <div key={element.id} style={elementStyle}>
-          {config.text || '[No Text]'}
+          {config.text}
         </div>
       );
     }
