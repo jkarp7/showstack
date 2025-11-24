@@ -480,7 +480,7 @@ export function registerPrepHandlers(): void {
   });
 
   // ============================================
-  // PDF EXPORT
+  // PDF EXPORT & PRINT
   // ============================================
 
   ipcMain.handle('prep:exportPDF', async (_event, projectId: string, templateData: any) => {
@@ -550,6 +550,63 @@ export function registerPrepHandlers(): void {
       };
     } catch (error) {
       console.error('Error exporting PDF:', error);
+      throw error;
+    }
+  });
+
+  // Direct Print
+  ipcMain.handle('prep:print', async (_event, projectId: string, templateData: any) => {
+    try {
+      const project = getPrepProjectById(projectId);
+      if (!project) {
+        throw new Error('Project not found');
+      }
+
+      // Create a hidden window for printing
+      const printWindow = new BrowserWindow({
+        width: 816, // Letter size width in pixels at 96 DPI
+        height: 1056, // Letter size height in pixels at 96 DPI
+        show: false,
+        webPreferences: {
+          nodeIntegration: false,
+          contextIsolation: true,
+        },
+      });
+
+      // Generate HTML content
+      const htmlContent = generatePDFContent(project, templateData);
+      await printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
+
+      // Wait for page to load
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Print with proper page settings
+      printWindow.webContents.print(
+        {
+          silent: false, // Show print dialog
+          printBackground: true,
+          pageSize: templateData.pageSettings?.pageSize || 'Letter',
+          landscape: templateData.pageSettings?.orientation === 'landscape',
+          margins: {
+            marginType: 'custom',
+            top: (templateData.pageSettings?.margins?.top || 0.75) * 72,
+            bottom: (templateData.pageSettings?.margins?.bottom || 0.75) * 72,
+            left: (templateData.pageSettings?.margins?.left || 0.75) * 72,
+            right: (templateData.pageSettings?.margins?.right || 0.75) * 72,
+          },
+        },
+        (success, failureReason) => {
+          if (!success && failureReason) {
+            console.error('Print failed:', failureReason);
+          }
+          // Close the hidden window after printing or canceling
+          printWindow.close();
+        }
+      );
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error printing:', error);
       throw error;
     }
   });

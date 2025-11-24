@@ -142,10 +142,18 @@ export function PrintPreview({
     }
   };
 
-  const handlePrint = () => {
-    // TODO: Implement print functionality
-    console.log('Print clicked');
-    alert('Print functionality coming soon!');
+  const handlePrint = async () => {
+    try {
+      const result = await window.api.prep.print(currentProject.id, template);
+
+      if (result.success) {
+        // Print dialog was shown and user either printed or canceled
+        // We don't need to show a success message since the OS print dialog handles that
+      }
+    } catch (error) {
+      console.error('Error printing:', error);
+      alert('Failed to open print dialog. Please try again.');
+    }
   };
 
   if (!template) return null;
