@@ -530,12 +530,7 @@ export function registerPrepHandlers(): void {
         pageSize: templateData.pageSettings?.pageSize || 'Letter',
         landscape: templateData.pageSettings?.orientation === 'landscape',
         printBackground: true,
-        margins: {
-          top: (templateData.pageSettings?.margins?.top || 0.75) * 72, // Convert inches to points
-          bottom: (templateData.pageSettings?.margins?.bottom || 0.75) * 72,
-          left: (templateData.pageSettings?.margins?.left || 0.75) * 72,
-          right: (templateData.pageSettings?.margins?.right || 0.75) * 72,
-        },
+        marginsType: 1, // 0 = default, 1 = none, 2 = minimum (we handle margins in CSS)
       });
 
       // Save PDF to file
@@ -587,13 +582,7 @@ export function registerPrepHandlers(): void {
           printBackground: true,
           pageSize: templateData.pageSettings?.pageSize || 'Letter',
           landscape: templateData.pageSettings?.orientation === 'landscape',
-          margins: {
-            marginType: 'custom',
-            top: (templateData.pageSettings?.margins?.top || 0.75) * 72,
-            bottom: (templateData.pageSettings?.margins?.bottom || 0.75) * 72,
-            left: (templateData.pageSettings?.margins?.left || 0.75) * 72,
-            right: (templateData.pageSettings?.margins?.right || 0.75) * 72,
-          },
+          marginsType: 1, // 0 = default, 1 = none, 2 = minimum (we handle margins in CSS)
         },
         (success, failureReason) => {
           if (!success && failureReason) {
@@ -619,6 +608,9 @@ function generatePDFContent(project: PrepProject, templateData: any): string {
   const sections = templateData.sections || [];
   const enabledSections = sections.filter((s: any) => s.enabled);
 
+  // Get margin settings (in inches)
+  const margins = templateData.pageSettings?.margins || { top: 0.75, right: 0.75, bottom: 0.75, left: 0.75 };
+
   return `
     <!DOCTYPE html>
     <html>
@@ -640,7 +632,7 @@ function generatePDFContent(project: PrepProject, templateData: any): string {
           .page {
             width: 100%;
             min-height: 100vh;
-            padding: 0.75in;
+            padding: ${margins.top}in ${margins.right}in ${margins.bottom}in ${margins.left}in;
             page-break-after: always;
           }
           .page:last-child {
