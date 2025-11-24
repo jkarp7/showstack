@@ -196,22 +196,24 @@ export function PrintPreview({
         )}
 
         {/* Page Preview */}
-        <div className="flex-1 overflow-auto bg-gray-700 p-8 flex items-start justify-center">
-          {totalPages > 0 && currentSection ? (
-            <PageRenderer
-              section={currentSection}
-              project={currentProject}
-              pageSettings={template.pageSettings}
-              pageNumber={currentPageIndex + 1}
-            />
-          ) : (
-            <div className="text-center p-12 text-gray-400">
-              <div className="text-lg mb-2">No Pages to Display</div>
-              <div className="text-sm">
-                Add sections using "Arrange Sections" to see the preview.
+        <div className="flex-1 overflow-auto bg-gray-700 p-8">
+          <div className="w-full h-full flex items-center justify-center">
+            {totalPages > 0 && currentSection ? (
+              <PageRenderer
+                section={currentSection}
+                project={currentProject}
+                pageSettings={template.pageSettings}
+                pageNumber={currentPageIndex + 1}
+              />
+            ) : (
+              <div className="text-center p-12 text-gray-400">
+                <div className="text-lg mb-2">No Pages to Display</div>
+                <div className="text-sm">
+                  Add sections using "Arrange Sections" to see the preview.
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 

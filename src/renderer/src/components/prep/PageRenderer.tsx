@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import type { PrintSection, PrepProject, PageLayoutTemplate, LayoutElement } from '../../types/prep';
 
 interface PageRendererProps {
@@ -52,6 +52,8 @@ type DataFieldType =
 export function PageRenderer({ section, project, pageSettings, pageNumber }: PageRendererProps) {
   const [layout, setLayout] = useState<PageLayoutTemplate | null>(null);
   const [loading, setLoading] = useState(true);
+  const [scale, setScale] = useState(1);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Page dimensions in pixels (at 96 DPI)
   const pageDimensions = {
@@ -77,6 +79,33 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
   // Content area dimensions
   const contentWidth = pageWidth - marginLeft - marginRight;
   const contentHeight = pageHeight - marginTop - marginBottom;
+
+  // Calculate scale to fit page in viewport
+  useEffect(() => {
+    const calculateScale = () => {
+      if (!containerRef.current) return;
+
+      const container = containerRef.current.parentElement;
+      if (!container) return;
+
+      const containerWidth = container.clientWidth - 64; // Account for padding
+      const containerHeight = container.clientHeight - 64;
+
+      // Calculate scale to fit both width and height with some margin
+      const scaleX = containerWidth / pageWidth;
+      const scaleY = containerHeight / pageHeight;
+
+      // Use the smaller scale to ensure the page fits completely
+      const newScale = Math.min(scaleX, scaleY, 1); // Cap at 1 (100%)
+      setScale(newScale);
+    };
+
+    calculateScale();
+
+    // Recalculate on window resize
+    window.addEventListener('resize', calculateScale);
+    return () => window.removeEventListener('resize', calculateScale);
+  }, [pageWidth, pageHeight]);
 
   useEffect(() => {
     async function loadLayout() {
@@ -273,14 +302,22 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
   if (loading) {
     return (
       <div
-        className="bg-white shadow-lg relative"
+        ref={containerRef}
         style={{
-          width: `${pageWidth}px`,
-          height: `${pageHeight}px`,
+          transform: `scale(${scale})`,
+          transformOrigin: 'center center',
         }}
       >
-        <div className="flex items-center justify-center h-full">
-          <div className="text-gray-400">Loading layout...</div>
+        <div
+          className="bg-white shadow-lg relative"
+          style={{
+            width: `${pageWidth}px`,
+            height: `${pageHeight}px`,
+          }}
+        >
+          <div className="flex items-center justify-center h-full">
+            <div className="text-gray-400">Loading layout...</div>
+          </div>
         </div>
       </div>
     );
@@ -289,18 +326,26 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
   if (!layout) {
     return (
       <div
-        className="bg-white shadow-lg relative"
+        ref={containerRef}
         style={{
-          width: `${pageWidth}px`,
-          height: `${pageHeight}px`,
-          padding: `${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px`,
+          transform: `scale(${scale})`,
+          transformOrigin: 'center center',
         }}
       >
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center text-gray-500">
-            <div className="text-lg font-semibold mb-2">No Layout Found</div>
-            <div className="text-sm">
-              No default layout exists for {section.type}
+        <div
+          className="bg-white shadow-lg relative"
+          style={{
+            width: `${pageWidth}px`,
+            height: `${pageHeight}px`,
+            padding: `${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px`,
+          }}
+        >
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center text-gray-500">
+              <div className="text-lg font-semibold mb-2">No Layout Found</div>
+              <div className="text-sm">
+                No default layout exists for {section.type}
+              </div>
             </div>
           </div>
         </div>
@@ -310,12 +355,19 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
 
   return (
     <div
-      className="bg-white shadow-lg relative"
+      ref={containerRef}
       style={{
-        width: `${pageWidth}px`,
-        height: `${pageHeight}px`,
+        transform: `scale(${scale})`,
+        transformOrigin: 'center center',
       }}
     >
+      <div
+        className="bg-white shadow-lg relative"
+        style={{
+          width: `${pageWidth}px`,
+          height: `${pageHeight}px`,
+        }}
+      >
       {/* Margin guides (visual only, not printed) */}
       <div
         className="absolute border border-dashed border-gray-300 pointer-events-none"
@@ -340,19 +392,20 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
         {layout.elements.map((element) => renderElement(element))}
       </div>
 
-      {/* Page number */}
-      {pageSettings.showPageNumbers && pageNumber !== undefined && (
-        <div
-          className="absolute text-gray-600 text-sm"
-          style={{
-            bottom: `${marginBottom / 2}px`,
-            right: `${marginRight}px`,
-            fontFamily: pageSettings.fontFamily || 'Arial',
-          }}
-        >
-          {pageNumber}
-        </div>
-      )}
+        {/* Page number */}
+        {pageSettings.showPageNumbers && pageNumber !== undefined && (
+          <div
+            className="absolute text-gray-600 text-sm"
+            style={{
+              bottom: `${marginBottom / 2}px`,
+              right: `${marginRight}px`,
+              fontFamily: pageSettings.fontFamily || 'Arial',
+            }}
+          >
+            {pageNumber}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
