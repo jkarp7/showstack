@@ -124,10 +124,22 @@ export function PrintPreview({
     };
   };
 
-  const handleExportPDF = () => {
-    // TODO: Implement PDF export functionality
-    console.log('Export to PDF clicked');
-    alert('PDF export functionality coming soon!');
+  const handleExportPDF = async () => {
+    try {
+      const result = await window.api.prep.exportPDF(currentProject.id, template);
+
+      if (result.canceled) {
+        // User canceled the save dialog
+        return;
+      }
+
+      if (result.success) {
+        alert(`PDF exported successfully to:\n${result.filePath}`);
+      }
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      alert('Failed to export PDF. Please try again.');
+    }
   };
 
   const handlePrint = () => {

@@ -1,4 +1,6 @@
-import { ipcMain } from 'electron';
+import { ipcMain, dialog, BrowserWindow } from 'electron';
+import * as path from 'path';
+import * as fs from 'fs';
 import {
   // Projects
   getAllPrepProjects,
@@ -477,5 +479,195 @@ export function registerPrepHandlers(): void {
     }
   });
 
+  // ============================================
+  // PDF EXPORT
+  // ============================================
+
+  ipcMain.handle('prep:exportPDF', async (_event, projectId: string, templateData: any) => {
+    try {
+      const project = getPrepProjectById(projectId);
+      if (!project) {
+        throw new Error('Project not found');
+      }
+
+      // Show save dialog
+      const mainWindow = BrowserWindow.getFocusedWindow();
+      if (!mainWindow) {
+        throw new Error('No active window');
+      }
+
+      const result = await dialog.showSaveDialog(mainWindow, {
+        title: 'Export PDF',
+        defaultPath: `${project.production_name}_ShopOrder.pdf`,
+        filters: [{ name: 'PDF Files', extensions: ['pdf'] }],
+      });
+
+      if (result.canceled || !result.filePath) {
+        return { success: false, canceled: true };
+      }
+
+      // Create a hidden window for PDF generation
+      const pdfWindow = new BrowserWindow({
+        width: 816, // Letter size width in pixels at 96 DPI
+        height: 1056, // Letter size height in pixels at 96 DPI
+        show: false,
+        webPreferences: {
+          nodeIntegration: false,
+          contextIsolation: true,
+        },
+      });
+
+      // Generate simple HTML content for the PDF
+      // TODO: In Phase 2, this will render the actual page layouts with real data
+      const htmlContent = generatePDFContent(project, templateData);
+      await pdfWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
+
+      // Wait for page to load
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Generate PDF with proper page settings
+      const pdfData = await pdfWindow.webContents.printToPDF({
+        pageSize: templateData.pageSettings?.pageSize || 'Letter',
+        landscape: templateData.pageSettings?.orientation === 'landscape',
+        printBackground: true,
+        margins: {
+          top: (templateData.pageSettings?.margins?.top || 0.75) * 72, // Convert inches to points
+          bottom: (templateData.pageSettings?.margins?.bottom || 0.75) * 72,
+          left: (templateData.pageSettings?.margins?.left || 0.75) * 72,
+          right: (templateData.pageSettings?.margins?.right || 0.75) * 72,
+        },
+      });
+
+      // Save PDF to file
+      fs.writeFileSync(result.filePath, pdfData);
+
+      // Close the hidden window
+      pdfWindow.close();
+
+      return {
+        success: true,
+        filePath: result.filePath,
+      };
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      throw error;
+    }
+  });
+
   console.log('✅ Prep IPC handlers registered');
+}
+
+// Helper function to generate HTML content for PDF
+function generatePDFContent(project: PrepProject, templateData: any): string {
+  const sections = templateData.sections || [];
+  const enabledSections = sections.filter((s: any) => s.enabled);
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          body {
+            font-family: ${templateData.pageSettings?.fontFamily || 'Arial'}, sans-serif;
+            font-size: ${templateData.pageSettings?.fontSize || 10}pt;
+            color: #000;
+            background: white;
+            padding: 0;
+          }
+          .page {
+            width: 100%;
+            min-height: 100vh;
+            padding: 0.75in;
+            page-break-after: always;
+          }
+          .page:last-child {
+            page-break-after: auto;
+          }
+          h1 {
+            font-size: 24pt;
+            margin-bottom: 12pt;
+            text-align: center;
+          }
+          h2 {
+            font-size: 16pt;
+            margin-top: 12pt;
+            margin-bottom: 8pt;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 4pt;
+          }
+          .info-row {
+            margin: 4pt 0;
+          }
+          .label {
+            font-weight: bold;
+            display: inline-block;
+            min-width: 120pt;
+          }
+          .placeholder {
+            color: #666;
+            font-style: italic;
+            text-align: center;
+            margin: 24pt 0;
+            padding: 24pt;
+            border: 1px dashed #ccc;
+          }
+        </style>
+      </head>
+      <body>
+        <!-- Cover Page -->
+        <div class="page">
+          <h1>${project.production_name}</h1>
+          <div style="text-align: center; margin: 24pt 0;">
+            <div style="font-size: 18pt; font-weight: bold;">ELECTRICS SHOP ORDER</div>
+            <div style="margin-top: 8pt; color: #666;">For Bid Only</div>
+          </div>
+          <div style="margin-top: 48pt;">
+            <div class="info-row"><span class="label">Venue:</span> ${project.venue || 'TBD'}</div>
+            <div class="info-row"><span class="label">Designer:</span> ${project.ld_name || 'TBD'}</div>
+            <div class="info-row"><span class="label">Production Manager:</span> ${project.pm_name || 'TBD'}</div>
+            <div class="info-row"><span class="label">Revision:</span> ${project.current_revision}</div>
+          </div>
+        </div>
+
+        <!-- Placeholder for actual content -->
+        <div class="page">
+          <div class="placeholder">
+            <h2>Live Page Rendering Coming Soon</h2>
+            <p style="margin-top: 12pt;">This PDF contains ${enabledSections.length} sections:</p>
+            <ul style="list-style: none; margin-top: 12pt; text-align: left; display: inline-block;">
+              ${enabledSections.map((s: any) => `<li style="margin: 4pt 0;">• ${getSectionLabel(s.type)}</li>`).join('')}
+            </ul>
+            <p style="margin-top: 24pt; font-size: 9pt;">
+              Phase 2 will include full page layout rendering with custom designs,<br/>
+              equipment lists, contacts, schedules, notes, and revision tracking.
+            </p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+}
+
+// Helper function to get section label
+function getSectionLabel(type: string): string {
+  const labels: Record<string, string> = {
+    'cover': 'Cover Page',
+    'project-details': 'Project Details',
+    'venue-info': 'Venue Information',
+    'schedule': 'Schedule',
+    'contacts': 'Contacts',
+    'equipment-by-section': 'Equipment by Section',
+    'equipment-summary': 'Equipment Summary',
+    'notes': 'Notes',
+    'revision-summary': 'Revision Summary',
+    'custom-text': 'Custom Text',
+    'page-break': 'Page Break',
+  };
+  return labels[type] || type;
 }

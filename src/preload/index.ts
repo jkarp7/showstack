@@ -131,7 +131,9 @@ contextBridge.exposeInMainWorld('api', {
       export: (projectId: string, filePath: string) => ipcRenderer.invoke('prep:file:export', projectId, filePath),
       import: (filePath: string) => ipcRenderer.invoke('prep:file:import', filePath),
       getFileName: (filePath: string) => ipcRenderer.invoke('prep:file:getFileName', filePath)
-    }
+    },
+    // PDF Export
+    exportPDF: (projectId: string, templateData: any) => ipcRenderer.invoke('prep:exportPDF', projectId, templateData)
   },
 
   // License operations
@@ -255,6 +257,7 @@ export interface ElectronAPI {
       import: (filePath: string) => Promise<any>;
       getFileName: (filePath: string) => Promise<string>;
     };
+    exportPDF: (projectId: string, templateData: any) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
   };
   license: {
     getStatus: () => Promise<any>;
