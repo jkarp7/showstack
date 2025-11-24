@@ -196,7 +196,7 @@ export function PrintPreview({
         )}
 
         {/* Page Preview */}
-        <div className="flex-1 overflow-auto bg-gray-700 p-8">
+        <div className="flex-1 overflow-auto bg-gray-700 p-2">
           <div className="w-full h-full flex items-center justify-center">
             {totalPages > 0 && currentSection ? (
               <PageRenderer

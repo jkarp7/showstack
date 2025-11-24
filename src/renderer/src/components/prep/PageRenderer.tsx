@@ -88,8 +88,8 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       const container = containerRef.current.parentElement;
       if (!container) return;
 
-      const containerWidth = container.clientWidth - 64; // Account for padding
-      const containerHeight = container.clientHeight - 64;
+      const containerWidth = container.clientWidth - 16; // Account for padding (p-2 = 8px on each side)
+      const containerHeight = container.clientHeight - 16;
 
       // Calculate scale to fit both width and height with some margin
       const scaleX = containerWidth / pageWidth;
@@ -243,23 +243,26 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       width: `${width}px`,
       height: `${height}px`,
       fontFamily: style.fontFamily || pageSettings.fontFamily || 'Arial',
-      fontSize: `${style.fontSize || pageSettings.fontSize || 10}pt`,
+      fontSize: `${style.fontSize || pageSettings.fontSize || 12}pt`, // Increased default to 12pt
       fontWeight: style.fontWeight || 'normal',
       textAlign: (style.textAlign as any) || 'left',
       color: style.color || '#000',
       backgroundColor: style.backgroundColor || 'transparent',
       padding: `${style.padding || 0}px`,
-      overflow: 'hidden',
+      overflow: 'visible', // Changed from 'hidden' to allow text to show
+      display: 'flex',
+      alignItems: 'center',
     };
 
     if (element.element_type === 'dataField') {
       const value = getDataFieldValue(config.fieldType);
       const label = config.showLabel ? `${config.fieldType.replace(/_/g, ' ')}: ` : '';
+      const displayValue = value || '—'; // Show em dash if empty
 
       return (
         <div key={element.id} style={elementStyle}>
           {label && <span style={{ fontWeight: 'bold' }}>{label}</span>}
-          {value}
+          <span style={{ color: value ? (style.color || '#000') : '#999' }}>{displayValue}</span>
         </div>
       );
     }
@@ -267,7 +270,7 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
     if (element.element_type === 'text') {
       return (
         <div key={element.id} style={elementStyle}>
-          {config.text || ''}
+          {config.text || '[No Text]'}
         </div>
       );
     }
