@@ -660,8 +660,11 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
 
       let changes: any[] = [];
 
-      if (currentProject.current_revision === 0) {
-        // First revision - mark all current items as additions
+      // Check if Revision 0 exists (baseline has been set)
+      const hasRevisionZero = revisions.some(r => r.revision_number === 0);
+
+      if (currentProject.current_revision === 0 && !hasRevisionZero) {
+        // No baseline set - mark all current items as additions
         changes = items.map(item => ({
           item_id: item.id,
           change_type: 'addition',
