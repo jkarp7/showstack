@@ -412,6 +412,7 @@ export function Prep() {
         'gm_name', 'gm_email', 'gm_phone',
         'pm_name', 'pm_email', 'pm_phone',
         'ld_name', 'ld_email', 'ld_phone',
+        'ald_name', 'ald_email', 'ald_phone',
         'pe_name', 'pe_email', 'pe_phone',
         'venue', 'venue_city', 'venue_state'
       ];
@@ -444,12 +445,11 @@ export function Prep() {
           onClick={() => handleFieldClick(field, value, fieldIsReadOnly)}
           className={`${
             fieldIsReadOnly
-              ? 'text-gray-400 cursor-default'
+              ? 'text-gray-400 cursor-not-allowed'
               : 'cursor-pointer hover:text-gray-200 hover:bg-gray-700 rounded px-2 py-1 transition'
           } ${!value && !fieldIsReadOnly ? 'italic text-gray-500' : 'text-gray-300'} ${className}`}
         >
           {value || placeholder}
-          {fieldIsReadOnly && value && <span className="ml-2 text-xs text-blue-400">(from parent)</span>}
         </span>
       );
     };
