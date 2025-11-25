@@ -13,6 +13,7 @@ import { NotesPanel } from '../../components/prep/NotesPanel';
 import { TemplateManagerDialog } from '../../components/prep/TemplateManagerDialog';
 import { PrepFileMenu } from '../../components/prep/PrepFileMenu';
 import { PrintPreview } from '../../components/prep/PrintPreview';
+import { formatPhoneNumber } from '../../utils/phoneFormatter';
 import type { PrepSection, Discipline, PrepProject } from '../../types/prep';
 
 export function Prep() {
@@ -207,15 +208,6 @@ export function Prep() {
     setEditValue(value || '');
   };
 
-  // Format phone number (US format)
-  const formatPhoneNumber = (value: string): string => {
-    const digits = value.replace(/\D/g, '');
-    if (digits.length === 10) {
-      return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
-    }
-    return value;
-  };
-
   // Format date to mm/dd/yy
   const formatDate = (value: string): string => {
     if (!value) return value;
@@ -377,20 +369,21 @@ export function Prep() {
     const getFieldValue = (field: keyof PrepProject): string => {
       if (isLinked && parentProject) {
         // Map prep project fields to parent project fields
-        // Company fields are NOT included - they always come from currentProject
         switch (field) {
           case 'gm_name': return parentProject.general_manager || '';
           case 'gm_email': return parentProject.general_manager_email || '';
-          case 'gm_phone': return parentProject.general_manager_phone || '';
+          case 'gm_phone': return formatPhoneNumber(parentProject.general_manager_phone) || '';
+          case 'gm_company': return parentProject.general_manager_company || '';
           case 'pm_name': return parentProject.production_manager || '';
           case 'pm_email': return parentProject.production_manager_email || '';
-          case 'pm_phone': return parentProject.production_manager_phone || '';
+          case 'pm_phone': return formatPhoneNumber(parentProject.production_manager_phone) || '';
+          case 'pm_company': return parentProject.production_manager_company || '';
           case 'ld_name': return parentProject.lighting_designer || '';
           case 'ld_email': return parentProject.lighting_designer_email || '';
-          case 'ld_phone': return parentProject.lighting_designer_phone || '';
+          case 'ld_phone': return formatPhoneNumber(parentProject.lighting_designer_phone) || '';
           case 'pe_name': return parentProject.electrician || '';
           case 'pe_email': return parentProject.electrician_email || '';
-          case 'pe_phone': return parentProject.electrician_phone || '';
+          case 'pe_phone': return formatPhoneNumber(parentProject.electrician_phone) || '';
           case 'venue': return parentProject.venue || '';
           case 'venue_city': return parentProject.venue_city || '';
           case 'venue_state': return parentProject.venue_state || '';
@@ -399,18 +392,22 @@ export function Prep() {
         }
       }
       // Always get from currentProject if not linked or field not in parent
-      return (currentProject[field] as string) || '';
+      // Apply phone formatting for phone fields
+      const value = (currentProject[field] as string) || '';
+      if (field.toString().includes('_phone')) {
+        return formatPhoneNumber(value);
+      }
+      return value;
     };
 
     // Helper to check if a specific field is read-only (pulling from parent)
     const isFieldReadOnly = (field: keyof PrepProject): boolean => {
       if (!isLinked || !parentProject) return false;
 
-      // Only these fields are read-only when linked (fields that pull from parent)
-      // Company fields are NOT included - they should be editable even when linked
+      // These fields are read-only when linked (fields that pull from parent)
       const parentFields: (keyof PrepProject)[] = [
-        'gm_name', 'gm_email', 'gm_phone',
-        'pm_name', 'pm_email', 'pm_phone',
+        'gm_name', 'gm_email', 'gm_phone', 'gm_company',
+        'pm_name', 'pm_email', 'pm_phone', 'pm_company',
         'ld_name', 'ld_email', 'ld_phone',
         'ald_name', 'ald_email', 'ald_phone',
         'pe_name', 'pe_email', 'pe_phone',
@@ -776,36 +773,40 @@ export function Prep() {
                   <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Management</h3>
                   <div className="space-y-2">
                     {/* GM Row */}
-                    <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
+                    <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
                       <span className="text-gray-500">General Manager</span>
-                      <div>
-                        {renderInlineField('gm_name', '+ Name')}
-                      </div>
-                      <div className="flex gap-4">
-                        {getFieldValue('gm_name') && (
-                          <>
-                            <div className="flex-1">{renderInlineField('gm_company', '+ Company')}</div>
-                            <div className="flex-1">{renderInlineField('gm_email', '+ Email')}</div>
-                            <div className="flex-1">{renderInlineField('gm_phone', '+ Phone')}</div>
-                          </>
-                        )}
-                      </div>
+                      <div>{renderInlineField('gm_name', '+ Name')}</div>
+                      {getFieldValue('gm_name') ? (
+                        <>
+                          <div>{renderInlineField('gm_company', '+ Company')}</div>
+                          <div>{renderInlineField('gm_email', '+ Email')}</div>
+                          <div>{renderInlineField('gm_phone', '+ Phone')}</div>
+                        </>
+                      ) : (
+                        <>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                        </>
+                      )}
                     </div>
                     {/* PM Row */}
-                    <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
+                    <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
                       <span className="text-gray-500">Production Manager</span>
-                      <div>
-                        {renderInlineField('pm_name', '+ Name')}
-                      </div>
-                      <div className="flex gap-4">
-                        {getFieldValue('pm_name') && (
-                          <>
-                            <div className="flex-1">{renderInlineField('pm_company', '+ Company')}</div>
-                            <div className="flex-1">{renderInlineField('pm_email', '+ Email')}</div>
-                            <div className="flex-1">{renderInlineField('pm_phone', '+ Phone')}</div>
-                          </>
-                        )}
-                      </div>
+                      <div>{renderInlineField('pm_name', '+ Name')}</div>
+                      {getFieldValue('pm_name') ? (
+                        <>
+                          <div>{renderInlineField('pm_company', '+ Company')}</div>
+                          <div>{renderInlineField('pm_email', '+ Email')}</div>
+                          <div>{renderInlineField('pm_phone', '+ Phone')}</div>
+                        </>
+                      ) : (
+                        <>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -816,73 +817,78 @@ export function Prep() {
                   <div className="space-y-2">
                     {disciplines.includes('lighting') && (
                       <>
-                        {/* LD Row */}
-                        <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
+                        {/* LD Row - no company field for designers */}
+                        <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
                           <span className="text-gray-500">Lighting Designer</span>
-                          <div>
-                            {renderInlineField('ld_name', '+ Name')}
-                          </div>
-                          <div className="flex gap-4">
-                            {getFieldValue('ld_name') && (
-                              <>
-                                {renderInlineField('ld_email', '+ Email')}
-                                {renderInlineField('ld_phone', '+ Phone')}
-                              </>
-                            )}
-                          </div>
+                          <div>{renderInlineField('ld_name', '+ Name')}</div>
+                          {getFieldValue('ld_name') ? (
+                            <>
+                              <div></div>
+                              <div>{renderInlineField('ld_email', '+ Email')}</div>
+                              <div>{renderInlineField('ld_phone', '+ Phone')}</div>
+                            </>
+                          ) : (
+                            <>
+                              <div></div>
+                              <div></div>
+                              <div></div>
+                            </>
+                          )}
                         </div>
                         {/* ALD Row */}
-                        <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
+                        <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
                           <span className="text-gray-500">Associate LD</span>
-                          <div>
-                            {renderInlineField('ald_name', '+ Name')}
-                          </div>
-                          <div className="flex gap-4">
-                            {getFieldValue('ald_name') && (
-                              <>
-                                {renderInlineField('ald_email', '+ Email')}
-                                {renderInlineField('ald_phone', '+ Phone')}
-                              </>
-                            )}
-                          </div>
+                          <div>{renderInlineField('ald_name', '+ Name')}</div>
+                          {getFieldValue('ald_name') ? (
+                            <>
+                              <div></div>
+                              <div>{renderInlineField('ald_email', '+ Email')}</div>
+                              <div>{renderInlineField('ald_phone', '+ Phone')}</div>
+                            </>
+                          ) : (
+                            <>
+                              <div></div>
+                              <div></div>
+                              <div></div>
+                            </>
+                          )}
                         </div>
                         {/* PE Row */}
-                        <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
+                        <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
                           <span className="text-gray-500">Production Elec.</span>
-                          <div>
-                            {renderInlineField('pe_name', '+ Name')}
-                          </div>
-                          <div className="flex gap-4">
-                            {getFieldValue('pe_name') && (
-                              <>
-                                {renderInlineField('pe_email', '+ Email')}
-                                {renderInlineField('pe_phone', '+ Phone')}
-                              </>
-                            )}
-                          </div>
+                          <div>{renderInlineField('pe_name', '+ Name')}</div>
+                          {getFieldValue('pe_name') ? (
+                            <>
+                              <div></div>
+                              <div>{renderInlineField('pe_email', '+ Email')}</div>
+                              <div>{renderInlineField('pe_phone', '+ Phone')}</div>
+                            </>
+                          ) : (
+                            <>
+                              <div></div>
+                              <div></div>
+                              <div></div>
+                            </>
+                          )}
                         </div>
                       </>
                     )}
                     {disciplines.includes('audio') && isLinked && parentProject?.audio_designer && (
-                      <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
+                      <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
                         <span className="text-gray-500">Audio Designer</span>
-                        <span className="text-gray-400">{parentProject.audio_designer}</span>
-                        <div className="text-gray-400">
-                          {parentProject.audio_designer_email && <span>{parentProject.audio_designer_email}</span>}
-                          {parentProject.audio_designer_phone && <span className="ml-4">{parentProject.audio_designer_phone}</span>}
-                          <span className="ml-2 text-xs text-blue-400">(from parent)</span>
-                        </div>
+                        <div className="text-gray-400">{parentProject.audio_designer}</div>
+                        <div></div>
+                        <div className="text-gray-400">{parentProject.audio_designer_email || ''}</div>
+                        <div className="text-gray-400">{formatPhoneNumber(parentProject.audio_designer_phone) || ''}</div>
                       </div>
                     )}
                     {disciplines.includes('video') && isLinked && parentProject?.video_designer && (
-                      <div className="grid grid-cols-[120px_1fr_2fr] gap-4 text-sm items-center">
+                      <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
                         <span className="text-gray-500">Video Designer</span>
-                        <span className="text-gray-400">{parentProject.video_designer}</span>
-                        <div className="text-gray-400">
-                          {parentProject.video_designer_email && <span>{parentProject.video_designer_email}</span>}
-                          {parentProject.video_designer_phone && <span className="ml-4">{parentProject.video_designer_phone}</span>}
-                          <span className="ml-2 text-xs text-blue-400">(from parent)</span>
-                        </div>
+                        <div className="text-gray-400">{parentProject.video_designer}</div>
+                        <div></div>
+                        <div className="text-gray-400">{parentProject.video_designer_email || ''}</div>
+                        <div className="text-gray-400">{formatPhoneNumber(parentProject.video_designer_phone) || ''}</div>
                       </div>
                     )}
                   </div>
