@@ -366,6 +366,83 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
         }
       }
 
+      // Associate Designers - sync from parent project's associate arrays
+      const additionalContacts: any[] = [];
+
+      // Lighting Associates
+      if (parentProject.lighting_associates) {
+        try {
+          const lightingAssociates = typeof parentProject.lighting_associates === 'string'
+            ? JSON.parse(parentProject.lighting_associates)
+            : parentProject.lighting_associates;
+
+          if (Array.isArray(lightingAssociates)) {
+            lightingAssociates.forEach((assoc: any) => {
+              additionalContacts.push({
+                role: 'Associate Lighting Designer',
+                discipline: 'lighting',
+                name: assoc.name || assoc,
+                email: assoc.email || '',
+                phone: assoc.phone || ''
+              });
+            });
+          }
+        } catch (e) {
+          console.error('Failed to parse lighting_associates:', e);
+        }
+      }
+
+      // Audio Associates
+      if (parentProject.audio_associates) {
+        try {
+          const audioAssociates = typeof parentProject.audio_associates === 'string'
+            ? JSON.parse(parentProject.audio_associates)
+            : parentProject.audio_associates;
+
+          if (Array.isArray(audioAssociates)) {
+            audioAssociates.forEach((assoc: any) => {
+              additionalContacts.push({
+                role: 'Associate Audio Designer',
+                discipline: 'audio',
+                name: assoc.name || assoc,
+                email: assoc.email || '',
+                phone: assoc.phone || ''
+              });
+            });
+          }
+        } catch (e) {
+          console.error('Failed to parse audio_associates:', e);
+        }
+      }
+
+      // Video Associates
+      if (parentProject.video_associates) {
+        try {
+          const videoAssociates = typeof parentProject.video_associates === 'string'
+            ? JSON.parse(parentProject.video_associates)
+            : parentProject.video_associates;
+
+          if (Array.isArray(videoAssociates)) {
+            videoAssociates.forEach((assoc: any) => {
+              additionalContacts.push({
+                role: 'Associate Video Designer',
+                discipline: 'video',
+                name: assoc.name || assoc,
+                email: assoc.email || '',
+                phone: assoc.phone || ''
+              });
+            });
+          }
+        } catch (e) {
+          console.error('Failed to parse video_associates:', e);
+        }
+      }
+
+      if (additionalContacts.length > 0) {
+        updates.additional_contacts = JSON.stringify(additionalContacts);
+        syncedFields.push('additional_contacts');
+      }
+
       // Apply updates
       if (Object.keys(updates).length > 0) {
         await window.api.prep.projects.update(projectId, updates);
