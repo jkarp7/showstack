@@ -133,6 +133,31 @@ export function ProjectPage() {
                         {project.lighting_designer_phone && (
                           <div className="text-gray-400 text-sm">{project.lighting_designer_phone}</div>
                         )}
+                        {/* Associate Lighting Designers */}
+                        {project.lighting_associates && (() => {
+                          try {
+                            const associates = typeof project.lighting_associates === 'string'
+                              ? JSON.parse(project.lighting_associates)
+                              : project.lighting_associates;
+                            if (Array.isArray(associates) && associates.length > 0) {
+                              return (
+                                <div className="mt-3 pt-2 border-t border-gray-700">
+                                  <div className="text-gray-500 text-xs font-medium uppercase mb-2">Associates</div>
+                                  {associates.map((assoc: any, idx: number) => (
+                                    <div key={idx} className="mb-2">
+                                      <div className="text-gray-300 text-sm">{assoc.name}</div>
+                                      {assoc.email && <div className="text-gray-400 text-xs">{assoc.email}</div>}
+                                      {assoc.phone && <div className="text-gray-400 text-xs">{assoc.phone}</div>}
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            }
+                          } catch (e) {
+                            return null;
+                          }
+                          return null;
+                        })()}
                       </div>
                     )}
                     {project.audio_designer && (
@@ -145,6 +170,31 @@ export function ProjectPage() {
                         {project.audio_designer_phone && (
                           <div className="text-gray-400 text-sm">{project.audio_designer_phone}</div>
                         )}
+                        {/* Associate Audio Designers */}
+                        {project.audio_associates && (() => {
+                          try {
+                            const associates = typeof project.audio_associates === 'string'
+                              ? JSON.parse(project.audio_associates)
+                              : project.audio_associates;
+                            if (Array.isArray(associates) && associates.length > 0) {
+                              return (
+                                <div className="mt-3 pt-2 border-t border-gray-700">
+                                  <div className="text-gray-500 text-xs font-medium uppercase mb-2">Associates</div>
+                                  {associates.map((assoc: any, idx: number) => (
+                                    <div key={idx} className="mb-2">
+                                      <div className="text-gray-300 text-sm">{assoc.name}</div>
+                                      {assoc.email && <div className="text-gray-400 text-xs">{assoc.email}</div>}
+                                      {assoc.phone && <div className="text-gray-400 text-xs">{assoc.phone}</div>}
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            }
+                          } catch (e) {
+                            return null;
+                          }
+                          return null;
+                        })()}
                       </div>
                     )}
                     {project.video_designer && (
@@ -157,6 +207,31 @@ export function ProjectPage() {
                         {project.video_designer_phone && (
                           <div className="text-gray-400 text-sm">{project.video_designer_phone}</div>
                         )}
+                        {/* Associate Video Designers */}
+                        {project.video_associates && (() => {
+                          try {
+                            const associates = typeof project.video_associates === 'string'
+                              ? JSON.parse(project.video_associates)
+                              : project.video_associates;
+                            if (Array.isArray(associates) && associates.length > 0) {
+                              return (
+                                <div className="mt-3 pt-2 border-t border-gray-700">
+                                  <div className="text-gray-500 text-xs font-medium uppercase mb-2">Associates</div>
+                                  {associates.map((assoc: any, idx: number) => (
+                                    <div key={idx} className="mb-2">
+                                      <div className="text-gray-300 text-sm">{assoc.name}</div>
+                                      {assoc.email && <div className="text-gray-400 text-xs">{assoc.email}</div>}
+                                      {assoc.phone && <div className="text-gray-400 text-xs">{assoc.phone}</div>}
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            }
+                          } catch (e) {
+                            return null;
+                          }
+                          return null;
+                        })()}
                       </div>
                     )}
                   </div>

@@ -366,6 +366,33 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
         }
       }
 
+      // Associate Lighting Designer - sync first associate to ald_name/ald_email/ald_phone
+      if (parentProject.lighting_associates) {
+        try {
+          const lightingAssociates = typeof parentProject.lighting_associates === 'string'
+            ? JSON.parse(parentProject.lighting_associates)
+            : parentProject.lighting_associates;
+
+          if (Array.isArray(lightingAssociates) && lightingAssociates.length > 0) {
+            const firstAssociate = lightingAssociates[0];
+            if (firstAssociate.name) {
+              updates.ald_name = firstAssociate.name;
+              syncedFields.push('ald_name');
+            }
+            if (firstAssociate.email) {
+              updates.ald_email = firstAssociate.email;
+              syncedFields.push('ald_email');
+            }
+            if (firstAssociate.phone) {
+              updates.ald_phone = firstAssociate.phone;
+              syncedFields.push('ald_phone');
+            }
+          }
+        } catch (e) {
+          console.error('Failed to parse lighting_associates for ALD sync:', e);
+        }
+      }
+
       // Associate Designers - sync from parent project's associate arrays
       const additionalContacts: any[] = [];
 
