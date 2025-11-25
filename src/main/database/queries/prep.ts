@@ -693,8 +693,6 @@ export interface PrepNote {
   id: string;
   prep_project_id: string;
   type: string;
-  section_id?: string;
-  revision_num?: number;
   content: string;
   created_at: number;
   updated_at: number;
@@ -739,15 +737,13 @@ export function createPrepNote(data: Partial<PrepNote>): PrepNote {
   db.run(
     `
     INSERT INTO prep_notes (
-      id, prep_project_id, type, section_id, revision_num, content, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      id, prep_project_id, type, content, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?)
   `,
     [
       id,
       data.prep_project_id!,
       data.type!,
-      data.section_id || null,
-      data.revision_num || null,
       data.content || '',
       now,
       now,
