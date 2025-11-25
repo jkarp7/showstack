@@ -18,7 +18,7 @@ import type { PrepSection, Discipline, PrepProject } from '../../types/prep';
 export function Prep() {
   const navigate = useNavigate();
   const { projectId: parentProjectId } = useParams<{ projectId?: string }>();
-  const { allProjects, currentProject, sections, revisions, currentTemplate, setCurrentTemplate, saveTemplate, loadAllProjects, loadProject, clearCurrentProject, updateProject, generateRevision, deleteRevision, syncFromParent } =
+  const { allProjects, currentProject, sections, revisions, currentTemplate, setCurrentTemplate, saveTemplate, loadAllProjects, loadProject, clearCurrentProject, updateProject, setRevisionZero, generateRevision, deleteRevision, syncFromParent } =
     usePrepStore();
   const { projects, loadProjects } = useProjectStore();
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
@@ -44,6 +44,9 @@ export function Prep() {
   const [showRevisionNotes, setShowRevisionNotes] = useState(false);
   const [revisionNotes, setRevisionNotes] = useState('');
   const [isGeneratingRevision, setIsGeneratingRevision] = useState(false);
+  const [showRevisionZeroNotes, setShowRevisionZeroNotes] = useState(false);
+  const [revisionZeroNotes, setRevisionZeroNotes] = useState('');
+  const [isSettingRevisionZero, setIsSettingRevisionZero] = useState(false);
 
   // State for template manager
   const [showTemplateManager, setShowTemplateManager] = useState(false);
@@ -122,6 +125,22 @@ export function Prep() {
       alert('Failed to generate revision');
     } finally {
       setIsGeneratingRevision(false);
+    }
+  };
+
+  const handleSetRevisionZero = async () => {
+    if (!currentProject) return;
+
+    setIsSettingRevisionZero(true);
+    try {
+      await setRevisionZero(currentProject.id, revisionZeroNotes || undefined);
+      setRevisionZeroNotes('');
+      setShowRevisionZeroNotes(false);
+    } catch (error) {
+      console.error('Failed to set revision 0:', error);
+      alert(`Failed to set revision 0: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsSettingRevisionZero(false);
     }
   };
 
@@ -930,16 +949,65 @@ export function Prep() {
                         Rev {currentProject.current_revision} | {5 - currentProject.current_revision} remaining
                       </span>
                     </button>
-                    <button
-                      onClick={() => setShowRevisionNotes(!showRevisionNotes)}
-                      disabled={isGeneratingRevision || currentProject.current_revision >= 5}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 rounded text-sm font-medium transition"
-                    >
-                      {isGeneratingRevision ? 'Generating...' : 'Generate Revision'}
-                    </button>
+                    <div className="flex gap-2">
+                      {currentProject.current_revision === 0 && !revisions.find(r => r.revision_number === 0) && (
+                        <button
+                          onClick={() => setShowRevisionZeroNotes(!showRevisionZeroNotes)}
+                          disabled={isSettingRevisionZero}
+                          className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:text-gray-500 rounded text-sm font-medium transition"
+                        >
+                          {isSettingRevisionZero ? 'Setting...' : 'Set Revision 0'}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setShowRevisionNotes(!showRevisionNotes)}
+                        disabled={isGeneratingRevision || currentProject.current_revision >= 5}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 rounded text-sm font-medium transition"
+                      >
+                        {isGeneratingRevision ? 'Generating...' : 'Generate Revision'}
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Notes input */}
+                  {/* Revision 0 Notes input */}
+                  {showRevisionZeroNotes && (
+                    <div className="mx-6 mb-4 p-4 bg-gray-700 border border-gray-600 rounded">
+                      <label className="block text-sm font-medium mb-2">
+                        Revision 0 Notes (optional)
+                      </label>
+                      <p className="text-xs text-gray-400 mb-3">
+                        Set the current state as your baseline. Future revisions will show actual changes.
+                      </p>
+                      <textarea
+                        value={revisionZeroNotes}
+                        onChange={(e) => setRevisionZeroNotes(e.target.value)}
+                        placeholder="Initial baseline for project..."
+                        className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+                        rows={3}
+                      />
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={handleSetRevisionZero}
+                          disabled={isSettingRevisionZero}
+                          className="px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-gray-700 rounded text-sm transition"
+                        >
+                          Set Baseline
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowRevisionZeroNotes(false);
+                            setRevisionZeroNotes('');
+                          }}
+                          disabled={isSettingRevisionZero}
+                          className="px-3 py-1.5 bg-gray-600 hover:bg-gray-500 rounded text-sm transition"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Generate Revision Notes input */}
                   {showRevisionNotes && (
                     <div className="mx-6 mb-4 p-4 bg-gray-700 border border-gray-600 rounded">
                       <label className="block text-sm font-medium mb-2">

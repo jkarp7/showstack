@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import type { PrepProject, PrepNote, PrepNoteTemplate } from '../../types/prep';
-import { formatNoteContent } from '../../utils/noteFormatting';
 
 interface NotesPanelProps {
   project: PrepProject;
@@ -169,14 +168,6 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
           placeholder="Add general conditions and terms..."
           className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
         />
-        {generalConditions && generalConditionsFormat !== 'plain' && (
-          <div className="mt-2 p-3 bg-gray-800/50 border border-gray-600 rounded">
-            <div className="text-xs text-gray-400 mb-2">Preview:</div>
-            <div className="text-white">
-              {formatNoteContent(generalConditions, generalConditionsFormat)}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* General Notes */}
@@ -212,14 +203,6 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
           placeholder="Add general project notes..."
           className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
         />
-        {generalNotes && generalNotesFormat !== 'plain' && (
-          <div className="mt-2 p-3 bg-gray-800/50 border border-gray-600 rounded">
-            <div className="text-xs text-gray-400 mb-2">Preview:</div>
-            <div className="text-white">
-              {formatNoteContent(generalNotes, generalNotesFormat)}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Fixture Notes */}
@@ -255,14 +238,6 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
           placeholder="Add notes about fixtures and equipment..."
           className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
         />
-        {fixtureNotes && fixtureNotesFormat !== 'plain' && (
-          <div className="mt-2 p-3 bg-gray-800/50 border border-gray-600 rounded">
-            <div className="text-xs text-gray-400 mb-2">Preview:</div>
-            <div className="text-white">
-              {formatNoteContent(fixtureNotes, fixtureNotesFormat)}
-            </div>
-          </div>
-        )}
       </div>
 
       {isSaving && (

@@ -82,6 +82,7 @@ interface PrepStore {
     revision_number: number;
     notes?: string;
   }) => Promise<void>;
+  setRevisionZero: (projectId: string, notes?: string) => Promise<void>;
   generateRevision: (projectId: string, notes?: string) => Promise<void>;
   deleteRevision: (projectId: string, revisionId: string) => Promise<void>;
 
@@ -563,6 +564,71 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
       }));
     } catch (error) {
       console.error('Failed to create prep revision:', error);
+    }
+  },
+
+  setRevisionZero: async (projectId: string, notes?: string) => {
+    if (!hasAPI()) {
+      console.warn('API not available');
+      return;
+    }
+
+    const { currentProject, items, sections } = get();
+
+    if (!currentProject || currentProject.id !== projectId) {
+      console.error('No current project loaded');
+      return;
+    }
+
+    if (currentProject.current_revision !== 0) {
+      throw new Error('Revision 0 can only be set when current revision is 0');
+    }
+
+    if (items.length === 0) {
+      throw new Error('Cannot set Revision 0 with no equipment items');
+    }
+
+    try {
+      // Create sections map for change detection
+      const sectionsMap = new Map(sections.map(s => [s.id, s]));
+
+      // Create baseline snapshot - all current items are "additions" at Revision 0
+      const changes = items.map(item => ({
+        item_id: item.id,
+        change_type: 'addition',
+        description: item.description,
+        section_name: sectionsMap.get(item.section_id)?.name,
+        new_values: {
+          description: item.description,
+          active_qty: item.active_qty,
+          spare_qty: item.spare_qty,
+          venue_qty: item.venue_qty,
+        }
+      }));
+
+      // Create Revision 0
+      await window.api.prep.revisions.create({
+        prep_project_id: projectId,
+        revision_number: 0,
+        notes: notes || 'Initial baseline',
+        change_log: JSON.stringify(changes),
+      });
+
+      // Mark all current items as added_in_revision: 0
+      for (const item of items) {
+        await window.api.prep.items.update(item.id, {
+          added_in_revision: 0,
+        });
+      }
+
+      // Reload revisions and items to reflect changes
+      await get().loadRevisions(projectId);
+      await get().loadItems(projectId);
+
+      console.log('Revision 0 baseline set successfully');
+    } catch (error) {
+      console.error('Failed to set revision 0:', error);
+      throw error;
     }
   },
 
