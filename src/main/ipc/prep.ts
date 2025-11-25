@@ -1,6 +1,7 @@
 import { ipcMain, dialog, BrowserWindow } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
+import { formatNoteContentAsHTML } from '../utils/noteFormatting';
 import {
   // Projects
   getAllPrepProjects,
@@ -611,6 +612,13 @@ function generatePDFContent(project: PrepProject, templateData: any): string {
   // Get margin settings (in inches)
   const margins = templateData.pageSettings?.margins || { top: 0.75, right: 0.75, bottom: 0.75, left: 0.75 };
 
+  // Fetch notes for the project
+  const notes = getNotesByProjectId(project.id);
+  const notesMap: Record<string, { content: string; format: string }> = {};
+  notes.forEach(note => {
+    notesMap[note.type] = { content: note.content, format: note.format || 'plain' };
+  });
+
   return `
     <!DOCTYPE html>
     <html>
@@ -684,20 +692,40 @@ function generatePDFContent(project: PrepProject, templateData: any): string {
           </div>
         </div>
 
-        <!-- Placeholder for actual content -->
+        <!-- Notes Sections -->
+        ${enabledSections.map((section: any) => {
+          if (section.type === 'notes' && section.config?.noteType) {
+            const noteType = section.config.noteType;
+            const noteData = notesMap[noteType];
+
+            if (noteData && noteData.content) {
+              return `
+                <div class="page">
+                  <h2>${getNoteTypeLabel(noteType)}</h2>
+                  ${formatNoteContentAsHTML(noteData.content, noteData.format as 'plain' | 'bullets' | 'numbered')}
+                </div>
+              `;
+            }
+          }
+          return '';
+        }).join('')}
+
+        <!-- Placeholder for other sections -->
+        ${enabledSections.some((s: any) => s.type !== 'notes' && s.type !== 'cover') ? `
         <div class="page">
           <div class="placeholder">
-            <h2>Live Page Rendering Coming Soon</h2>
+            <h2>Additional Sections Coming Soon</h2>
             <p style="margin-top: 12pt;">This PDF contains ${enabledSections.length} sections:</p>
             <ul style="list-style: none; margin-top: 12pt; text-align: left; display: inline-block;">
               ${enabledSections.map((s: any) => `<li style="margin: 4pt 0;">• ${getSectionLabel(s.type)}</li>`).join('')}
             </ul>
             <p style="margin-top: 24pt; font-size: 9pt;">
-              Phase 2 will include full page layout rendering with custom designs,<br/>
-              equipment lists, contacts, schedules, notes, and revision tracking.
+              Full page layout rendering will include custom designs,<br/>
+              equipment lists, contacts, schedules, and revision tracking.
             </p>
           </div>
         </div>
+        ` : ''}
       </body>
     </html>
   `;
@@ -719,4 +747,14 @@ function getSectionLabel(type: string): string {
     'page-break': 'Page Break',
   };
   return labels[type] || type;
+}
+
+// Helper function to get note type label
+function getNoteTypeLabel(noteType: string): string {
+  const labels: Record<string, string> = {
+    'general_conditions': 'General Conditions',
+    'general_notes': 'General Notes',
+    'fixture_notes': 'Fixture Notes',
+  };
+  return labels[noteType] || noteType;
 }
