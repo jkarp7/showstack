@@ -177,6 +177,7 @@ export interface PrepNote {
 
   type: NoteType;
   content: string;
+  format: 'plain' | 'bullets' | 'numbered';
 
   created_at: number;
   updated_at: number;

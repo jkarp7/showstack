@@ -101,7 +101,7 @@ contextBridge.exposeInMainWorld('api', {
     notes: {
       getByProjectId: (projectId: string, type?: string) => ipcRenderer.invoke('prep:notes:getByProjectId', projectId, type),
       create: (data: any) => ipcRenderer.invoke('prep:notes:create', data),
-      update: (id: string, content: string) => ipcRenderer.invoke('prep:notes:update', id, content),
+      update: (id: string, updates: { content?: string; format?: string }) => ipcRenderer.invoke('prep:notes:update', id, updates),
       delete: (id: string) => ipcRenderer.invoke('prep:notes:delete', id)
     },
     // Note Templates

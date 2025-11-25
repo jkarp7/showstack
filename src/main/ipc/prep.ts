@@ -261,9 +261,9 @@ export function registerPrepHandlers(): void {
     }
   });
 
-  ipcMain.handle('prep:notes:update', async (_event, id: string, content: string) => {
+  ipcMain.handle('prep:notes:update', async (_event, id: string, updates: { content?: string; format?: string }) => {
     try {
-      return updatePrepNote(id, content);
+      return updatePrepNote(id, updates);
     } catch (error) {
       console.error('Error updating prep note:', error);
       throw error;

@@ -387,6 +387,16 @@ function runProjectMigrations(db: Database): void {
     db.run('CREATE INDEX IF NOT EXISTS idx_prep_notes_type ON prep_notes(prep_project_id, type)');
   }
 
+  // Add format column to prep_notes if it doesn't exist
+  const prepNotesColumns = db.exec("PRAGMA table_info(prep_notes)");
+  if (prepNotesColumns[0]) {
+    const columns = prepNotesColumns[0].values.map(row => row[1]); // Column names are at index 1
+    if (!columns.includes('format')) {
+      console.log('Running migration: Adding format column to prep_notes');
+      db.run("ALTER TABLE prep_notes ADD COLUMN format TEXT DEFAULT 'plain' CHECK(format IN ('plain', 'bullets', 'numbered'))");
+    }
+  }
+
   // Prep Note Templates table migrations
   const prepNoteTemplatesTableInfo = db.exec("PRAGMA table_info(prep_note_templates)");
   if (!prepNoteTemplatesTableInfo[0] || prepNoteTemplatesTableInfo[0].values.length === 0) {

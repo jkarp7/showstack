@@ -694,6 +694,7 @@ export interface PrepNote {
   prep_project_id: string;
   type: string;
   content: string;
+  format: string;
   created_at: number;
   updated_at: number;
 }
@@ -737,14 +738,15 @@ export function createPrepNote(data: Partial<PrepNote>): PrepNote {
   db.run(
     `
     INSERT INTO prep_notes (
-      id, prep_project_id, type, content, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?)
+      id, prep_project_id, type, content, format, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?)
   `,
     [
       id,
       data.prep_project_id!,
       data.type!,
       data.content || '',
+      data.format || 'plain',
       now,
       now,
     ]
@@ -754,17 +756,37 @@ export function createPrepNote(data: Partial<PrepNote>): PrepNote {
   return getPrepNoteById(id)!;
 }
 
-export function updatePrepNote(id: string, content: string): PrepNote {
+export function updatePrepNote(id: string, updates: Partial<Pick<PrepNote, 'content' | 'format'>>): PrepNote {
   const db = getDatabase();
   const now = Date.now();
+
+  const fields: string[] = [];
+  const values: any[] = [];
+
+  if (updates.content !== undefined) {
+    fields.push('content = ?');
+    values.push(updates.content);
+  }
+
+  if (updates.format !== undefined) {
+    fields.push('format = ?');
+    values.push(updates.format);
+  }
+
+  if (fields.length === 0) {
+    return getPrepNoteById(id)!;
+  }
+
+  fields.push('updated_at = ?');
+  values.push(now, id);
 
   db.run(
     `
     UPDATE prep_notes
-    SET content = ?, updated_at = ?
+    SET ${fields.join(', ')}
     WHERE id = ?
   `,
-    [content, now, id]
+    values
   );
 
   saveDatabase();

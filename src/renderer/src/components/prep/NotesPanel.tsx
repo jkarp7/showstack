@@ -15,6 +15,10 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
   const [generalNotesId, setGeneralNotesId] = useState<string | null>(null);
   const [fixtureNotesId, setFixtureNotesId] = useState<string | null>(null);
 
+  const [generalConditionsFormat, setGeneralConditionsFormat] = useState<'plain' | 'bullets' | 'numbered'>('plain');
+  const [generalNotesFormat, setGeneralNotesFormat] = useState<'plain' | 'bullets' | 'numbered'>('plain');
+  const [fixtureNotesFormat, setFixtureNotesFormat] = useState<'plain' | 'bullets' | 'numbered'>('plain');
+
   const [isSaving, setIsSaving] = useState(false);
 
   // Load notes on mount
@@ -31,14 +35,17 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
           case 'general_conditions':
             setGeneralConditions(note.content);
             setGeneralConditionsId(note.id);
+            setGeneralConditionsFormat(note.format || 'plain');
             break;
           case 'general_notes':
             setGeneralNotes(note.content);
             setGeneralNotesId(note.id);
+            setGeneralNotesFormat(note.format || 'plain');
             break;
           case 'fixture_notes':
             setFixtureNotes(note.content);
             setFixtureNotesId(note.id);
+            setFixtureNotesFormat(note.format || 'plain');
             break;
         }
       });
@@ -50,19 +57,21 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
   const handleSave = async (
     type: 'general_conditions' | 'general_notes' | 'fixture_notes',
     content: string,
+    format: 'plain' | 'bullets' | 'numbered',
     noteId: string | null
   ) => {
     setIsSaving(true);
     try {
       if (noteId) {
         // Update existing note
-        await window.api.prep.notes.update(noteId, content);
+        await window.api.prep.notes.update(noteId, { content, format });
       } else {
         // Create new note
         const newNote = await window.api.prep.notes.create({
           prep_project_id: project.id,
           type,
           content,
+          format,
         });
 
         // Update the note ID so future edits will update instead of create
@@ -130,17 +139,32 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
       <div className="bg-gray-700/50 rounded-lg p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-base font-semibold text-white">General Conditions</h3>
-          <button
-            onClick={() => loadTemplate('general_conditions')}
-            className="px-2 py-1 bg-blue-600/20 hover:bg-blue-600/30 rounded text-xs text-blue-400 transition"
-          >
-            Load Template
-          </button>
+          <div className="flex items-center gap-2">
+            <select
+              value={generalConditionsFormat}
+              onChange={(e) => {
+                const newFormat = e.target.value as 'plain' | 'bullets' | 'numbered';
+                setGeneralConditionsFormat(newFormat);
+                handleSave('general_conditions', generalConditions, newFormat, generalConditionsId);
+              }}
+              className="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-xs text-white"
+            >
+              <option value="plain">Plain Text</option>
+              <option value="bullets">Bullets</option>
+              <option value="numbered">Numbered</option>
+            </select>
+            <button
+              onClick={() => loadTemplate('general_conditions')}
+              className="px-2 py-1 bg-blue-600/20 hover:bg-blue-600/30 rounded text-xs text-blue-400 transition"
+            >
+              Load Template
+            </button>
+          </div>
         </div>
         <textarea
           value={generalConditions}
           onChange={(e) => setGeneralConditions(e.target.value)}
-          onBlur={() => handleSave('general_conditions', generalConditions, generalConditionsId)}
+          onBlur={() => handleSave('general_conditions', generalConditions, generalConditionsFormat, generalConditionsId)}
           placeholder="Add general conditions and terms..."
           className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
         />
@@ -150,17 +174,32 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
       <div className="bg-gray-700/50 rounded-lg p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-base font-semibold text-white">General Notes</h3>
-          <button
-            onClick={() => loadTemplate('general_notes')}
-            className="px-2 py-1 bg-blue-600/20 hover:bg-blue-600/30 rounded text-xs text-blue-400 transition"
-          >
-            Load Template
-          </button>
+          <div className="flex items-center gap-2">
+            <select
+              value={generalNotesFormat}
+              onChange={(e) => {
+                const newFormat = e.target.value as 'plain' | 'bullets' | 'numbered';
+                setGeneralNotesFormat(newFormat);
+                handleSave('general_notes', generalNotes, newFormat, generalNotesId);
+              }}
+              className="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-xs text-white"
+            >
+              <option value="plain">Plain Text</option>
+              <option value="bullets">Bullets</option>
+              <option value="numbered">Numbered</option>
+            </select>
+            <button
+              onClick={() => loadTemplate('general_notes')}
+              className="px-2 py-1 bg-blue-600/20 hover:bg-blue-600/30 rounded text-xs text-blue-400 transition"
+            >
+              Load Template
+            </button>
+          </div>
         </div>
         <textarea
           value={generalNotes}
           onChange={(e) => setGeneralNotes(e.target.value)}
-          onBlur={() => handleSave('general_notes', generalNotes, generalNotesId)}
+          onBlur={() => handleSave('general_notes', generalNotes, generalNotesFormat, generalNotesId)}
           placeholder="Add general project notes..."
           className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
         />
@@ -170,17 +209,32 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
       <div className="bg-gray-700/50 rounded-lg p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-base font-semibold text-white">Fixture Notes</h3>
-          <button
-            onClick={() => loadTemplate('fixture_notes')}
-            className="px-2 py-1 bg-blue-600/20 hover:bg-blue-600/30 rounded text-xs text-blue-400 transition"
-          >
-            Load Template
-          </button>
+          <div className="flex items-center gap-2">
+            <select
+              value={fixtureNotesFormat}
+              onChange={(e) => {
+                const newFormat = e.target.value as 'plain' | 'bullets' | 'numbered';
+                setFixtureNotesFormat(newFormat);
+                handleSave('fixture_notes', fixtureNotes, newFormat, fixtureNotesId);
+              }}
+              className="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-xs text-white"
+            >
+              <option value="plain">Plain Text</option>
+              <option value="bullets">Bullets</option>
+              <option value="numbered">Numbered</option>
+            </select>
+            <button
+              onClick={() => loadTemplate('fixture_notes')}
+              className="px-2 py-1 bg-blue-600/20 hover:bg-blue-600/30 rounded text-xs text-blue-400 transition"
+            >
+              Load Template
+            </button>
+          </div>
         </div>
         <textarea
           value={fixtureNotes}
           onChange={(e) => setFixtureNotes(e.target.value)}
-          onBlur={() => handleSave('fixture_notes', fixtureNotes, fixtureNotesId)}
+          onBlur={() => handleSave('fixture_notes', fixtureNotes, fixtureNotesFormat, fixtureNotesId)}
           placeholder="Add notes about fixtures and equipment..."
           className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
         />
