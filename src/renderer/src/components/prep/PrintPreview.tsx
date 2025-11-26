@@ -61,7 +61,7 @@ export function PrintPreview({
         },
         { id: 's2', type: 'page-break', order: 1, enabled: true, config: {} },
 
-        // Page 2: Contacts & Dates
+        // Page 2: Contacts & Dates (combined on one page)
         {
           id: 's3',
           type: 'contacts',
@@ -71,48 +71,13 @@ export function PrintPreview({
             contactTypes: ['gm', 'pm', 'ld', 'ald', 'pe']
           }
         },
-        {
-          id: 's4',
-          type: 'schedule',
-          order: 3,
-          enabled: true,
-          config: {
-            includeDates: ['prep_start_date', 'prep_end_date', 'load_in_date', 'first_preview_date', 'opening_night_date', 'closing_date']
-          }
-        },
-        { id: 's5', type: 'page-break', order: 4, enabled: true, config: {} },
+        { id: 's4', type: 'page-break', order: 3, enabled: true, config: {} },
 
-        // Page 3: General Notes & Conditions
+        // Page 3: Equipment by Section
         {
-          id: 's6',
-          type: 'notes',
-          order: 5,
-          enabled: true,
-          config: {
-            noteType: 'general_conditions'
-          }
-        },
-        { id: 's7', type: 'page-break', order: 6, enabled: true, config: {} },
-
-        // Page 4+: Revision Summary (only if revisions exist)
-        {
-          id: 's8',
-          type: 'revision-summary',
-          order: 7,
-          enabled: true,
-          config: {
-            showRevisionDetails: true,
-            includeChangelog: true,
-            onlyShowIfRevisions: true
-          }
-        },
-        { id: 's9', type: 'page-break', order: 8, enabled: true, config: {} },
-
-        // Main pages: Equipment by Section
-        {
-          id: 's10',
+          id: 's5',
           type: 'equipment-by-section',
-          order: 9,
+          order: 4,
           enabled: true,
           config: {
             groupBy: 'section',
@@ -120,6 +85,32 @@ export function PrintPreview({
             showWeightColumn: false,
             showPowerColumn: false,
             showRevisionMarkers: true
+          }
+        },
+        { id: 's6', type: 'page-break', order: 5, enabled: true, config: {} },
+
+        // Page 4: Revision Summary (if revisions exist)
+        {
+          id: 's7',
+          type: 'revision-summary',
+          order: 6,
+          enabled: true,
+          config: {
+            showRevisionDetails: true,
+            includeChangelog: true,
+            onlyShowIfRevisions: true
+          }
+        },
+        { id: 's8', type: 'page-break', order: 7, enabled: true, config: {} },
+
+        // Page 5: General Notes & Conditions
+        {
+          id: 's9',
+          type: 'notes',
+          order: 8,
+          enabled: true,
+          config: {
+            noteType: 'general_notes'
           }
         },
       ],
