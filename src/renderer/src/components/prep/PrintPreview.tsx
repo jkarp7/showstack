@@ -61,7 +61,7 @@ export function PrintPreview({
         },
         { id: 's2', type: 'page-break', order: 1, enabled: true, config: {} },
 
-        // Page 2: Contacts & Dates (combined on one page)
+        // Page 2: Contacts & Dates
         {
           id: 's3',
           type: 'contacts',
@@ -73,23 +73,19 @@ export function PrintPreview({
         },
         { id: 's4', type: 'page-break', order: 3, enabled: true, config: {} },
 
-        // Page 3: Equipment by Section
+        // Page 3: Notes
         {
           id: 's5',
-          type: 'equipment-by-section',
+          type: 'notes',
           order: 4,
           enabled: true,
           config: {
-            groupBy: 'section',
-            showVenueColumn: true,
-            showWeightColumn: false,
-            showPowerColumn: false,
-            showRevisionMarkers: true
+            noteType: 'general_notes'
           }
         },
         { id: 's6', type: 'page-break', order: 5, enabled: true, config: {} },
 
-        // Page 4: Revision Summary (if revisions exist)
+        // Page 4: Revision Summary
         {
           id: 's7',
           type: 'revision-summary',
@@ -103,14 +99,18 @@ export function PrintPreview({
         },
         { id: 's8', type: 'page-break', order: 7, enabled: true, config: {} },
 
-        // Page 5: General Notes & Conditions
+        // Page 5: Equipment by Section
         {
           id: 's9',
-          type: 'notes',
+          type: 'equipment-by-section',
           order: 8,
           enabled: true,
           config: {
-            noteType: 'general_notes'
+            groupBy: 'section',
+            showVenueColumn: true,
+            showWeightColumn: false,
+            showPowerColumn: false,
+            showRevisionMarkers: true
           }
         },
       ],
