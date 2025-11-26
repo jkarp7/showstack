@@ -84,21 +84,14 @@ export async function initDatabase(): Promise<void> {
 function runAppMigrations(db: Database): void {
   // App database migrations (for licenses and settings)
 
-  // Check if we need to update layouts (migration for dynamic content)
-  const needsLayoutUpdate = db.exec(`
-    SELECT COUNT(*) as count FROM page_layout_elements
-    WHERE element_type IN ('equipment_list', 'notes_content', 'revision_log')
-  `);
-  const hasDynamicElements = (needsLayoutUpdate[0]?.values[0]?.[0] || 0) > 0;
+  // Seed default page layouts if none exist (safe approach - only add if completely missing)
+  const layoutResult = db.exec('SELECT COUNT(*) as count FROM page_layout_templates');
+  const layoutCount = layoutResult[0]?.values[0]?.[0] || 0;
 
-  if (!hasDynamicElements) {
-    console.log('Updating page layouts with dynamic content support...');
-    // Delete old layouts
-    db.run('DELETE FROM page_layout_elements');
-    db.run('DELETE FROM page_layout_templates');
-    // Re-seed with new layouts
+  if (layoutCount === 0) {
+    console.log('No default page layouts found - seeding defaults...');
     seedDefaultPageLayouts();
-    console.log('✅ Page layouts updated with dynamic content support');
+    console.log('✅ Default page layouts seeded');
   }
 
   console.log('✅ App database migrations complete');
