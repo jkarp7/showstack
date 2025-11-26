@@ -61,7 +61,7 @@ export const APP_SCHEMA = `
   CREATE TABLE IF NOT EXISTS page_layout_elements (
     id TEXT PRIMARY KEY,
     template_id TEXT NOT NULL,
-    element_type TEXT NOT NULL CHECK(element_type IN ('dataField', 'text', 'image', 'table', 'shape')),
+    element_type TEXT NOT NULL CHECK(element_type IN ('dataField', 'text', 'image', 'table', 'shape', 'equipment_list', 'notes_content', 'revision_log')),
     config TEXT NOT NULL, -- JSON: type-specific configuration
     grid_column INTEGER NOT NULL,
     grid_row INTEGER NOT NULL,
