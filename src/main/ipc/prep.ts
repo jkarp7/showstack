@@ -604,13 +604,23 @@ export function registerPrepHandlers(): void {
   console.log('✅ Prep IPC handlers registered');
 }
 
-// Helper function to generate HTML content for PDF
+// Helper function to generate HTML content for PDF using page layouts
 function generatePDFContent(project: PrepProject, templateData: any): string {
   const sections = templateData.sections || [];
-  const enabledSections = sections.filter((s: any) => s.enabled);
+  const enabledSections = sections.filter((s: any) => s.enabled && s.type !== 'page-break');
 
   // Get margin settings (in inches)
   const margins = templateData.pageSettings?.margins || { top: 0.75, right: 0.75, bottom: 0.75, left: 0.75 };
+
+  // Page dimensions in pixels (at 96 DPI)
+  const pageWidth = 816; // 8.5" at 96 DPI
+  const pageHeight = 1056; // 11" at 96 DPI
+  const marginTop = margins.top * 96;
+  const marginRight = margins.right * 96;
+  const marginBottom = margins.bottom * 96;
+  const marginLeft = margins.left * 96;
+  const contentWidth = pageWidth - marginLeft - marginRight;
+  const contentHeight = pageHeight - marginTop - marginBottom;
 
   // Fetch notes for the project
   const notes = getNotesByProjectId(project.id);
@@ -618,6 +628,11 @@ function generatePDFContent(project: PrepProject, templateData: any): string {
   notes.forEach(note => {
     notesMap[note.type] = { content: note.content, format: note.format || 'plain' };
   });
+
+  // Generate HTML pages for each section
+  const pagesHTML = enabledSections.map((section: any) => {
+    return renderPageSection(section, project, contentWidth, contentHeight, notesMap);
+  }).filter(html => html).join('');
 
   return `
     <!DOCTYPE html>
@@ -638,97 +653,232 @@ function generatePDFContent(project: PrepProject, templateData: any): string {
             padding: 0;
           }
           .page {
-            width: 100%;
-            min-height: 100vh;
-            padding: ${margins.top}in ${margins.right}in ${margins.bottom}in ${margins.left}in;
+            width: ${pageWidth}px;
+            height: ${pageHeight}px;
+            padding: ${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px;
             page-break-after: always;
+            position: relative;
+            background: white;
           }
           .page:last-child {
             page-break-after: auto;
           }
-          h1 {
-            font-size: 24pt;
-            margin-bottom: 12pt;
-            text-align: center;
-          }
-          h2 {
-            font-size: 16pt;
-            margin-top: 12pt;
-            margin-bottom: 8pt;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 4pt;
-          }
-          .info-row {
-            margin: 4pt 0;
-          }
-          .label {
-            font-weight: bold;
-            display: inline-block;
-            min-width: 120pt;
-          }
-          .placeholder {
-            color: #666;
-            font-style: italic;
-            text-align: center;
-            margin: 24pt 0;
-            padding: 24pt;
-            border: 1px dashed #ccc;
+          .content-area {
+            width: ${contentWidth}px;
+            height: ${contentHeight}px;
+            position: relative;
           }
         </style>
       </head>
       <body>
-        <!-- Cover Page -->
-        <div class="page">
-          <h1>${project.production_name}</h1>
-          <div style="text-align: center; margin: 24pt 0;">
-            <div style="font-size: 18pt; font-weight: bold;">ELECTRICS SHOP ORDER</div>
-            <div style="margin-top: 8pt; color: #666;">For Bid Only</div>
-          </div>
-          <div style="margin-top: 48pt;">
-            <div class="info-row"><span class="label">Venue:</span> ${project.venue || 'TBD'}</div>
-            <div class="info-row"><span class="label">Designer:</span> ${project.ld_name || 'TBD'}</div>
-            <div class="info-row"><span class="label">Production Manager:</span> ${project.pm_name || 'TBD'}</div>
-            <div class="info-row"><span class="label">Revision:</span> ${project.current_revision}</div>
-          </div>
-        </div>
-
-        <!-- Notes Sections -->
-        ${enabledSections.map((section: any) => {
-          if (section.type === 'notes' && section.config?.noteType) {
-            const noteType = section.config.noteType;
-            const noteData = notesMap[noteType];
-
-            if (noteData && noteData.content) {
-              return `
-                <div class="page">
-                  <h2>${getNoteTypeLabel(noteType)}</h2>
-                  ${formatNoteContentAsHTML(noteData.content, noteData.format as 'plain' | 'bullets' | 'numbered')}
-                </div>
-              `;
-            }
-          }
-          return '';
-        }).join('')}
-
-        <!-- Placeholder for other sections -->
-        ${enabledSections.some((s: any) => s.type !== 'notes' && s.type !== 'cover') ? `
-        <div class="page">
-          <div class="placeholder">
-            <h2>Additional Sections Coming Soon</h2>
-            <p style="margin-top: 12pt;">This PDF contains ${enabledSections.length} sections:</p>
-            <ul style="list-style: none; margin-top: 12pt; text-align: left; display: inline-block;">
-              ${enabledSections.map((s: any) => `<li style="margin: 4pt 0;">• ${getSectionLabel(s.type)}</li>`).join('')}
-            </ul>
-            <p style="margin-top: 24pt; font-size: 9pt;">
-              Full page layout rendering will include custom designs,<br/>
-              equipment lists, contacts, schedules, and revision tracking.
-            </p>
-          </div>
-        </div>
-        ` : ''}
+        ${pagesHTML}
       </body>
     </html>
   `;
+}
+
+// Render a page section using its layout template
+function renderPageSection(
+  section: any,
+  project: PrepProject,
+  contentWidth: number,
+  contentHeight: number,
+  notesMap: Record<string, {content: string; format: string}>
+): string {
+  // Load default layout for this section type
+  const layout = getDefaultLayoutTemplate(section.type);
+
+  if (!layout) {
+    // Fallback for sections without layouts
+    return `<div class="page"><div class="content-area" style="text-align: center; padding: 20px;">Layout not found for ${section.type}</div></div>`;
+  }
+
+  // Load layout elements
+  const elements = getLayoutElementsByTemplateId(layout.id);
+
+  if (elements.length === 0) {
+    return `<div class="page"><div class="content-area"></div></div>`;
+  }
+
+  // Render all elements to HTML
+  const elementsHTML = elements.map(el => {
+    const element = {
+      ...el,
+      config: typeof el.config === 'string' ? JSON.parse(el.config) : el.config,
+      style: typeof el.style === 'string' ? JSON.parse(el.style) : el.style,
+    };
+    return renderLayoutElement(element, project, layout, contentWidth, contentHeight, notesMap);
+  }).filter(html => html).join('');
+
+  return `
+    <div class="page">
+      <div class="content-area">
+        ${elementsHTML}
+      </div>
+    </div>
+  `;
+}
+
+// Render a single layout element to HTML
+function renderLayoutElement(
+  element: any,
+  project: PrepProject,
+  layout: any,
+  contentWidth: number,
+  contentHeight: number,
+  notesMap: Record<string, {content: string; format: string}>
+): string {
+  const { grid_column, grid_row, column_span, row_span, config, style, element_type } = element;
+
+  const gridColumns = layout.grid_columns || 12;
+  const gridRows = layout.grid_rows || 20;
+  const cellWidth = contentWidth / gridColumns;
+  const cellHeight = contentHeight / gridRows;
+
+  const left = grid_column * cellWidth;
+  const top = grid_row * cellHeight;
+  const width = column_span * cellWidth;
+  const height = row_span * cellHeight;
+
+  const baseStyle = `
+    position: absolute;
+    left: ${left}px;
+    top: ${top}px;
+    width: ${width}px;
+    height: ${height}px;
+    font-family: ${style.fontFamily || 'Arial'};
+    font-size: ${style.fontSize || 10}pt;
+    font-weight: ${style.fontWeight || 'normal'};
+    color: ${style.color || '#000'};
+    background-color: ${style.backgroundColor || 'transparent'};
+    padding: ${style.padding || 0}px;
+    text-align: ${style.textAlign || 'left'};
+    display: flex;
+    align-items: center;
+    justify-content: ${getJustifyContent(style.textAlign || 'left')};
+    ${style.textDecoration ? `text-decoration: ${style.textDecoration};` : ''}
+    ${style.fontStyle ? `font-style: ${style.fontStyle};` : ''}
+  `.replace(/\s+/g, ' ').trim();
+
+  if (element_type === 'dataField') {
+    const value = getDataFieldValue(config.fieldType, project);
+    const label = config.showLabel && config.label ? config.label + ' ' : '';
+
+    if (!value && !label) return '';
+
+    return `<div style="${baseStyle}">
+      ${label ? `<span style="font-weight: ${style.fontWeight || 'normal'};">${escapeHtml(label)}</span>` : ''}
+      <span style="color: ${value ? (style.color || '#000') : '#999'};">${escapeHtml(value || '')}</span>
+    </div>`;
+  }
+
+  if (element_type === 'text') {
+    const content = config.content || '';
+    if (!content) return '';
+
+    // Replace placeholders
+    const displayText = content.replace(/\{([^}]+)\}/g, (match: string, fieldName: string) => {
+      return getDataFieldValue(fieldName, project) || '';
+    });
+
+    if (!displayText.trim()) return '';
+
+    return `<div style="${baseStyle}">${escapeHtml(displayText)}</div>`;
+  }
+
+  if (element_type === 'shape') {
+    const thickness = config.thickness || 1;
+    const color = config.color || style.backgroundColor || '#000';
+
+    if (config.shapeType === 'line' || config.shapeType === 'divider') {
+      return `<div style="position: absolute; left: ${left}px; top: ${top + height/2}px; width: ${width}px; border-bottom: ${thickness}px solid ${color}; height: 0;"></div>`;
+    }
+    if (config.shapeType === 'rectangle') {
+      return `<div style="${baseStyle} background-color: ${color};"></div>`;
+    }
+  }
+
+  return '';
+}
+
+// Get data field value for PDF
+function getDataFieldValue(fieldType: string, project: PrepProject): string {
+  const formatDate = (timestamp?: string | number): string => {
+    if (!timestamp) return '';
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return String(timestamp);
+    }
+  };
+
+  const formatPhone = (phone?: string): string => {
+    if (!phone) return '';
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length === 10) {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+    if (digits.length === 11 && digits.startsWith('1')) {
+      return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+    }
+    return phone;
+  };
+
+  switch (fieldType) {
+    case 'production_name': return project.production_name || 'Untitled Production';
+    case 'venue': return project.venue || '';
+    case 'venue_city': return project.venue_city || '';
+    case 'venue_state': return project.venue_state || '';
+    case 'order_date': return formatDate(project.order_date);
+    case 'gm_name': return project.gm_name || '';
+    case 'gm_company': return project.gm_company || '';
+    case 'gm_email': return project.gm_email || '';
+    case 'gm_phone': return formatPhone(project.gm_phone);
+    case 'pm_name': return project.pm_name || '';
+    case 'pm_company': return project.pm_company || '';
+    case 'pm_email': return project.pm_email || '';
+    case 'pm_phone': return formatPhone(project.pm_phone);
+    case 'ld_name': return project.ld_name || '';
+    case 'ld_email': return project.ld_email || '';
+    case 'ld_phone': return formatPhone(project.ld_phone);
+    case 'ald_name': return project.ald_name || '';
+    case 'ald_email': return project.ald_email || '';
+    case 'ald_phone': return formatPhone(project.ald_phone);
+    case 'pe_name': return project.pe_name || '';
+    case 'pe_email': return project.pe_email || '';
+    case 'pe_phone': return formatPhone(project.pe_phone);
+    case 'prep_start_date': return formatDate(project.prep_start_date);
+    case 'prep_end_date': return formatDate(project.prep_end_date);
+    case 'load_in_date': return formatDate(project.load_in_date);
+    case 'first_preview_date': return formatDate(project.first_preview_date);
+    case 'opening_night_date': return formatDate(project.opening_night_date);
+    case 'closing_date': return formatDate(project.closing_date);
+    case 'current_revision': return String(project.current_revision);
+    default: return '';
+  }
+}
+
+// Helper to get justify-content for text alignment
+function getJustifyContent(textAlign: string): string {
+  switch (textAlign) {
+    case 'center': return 'center';
+    case 'right': return 'flex-end';
+    case 'left':
+    default: return 'flex-start';
+  }
+}
+
+// Helper to escape HTML
+function escapeHtml(text: string): string {
+  const div = { innerHTML: '' } as any;
+  div.textContent = text;
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 // Helper function to get section label
