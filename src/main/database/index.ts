@@ -84,44 +84,52 @@ export async function initDatabase(): Promise<void> {
 function runAppMigrations(db: Database): void {
   // App database migrations (for licenses and settings)
 
-  // Seed default page layouts if none exist (safe approach - only add if completely missing)
-  const layoutResult = db.exec('SELECT COUNT(*) as count FROM page_layout_templates');
-  const layoutCount = layoutResult[0]?.values[0]?.[0] || 0;
+  try {
+    // Seed default page layouts if none exist (safe approach - only add if completely missing)
+    const layoutResult = db.exec('SELECT COUNT(*) as count FROM page_layout_templates');
+    const layoutCount = layoutResult[0]?.values[0]?.[0] || 0;
 
-  if (layoutCount === 0) {
-    console.log('No default page layouts found - seeding defaults...');
-    seedDefaultPageLayouts();
-    console.log('✅ Default page layouts seeded');
-  } else {
-    // Migration: Add v2 layouts with dynamic content if they don't exist
-    const dynamicLayoutsResult = db.exec(`
-      SELECT COUNT(*) as count FROM page_layout_elements
-      WHERE element_type IN ('equipment_list', 'notes_content', 'revision_log')
-    `);
-    const hasDynamicLayouts = (dynamicLayoutsResult[0]?.values[0]?.[0] || 0) > 0;
-
-    if (!hasDynamicLayouts) {
-      console.log('Adding v2 layouts with dynamic content support...');
-
-      // Unset all current defaults (they'll become v1 backups)
-      db.run('UPDATE page_layout_templates SET is_default = 0');
-
-      // Rename existing default layouts to indicate they're v1
-      db.run(`
-        UPDATE page_layout_templates
-        SET name = name || ' (v1)'
-        WHERE is_default = 0
-        AND name NOT LIKE '%(v1)%'
-      `);
-
-      // Create new v2 layouts with dynamic content
+    if (layoutCount === 0) {
+      console.log('No default page layouts found - seeding defaults...');
       seedDefaultPageLayouts();
+      console.log('✅ Default page layouts seeded');
+    } else {
+      // Migration: Add v2 layouts with dynamic content if they don't exist
+      const dynamicLayoutsResult = db.exec(`
+        SELECT COUNT(*) as count FROM page_layout_elements
+        WHERE element_type IN ('equipment_list', 'notes_content', 'revision_log')
+      `);
+      const hasDynamicLayouts = (dynamicLayoutsResult[0]?.values[0]?.[0] || 0) > 0;
 
-      console.log('✅ V2 layouts with dynamic content added (old layouts preserved as v1)');
+      if (!hasDynamicLayouts) {
+        console.log('Adding v2 layouts with dynamic content support...');
+
+        // Unset all current defaults (they'll become v1 backups)
+        db.run('UPDATE page_layout_templates SET is_default = 0');
+
+        // Rename existing default layouts to indicate they're v1
+        db.run(`
+          UPDATE page_layout_templates
+          SET name = name || ' (v1)'
+          WHERE is_default = 0
+          AND name NOT LIKE '%(v1)%'
+        `);
+
+        // Create new v2 layouts with dynamic content
+        seedDefaultPageLayouts();
+
+        // Save after migration
+        saveAppDatabase();
+
+        console.log('✅ V2 layouts with dynamic content added (old layouts preserved as v1)');
+      }
     }
-  }
 
-  console.log('✅ App database migrations complete');
+    console.log('✅ App database migrations complete');
+  } catch (error) {
+    console.error('❌ Error running app migrations:', error);
+    // Continue anyway - don't block app startup
+  }
 }
 
 /**
