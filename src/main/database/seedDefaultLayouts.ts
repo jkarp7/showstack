@@ -1165,6 +1165,22 @@ function seedEquipmentPageLayout() {
         borderStyle: 'solid',
         borderColor: '#3B82F6'
       })
+    },
+
+    // Equipment list (dynamic content)
+    {
+      element_type: 'equipment_list',
+      config: JSON.stringify({}),
+      grid_column: 0,
+      grid_row: 7,
+      column_span: 12,
+      row_span: 16,
+      layer: 0,
+      style: JSON.stringify({
+        fontFamily: 'Arial',
+        fontSize: 9,
+        padding: 0
+      })
     }
   ];
 
@@ -1404,22 +1420,19 @@ function seedRevisionSummaryLayout() {
       })
     },
 
-    // Previous revisions title
+    // Revision change log (dynamic content)
     {
-      element_type: 'text',
-      config: JSON.stringify({
-        content: 'PREVIOUS REVISIONS:'
-      }),
+      element_type: 'revision_log',
+      config: JSON.stringify({}),
       grid_column: 0,
-      grid_row: 18,
+      grid_row: 13,
       column_span: 12,
-      row_span: 1,
+      row_span: 6,
       layer: 0,
       style: JSON.stringify({
         fontFamily: 'Arial',
-        fontSize: 11,
-        fontWeight: 'bold',
-        paddingTop: 12
+        fontSize: 9,
+        padding: 0
       })
     }
   ];
@@ -1525,11 +1538,11 @@ function seedNotesPageLayout() {
       })
     },
 
-    // Notes content area (placeholder - actual content rendered dynamically)
+    // Notes content area (dynamic content)
     {
-      element_type: 'text',
+      element_type: 'notes_content',
       config: JSON.stringify({
-        content: '{notes_content}'
+        noteType: 'general_notes'
       }),
       grid_column: 0,
       grid_row: 5,

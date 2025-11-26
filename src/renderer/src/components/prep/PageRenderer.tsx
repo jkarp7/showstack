@@ -345,6 +345,36 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       }
     }
 
+    // Dynamic content: Equipment List
+    if (element.element_type === 'equipment_list') {
+      return (
+        <div key={element.id} style={{ ...elementStyle, overflow: 'auto', display: 'block', alignItems: 'flex-start' }}>
+          <div className="text-sm text-gray-500 italic">Equipment list will render in PDF</div>
+          <div className="text-xs text-gray-400 mt-1">Dynamic content based on project sections and items</div>
+        </div>
+      );
+    }
+
+    // Dynamic content: Notes
+    if (element.element_type === 'notes_content') {
+      return (
+        <div key={element.id} style={{ ...elementStyle, overflow: 'auto', display: 'block', alignItems: 'flex-start' }}>
+          <div className="text-sm text-gray-500 italic">Notes content will render in PDF</div>
+          <div className="text-xs text-gray-400 mt-1">Dynamic content based on project notes</div>
+        </div>
+      );
+    }
+
+    // Dynamic content: Revision Log
+    if (element.element_type === 'revision_log') {
+      return (
+        <div key={element.id} style={{ ...elementStyle, overflow: 'auto', display: 'block', alignItems: 'flex-start' }}>
+          <div className="text-sm text-gray-500 italic">Revision log will render in PDF</div>
+          <div className="text-xs text-gray-400 mt-1">Dynamic content based on revision history</div>
+        </div>
+      );
+    }
+
     // TODO: Handle table, image elements
     return null;
   }

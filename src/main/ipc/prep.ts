@@ -798,6 +798,144 @@ function renderLayoutElement(
     }
   }
 
+  // Dynamic content: Equipment List
+  if (element_type === 'equipment_list') {
+    const sections = getSectionsByProjectId(project.id);
+    if (sections.length === 0) {
+      return `<div style="${baseStyle}">No equipment items</div>`;
+    }
+
+    let equipmentHTML = '';
+    let currentY = top;
+
+    sections.forEach(section => {
+      const items = getItemsBySectionId(section.id);
+      if (items.length === 0) return;
+
+      // Section header
+      equipmentHTML += `
+        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; background-color: #DBEAFE; padding: 6px; font-weight: bold; font-size: 11pt; border: 1px solid #3B82F6;">
+          ${escapeHtml(section.name.toUpperCase())}
+        </div>
+      `;
+      currentY += 30;
+
+      // Table headers
+      const col1Width = width * 0.55; // Description
+      const col2Width = width * 0.15; // Active
+      const col3Width = width * 0.15; // Spare
+      const col4Width = width * 0.15; // Venue
+
+      equipmentHTML += `
+        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${col1Width}px; background-color: #F3F4F6; padding: 4px; font-size: 9pt; font-weight: bold; border: 1px solid #D1D5DB;">Description</div>
+        <div style="position: absolute; left: ${left + col1Width}px; top: ${currentY}px; width: ${col2Width}px; background-color: #F3F4F6; padding: 4px; font-size: 9pt; font-weight: bold; border: 1px solid #D1D5DB; text-align: center;">Active</div>
+        <div style="position: absolute; left: ${left + col1Width + col2Width}px; top: ${currentY}px; width: ${col3Width}px; background-color: #F3F4F6; padding: 4px; font-size: 9pt; font-weight: bold; border: 1px solid #D1D5DB; text-align: center;">Spare</div>
+        <div style="position: absolute; left: ${left + col1Width + col2Width + col3Width}px; top: ${currentY}px; width: ${col4Width}px; background-color: #F3F4F6; padding: 4px; font-size: 9pt; font-weight: bold; border: 1px solid #D1D5DB; text-align: center;">Venue</div>
+      `;
+      currentY += 22;
+
+      // Equipment items
+      items.forEach(item => {
+        equipmentHTML += `
+          <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${col1Width}px; padding: 3px 4px; font-size: 9pt; border: 1px solid #E5E7EB;">${escapeHtml(item.description)}</div>
+          <div style="position: absolute; left: ${left + col1Width}px; top: ${currentY}px; width: ${col2Width}px; padding: 3px 4px; font-size: 9pt; border: 1px solid #E5E7EB; text-align: center;">${item.active_qty}</div>
+          <div style="position: absolute; left: ${left + col1Width + col2Width}px; top: ${currentY}px; width: ${col3Width}px; padding: 3px 4px; font-size: 9pt; border: 1px solid #E5E7EB; text-align: center;">${item.spare_qty}</div>
+          <div style="position: absolute; left: ${left + col1Width + col2Width + col3Width}px; top: ${currentY}px; width: ${col4Width}px; padding: 3px 4px; font-size: 9pt; border: 1px solid #E5E7EB; text-align: center;">${item.venue_qty}</div>
+        `;
+        currentY += 20;
+      });
+
+      currentY += 15; // Space between sections
+    });
+
+    return equipmentHTML;
+  }
+
+  // Dynamic content: Notes
+  if (element_type === 'notes_content') {
+    const noteType = config.noteType || 'general_notes';
+    const notes = getNotesByProjectId(project.id, noteType);
+
+    if (notes.length === 0) {
+      return `<div style="${baseStyle}">No notes available</div>`;
+    }
+
+    let notesHTML = '';
+    let currentY = top;
+
+    notes.forEach(note => {
+      const content = note.content || '';
+      const format = note.format || 'plain';
+
+      // Format content based on format type
+      let formattedContent = escapeHtml(content);
+      if (format === 'bullets') {
+        const lines = content.split('\n').filter(l => l.trim());
+        formattedContent = lines.map(line => `• ${escapeHtml(line.trim())}`).join('<br/>');
+      } else if (format === 'numbered') {
+        const lines = content.split('\n').filter(l => l.trim());
+        formattedContent = lines.map((line, idx) => `${idx + 1}. ${escapeHtml(line.trim())}`).join('<br/>');
+      } else {
+        formattedContent = escapeHtml(content).replace(/\n/g, '<br/>');
+      }
+
+      notesHTML += `
+        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; font-size: ${style.fontSize || 10}pt; line-height: 1.4; padding: ${style.padding || 0}px;">
+          ${formattedContent}
+        </div>
+      `;
+      currentY += 100; // Adjust based on content
+    });
+
+    return notesHTML;
+  }
+
+  // Dynamic content: Revision Log
+  if (element_type === 'revision_log') {
+    const revisions = getRevisionsByProjectId(project.id);
+
+    if (revisions.length === 0) {
+      return `<div style="${baseStyle}">No revision history</div>`;
+    }
+
+    const currentRevision = revisions.find(r => r.revision_number === project.current_revision);
+    if (!currentRevision) {
+      return `<div style="${baseStyle}">Current revision not found</div>`;
+    }
+
+    let changeLog: any[] = [];
+    try {
+      changeLog = JSON.parse(currentRevision.change_log || '[]');
+    } catch (e) {
+      changeLog = [];
+    }
+
+    if (changeLog.length === 0) {
+      return `<div style="${baseStyle}">No changes in this revision</div>`;
+    }
+
+    let revisionHTML = '';
+    let currentY = top;
+
+    changeLog.forEach(change => {
+      const bgColor =
+        change.type === 'increase' ? '#D1FAE5' :
+        change.type === 'decrease' ? '#FEE2E2' :
+        change.type === 'new' ? '#FEF9C3' :
+        change.type === 'modified' ? '#DBEAFE' : '#FFF';
+
+      revisionHTML += `
+        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; background-color: ${bgColor}; padding: 6px; font-size: 9pt; border: 1px solid #E5E7EB; line-height: 1.4;">
+          <strong>${escapeHtml(change.description || '')}</strong><br/>
+          ${escapeHtml(change.details || '')}
+        </div>
+      `;
+      currentY += 35;
+    });
+
+    return revisionHTML;
+  }
+
   return '';
 }
 

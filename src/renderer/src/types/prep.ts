@@ -366,7 +366,7 @@ export interface PrintPageSettings {
  */
 
 // Element types that can be placed on the canvas
-export type LayoutElementType = 'dataField' | 'text' | 'image' | 'table' | 'shape';
+export type LayoutElementType = 'dataField' | 'text' | 'image' | 'table' | 'shape' | 'equipment_list' | 'notes_content' | 'revision_log';
 
 // Data fields that can be displayed
 export type DataFieldType =
@@ -378,6 +378,7 @@ export type DataFieldType =
   | 'prep_start_date'
   | 'prep_end_date'
   | 'load_in_date'
+  | 'first_preview_date'
   | 'opening_night_date'
   | 'closing_date'
   | 'load_out_date'
@@ -444,13 +445,31 @@ export interface ShapeConfig {
   color?: string;
 }
 
+// Configuration for equipment list elements (dynamic content)
+export interface EquipmentListConfig {
+  // Equipment list is rendered dynamically from project data
+}
+
+// Configuration for notes content elements (dynamic content)
+export interface NotesContentConfig {
+  noteType?: 'general_conditions' | 'general_notes' | 'fixture_notes';
+}
+
+// Configuration for revision log elements (dynamic content)
+export interface RevisionLogConfig {
+  // Revision log is rendered dynamically from project data
+}
+
 // Union type for all element configurations
 export type ElementConfig =
   | DataFieldConfig
   | TextConfig
   | ImageConfig
   | TableConfig
-  | ShapeConfig;
+  | ShapeConfig
+  | EquipmentListConfig
+  | NotesContentConfig
+  | RevisionLogConfig;
 
 // Styling options for elements
 export interface ElementStyle {

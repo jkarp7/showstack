@@ -78,10 +78,58 @@ const paletteElements: PaletteElement[] = [
   },
   {
     type: 'dataField',
+    subType: 'prep_start_date',
+    label: 'Prep Start Date',
+    description: 'Shop prep start',
+    icon: '🔧',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'prep_end_date',
+    label: 'Prep End Date',
+    description: 'Shop prep end',
+    icon: '🔧',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'first_preview_date',
+    label: 'First Preview',
+    description: 'First preview date',
+    icon: '🎭',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
     subType: 'gm_name',
     label: 'General Manager',
     description: 'GM name',
     icon: '👤',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'gm_company',
+    label: 'GM Company',
+    description: 'GM company name',
+    icon: '🏢',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'gm_email',
+    label: 'GM Email',
+    description: 'GM email address',
+    icon: '📧',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'gm_phone',
+    label: 'GM Phone',
+    description: 'GM phone number',
+    icon: '📞',
     category: 'data'
   },
   {
@@ -94,10 +142,106 @@ const paletteElements: PaletteElement[] = [
   },
   {
     type: 'dataField',
+    subType: 'pm_company',
+    label: 'PM Company',
+    description: 'PM company name',
+    icon: '🏢',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'pm_email',
+    label: 'PM Email',
+    description: 'PM email address',
+    icon: '📧',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'pm_phone',
+    label: 'PM Phone',
+    description: 'PM phone number',
+    icon: '📞',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
     subType: 'ld_name',
     label: 'Lighting Designer',
     description: 'LD name',
     icon: '💡',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'ld_email',
+    label: 'LD Email',
+    description: 'LD email address',
+    icon: '📧',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'ld_phone',
+    label: 'LD Phone',
+    description: 'LD phone number',
+    icon: '📞',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'ald_name',
+    label: 'Associate LD',
+    description: 'ALD name',
+    icon: '👤',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'ald_email',
+    label: 'ALD Email',
+    description: 'ALD email address',
+    icon: '📧',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'ald_phone',
+    label: 'ALD Phone',
+    description: 'ALD phone number',
+    icon: '📞',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'pe_name',
+    label: 'Production Electrician',
+    description: 'PE name',
+    icon: '👤',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'pe_email',
+    label: 'PE Email',
+    description: 'PE email address',
+    icon: '📧',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'pe_phone',
+    label: 'PE Phone',
+    description: 'PE phone number',
+    icon: '📞',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'current_revision',
+    label: 'Current Revision',
+    description: 'Revision number',
+    icon: '🔄',
     category: 'data'
   },
   {
@@ -115,6 +259,27 @@ const paletteElements: PaletteElement[] = [
     label: 'Text Box',
     description: 'Custom text content',
     icon: '📝',
+    category: 'content'
+  },
+  {
+    type: 'equipment_list',
+    label: 'Equipment List',
+    description: 'Dynamic equipment by section',
+    icon: '📦',
+    category: 'content'
+  },
+  {
+    type: 'notes_content',
+    label: 'Notes Content',
+    description: 'Dynamic notes and conditions',
+    icon: '📋',
+    category: 'content'
+  },
+  {
+    type: 'revision_log',
+    label: 'Revision Log',
+    description: 'Dynamic revision changes',
+    icon: '📜',
     category: 'content'
   },
   {
