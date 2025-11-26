@@ -4,6 +4,7 @@ import { join } from 'path';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { APP_SCHEMA } from './appSchema';
 import { PROJECT_SCHEMA } from './projectSchema';
+import { seedDefaultPageLayouts } from './seedDefaultLayouts';
 
 // Two separate databases
 let appDb: Database | null = null;
@@ -82,7 +83,17 @@ export async function initDatabase(): Promise<void> {
  */
 function runAppMigrations(db: Database): void {
   // App database migrations (for licenses and settings)
-  // Currently no migrations needed - schema is stable
+
+  // Seed default page layouts if none exist
+  const layoutResult = db.exec('SELECT COUNT(*) as count FROM page_layout_templates');
+  const layoutCount = layoutResult[0]?.values[0]?.[0] || 0;
+
+  if (layoutCount === 0) {
+    console.log('No default page layouts found - seeding defaults...');
+    seedDefaultPageLayouts();
+    console.log('✅ Default page layouts seeded');
+  }
+
   console.log('✅ App database migrations complete');
 }
 

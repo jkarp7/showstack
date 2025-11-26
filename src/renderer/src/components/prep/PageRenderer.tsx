@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import type { PrintSection, PrepProject, PageLayoutTemplate, LayoutElement } from '../../types/prep';
+import { formatPhoneNumber } from '../../utils/phoneFormatter';
 
 interface PageRendererProps {
   section: PrintSection;
@@ -174,8 +175,12 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
         return project.ld_name || 'TBD';
       case 'gm_name':
         return project.gm_name || '';
+      case 'gm_company':
+        return project.gm_company || '';
       case 'pm_name':
         return project.pm_name || '';
+      case 'pm_company':
+        return project.pm_company || '';
       case 'ld_name':
         return project.ld_name || '';
       case 'ald_name':
@@ -193,15 +198,15 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       case 'pe_email':
         return project.pe_email || '';
       case 'gm_phone':
-        return project.gm_phone || '';
+        return formatPhoneNumber(project.gm_phone) || '';
       case 'pm_phone':
-        return project.pm_phone || '';
+        return formatPhoneNumber(project.pm_phone) || '';
       case 'ld_phone':
-        return project.ld_phone || '';
+        return formatPhoneNumber(project.ld_phone) || '';
       case 'ald_phone':
-        return project.ald_phone || '';
+        return formatPhoneNumber(project.ald_phone) || '';
       case 'pe_phone':
-        return project.pe_phone || '';
+        return formatPhoneNumber(project.pe_phone) || '';
       case 'prep_start_date':
         return formatDate(project.prep_start_date);
       case 'prep_end_date':
@@ -271,12 +276,15 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
 
     if (element.element_type === 'dataField') {
       const value = getDataFieldValue(config.fieldType);
-      const label = config.showLabel ? `${config.fieldType.replace(/_/g, ' ')}: ` : '';
-      const displayValue = value || '—'; // Show em dash if empty
+      const label = config.showLabel && config.label ? config.label : '';
+      const displayValue = value || '';
+
+      // Don't render if no value and not showing label
+      if (!value && !label) return null;
 
       return (
         <div key={element.id} style={elementStyle}>
-          {label && <span style={{ fontWeight: 'bold' }}>{label}</span>}
+          {label && <span style={{ fontWeight: style.fontWeight || 'normal' }}>{label} </span>}
           <span style={{ color: value ? (style.color || '#000') : '#999' }}>{displayValue}</span>
         </div>
       );
@@ -284,31 +292,49 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
 
     if (element.element_type === 'text') {
       // Don't render empty text elements
-      if (!config.text) return null;
+      const content = config.content || '';
+      if (!content) return null;
+
+      // Replace placeholders with actual data
+      let displayText = content;
+
+      // Replace data field placeholders
+      const placeholderRegex = /\{([^}]+)\}/g;
+      displayText = displayText.replace(placeholderRegex, (match, fieldName) => {
+        return getDataFieldValue(fieldName) || '';
+      });
+
+      // Don't render if text is now empty after replacements
+      if (!displayText.trim()) return null;
 
       return (
         <div key={element.id} style={elementStyle}>
-          {config.text}
+          {displayText}
         </div>
       );
     }
 
     if (element.element_type === 'shape') {
+      const thickness = config.thickness || 1;
+      const color = config.color || style.backgroundColor || '#000';
+
       const shapeStyle: React.CSSProperties = {
         ...elementStyle,
-        border: config.borderWidth ? `${config.borderWidth}px solid ${config.borderColor || '#000'}` : 'none',
       };
 
       if (config.shapeType === 'rectangle') {
-        return <div key={element.id} style={shapeStyle} />;
+        return <div key={element.id} style={{ ...shapeStyle, backgroundColor: color }} />;
       }
-      if (config.shapeType === 'line') {
+      if (config.shapeType === 'line' || config.shapeType === 'divider') {
         return (
           <div
             key={element.id}
             style={{
-              ...shapeStyle,
-              borderBottom: `${config.borderWidth || 1}px solid ${config.borderColor || '#000'}`,
+              position: 'absolute',
+              left: `${left}px`,
+              top: `${top + height/2}px`,
+              width: `${width}px`,
+              borderBottom: `${thickness}px solid ${color}`,
               height: '0',
             }}
           />
