@@ -828,7 +828,7 @@ function seedContactsPageLayout() {
     {
       element_type: 'text',
       config: JSON.stringify({
-        content: '[prep start] to [prep end]'
+        content: '{prep_start_date} to {prep_end_date}'
       }),
       grid_column: 4,
       grid_row: 14,
@@ -860,9 +860,10 @@ function seedContactsPageLayout() {
       })
     },
     {
-      element_type: 'text',
+      element_type: 'dataField',
       config: JSON.stringify({
-        content: '[load in]'
+        fieldType: 'load_in_date',
+        showLabel: false
       }),
       grid_column: 4,
       grid_row: 15,
@@ -893,9 +894,10 @@ function seedContactsPageLayout() {
       })
     },
     {
-      element_type: 'text',
+      element_type: 'dataField',
       config: JSON.stringify({
-        content: '[1st preview]'
+        fieldType: 'first_preview_date',
+        showLabel: false
       }),
       grid_column: 4,
       grid_row: 16,
@@ -926,9 +928,10 @@ function seedContactsPageLayout() {
       })
     },
     {
-      element_type: 'text',
+      element_type: 'dataField',
       config: JSON.stringify({
-        content: '[opening]'
+        fieldType: 'opening_night_date',
+        showLabel: false
       }),
       grid_column: 4,
       grid_row: 17,
@@ -959,9 +962,10 @@ function seedContactsPageLayout() {
       })
     },
     {
-      element_type: 'text',
+      element_type: 'dataField',
       config: JSON.stringify({
-        content: '[closing]'
+        fieldType: 'closing_date',
+        showLabel: false
       }),
       grid_column: 4,
       grid_row: 18,

@@ -25,7 +25,9 @@ type DataFieldType =
   | 'designer_name'
   | 'designer_company'
   | 'gm_name'
+  | 'gm_company'
   | 'pm_name'
+  | 'pm_company'
   | 'ld_name'
   | 'ald_name'
   | 'pe_name'
@@ -46,6 +48,7 @@ type DataFieldType =
   | 'opening_night_date'
   | 'closing_date'
   | 'load_out_date'
+  | 'current_revision'
   | 'revision_number'
   | 'document_title'
   | 'logo';
