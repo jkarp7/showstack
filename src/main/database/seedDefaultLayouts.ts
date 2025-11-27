@@ -1208,7 +1208,7 @@ function seedRevisionSummaryLayout() {
 
 function seedNotesPageLayout() {
   const elements: Partial<LayoutElementData>[] = [
-    // Section header
+    // Main page header
     {
       element_type: 'text',
       config: JSON.stringify({
@@ -1230,24 +1230,143 @@ function seedNotesPageLayout() {
       })
     },
 
-    // Notes content area (dynamic content)
+    // ========== GENERAL CONDITIONS ==========
+    // Section subheader
+    {
+      element_type: 'text',
+      config: JSON.stringify({
+        content: 'General Conditions'
+      }),
+      grid_column: 0,
+      grid_row: 1,
+      column_span: 12,
+      row_span: 1,
+      layer: 0,
+      style: JSON.stringify({
+        fontFamily: 'Arial',
+        fontSize: 11,
+        fontWeight: 'bold',
+        textAlign: 'left',
+        color: '#000000',
+        backgroundColor: '#F3F4F6',
+        padding: 6,
+        paddingLeft: 12
+      })
+    },
+
+    // General conditions content (dynamic)
+    {
+      element_type: 'notes_content',
+      config: JSON.stringify({
+        noteType: 'general_conditions'
+      }),
+      grid_column: 0,
+      grid_row: 2,
+      column_span: 12,
+      row_span: 5,
+      layer: 0,
+      style: JSON.stringify({
+        fontFamily: 'Arial',
+        fontSize: 9,
+        textAlign: 'left',
+        color: '#000000',
+        backgroundColor: 'transparent',
+        padding: 12,
+        paddingLeft: 16,
+        lineHeight: 1.4
+      })
+    },
+
+    // ========== GENERAL NOTES ==========
+    // Section subheader
+    {
+      element_type: 'text',
+      config: JSON.stringify({
+        content: 'General Notes'
+      }),
+      grid_column: 0,
+      grid_row: 7,
+      column_span: 12,
+      row_span: 1,
+      layer: 0,
+      style: JSON.stringify({
+        fontFamily: 'Arial',
+        fontSize: 11,
+        fontWeight: 'bold',
+        textAlign: 'left',
+        color: '#000000',
+        backgroundColor: '#F3F4F6',
+        padding: 6,
+        paddingLeft: 12
+      })
+    },
+
+    // General notes content (dynamic)
     {
       element_type: 'notes_content',
       config: JSON.stringify({
         noteType: 'general_notes'
       }),
       grid_column: 0,
-      grid_row: 2,
+      grid_row: 8,
       column_span: 12,
-      row_span: 14,
+      row_span: 5,
       layer: 0,
       style: JSON.stringify({
         fontFamily: 'Arial',
-        fontSize: 10,
+        fontSize: 9,
         textAlign: 'left',
         color: '#000000',
         backgroundColor: 'transparent',
-        padding: 16,
+        padding: 12,
+        paddingLeft: 16,
+        lineHeight: 1.4
+      })
+    },
+
+    // ========== FIXTURE NOTES ==========
+    // Section subheader
+    {
+      element_type: 'text',
+      config: JSON.stringify({
+        content: 'Fixture Notes'
+      }),
+      grid_column: 0,
+      grid_row: 13,
+      column_span: 12,
+      row_span: 1,
+      layer: 0,
+      style: JSON.stringify({
+        fontFamily: 'Arial',
+        fontSize: 11,
+        fontWeight: 'bold',
+        textAlign: 'left',
+        color: '#000000',
+        backgroundColor: '#F3F4F6',
+        padding: 6,
+        paddingLeft: 12
+      })
+    },
+
+    // Fixture notes content (dynamic)
+    {
+      element_type: 'notes_content',
+      config: JSON.stringify({
+        noteType: 'fixture_notes'
+      }),
+      grid_column: 0,
+      grid_row: 14,
+      column_span: 12,
+      row_span: 6,
+      layer: 0,
+      style: JSON.stringify({
+        fontFamily: 'Arial',
+        fontSize: 9,
+        textAlign: 'left',
+        color: '#000000',
+        backgroundColor: 'transparent',
+        padding: 12,
+        paddingLeft: 16,
         lineHeight: 1.4
       })
     }
