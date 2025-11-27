@@ -805,6 +805,22 @@ function renderLayoutElement(
       return `<div style="${baseStyle}">No equipment items</div>`;
     }
 
+    // Get current revision changes for delta column
+    const revisions = getRevisionsByProjectId(project.id);
+    const currentRevision = revisions.find(r => r.revision_number === project.current_revision);
+    let changeMap = new Map<string, any>();
+
+    if (currentRevision) {
+      try {
+        const changeLog = JSON.parse(currentRevision.change_log || '[]');
+        changeLog.forEach((change: any) => {
+          changeMap.set(change.item_id, change);
+        });
+      } catch (e) {
+        console.error('Error parsing change log:', e);
+      }
+    }
+
     let equipmentHTML = '';
     let currentY = top;
 
@@ -820,29 +836,73 @@ function renderLayoutElement(
       `;
       currentY += 30;
 
-      // Table headers
-      const col1Width = width * 0.55; // Description
-      const col2Width = width * 0.15; // Active
-      const col3Width = width * 0.15; // Spare
-      const col4Width = width * 0.15; // Venue
+      // Section notes (if present)
+      if (section.notes && section.notes.trim()) {
+        equipmentHTML += `
+          <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; padding: 4px 8px; font-size: 8pt; font-style: italic; background-color: #FEF9C3; border: 1px solid #FDE047;">
+            ${escapeHtml(section.notes)}
+          </div>
+        `;
+        currentY += 25;
+      }
+
+      // Table headers: Delta | Total | Active | Spare | Description
+      const deltaWidth = width * 0.08;  // Delta
+      const totalWidth = width * 0.10;  // Total
+      const activeWidth = width * 0.10; // Active
+      const spareWidth = width * 0.10;  // Spare
+      const descWidth = width * 0.62;   // Description
 
       equipmentHTML += `
-        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${col1Width}px; background-color: #F3F4F6; padding: 4px; font-size: 9pt; font-weight: bold; border: 1px solid #D1D5DB;">Description</div>
-        <div style="position: absolute; left: ${left + col1Width}px; top: ${currentY}px; width: ${col2Width}px; background-color: #F3F4F6; padding: 4px; font-size: 9pt; font-weight: bold; border: 1px solid #D1D5DB; text-align: center;">Active</div>
-        <div style="position: absolute; left: ${left + col1Width + col2Width}px; top: ${currentY}px; width: ${col3Width}px; background-color: #F3F4F6; padding: 4px; font-size: 9pt; font-weight: bold; border: 1px solid #D1D5DB; text-align: center;">Spare</div>
-        <div style="position: absolute; left: ${left + col1Width + col2Width + col3Width}px; top: ${currentY}px; width: ${col4Width}px; background-color: #F3F4F6; padding: 4px; font-size: 9pt; font-weight: bold; border: 1px solid #D1D5DB; text-align: center;">Venue</div>
+        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${deltaWidth}px; background-color: #F3F4F6; padding: 4px; font-size: 8pt; font-weight: bold; border: 1px solid #D1D5DB; text-align: center;">Δ</div>
+        <div style="position: absolute; left: ${left + deltaWidth}px; top: ${currentY}px; width: ${totalWidth}px; background-color: #F3F4F6; padding: 4px; font-size: 8pt; font-weight: bold; border: 1px solid #D1D5DB; text-align: center;">Total</div>
+        <div style="position: absolute; left: ${left + deltaWidth + totalWidth}px; top: ${currentY}px; width: ${activeWidth}px; background-color: #F3F4F6; padding: 4px; font-size: 8pt; font-weight: bold; border: 1px solid #D1D5DB; text-align: center;">Active</div>
+        <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth}px; top: ${currentY}px; width: ${spareWidth}px; background-color: #F3F4F6; padding: 4px; font-size: 8pt; font-weight: bold; border: 1px solid #D1D5DB; text-align: center;">Spare</div>
+        <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth + spareWidth}px; top: ${currentY}px; width: ${descWidth}px; background-color: #F3F4F6; padding: 4px; font-size: 8pt; font-weight: bold; border: 1px solid #D1D5DB;">Description</div>
       `;
-      currentY += 22;
+      currentY += 20;
 
       // Equipment items
       items.forEach(item => {
+        const change = changeMap.get(item.id);
+        let deltaContent = '';
+        let rowBgColor = '#FFFFFF';
+
+        if (change) {
+          if (change.change_type === 'increase') {
+            const delta = change.new_values?.total_qty - change.old_values?.total_qty;
+            deltaContent = `<span style="color: #059669;">▲ +${delta}</span>`;
+            rowBgColor = '#D1FAE5'; // Light green
+          } else if (change.change_type === 'decrease') {
+            const delta = change.old_values?.total_qty - change.new_values?.total_qty;
+            deltaContent = `<span style="color: #DC2626;">▼ -${delta}</span>`;
+            rowBgColor = '#FEE2E2'; // Light red
+          } else if (change.change_type === 'new') {
+            deltaContent = '<span style="color: #3B82F6;">NEW</span>';
+            rowBgColor = '#DBEAFE'; // Light blue
+          }
+        }
+
+        const total = item.active_qty + item.spare_qty;
+
         equipmentHTML += `
-          <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${col1Width}px; padding: 3px 4px; font-size: 9pt; border: 1px solid #E5E7EB;">${escapeHtml(item.description)}</div>
-          <div style="position: absolute; left: ${left + col1Width}px; top: ${currentY}px; width: ${col2Width}px; padding: 3px 4px; font-size: 9pt; border: 1px solid #E5E7EB; text-align: center;">${item.active_qty}</div>
-          <div style="position: absolute; left: ${left + col1Width + col2Width}px; top: ${currentY}px; width: ${col3Width}px; padding: 3px 4px; font-size: 9pt; border: 1px solid #E5E7EB; text-align: center;">${item.spare_qty}</div>
-          <div style="position: absolute; left: ${left + col1Width + col2Width + col3Width}px; top: ${currentY}px; width: ${col4Width}px; padding: 3px 4px; font-size: 9pt; border: 1px solid #E5E7EB; text-align: center;">${item.venue_qty}</div>
+          <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${deltaWidth}px; padding: 3px 2px; font-size: 7pt; border: 1px solid #E5E7EB; text-align: center; background-color: ${rowBgColor};">${deltaContent}</div>
+          <div style="position: absolute; left: ${left + deltaWidth}px; top: ${currentY}px; width: ${totalWidth}px; padding: 3px 2px; font-size: 8pt; border: 1px solid #E5E7EB; text-align: center; background-color: ${rowBgColor}; font-weight: bold;">${total}</div>
+          <div style="position: absolute; left: ${left + deltaWidth + totalWidth}px; top: ${currentY}px; width: ${activeWidth}px; padding: 3px 2px; font-size: 8pt; border: 1px solid #E5E7EB; text-align: center; background-color: ${rowBgColor};">${item.active_qty}</div>
+          <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth}px; top: ${currentY}px; width: ${spareWidth}px; padding: 3px 2px; font-size: 8pt; border: 1px solid #E5E7EB; text-align: center; background-color: ${rowBgColor};">${item.spare_qty}</div>
+          <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth + spareWidth}px; top: ${currentY}px; width: ${descWidth}px; padding: 3px 4px; font-size: 8pt; border: 1px solid #E5E7EB; background-color: ${rowBgColor};">${escapeHtml(item.description)}</div>
         `;
-        currentY += 20;
+        currentY += 18;
+
+        // Item notes (if present)
+        if (item.notes && item.notes.trim()) {
+          equipmentHTML += `
+            <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth + spareWidth}px; top: ${currentY}px; width: ${descWidth}px; padding: 2px 4px; font-size: 7pt; font-style: italic; color: #6B7280; border-left: 2px solid #9CA3AF;">
+              Note: ${escapeHtml(item.notes)}
+            </div>
+          `;
+          currentY += 15;
+        }
       });
 
       currentY += 15; // Space between sections
@@ -910,27 +970,88 @@ function renderLayoutElement(
       changeLog = [];
     }
 
-    if (changeLog.length === 0) {
-      return `<div style="${baseStyle}">No changes in this revision</div>`;
-    }
-
     let revisionHTML = '';
     let currentY = top;
 
+    // Helper function to format dates
+    const formatRevDate = (timestamp?: number): string => {
+      if (!timestamp) return '';
+      try {
+        const date = new Date(timestamp);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      } catch {
+        return '';
+      }
+    };
+
+    // List previous revisions issued
+    if (revisions.length > 1) {
+      const previousRevisions = revisions
+        .filter(r => r.revision_number < project.current_revision)
+        .sort((a, b) => b.revision_number - a.revision_number)
+        .map(r => `Rev ${r.revision_number} - ${formatRevDate(r.revision_date)}`)
+        .join(' | ');
+
+      if (previousRevisions) {
+        revisionHTML += `
+          <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; background-color: #F3F4F6; padding: 6px; font-size: 8pt; border: 1px solid #D1D5DB;">
+            <strong>Previous Revisions:</strong> ${escapeHtml(previousRevisions)}
+          </div>
+        `;
+        currentY += 25;
+      }
+    }
+
+    // Display changes in current revision
+    if (changeLog.length === 0) {
+      revisionHTML += `<div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; font-size: 9pt;">No changes in this revision</div>`;
+      return revisionHTML;
+    }
+
+    // Header for changes section
+    revisionHTML += `
+      <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; background-color: #FEF3C7; padding: 6px; font-size: 9pt; font-weight: bold; border: 1px solid #FDE047;">
+        Revision ${project.current_revision} Changes - ${formatRevDate(currentRevision.revision_date)}
+      </div>
+    `;
+    currentY += 28;
+
     changeLog.forEach(change => {
       const bgColor =
-        change.type === 'increase' ? '#D1FAE5' :
-        change.type === 'decrease' ? '#FEE2E2' :
-        change.type === 'new' ? '#FEF9C3' :
-        change.type === 'modified' ? '#DBEAFE' : '#FFF';
+        change.change_type === 'increase' ? '#D1FAE5' :
+        change.change_type === 'decrease' ? '#FEE2E2' :
+        change.change_type === 'new' ? '#DBEAFE' :
+        change.change_type === 'modified' ? '#FEF9C3' : '#FFF';
+
+      let changeDetail = '';
+
+      // Show changes to total quantity
+      if (change.change_type === 'increase') {
+        const oldTotal = (change.old_values?.active_qty || 0) + (change.old_values?.spare_qty || 0);
+        const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
+        const delta = newTotal - oldTotal;
+        changeDetail = `Total increased from ${oldTotal} to ${newTotal} (+${delta})`;
+      } else if (change.change_type === 'decrease') {
+        const oldTotal = (change.old_values?.active_qty || 0) + (change.old_values?.spare_qty || 0);
+        const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
+        const delta = oldTotal - newTotal;
+        changeDetail = `Total decreased from ${oldTotal} to ${newTotal} (-${delta})`;
+      } else if (change.change_type === 'new') {
+        const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
+        changeDetail = `New item added (Total: ${newTotal})`;
+      } else if (change.change_type === 'modified') {
+        changeDetail = 'Item details modified';
+      }
+
+      const sectionLabel = change.section_name ? ` [${change.section_name}]` : '';
 
       revisionHTML += `
-        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; background-color: ${bgColor}; padding: 6px; font-size: 9pt; border: 1px solid #E5E7EB; line-height: 1.4;">
-          <strong>${escapeHtml(change.description || '')}</strong><br/>
-          ${escapeHtml(change.details || '')}
+        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; background-color: ${bgColor}; padding: 6px; font-size: 8pt; border: 1px solid #E5E7EB; line-height: 1.5;">
+          <strong>${escapeHtml(change.description || '')}${sectionLabel}</strong><br/>
+          ${escapeHtml(changeDetail)}
         </div>
       `;
-      currentY += 35;
+      currentY += 32;
     });
 
     return revisionHTML;
