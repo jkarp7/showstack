@@ -762,13 +762,13 @@ function renderLayoutElement(
 
   if (element_type === 'dataField') {
     const value = getDataFieldValue(config.fieldType, project);
-    const label = config.showLabel && config.label ? config.label + '  ' : ''; // 2 spaces
+    const label = config.showLabel && config.label ? config.label : '';
 
     if (!value && !label) return '';
 
     return `<div style="${baseStyle}">
       ${label ? `<span style="font-weight: ${style.fontWeight || 'normal'};">${escapeHtml(label)}</span>` : ''}
-      <span style="color: ${value ? (style.color || '#000') : '#999'};">${escapeHtml(value || '')}</span>
+      <span style="color: ${value ? (style.color || '#000') : '#999'}; ${label ? 'margin-left: 8px;' : ''}">${escapeHtml(value || '')}</span>
     </div>`;
   }
 
@@ -974,7 +974,7 @@ function renderLayoutElement(
     // Render all notes in a single container
     const combinedContent = allContent.join('<br/><br/>');
     return `
-      <div style="${baseStyle} overflow: hidden;">
+      <div style="${baseStyle} overflow: hidden; align-items: flex-start;">
         ${combinedContent}
       </div>
     `;
@@ -1013,6 +1013,9 @@ function renderLayoutElement(
         return '';
       }
     };
+
+    // Add spacing after page header
+    currentY += 24;
 
     // Legend - compact grid at top
     const legendHeight = 14;
