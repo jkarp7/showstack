@@ -873,16 +873,23 @@ function renderLayoutElement(
 
         if (change) {
           if (change.change_type === 'increase') {
-            const delta = change.new_values?.total_qty - change.old_values?.total_qty;
+            const oldTotal = (change.old_values?.active_qty || 0) + (change.old_values?.spare_qty || 0);
+            const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
+            const delta = newTotal - oldTotal;
             deltaContent = `<span style="color: #059669;">▲ +${delta}</span>`;
             rowBgColor = '#D1FAE5'; // Light green
           } else if (change.change_type === 'decrease') {
-            const delta = change.old_values?.total_qty - change.new_values?.total_qty;
+            const oldTotal = (change.old_values?.active_qty || 0) + (change.old_values?.spare_qty || 0);
+            const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
+            const delta = oldTotal - newTotal;
             deltaContent = `<span style="color: #DC2626;">▼ -${delta}</span>`;
             rowBgColor = '#FEE2E2'; // Light red
           } else if (change.change_type === 'new') {
             deltaContent = '<span style="color: #3B82F6;">NEW</span>';
             rowBgColor = '#DBEAFE'; // Light blue
+          } else if (change.change_type === 'modified') {
+            deltaContent = '<span style="color: #CA8A04;">MOD</span>';
+            rowBgColor = '#FEF9C3'; // Light yellow
           }
         }
 
@@ -993,42 +1000,109 @@ function renderLayoutElement(
       }
     };
 
-    // Display changes in current revision
-    if (changeLog.length === 0) {
-      return '';
-    }
+    // Header: "REVISION CHANGE LOG"
+    revisionHTML += `
+      <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; font-size: 12pt; font-weight: bold; text-align: center; padding: 8px 0;">
+        REVISION CHANGE LOG
+      </div>
+    `;
+    currentY += 32;
 
-    changeLog.forEach(change => {
-      const bgColor =
-        change.change_type === 'increase' ? '#D1FAE5' :
-        change.change_type === 'decrease' ? '#FEE2E2' :
-        change.change_type === 'new' ? '#DBEAFE' :
-        change.change_type === 'modified' ? '#FEF9C3' : '#FFF';
+    // Legend - compact grid at top
+    const legendHeight = 14;
+    const legendPadding = 3;
+    const legendFontSize = 7;
 
-      let deltaSymbol = '';
+    revisionHTML += `
+      <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width * 0.22}px; background-color: #D1FAE5; padding: ${legendPadding}px 4px; font-size: ${legendFontSize}pt; text-align: center; border: 1px solid #ccc;">
+        <span style="color: #059669;">▲ Increase</span>
+      </div>
+      <div style="position: absolute; left: ${left + width * 0.24}px; top: ${currentY}px; width: ${width * 0.22}px; background-color: #FEE2E2; padding: ${legendPadding}px 4px; font-size: ${legendFontSize}pt; text-align: center; border: 1px solid #ccc;">
+        <span style="color: #DC2626;">▼ Decrease</span>
+      </div>
+      <div style="position: absolute; left: ${left + width * 0.48}px; top: ${currentY}px; width: ${width * 0.22}px; background-color: #DBEAFE; padding: ${legendPadding}px 4px; font-size: ${legendFontSize}pt; text-align: center; border: 1px solid #ccc;">
+        <span style="color: #3B82F6;">NEW</span>
+      </div>
+      <div style="position: absolute; left: ${left + width * 0.72}px; top: ${currentY}px; width: ${width * 0.26}px; background-color: #FEF9C3; padding: ${legendPadding}px 4px; font-size: ${legendFontSize}pt; text-align: center; border: 1px solid #ccc;">
+        Modified
+      </div>
+    `;
+    currentY += legendHeight + 8;
 
-      // Show changes with delta symbols matching equipment list format
-      if (change.change_type === 'increase') {
-        const oldTotal = (change.old_values?.active_qty || 0) + (change.old_values?.spare_qty || 0);
-        const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
-        const delta = newTotal - oldTotal;
-        deltaSymbol = `<span style="color: #059669;">▲ +${delta}</span>`;
-      } else if (change.change_type === 'decrease') {
-        const oldTotal = (change.old_values?.active_qty || 0) + (change.old_values?.spare_qty || 0);
-        const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
-        const delta = oldTotal - newTotal;
-        deltaSymbol = `<span style="color: #DC2626;">▼ -${delta}</span>`;
-      } else if (change.change_type === 'new') {
-        deltaSymbol = `<span style="color: #3B82F6;">NEW</span>`;
-      }
+    // Current revision header with number and date
+    revisionHTML += `
+      <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; background-color: #F3F4F6; padding: 6px 8px; font-size: 10pt; font-weight: bold;">
+        Revision ${project.current_revision} - Issued ${formatRevDate(currentRevision.revision_date)}
+      </div>
+    `;
+    currentY += 28;
 
+    // Current revision changes
+    if (changeLog.length > 0) {
+      changeLog.forEach(change => {
+        const bgColor =
+          change.change_type === 'increase' ? '#D1FAE5' :
+          change.change_type === 'decrease' ? '#FEE2E2' :
+          change.change_type === 'new' ? '#DBEAFE' :
+          change.change_type === 'modified' ? '#FEF9C3' : '#FFF';
+
+        let deltaSymbol = '';
+
+        // Show changes with delta symbols
+        if (change.change_type === 'increase') {
+          const oldTotal = (change.old_values?.active_qty || 0) + (change.old_values?.spare_qty || 0);
+          const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
+          const delta = newTotal - oldTotal;
+          deltaSymbol = `<span style="color: #059669;">▲ +${delta}</span>`;
+        } else if (change.change_type === 'decrease') {
+          const oldTotal = (change.old_values?.active_qty || 0) + (change.old_values?.spare_qty || 0);
+          const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
+          const delta = oldTotal - newTotal;
+          deltaSymbol = `<span style="color: #DC2626;">▼ -${delta}</span>`;
+        } else if (change.change_type === 'new') {
+          deltaSymbol = `<span style="color: #3B82F6;">NEW</span>`;
+        } else if (change.change_type === 'modified') {
+          deltaSymbol = `<span style="color: #CA8A04;">MOD</span>`;
+        }
+
+        revisionHTML += `
+          <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; background-color: ${bgColor}; padding: 5px 8px; font-size: 8pt; line-height: 1.4;">
+            ${deltaSymbol} ${escapeHtml(change.description || '')}
+          </div>
+        `;
+        currentY += 22;
+      });
+    } else {
       revisionHTML += `
-        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; background-color: ${bgColor}; padding: 6px 8px; font-size: 9pt; line-height: 1.5;">
-          ${deltaSymbol} ${escapeHtml(change.description || '')}
+        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; padding: 5px 8px; font-size: 8pt; font-style: italic; color: #666;">
+          No changes in this revision
         </div>
       `;
-      currentY += 28;
-    });
+      currentY += 22;
+    }
+
+    currentY += 12; // Space before previous revisions
+
+    // Previous revisions list
+    const previousRevisions = revisions.filter(r => r.revision_number < project.current_revision).sort((a, b) => b.revision_number - a.revision_number);
+
+    if (previousRevisions.length > 0) {
+      revisionHTML += `
+        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; font-size: 9pt; font-weight: bold; padding: 4px 0;">
+          Previous Revisions
+        </div>
+      `;
+      currentY += 20;
+
+      previousRevisions.forEach(rev => {
+        revisionHTML += `
+          <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; padding: 3px 8px; font-size: 8pt; color: #374151;">
+            Revision ${rev.revision_number} - ${formatRevDate(rev.revision_date)}
+          </div>
+        `;
+        currentY += 18;
+      });
+    }
 
     return revisionHTML;
   }

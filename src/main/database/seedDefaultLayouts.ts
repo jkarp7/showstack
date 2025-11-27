@@ -190,14 +190,16 @@ function seedCoverPageLayout() {
       })
     },
 
-    // Revision issued text
+    // Revision date
     {
-      element_type: 'text',
+      element_type: 'dataField',
       config: JSON.stringify({
-        content: 'REVISION ISSUED:'
+        fieldType: 'revision_date',
+        label: 'REVISION ISSUED:',
+        showLabel: true
       }),
       grid_column: 0,
-      grid_row: 14,
+      grid_row: 17,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -219,7 +221,7 @@ function seedCoverPageLayout() {
         showLabel: true
       }),
       grid_column: 0,
-      grid_row: 15,
+      grid_row: 18,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -687,7 +689,7 @@ function seedContactsPageLayout() {
         content: 'Shop Prep'
       }),
       grid_column: 2,
-      grid_row: 14,
+      grid_row: 10,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -706,7 +708,7 @@ function seedContactsPageLayout() {
         content: '{prep_start_date} to {prep_end_date}'
       }),
       grid_column: 6,
-      grid_row: 14,
+      grid_row: 10,
       column_span: 4,
       row_span: 1,
       layer: 0,
@@ -722,7 +724,7 @@ function seedContactsPageLayout() {
         content: 'Load In'
       }),
       grid_column: 2,
-      grid_row: 15,
+      grid_row: 11,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -741,7 +743,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 6,
-      grid_row: 15,
+      grid_row: 11,
       column_span: 4,
       row_span: 1,
       layer: 0,
@@ -758,7 +760,7 @@ function seedContactsPageLayout() {
         content: 'First Preview'
       }),
       grid_column: 2,
-      grid_row: 16,
+      grid_row: 12,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -777,7 +779,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 6,
-      grid_row: 16,
+      grid_row: 12,
       column_span: 4,
       row_span: 1,
       layer: 0,
@@ -794,7 +796,7 @@ function seedContactsPageLayout() {
         content: 'Opening Night'
       }),
       grid_column: 2,
-      grid_row: 17,
+      grid_row: 13,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -813,7 +815,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 6,
-      grid_row: 17,
+      grid_row: 13,
       column_span: 4,
       row_span: 1,
       layer: 0,
@@ -830,7 +832,7 @@ function seedContactsPageLayout() {
         content: 'Closing Night'
       }),
       grid_column: 2,
-      grid_row: 18,
+      grid_row: 14,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -849,7 +851,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 6,
-      grid_row: 18,
+      grid_row: 14,
       column_span: 4,
       row_span: 1,
       layer: 0,
@@ -1277,7 +1279,7 @@ function seedNotesPageLayout() {
       grid_column: 0,
       grid_row: 2,
       column_span: 12,
-      row_span: 5,
+      row_span: 6,
       layer: 0,
       style: JSON.stringify({
         fontFamily: 'Arial',
@@ -1285,7 +1287,8 @@ function seedNotesPageLayout() {
         textAlign: 'left',
         color: '#000000',
         backgroundColor: 'transparent',
-        padding: 12,
+        paddingTop: 0,
+        paddingBottom: 8,
         paddingLeft: 16,
         lineHeight: 1.4
       })
@@ -1299,7 +1302,7 @@ function seedNotesPageLayout() {
         content: 'General Notes'
       }),
       grid_column: 0,
-      grid_row: 8,
+      grid_row: 7,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -1322,9 +1325,9 @@ function seedNotesPageLayout() {
         noteType: 'general_notes'
       }),
       grid_column: 0,
-      grid_row: 9,
+      grid_row: 8,
       column_span: 12,
-      row_span: 4,
+      row_span: 6,
       layer: 0,
       style: JSON.stringify({
         fontFamily: 'Arial',
@@ -1332,7 +1335,8 @@ function seedNotesPageLayout() {
         textAlign: 'left',
         color: '#000000',
         backgroundColor: 'transparent',
-        padding: 12,
+        paddingTop: 0,
+        paddingBottom: 8,
         paddingLeft: 16,
         lineHeight: 1.4
       })
@@ -1346,7 +1350,7 @@ function seedNotesPageLayout() {
         content: 'Fixture Notes'
       }),
       grid_column: 0,
-      grid_row: 14,
+      grid_row: 13,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -1369,9 +1373,9 @@ function seedNotesPageLayout() {
         noteType: 'fixture_notes'
       }),
       grid_column: 0,
-      grid_row: 15,
+      grid_row: 14,
       column_span: 12,
-      row_span: 5,
+      row_span: 7,
       layer: 0,
       style: JSON.stringify({
         fontFamily: 'Arial',
@@ -1379,7 +1383,8 @@ function seedNotesPageLayout() {
         textAlign: 'left',
         color: '#000000',
         backgroundColor: 'transparent',
-        padding: 12,
+        paddingTop: 0,
+        paddingBottom: 8,
         paddingLeft: 16,
         lineHeight: 1.4
       })
