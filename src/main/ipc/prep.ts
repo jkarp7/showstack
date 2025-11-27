@@ -762,7 +762,7 @@ function renderLayoutElement(
 
   if (element_type === 'dataField') {
     const value = getDataFieldValue(config.fieldType, project);
-    const label = config.showLabel && config.label ? config.label + ' ' : '';
+    const label = config.showLabel && config.label ? config.label + '  ' : ''; // 2 spaces
 
     if (!value && !label) return '';
 
@@ -872,24 +872,38 @@ function renderLayoutElement(
         let rowBgColor = '#FFFFFF';
 
         if (change) {
-          if (change.change_type === 'increase') {
-            const oldTotal = (change.old_values?.active_qty || 0) + (change.old_values?.spare_qty || 0);
-            const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
-            const delta = newTotal - oldTotal;
-            deltaContent = `<span style="color: #059669;">▲ +${delta}</span>`;
-            rowBgColor = '#D1FAE5'; // Light green
-          } else if (change.change_type === 'decrease') {
-            const oldTotal = (change.old_values?.active_qty || 0) + (change.old_values?.spare_qty || 0);
-            const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
-            const delta = oldTotal - newTotal;
-            deltaContent = `<span style="color: #DC2626;">▼ -${delta}</span>`;
-            rowBgColor = '#FEE2E2'; // Light red
-          } else if (change.change_type === 'new') {
+          if (change.change_type === 'addition') {
+            // New item added
             deltaContent = '<span style="color: #3B82F6;">NEW</span>';
             rowBgColor = '#DBEAFE'; // Light blue
-          } else if (change.change_type === 'modified') {
-            deltaContent = '<span style="color: #CA8A04;">MOD</span>';
-            rowBgColor = '#FEF9C3'; // Light yellow
+          } else if (change.change_type === 'deletion') {
+            // Item removed (shouldn't show in equipment list, but handle it)
+            deltaContent = '<span style="color: #DC2626;">DEL</span>';
+            rowBgColor = '#FEE2E2'; // Light red
+          } else if (change.change_type === 'modification') {
+            // Check if quantity changed
+            const oldActive = change.old_values?.active_qty || 0;
+            const oldSpare = change.old_values?.spare_qty || 0;
+            const newActive = change.new_values?.active_qty || 0;
+            const newSpare = change.new_values?.spare_qty || 0;
+            const oldTotal = oldActive + oldSpare;
+            const newTotal = newActive + newSpare;
+
+            if (newTotal > oldTotal) {
+              // Quantity increased
+              const delta = newTotal - oldTotal;
+              deltaContent = `<span style="color: #059669;">▲ +${delta}</span>`;
+              rowBgColor = '#D1FAE5'; // Light green
+            } else if (newTotal < oldTotal) {
+              // Quantity decreased
+              const delta = oldTotal - newTotal;
+              deltaContent = `<span style="color: #DC2626;">▼ -${delta}</span>`;
+              rowBgColor = '#FEE2E2'; // Light red
+            } else {
+              // Other modification (description, notes, etc.)
+              deltaContent = '<span style="color: #CA8A04;">MOD</span>';
+              rowBgColor = '#FEF9C3'; // Light yellow
+            }
           }
         }
 
@@ -1000,14 +1014,6 @@ function renderLayoutElement(
       }
     };
 
-    // Header: "REVISION CHANGE LOG"
-    revisionHTML += `
-      <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; font-size: 12pt; font-weight: bold; text-align: center; padding: 8px 0;">
-        REVISION CHANGE LOG
-      </div>
-    `;
-    currentY += 32;
-
     // Legend - compact grid at top
     const legendHeight = 14;
     const legendPadding = 3;
@@ -1027,7 +1033,7 @@ function renderLayoutElement(
         Modified
       </div>
     `;
-    currentY += legendHeight + 8;
+    currentY += legendHeight + 16; // Increased spacing after legend
 
     // Current revision header with number and date
     revisionHTML += `
@@ -1035,34 +1041,47 @@ function renderLayoutElement(
         Revision ${project.current_revision} - Issued ${formatRevDate(currentRevision.revision_date)}
       </div>
     `;
-    currentY += 28;
+    currentY += 32; // Increased spacing after header
 
     // Current revision changes
     if (changeLog.length > 0) {
       changeLog.forEach(change => {
-        const bgColor =
-          change.change_type === 'increase' ? '#D1FAE5' :
-          change.change_type === 'decrease' ? '#FEE2E2' :
-          change.change_type === 'new' ? '#DBEAFE' :
-          change.change_type === 'modified' ? '#FEF9C3' : '#FFF';
-
+        let bgColor = '#FFF';
         let deltaSymbol = '';
 
-        // Show changes with delta symbols
-        if (change.change_type === 'increase') {
-          const oldTotal = (change.old_values?.active_qty || 0) + (change.old_values?.spare_qty || 0);
-          const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
-          const delta = newTotal - oldTotal;
-          deltaSymbol = `<span style="color: #059669;">▲ +${delta}</span>`;
-        } else if (change.change_type === 'decrease') {
-          const oldTotal = (change.old_values?.active_qty || 0) + (change.old_values?.spare_qty || 0);
-          const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
-          const delta = oldTotal - newTotal;
-          deltaSymbol = `<span style="color: #DC2626;">▼ -${delta}</span>`;
-        } else if (change.change_type === 'new') {
+        // Determine change display based on change_type
+        if (change.change_type === 'addition') {
+          // New item added
+          bgColor = '#DBEAFE'; // Light blue
           deltaSymbol = `<span style="color: #3B82F6;">NEW</span>`;
-        } else if (change.change_type === 'modified') {
-          deltaSymbol = `<span style="color: #CA8A04;">MOD</span>`;
+        } else if (change.change_type === 'deletion') {
+          // Item removed
+          bgColor = '#FEE2E2'; // Light red
+          deltaSymbol = `<span style="color: #DC2626;">REMOVED</span>`;
+        } else if (change.change_type === 'modification') {
+          // Check if quantity changed
+          const oldActive = change.old_values?.active_qty || 0;
+          const oldSpare = change.old_values?.spare_qty || 0;
+          const newActive = change.new_values?.active_qty || 0;
+          const newSpare = change.new_values?.spare_qty || 0;
+          const oldTotal = oldActive + oldSpare;
+          const newTotal = newActive + newSpare;
+
+          if (newTotal > oldTotal) {
+            // Quantity increased
+            const delta = newTotal - oldTotal;
+            bgColor = '#D1FAE5'; // Light green
+            deltaSymbol = `<span style="color: #059669;">▲ +${delta}</span>`;
+          } else if (newTotal < oldTotal) {
+            // Quantity decreased
+            const delta = oldTotal - newTotal;
+            bgColor = '#FEE2E2'; // Light red
+            deltaSymbol = `<span style="color: #DC2626;">▼ -${delta}</span>`;
+          } else {
+            // Other modification (description, notes, etc.)
+            bgColor = '#FEF9C3'; // Light yellow
+            deltaSymbol = `<span style="color: #CA8A04;">MOD</span>`;
+          }
         }
 
         revisionHTML += `

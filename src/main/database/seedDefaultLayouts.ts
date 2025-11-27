@@ -870,13 +870,14 @@ function seedContactsPageLayout() {
         content: 'Please confirm all dates with Production Management'
       }),
       grid_column: 0,
-      grid_row: 19,
+      grid_row: 16,
       column_span: 12,
       row_span: 1,
       layer: 0,
       style: JSON.stringify({
         fontFamily: 'Arial',
         fontSize: 10,
+        fontWeight: 'bold',
         textAlign: 'center',
         color: '#000000',
         paddingTop: 12
@@ -1030,11 +1031,11 @@ function seedEquipmentPageLayout() {
 
 function seedRevisionSummaryLayout() {
   const elements: Partial<LayoutElementData>[] = [
-    // Revision change log title
+    // Page header (matching other pages style)
     {
       element_type: 'text',
       config: JSON.stringify({
-        content: 'REVISION {revision_number} CHANGE LOG'
+        content: 'REVISION CHANGE LOG'
       }),
       grid_column: 0,
       grid_row: 0,
@@ -1043,147 +1044,12 @@ function seedRevisionSummaryLayout() {
       layer: 0,
       style: JSON.stringify({
         fontFamily: 'Arial',
-        fontSize: 13,
+        fontSize: 14,
         fontWeight: 'bold',
         textAlign: 'center',
-        backgroundColor: '#FEF3C7',
-        padding: 8
-      })
-    },
-
-    // Subtitle with stats
-    {
-      element_type: 'text',
-      config: JSON.stringify({
-        content: 'Issued on {revision_date} | {total_items} total items | {increases} increases, {decreases} decreases, {new_items} new items'
-      }),
-      grid_column: 0,
-      grid_row: 4,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 9,
-        fontStyle: 'italic',
-        textAlign: 'center',
-        padding: 4
-      })
-    },
-
-    // Legend title
-    {
-      element_type: 'text',
-      config: JSON.stringify({
-        content: 'REVISION CHANGE LEGEND'
-      }),
-      grid_column: 0,
-      grid_row: 6,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 11,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        padding: 6
-      })
-    },
-
-    // Legend: Increased
-    {
-      element_type: 'text',
-      config: JSON.stringify({
-        content: 'Item quantity increased from previous revision'
-      }),
-      grid_column: 0,
-      grid_row: 7,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 9,
-        backgroundColor: '#D1FAE5',
-        padding: 6
-      })
-    },
-
-    // Legend: Decreased
-    {
-      element_type: 'text',
-      config: JSON.stringify({
-        content: 'Item quantity decreased from previous revision'
-      }),
-      grid_column: 0,
-      grid_row: 8,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 9,
-        backgroundColor: '#FEE2E2',
-        padding: 6
-      })
-    },
-
-    // Legend: New
-    {
-      element_type: 'text',
-      config: JSON.stringify({
-        content: 'New item added in this revision'
-      }),
-      grid_column: 0,
-      grid_row: 9,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 9,
-        backgroundColor: '#FEF9C3',
-        padding: 6
-      })
-    },
-
-    // Legend: Modified
-    {
-      element_type: 'text',
-      config: JSON.stringify({
-        content: 'Item modified from previous revision'
-      }),
-      grid_column: 0,
-      grid_row: 10,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 9,
-        backgroundColor: '#DBEAFE',
-        padding: 6
-      })
-    },
-
-    // Detailed changes title
-    {
-      element_type: 'text',
-      config: JSON.stringify({
-        content: 'DETAILED CHANGES:'
-      }),
-      grid_column: 0,
-      grid_row: 12,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 11,
-        fontWeight: 'bold',
-        paddingTop: 12,
-        paddingBottom: 6
+        color: '#000000',
+        backgroundColor: '#D1D5DB',
+        padding: 10
       })
     },
 
@@ -1192,9 +1058,9 @@ function seedRevisionSummaryLayout() {
       element_type: 'revision_log',
       config: JSON.stringify({}),
       grid_column: 0,
-      grid_row: 13,
+      grid_row: 1,
       column_span: 12,
-      row_span: 6,
+      row_span: 19,
       layer: 0,
       style: JSON.stringify({
         fontFamily: 'Arial',
@@ -1266,6 +1132,7 @@ function seedNotesPageLayout() {
         color: '#000000',
         backgroundColor: '#F3F4F6',
         padding: 6,
+        paddingBottom: 0,
         paddingLeft: 12
       })
     },
@@ -1314,6 +1181,7 @@ function seedNotesPageLayout() {
         color: '#000000',
         backgroundColor: '#F3F4F6',
         padding: 6,
+        paddingBottom: 0,
         paddingLeft: 12
       })
     },
@@ -1327,7 +1195,7 @@ function seedNotesPageLayout() {
       grid_column: 0,
       grid_row: 8,
       column_span: 12,
-      row_span: 6,
+      row_span: 8,
       layer: 0,
       style: JSON.stringify({
         fontFamily: 'Arial',
@@ -1350,7 +1218,7 @@ function seedNotesPageLayout() {
         content: 'Fixture Notes'
       }),
       grid_column: 0,
-      grid_row: 13,
+      grid_row: 16,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -1362,6 +1230,7 @@ function seedNotesPageLayout() {
         color: '#000000',
         backgroundColor: '#F3F4F6',
         padding: 6,
+        paddingBottom: 0,
         paddingLeft: 12
       })
     },
@@ -1373,9 +1242,9 @@ function seedNotesPageLayout() {
         noteType: 'fixture_notes'
       }),
       grid_column: 0,
-      grid_row: 14,
+      grid_row: 17,
       column_span: 12,
-      row_span: 7,
+      row_span: 3,
       layer: 0,
       style: JSON.stringify({
         fontFamily: 'Arial',
