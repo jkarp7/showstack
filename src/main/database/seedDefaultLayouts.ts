@@ -282,7 +282,7 @@ function seedContactsPageLayout() {
         content: 'General Manager:'
       }),
       grid_column: 0,
-      grid_row: 5,
+      grid_row: 2,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -290,9 +290,8 @@ function seedContactsPageLayout() {
         fontFamily: 'Arial',
         fontSize: 10,
         fontWeight: 'bold',
-        textAlign: 'right',
+        textAlign: 'left',
         color: '#000000',
-        paddingRight: 8,
         paddingTop: 4
       })
     },
@@ -303,7 +302,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 3,
-      grid_row: 5,
+      grid_row: 2,
       column_span: 4,
       row_span: 1,
       layer: 0,
@@ -320,7 +319,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 3,
-      grid_row: 6,
+      grid_row: 3,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -337,7 +336,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 6,
-      grid_row: 6,
+      grid_row: 3,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -354,14 +353,15 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 9,
-      grid_row: 6,
+      grid_row: 3,
       column_span: 3,
       row_span: 1,
       layer: 0,
       style: JSON.stringify({
         fontFamily: 'Arial',
         fontSize: 10,
-        padding: 2
+        padding: 2,
+        textAlign: 'right'
       })
     },
 
@@ -372,7 +372,7 @@ function seedContactsPageLayout() {
         content: 'Production Manager:'
       }),
       grid_column: 0,
-      grid_row: 7,
+      grid_row: 4,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -380,9 +380,8 @@ function seedContactsPageLayout() {
         fontFamily: 'Arial',
         fontSize: 10,
         fontWeight: 'bold',
-        textAlign: 'right',
+        textAlign: 'left',
         color: '#000000',
-        paddingRight: 8,
         paddingTop: 8
       })
     },
@@ -393,7 +392,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 3,
-      grid_row: 7,
+      grid_row: 4,
       column_span: 4,
       row_span: 1,
       layer: 0,
@@ -410,7 +409,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 3,
-      grid_row: 8,
+      grid_row: 5,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -427,7 +426,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 6,
-      grid_row: 8,
+      grid_row: 5,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -444,14 +443,15 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 9,
-      grid_row: 8,
+      grid_row: 5,
       column_span: 3,
       row_span: 1,
       layer: 0,
       style: JSON.stringify({
         fontFamily: 'Arial',
         fontSize: 10,
-        padding: 2
+        padding: 2,
+        textAlign: 'right'
       })
     },
 
@@ -462,7 +462,7 @@ function seedContactsPageLayout() {
         content: 'Lighting Designer:'
       }),
       grid_column: 0,
-      grid_row: 9,
+      grid_row: 6,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -470,7 +470,7 @@ function seedContactsPageLayout() {
         fontFamily: 'Arial',
         fontSize: 10,
         fontWeight: 'bold',
-        textAlign: 'right',
+        textAlign: 'left',
         color: '#000000',
         paddingRight: 8,
         paddingTop: 8
@@ -483,7 +483,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 3,
-      grid_row: 9,
+      grid_row: 6,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -500,7 +500,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 6,
-      grid_row: 9,
+      grid_row: 6,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -517,7 +517,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 9,
-      grid_row: 9,
+      grid_row: 6,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -525,6 +525,8 @@ function seedContactsPageLayout() {
         fontFamily: 'Arial',
         fontSize: 10,
         paddingTop: 8
+,
+        textAlign: 'right'
       })
     },
 
@@ -535,7 +537,7 @@ function seedContactsPageLayout() {
         content: 'Associate Lighting Designer:'
       }),
       grid_column: 0,
-      grid_row: 10,
+      grid_row: 7,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -543,7 +545,7 @@ function seedContactsPageLayout() {
         fontFamily: 'Arial',
         fontSize: 10,
         fontWeight: 'bold',
-        textAlign: 'right',
+        textAlign: 'left',
         color: '#000000',
         paddingRight: 8,
         paddingTop: 8
@@ -556,7 +558,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 3,
-      grid_row: 10,
+      grid_row: 7,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -573,7 +575,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 6,
-      grid_row: 10,
+      grid_row: 7,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -590,7 +592,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 9,
-      grid_row: 10,
+      grid_row: 7,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -598,6 +600,8 @@ function seedContactsPageLayout() {
         fontFamily: 'Arial',
         fontSize: 10,
         paddingTop: 8
+,
+        textAlign: 'right'
       })
     },
 
@@ -608,7 +612,7 @@ function seedContactsPageLayout() {
         content: 'Production Electrician:'
       }),
       grid_column: 0,
-      grid_row: 11,
+      grid_row: 8,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -616,7 +620,7 @@ function seedContactsPageLayout() {
         fontFamily: 'Arial',
         fontSize: 10,
         fontWeight: 'bold',
-        textAlign: 'right',
+        textAlign: 'left',
         color: '#000000',
         paddingRight: 8,
         paddingTop: 8
@@ -629,7 +633,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 3,
-      grid_row: 11,
+      grid_row: 8,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -646,7 +650,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 6,
-      grid_row: 11,
+      grid_row: 8,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -663,7 +667,7 @@ function seedContactsPageLayout() {
         showLabel: false
       }),
       grid_column: 9,
-      grid_row: 11,
+      grid_row: 8,
       column_span: 3,
       row_span: 1,
       layer: 0,
@@ -671,6 +675,8 @@ function seedContactsPageLayout() {
         fontFamily: 'Arial',
         fontSize: 10,
         paddingTop: 8
+,
+        textAlign: 'right'
       })
     },
 
@@ -680,7 +686,7 @@ function seedContactsPageLayout() {
       config: JSON.stringify({
         content: 'Shop Prep'
       }),
-      grid_column: 1,
+      grid_column: 2,
       grid_row: 14,
       column_span: 3,
       row_span: 1,
@@ -699,7 +705,7 @@ function seedContactsPageLayout() {
       config: JSON.stringify({
         content: '{prep_start_date} to {prep_end_date}'
       }),
-      grid_column: 4,
+      grid_column: 6,
       grid_row: 14,
       column_span: 4,
       row_span: 1,
@@ -715,7 +721,7 @@ function seedContactsPageLayout() {
       config: JSON.stringify({
         content: 'Load In'
       }),
-      grid_column: 1,
+      grid_column: 2,
       grid_row: 15,
       column_span: 3,
       row_span: 1,
@@ -734,7 +740,7 @@ function seedContactsPageLayout() {
         fieldType: 'load_in_date',
         showLabel: false
       }),
-      grid_column: 4,
+      grid_column: 6,
       grid_row: 15,
       column_span: 4,
       row_span: 1,
@@ -742,6 +748,8 @@ function seedContactsPageLayout() {
       style: JSON.stringify({
         fontFamily: 'Arial',
         fontSize: 10
+,
+        paddingLeft: 12
       })
     },
     {
@@ -749,7 +757,7 @@ function seedContactsPageLayout() {
       config: JSON.stringify({
         content: 'First Preview'
       }),
-      grid_column: 1,
+      grid_column: 2,
       grid_row: 16,
       column_span: 3,
       row_span: 1,
@@ -768,7 +776,7 @@ function seedContactsPageLayout() {
         fieldType: 'first_preview_date',
         showLabel: false
       }),
-      grid_column: 4,
+      grid_column: 6,
       grid_row: 16,
       column_span: 4,
       row_span: 1,
@@ -776,6 +784,8 @@ function seedContactsPageLayout() {
       style: JSON.stringify({
         fontFamily: 'Arial',
         fontSize: 10
+,
+        paddingLeft: 12
       })
     },
     {
@@ -783,7 +793,7 @@ function seedContactsPageLayout() {
       config: JSON.stringify({
         content: 'Opening Night'
       }),
-      grid_column: 1,
+      grid_column: 2,
       grid_row: 17,
       column_span: 3,
       row_span: 1,
@@ -802,7 +812,7 @@ function seedContactsPageLayout() {
         fieldType: 'opening_night_date',
         showLabel: false
       }),
-      grid_column: 4,
+      grid_column: 6,
       grid_row: 17,
       column_span: 4,
       row_span: 1,
@@ -810,6 +820,8 @@ function seedContactsPageLayout() {
       style: JSON.stringify({
         fontFamily: 'Arial',
         fontSize: 10
+,
+        paddingLeft: 12
       })
     },
     {
@@ -817,7 +829,7 @@ function seedContactsPageLayout() {
       config: JSON.stringify({
         content: 'Closing Night'
       }),
-      grid_column: 1,
+      grid_column: 2,
       grid_row: 18,
       column_span: 3,
       row_span: 1,
@@ -836,7 +848,7 @@ function seedContactsPageLayout() {
         fieldType: 'closing_date',
         showLabel: false
       }),
-      grid_column: 4,
+      grid_column: 6,
       grid_row: 18,
       column_span: 4,
       row_span: 1,
@@ -844,6 +856,8 @@ function seedContactsPageLayout() {
       style: JSON.stringify({
         fontFamily: 'Arial',
         fontSize: 10
+,
+        paddingLeft: 12
       })
     },
 

@@ -824,6 +824,26 @@ function renderLayoutElement(
     let equipmentHTML = '';
     let currentY = top;
 
+    // Add revision info at top
+    const formatDate = (timestamp?: number): string => {
+      if (!timestamp) return '';
+      try {
+        const date = new Date(timestamp);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      } catch {
+        return '';
+      }
+    };
+
+    if (currentRevision) {
+      equipmentHTML += `
+        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; font-size: 9pt; font-style: italic; color: #6B7280; padding-bottom: 8px;">
+          Revision ${project.current_revision} - ${formatDate(currentRevision.revision_date)}
+        </div>
+      `;
+      currentY += 22;
+    }
+
     sections.forEach(section => {
       const items = getItemsBySectionId(section.id);
       if (items.length === 0) return;
@@ -845,7 +865,7 @@ function renderLayoutElement(
             ${bulletedNotes}
           </div>
         `;
-        currentY += (noteLines.length * 12) + 8;
+        currentY += (noteLines.length * 12) + 20; // Extra space before equipment table
       }
 
       // Table headers: Delta | Total | Active | Spare | Description
@@ -900,8 +920,8 @@ function renderLayoutElement(
         // Item notes (if present)
         if (item.notes && item.notes.trim()) {
           equipmentHTML += `
-            <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth + spareWidth}px; top: ${currentY}px; width: ${descWidth}px; padding: 2px 4px; font-size: 7pt; font-style: italic; color: #6B7280; border-left: 2px solid #9CA3AF;">
-              Note: ${escapeHtml(item.notes)}
+            <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth + spareWidth}px; top: ${currentY}px; width: ${descWidth}px; padding: 2px 4px 2px 8px; font-size: 7pt; font-style: italic; color: #6B7280;">
+              ${escapeHtml(item.notes)}
             </div>
           `;
           currentY += 15;
@@ -920,7 +940,7 @@ function renderLayoutElement(
     const notes = getNotesByProjectId(project.id, noteType);
 
     if (notes.length === 0) {
-      return `<div style="${baseStyle} font-size: 8pt; color: #9CA3AF; font-style: italic;">No ${noteType.replace(/_/g, ' ')} available</div>`;
+      return ''; // No placeholder
     }
 
     let allContent: string[] = [];
@@ -947,7 +967,7 @@ function renderLayoutElement(
     });
 
     if (allContent.length === 0) {
-      return `<div style="${baseStyle} font-size: 8pt; color: #9CA3AF; font-style: italic;">No ${noteType.replace(/_/g, ' ')} available</div>`;
+      return ''; // No placeholder
     }
 
     // Render all notes in a single container
@@ -993,37 +1013,10 @@ function renderLayoutElement(
       }
     };
 
-    // List previous revisions issued
-    if (revisions.length > 1) {
-      const previousRevisions = revisions
-        .filter(r => r.revision_number < project.current_revision)
-        .sort((a, b) => b.revision_number - a.revision_number)
-        .map(r => `Rev ${r.revision_number} - ${formatRevDate(r.revision_date)}`)
-        .join(' | ');
-
-      if (previousRevisions) {
-        revisionHTML += `
-          <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; background-color: #F3F4F6; padding: 6px; font-size: 8pt; border: 1px solid #D1D5DB;">
-            <strong>Previous Revisions:</strong> ${escapeHtml(previousRevisions)}
-          </div>
-        `;
-        currentY += 25;
-      }
-    }
-
     // Display changes in current revision
     if (changeLog.length === 0) {
-      revisionHTML += `<div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; font-size: 9pt;">No changes in this revision</div>`;
-      return revisionHTML;
+      return '';
     }
-
-    // Header for changes section
-    revisionHTML += `
-      <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; background-color: #FEF3C7; padding: 6px; font-size: 9pt; font-weight: bold; border: 1px solid #FDE047;">
-        Revision ${project.current_revision} Changes - ${formatRevDate(currentRevision.revision_date)}
-      </div>
-    `;
-    currentY += 28;
 
     changeLog.forEach(change => {
       const bgColor =
@@ -1033,38 +1026,28 @@ function renderLayoutElement(
         change.change_type === 'modified' ? '#FEF9C3' : '#FFF';
 
       let deltaSymbol = '';
-      let changeDetail = '';
 
       // Show changes with delta symbols matching equipment list format
       if (change.change_type === 'increase') {
         const oldTotal = (change.old_values?.active_qty || 0) + (change.old_values?.spare_qty || 0);
         const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
         const delta = newTotal - oldTotal;
-        deltaSymbol = `<span style="color: #059669; font-weight: bold;">▲ +${delta}</span>`;
-        changeDetail = `Total: ${oldTotal} → ${newTotal}`;
+        deltaSymbol = `<span style="color: #059669;">▲ +${delta}</span>`;
       } else if (change.change_type === 'decrease') {
         const oldTotal = (change.old_values?.active_qty || 0) + (change.old_values?.spare_qty || 0);
         const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
         const delta = oldTotal - newTotal;
-        deltaSymbol = `<span style="color: #DC2626; font-weight: bold;">▼ -${delta}</span>`;
-        changeDetail = `Total: ${oldTotal} → ${newTotal}`;
+        deltaSymbol = `<span style="color: #DC2626;">▼ -${delta}</span>`;
       } else if (change.change_type === 'new') {
-        const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
-        deltaSymbol = `<span style="color: #3B82F6; font-weight: bold;">NEW</span>`;
-        changeDetail = `Added with total qty: ${newTotal}`;
-      } else if (change.change_type === 'modified') {
-        changeDetail = 'Item details modified';
+        deltaSymbol = `<span style="color: #3B82F6;">NEW</span>`;
       }
 
-      const sectionLabel = change.section_name ? ` [${change.section_name}]` : '';
-
       revisionHTML += `
-        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; background-color: ${bgColor}; padding: 8px; font-size: 9pt; border: 1px solid #E5E7EB; line-height: 1.5;">
-          ${deltaSymbol} <strong>${escapeHtml(change.description || '')}${sectionLabel}</strong><br/>
-          <span style="font-size: 8pt; color: #4B5563;">${escapeHtml(changeDetail)}</span>
+        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; background-color: ${bgColor}; padding: 6px 8px; font-size: 9pt; line-height: 1.5;">
+          ${deltaSymbol} ${escapeHtml(change.description || '')}
         </div>
       `;
-      currentY += 38;
+      currentY += 28;
     });
 
     return revisionHTML;
