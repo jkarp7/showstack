@@ -1299,7 +1299,7 @@ function seedNotesPageLayout() {
         content: 'General Notes'
       }),
       grid_column: 0,
-      grid_row: 7,
+      grid_row: 8,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -1322,9 +1322,9 @@ function seedNotesPageLayout() {
         noteType: 'general_notes'
       }),
       grid_column: 0,
-      grid_row: 8,
+      grid_row: 9,
       column_span: 12,
-      row_span: 5,
+      row_span: 4,
       layer: 0,
       style: JSON.stringify({
         fontFamily: 'Arial',
@@ -1346,7 +1346,7 @@ function seedNotesPageLayout() {
         content: 'Fixture Notes'
       }),
       grid_column: 0,
-      grid_row: 13,
+      grid_row: 14,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -1369,9 +1369,9 @@ function seedNotesPageLayout() {
         noteType: 'fixture_notes'
       }),
       grid_column: 0,
-      grid_row: 14,
+      grid_row: 15,
       column_span: 12,
-      row_span: 6,
+      row_span: 5,
       layer: 0,
       style: JSON.stringify({
         fontFamily: 'Arial',

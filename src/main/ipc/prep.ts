@@ -824,26 +824,6 @@ function renderLayoutElement(
     let equipmentHTML = '';
     let currentY = top;
 
-    // Add revision info at top
-    const formatDate = (timestamp?: number): string => {
-      if (!timestamp) return '';
-      try {
-        const date = new Date(timestamp);
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      } catch {
-        return '';
-      }
-    };
-
-    if (currentRevision) {
-      equipmentHTML += `
-        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; font-size: 9pt; font-style: italic; color: #6B7280; padding-bottom: 8px;">
-          Revision ${project.current_revision} - ${formatDate(currentRevision.revision_date)}
-        </div>
-      `;
-      currentY += 22;
-    }
-
     sections.forEach(section => {
       const items = getItemsBySectionId(section.id);
       if (items.length === 0) return;
@@ -1080,6 +1060,12 @@ function getDataFieldValue(fieldType: string, project: PrepProject): string {
     return phone;
   };
 
+  const getRevisionDate = (): string => {
+    const revisions = getRevisionsByProjectId(project.id);
+    const currentRevision = revisions.find(r => r.revision_number === project.current_revision);
+    return currentRevision ? formatDate(currentRevision.revision_date) : '';
+  };
+
   switch (fieldType) {
     case 'production_name': return project.production_name || 'Untitled Production';
     case 'venue': return project.venue || '';
@@ -1110,6 +1096,8 @@ function getDataFieldValue(fieldType: string, project: PrepProject): string {
     case 'opening_night_date': return formatDate(project.opening_night_date);
     case 'closing_date': return formatDate(project.closing_date);
     case 'current_revision': return String(project.current_revision);
+    case 'revision_number': return String(project.current_revision);
+    case 'revision_date': return getRevisionDate();
     default: return '';
   }
 }
