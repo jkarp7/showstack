@@ -1,4 +1,4 @@
-import { getDatabase, saveDatabase } from '../index';
+import { getAppDatabase, saveAppDatabase } from '../index';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   UserLicense,
@@ -11,7 +11,7 @@ import type {
  * Get the current active license
  */
 export function getCurrentLicense(): UserLicense | null {
-  const db = getDatabase();
+  const db = getAppDatabase();
 
   const result = db.exec(`
     SELECT * FROM licenses
@@ -31,7 +31,7 @@ export function getCurrentLicense(): UserLicense | null {
  * Get license by ID
  */
 export function getLicenseById(id: string): UserLicense | null {
-  const db = getDatabase();
+  const db = getAppDatabase();
 
   const result = db.exec(`
     SELECT * FROM licenses
@@ -49,7 +49,7 @@ export function getLicenseById(id: string): UserLicense | null {
  * Get license by license key
  */
 export function getLicenseByKey(licenseKey: string): UserLicense | null {
-  const db = getDatabase();
+  const db = getAppDatabase();
 
   const result = db.exec(`
     SELECT * FROM licenses
@@ -74,7 +74,7 @@ export function createLicense(data: {
   modules: ModuleAccess[];
   expirationDate: number;
 }): UserLicense {
-  const db = getDatabase();
+  const db = getAppDatabase();
   const now = Date.now();
   const id = uuidv4();
 
@@ -98,7 +98,7 @@ export function createLicense(data: {
     now
   ]);
 
-  saveDatabase();
+  saveAppDatabase();
 
   return getLicenseById(id)!;
 }
@@ -118,7 +118,7 @@ export function updateLicense(
     lastVerified: number;
   }>
 ): UserLicense {
-  const db = getDatabase();
+  const db = getAppDatabase();
   const now = Date.now();
 
   const fields: string[] = [];
@@ -163,7 +163,7 @@ export function updateLicense(
     WHERE id = ?
   `, values);
 
-  saveDatabase();
+  saveAppDatabase();
 
   return getLicenseById(id)!;
 }
@@ -172,7 +172,7 @@ export function updateLicense(
  * Delete license (soft delete by setting status to 'deleted')
  */
 export function deleteLicense(id: string): void {
-  const db = getDatabase();
+  const db = getAppDatabase();
 
   db.run(`
     UPDATE licenses
@@ -180,7 +180,7 @@ export function deleteLicense(id: string): void {
     WHERE id = ?
   `, [Date.now(), id]);
 
-  saveDatabase();
+  saveAppDatabase();
 }
 
 /**

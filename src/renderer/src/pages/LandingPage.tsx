@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NewProjectDialog } from '../components/common/NewProjectDialog';
 import { DeleteProjectDialog } from '../components/common/DeleteProjectDialog';
+import { ImportConflictDialog } from '../components/common/ImportConflictDialog';
 import { AccountDialog } from '../components/License/Account/AccountDialog';
 import { useProjectStore, Project } from '../store/projectStore';
 import { useFileStore } from '../store/fileStore';
@@ -10,7 +11,7 @@ import { migrateLegacyRecentFiles } from '../utils/recentFiles';
 export function LandingPage() {
   const navigate = useNavigate();
   const { projects, loadProjects, createProject, deleteProject, setCurrentProject } = useProjectStore();
-  const { openFileByPath } = useFileStore();
+  const { conflictInfo, conflictFilePath, resolveConflict } = useFileStore();
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false);
@@ -29,9 +30,14 @@ export function LandingPage() {
     }
   };
 
-  const handleOpenProject = (projectId: string) => {
-    setCurrentProject(projectId);
-    navigate(`/project/${projectId}`);
+  const handleOpenProject = async (projectId: string) => {
+    try {
+      setCurrentProject(projectId);
+      // Open project in a new window
+      await window.api.windows.openProject(projectId);
+    } catch (error) {
+      console.error('Failed to open project window:', error);
+    }
   };
 
   const handleDeleteProject = async () => {
@@ -42,6 +48,12 @@ export function LandingPage() {
         console.error('Failed to delete project:', error);
       }
     }
+  };
+
+  const handleResolveConflict = async (action: 'replace' | 'keep-both' | 'cancel') => {
+    await resolveConflict(action, async () => {
+      await loadProjects();
+    });
   };
 
   return (
@@ -256,6 +268,16 @@ export function LandingPage() {
         isOpen={isAccountDialogOpen}
         onClose={() => setIsAccountDialogOpen(false)}
       />
+
+      {/* Import Conflict Dialog */}
+      {conflictInfo && conflictFilePath && (
+        <ImportConflictDialog
+          isOpen={true}
+          conflict={conflictInfo}
+          filePath={conflictFilePath}
+          onResolve={handleResolveConflict}
+        />
+      )}
     </div>
   );
 }

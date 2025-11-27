@@ -58,6 +58,7 @@ contextBridge.exposeInMainWorld('api', {
   files: {
     open: () => ipcRenderer.invoke('file:open'),
     openByPath: (filePath: string) => ipcRenderer.invoke('file:openByPath', filePath),
+    resolveConflict: (filePath: string, resolution: any) => ipcRenderer.invoke('file:resolveConflict', filePath, resolution),
     save: (filePath?: string) => ipcRenderer.invoke('file:save', filePath),
     saveAs: (defaultName?: string, module?: string) => ipcRenderer.invoke('file:saveAs', defaultName, module),
     new: () => ipcRenderer.invoke('file:new'),
@@ -100,7 +101,7 @@ contextBridge.exposeInMainWorld('api', {
     notes: {
       getByProjectId: (projectId: string, type?: string) => ipcRenderer.invoke('prep:notes:getByProjectId', projectId, type),
       create: (data: any) => ipcRenderer.invoke('prep:notes:create', data),
-      update: (id: string, content: string) => ipcRenderer.invoke('prep:notes:update', id, content),
+      update: (id: string, updates: { content?: string; format?: string }) => ipcRenderer.invoke('prep:notes:update', id, updates),
       delete: (id: string) => ipcRenderer.invoke('prep:notes:delete', id)
     },
     // Note Templates
@@ -112,6 +113,17 @@ contextBridge.exposeInMainWorld('api', {
       update: (id: string, updates: any) => ipcRenderer.invoke('prep:noteTemplates:update', id, updates),
       delete: (id: string) => ipcRenderer.invoke('prep:noteTemplates:delete', id)
     },
+    // Layout Templates
+    layoutTemplates: {
+      getByProjectId: (projectId: string, pageType?: string) => ipcRenderer.invoke('prep:layoutTemplates:getByProjectId', projectId, pageType),
+      getById: (id: string) => ipcRenderer.invoke('prep:layoutTemplates:getById', id),
+      getElements: (templateId: string) => ipcRenderer.invoke('prep:layoutTemplates:getElements', templateId),
+      getDefault: (projectId: string, pageType: string) => ipcRenderer.invoke('prep:layoutTemplates:getDefault', projectId, pageType),
+      create: (data: any, elements: any[]) => ipcRenderer.invoke('prep:layoutTemplates:create', data, elements),
+      update: (id: string, updates: any, elements?: any[]) => ipcRenderer.invoke('prep:layoutTemplates:update', id, updates, elements),
+      delete: (id: string) => ipcRenderer.invoke('prep:layoutTemplates:delete', id),
+      seedDefaults: () => ipcRenderer.invoke('prep:layoutTemplates:seedDefaults')
+    },
     // File Operations
     file: {
       showOpenDialog: () => ipcRenderer.invoke('prep:file:showOpenDialog'),
@@ -119,7 +131,11 @@ contextBridge.exposeInMainWorld('api', {
       export: (projectId: string, filePath: string) => ipcRenderer.invoke('prep:file:export', projectId, filePath),
       import: (filePath: string) => ipcRenderer.invoke('prep:file:import', filePath),
       getFileName: (filePath: string) => ipcRenderer.invoke('prep:file:getFileName', filePath)
-    }
+    },
+    // PDF Export
+    exportPDF: (projectId: string, templateData: any) => ipcRenderer.invoke('prep:exportPDF', projectId, templateData),
+    // Print
+    print: (projectId: string, templateData: any) => ipcRenderer.invoke('prep:print', projectId, templateData)
   },
 
   // License operations
@@ -141,6 +157,12 @@ contextBridge.exposeInMainWorld('api', {
     save: (settings: any) => ipcRenderer.invoke('settings:save', settings),
     update: (updates: any) => ipcRenderer.invoke('settings:update', updates),
     reset: () => ipcRenderer.invoke('settings:reset')
+  },
+
+  // Window operations
+  windows: {
+    openProject: (projectId: string) => ipcRenderer.invoke('window:openProject', projectId),
+    getCurrentProjectId: () => ipcRenderer.invoke('window:getCurrentProjectId')
   }
 });
 
@@ -173,6 +195,7 @@ export interface ElectronAPI {
   files: {
     open: () => Promise<any>;
     openByPath: (filePath: string) => Promise<any>;
+    resolveConflict: (filePath: string, resolution: any) => Promise<any>;
     save: (filePath?: string) => Promise<string | null>;
     saveAs: (defaultName?: string, module?: string) => Promise<string | null>;
     new: () => Promise<string>;
@@ -219,6 +242,16 @@ export interface ElectronAPI {
       update: (id: string, updates: any) => Promise<any>;
       delete: (id: string) => Promise<void>;
     };
+    layoutTemplates: {
+      getByProjectId: (projectId: string, pageType?: string) => Promise<any[]>;
+      getById: (id: string) => Promise<any | null>;
+      getElements: (templateId: string) => Promise<any[]>;
+      getDefault: (projectId: string, pageType: string) => Promise<any | null>;
+      create: (data: any, elements: any[]) => Promise<any>;
+      update: (id: string, updates: any, elements?: any[]) => Promise<any>;
+      delete: (id: string) => Promise<void>;
+      seedDefaults: () => Promise<{ success: boolean; message: string }>;
+    };
     file: {
       showOpenDialog: () => Promise<string | null>;
       showSaveDialog: (defaultName?: string) => Promise<string | null>;
@@ -226,6 +259,8 @@ export interface ElectronAPI {
       import: (filePath: string) => Promise<any>;
       getFileName: (filePath: string) => Promise<string>;
     };
+    exportPDF: (projectId: string, templateData: any) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
+    print: (projectId: string, templateData: any) => Promise<{ success: boolean }>;
   };
   license: {
     getStatus: () => Promise<any>;
@@ -242,6 +277,10 @@ export interface ElectronAPI {
     save: (settings: any) => Promise<{ success: boolean }>;
     update: (updates: any) => Promise<{ success: boolean }>;
     reset: () => Promise<{ success: boolean }>;
+  };
+  windows: {
+    openProject: (projectId: string) => Promise<void>;
+    getCurrentProjectId: () => Promise<string | null>;
   };
 }
 

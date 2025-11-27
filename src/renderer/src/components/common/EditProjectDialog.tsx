@@ -13,17 +13,22 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
   const [description, setDescription] = useState('');
   const [logoPath, setLogoPath] = useState('');
   const [venue, setVenue] = useState('');
+  const [venueCity, setVenueCity] = useState('');
+  const [venueState, setVenueState] = useState('');
 
   // Design team
   const [lightingDesigner, setLightingDesigner] = useState('');
   const [lightingDesignerEmail, setLightingDesignerEmail] = useState('');
   const [lightingDesignerPhone, setLightingDesignerPhone] = useState('');
+  const [lightingAssociates, setLightingAssociates] = useState<Array<{name: string; email: string; phone: string}>>([]);
   const [audioDesigner, setAudioDesigner] = useState('');
   const [audioDesignerEmail, setAudioDesignerEmail] = useState('');
   const [audioDesignerPhone, setAudioDesignerPhone] = useState('');
+  const [audioAssociates, setAudioAssociates] = useState<Array<{name: string; email: string; phone: string}>>([]);
   const [videoDesigner, setVideoDesigner] = useState('');
   const [videoDesignerEmail, setVideoDesignerEmail] = useState('');
   const [videoDesignerPhone, setVideoDesignerPhone] = useState('');
+  const [videoAssociates, setVideoAssociates] = useState<Array<{name: string; email: string; phone: string}>>([]);
 
   // Production staff
   const [electrician, setElectrician] = useState('');
@@ -45,6 +50,8 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
   const [generalManagerCompany, setGeneralManagerCompany] = useState('');
 
   // Show dates
+  const [prepStart, setPrepStart] = useState('');
+  const [prepEnd, setPrepEnd] = useState('');
   const [loadIn, setLoadIn] = useState('');
   const [tech, setTech] = useState('');
   const [previews, setPreviews] = useState('');
@@ -61,16 +68,33 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
       setDescription(project.description || '');
       setLogoPath(project.logo_path || '');
       setVenue(project.venue || '');
+      setVenueCity(project.venue_city || '');
+      setVenueState(project.venue_state || '');
 
       setLightingDesigner(project.lighting_designer || '');
       setLightingDesignerEmail(project.lighting_designer_email || '');
       setLightingDesignerPhone(project.lighting_designer_phone || '');
+      setLightingAssociates(
+        project.lighting_associates
+          ? (typeof project.lighting_associates === 'string' ? JSON.parse(project.lighting_associates) : project.lighting_associates)
+          : []
+      );
       setAudioDesigner(project.audio_designer || '');
       setAudioDesignerEmail(project.audio_designer_email || '');
       setAudioDesignerPhone(project.audio_designer_phone || '');
+      setAudioAssociates(
+        project.audio_associates
+          ? (typeof project.audio_associates === 'string' ? JSON.parse(project.audio_associates) : project.audio_associates)
+          : []
+      );
       setVideoDesigner(project.video_designer || '');
       setVideoDesignerEmail(project.video_designer_email || '');
       setVideoDesignerPhone(project.video_designer_phone || '');
+      setVideoAssociates(
+        project.video_associates
+          ? (typeof project.video_associates === 'string' ? JSON.parse(project.video_associates) : project.video_associates)
+          : []
+      );
 
       setElectrician(project.electrician || '');
       setElectricianEmail(project.electrician_email || '');
@@ -90,6 +114,8 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
       setGeneralManagerPhone(project.general_manager_phone || '');
       setGeneralManagerCompany(project.general_manager_company || '');
 
+      setPrepStart(project.show_dates?.prep_start || '');
+      setPrepEnd(project.show_dates?.prep_end || '');
       setLoadIn(project.show_dates?.load_in || '');
       setTech(project.show_dates?.tech || '');
       setPreviews(project.show_dates?.previews || '');
@@ -108,6 +134,8 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
     if (name.trim()) {
       // Build show dates object, including all fields (empty dates will be undefined to clear them)
       const showDates: ShowDates = {
+        prep_start: prepStart || undefined,
+        prep_end: prepEnd || undefined,
         load_in: loadIn || undefined,
         tech: tech || undefined,
         previews: previews || undefined,
@@ -122,16 +150,21 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
         description: description.trim() || null,
         logo_path: logoPath || null,
         venue: venue.trim() || null,
+        venue_city: venueCity.trim() || null,
+        venue_state: venueState.trim() || null,
         // Design team
         lighting_designer: lightingDesigner.trim() || null,
         lighting_designer_email: lightingDesignerEmail.trim() || null,
         lighting_designer_phone: lightingDesignerPhone.trim() || null,
+        lighting_associates: lightingAssociates.length > 0 ? JSON.stringify(lightingAssociates) : null,
         audio_designer: audioDesigner.trim() || null,
         audio_designer_email: audioDesignerEmail.trim() || null,
         audio_designer_phone: audioDesignerPhone.trim() || null,
+        audio_associates: audioAssociates.length > 0 ? JSON.stringify(audioAssociates) : null,
         video_designer: videoDesigner.trim() || null,
         video_designer_email: videoDesignerEmail.trim() || null,
         video_designer_phone: videoDesignerPhone.trim() || null,
+        video_associates: videoAssociates.length > 0 ? JSON.stringify(videoAssociates) : null,
         // Production staff
         electrician: electrician.trim() || null,
         electrician_email: electricianEmail.trim() || null,
@@ -232,6 +265,35 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
               />
             </div>
 
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label htmlFor="venue-city" className="block text-sm font-medium text-gray-300 mb-2">
+                  Venue City
+                </label>
+                <input
+                  id="venue-city"
+                  type="text"
+                  value={venueCity}
+                  onChange={(e) => setVenueCity(e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                  placeholder="e.g., New York"
+                />
+              </div>
+              <div>
+                <label htmlFor="venue-state" className="block text-sm font-medium text-gray-300 mb-2">
+                  Venue State
+                </label>
+                <input
+                  id="venue-state"
+                  type="text"
+                  value={venueState}
+                  onChange={(e) => setVenueState(e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                  placeholder="e.g., NY"
+                />
+              </div>
+            </div>
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Show Logo
@@ -291,6 +353,62 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                   placeholder="Phone"
                 />
               </div>
+              {/* Associate Lighting Designers */}
+              <div className="mt-2">
+                {lightingAssociates.map((assoc, index) => (
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+                    <input
+                      type="text"
+                      value={assoc.name}
+                      onChange={(e) => {
+                        const updated = [...lightingAssociates];
+                        updated[index].name = e.target.value;
+                        setLightingAssociates(updated);
+                      }}
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                      placeholder="Associate name"
+                    />
+                    <input
+                      type="email"
+                      value={assoc.email}
+                      onChange={(e) => {
+                        const updated = [...lightingAssociates];
+                        updated[index].email = e.target.value;
+                        setLightingAssociates(updated);
+                      }}
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                      placeholder="Email"
+                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="tel"
+                        value={assoc.phone}
+                        onChange={(e) => {
+                          const updated = [...lightingAssociates];
+                          updated[index].phone = e.target.value;
+                          setLightingAssociates(updated);
+                        }}
+                        className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                        placeholder="Phone"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setLightingAssociates(lightingAssociates.filter((_, i) => i !== index))}
+                        className="px-2 py-2 bg-red-600 hover:bg-red-700 rounded text-white text-xs transition"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setLightingAssociates([...lightingAssociates, {name: '', email: '', phone: ''}])}
+                  className="mt-2 px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-xs transition"
+                >
+                  + Add Associate
+                </button>
+              </div>
             </div>
 
             {/* Audio Designer */}
@@ -319,6 +437,62 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                   placeholder="Phone"
                 />
               </div>
+              {/* Associate Audio Designers */}
+              <div className="mt-2">
+                {audioAssociates.map((assoc, index) => (
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+                    <input
+                      type="text"
+                      value={assoc.name}
+                      onChange={(e) => {
+                        const updated = [...audioAssociates];
+                        updated[index].name = e.target.value;
+                        setAudioAssociates(updated);
+                      }}
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                      placeholder="Associate name"
+                    />
+                    <input
+                      type="email"
+                      value={assoc.email}
+                      onChange={(e) => {
+                        const updated = [...audioAssociates];
+                        updated[index].email = e.target.value;
+                        setAudioAssociates(updated);
+                      }}
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                      placeholder="Email"
+                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="tel"
+                        value={assoc.phone}
+                        onChange={(e) => {
+                          const updated = [...audioAssociates];
+                          updated[index].phone = e.target.value;
+                          setAudioAssociates(updated);
+                        }}
+                        className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                        placeholder="Phone"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setAudioAssociates(audioAssociates.filter((_, i) => i !== index))}
+                        className="px-2 py-2 bg-red-600 hover:bg-red-700 rounded text-white text-xs transition"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setAudioAssociates([...audioAssociates, {name: '', email: '', phone: ''}])}
+                  className="mt-2 px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-xs transition"
+                >
+                  + Add Associate
+                </button>
+              </div>
             </div>
 
             {/* Video Designer */}
@@ -346,6 +520,62 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Phone"
                 />
+              </div>
+              {/* Associate Video Designers */}
+              <div className="mt-2">
+                {videoAssociates.map((assoc, index) => (
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+                    <input
+                      type="text"
+                      value={assoc.name}
+                      onChange={(e) => {
+                        const updated = [...videoAssociates];
+                        updated[index].name = e.target.value;
+                        setVideoAssociates(updated);
+                      }}
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                      placeholder="Associate name"
+                    />
+                    <input
+                      type="email"
+                      value={assoc.email}
+                      onChange={(e) => {
+                        const updated = [...videoAssociates];
+                        updated[index].email = e.target.value;
+                        setVideoAssociates(updated);
+                      }}
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                      placeholder="Email"
+                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="tel"
+                        value={assoc.phone}
+                        onChange={(e) => {
+                          const updated = [...videoAssociates];
+                          updated[index].phone = e.target.value;
+                          setVideoAssociates(updated);
+                        }}
+                        className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
+                        placeholder="Phone"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setVideoAssociates(videoAssociates.filter((_, i) => i !== index))}
+                        className="px-2 py-2 bg-red-600 hover:bg-red-700 rounded text-white text-xs transition"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setVideoAssociates([...videoAssociates, {name: '', email: '', phone: ''}])}
+                  className="mt-2 px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-xs transition"
+                >
+                  + Add Associate
+                </button>
               </div>
             </div>
           </div>
@@ -517,7 +747,33 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-4 text-blue-400">Show Dates</h3>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <label htmlFor="prep-start" className="block text-sm font-medium text-gray-300 mb-2">
+                  Prep Start
+                </label>
+                <input
+                  id="prep-start"
+                  type="date"
+                  value={prepStart}
+                  onChange={(e) => setPrepStart(e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="prep-end" className="block text-sm font-medium text-gray-300 mb-2">
+                  Prep End
+                </label>
+                <input
+                  id="prep-end"
+                  type="date"
+                  value={prepEnd}
+                  onChange={(e) => setPrepEnd(e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
               <div>
                 <label htmlFor="load-in" className="block text-sm font-medium text-gray-300 mb-2">
                   Load In

@@ -6,6 +6,7 @@ import type {
   PrepRevision,
   PrepNote,
   Discipline,
+  PrintTemplate,
 } from '../types/prep';
 
 // Type guard for window.api
@@ -22,6 +23,8 @@ interface PrepStore {
   items: PrepEquipmentItem[];
   revisions: PrepRevision[];
   notes: PrepNote[];
+  printTemplates: PrintTemplate[];
+  currentTemplate: PrintTemplate | null;
 
   // All projects (for project list view)
   allProjects: PrepProject[];
@@ -79,6 +82,7 @@ interface PrepStore {
     revision_number: number;
     notes?: string;
   }) => Promise<void>;
+  setRevisionZero: (projectId: string, notes?: string) => Promise<void>;
   generateRevision: (projectId: string, notes?: string) => Promise<void>;
   deleteRevision: (projectId: string, revisionId: string) => Promise<void>;
 
@@ -94,6 +98,12 @@ interface PrepStore {
   updateNote: (id: string, content: string) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
 
+  // ===== PRINT TEMPLATE ACTIONS =====
+  loadPrintTemplates: (projectId: string) => Promise<void>;
+  setCurrentTemplate: (template: PrintTemplate | null) => void;
+  saveTemplate: (template: PrintTemplate) => Promise<void>;
+  deleteTemplate: (templateId: string) => Promise<void>;
+
   // ===== UTILITY ACTIONS =====
   clearCurrentProject: () => void;
 }
@@ -104,6 +114,8 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
   items: [],
   revisions: [],
   notes: [],
+  printTemplates: [],
+  currentTemplate: null,
   allProjects: [],
   isLoading: false,
 
@@ -275,28 +287,50 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
         updates.venue = parentProject.venue;
         syncedFields.push('venue');
       }
+      if (parentProject.venue_city) {
+        updates.venue_city = parentProject.venue_city;
+        syncedFields.push('venue_city');
+      }
+      if (parentProject.venue_state) {
+        updates.venue_state = parentProject.venue_state;
+        syncedFields.push('venue_state');
+      }
 
-      // Dates - try to map from parent project
-      const dateFieldMap: Record<string, string> = {
-        'prep_start': 'prep_start_date',
-        'prep_end': 'prep_end_date',
-        'load_in': 'load_in_date',
-        'first_preview': 'first_preview_date',
-        'opening': 'opening_night_date',
-        'closing': 'closing_date',
-        'load_out': 'load_out_date',
-      };
+      // Dates - map from parent project's show_dates object
+      if (parentProject.show_dates) {
+        const showDates = parentProject.show_dates;
 
-      for (const [parentField, prepField] of Object.entries(dateFieldMap)) {
-        if ((parentProject as any)[parentField]) {
-          updates[prepField] = (parentProject as any)[parentField];
-          syncedFields.push(prepField);
+        if (showDates.prep_start) {
+          updates.prep_start_date = showDates.prep_start;
+          syncedFields.push('prep_start_date');
         }
-        // Also try with _date suffix
-        const parentFieldWithSuffix = `${parentField}_date`;
-        if ((parentProject as any)[parentFieldWithSuffix]) {
-          updates[prepField] = (parentProject as any)[parentFieldWithSuffix];
-          syncedFields.push(prepField);
+        if (showDates.prep_end) {
+          updates.prep_end_date = showDates.prep_end;
+          syncedFields.push('prep_end_date');
+        }
+        if (showDates.load_in) {
+          updates.load_in_date = showDates.load_in;
+          syncedFields.push('load_in_date');
+        }
+        if (showDates.tech) {
+          updates.first_preview_date = showDates.tech; // Map tech to first_preview
+          syncedFields.push('first_preview_date');
+        }
+        if (showDates.previews) {
+          updates.first_preview_date = showDates.previews;
+          syncedFields.push('first_preview_date');
+        }
+        if (showDates.opening) {
+          updates.opening_night_date = showDates.opening;
+          syncedFields.push('opening_night_date');
+        }
+        if (showDates.closing) {
+          updates.closing_date = showDates.closing;
+          syncedFields.push('closing_date');
+        }
+        if (showDates.load_out) {
+          updates.load_out_date = showDates.load_out;
+          syncedFields.push('load_out_date');
         }
       }
 
@@ -330,6 +364,110 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
             break; // Use first match
           }
         }
+      }
+
+      // Associate Lighting Designer - sync first associate to ald_name/ald_email/ald_phone
+      if (parentProject.lighting_associates) {
+        try {
+          const lightingAssociates = typeof parentProject.lighting_associates === 'string'
+            ? JSON.parse(parentProject.lighting_associates)
+            : parentProject.lighting_associates;
+
+          if (Array.isArray(lightingAssociates) && lightingAssociates.length > 0) {
+            const firstAssociate = lightingAssociates[0];
+            if (firstAssociate.name) {
+              updates.ald_name = firstAssociate.name;
+              syncedFields.push('ald_name');
+            }
+            if (firstAssociate.email) {
+              updates.ald_email = firstAssociate.email;
+              syncedFields.push('ald_email');
+            }
+            if (firstAssociate.phone) {
+              updates.ald_phone = firstAssociate.phone;
+              syncedFields.push('ald_phone');
+            }
+          }
+        } catch (e) {
+          console.error('Failed to parse lighting_associates for ALD sync:', e);
+        }
+      }
+
+      // Associate Designers - sync from parent project's associate arrays
+      const additionalContacts: any[] = [];
+
+      // Lighting Associates
+      if (parentProject.lighting_associates) {
+        try {
+          const lightingAssociates = typeof parentProject.lighting_associates === 'string'
+            ? JSON.parse(parentProject.lighting_associates)
+            : parentProject.lighting_associates;
+
+          if (Array.isArray(lightingAssociates)) {
+            lightingAssociates.forEach((assoc: any) => {
+              additionalContacts.push({
+                role: 'Associate Lighting Designer',
+                discipline: 'lighting',
+                name: assoc.name || assoc,
+                email: assoc.email || '',
+                phone: assoc.phone || ''
+              });
+            });
+          }
+        } catch (e) {
+          console.error('Failed to parse lighting_associates:', e);
+        }
+      }
+
+      // Audio Associates
+      if (parentProject.audio_associates) {
+        try {
+          const audioAssociates = typeof parentProject.audio_associates === 'string'
+            ? JSON.parse(parentProject.audio_associates)
+            : parentProject.audio_associates;
+
+          if (Array.isArray(audioAssociates)) {
+            audioAssociates.forEach((assoc: any) => {
+              additionalContacts.push({
+                role: 'Associate Audio Designer',
+                discipline: 'audio',
+                name: assoc.name || assoc,
+                email: assoc.email || '',
+                phone: assoc.phone || ''
+              });
+            });
+          }
+        } catch (e) {
+          console.error('Failed to parse audio_associates:', e);
+        }
+      }
+
+      // Video Associates
+      if (parentProject.video_associates) {
+        try {
+          const videoAssociates = typeof parentProject.video_associates === 'string'
+            ? JSON.parse(parentProject.video_associates)
+            : parentProject.video_associates;
+
+          if (Array.isArray(videoAssociates)) {
+            videoAssociates.forEach((assoc: any) => {
+              additionalContacts.push({
+                role: 'Associate Video Designer',
+                discipline: 'video',
+                name: assoc.name || assoc,
+                email: assoc.email || '',
+                phone: assoc.phone || ''
+              });
+            });
+          }
+        } catch (e) {
+          console.error('Failed to parse video_associates:', e);
+        }
+      }
+
+      if (additionalContacts.length > 0) {
+        updates.additional_contacts = JSON.stringify(additionalContacts);
+        syncedFields.push('additional_contacts');
       }
 
       // Apply updates
@@ -533,6 +671,71 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
     }
   },
 
+  setRevisionZero: async (projectId: string, notes?: string) => {
+    if (!hasAPI()) {
+      console.warn('API not available');
+      return;
+    }
+
+    const { currentProject, items, sections } = get();
+
+    if (!currentProject || currentProject.id !== projectId) {
+      console.error('No current project loaded');
+      return;
+    }
+
+    if (currentProject.current_revision !== 0) {
+      throw new Error('Revision 0 can only be set when current revision is 0');
+    }
+
+    if (items.length === 0) {
+      throw new Error('Cannot set Revision 0 with no equipment items');
+    }
+
+    try {
+      // Create sections map for change detection
+      const sectionsMap = new Map(sections.map(s => [s.id, s]));
+
+      // Create baseline snapshot - all current items are "additions" at Revision 0
+      const changes = items.map(item => ({
+        item_id: item.id,
+        change_type: 'addition',
+        description: item.description,
+        section_name: sectionsMap.get(item.section_id)?.name,
+        new_values: {
+          description: item.description,
+          active_qty: item.active_qty,
+          spare_qty: item.spare_qty,
+          venue_qty: item.venue_qty,
+        }
+      }));
+
+      // Create Revision 0
+      await window.api.prep.revisions.create({
+        prep_project_id: projectId,
+        revision_number: 0,
+        notes: notes || 'Initial baseline',
+        change_log: JSON.stringify(changes),
+      });
+
+      // Mark all current items as added_in_revision: 0
+      for (const item of items) {
+        await window.api.prep.items.update(item.id, {
+          added_in_revision: 0,
+        });
+      }
+
+      // Reload revisions and items to reflect changes
+      await get().loadRevisions(projectId);
+      await get().loadItems(projectId);
+
+      console.log('Revision 0 baseline set successfully');
+    } catch (error) {
+      console.error('Failed to set revision 0:', error);
+      throw error;
+    }
+  },
+
   generateRevision: async (projectId: string, notes?: string) => {
     if (!hasAPI()) {
       console.warn('API not available');
@@ -561,8 +764,11 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
 
       let changes: any[] = [];
 
-      if (currentProject.current_revision === 0) {
-        // First revision - mark all current items as additions
+      // Check if Revision 0 exists (baseline has been set)
+      const hasRevisionZero = revisions.some(r => r.revision_number === 0);
+
+      if (currentProject.current_revision === 0 && !hasRevisionZero) {
+        // No baseline set - mark all current items as additions
         changes = items.map(item => ({
           item_id: item.id,
           change_type: 'addition',
@@ -806,6 +1012,70 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
     }
   },
 
+  // ===== PRINT TEMPLATE ACTIONS =====
+  loadPrintTemplates: async (projectId: string) => {
+    if (!hasAPI()) {
+      console.warn('API not available - using default template');
+      return;
+    }
+
+    try {
+      const templates = await window.api.prep.printTemplates?.getByProjectId(projectId);
+      set({ printTemplates: templates || [] });
+    } catch (error) {
+      console.error('Failed to load print templates:', error);
+      set({ printTemplates: [] });
+    }
+  },
+
+  setCurrentTemplate: (template: PrintTemplate | null) => {
+    set({ currentTemplate: template });
+  },
+
+  saveTemplate: async (template: PrintTemplate) => {
+    if (!hasAPI()) {
+      console.warn('API not available - storing template locally');
+      set((state) => ({
+        printTemplates: [...state.printTemplates, template],
+        currentTemplate: template,
+      }));
+      return;
+    }
+
+    try {
+      const saved = await window.api.prep.printTemplates?.save(template);
+      if (saved) {
+        set((state) => ({
+          printTemplates: [...state.printTemplates.filter(t => t.id !== saved.id), saved],
+          currentTemplate: saved,
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to save print template:', error);
+    }
+  },
+
+  deleteTemplate: async (templateId: string) => {
+    if (!hasAPI()) {
+      console.warn('API not available');
+      set((state) => ({
+        printTemplates: state.printTemplates.filter(t => t.id !== templateId),
+        currentTemplate: state.currentTemplate?.id === templateId ? null : state.currentTemplate,
+      }));
+      return;
+    }
+
+    try {
+      await window.api.prep.printTemplates?.delete(templateId);
+      set((state) => ({
+        printTemplates: state.printTemplates.filter(t => t.id !== templateId),
+        currentTemplate: state.currentTemplate?.id === templateId ? null : state.currentTemplate,
+      }));
+    } catch (error) {
+      console.error('Failed to delete print template:', error);
+    }
+  },
+
   // ===== UTILITY ACTIONS =====
   clearCurrentProject: () => {
     set({
@@ -814,6 +1084,8 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
       items: [],
       revisions: [],
       notes: [],
+      printTemplates: [],
+      currentTemplate: null,
     });
   },
 }));

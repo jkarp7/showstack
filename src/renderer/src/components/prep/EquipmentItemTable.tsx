@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { PrepEquipmentItem } from '../../types/prep';
 import { usePrepStore } from '../../store/prepStore';
 
@@ -45,6 +45,7 @@ export function EquipmentItemTable({
   const [isSubmittingNewRow, setIsSubmittingNewRow] = useState(false);
   const [draggedItem, setDraggedItem] = useState<PrepEquipmentItem | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const descriptionInputRef = useRef<HTMLInputElement>(null);
 
   const sortedItems = [...items].sort((a, b) => a.sort_order - b.sort_order);
 
@@ -188,8 +189,12 @@ export function EquipmentItemTable({
 
     if (!continueAdding) {
       setIsAddingRow(false);
+    } else {
+      // If continuing, focus the description input for next entry
+      setTimeout(() => {
+        descriptionInputRef.current?.focus();
+      }, 50);
     }
-    // If continuing, keep isAddingRow true and form will be reset for next entry
   };
 
   const handleNewRowKeyDown = (e: React.KeyboardEvent) => {
@@ -505,6 +510,7 @@ export function EquipmentItemTable({
               <tr className="bg-blue-900/20 border-2 border-blue-500">
                 <td className="px-3 py-2">
                   <input
+                    ref={descriptionInputRef}
                     type="text"
                     value={newRow.description}
                     onChange={(e) => setNewRow({ ...newRow, description: e.target.value })}

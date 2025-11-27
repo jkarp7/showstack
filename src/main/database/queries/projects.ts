@@ -118,6 +118,8 @@ export function updateProject(id: string, updates: Partial<Project>): Project {
     'name',
     'description',
     'venue',
+    'venue_city',
+    'venue_state',
     'designer',
     'logo_path',
     'enabled_modules',

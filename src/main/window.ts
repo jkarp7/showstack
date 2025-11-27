@@ -1,7 +1,7 @@
 import { BrowserWindow, dialog } from 'electron';
 import { join } from 'path';
 
-export function createWindow(): BrowserWindow {
+export function createWindow(routePath: string = '/'): BrowserWindow {
   const window = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -26,15 +26,18 @@ export function createWindow(): BrowserWindow {
   const isDev = process.env.NODE_ENV === 'development';
 
   if (isDev) {
-    // In development, load from Vite dev server
+    // In development, load from Vite dev server with route
     const devServerUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173';
-    console.log('Loading from dev server:', devServerUrl);
-    window.loadURL(devServerUrl);
+    const fullUrl = `${devServerUrl}${routePath}`;
+    console.log('Loading from dev server:', fullUrl);
+    window.loadURL(fullUrl);
     window.webContents.openDevTools();
   } else {
     // In production, load from built files
-    console.log('Loading from file:', join(__dirname, '../renderer/index.html'));
-    window.loadFile(join(__dirname, '../renderer/index.html'));
+    const indexPath = join(__dirname, '../renderer/index.html');
+    const fullPath = routePath !== '/' ? `${indexPath}#${routePath}` : indexPath;
+    console.log('Loading from file:', fullPath);
+    window.loadFile(indexPath, { hash: routePath });
   }
 
   // Handle window close event - check for unsaved changes

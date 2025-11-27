@@ -177,6 +177,7 @@ export interface PrepNote {
 
   type: NoteType;
   content: string;
+  format: 'plain' | 'bullets' | 'numbered';
 
   created_at: number;
   updated_at: number;
@@ -260,3 +261,298 @@ export interface EquipmentSortOptions {
   field: keyof PrepEquipmentItem;
   direction: 'asc' | 'desc';
 }
+
+/**
+ * Print Template System for Shop Order Output
+ */
+
+export type PrintSectionType =
+  | 'cover'
+  | 'project-details'
+  | 'venue-info'
+  | 'schedule'
+  | 'contacts'
+  | 'equipment-by-section'
+  | 'equipment-summary'
+  | 'notes'
+  | 'revision-summary'
+  | 'custom-text'
+  | 'page-break';
+
+export interface PrintSection {
+  id: string;
+  type: PrintSectionType;
+  order: number;
+  enabled: boolean;
+  config: PrintSectionConfig;
+}
+
+export interface PrintSectionConfig {
+  // Cover page
+  title?: string;
+  subtitle?: string;
+  showLogo?: boolean;
+  showDate?: boolean;
+
+  // Project details
+  includeFields?: string[];
+
+  // Venue info
+  includeContact?: boolean;
+  includeAddress?: boolean;
+
+  // Schedule
+  dateFormat?: string;
+  includeDates?: string[];
+
+  // Contacts
+  contactTypes?: string[]; // 'gm', 'pm', 'ld', 'ald', 'pe', 'additional'
+
+  // Equipment
+  groupBy?: 'section' | 'discipline' | 'none';
+  showVenueColumn?: boolean;
+  showWeightColumn?: boolean;
+  showPowerColumn?: boolean;
+  showRevisionMarkers?: boolean;
+
+  // Notes
+  noteType?: NoteType;
+  customText?: string;
+
+  // Revision summary
+  showRevisionDetails?: boolean;
+  includeChangelog?: boolean;
+  onlyShowIfRevisions?: boolean; // Only render if currentProject.current_revision > 0
+
+  // Custom text
+  fontSize?: number;
+  fontWeight?: 'normal' | 'bold';
+  alignment?: 'left' | 'center' | 'right';
+
+  // Page break
+  pageBreakBefore?: boolean;
+}
+
+export interface PrintTemplate {
+  id: string;
+  prep_project_id?: string; // null if global template
+  name: string;
+  description?: string;
+  sections: PrintSection[];
+  pageSettings: PrintPageSettings;
+  isDefault?: boolean;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface PrintPageSettings {
+  pageSize: 'letter' | 'legal' | 'a4' | 'tabloid';
+  orientation: 'portrait' | 'landscape';
+  margins: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+  headerText?: string;
+  footerText?: string;
+  showPageNumbers?: boolean;
+  fontSize?: number;
+  fontFamily?: string;
+}
+
+/**
+ * Visual Page Layout Designer System
+ */
+
+// Element types that can be placed on the canvas
+export type LayoutElementType = 'dataField' | 'text' | 'image' | 'table' | 'shape' | 'equipment_list' | 'notes_content' | 'revision_log';
+
+// Data fields that can be displayed
+export type DataFieldType =
+  | 'production_name'
+  | 'venue'
+  | 'venue_city'
+  | 'venue_state'
+  | 'order_date'
+  | 'prep_start_date'
+  | 'prep_end_date'
+  | 'load_in_date'
+  | 'first_preview_date'
+  | 'opening_night_date'
+  | 'closing_date'
+  | 'load_out_date'
+  | 'gm_name'
+  | 'gm_company'
+  | 'gm_email'
+  | 'gm_phone'
+  | 'pm_name'
+  | 'pm_company'
+  | 'pm_email'
+  | 'pm_phone'
+  | 'ld_name'
+  | 'ld_email'
+  | 'ld_phone'
+  | 'ald_name'
+  | 'ald_email'
+  | 'ald_phone'
+  | 'pe_name'
+  | 'pe_email'
+  | 'pe_phone'
+  | 'current_revision'
+  | 'disciplines'
+  | 'logo';
+
+// Shape types for visual elements
+export type ShapeType = 'rectangle' | 'line' | 'divider';
+
+// Configuration for data field elements
+export interface DataFieldConfig {
+  fieldType: DataFieldType;
+  label?: string; // Optional label to show before the value
+  showLabel?: boolean;
+  dateFormat?: string; // For date fields
+}
+
+// Configuration for text elements
+export interface TextConfig {
+  content: string;
+  placeholder?: string;
+}
+
+// Configuration for image elements
+export interface ImageConfig {
+  src?: string; // URL or base64
+  altText?: string;
+  objectFit?: 'contain' | 'cover' | 'fill';
+}
+
+// Configuration for table elements
+export interface TableConfig {
+  contactTypes: string[]; // Which contacts to include
+  showHeaders?: boolean;
+  columns: {
+    field: string;
+    label: string;
+    width?: number;
+  }[];
+}
+
+// Configuration for shape elements
+export interface ShapeConfig {
+  shapeType: ShapeType;
+  thickness?: number;
+  color?: string;
+}
+
+// Configuration for equipment list elements (dynamic content)
+export interface EquipmentListConfig {
+  // Equipment list is rendered dynamically from project data
+}
+
+// Configuration for notes content elements (dynamic content)
+export interface NotesContentConfig {
+  noteType?: 'general_conditions' | 'general_notes' | 'fixture_notes';
+}
+
+// Configuration for revision log elements (dynamic content)
+export interface RevisionLogConfig {
+  // Revision log is rendered dynamically from project data
+}
+
+// Union type for all element configurations
+export type ElementConfig =
+  | DataFieldConfig
+  | TextConfig
+  | ImageConfig
+  | TableConfig
+  | ShapeConfig
+  | EquipmentListConfig
+  | NotesContentConfig
+  | RevisionLogConfig;
+
+// Styling options for elements
+export interface ElementStyle {
+  // Typography
+  fontFamily?: string;
+  fontSize?: number;
+  fontWeight?: 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
+  fontStyle?: 'normal' | 'italic';
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
+  textDecoration?: 'none' | 'underline' | 'line-through';
+  lineHeight?: number;
+  letterSpacing?: number;
+
+  // Colors
+  color?: string;
+  backgroundColor?: string;
+
+  // Borders
+  borderWidth?: number;
+  borderStyle?: 'none' | 'solid' | 'dashed' | 'dotted';
+  borderColor?: string;
+  borderRadius?: number;
+
+  // Spacing
+  padding?: number;
+  paddingTop?: number;
+  paddingRight?: number;
+  paddingBottom?: number;
+  paddingLeft?: number;
+
+  // Display
+  opacity?: number;
+}
+
+// Layout element placed on the canvas
+export interface LayoutElement {
+  id: string;
+  element_type: LayoutElementType;
+  config: ElementConfig;
+
+  // Grid position
+  grid_column: number;
+  grid_row: number;
+  column_span: number;
+  row_span: number;
+
+  // Layer (z-index)
+  layer: number;
+
+  // Styling
+  style: ElementStyle;
+
+  created_at: number;
+  updated_at: number;
+}
+
+// Page layout template (app-level user preference)
+export interface PageLayoutTemplate {
+  id: string;
+  user_id?: string; // Optional user identifier
+  name: string;
+  description?: string;
+  page_type: PrintSectionType;
+
+  // Grid configuration
+  grid_columns: number;
+  grid_rows: number;
+  grid_gap: number; // pixels
+
+  // Page settings
+  page_width: number; // pixels
+  page_height: number; // pixels
+
+  elements: LayoutElement[];
+
+  is_default: boolean;
+  created_at: number;
+  updated_at: number;
+}
+
+// Helper types for creating/updating
+export type CreateLayoutTemplate = Omit<PageLayoutTemplate, 'id' | 'created_at' | 'updated_at' | 'elements'>;
+export type UpdateLayoutTemplate = Partial<Omit<PageLayoutTemplate, 'id' | 'created_at' | 'updated_at'>>;
+
+export type CreateLayoutElement = Omit<LayoutElement, 'id' | 'created_at' | 'updated_at'>;
+export type UpdateLayoutElement = Partial<Omit<LayoutElement, 'id' | 'created_at' | 'updated_at'>>;

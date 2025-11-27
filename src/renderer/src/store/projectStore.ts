@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 
 export interface ShowDates {
+  prep_start?: string;
+  prep_end?: string;
   load_in?: string;
   tech?: string;
   previews?: string;
@@ -50,6 +52,8 @@ export interface Project {
 
   // Venue & Dates
   venue?: string;
+  venue_city?: string;
+  venue_state?: string;
   show_dates?: ShowDates;
 
   enabled_modules?: string[]; // ['production', 'manager', 'design']

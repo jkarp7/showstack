@@ -92,9 +92,17 @@ export function ProjectPage() {
                 <p className="text-gray-400 mb-3">{project.description}</p>
               )}
               {project.venue && (
-                <p className="text-gray-300">
-                  <span className="text-gray-500">Venue:</span> {project.venue}
-                </p>
+                <div className="flex gap-2">
+                  <span className="text-gray-500">Venue:</span>
+                  <div className="flex-1">
+                    <p className="text-gray-300">{project.venue}</p>
+                    {(project.venue_city || project.venue_state) && (
+                      <p className="text-gray-400 text-sm">
+                        {project.venue_city}{project.venue_city && project.venue_state ? ', ' : ''}{project.venue_state}
+                      </p>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -125,6 +133,31 @@ export function ProjectPage() {
                         {project.lighting_designer_phone && (
                           <div className="text-gray-400 text-sm">{project.lighting_designer_phone}</div>
                         )}
+                        {/* Associate Lighting Designers */}
+                        {project.lighting_associates && (() => {
+                          try {
+                            const associates = typeof project.lighting_associates === 'string'
+                              ? JSON.parse(project.lighting_associates)
+                              : project.lighting_associates;
+                            if (Array.isArray(associates) && associates.length > 0) {
+                              return (
+                                <div className="mt-3 pt-2 border-t border-gray-700">
+                                  <div className="text-gray-500 text-xs font-medium uppercase mb-2">Associates</div>
+                                  {associates.map((assoc: any, idx: number) => (
+                                    <div key={idx} className="mb-2">
+                                      <div className="text-gray-300 text-sm">{assoc.name}</div>
+                                      {assoc.email && <div className="text-gray-400 text-xs">{assoc.email}</div>}
+                                      {assoc.phone && <div className="text-gray-400 text-xs">{assoc.phone}</div>}
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            }
+                          } catch (e) {
+                            return null;
+                          }
+                          return null;
+                        })()}
                       </div>
                     )}
                     {project.audio_designer && (
@@ -137,6 +170,31 @@ export function ProjectPage() {
                         {project.audio_designer_phone && (
                           <div className="text-gray-400 text-sm">{project.audio_designer_phone}</div>
                         )}
+                        {/* Associate Audio Designers */}
+                        {project.audio_associates && (() => {
+                          try {
+                            const associates = typeof project.audio_associates === 'string'
+                              ? JSON.parse(project.audio_associates)
+                              : project.audio_associates;
+                            if (Array.isArray(associates) && associates.length > 0) {
+                              return (
+                                <div className="mt-3 pt-2 border-t border-gray-700">
+                                  <div className="text-gray-500 text-xs font-medium uppercase mb-2">Associates</div>
+                                  {associates.map((assoc: any, idx: number) => (
+                                    <div key={idx} className="mb-2">
+                                      <div className="text-gray-300 text-sm">{assoc.name}</div>
+                                      {assoc.email && <div className="text-gray-400 text-xs">{assoc.email}</div>}
+                                      {assoc.phone && <div className="text-gray-400 text-xs">{assoc.phone}</div>}
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            }
+                          } catch (e) {
+                            return null;
+                          }
+                          return null;
+                        })()}
                       </div>
                     )}
                     {project.video_designer && (
@@ -149,6 +207,31 @@ export function ProjectPage() {
                         {project.video_designer_phone && (
                           <div className="text-gray-400 text-sm">{project.video_designer_phone}</div>
                         )}
+                        {/* Associate Video Designers */}
+                        {project.video_associates && (() => {
+                          try {
+                            const associates = typeof project.video_associates === 'string'
+                              ? JSON.parse(project.video_associates)
+                              : project.video_associates;
+                            if (Array.isArray(associates) && associates.length > 0) {
+                              return (
+                                <div className="mt-3 pt-2 border-t border-gray-700">
+                                  <div className="text-gray-500 text-xs font-medium uppercase mb-2">Associates</div>
+                                  {associates.map((assoc: any, idx: number) => (
+                                    <div key={idx} className="mb-2">
+                                      <div className="text-gray-300 text-sm">{assoc.name}</div>
+                                      {assoc.email && <div className="text-gray-400 text-xs">{assoc.email}</div>}
+                                      {assoc.phone && <div className="text-gray-400 text-xs">{assoc.phone}</div>}
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            }
+                          } catch (e) {
+                            return null;
+                          }
+                          return null;
+                        })()}
                       </div>
                     )}
                   </div>
@@ -243,7 +326,23 @@ export function ProjectPage() {
               {project.show_dates && Object.keys(project.show_dates).length > 0 && (
                 <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
                   <h2 className="text-xl font-bold mb-4 text-blue-400">Show Dates</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-sm">
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 text-sm">
+                    {project.show_dates.prep_start && (
+                      <div>
+                        <span className="text-gray-500 block">Prep Start</span>
+                        <span className="text-gray-300">
+                          {new Date(project.show_dates.prep_start).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {project.show_dates.prep_end && (
+                      <div>
+                        <span className="text-gray-500 block">Prep End</span>
+                        <span className="text-gray-300">
+                          {new Date(project.show_dates.prep_end).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
                     {project.show_dates.load_in && (
                       <div>
                         <span className="text-gray-500 block">Load In</span>
