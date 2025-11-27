@@ -40,74 +40,6 @@ export function seedDefaultPageLayouts() {
 
 function seedCoverPageLayout() {
   const elements: Partial<LayoutElementData>[] = [
-    // Production Name (top)
-    {
-      element_type: 'dataField',
-      config: JSON.stringify({
-        fieldType: 'production_name',
-        showLabel: false
-      }),
-      grid_column: 0,
-      grid_row: 0,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 16,
-        fontWeight: 'normal',
-        textAlign: 'center',
-        color: '#000000',
-        backgroundColor: 'transparent',
-        padding: 8
-      })
-    },
-
-    // Designer name with label
-    {
-      element_type: 'dataField',
-      config: JSON.stringify({
-        fieldType: 'ld_name',
-        label: 'Lighting Designer:',
-        showLabel: true
-      }),
-      grid_column: 0,
-      grid_row: 1,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 11,
-        fontWeight: 'normal',
-        textAlign: 'center',
-        color: '#000000',
-        backgroundColor: 'transparent',
-        padding: 2
-      })
-    },
-
-    // Horizontal line separator
-    {
-      element_type: 'shape',
-      config: JSON.stringify({
-        shapeType: 'line',
-        thickness: 1,
-        color: '#000000'
-      }),
-      grid_column: 1,
-      grid_row: 2,
-      column_span: 10,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        backgroundColor: '#000000',
-        padding: 0,
-        marginTop: 4,
-        marginBottom: 4
-      })
-    },
-
     // Logo placeholder (centered, larger)
     {
       element_type: 'dataField',
@@ -116,7 +48,7 @@ function seedCoverPageLayout() {
         showLabel: false
       }),
       grid_column: 3,
-      grid_row: 4,
+      grid_row: 1,
       column_span: 6,
       row_span: 4,
       layer: 0,
@@ -130,7 +62,7 @@ function seedCoverPageLayout() {
       })
     },
 
-    // Designer name again (below logo)
+    // Designer name (below logo)
     {
       element_type: 'dataField',
       config: JSON.stringify({
@@ -139,7 +71,7 @@ function seedCoverPageLayout() {
         showLabel: true
       }),
       grid_column: 0,
-      grid_row: 9,
+      grid_row: 6,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -162,7 +94,7 @@ function seedCoverPageLayout() {
         showLabel: false
       }),
       grid_column: 0,
-      grid_row: 11,
+      grid_row: 8,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -182,7 +114,7 @@ function seedCoverPageLayout() {
         content: '{venue_city}, {venue_state}'
       }),
       grid_column: 0,
-      grid_row: 12,
+      grid_row: 9,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -202,7 +134,7 @@ function seedCoverPageLayout() {
         content: 'ELECTRICS SHOP ORDER'
       }),
       grid_column: 0,
-      grid_row: 14,
+      grid_row: 11,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -224,7 +156,7 @@ function seedCoverPageLayout() {
         content: 'For Bid Only'
       }),
       grid_column: 0,
-      grid_row: 15,
+      grid_row: 12,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -245,7 +177,7 @@ function seedCoverPageLayout() {
         showLabel: false
       }),
       grid_column: 0,
-      grid_row: 16,
+      grid_row: 13,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -265,7 +197,7 @@ function seedCoverPageLayout() {
         content: 'REVISION ISSUED:'
       }),
       grid_column: 0,
-      grid_row: 17,
+      grid_row: 14,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -287,7 +219,7 @@ function seedCoverPageLayout() {
         showLabel: true
       }),
       grid_column: 0,
-      grid_row: 18,
+      grid_row: 15,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -321,69 +253,6 @@ function seedCoverPageLayout() {
 
 function seedContactsPageLayout() {
   const elements: Partial<LayoutElementData>[] = [
-    // Production Name at top
-    {
-      element_type: 'dataField',
-      config: JSON.stringify({
-        fieldType: 'production_name',
-        showLabel: false
-      }),
-      grid_column: 0,
-      grid_row: 0,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 14,
-        fontWeight: 'normal',
-        textAlign: 'center',
-        color: '#000000',
-        padding: 4
-      })
-    },
-
-    // Designer name
-    {
-      element_type: 'dataField',
-      config: JSON.stringify({
-        fieldType: 'ld_name',
-        label: 'Lighting Designer:',
-        showLabel: true
-      }),
-      grid_column: 0,
-      grid_row: 1,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 11,
-        textAlign: 'center',
-        color: '#000000',
-        padding: 2
-      })
-    },
-
-    // Horizontal line
-    {
-      element_type: 'shape',
-      config: JSON.stringify({
-        shapeType: 'line',
-        thickness: 1,
-        color: '#000000'
-      }),
-      grid_column: 1,
-      grid_row: 2,
-      column_span: 10,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        backgroundColor: '#000000',
-        padding: 0
-      })
-    },
-
     // Section header
     {
       element_type: 'text',
@@ -391,7 +260,7 @@ function seedContactsPageLayout() {
         content: 'CONTACT & IMPORTANT DATES'
       }),
       grid_column: 0,
-      grid_row: 3,
+      grid_row: 0,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -1021,65 +890,6 @@ function seedEquipmentPageLayout() {
   // This layout will be dynamically generated based on sections
   // We create a basic header structure here
   const elements: Partial<LayoutElementData>[] = [
-    // Production Name at top
-    {
-      element_type: 'dataField',
-      config: JSON.stringify({
-        fieldType: 'production_name',
-        showLabel: false
-      }),
-      grid_column: 0,
-      grid_row: 0,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 14,
-        textAlign: 'center',
-        padding: 4
-      })
-    },
-
-    // Designer name
-    {
-      element_type: 'dataField',
-      config: JSON.stringify({
-        fieldType: 'ld_name',
-        label: 'Lighting Designer:',
-        showLabel: true
-      }),
-      grid_column: 0,
-      grid_row: 1,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 11,
-        textAlign: 'center',
-        padding: 2
-      })
-    },
-
-    // Horizontal line
-    {
-      element_type: 'shape',
-      config: JSON.stringify({
-        shapeType: 'line',
-        thickness: 1,
-        color: '#000000'
-      }),
-      grid_column: 1,
-      grid_row: 2,
-      column_span: 10,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        backgroundColor: '#000000'
-      })
-    },
-
     // Shop order title
     {
       element_type: 'text',
@@ -1087,7 +897,7 @@ function seedEquipmentPageLayout() {
         content: 'SHOP ORDER - REVISION {revision_number}'
       }),
       grid_column: 0,
-      grid_row: 3,
+      grid_row: 0,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -1107,7 +917,7 @@ function seedEquipmentPageLayout() {
         content: 'Revised as of {revision_date}'
       }),
       grid_column: 0,
-      grid_row: 4,
+      grid_row: 1,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -1127,7 +937,7 @@ function seedEquipmentPageLayout() {
         content: 'LIGHTING ORDER'
       }),
       grid_column: 0,
-      grid_row: 5,
+      grid_row: 2,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -1149,7 +959,7 @@ function seedEquipmentPageLayout() {
         content: 'MAIN ORDER'
       }),
       grid_column: 0,
-      grid_row: 6,
+      grid_row: 3,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -1172,7 +982,7 @@ function seedEquipmentPageLayout() {
       element_type: 'equipment_list',
       config: JSON.stringify({}),
       grid_column: 0,
-      grid_row: 7,
+      grid_row: 4,
       column_span: 12,
       row_span: 16,
       layer: 0,
@@ -1204,65 +1014,6 @@ function seedEquipmentPageLayout() {
 
 function seedRevisionSummaryLayout() {
   const elements: Partial<LayoutElementData>[] = [
-    // Production Name at top
-    {
-      element_type: 'dataField',
-      config: JSON.stringify({
-        fieldType: 'production_name',
-        showLabel: false
-      }),
-      grid_column: 0,
-      grid_row: 0,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 14,
-        textAlign: 'center',
-        padding: 4
-      })
-    },
-
-    // Designer name
-    {
-      element_type: 'dataField',
-      config: JSON.stringify({
-        fieldType: 'ld_name',
-        label: 'Lighting Designer:',
-        showLabel: true
-      }),
-      grid_column: 0,
-      grid_row: 1,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 11,
-        textAlign: 'center',
-        padding: 2
-      })
-    },
-
-    // Horizontal line
-    {
-      element_type: 'shape',
-      config: JSON.stringify({
-        shapeType: 'line',
-        thickness: 1,
-        color: '#000000'
-      }),
-      grid_column: 1,
-      grid_row: 2,
-      column_span: 10,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        backgroundColor: '#000000'
-      })
-    },
-
     // Revision change log title
     {
       element_type: 'text',
@@ -1270,7 +1021,7 @@ function seedRevisionSummaryLayout() {
         content: 'REVISION {revision_number} CHANGE LOG'
       }),
       grid_column: 0,
-      grid_row: 3,
+      grid_row: 0,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -1457,65 +1208,6 @@ function seedRevisionSummaryLayout() {
 
 function seedNotesPageLayout() {
   const elements: Partial<LayoutElementData>[] = [
-    // Production Name at top
-    {
-      element_type: 'dataField',
-      config: JSON.stringify({
-        fieldType: 'production_name',
-        showLabel: false
-      }),
-      grid_column: 0,
-      grid_row: 0,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 14,
-        textAlign: 'center',
-        padding: 4
-      })
-    },
-
-    // Designer name
-    {
-      element_type: 'dataField',
-      config: JSON.stringify({
-        fieldType: 'ld_name',
-        label: 'Lighting Designer:',
-        showLabel: true
-      }),
-      grid_column: 0,
-      grid_row: 1,
-      column_span: 12,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        fontFamily: 'Arial',
-        fontSize: 11,
-        textAlign: 'center',
-        padding: 2
-      })
-    },
-
-    // Horizontal line
-    {
-      element_type: 'shape',
-      config: JSON.stringify({
-        shapeType: 'line',
-        thickness: 1,
-        color: '#000000'
-      }),
-      grid_column: 1,
-      grid_row: 2,
-      column_span: 10,
-      row_span: 1,
-      layer: 0,
-      style: JSON.stringify({
-        backgroundColor: '#000000'
-      })
-    },
-
     // Section header
     {
       element_type: 'text',
@@ -1523,7 +1215,7 @@ function seedNotesPageLayout() {
         content: 'GENERAL NOTES & CONDITIONS'
       }),
       grid_column: 0,
-      grid_row: 3,
+      grid_row: 0,
       column_span: 12,
       row_span: 1,
       layer: 0,
@@ -1545,7 +1237,7 @@ function seedNotesPageLayout() {
         noteType: 'general_notes'
       }),
       grid_column: 0,
-      grid_row: 5,
+      grid_row: 2,
       column_span: 12,
       row_span: 14,
       layer: 0,
