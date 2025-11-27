@@ -828,37 +828,40 @@ function renderLayoutElement(
       const items = getItemsBySectionId(section.id);
       if (items.length === 0) return;
 
-      // Section header
+      // Section header - no background fill
       equipmentHTML += `
-        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; background-color: #DBEAFE; padding: 6px; font-weight: bold; font-size: 11pt; border: 1px solid #3B82F6;">
+        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; padding: 6px 0; font-weight: bold; font-size: 11pt;">
           ${escapeHtml(section.name.toUpperCase())}
         </div>
       `;
-      currentY += 30;
+      currentY += 28;
 
-      // Section notes (if present)
+      // Section notes (if present) - formatted as bulleted list
       if (section.notes && section.notes.trim()) {
+        const noteLines = section.notes.split('\n').filter(line => line.trim());
+        const bulletedNotes = noteLines.map(line => `• ${escapeHtml(line.trim())}`).join('<br/>');
         equipmentHTML += `
-          <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; padding: 4px 8px; font-size: 8pt; font-style: italic; background-color: #FEF9C3; border: 1px solid #FDE047;">
-            ${escapeHtml(section.notes)}
+          <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; padding: 4px 8px; font-size: 8pt; line-height: 1.4;">
+            ${bulletedNotes}
           </div>
         `;
-        currentY += 25;
+        currentY += (noteLines.length * 12) + 8;
       }
 
       // Table headers: Delta | Total | Active | Spare | Description
-      const deltaWidth = width * 0.08;  // Delta
-      const totalWidth = width * 0.10;  // Total
-      const activeWidth = width * 0.10; // Active
-      const spareWidth = width * 0.10;  // Spare
-      const descWidth = width * 0.62;   // Description
+      // Tightened column widths
+      const deltaWidth = width * 0.05;  // Delta - tighter
+      const totalWidth = width * 0.07;  // Total - tighter
+      const activeWidth = width * 0.07; // Active - tighter
+      const spareWidth = width * 0.07;  // Spare - tighter
+      const descWidth = width * 0.74;   // Description - wider
 
       equipmentHTML += `
-        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${deltaWidth}px; background-color: #F3F4F6; padding: 4px; font-size: 8pt; font-weight: bold; border: 1px solid #D1D5DB; text-align: center;">Δ</div>
-        <div style="position: absolute; left: ${left + deltaWidth}px; top: ${currentY}px; width: ${totalWidth}px; background-color: #F3F4F6; padding: 4px; font-size: 8pt; font-weight: bold; border: 1px solid #D1D5DB; text-align: center;">Total</div>
-        <div style="position: absolute; left: ${left + deltaWidth + totalWidth}px; top: ${currentY}px; width: ${activeWidth}px; background-color: #F3F4F6; padding: 4px; font-size: 8pt; font-weight: bold; border: 1px solid #D1D5DB; text-align: center;">Active</div>
-        <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth}px; top: ${currentY}px; width: ${spareWidth}px; background-color: #F3F4F6; padding: 4px; font-size: 8pt; font-weight: bold; border: 1px solid #D1D5DB; text-align: center;">Spare</div>
-        <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth + spareWidth}px; top: ${currentY}px; width: ${descWidth}px; background-color: #F3F4F6; padding: 4px; font-size: 8pt; font-weight: bold; border: 1px solid #D1D5DB;">Description</div>
+        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${deltaWidth}px; background-color: #F3F4F6; padding: 4px 2px; font-size: 8pt; font-weight: bold; text-align: center;">Δ</div>
+        <div style="position: absolute; left: ${left + deltaWidth}px; top: ${currentY}px; width: ${totalWidth}px; background-color: #F3F4F6; padding: 4px 2px; font-size: 8pt; font-weight: bold; text-align: center;">Total</div>
+        <div style="position: absolute; left: ${left + deltaWidth + totalWidth}px; top: ${currentY}px; width: ${activeWidth}px; background-color: #F3F4F6; padding: 4px 2px; font-size: 8pt; font-weight: bold; text-align: center;">Active</div>
+        <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth}px; top: ${currentY}px; width: ${spareWidth}px; background-color: #F3F4F6; padding: 4px 2px; font-size: 8pt; font-weight: bold; text-align: center;">Spare</div>
+        <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth + spareWidth}px; top: ${currentY}px; width: ${descWidth}px; background-color: #F3F4F6; padding: 4px; font-size: 8pt; font-weight: bold;">Description</div>
       `;
       currentY += 20;
 
@@ -886,11 +889,11 @@ function renderLayoutElement(
         const total = item.active_qty + item.spare_qty;
 
         equipmentHTML += `
-          <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${deltaWidth}px; padding: 3px 2px; font-size: 7pt; border: 1px solid #E5E7EB; text-align: center; background-color: ${rowBgColor};">${deltaContent}</div>
-          <div style="position: absolute; left: ${left + deltaWidth}px; top: ${currentY}px; width: ${totalWidth}px; padding: 3px 2px; font-size: 8pt; border: 1px solid #E5E7EB; text-align: center; background-color: ${rowBgColor}; font-weight: bold;">${total}</div>
-          <div style="position: absolute; left: ${left + deltaWidth + totalWidth}px; top: ${currentY}px; width: ${activeWidth}px; padding: 3px 2px; font-size: 8pt; border: 1px solid #E5E7EB; text-align: center; background-color: ${rowBgColor};">${item.active_qty}</div>
-          <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth}px; top: ${currentY}px; width: ${spareWidth}px; padding: 3px 2px; font-size: 8pt; border: 1px solid #E5E7EB; text-align: center; background-color: ${rowBgColor};">${item.spare_qty}</div>
-          <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth + spareWidth}px; top: ${currentY}px; width: ${descWidth}px; padding: 3px 4px; font-size: 8pt; border: 1px solid #E5E7EB; background-color: ${rowBgColor};">${escapeHtml(item.description)}</div>
+          <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${deltaWidth}px; padding: 3px 2px; font-size: 7pt; text-align: center; background-color: ${rowBgColor};">${deltaContent}</div>
+          <div style="position: absolute; left: ${left + deltaWidth}px; top: ${currentY}px; width: ${totalWidth}px; padding: 3px 2px; font-size: 8pt; text-align: center; background-color: ${rowBgColor}; font-weight: bold;">${total}</div>
+          <div style="position: absolute; left: ${left + deltaWidth + totalWidth}px; top: ${currentY}px; width: ${activeWidth}px; padding: 3px 2px; font-size: 8pt; text-align: center; background-color: ${rowBgColor};">${item.active_qty}</div>
+          <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth}px; top: ${currentY}px; width: ${spareWidth}px; padding: 3px 2px; font-size: 8pt; text-align: center; background-color: ${rowBgColor};">${item.spare_qty}</div>
+          <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth + spareWidth}px; top: ${currentY}px; width: ${descWidth}px; padding: 3px 4px; font-size: 8pt; background-color: ${rowBgColor};">${escapeHtml(item.description)}</div>
         `;
         currentY += 18;
 
@@ -917,18 +920,17 @@ function renderLayoutElement(
     const notes = getNotesByProjectId(project.id, noteType);
 
     if (notes.length === 0) {
-      return `<div style="${baseStyle}">No notes available</div>`;
+      return `<div style="${baseStyle} font-size: 8pt; color: #9CA3AF; font-style: italic;">No ${noteType.replace(/_/g, ' ')} available</div>`;
     }
 
-    let notesHTML = '';
-    let currentY = top;
+    let allContent: string[] = [];
 
     notes.forEach(note => {
       const content = note.content || '';
       const format = note.format || 'plain';
 
       // Format content based on format type
-      let formattedContent = escapeHtml(content);
+      let formattedContent = '';
       if (format === 'bullets') {
         const lines = content.split('\n').filter(l => l.trim());
         formattedContent = lines.map(line => `• ${escapeHtml(line.trim())}`).join('<br/>');
@@ -939,15 +941,22 @@ function renderLayoutElement(
         formattedContent = escapeHtml(content).replace(/\n/g, '<br/>');
       }
 
-      notesHTML += `
-        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; font-size: ${style.fontSize || 10}pt; line-height: 1.4; padding: ${style.padding || 0}px;">
-          ${formattedContent}
-        </div>
-      `;
-      currentY += 100; // Adjust based on content
+      if (formattedContent) {
+        allContent.push(formattedContent);
+      }
     });
 
-    return notesHTML;
+    if (allContent.length === 0) {
+      return `<div style="${baseStyle} font-size: 8pt; color: #9CA3AF; font-style: italic;">No ${noteType.replace(/_/g, ' ')} available</div>`;
+    }
+
+    // Render all notes in a single container
+    const combinedContent = allContent.join('<br/><br/>');
+    return `
+      <div style="${baseStyle} overflow: hidden;">
+        ${combinedContent}
+      </div>
+    `;
   }
 
   // Dynamic content: Revision Log
@@ -1023,22 +1032,26 @@ function renderLayoutElement(
         change.change_type === 'new' ? '#DBEAFE' :
         change.change_type === 'modified' ? '#FEF9C3' : '#FFF';
 
+      let deltaSymbol = '';
       let changeDetail = '';
 
-      // Show changes to total quantity
+      // Show changes with delta symbols matching equipment list format
       if (change.change_type === 'increase') {
         const oldTotal = (change.old_values?.active_qty || 0) + (change.old_values?.spare_qty || 0);
         const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
         const delta = newTotal - oldTotal;
-        changeDetail = `Total increased from ${oldTotal} to ${newTotal} (+${delta})`;
+        deltaSymbol = `<span style="color: #059669; font-weight: bold;">▲ +${delta}</span>`;
+        changeDetail = `Total: ${oldTotal} → ${newTotal}`;
       } else if (change.change_type === 'decrease') {
         const oldTotal = (change.old_values?.active_qty || 0) + (change.old_values?.spare_qty || 0);
         const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
         const delta = oldTotal - newTotal;
-        changeDetail = `Total decreased from ${oldTotal} to ${newTotal} (-${delta})`;
+        deltaSymbol = `<span style="color: #DC2626; font-weight: bold;">▼ -${delta}</span>`;
+        changeDetail = `Total: ${oldTotal} → ${newTotal}`;
       } else if (change.change_type === 'new') {
         const newTotal = (change.new_values?.active_qty || 0) + (change.new_values?.spare_qty || 0);
-        changeDetail = `New item added (Total: ${newTotal})`;
+        deltaSymbol = `<span style="color: #3B82F6; font-weight: bold;">NEW</span>`;
+        changeDetail = `Added with total qty: ${newTotal}`;
       } else if (change.change_type === 'modified') {
         changeDetail = 'Item details modified';
       }
@@ -1046,12 +1059,12 @@ function renderLayoutElement(
       const sectionLabel = change.section_name ? ` [${change.section_name}]` : '';
 
       revisionHTML += `
-        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; background-color: ${bgColor}; padding: 6px; font-size: 8pt; border: 1px solid #E5E7EB; line-height: 1.5;">
-          <strong>${escapeHtml(change.description || '')}${sectionLabel}</strong><br/>
-          ${escapeHtml(changeDetail)}
+        <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; background-color: ${bgColor}; padding: 8px; font-size: 9pt; border: 1px solid #E5E7EB; line-height: 1.5;">
+          ${deltaSymbol} <strong>${escapeHtml(change.description || '')}${sectionLabel}</strong><br/>
+          <span style="font-size: 8pt; color: #4B5563;">${escapeHtml(changeDetail)}</span>
         </div>
       `;
-      currentY += 32;
+      currentY += 38;
     });
 
     return revisionHTML;
