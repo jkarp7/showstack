@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Download, Upload, RefreshCw, FileJson, AlertCircle, CheckCircle, X } from 'lucide-react';
+import { Download, Upload, RefreshCw, FileJson, AlertCircle, CheckCircle, X, Edit2, Info } from 'lucide-react';
+import { LayoutDesigner } from '../prep/layout/LayoutDesigner';
 
 export function LayoutTemplateManager() {
   const [layouts, setLayouts] = useState<any[]>([]);
   const [defaultLayoutFiles, setDefaultLayoutFiles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [editingLayout, setEditingLayout] = useState<any | null>(null);
+  const [editingElements, setEditingElements] = useState<any[]>([]);
+  const [showRenameDialog, setShowRenameDialog] = useState(false);
+  const [newLayoutName, setNewLayoutName] = useState('');
   const [notification, setNotification] = useState<{
     type: 'success' | 'error' | 'info';
     message: string;
@@ -149,6 +154,161 @@ export function LayoutTemplateManager() {
     }
   };
 
+  const handleEditLayout = async (layout: any) => {
+    try {
+      // Load the layout elements
+      const elements = await window.api.prep.layoutTemplates.getElements(layout.id);
+
+      // Parse JSON strings
+      const parsedElements = elements.map((el: any) => ({
+        ...el,
+        config: typeof el.config === 'string' ? JSON.parse(el.config) : el.config,
+        style: typeof el.style === 'string' ? JSON.parse(el.style) : el.style,
+      }));
+
+      setEditingLayout(layout);
+      setEditingElements(parsedElements);
+    } catch (error) {
+      console.error('Error loading layout for editing:', error);
+      showNotification('error', 'Failed to load layout');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingLayout(null);
+    setEditingElements([]);
+  };
+
+  const handleRestoreLayout = async () => {
+    if (!confirm('Restore this layout to its last saved state?')) {
+      return;
+    }
+
+    // Reload the layout from database
+    if (editingLayout) {
+      await handleEditLayout(editingLayout);
+      showNotification('info', 'Layout restored to last saved state');
+    }
+  };
+
+  const handleUpdateLayout = () => {
+    // Prompt for new name
+    setNewLayoutName(editingLayout.name + ' (Custom)');
+    setShowRenameDialog(true);
+  };
+
+  const handleConfirmUpdate = async () => {
+    if (!newLayoutName.trim()) {
+      showNotification('error', 'Please enter a layout name');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      // Update the layout
+      const updatedTemplate = {
+        ...editingLayout,
+        name: newLayoutName,
+        is_default: false, // Custom layouts are not defaults
+      };
+
+      await window.api.prep.layoutTemplates.update(
+        editingLayout.id,
+        updatedTemplate,
+        editingElements
+      );
+
+      showNotification('success', `Layout updated as "${newLayoutName}"`);
+      setShowRenameDialog(false);
+      setEditingLayout(null);
+      setEditingElements([]);
+      await loadLayouts();
+    } catch (error) {
+      console.error('Error updating layout:', error);
+      showNotification('error', 'Failed to update layout');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // If editing a layout, show the designer
+  if (editingLayout) {
+    return (
+      <div className="max-w-full">
+        {/* Editor Header */}
+        <div className="mb-4 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div>
+            <h3 className="font-semibold text-blue-900">Editing: {editingLayout.name}</h3>
+            <p className="text-sm text-blue-700">Make changes to the layout below</p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={handleCancelEdit}
+              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-md transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleRestoreLayout}
+              className="px-4 py-2 text-orange-700 bg-orange-50 border border-orange-300 hover:bg-orange-100 rounded-md transition-colors"
+            >
+              Restore
+            </button>
+            <button
+              onClick={handleUpdateLayout}
+              className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+            >
+              Update
+            </button>
+          </div>
+        </div>
+
+        {/* Layout Designer */}
+        <LayoutDesigner
+          templateId={editingLayout.id}
+          onClose={handleCancelEdit}
+        />
+
+        {/* Rename Dialog */}
+        {showRenameDialog && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
+              <h3 className="text-lg font-semibold mb-4">Save Layout As</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Enter a name for your customized layout. This will create a new version
+                distinct from the system default.
+              </p>
+              <input
+                type="text"
+                value={newLayoutName}
+                onChange={(e) => setNewLayoutName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+                placeholder="Layout name"
+                autoFocus
+              />
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowRenameDialog(false)}
+                  className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmUpdate}
+                  className="flex-1 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+                  disabled={!newLayoutName.trim()}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-5xl">
       {/* Notification */}
@@ -187,35 +347,51 @@ export function LayoutTemplateManager() {
         </p>
       </div>
 
+      {/* Instructions */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="flex items-start gap-2">
+          <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div>
+            <h4 className="font-medium text-blue-900 mb-2">How to Use</h4>
+            <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+              <li>Click <strong>Edit</strong> to customize layouts visually or <strong>Export</strong> to save as JSON files</li>
+              <li>Edit exported JSON files in a text editor if needed</li>
+              <li>Import modified JSON files to update default layouts</li>
+              <li>Use "Reset to Factory Defaults" to restore original templates</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
       {/* Quick Actions */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-        <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+        <h3 className="text-sm font-semibold mb-3 text-gray-700">Quick Actions</h3>
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={handleExportAllLayouts}
             disabled={isLoading}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Download className="w-5 h-5" />
-            <span>Export All Default Layouts</span>
+            <Download className="w-4 h-4" />
+            <span>Export All</span>
           </button>
 
           <button
             onClick={handleImportLayouts}
             disabled={isLoading}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Upload className="w-5 h-5" />
-            <span>Import Layouts from JSON</span>
+            <Upload className="w-4 h-4" />
+            <span>Import JSON</span>
           </button>
 
           <button
             onClick={handleResetToFactory}
             disabled={isLoading}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white text-sm rounded-md hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <RefreshCw className="w-5 h-5" />
-            <span>Reset to Factory Defaults</span>
+            <RefreshCw className="w-4 h-4" />
+            <span>Reset to Factory</span>
           </button>
         </div>
       </div>
@@ -264,14 +440,24 @@ export function LayoutTemplateManager() {
                       <span>Size: {layout.page_width}x{layout.page_height}px</span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleExportLayout(layout.id)}
-                    disabled={isLoading}
-                    className="flex items-center gap-2 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span className="text-sm">Export</span>
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEditLayout(layout)}
+                      disabled={isLoading}
+                      className="flex items-center gap-2 px-3 py-2 text-purple-600 hover:bg-purple-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      <span className="text-sm">Edit</span>
+                    </button>
+                    <button
+                      onClick={() => handleExportLayout(layout.id)}
+                      disabled={isLoading}
+                      className="flex items-center gap-2 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span className="text-sm">Export</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
@@ -279,16 +465,6 @@ export function LayoutTemplateManager() {
         </div>
       </div>
 
-      {/* Instructions */}
-      <div className="mt-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <h4 className="font-medium text-gray-900 mb-2">How to Use</h4>
-        <ol className="text-sm text-gray-700 space-y-1 list-decimal list-inside">
-          <li>Export all default layouts to save current templates as JSON files</li>
-          <li>Edit JSON files in the exported directory or use the Layout Designer</li>
-          <li>Import modified JSON files to update default layouts</li>
-          <li>Use "Reset to Factory Defaults" to restore original templates</li>
-        </ol>
-      </div>
     </div>
   );
 }
