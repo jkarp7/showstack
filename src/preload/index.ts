@@ -159,6 +159,18 @@ contextBridge.exposeInMainWorld('api', {
     reset: () => ipcRenderer.invoke('settings:reset')
   },
 
+  // Admin operations
+  admin: {
+    verifyPassword: (password: string) => ipcRenderer.invoke('admin:verifyPassword', password),
+    setPassword: (password: string) => ipcRenderer.invoke('admin:setPassword', password),
+    hasPassword: () => ipcRenderer.invoke('admin:hasPassword'),
+    exportLayout: (templateId: string) => ipcRenderer.invoke('admin:exportLayout', templateId),
+    exportAllDefaultLayouts: () => ipcRenderer.invoke('admin:exportAllDefaultLayouts'),
+    importLayouts: (filePaths?: string[]) => ipcRenderer.invoke('admin:importLayouts', filePaths),
+    resetLayoutsToFactory: () => ipcRenderer.invoke('admin:resetLayoutsToFactory'),
+    getDefaultLayoutFiles: () => ipcRenderer.invoke('admin:getDefaultLayoutFiles')
+  },
+
   // Window operations
   windows: {
     openProject: (projectId: string) => ipcRenderer.invoke('window:openProject', projectId),
@@ -277,6 +289,16 @@ export interface ElectronAPI {
     save: (settings: any) => Promise<{ success: boolean }>;
     update: (updates: any) => Promise<{ success: boolean }>;
     reset: () => Promise<{ success: boolean }>;
+  };
+  admin: {
+    verifyPassword: (password: string) => Promise<{ success: boolean; firstTime?: boolean }>;
+    setPassword: (password: string) => Promise<{ success: boolean }>;
+    hasPassword: () => Promise<{ hasPassword: boolean }>;
+    exportLayout: (templateId: string) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
+    exportAllDefaultLayouts: () => Promise<{ success: boolean; count?: number; directory?: string; canceled?: boolean }>;
+    importLayouts: (filePaths?: string[]) => Promise<{ success: boolean; count?: number; errors?: string[]; canceled?: boolean }>;
+    resetLayoutsToFactory: () => Promise<{ success: boolean }>;
+    getDefaultLayoutFiles: () => Promise<{ success: boolean; files: string[]; directory?: string }>;
   };
   windows: {
     openProject: (projectId: string) => Promise<void>;

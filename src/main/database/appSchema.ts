@@ -15,6 +15,13 @@ export const APP_SCHEMA = `
     CHECK (id = 1) -- Ensure only one settings record
   );
 
+  -- Key-Value Settings (for specific settings like admin password)
+  CREATE TABLE IF NOT EXISTS app_settings_kv (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+
   -- User Licenses
   CREATE TABLE IF NOT EXISTS licenses (
     id TEXT PRIMARY KEY,

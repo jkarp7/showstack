@@ -1,18 +1,34 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Login } from './pages/Login';
 import { LandingPage } from './pages/LandingPage';
 import { ProjectPage } from './pages/ProjectPage';
 import { Prep } from './pages/modules/Prep';
 import { SystemDocs } from './pages/modules/SystemDocs';
 import { Manager } from './pages/modules/Manager';
+import { AdminPanel } from './pages/admin/AdminPanel';
 import { LicenseBanner } from './components/License/LicenseBanner';
 import { useUser } from './hooks/useUser';
 
-export default function App() {
+function AppContent() {
   const { status } = useUser();
+  const navigate = useNavigate();
+
+  // Keyboard shortcut for admin panel (Cmd/Ctrl+Shift+A)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'A') {
+        e.preventDefault();
+        navigate('/admin');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [navigate]);
 
   return (
-    <Router>
+    <>
       {/* License Status Banner - shows warnings for expiration/offline */}
       {status && <LicenseBanner status={status} />}
 
@@ -50,9 +66,20 @@ export default function App() {
         <Route path="/module/production/paperwork" element={<Navigate to="/module/production/system-docs" replace />} />
         <Route path="/module/production/labels" element={<Navigate to="/module/production/system-docs" replace />} />
 
+        {/* Admin panel */}
+        <Route path="/admin" element={<AdminPanel />} />
+
         {/* Catch all - redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
