@@ -37,8 +37,8 @@ export function PasswordPrompt({ isOpen, onClose, onSuccess, isFirstTime = false
       try {
         const result = await window.api.admin.setPassword(password);
         if (result.success) {
+          // Don't call handleClose() here - let parent handle it after state updates
           onSuccess();
-          handleClose();
         } else {
           setError('Failed to set password');
         }
@@ -54,8 +54,8 @@ export function PasswordPrompt({ isOpen, onClose, onSuccess, isFirstTime = false
       try {
         const result = await window.api.admin.verifyPassword(password);
         if (result.success) {
+          // Don't call handleClose() here - let parent handle it after state updates
           onSuccess();
-          handleClose();
         } else {
           setError('Incorrect password');
           setPassword('');

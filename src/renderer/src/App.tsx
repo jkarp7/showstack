@@ -17,7 +17,8 @@ function AppContent() {
   // Keyboard shortcut for admin panel (Cmd/Ctrl+Shift+A)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'A') {
+      // Check for both 'A' and 'a' to handle Shift key properly
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
         e.preventDefault();
         navigate('/admin');
       }
