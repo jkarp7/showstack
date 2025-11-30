@@ -233,46 +233,26 @@ export function LayoutTemplateManager() {
   };
 
   // If editing a layout, show the designer
-  if (editingLayout) {
-    return (
-      <div className="max-w-full">
-        {/* Editor Header */}
-        <div className="mb-4 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div>
-            <h3 className="font-semibold text-blue-900">Editing: {editingLayout.name}</h3>
-            <p className="text-sm text-blue-700">Make changes to the layout below</p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={handleCancelEdit}
-              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-md transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleRestoreLayout}
-              className="px-4 py-2 text-orange-700 bg-orange-50 border border-orange-300 hover:bg-orange-100 rounded-md transition-colors"
-            >
-              Restore
-            </button>
-            <button
-              onClick={handleUpdateLayout}
-              className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
-            >
-              Update
-            </button>
-          </div>
-        </div>
+  if (editingLayout && editingElements) {
+    // Construct the full template object with elements for LayoutDesigner
+    const fullTemplate = {
+      ...editingLayout,
+      elements: editingElements
+    };
 
-        {/* Layout Designer */}
+    return (
+      <>
+        {/* Layout Designer - fullscreen overlay */}
         <LayoutDesigner
-          templateId={editingLayout.id}
+          projectId="admin-default-templates"
+          pageType={editingLayout.page_type}
+          initialTemplate={fullTemplate}
           onClose={handleCancelEdit}
         />
 
-        {/* Rename Dialog */}
+        {/* Rename Dialog - will be used in future for Update functionality */}
         {showRenameDialog && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
               <h3 className="text-lg font-semibold mb-4">Save Layout As</h3>
               <p className="text-sm text-gray-600 mb-4">
@@ -305,7 +285,7 @@ export function LayoutTemplateManager() {
             </div>
           </div>
         )}
-      </div>
+      </>
     );
   }
 
