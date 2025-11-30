@@ -1,0 +1,49 @@
+{
+  "template": {
+    "name": "Revision Summary - ShowStack Default",
+    "description": "Revision change log matching ShowStack Designer format",
+    "page_type": "revision-summary",
+    "grid_columns": 12,
+    "grid_rows": 20,
+    "grid_gap": 4,
+    "page_width": 816,
+    "page_height": 1056,
+    "is_default": true
+  },
+  "elements": [
+    {
+      "element_type": "text",
+      "config": {
+        "content": "REVISION CHANGE LOG"
+      },
+      "grid_column": 0,
+      "grid_row": 0,
+      "column_span": 12,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 14,
+        "fontWeight": "bold",
+        "textAlign": "center",
+        "color": "#000000",
+        "backgroundColor": "#D1D5DB",
+        "padding": 10
+      }
+    },
+    {
+      "element_type": "revision_log",
+      "config": {},
+      "grid_column": 0,
+      "grid_row": 1,
+      "column_span": 12,
+      "row_span": 19,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 9,
+        "padding": 0
+      }
+    }
+  ]
+}
