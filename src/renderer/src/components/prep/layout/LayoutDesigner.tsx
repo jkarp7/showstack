@@ -22,6 +22,10 @@ interface LayoutDesignerProps {
   onSave?: (template: PageLayoutTemplate) => void;
   onClose: () => void;
   initialTemplate?: PageLayoutTemplate;
+  // Admin panel mode - custom buttons for editing default templates
+  adminMode?: boolean;
+  onRestore?: () => void;
+  onUpdate?: (template: PageLayoutTemplate) => void;
 }
 
 export function LayoutDesigner({
@@ -30,7 +34,10 @@ export function LayoutDesigner({
   pageType,
   onSave,
   onClose,
-  initialTemplate
+  initialTemplate,
+  adminMode = false,
+  onRestore,
+  onUpdate
 }: LayoutDesignerProps) {
   // Initialize template with blank template (will be replaced if default exists)
   const [template, setTemplate] = useState<PageLayoutTemplate>(() => {
@@ -335,27 +342,59 @@ export function LayoutDesigner({
         </div>
 
         <div className="flex items-center gap-3">
-          {availableTemplates.length > 0 && (
-            <button
-              onClick={() => setShowLoadDialog(true)}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition"
-            >
-              Load Layout
-            </button>
+          {adminMode ? (
+            // Admin mode buttons: Restore and Update
+            <>
+              {onRestore && (
+                <button
+                  onClick={onRestore}
+                  className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded transition font-medium"
+                >
+                  Restore
+                </button>
+              )}
+              {onUpdate && (
+                <button
+                  onClick={() => onUpdate(template)}
+                  disabled={!hasChanges}
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Update
+                </button>
+              )}
+              <button
+                onClick={handleClose}
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition font-medium"
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            // Project mode buttons: Load, Save, Done
+            <>
+              {availableTemplates.length > 0 && (
+                <button
+                  onClick={() => setShowLoadDialog(true)}
+                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition"
+                >
+                  Load Layout
+                </button>
+              )}
+              <button
+                onClick={handleSave}
+                disabled={!hasChanges}
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Save
+              </button>
+              <button
+                onClick={handleClose}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition font-medium"
+              >
+                Done
+              </button>
+            </>
           )}
-          <button
-            onClick={handleSave}
-            disabled={!hasChanges}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Save
-          </button>
-          <button
-            onClick={handleClose}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition font-medium"
-          >
-            Done
-          </button>
         </div>
       </div>
 

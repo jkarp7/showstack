@@ -180,20 +180,35 @@ export function LayoutTemplateManager() {
   };
 
   const handleRestoreLayout = async () => {
-    if (!confirm('Restore this layout to its last saved state?')) {
-      return;
-    }
+    if (!editingLayout) return;
 
-    // Reload the layout from database
-    if (editingLayout) {
-      await handleEditLayout(editingLayout);
+    try {
+      // Reload the layout and elements from database
+      const layout = await window.api.prep.layoutTemplates.getById(editingLayout.id);
+      const elements = await window.api.prep.layoutTemplates.getElements(editingLayout.id);
+
+      const parsedElements = elements.map((el: any) => ({
+        ...el,
+        config: typeof el.config === 'string' ? JSON.parse(el.config) : el.config,
+        style: typeof el.style === 'string' ? JSON.parse(el.style) : el.style,
+      }));
+
+      setEditingLayout(layout);
+      setEditingElements(parsedElements);
       showNotification('info', 'Layout restored to last saved state');
+    } catch (error) {
+      console.error('Error restoring layout:', error);
+      showNotification('error', 'Failed to restore layout');
     }
   };
 
-  const handleUpdateLayout = () => {
-    // Prompt for new name
-    setNewLayoutName(editingLayout.name + ' (Custom)');
+  const handleUpdateLayout = (template: any) => {
+    // Update the editing state with changes from the visual editor
+    setEditingElements(template.elements);
+
+    // Prompt for new name to distinguish from system default
+    const baseName = editingLayout.name.replace(' - ShowStack Default', '').replace(' (Custom)', '');
+    setNewLayoutName(baseName + ' (Custom)');
     setShowRenameDialog(true);
   };
 
@@ -206,20 +221,27 @@ export function LayoutTemplateManager() {
     try {
       setIsLoading(true);
 
-      // Update the layout
+      // Serialize elements for database storage
+      const serializedElements = editingElements.map((el: any) => ({
+        ...el,
+        config: typeof el.config === 'object' ? JSON.stringify(el.config) : el.config,
+        style: typeof el.style === 'object' ? JSON.stringify(el.style) : el.style,
+      }));
+
+      // Update the layout with new name and mark as not default
       const updatedTemplate = {
         ...editingLayout,
         name: newLayoutName,
-        is_default: false, // Custom layouts are not defaults
+        is_default: false, // Custom layouts are not system defaults
       };
 
       await window.api.prep.layoutTemplates.update(
         editingLayout.id,
         updatedTemplate,
-        editingElements
+        serializedElements
       );
 
-      showNotification('success', `Layout updated as "${newLayoutName}"`);
+      showNotification('success', `Layout saved as "${newLayoutName}"`);
       setShowRenameDialog(false);
       setEditingLayout(null);
       setEditingElements([]);
@@ -242,12 +264,15 @@ export function LayoutTemplateManager() {
 
     return (
       <>
-        {/* Layout Designer - fullscreen overlay */}
+        {/* Layout Designer - fullscreen overlay with admin mode buttons */}
         <LayoutDesigner
           projectId="admin-default-templates"
           pageType={editingLayout.page_type}
           initialTemplate={fullTemplate}
           onClose={handleCancelEdit}
+          adminMode={true}
+          onRestore={handleRestoreLayout}
+          onUpdate={handleUpdateLayout}
         />
 
         {/* Rename Dialog - will be used in future for Update functionality */}
