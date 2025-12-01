@@ -1,0 +1,127 @@
+import { useState } from 'react';
+import { Sliders, Code, Zap, Save } from 'lucide-react';
+
+export function AdvancedSettings() {
+  const [developerMode, setDeveloperMode] = useState(false);
+  const [memoryLimit, setMemoryLimit] = useState(2048);
+  const [cacheSize, setCacheSize] = useState(500);
+  const [renderQuality, setRenderQuality] = useState('high');
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Advanced Settings</h2>
+        <p className="text-gray-600">Developer mode and performance tuning</p>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Code className="w-5 h-5 text-blue-600" />
+          <span>Developer Mode</span>
+        </h3>
+
+        <div className="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
+          <div className="flex-1">
+            <h4 className="font-medium text-gray-900 mb-2">Enable Developer Tools</h4>
+            <p className="text-sm text-gray-600 mb-2">
+              Access debugging tools, inspect element, and view console logs
+            </p>
+            <p className="text-xs text-amber-600 font-medium">
+              ⚠️ For advanced users only - may impact performance
+            </p>
+          </div>
+          <label className="ml-4 relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" checked={developerMode} onChange={(e) => setDeveloperMode(e.target.checked)} className="sr-only peer" />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+
+        {developerMode && (
+          <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+            <h4 className="font-medium text-purple-900 mb-2">Developer Tools Active</h4>
+            <div className="space-y-2 text-sm text-purple-800">
+              <div className="flex items-center gap-2">
+                <Code className="w-4 h-4" />
+                <span>Press F12 to open DevTools</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Code className="w-4 h-4" />
+                <span>Right-click elements to inspect</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Code className="w-4 h-4" />
+                <span>Console logging enabled</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Zap className="w-5 h-5 text-blue-600" />
+          <span>Performance Tuning</span>
+        </h3>
+
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Memory Limit: {memoryLimit} MB
+            </label>
+            <input type="range" min="1024" max="8192" step="512" value={memoryLimit} onChange={(e) => setMemoryLimit(parseInt(e.target.value))} className="w-full" />
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>1 GB</span>
+              <span>4 GB</span>
+              <span>8 GB</span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Maximum memory for the application</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Cache Size: {cacheSize} MB
+            </label>
+            <input type="range" min="100" max="2000" step="100" value={cacheSize} onChange={(e) => setCacheSize(parseInt(e.target.value))} className="w-full" />
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>100 MB</span>
+              <span>1 GB</span>
+              <span>2 GB</span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Disk space for caching assets</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Render Quality</label>
+            <select value={renderQuality} onChange={(e) => setRenderQuality(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="low">Low (Faster)</option>
+              <option value="medium">Medium (Balanced)</option>
+              <option value="high">High (Better Quality)</option>
+              <option value="ultra">Ultra (Best Quality)</option>
+            </select>
+            <p className="text-xs text-gray-500 mt-1">Higher quality uses more resources</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <div className="flex items-start gap-2">
+          <Zap className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+          <div>
+            <h4 className="font-medium text-amber-900 mb-1">Performance Impact</h4>
+            <p className="text-sm text-amber-800">
+              Changes to these settings may require an application restart to take full effect.
+              Higher memory and cache limits improve performance but use more system resources.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <button onClick={() => console.log('Save')} className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium">
+          <Save className="w-4 h-4" />
+          <span>Save Settings</span>
+        </button>
+      </div>
+    </div>
+  );
+}
