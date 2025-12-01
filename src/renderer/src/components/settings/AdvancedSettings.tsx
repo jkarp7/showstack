@@ -127,7 +127,7 @@ export function AdvancedSettings() {
       </div>
 
       <div className="flex justify-end">
-        <button onClick={() => console.log('Save')} className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium">
+        <button onClick={() => console.log('Save')} className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded-md transition-colors font-medium">
           <Save className="w-4 h-4" />
           <span>Save Settings</span>
         </button>

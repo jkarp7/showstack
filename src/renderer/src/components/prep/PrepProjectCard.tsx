@@ -19,11 +19,11 @@ export function PrepProjectCard({ project, onClick }: PrepProjectCardProps) {
       className="bg-gray-800 border border-gray-700 rounded-lg p-4 hover:border-blue-500 cursor-pointer transition group"
     >
       <div className="flex items-start justify-between mb-2">
-        <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-400 transition">
           {project.production_name}
         </h3>
         {project.current_revision > 0 && (
-          <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded">
+          <span className="px-2 py-1 bg-blue-600 text-gray-900 dark:text-white text-xs rounded">
             Rev {project.current_revision}
           </span>
         )}

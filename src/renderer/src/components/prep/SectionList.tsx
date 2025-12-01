@@ -158,10 +158,10 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg">
       <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">Equipment Sections</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Equipment Sections</h3>
         <button
           onClick={onAddSection}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm font-medium transition"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-gray-900 dark:text-white text-sm font-medium transition"
         >
           + Add Section
         </button>
@@ -176,7 +176,7 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
           </p>
           <button
             onClick={onAddSection}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm font-medium transition"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-gray-900 dark:text-white text-sm font-medium transition"
           >
             Create First Section
           </button>
@@ -206,7 +206,7 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
                     {/* Expand/Collapse Button */}
                     <button
                       onClick={() => toggleSection(section.id)}
-                      className="text-gray-400 hover:text-white transition"
+                      className="text-gray-400 hover:text-gray-900 dark:text-white transition"
                     >
                       {isExpanded ? '▼' : '▶'}
                     </button>
@@ -214,7 +214,7 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
                         <h4
-                          className="font-medium text-white cursor-pointer hover:text-blue-400 transition"
+                          className="font-medium text-gray-900 dark:text-white cursor-pointer hover:text-blue-400 transition"
                           onClick={() => toggleSection(section.id)}
                         >
                           {section.name}
@@ -237,13 +237,13 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
                   <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition">
                     <button
                       onClick={() => handleAddItem(section.id)}
-                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm text-white transition"
+                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm text-gray-900 dark:text-white transition"
                     >
                       + Item
                     </button>
                     <button
                       onClick={() => onEditSection(section)}
-                      className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm text-white transition"
+                      className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm text-gray-900 dark:text-white transition"
                     >
                       Edit
                     </button>
@@ -268,13 +268,13 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
                         onKeyDown={handleSectionNotesKeyDown}
                         placeholder="Add section notes... (SHIFT+ENTER for new line, ENTER to save)"
                         rows={3}
-                        className="w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white placeholder-gray-400 focus:outline-none resize-none"
+                        className="w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none resize-none"
                         autoFocus
                       />
                     ) : (
                       <div
                         onClick={() => handleSectionNotesClick(section.id, section.notes || '')}
-                        className="text-sm text-gray-300 italic cursor-pointer hover:text-gray-200 hover:bg-gray-700 rounded px-1 py-0.5 transition min-h-[24px] whitespace-pre-wrap"
+                        className="text-sm text-gray-300 italic cursor-pointer hover:text-gray-800 dark:text-gray-200 hover:bg-gray-700 rounded px-1 py-0.5 transition min-h-[24px] whitespace-pre-wrap"
                       >
                         {section.notes || '+ Add section notes...'}
                       </div>

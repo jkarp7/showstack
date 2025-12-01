@@ -80,7 +80,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         </div>
 
         {/* App Name */}
-        <h1 className="text-5xl font-bold text-white mb-2 tracking-tight">
+        <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
           ShowStack
         </h1>
         <p className="text-gray-400 text-lg mb-8">

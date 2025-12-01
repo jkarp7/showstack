@@ -50,13 +50,13 @@ export function ImportConflictDialog({ isOpen, conflict, filePath, onResolve }: 
       <div className="bg-gray-800 rounded-lg border border-gray-700 shadow-xl w-full max-w-md mx-4">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-700">
-          <h2 className="text-xl font-bold text-white">Project Already Exists</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Project Already Exists</h2>
         </div>
 
         {/* Content */}
         <div className="px-6 py-4 space-y-4">
           <p className="text-gray-300 text-sm">
-            The project <span className="font-semibold text-white">"{conflict.importedProject.name}"</span> already exists in your database.
+            The project <span className="font-semibold text-gray-900 dark:text-white">"{conflict.importedProject.name}"</span> already exists in your database.
           </p>
 
           {/* Version Comparison */}
@@ -96,7 +96,7 @@ export function ImportConflictDialog({ isOpen, conflict, filePath, onResolve }: 
                 className="mt-1 text-blue-600 focus:ring-blue-500"
               />
               <div className="flex-1">
-                <div className="text-sm font-medium text-white">Replace</div>
+                <div className="text-sm font-medium text-gray-900 dark:text-white">Replace</div>
                 <div className="text-xs text-gray-400 mt-1">
                   Overwrite your existing project with the imported version
                 </div>
@@ -113,7 +113,7 @@ export function ImportConflictDialog({ isOpen, conflict, filePath, onResolve }: 
                 className="mt-1 text-blue-600 focus:ring-blue-500"
               />
               <div className="flex-1">
-                <div className="text-sm font-medium text-white">Keep Both</div>
+                <div className="text-sm font-medium text-gray-900 dark:text-white">Keep Both</div>
                 <div className="text-xs text-gray-400 mt-1">
                   Import as a separate project (e.g., "{conflict.importedProject.name} (2)")
                 </div>
@@ -126,13 +126,13 @@ export function ImportConflictDialog({ isOpen, conflict, filePath, onResolve }: 
         <div className="px-6 py-4 border-t border-gray-700 flex justify-end gap-3">
           <button
             onClick={handleCancel}
-            className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition"
+            className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-gray-900 dark:text-white transition"
           >
             Cancel
           </button>
           <button
             onClick={handleImport}
-            className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded transition"
+            className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded transition"
           >
             Import
           </button>

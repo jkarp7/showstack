@@ -96,7 +96,7 @@ export function IntegrationSettings() {
                 <button
                   onClick={handleTestConnection}
                   disabled={connectionStatus === 'testing'}
-                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-gray-900 dark:text-white rounded-md transition-colors disabled:opacity-50"
                 >
                   <Link2 className="w-4 h-4" />
                   <span>{connectionStatus === 'testing' ? 'Testing...' : 'Test Connection'}</span>
@@ -214,7 +214,7 @@ export function IntegrationSettings() {
       <div className="flex justify-end">
         <button
           onClick={handleSave}
-          className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium"
+          className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded-md transition-colors font-medium"
         >
           <Save className="w-4 h-4" />
           <span>Save Settings</span>

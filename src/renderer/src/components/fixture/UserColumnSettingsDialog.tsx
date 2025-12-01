@@ -44,7 +44,7 @@ export function UserColumnSettingsDialog({
     setDefinitions(reset);
   };
 
-  const inputClass = 'w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm focus:outline-none focus:border-blue-500';
+  const inputClass = 'w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:border-blue-500';
   const labelClass = 'text-xs font-medium text-gray-400 mb-1 w-16';
 
   return (

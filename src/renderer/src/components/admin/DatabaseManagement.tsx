@@ -110,7 +110,7 @@ export function DatabaseManagement() {
             <button
               onClick={handleBackup}
               disabled={isWorking}
-              className="ml-4 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="ml-4 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download className="w-4 h-4" />
               <span>Backup</span>
@@ -127,7 +127,7 @@ export function DatabaseManagement() {
             <button
               onClick={handleRestore}
               disabled={isWorking}
-              className="ml-4 flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="ml-4 flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-gray-900 dark:text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Upload className="w-4 h-4" />
               <span>Restore</span>
@@ -154,7 +154,7 @@ export function DatabaseManagement() {
             <button
               onClick={handleVacuum}
               disabled={isWorking}
-              className="ml-4 flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="ml-4 flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-gray-900 dark:text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <RefreshCw className="w-4 h-4" />
               <span>Vacuum</span>
@@ -171,7 +171,7 @@ export function DatabaseManagement() {
             <button
               onClick={handleIntegrityCheck}
               disabled={isWorking}
-              className="ml-4 flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="ml-4 flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-gray-900 dark:text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <CheckCircle className="w-4 h-4" />
               <span>Check</span>
@@ -188,7 +188,7 @@ export function DatabaseManagement() {
             <button
               onClick={handleCleanupOldData}
               disabled={isWorking}
-              className="ml-4 flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="ml-4 flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-gray-900 dark:text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Trash2 className="w-4 h-4" />
               <span>Cleanup</span>

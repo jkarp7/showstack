@@ -27,7 +27,7 @@ export function DataPrivacy() {
               <h4 className="font-medium text-gray-900 dark:text-white mb-1">Export User Data</h4>
               <p className="text-sm text-gray-600 dark:text-gray-400">Download all your profile data, settings, and preferences</p>
             </div>
-            <button onClick={handleExportData} className="ml-4 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
+            <button onClick={handleExportData} className="ml-4 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded-md transition-colors">
               <Download className="w-4 h-4" />
               <span>Export</span>
             </button>
@@ -38,7 +38,7 @@ export function DataPrivacy() {
               <h4 className="font-medium text-gray-900 dark:text-white mb-1">Delete All Data</h4>
               <p className="text-sm text-gray-600 dark:text-gray-400">Permanently remove all your data from the application</p>
             </div>
-            <button onClick={handleDeleteData} className="ml-4 flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors">
+            <button onClick={handleDeleteData} className="ml-4 flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-gray-900 dark:text-white rounded-md transition-colors">
               <Trash2 className="w-4 h-4" />
               <span>Delete</span>
             </button>

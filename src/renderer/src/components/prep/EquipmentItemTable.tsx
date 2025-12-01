@@ -332,7 +332,7 @@ export function EquipmentItemTable({
         <p className="text-gray-400 text-sm mb-3">No equipment items in this section</p>
         <button
           onClick={handleStartAddingRow}
-          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm transition"
+          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-gray-900 dark:text-white text-sm transition"
         >
           + Add First Item
         </button>
@@ -384,7 +384,7 @@ export function EquipmentItemTable({
                   dragOverIndex === index ? 'border-t-2 border-blue-500' : ''
                 } ${draggedItem?.id === item.id ? 'opacity-50' : ''}`}
               >
-                <td className="px-3 py-2 text-white">
+                <td className="px-3 py-2 text-gray-900 dark:text-white">
                   <div>
                     <div>{item.description}</div>
                     {/* Inline editable notes */}
@@ -396,7 +396,7 @@ export function EquipmentItemTable({
                         onBlur={handleNotesBlur}
                         onKeyDown={handleNotesKeyDown}
                         placeholder="Add notes..."
-                        className="w-full mt-1 px-2 py-1 bg-gray-600 border border-blue-500 rounded text-xs text-white placeholder-gray-400 focus:outline-none"
+                        className="w-full mt-1 px-2 py-1 bg-gray-600 border border-blue-500 rounded text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none"
                         autoFocus
                       />
                     ) : (
@@ -422,12 +422,12 @@ export function EquipmentItemTable({
                       onChange={(e) => handleQtyChange(e.target.value)}
                       onBlur={handleQtyBlur}
                       onKeyDown={handleQtyKeyDown}
-                      className="w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-center text-white focus:outline-none"
+                      className="w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-center text-gray-900 dark:text-white focus:outline-none"
                       autoFocus
                       min="0"
                     />
                   ) : (
-                    <span className="text-white">{item.active_qty}</span>
+                    <span className="text-gray-900 dark:text-white">{item.active_qty}</span>
                   )}
                 </td>
 
@@ -443,12 +443,12 @@ export function EquipmentItemTable({
                       onChange={(e) => handleQtyChange(e.target.value)}
                       onBlur={handleQtyBlur}
                       onKeyDown={handleQtyKeyDown}
-                      className="w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-center text-white focus:outline-none"
+                      className="w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-center text-gray-900 dark:text-white focus:outline-none"
                       autoFocus
                       min="0"
                     />
                   ) : (
-                    <span className="text-white">{item.spare_qty}</span>
+                    <span className="text-gray-900 dark:text-white">{item.spare_qty}</span>
                   )}
                 </td>
 
@@ -469,7 +469,7 @@ export function EquipmentItemTable({
                       onChange={(e) => handleQtyChange(e.target.value)}
                       onBlur={handleQtyBlur}
                       onKeyDown={handleQtyKeyDown}
-                      className="w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-center text-white focus:outline-none"
+                      className="w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-center text-gray-900 dark:text-white focus:outline-none"
                       autoFocus
                       min="0"
                     />
@@ -488,7 +488,7 @@ export function EquipmentItemTable({
                   <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition">
                     <button
                       onClick={() => onEditItem(item)}
-                      className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs text-white transition"
+                      className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs text-gray-900 dark:text-white transition"
                       title="Edit details (weight, power, notes)"
                     >
                       Edit
@@ -516,7 +516,7 @@ export function EquipmentItemTable({
                     onChange={(e) => setNewRow({ ...newRow, description: e.target.value })}
                     onKeyDown={handleNewRowKeyDown}
                     placeholder="Enter equipment description..."
-                    className="w-full px-2 py-1 bg-gray-700 border border-blue-500 rounded text-white placeholder-gray-400 focus:outline-none"
+                    className="w-full px-2 py-1 bg-gray-700 border border-blue-500 rounded text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none"
                     autoFocus
                   />
                 </td>
@@ -529,7 +529,7 @@ export function EquipmentItemTable({
                     }
                     onKeyDown={handleNewRowKeyDown}
                     min="0"
-                    className="w-full px-2 py-1 bg-gray-700 border border-blue-500 rounded text-center text-white focus:outline-none"
+                    className="w-full px-2 py-1 bg-gray-700 border border-blue-500 rounded text-center text-gray-900 dark:text-white focus:outline-none"
                   />
                 </td>
                 <td className="px-3 py-2">
@@ -541,7 +541,7 @@ export function EquipmentItemTable({
                     }
                     onKeyDown={handleNewRowKeyDown}
                     min="0"
-                    className="w-full px-2 py-1 bg-gray-700 border border-blue-500 rounded text-center text-white focus:outline-none"
+                    className="w-full px-2 py-1 bg-gray-700 border border-blue-500 rounded text-center text-gray-900 dark:text-white focus:outline-none"
                   />
                 </td>
                 <td className="px-3 py-2 text-center">
@@ -556,7 +556,7 @@ export function EquipmentItemTable({
                     }
                     onKeyDown={handleNewRowKeyDown}
                     min="0"
-                    className="w-full px-2 py-1 bg-gray-700 border border-purple-500 rounded text-center text-white focus:outline-none"
+                    className="w-full px-2 py-1 bg-gray-700 border border-purple-500 rounded text-center text-gray-900 dark:text-white focus:outline-none"
                   />
                 </td>
                 <td className="px-3 py-2 text-center">
@@ -569,14 +569,14 @@ export function EquipmentItemTable({
                     <button
                       onClick={() => handleSaveNewRow(false)}
                       disabled={!newRow.description.trim() || isSubmittingNewRow}
-                      className="px-2 py-1 bg-green-600 hover:bg-green-700 rounded text-xs text-white transition disabled:opacity-50"
+                      className="px-2 py-1 bg-green-600 hover:bg-green-700 rounded text-xs text-gray-900 dark:text-white transition disabled:opacity-50"
                     >
                       {isSubmittingNewRow ? '...' : 'Save'}
                     </button>
                     <button
                       onClick={handleCancelNewRow}
                       disabled={isSubmittingNewRow}
-                      className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs text-white transition disabled:opacity-50"
+                      className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs text-gray-900 dark:text-white transition disabled:opacity-50"
                     >
                       Cancel
                     </button>
@@ -594,14 +594,14 @@ export function EquipmentItemTable({
             <>
               <button
                 onClick={handleStartAddingRow}
-                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm transition"
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-gray-900 dark:text-white text-sm transition"
               >
                 + Add Item
               </button>
               {sortedItems.length > 1 && (
                 <button
                   onClick={handleMergeDuplicates}
-                  className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 rounded text-white text-sm transition"
+                  className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 rounded text-gray-900 dark:text-white text-sm transition"
                   title="Merge items with identical descriptions"
                 >
                   Merge Duplicates

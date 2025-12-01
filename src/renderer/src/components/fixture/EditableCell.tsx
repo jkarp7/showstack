@@ -52,7 +52,7 @@ export function EditableCell({ value, onChange, className, style, readOnly = fal
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          className="w-full bg-gray-700 border border-blue-500 rounded px-1 py-0.5 text-white focus:outline-none"
+          className="w-full bg-gray-700 border border-blue-500 rounded px-1 py-0.5 text-gray-900 dark:text-white focus:outline-none"
         />
       ) : (
         <div

@@ -37,7 +37,7 @@ export function UserProfile() {
             </div>
             <button
               onClick={handleUploadAvatar}
-              className="absolute bottom-0 right-0 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors"
+              className="absolute bottom-0 right-0 p-2 bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded-full transition-colors"
             >
               <Camera className="w-4 h-4" />
             </button>
@@ -165,7 +165,7 @@ export function UserProfile() {
       <div className="flex justify-end">
         <button
           onClick={handleSave}
-          className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium"
+          className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded-md transition-colors font-medium"
         >
           <Save className="w-4 h-4" />
           <span>Save Profile</span>

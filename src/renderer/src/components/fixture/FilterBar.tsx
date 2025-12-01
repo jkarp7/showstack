@@ -36,13 +36,13 @@ export function FilterBar({
         placeholder="Search fixtures..."
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm flex-1 text-white focus:outline-none focus:border-blue-500"
+        className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm flex-1 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
       />
 
       <select
         value={locationFilter}
         onChange={(e) => onLocationChange(e.target.value)}
-        className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+        className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
       >
         <option value="all">All Locations</option>
         {availableLocations.map((location) => (
@@ -55,7 +55,7 @@ export function FilterBar({
       <select
         value={typeFilter}
         onChange={(e) => onTypeChange(e.target.value)}
-        className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+        className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
       >
         <option value="all">All Types</option>
         {availableTypes.map((type) => (
@@ -68,7 +68,7 @@ export function FilterBar({
       <select
         value={statusFilter}
         onChange={(e) => onStatusChange(e.target.value)}
-        className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+        className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
       >
         <option value="all">All Status</option>
         {availableStatuses.map((status) => (

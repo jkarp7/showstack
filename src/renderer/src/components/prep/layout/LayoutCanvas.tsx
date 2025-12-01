@@ -221,20 +221,20 @@ export function LayoutCanvas({
           <button
             onClick={handleZoomOut}
             disabled={zoom <= 50}
-            className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-white disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             −
           </button>
           <button
             onClick={handleZoomReset}
-            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-white text-xs transition min-w-16"
+            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-gray-900 dark:text-white text-xs transition min-w-16"
           >
             {zoom}%
           </button>
           <button
             onClick={handleZoomIn}
             disabled={zoom >= 200}
-            className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-white disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             +
           </button>
@@ -422,7 +422,7 @@ export function LayoutCanvas({
 
                   {/* Selection Indicator */}
                   {selectedElementId === element.id && (
-                    <div className="absolute -top-6 left-0 bg-blue-500 text-white px-2 py-0.5 rounded text-xs whitespace-nowrap pointer-events-none">
+                    <div className="absolute -top-6 left-0 bg-blue-500 text-gray-900 dark:text-white px-2 py-0.5 rounded text-xs whitespace-nowrap pointer-events-none">
                       {element.element_type}
                       {' '}
                       ({element.column_span}×{element.row_span})

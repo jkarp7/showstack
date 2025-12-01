@@ -70,7 +70,7 @@ export function AddItemDialog({ isOpen, onClose, sectionId, sectionName }: AddIt
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-1 text-white">Add Equipment Item</h2>
+        <h2 className="text-xl font-bold mb-1 text-gray-900 dark:text-white">Add Equipment Item</h2>
         <p className="text-sm text-gray-400 mb-4">Section: {sectionName}</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -84,7 +84,7 @@ export function AddItemDialog({ isOpen, onClose, sectionId, sectionName }: AddIt
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="e.g., Robe Robin T1 Profile"
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
               autoFocus
             />
           </div>
@@ -98,7 +98,7 @@ export function AddItemDialog({ isOpen, onClose, sectionId, sectionName }: AddIt
                 value={activeQty}
                 onChange={(e) => setActiveQty(parseInt(e.target.value) || 0)}
                 min="0"
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
               />
             </div>
 
@@ -109,7 +109,7 @@ export function AddItemDialog({ isOpen, onClose, sectionId, sectionName }: AddIt
                 value={spareQty}
                 onChange={(e) => setSpareQty(parseInt(e.target.value) || 0)}
                 min="0"
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
               />
             </div>
 
@@ -122,7 +122,7 @@ export function AddItemDialog({ isOpen, onClose, sectionId, sectionName }: AddIt
                 value={venueQty}
                 onChange={(e) => setVenueQty(parseInt(e.target.value) || 0)}
                 min="0"
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-purple-500"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-purple-500"
               />
             </div>
           </div>
@@ -131,7 +131,7 @@ export function AddItemDialog({ isOpen, onClose, sectionId, sectionName }: AddIt
           <div className="bg-gray-700/50 rounded p-3 grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-gray-400">Total Needed:</span>{' '}
-              <span className="text-white font-medium">{activeQty + spareQty}</span>
+              <span className="text-gray-900 dark:text-white font-medium">{activeQty + spareQty}</span>
             </div>
             <div>
               <span className="text-gray-400">Rental Qty:</span>{' '}
@@ -153,7 +153,7 @@ export function AddItemDialog({ isOpen, onClose, sectionId, sectionName }: AddIt
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 placeholder="Optional"
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
               />
             </div>
 
@@ -167,7 +167,7 @@ export function AddItemDialog({ isOpen, onClose, sectionId, sectionName }: AddIt
                 value={power}
                 onChange={(e) => setPower(e.target.value)}
                 placeholder="Optional"
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
@@ -180,7 +180,7 @@ export function AddItemDialog({ isOpen, onClose, sectionId, sectionName }: AddIt
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Optional notes about this equipment..."
               rows={3}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 resize-none"
             />
           </div>
 
@@ -190,14 +190,14 @@ export function AddItemDialog({ isOpen, onClose, sectionId, sectionName }: AddIt
               type="button"
               onClick={handleClose}
               disabled={isSubmitting}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white transition disabled:opacity-50"
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-gray-900 dark:text-white transition disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!description.trim() || isSubmitting}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-gray-900 dark:text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Adding...' : 'Add Item'}
             </button>

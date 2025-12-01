@@ -140,14 +140,14 @@ export function ModuleLanding() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900 text-white">
+    <div className="h-screen flex flex-col bg-gray-900 text-gray-900 dark:text-white">
       {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={handleBackClick}
-              className="text-gray-400 hover:text-white flex items-center gap-2"
+              className="text-gray-400 hover:text-gray-900 dark:text-white flex items-center gap-2"
             >
               ← Back to {projectId ? 'Project' : 'Home'}
             </button>

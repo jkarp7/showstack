@@ -17,7 +17,7 @@ export function Login() {
     <div className="h-screen flex items-center justify-center bg-gray-900">
       <div className="w-full max-w-md p-8 bg-gray-800 rounded-lg border border-gray-700">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">ShowStack</h1>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">ShowStack</h1>
           <p className="text-gray-400">Production Management Suite</p>
         </div>
 
@@ -31,7 +31,7 @@ export function Login() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
               placeholder="you@example.com"
               required
             />
@@ -46,7 +46,7 @@ export function Login() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
               placeholder="••••••••"
               required
             />
@@ -54,7 +54,7 @@ export function Login() {
 
           <button
             type="submit"
-            className="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-medium transition"
+            className="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded text-gray-900 dark:text-white font-medium transition"
           >
             Sign In
           </button>

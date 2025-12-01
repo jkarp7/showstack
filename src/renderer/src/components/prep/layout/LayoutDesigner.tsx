@@ -334,9 +334,9 @@ export function LayoutDesigner({
       {/* Header */}
       <div className="bg-gray-800 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">Layout Designer</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Layout Designer</h2>
           <p className="text-sm text-gray-400 mt-1">
-            Designing: <span className="text-white font-medium">{pageType}</span> page
+            Designing: <span className="text-gray-900 dark:text-white font-medium">{pageType}</span> page
             {hasChanges && <span className="text-yellow-500 ml-2">• Unsaved changes</span>}
           </p>
         </div>
@@ -348,7 +348,7 @@ export function LayoutDesigner({
               {onRestore && (
                 <button
                   onClick={onRestore}
-                  className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded transition font-medium"
+                  className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-gray-900 dark:text-white rounded transition font-medium"
                 >
                   Restore
                 </button>
@@ -357,14 +357,14 @@ export function LayoutDesigner({
                 <button
                   onClick={() => onUpdate(template)}
                   disabled={!hasChanges}
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Update
                 </button>
               )}
               <button
                 onClick={handleClose}
-                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition font-medium"
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-gray-900 dark:text-white rounded transition font-medium"
               >
                 Cancel
               </button>
@@ -375,7 +375,7 @@ export function LayoutDesigner({
               {availableTemplates.length > 0 && (
                 <button
                   onClick={() => setShowLoadDialog(true)}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition"
+                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-900 dark:text-white rounded transition"
                 >
                   Load Layout
                 </button>
@@ -383,13 +383,13 @@ export function LayoutDesigner({
               <button
                 onClick={handleSave}
                 disabled={!hasChanges}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Save
               </button>
               <button
                 onClick={handleClose}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition font-medium"
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-gray-900 dark:text-white rounded transition font-medium"
               >
                 Done
               </button>
@@ -445,7 +445,7 @@ export function LayoutDesigner({
           <div className="bg-gray-800 rounded-lg border border-gray-700 max-w-2xl w-full max-h-[80vh] flex flex-col">
             {/* Dialog Header */}
             <div className="px-6 py-4 border-b border-gray-700">
-              <h3 className="text-lg font-bold text-white">Load Layout</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Load Layout</h3>
               <p className="text-sm text-gray-400 mt-1">
                 Select a saved page layout to load
               </p>
@@ -467,7 +467,7 @@ export function LayoutDesigner({
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="font-medium text-white group-hover:text-blue-400 transition-colors">
+                          <div className="font-medium text-gray-900 dark:text-white group-hover:text-blue-400 transition-colors">
                             {tmpl.name}
                           </div>
                           {tmpl.description && (
@@ -500,7 +500,7 @@ export function LayoutDesigner({
             <div className="px-6 py-4 border-t border-gray-700 flex justify-end">
               <button
                 onClick={() => setShowLoadDialog(false)}
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition"
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-900 dark:text-white rounded transition"
               >
                 Close
               </button>

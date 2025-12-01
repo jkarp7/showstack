@@ -102,7 +102,7 @@ export function ModuleSelector({ currentModule, onModuleChange }: ModuleSelector
               }
               ${!hasAccess
                 ? 'opacity-50 cursor-not-allowed'
-                : 'hover:bg-blue-400 hover:text-white'
+                : 'hover:bg-blue-400 hover:text-gray-900 dark:hover:text-white'
               }
             `}
           >

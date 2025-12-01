@@ -38,7 +38,7 @@ export function ModuleCard({ name, description, icon, route, isLocked = false }:
       )}
 
       <div className="text-4xl mb-4">{icon}</div>
-      <h2 className="text-2xl font-bold mb-2 text-white">{name}</h2>
+      <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{name}</h2>
       <p className="text-gray-400">{description}</p>
 
       {isLocked && (

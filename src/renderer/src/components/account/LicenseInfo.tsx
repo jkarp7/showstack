@@ -25,7 +25,7 @@ export function LicenseInfo() {
               <p className="text-sm text-blue-800 dark:text-blue-300 mb-3">
                 Your license expires on {expirationDate}. Manage your subscription in the billing portal.
               </p>
-              <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors">
+              <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded-md text-sm font-medium transition-colors">
                 Manage Subscription
               </button>
             </div>
@@ -40,7 +40,7 @@ export function LicenseInfo() {
               <p className="text-sm text-amber-800 dark:text-amber-300 mb-3">
                 You don't have an active license. Purchase a license to unlock all features and receive updates.
               </p>
-              <button className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-md text-sm font-medium transition-colors">
+              <button className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-gray-900 dark:text-white rounded-md text-sm font-medium transition-colors">
                 Purchase License
               </button>
             </div>

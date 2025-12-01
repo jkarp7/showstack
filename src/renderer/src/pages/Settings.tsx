@@ -30,7 +30,7 @@ export function Settings() {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate('/')}
-                className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-900 dark:text-white transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
                 <span>Back to Home</span>

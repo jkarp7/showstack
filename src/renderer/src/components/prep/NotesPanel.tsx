@@ -138,7 +138,7 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
       {/* General Conditions */}
       <div className="bg-gray-700/50 rounded-lg p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-base font-semibold text-white">General Conditions</h3>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white">General Conditions</h3>
           <div className="flex items-center gap-2">
             <select
               value={generalConditionsFormat}
@@ -147,7 +147,7 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
                 setGeneralConditionsFormat(newFormat);
                 handleSave('general_conditions', generalConditions, newFormat, generalConditionsId);
               }}
-              className="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-xs text-white"
+              className="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-xs text-gray-900 dark:text-white"
             >
               <option value="plain">Plain Text</option>
               <option value="bullets">Bullets</option>
@@ -166,14 +166,14 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
           onChange={(e) => setGeneralConditions(e.target.value)}
           onBlur={() => handleSave('general_conditions', generalConditions, generalConditionsFormat, generalConditionsId)}
           placeholder="Add general conditions and terms..."
-          className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
+          className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
         />
       </div>
 
       {/* General Notes */}
       <div className="bg-gray-700/50 rounded-lg p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-base font-semibold text-white">General Notes</h3>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white">General Notes</h3>
           <div className="flex items-center gap-2">
             <select
               value={generalNotesFormat}
@@ -182,7 +182,7 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
                 setGeneralNotesFormat(newFormat);
                 handleSave('general_notes', generalNotes, newFormat, generalNotesId);
               }}
-              className="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-xs text-white"
+              className="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-xs text-gray-900 dark:text-white"
             >
               <option value="plain">Plain Text</option>
               <option value="bullets">Bullets</option>
@@ -201,14 +201,14 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
           onChange={(e) => setGeneralNotes(e.target.value)}
           onBlur={() => handleSave('general_notes', generalNotes, generalNotesFormat, generalNotesId)}
           placeholder="Add general project notes..."
-          className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
+          className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
         />
       </div>
 
       {/* Fixture Notes */}
       <div className="bg-gray-700/50 rounded-lg p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-base font-semibold text-white">Fixture Notes</h3>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white">Fixture Notes</h3>
           <div className="flex items-center gap-2">
             <select
               value={fixtureNotesFormat}
@@ -217,7 +217,7 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
                 setFixtureNotesFormat(newFormat);
                 handleSave('fixture_notes', fixtureNotes, newFormat, fixtureNotesId);
               }}
-              className="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-xs text-white"
+              className="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-xs text-gray-900 dark:text-white"
             >
               <option value="plain">Plain Text</option>
               <option value="bullets">Bullets</option>
@@ -236,7 +236,7 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
           onChange={(e) => setFixtureNotes(e.target.value)}
           onBlur={() => handleSave('fixture_notes', fixtureNotes, fixtureNotesFormat, fixtureNotesId)}
           placeholder="Add notes about fixtures and equipment..."
-          className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
+          className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
         />
       </div>
 

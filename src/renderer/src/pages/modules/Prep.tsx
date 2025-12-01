@@ -566,7 +566,7 @@ export function Prep() {
       : null;
 
     return (
-      <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-white">
+      <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
         {/* Header with file operations */}
         <header className="bg-white dark:bg-gray-800 border-b border-gray-700 p-4">
           <div className="flex items-center justify-between">
@@ -1126,7 +1126,7 @@ export function Prep() {
 
   // Show project list
   return (
-    <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-white">
+    <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       <header className="bg-white dark:bg-gray-800 border-b border-gray-700 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">

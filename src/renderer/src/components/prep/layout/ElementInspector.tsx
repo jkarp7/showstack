@@ -69,14 +69,14 @@ export function ElementInspector({
           <h3 className="text-sm font-semibold text-gray-300 uppercase">Element Inspector</h3>
           <button
             onClick={onDelete}
-            className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded transition"
+            className="px-3 py-1 bg-red-600 hover:bg-red-700 text-gray-900 dark:text-white text-xs rounded transition"
           >
             Delete
           </button>
         </div>
 
         <div className="text-xs text-gray-400 mb-3">
-          Type: <span className="text-white font-mono">{element.element_type}</span>
+          Type: <span className="text-gray-900 dark:text-white font-mono">{element.element_type}</span>
         </div>
 
         {/* Section Tabs */}
@@ -125,7 +125,7 @@ export function ElementInspector({
                   <select
                     value={(element.config as DataFieldConfig).fieldType}
                     onChange={(e) => updateConfig({ fieldType: e.target.value as DataFieldType })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                   >
                     <option value="production_name">Production Name</option>
                     <option value="venue">Venue</option>
@@ -148,7 +148,7 @@ export function ElementInspector({
                     value={(element.config as DataFieldConfig).label || ''}
                     onChange={(e) => updateConfig({ label: e.target.value })}
                     placeholder="Optional label"
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                   />
                 </FormField>
 
@@ -174,7 +174,7 @@ export function ElementInspector({
                     value={(element.config as TextConfig).content}
                     onChange={(e) => updateConfig({ content: e.target.value })}
                     rows={4}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                   />
                 </FormField>
               </ConfigSection>
@@ -189,7 +189,7 @@ export function ElementInspector({
                     value={(element.config as ImageConfig).src || ''}
                     onChange={(e) => updateConfig({ src: e.target.value })}
                     placeholder="https://... or base64"
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                   />
                 </FormField>
 
@@ -197,7 +197,7 @@ export function ElementInspector({
                   <select
                     value={(element.config as ImageConfig).objectFit || 'contain'}
                     onChange={(e) => updateConfig({ objectFit: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                   >
                     <option value="contain">Contain</option>
                     <option value="cover">Cover</option>
@@ -214,7 +214,7 @@ export function ElementInspector({
                   <select
                     value={(element.config as ShapeConfig).shapeType}
                     onChange={(e) => updateConfig({ shapeType: e.target.value as ShapeType })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                   >
                     <option value="rectangle">Rectangle</option>
                     <option value="line">Line</option>
@@ -238,7 +238,7 @@ export function ElementInspector({
                     onChange={(e) => updateConfig({ thickness: parseInt(e.target.value) })}
                     min="1"
                     max="20"
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                   />
                 </FormField>
               </ConfigSection>
@@ -274,7 +274,7 @@ export function ElementInspector({
                 <select
                   value={element.style.fontFamily || 'Arial'}
                   onChange={(e) => updateStyle({ fontFamily: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 >
                   <option value="Arial">Arial</option>
                   <option value="Helvetica">Helvetica</option>
@@ -292,7 +292,7 @@ export function ElementInspector({
                   onChange={(e) => updateStyle({ fontSize: parseInt(e.target.value) })}
                   min="6"
                   max="72"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 />
               </FormField>
 
@@ -300,7 +300,7 @@ export function ElementInspector({
                 <select
                   value={element.style.fontWeight || 'normal'}
                   onChange={(e) => updateStyle({ fontWeight: e.target.value as any })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 >
                   <option value="normal">Normal</option>
                   <option value="bold">Bold</option>
@@ -316,7 +316,7 @@ export function ElementInspector({
                 <select
                   value={element.style.textAlign || 'left'}
                   onChange={(e) => updateStyle({ textAlign: e.target.value as any })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 >
                   <option value="left">Left</option>
                   <option value="center">Center</option>
@@ -347,7 +347,7 @@ export function ElementInspector({
                   />
                   <button
                     onClick={() => updateStyle({ backgroundColor: 'transparent' })}
-                    className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-xs rounded transition"
+                    className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-900 dark:text-white text-xs rounded transition"
                   >
                     Clear
                   </button>
@@ -364,7 +364,7 @@ export function ElementInspector({
                   onChange={(e) => updateStyle({ borderWidth: parseInt(e.target.value) })}
                   min="0"
                   max="20"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 />
               </FormField>
 
@@ -372,7 +372,7 @@ export function ElementInspector({
                 <select
                   value={element.style.borderStyle || 'solid'}
                   onChange={(e) => updateStyle({ borderStyle: e.target.value as any })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 >
                   <option value="none">None</option>
                   <option value="solid">Solid</option>
@@ -397,7 +397,7 @@ export function ElementInspector({
                   onChange={(e) => updateStyle({ borderRadius: parseInt(e.target.value) })}
                   min="0"
                   max="50"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 />
               </FormField>
             </ConfigSection>
@@ -411,7 +411,7 @@ export function ElementInspector({
                   onChange={(e) => updateStyle({ padding: parseInt(e.target.value) })}
                   min="0"
                   max="100"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 />
               </FormField>
 
@@ -444,7 +444,7 @@ export function ElementInspector({
                   onChange={(e) => updatePosition({ grid_column: Math.max(0, Math.min(maxColumns - 1, parseInt(e.target.value) || 0)) })}
                   min="0"
                   max={maxColumns - 1}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 />
               </FormField>
 
@@ -455,7 +455,7 @@ export function ElementInspector({
                   onChange={(e) => updatePosition({ grid_row: Math.max(0, Math.min(maxRows - 1, parseInt(e.target.value) || 0)) })}
                   min="0"
                   max={maxRows - 1}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 />
               </FormField>
             </ConfigSection>
@@ -469,7 +469,7 @@ export function ElementInspector({
                   onChange={(e) => updatePosition({ column_span: Math.max(1, Math.min(maxColumns - element.grid_column, parseInt(e.target.value) || 1)) })}
                   min="1"
                   max={maxColumns - element.grid_column}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 />
               </FormField>
 
@@ -480,7 +480,7 @@ export function ElementInspector({
                   onChange={(e) => updatePosition({ row_span: Math.max(1, Math.min(maxRows - element.grid_row, parseInt(e.target.value) || 1)) })}
                   min="1"
                   max={maxRows - element.grid_row}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 />
               </FormField>
             </ConfigSection>
@@ -492,7 +492,7 @@ export function ElementInspector({
                   type="number"
                   value={element.layer}
                   onChange={(e) => updatePosition({ layer: parseInt(e.target.value) || 0 })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 />
               </FormField>
               <div className="text-xs text-gray-500">

@@ -307,7 +307,7 @@ export function LayoutTemplateManager() {
                 </button>
                 <button
                   onClick={handleConfirmUpdate}
-                  className="flex-1 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+                  className="flex-1 px-4 py-2 text-gray-900 dark:text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
                   disabled={!newLayoutName.trim()}
                 >
                   Save
@@ -381,7 +381,7 @@ export function LayoutTemplateManager() {
           <button
             onClick={handleExportAllLayouts}
             disabled={isLoading}
-            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-gray-900 dark:text-white text-sm rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Download className="w-4 h-4" />
             <span>Export All</span>
@@ -390,7 +390,7 @@ export function LayoutTemplateManager() {
           <button
             onClick={handleImportLayouts}
             disabled={isLoading}
-            className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 py-2 bg-green-600 text-gray-900 dark:text-white text-sm rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Upload className="w-4 h-4" />
             <span>Import JSON</span>
@@ -399,7 +399,7 @@ export function LayoutTemplateManager() {
           <button
             onClick={handleResetToFactory}
             disabled={isLoading}
-            className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white text-sm rounded-md hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-gray-900 dark:text-white text-sm rounded-md hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw className="w-4 h-4" />
             <span>Reset to Factory</span>

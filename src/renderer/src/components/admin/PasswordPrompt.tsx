@@ -171,7 +171,7 @@ export function PasswordPrompt({ isOpen, onClose, onSuccess, isFirstTime = false
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 text-gray-900 dark:text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading || !password || (isFirstTime && !confirmPassword)}
             >
               {isLoading ? 'Please wait...' : isFirstTime ? 'Set Password' : 'Unlock'}

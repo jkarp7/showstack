@@ -70,7 +70,7 @@ export function NewProjectDialog({ isOpen, onClose, onCreate }: NewProjectDialog
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
               placeholder="e.g., Hamilton National Tour 2025"
               autoFocus
               required
@@ -86,7 +86,7 @@ export function NewProjectDialog({ isOpen, onClose, onCreate }: NewProjectDialog
               id="project-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 resize-none"
               placeholder="Optional description..."
               rows={3}
             />

@@ -212,7 +212,7 @@ export function PrintPreview({
       <div className="w-96 bg-gray-800 border border-gray-700 rounded-lg p-6 flex flex-col" style={{ maxHeight: 'calc(100vh - 300px)' }}>
         {/* Header */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-white">Print Settings</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Print Settings</h3>
           <p className="text-sm text-gray-400 mt-1">
             {template.name}
             {template.isDefault && <span className="ml-2 text-blue-400">• Default</span>}
@@ -232,7 +232,7 @@ export function PrintPreview({
                   pageSettings: { ...template.pageSettings, pageSize: e.target.value as any },
                   updated_at: Date.now()
                 })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
               >
                 <option value="letter">Letter</option>
                 <option value="legal">Legal</option>
@@ -249,7 +249,7 @@ export function PrintPreview({
                   pageSettings: { ...template.pageSettings, orientation: e.target.value as any },
                   updated_at: Date.now()
                 })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
               >
                 <option value="portrait">Portrait</option>
                 <option value="landscape">Landscape</option>
@@ -281,7 +281,7 @@ export function PrintPreview({
           </p>
           <button
             onClick={() => setShowSectionEditor(true)}
-            className="mt-3 w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition text-sm"
+            className="mt-3 w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded transition text-sm"
           >
             Arrange Sections
           </button>
@@ -291,13 +291,13 @@ export function PrintPreview({
         <div className="mt-auto flex gap-2">
           <button
             onClick={handleExportPDF}
-            className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition text-sm"
+            className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-gray-900 dark:text-white rounded transition text-sm"
           >
             Export PDF
           </button>
           <button
             onClick={handlePrint}
-            className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition text-sm"
+            className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-gray-900 dark:text-white rounded transition text-sm"
           >
             Print
           </button>
@@ -310,10 +310,10 @@ export function PrintPreview({
           <div className="bg-gray-900 rounded-lg w-full h-full max-w-7xl max-h-[90vh] overflow-hidden border border-gray-700 flex flex-col">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-700">
-              <h3 className="text-xl font-bold text-white">Arrange Sections</h3>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Arrange Sections</h3>
               <button
                 onClick={() => setShowSectionEditor(false)}
-                className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition"
+                className="p-2 text-gray-400 hover:text-gray-900 dark:text-white hover:bg-gray-700 rounded transition"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
