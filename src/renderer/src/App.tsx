@@ -7,6 +7,8 @@ import { Prep } from './pages/modules/Prep';
 import { SystemDocs } from './pages/modules/SystemDocs';
 import { Manager } from './pages/modules/Manager';
 import { AdminPanel } from './pages/admin/AdminPanel';
+import { Account } from './pages/Account';
+import { Settings } from './pages/Settings';
 import { LicenseBanner } from './components/License/LicenseBanner';
 import { useUser } from './hooks/useUser';
 
@@ -69,6 +71,10 @@ function AppContent() {
 
         {/* Admin panel */}
         <Route path="/admin" element={<AdminPanel />} />
+
+        {/* User account and settings */}
+        <Route path="/account" element={<Account />} />
+        <Route path="/settings" element={<Settings />} />
 
         {/* Catch all - redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
