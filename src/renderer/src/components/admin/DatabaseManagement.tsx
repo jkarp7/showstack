@@ -52,6 +52,20 @@ export function DatabaseManagement() {
         <p className="text-gray-600">Maintain, backup, and optimize application database</p>
       </div>
 
+      {/* Warning Notice */}
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <div className="flex items-start gap-2">
+          <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+          <div>
+            <h4 className="font-medium text-amber-900 mb-1">Important Safety Information</h4>
+            <p className="text-sm text-amber-800">
+              Always create a backup before performing maintenance operations or restoring from a backup file.
+              These operations can significantly impact your data and should be performed with caution.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Database Info */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -179,20 +193,6 @@ export function DatabaseManagement() {
               <Trash2 className="w-4 h-4" />
               <span>Cleanup</span>
             </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Warning Notice */}
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-        <div className="flex items-start gap-2">
-          <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
-          <div>
-            <h4 className="font-medium text-amber-900 mb-1">Important Safety Information</h4>
-            <p className="text-sm text-amber-800">
-              Always create a backup before performing maintenance operations or restoring from a backup file.
-              These operations can significantly impact your data and should be performed with caution.
-            </p>
           </div>
         </div>
       </div>

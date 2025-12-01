@@ -81,6 +81,20 @@ export function AuditLogging() {
         <p className="text-gray-600">Track system activities, changes, and access logs</p>
       </div>
 
+      {/* Info Notice */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-start gap-2">
+          <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div>
+            <h4 className="font-medium text-blue-900 mb-1">Audit Log Retention</h4>
+            <p className="text-sm text-blue-800">
+              Audit logs are retained for 90 days by default. Export logs regularly if you need longer retention.
+              Clearing logs will permanently remove all entries and cannot be undone.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Controls */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -196,20 +210,6 @@ export function AuditLogging() {
               <div className="text-sm text-gray-500">November 30, 2024 at 6:00 PM</div>
             </div>
             <span className="text-sm text-gray-600">/backups/app_2024-11-30.db</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Info Notice */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-start gap-2">
-          <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-          <div>
-            <h4 className="font-medium text-blue-900 mb-1">Audit Log Retention</h4>
-            <p className="text-sm text-blue-800">
-              Audit logs are retained for 90 days by default. Export logs regularly if you need longer retention.
-              Clearing logs will permanently remove all entries and cannot be undone.
-            </p>
           </div>
         </div>
       </div>

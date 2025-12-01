@@ -31,6 +31,20 @@ export function ApplicationSettings() {
         <p className="text-gray-600">Configure default paths, file naming, and auto-backup settings</p>
       </div>
 
+      {/* Info Notice */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-start gap-2">
+          <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div>
+            <h4 className="font-medium text-blue-900 mb-1">Settings Scope</h4>
+            <p className="text-sm text-blue-800">
+              These settings apply application-wide and affect all users. Changes take effect immediately after saving.
+              Default paths will be set to the application installation directory when bundled.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Default Directories */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -157,19 +171,6 @@ export function ApplicationSettings() {
               <p className="text-xs text-gray-500 mt-1">How often to create automatic backups (1-168 hours)</p>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Info Notice */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-start gap-2">
-          <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-          <div>
-            <h4 className="font-medium text-blue-900 mb-1">Settings Scope</h4>
-            <p className="text-sm text-blue-800">
-              These settings apply application-wide and affect all users. Changes take effect immediately after saving.
-            </p>
-          </div>
         </div>
       </div>
 
