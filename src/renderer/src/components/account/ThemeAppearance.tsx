@@ -29,6 +29,13 @@ export function ThemeAppearance() {
         <p className="text-gray-600 dark:text-gray-400">Customize the look and feel of your application</p>
       </div>
 
+      {/* Info: Changes apply immediately */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <p className="text-sm text-blue-800 dark:text-blue-300">
+          ✨ <strong>Changes apply immediately</strong> - no need to save! Your preferences are automatically saved.
+        </p>
+      </div>
+
       {/* Theme Mode */}
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
@@ -177,13 +184,6 @@ export function ThemeAppearance() {
             <span>125%</span>
           </div>
         </div>
-      </div>
-
-      {/* Info: Changes apply immediately */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <p className="text-sm text-blue-800 dark:text-blue-300">
-          ✨ <strong>Changes apply immediately</strong> - no need to save! Your preferences are automatically saved.
-        </p>
       </div>
     </div>
   );
