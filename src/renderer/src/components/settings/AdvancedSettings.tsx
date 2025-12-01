@@ -57,6 +57,20 @@ export function AdvancedSettings() {
         )}
       </div>
 
+      {/* Performance Warning - Now at top */}
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <div className="flex items-start gap-2">
+          <Zap className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+          <div>
+            <h4 className="font-medium text-amber-900 mb-1">Performance Impact</h4>
+            <p className="text-sm text-amber-800">
+              Changes to these settings may require an application restart to take full effect.
+              Higher memory and cache limits improve performance but use more system resources.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <Zap className="w-5 h-5 text-blue-600" />
@@ -74,7 +88,10 @@ export function AdvancedSettings() {
               <span>4 GB</span>
               <span>8 GB</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Maximum memory for the application</p>
+            <p className="text-xs text-gray-500 mt-1">
+              <strong>Controls:</strong> Maximum RAM the application can use. Higher values allow working with larger projects and more assets simultaneously.
+              Increase if you experience slowdowns with complex projects.
+            </p>
           </div>
 
           <div>
@@ -87,7 +104,10 @@ export function AdvancedSettings() {
               <span>1 GB</span>
               <span>2 GB</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Disk space for caching assets</p>
+            <p className="text-xs text-gray-500 mt-1">
+              <strong>Controls:</strong> Disk space for caching rendered layouts, images, and project assets. Larger cache reduces re-rendering time.
+              Increase for faster performance when working with many projects.
+            </p>
           </div>
 
           <div>
@@ -98,19 +118,9 @@ export function AdvancedSettings() {
               <option value="high">High (Better Quality)</option>
               <option value="ultra">Ultra (Best Quality)</option>
             </select>
-            <p className="text-xs text-gray-500 mt-1">Higher quality uses more resources</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-        <div className="flex items-start gap-2">
-          <Zap className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
-          <div>
-            <h4 className="font-medium text-amber-900 mb-1">Performance Impact</h4>
-            <p className="text-sm text-amber-800">
-              Changes to these settings may require an application restart to take full effect.
-              Higher memory and cache limits improve performance but use more system resources.
+            <p className="text-xs text-gray-500 mt-1">
+              <strong>Controls:</strong> Visual quality of layout rendering and PDF exports. Higher quality produces sharper text and graphics but requires more processing power.
+              Use "Low" for better performance on slower systems.
             </p>
           </div>
         </div>

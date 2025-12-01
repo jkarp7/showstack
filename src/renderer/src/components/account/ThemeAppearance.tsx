@@ -72,6 +72,9 @@ export function ThemeAppearance() {
       {/* Accent Color */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Accent Color</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          <strong>Controls:</strong> Color used for buttons, links, highlights, and interactive elements throughout the app.
+        </p>
 
         <div className="flex items-center gap-4">
           <input
@@ -103,6 +106,10 @@ export function ThemeAppearance() {
       {/* UI Density */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">UI Density</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          <strong>Controls:</strong> Spacing between UI elements. "Comfortable" adds more padding and spacing for easier clicking.
+          "Compact" reduces spacing to fit more content on screen at once.
+        </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button
@@ -134,6 +141,10 @@ export function ThemeAppearance() {
       {/* Font Scale */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Font Scale</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          <strong>Controls:</strong> Size of all text in the application UI (menus, buttons, labels, etc.). Does not affect project content.
+          Increase for better readability or decrease to fit more information on screen.
+        </p>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">

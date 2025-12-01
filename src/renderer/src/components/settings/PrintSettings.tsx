@@ -19,6 +19,10 @@ export function PrintSettings() {
           <Printer className="w-5 h-5 text-blue-600" />
           <span>Page Setup</span>
         </h3>
+        <p className="text-sm text-gray-600 mb-4">
+          <strong>Controls:</strong> Default page size, orientation, and resolution for all PDF exports and printed shop orders.
+          These settings can be overridden per project.
+        </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -30,6 +34,9 @@ export function PrintSettings() {
               <option value="a4">A4</option>
               <option value="a3">A3</option>
             </select>
+            <p className="text-xs text-gray-500 mt-1">
+              Standard theatrical shop orders typically use Tabloid (11" × 17")
+            </p>
           </div>
 
           <div>
@@ -38,6 +45,9 @@ export function PrintSettings() {
               <option value="portrait">Portrait</option>
               <option value="landscape">Landscape</option>
             </select>
+            <p className="text-xs text-gray-500 mt-1">
+              Landscape is recommended for plot layouts with wide stages
+            </p>
           </div>
 
           <div className="md:col-span-2">
@@ -47,6 +57,9 @@ export function PrintSettings() {
               <option value="300">300 DPI (Standard)</option>
               <option value="600">600 DPI (High Quality)</option>
             </select>
+            <p className="text-xs text-gray-500 mt-1">
+              Higher DPI produces sharper prints but larger file sizes. 300 DPI is recommended for professional shop orders.
+            </p>
           </div>
         </div>
       </div>
@@ -56,12 +69,15 @@ export function PrintSettings() {
           <FileText className="w-5 h-5 text-blue-600" />
           <span>PDF Export Options</span>
         </h3>
+        <p className="text-sm text-gray-600 mb-4">
+          <strong>Controls:</strong> Additional options for PDF exports, such as watermarks for draft documents.
+        </p>
 
         <div className="space-y-3">
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
             <div>
               <div className="font-medium text-gray-900">Include Watermark</div>
-              <div className="text-sm text-gray-500">Add "DRAFT" watermark to PDFs</div>
+              <div className="text-sm text-gray-500">Add "DRAFT" watermark to PDFs for work-in-progress documents</div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" checked={includeWatermark} onChange={(e) => setIncludeWatermark(e.target.checked)} className="sr-only peer" />

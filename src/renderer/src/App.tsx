@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Login } from './pages/Login';
 import { LandingPage } from './pages/LandingPage';
 import { ProjectPage } from './pages/ProjectPage';
@@ -10,6 +10,7 @@ import { AdminPanel } from './pages/admin/AdminPanel';
 import { Account } from './pages/Account';
 import { Settings } from './pages/Settings';
 import { LicenseBanner } from './components/License/LicenseBanner';
+import { SplashScreen } from './components/SplashScreen';
 import { useUser } from './hooks/useUser';
 
 function AppContent() {
@@ -84,9 +85,19 @@ function AppContent() {
 }
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+  };
+
   return (
     <Router>
-      <AppContent />
+      {showSplash ? (
+        <SplashScreen onComplete={handleSplashComplete} />
+      ) : (
+        <AppContent />
+      )}
     </Router>
   );
 }
