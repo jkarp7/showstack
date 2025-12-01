@@ -33,13 +33,13 @@ export function SystemDocs() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900 text-white">
+    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Tab Navigation */}
-      <div className="bg-gray-800 border-b border-gray-700">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-700">
         <div className="flex items-center">
           <button
             onClick={handleBackClick}
-            className="px-4 py-3 bg-gray-700 hover:bg-gray-600 border-r border-gray-700 transition"
+            className="px-4 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 border-r border-gray-200 dark:border-gray-700 transition"
             title={routeProjectId ? "Back to Project" : "Back to Projects"}
           >
             ← Back
@@ -51,8 +51,8 @@ export function SystemDocs() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-6 py-3 border-r border-gray-700 transition flex items-center gap-2 ${
                   activeTab === tab.id
-                    ? 'bg-gray-900 text-white border-b-2 border-blue-500'
-                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+                    ? 'bg-gray-900 text-gray-900 dark:text-white border-b-2 border-blue-500'
+                    : 'bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-900 dark:text-white'
                 }`}
               >
                 <span>{tab.icon}</span>
@@ -62,7 +62,7 @@ export function SystemDocs() {
           </div>
           <button
             onClick={handleHomeClick}
-            className="px-4 py-3 bg-gray-700 hover:bg-gray-600 border-l border-gray-700 transition text-xl"
+            className="px-4 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 border-l border-gray-200 dark:border-gray-700 transition text-xl"
             title="Home (Projects)"
           >
             🏠

@@ -443,15 +443,15 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   ]);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900 text-white">
+    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 p-4">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-4">
             {!embedded && (
               <button
                 onClick={() => navigate('/modules')}
-                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+                className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
               >
                 ← Home
               </button>
@@ -462,19 +462,19 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
                 {!embedded && (
                   <>
                     <span className="text-gray-500">•</span>
-                    <span className="text-lg text-gray-400">ShowStack:Production</span>
+                    <span className="text-lg text-gray-600 dark:text-gray-400">ShowStack:Production</span>
                   </>
                 )}
               </div>
-              <p className="text-sm text-gray-400">Fixture Schedule</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Fixture Schedule</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
               {processedFixtures.length} / {fixtures.length} fixtures
             </span>
-            <span className="text-sm text-gray-400">•</span>
-            <span className="text-sm text-gray-400">{selectedRows.size} selected</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">•</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">{selectedRows.size} selected</span>
           </div>
         </div>
 
@@ -537,7 +537,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
       </main>
 
       {/* Status Bar */}
-      <footer className="bg-gray-800 border-t border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-400">
+      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
         <div>Ready</div>
         <div>ShowStack:Production v0.1.0-alpha</div>
       </footer>
