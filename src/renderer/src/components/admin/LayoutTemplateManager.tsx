@@ -221,25 +221,31 @@ export function LayoutTemplateManager() {
     try {
       setIsLoading(true);
 
-      // Serialize elements for database storage
-      const serializedElements = editingElements.map((el: any) => ({
-        ...el,
-        config: typeof el.config === 'object' ? JSON.stringify(el.config) : el.config,
-        style: typeof el.style === 'object' ? JSON.stringify(el.style) : el.style,
-      }));
+      // Serialize elements for database storage (remove id and template_id so new IDs are generated)
+      const serializedElements = editingElements.map((el: any) => {
+        const { id, template_id, ...elementWithoutIds } = el;
+        return {
+          ...elementWithoutIds,
+          config: typeof el.config === 'object' ? JSON.stringify(el.config) : el.config,
+          style: typeof el.style === 'object' ? JSON.stringify(el.style) : el.style,
+        };
+      });
 
-      // Update the layout with new name and mark as not default
-      const updatedTemplate = {
-        ...editingLayout,
+      // Create a new layout (copy) with the custom name and mark as default
+      // This preserves the original system default while creating a user-customized version
+      const newTemplateData = {
         name: newLayoutName,
-        is_default: false, // Custom layouts are not system defaults
+        description: editingLayout.description,
+        page_type: editingLayout.page_type,
+        grid_columns: editingLayout.grid_columns,
+        grid_rows: editingLayout.grid_rows,
+        grid_gap: editingLayout.grid_gap,
+        page_width: editingLayout.page_width,
+        page_height: editingLayout.page_height,
+        is_default: true // Mark as default so it shows in admin panel and gets used
       };
 
-      await window.api.prep.layoutTemplates.update(
-        editingLayout.id,
-        updatedTemplate,
-        serializedElements
-      );
+      await window.api.prep.layoutTemplates.create(newTemplateData, serializedElements);
 
       showNotification('success', `Layout saved as "${newLayoutName}"`);
       setShowRenameDialog(false);
@@ -247,8 +253,8 @@ export function LayoutTemplateManager() {
       setEditingElements([]);
       await loadLayouts();
     } catch (error) {
-      console.error('Error updating layout:', error);
-      showNotification('error', 'Failed to update layout');
+      console.error('Error creating custom layout:', error);
+      showNotification('error', 'Failed to save layout');
     } finally {
       setIsLoading(false);
     }
