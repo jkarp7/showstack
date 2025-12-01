@@ -14,7 +14,7 @@ interface ToolbarProps {
 
 export function Toolbar({ selectedCount, onAddFixture, onBulkEdit, onDeleteSelected, onUserColumnSettings, columnVisibility, onColumnVisibilityChange, userColumnDefinitions }: ToolbarProps) {
   return (
-    <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center gap-2">
+    <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center gap-2">
       <button
         onClick={onAddFixture}
         className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium transition"

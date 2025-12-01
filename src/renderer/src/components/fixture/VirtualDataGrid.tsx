@@ -260,11 +260,11 @@ export function VirtualDataGrid({
   }, [columnOrder, userColumnDefinitions]);
 
   return (
-    <div className="h-full flex flex-col bg-gray-900">
+    <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
       {/* Column Headers */}
       <div
         ref={headerRef}
-        className="flex items-center bg-gray-800 border-b border-gray-700 overflow-x-auto overflow-y-scroll"
+        className="flex items-center bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 overflow-x-auto overflow-y-scroll"
         style={{ height: HEADER_HEIGHT }}
         onScroll={handleHeaderScroll}
       >
@@ -291,7 +291,7 @@ export function VirtualDataGrid({
               onDragStart={(e) => handleDragStart(e, col.key)}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, col.key)}
-              className={`px-2 font-semibold text-sm text-gray-300 flex-shrink-0 cursor-move hover:bg-gray-700 transition relative ${
+              className={`px-2 font-semibold text-sm text-gray-700 dark:text-gray-300 flex-shrink-0 cursor-move hover:bg-gray-200 dark:hover:bg-gray-700 transition relative ${
                 draggedColumn === col.key ? 'opacity-50' : ''
               }`}
               style={{ width: `${colWidth}px` }}

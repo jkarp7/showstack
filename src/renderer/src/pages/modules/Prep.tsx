@@ -431,7 +431,7 @@ export function Prep() {
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={handleFieldBlur}
             onKeyDown={handleFieldKeyDown}
-            className={`w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white focus:outline-none ${className}`}
+            className={`w-full px-2 py-1 bg-white dark:bg-gray-600 border border-blue-500 rounded text-sm text-gray-900 dark:text-white focus:outline-none ${className}`}
             autoFocus
           />
         );
@@ -442,9 +442,9 @@ export function Prep() {
           onClick={() => handleFieldClick(field, value, fieldIsReadOnly)}
           className={`${
             fieldIsReadOnly
-              ? 'text-gray-400 cursor-not-allowed'
-              : 'cursor-pointer hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded px-2 py-1 transition'
-          } ${!value && !fieldIsReadOnly ? 'italic text-gray-500' : 'text-gray-300'} ${className}`}
+              ? 'text-gray-400 dark:text-gray-400 cursor-not-allowed'
+              : 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded px-2 py-1 transition'
+          } ${!value && !fieldIsReadOnly ? 'italic text-gray-500 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300'} ${className}`}
         >
           {value || placeholder}
         </span>
@@ -466,7 +466,7 @@ export function Prep() {
               onChange={(e) => setEditValue(e.target.value)}
               onBlur={handleFieldBlur}
               onKeyDown={handleFieldKeyDown}
-              className={`w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white focus:outline-none ${className}`}
+              className={`w-full px-2 py-1 bg-white dark:bg-gray-600 border border-blue-500 rounded text-sm text-gray-900 dark:text-white focus:outline-none ${className}`}
               autoFocus
             />
           );
@@ -479,7 +479,7 @@ export function Prep() {
               onChange={(e) => setEditValue(e.target.value)}
               onBlur={handleFieldBlur}
               onKeyDown={handleFieldKeyDown}
-              className={`w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white focus:outline-none ${className}`}
+              className={`w-full px-2 py-1 bg-white dark:bg-gray-600 border border-blue-500 rounded text-sm text-gray-900 dark:text-white focus:outline-none ${className}`}
               autoFocus
             />
           );
@@ -515,7 +515,7 @@ export function Prep() {
         <span
           onClick={handleClick}
           onDoubleClick={handleDoubleClick}
-          className={`cursor-pointer hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded px-2 py-1 transition ${!value ? 'italic text-gray-500' : 'text-gray-300'} ${className}`}
+          className={`cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded px-2 py-1 transition ${!value ? 'italic text-gray-500 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300'} ${className}`}
         >
           {value || placeholder}
         </span>
@@ -530,7 +530,7 @@ export function Prep() {
 
       return (
         <div>
-          {label && <span className="text-gray-500 text-sm">{label}:</span>}{' '}
+          {label && <span className="text-gray-500 dark:text-gray-500 text-sm">{label}:</span>}{' '}
           {isEditing ? (
             <input
               type="text"
@@ -538,7 +538,7 @@ export function Prep() {
               onChange={(e) => setEditValue(e.target.value)}
               onBlur={handleFieldBlur}
               onKeyDown={handleFieldKeyDown}
-              className="inline-block px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-gray-900 dark:text-white focus:outline-none"
+              className="inline-block px-2 py-1 bg-white dark:bg-gray-600 border border-blue-500 rounded text-sm text-gray-900 dark:text-white focus:outline-none"
               autoFocus
             />
           ) : (
@@ -546,15 +546,15 @@ export function Prep() {
               onClick={() => handleFieldClick(field, value, fieldIsReadOnly)}
               className={`${
                 fieldIsReadOnly
-                  ? 'text-gray-400 cursor-default'
-                  : 'text-gray-300 cursor-pointer hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded px-1 py-0.5 transition'
-              } ${!value && !fieldIsReadOnly ? 'italic text-gray-500' : ''}`}
+                  ? 'text-gray-400 dark:text-gray-400 cursor-default'
+                  : 'text-gray-700 dark:text-gray-300 cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded px-1 py-0.5 transition'
+              } ${!value && !fieldIsReadOnly ? 'italic text-gray-500 dark:text-gray-500' : ''}`}
             >
               {value || placeholder}
             </span>
           )}
           {fieldIsReadOnly && value && (
-            <span className="ml-2 text-xs text-blue-400">(from parent)</span>
+            <span className="ml-2 text-xs text-blue-600 dark:text-blue-400">(from parent)</span>
           )}
         </div>
       );
@@ -568,12 +568,12 @@ export function Prep() {
     return (
       <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
         {/* Header with file operations */}
-        <header className="bg-white dark:bg-gray-800 border-b border-gray-700 p-4">
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={handleBackToList}
-                className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+                className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition"
               >
                 ← Back to Projects
               </button>
@@ -585,7 +585,7 @@ export function Prep() {
             </div>
             <button
               onClick={handleHomeClick}
-              className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition"
               title="Home (Projects)"
             >
               🏠
@@ -594,22 +594,22 @@ export function Prep() {
         </header>
 
         {/* Show name and badges */}
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-700 px-6 py-4">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
           <div className="flex items-center gap-4">
             <h1 className="text-3xl font-bold">{currentProject.production_name}</h1>
             {currentProject.current_revision > 0 && (
-              <span className="px-3 py-1.5 bg-blue-600 text-gray-900 dark:text-white text-sm font-medium rounded">
+              <span className="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded">
                 Revision {currentProject.current_revision}
               </span>
             )}
             {isLinked && (
               <>
-                <span className="px-3 py-1.5 bg-blue-600/20 text-blue-400 text-sm rounded">
+                <span className="px-3 py-1.5 bg-blue-600/20 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 text-sm rounded">
                   Linked to Parent Project
                 </span>
                 <button
                   onClick={handleSyncFromParent}
-                  className="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-sm rounded transition"
+                  className="px-3 py-1.5 bg-blue-600/20 dark:bg-blue-600/20 hover:bg-blue-600/30 dark:hover:bg-blue-600/30 text-blue-600 dark:text-blue-400 text-sm rounded transition"
                   title="Sync dates and contacts from parent project"
                 >
                   🔄 Sync from Parent
@@ -620,15 +620,15 @@ export function Prep() {
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-gray-700 bg-white dark:bg-gray-800">
+        <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <div className="max-w-6xl mx-auto px-6">
             <div className="flex gap-4">
               <button
                 onClick={() => setActiveTab('builder')}
                 className={`px-4 py-3 text-sm font-medium transition border-b-2 ${
                   activeTab === 'builder'
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-gray-400 hover:text-gray-300'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'
                 }`}
               >
                 Shop Order Builder
@@ -637,8 +637,8 @@ export function Prep() {
                 onClick={() => setActiveTab('output')}
                 className={`px-4 py-3 text-sm font-medium transition border-b-2 ${
                   activeTab === 'output'
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-gray-400 hover:text-gray-300'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'
                 }`}
               >
                 Print-Ready Output
@@ -652,10 +652,10 @@ export function Prep() {
             {activeTab === 'builder' && (
               <>
                 {/* Project Details */}
-                <div className="bg-white dark:bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                   <button
                     onClick={() => setProjectDetailsExpanded(!projectDetailsExpanded)}
-                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-750 transition"
+                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-750 transition"
                   >
                     <div className="flex items-center gap-4">
                       <span className="text-gray-600 dark:text-gray-400 text-lg">{projectDetailsExpanded ? '▼' : '▶'}</span>

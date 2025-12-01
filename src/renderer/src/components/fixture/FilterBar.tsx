@@ -30,7 +30,7 @@ export function FilterBar({
   const hasActiveFilters = searchQuery || locationFilter !== 'all' || typeFilter !== 'all' || statusFilter !== 'all';
 
   return (
-    <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center gap-2">
+    <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center gap-2">
       <input
         type="text"
         placeholder="Search fixtures..."

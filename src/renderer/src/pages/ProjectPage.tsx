@@ -41,7 +41,7 @@ export function ProjectPage() {
           <h1 className="text-2xl font-bold mb-4">Project Not Found</h1>
           <button
             onClick={() => navigate('/')}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg"
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
           >
             Return to Home
           </button>
@@ -55,31 +55,31 @@ export function ProjectPage() {
   return (
     <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-700 p-6">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={() => navigate('/')}
-              className="text-gray-400 hover:text-gray-900 dark:text-white flex items-center gap-2"
+              className="text-gray-700 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center gap-2"
             >
               ← Back to Projects
             </button>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => navigate('/account')}
-                className="px-4 py-2 text-gray-300 hover:text-gray-900 dark:text-white transition"
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition"
               >
                 Account
               </button>
               <button
                 onClick={() => navigate('/settings')}
-                className="px-4 py-2 text-gray-300 hover:text-gray-900 dark:text-white transition"
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition"
               >
                 Settings
               </button>
               <button
                 onClick={() => setIsEditDialogOpen(true)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-medium transition"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium transition"
               >
                 Edit Project
               </button>
@@ -134,8 +134,8 @@ export function ProjectPage() {
             <div className="mb-8 space-y-6">
               {/* Design Team */}
               {(project.lighting_designer || project.audio_designer || project.video_designer) && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-700 p-6">
-                  <h2 className="text-xl font-bold mb-4 text-blue-400">Design Team</h2>
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                  <h2 className="text-xl font-bold mb-4 text-blue-600 dark:text-blue-400">Design Team</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {project.lighting_designer && (
                       <div className="space-y-1">
@@ -255,8 +255,8 @@ export function ProjectPage() {
               {/* Production Staff */}
               {(project.electrician || project.audio_tech || project.video_tech ||
                 project.production_manager || project.general_manager) && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-700 p-6">
-                  <h2 className="text-xl font-bold mb-4 text-blue-400">Production Staff</h2>
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                  <h2 className="text-xl font-bold mb-4 text-blue-600 dark:text-blue-400">Production Staff</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {project.electrician && (
                       <div className="space-y-1">
@@ -338,8 +338,8 @@ export function ProjectPage() {
 
               {/* Show Dates */}
               {project.show_dates && Object.keys(project.show_dates).length > 0 && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-700 p-6">
-                  <h2 className="text-xl font-bold mb-4 text-blue-400">Show Dates</h2>
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                  <h2 className="text-xl font-bold mb-4 text-blue-600 dark:text-blue-400">Show Dates</h2>
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 text-sm">
                     {project.show_dates.prep_start && (
                       <div>
@@ -460,7 +460,7 @@ export function ProjectPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-gray-800 border-t border-gray-700 px-6 py-4 text-center text-sm text-gray-400">
+      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
         ShowStack v0.1.0-alpha | © 2025 Lytrix
       </footer>
 

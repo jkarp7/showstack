@@ -26,8 +26,8 @@ export const VirtualRow = memo(function VirtualRow({
 }: VirtualRowProps) {
   // Get ordered column configs
   const orderedColumns = getOrderedColumns(columnOrder);
-  const rowClass = `flex items-center h-10 border-b border-gray-800 hover:bg-gray-800 ${
-    isSelected ? 'bg-blue-900 hover:bg-blue-800' : ''
+  const rowClass = `flex items-center h-10 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 ${
+    isSelected ? 'bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800' : ''
   }`;
 
   const handleCheckboxClick = (e: React.MouseEvent) => {
