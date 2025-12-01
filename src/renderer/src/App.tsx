@@ -86,10 +86,24 @@ function AppContent() {
 }
 
 export default function App() {
-  const [showSplash, setShowSplash] = useState(true);
+  // Only show splash on first app launch (main window), not in project windows
+  const [showSplash, setShowSplash] = useState(() => {
+    // Check if this is the main window or a project window
+    const searchParams = new URLSearchParams(window.location.search);
+    const isProjectWindow = searchParams.has('projectId');
+
+    // Don't show splash in project windows
+    if (isProjectWindow) return false;
+
+    // Check if splash was already shown in this session
+    const splashShown = sessionStorage.getItem('splashShown');
+    return !splashShown;
+  });
 
   const handleSplashComplete = () => {
     setShowSplash(false);
+    // Mark splash as shown for this session
+    sessionStorage.setItem('splashShown', 'true');
   };
 
   return (

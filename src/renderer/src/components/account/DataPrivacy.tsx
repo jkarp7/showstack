@@ -16,7 +16,7 @@ export function DataPrivacy() {
       </div>
 
       <div className="bg-white dark:bg-gray-800 border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <Shield className="w-5 h-5 text-blue-600 dark:text-blue-500" />
           <span>Your Data</span>
         </h3>
@@ -47,7 +47,7 @@ export function DataPrivacy() {
       </div>
 
       <div className="bg-white dark:bg-gray-800 border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4">Data Retention</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Data Retention</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Project History</div>

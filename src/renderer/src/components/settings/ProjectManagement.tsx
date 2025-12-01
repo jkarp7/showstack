@@ -14,7 +14,7 @@ export function ProjectManagement() {
       </div>
 
       <div className="bg-white dark:bg-gray-800 border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <Clock className="w-5 h-5 text-blue-600 dark:text-blue-500" />
           <span>Recent Projects</span>
         </h3>
@@ -47,7 +47,7 @@ export function ProjectManagement() {
       </div>
 
       <div className="bg-white dark:bg-gray-800 border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <Archive className="w-5 h-5 text-blue-600 dark:text-blue-500" />
           <span>Auto-Archive</span>
         </h3>

@@ -57,28 +57,28 @@ export function LandingPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900 text-white">
+    <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 p-6">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-700 p-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">ShowStack</h1>
-            <p className="text-gray-400 text-sm mt-1">Production Management Suite</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Production Management Suite</p>
           </div>
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/account')}
-              className="px-4 py-2 text-gray-300 hover:text-white transition"
+              className="px-4 py-2 text-gray-300 hover:text-gray-900 dark:hover:text-white transition"
             >
               Account
             </button>
             <button
               onClick={() => navigate('/settings')}
-              className="px-4 py-2 text-gray-300 hover:text-white transition"
+              className="px-4 py-2 text-gray-300 hover:text-gray-900 dark:hover:text-white transition"
             >
               Settings
             </button>
-            <button className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition">
+            <button className="px-4 py-2 bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition">
               Sign Out
             </button>
           </div>
@@ -93,7 +93,7 @@ export function LandingPage() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl font-bold mb-2">Projects</h2>
-                <p className="text-gray-400">Your ShowStack projects</p>
+                <p className="text-gray-600 dark:text-gray-400">Your ShowStack projects</p>
               </div>
               <div className="flex gap-3">
                 <button
@@ -104,7 +104,7 @@ export function LandingPage() {
                       // Stay on landing page after opening file
                     });
                   }}
-                  className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition flex items-center gap-2"
+                  className="px-6 py-3 bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg font-medium transition flex items-center gap-2"
                 >
                   Open File...
                 </button>
@@ -126,7 +126,7 @@ export function LandingPage() {
                   {projects.map((project) => (
                     <div
                       key={project.id}
-                      className="bg-gray-800 rounded-lg border border-gray-700 p-6 hover:border-blue-500 transition cursor-pointer group"
+                      className="bg-white dark:bg-gray-800 rounded-lg border border-gray-700 p-6 hover:border-blue-500 transition cursor-pointer group"
                       onClick={() => handleOpenProject(project.id)}
                     >
                       <div className="flex items-start justify-between mb-3">
@@ -146,7 +146,7 @@ export function LandingPage() {
                             e.stopPropagation();
                             setProjectToDelete(project);
                           }}
-                          className="text-gray-500 hover:text-red-500 transition opacity-0 group-hover:opacity-100"
+                          className="text-gray-500 dark:text-gray-500 hover:text-red-500 transition opacity-0 group-hover:opacity-100"
                           title="Delete project"
                         >
                           ×
@@ -164,7 +164,7 @@ export function LandingPage() {
                 </div>
               ) : (
                 /* Table view for more than 3 projects */
-                <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
                   <table className="w-full">
                     <thead className="bg-gray-750 border-b border-gray-700">
                       <tr>
@@ -215,7 +215,7 @@ export function LandingPage() {
                                 e.stopPropagation();
                                 setProjectToDelete(project);
                               }}
-                              className="text-gray-500 hover:text-red-500 transition text-sm"
+                              className="text-gray-500 dark:text-gray-500 hover:text-red-500 transition text-sm"
                             >
                               Delete
                             </button>
@@ -227,10 +227,10 @@ export function LandingPage() {
                 </div>
               )
             ) : (
-              <div className="bg-gray-800 rounded-lg border border-gray-700 p-12 text-center">
+              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-700 p-12 text-center">
                 <div className="text-6xl mb-4">📂</div>
-                <p className="text-gray-400 text-lg mb-4">No projects yet</p>
-                <p className="text-gray-500 text-sm mb-6">
+                <p className="text-gray-600 dark:text-gray-400 text-lg mb-4">No projects yet</p>
+                <p className="text-gray-500 dark:text-gray-500 text-sm mb-6">
                   Create a new project to get started with ShowStack
                 </p>
                 <button
@@ -247,7 +247,7 @@ export function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-800 border-t border-gray-700 px-6 py-4 text-center text-sm text-gray-400">
+      <footer className="bg-white dark:bg-gray-800 border-t border-gray-700 px-6 py-4 text-center text-sm text-gray-400">
         ShowStack v0.1.0-alpha | © 2025 Lytrix
       </footer>
 

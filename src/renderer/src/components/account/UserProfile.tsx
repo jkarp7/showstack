@@ -29,7 +29,7 @@ export function UserProfile() {
 
       {/* Avatar */}
       <div className="bg-white dark:bg-gray-800 border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4">Profile Picture</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Profile Picture</h3>
         <div className="flex items-center gap-6">
           <div className="relative">
             <div className="w-24 h-24 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center">
@@ -55,7 +55,7 @@ export function UserProfile() {
 
       {/* Personal Information */}
       <div className="bg-white dark:bg-gray-800 border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <UserCircle className="w-5 h-5 text-blue-600 dark:text-blue-500" />
           <span>Personal Information</span>
         </h3>
@@ -139,7 +139,7 @@ export function UserProfile() {
 
       {/* Designer Credit */}
       <div className="bg-white dark:bg-gray-800 border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4">Designer Credit</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Designer Credit</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
           This information will appear on shop orders and exported documents
         </p>

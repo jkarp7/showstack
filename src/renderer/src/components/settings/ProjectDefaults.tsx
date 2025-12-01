@@ -14,7 +14,7 @@ export function ProjectDefaults() {
       </div>
 
       <div className="bg-white dark:bg-gray-800 border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <FileText className="w-5 h-5 text-blue-600 dark:text-blue-500" />
           <span>Default Project Information</span>
         </h3>
@@ -36,7 +36,7 @@ export function ProjectDefaults() {
       </div>
 
       <div className="bg-white dark:bg-gray-800 border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4">Default Contacts</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Default Contacts</h3>
         <div className="space-y-3">
           {['General Manager', 'Production Manager', 'Master Electrician'].map(role => (
             <div key={role} className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">

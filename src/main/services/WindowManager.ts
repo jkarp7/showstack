@@ -54,7 +54,13 @@ class WindowManager {
     // Check if window for this project already exists
     const existingWindow = this.findProjectWindow(projectId);
     if (existingWindow && !existingWindow.isDestroyed()) {
+      // Bring window to front more aggressively
+      if (existingWindow.isMinimized()) {
+        existingWindow.restore();
+      }
+      existingWindow.show();
       existingWindow.focus();
+      existingWindow.moveTop(); // Ensure it's on top
       return existingWindow;
     }
 
