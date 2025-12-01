@@ -64,12 +64,26 @@ export function ProjectPage() {
             >
               ← Back to Projects
             </button>
-            <button
-              onClick={() => setIsEditDialogOpen(true)}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-medium transition"
-            >
-              Edit Project
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/account')}
+                className="px-4 py-2 text-gray-300 hover:text-white transition"
+              >
+                Account
+              </button>
+              <button
+                onClick={() => navigate('/settings')}
+                className="px-4 py-2 text-gray-300 hover:text-white transition"
+              >
+                Settings
+              </button>
+              <button
+                onClick={() => setIsEditDialogOpen(true)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-medium transition"
+              >
+                Edit Project
+              </button>
+            </div>
           </div>
           <div className="flex items-start gap-6">
             {/* Project Logo */}

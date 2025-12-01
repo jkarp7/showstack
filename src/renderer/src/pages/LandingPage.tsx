@@ -67,12 +67,15 @@ export function LandingPage() {
           </div>
           <div className="flex items-center gap-4">
             <button
-              onClick={() => setIsAccountDialogOpen(true)}
+              onClick={() => navigate('/account')}
               className="px-4 py-2 text-gray-300 hover:text-white transition"
             >
               Account
             </button>
-            <button className="px-4 py-2 text-gray-300 hover:text-white transition">
+            <button
+              onClick={() => navigate('/settings')}
+              className="px-4 py-2 text-gray-300 hover:text-white transition"
+            >
               Settings
             </button>
             <button className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition">
