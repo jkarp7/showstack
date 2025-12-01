@@ -11,6 +11,7 @@ import { Account } from './pages/Account';
 import { Settings } from './pages/Settings';
 import { LicenseBanner } from './components/License/LicenseBanner';
 import { SplashScreen } from './components/SplashScreen';
+import { ThemeProvider } from './components/ThemeProvider';
 import { useUser } from './hooks/useUser';
 
 function AppContent() {
@@ -92,12 +93,14 @@ export default function App() {
   };
 
   return (
-    <Router>
-      {showSplash ? (
-        <SplashScreen onComplete={handleSplashComplete} />
-      ) : (
-        <AppContent />
-      )}
-    </Router>
+    <ThemeProvider>
+      <Router>
+        {showSplash ? (
+          <SplashScreen onComplete={handleSplashComplete} />
+        ) : (
+          <AppContent />
+        )}
+      </Router>
+    </ThemeProvider>
   );
 }

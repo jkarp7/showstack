@@ -14,24 +14,30 @@ export function Account() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('profile');
 
+  const tabClass = (isActive: boolean) => `flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
+    isActive
+      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+  }`;
+
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate('/')}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+                className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
                 <span>Back to Home</span>
               </button>
-              <div className="h-6 w-px bg-gray-300" />
+              <div className="h-6 w-px bg-gray-300 dark:bg-gray-600" />
               <div className="flex items-center gap-2">
-                <User className="w-6 h-6 text-blue-600" />
-                <h1 className="text-xl font-bold text-gray-900">Account</h1>
+                <User className="w-6 h-6 text-blue-600 dark:text-blue-500" />
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Account</h1>
               </div>
             </div>
           </div>
@@ -41,71 +47,29 @@ export function Account() {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tabs */}
-        <div className="mb-6 border-b border-gray-200">
+        <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
           <nav className="-mb-px flex space-x-8 overflow-x-auto">
-            <button
-              onClick={() => setActiveTab('profile')}
-              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
-                activeTab === 'profile'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
+            <button onClick={() => setActiveTab('profile')} className={tabClass(activeTab === 'profile')}>
               <UserCircle className="w-5 h-5" />
               <span>User Profile</span>
             </button>
-            <button
-              onClick={() => setActiveTab('theme')}
-              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
-                activeTab === 'theme'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
+            <button onClick={() => setActiveTab('theme')} className={tabClass(activeTab === 'theme')}>
               <Palette className="w-5 h-5" />
               <span>Theme & Appearance</span>
             </button>
-            <button
-              onClick={() => setActiveTab('notifications')}
-              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
-                activeTab === 'notifications'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
+            <button onClick={() => setActiveTab('notifications')} className={tabClass(activeTab === 'notifications')}>
               <Bell className="w-5 h-5" />
               <span>Notifications</span>
             </button>
-            <button
-              onClick={() => setActiveTab('privacy')}
-              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
-                activeTab === 'privacy'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
+            <button onClick={() => setActiveTab('privacy')} className={tabClass(activeTab === 'privacy')}>
               <Shield className="w-5 h-5" />
               <span>Data & Privacy</span>
             </button>
-            <button
-              onClick={() => setActiveTab('license')}
-              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
-                activeTab === 'license'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
+            <button onClick={() => setActiveTab('license')} className={tabClass(activeTab === 'license')}>
               <FileText className="w-5 h-5" />
               <span>License Info</span>
             </button>
-            <button
-              onClick={() => setActiveTab('advanced')}
-              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
-                activeTab === 'advanced'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
+            <button onClick={() => setActiveTab('advanced')} className={tabClass(activeTab === 'advanced')}>
               <CreditCard className="w-5 h-5" />
               <span>Advanced</span>
             </button>
