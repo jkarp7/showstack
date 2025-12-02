@@ -1,14 +1,15 @@
-import { useState } from 'react';
 import { Monitor, Grid, Ruler, Save } from 'lucide-react';
+import { useSettingsStore } from '../../store/settingsStore';
 
 export function WorkspacePreferences() {
-  const [defaultView, setDefaultView] = useState('projects');
-  const [gridDisplay, setGridDisplay] = useState(true);
-  const [snapToGrid, setSnapToGrid] = useState(true);
-  const [gridSize, setGridSize] = useState(10);
-  const [units, setUnits] = useState('imperial');
+  const workspace = useSettingsStore((state) => state.workspace);
+  const updateWorkspace = useSettingsStore((state) => state.updateWorkspace);
 
-  const handleSave = () => console.log('Saving workspace preferences...');
+  const handleSave = () => {
+    // Settings are already saved via Zustand persist middleware
+    // This is just for user feedback
+    console.log('Workspace preferences saved!', workspace);
+  };
 
   return (
     <div className="space-y-6">
@@ -28,8 +29,8 @@ export function WorkspacePreferences() {
             Startup View
           </label>
           <select
-            value={defaultView}
-            onChange={(e) => setDefaultView(e.target.value)}
+            value={workspace.defaultView}
+            onChange={(e) => updateWorkspace({ defaultView: e.target.value as any })}
             className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="projects">Projects List</option>
@@ -54,7 +55,7 @@ export function WorkspacePreferences() {
               <div className="text-sm text-gray-500 dark:text-gray-400">Display grid lines in designer</div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" checked={gridDisplay} onChange={(e) => setGridDisplay(e.target.checked)} className="sr-only peer" />
+              <input type="checkbox" checked={workspace.gridDisplay} onChange={(e) => updateWorkspace({ gridDisplay: e.target.checked })} className="sr-only peer" />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-gray-800 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
           </div>
@@ -65,22 +66,22 @@ export function WorkspacePreferences() {
               <div className="text-sm text-gray-500 dark:text-gray-400">Automatically align elements to grid</div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" checked={snapToGrid} onChange={(e) => setSnapToGrid(e.target.checked)} className="sr-only peer" />
+              <input type="checkbox" checked={workspace.snapToGrid} onChange={(e) => updateWorkspace({ snapToGrid: e.target.checked })} className="sr-only peer" />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-gray-800 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Grid Size: {gridSize}px
+              Grid Size: {workspace.gridSize}px
             </label>
             <input
               type="range"
               min="5"
               max="50"
               step="5"
-              value={gridSize}
-              onChange={(e) => setGridSize(parseInt(e.target.value))}
+              value={workspace.gridSize}
+              onChange={(e) => updateWorkspace({ gridSize: parseInt(e.target.value) })}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -100,9 +101,9 @@ export function WorkspacePreferences() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button
-            onClick={() => setUnits('imperial')}
+            onClick={() => updateWorkspace({ units: 'imperial' })}
             className={`p-4 border-2 rounded-lg text-left transition-all ${
-              units === 'imperial'
+              workspace.units === 'imperial'
                 ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
@@ -112,9 +113,9 @@ export function WorkspacePreferences() {
           </button>
 
           <button
-            onClick={() => setUnits('metric')}
+            onClick={() => updateWorkspace({ units: 'metric' })}
             className={`p-4 border-2 rounded-lg text-left transition-all ${
-              units === 'metric'
+              workspace.units === 'metric'
                 ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
