@@ -80,7 +80,7 @@ export const VirtualRow = memo(function VirtualRow({
           type="checkbox"
           checked={isSelected}
           onChange={() => {}} // Handled by click
-          className="w-4 h-4 pointer-events-none"
+          className="w-4 h-4 pointer-events-none accent-blue-600"
         />
       </div>
       {orderedColumns.filter(col => columnVisibility[col.key]).map(col => {

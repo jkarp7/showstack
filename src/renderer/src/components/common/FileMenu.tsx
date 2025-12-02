@@ -19,7 +19,8 @@ export function FileMenu({ className = '', onDataReload, projectName }: FileMenu
     saveFileAs
   } = useFileStore();
 
-  const currentFileName = getCurrentFileName();
+  // Use projectName prop if provided, otherwise fall back to file store
+  const currentFileName = projectName || getCurrentFileName();
   const isLoading = isSaving || isOpening;
 
   const handleNew = async () => {
