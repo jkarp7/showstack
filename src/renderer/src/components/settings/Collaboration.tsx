@@ -8,12 +8,12 @@ export function Collaboration() {
         <p className="text-gray-600 dark:text-gray-400">Share projects and collaborate with team members</p>
       </div>
 
-      <div className="bg-blue-50 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+      <div className="bg-blue-50 dark:bg-gray-800 border border-blue-200 dark:border-blue-500 rounded-lg p-4">
         <div className="flex items-start gap-2">
           <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
           <div>
-            <h4 className="font-medium text-blue-900 dark:text-blue-200 mb-1">Coming Soon</h4>
-            <p className="text-sm text-blue-800 dark:text-blue-200">
+            <h4 className="font-medium text-blue-900 dark:text-gray-200 mb-1">Coming Soon</h4>
+            <p className="text-sm text-blue-800 dark:text-gray-300">
               Real-time collaboration features are currently in development. You'll be able to share projects,
               leave comments, and work simultaneously with team members.
             </p>
