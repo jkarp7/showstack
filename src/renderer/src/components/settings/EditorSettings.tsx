@@ -1,10 +1,9 @@
-import { useState } from 'react';
 import { Edit3, Save, RotateCcw, Keyboard } from 'lucide-react';
+import { useSettingsStore } from '../../store/settingsStore';
 
 export function EditorSettings() {
-  const [autoSaveInterval, setAutoSaveInterval] = useState(30);
-  const [undoDepth, setUndoDepth] = useState(50);
-  const [showToolbar, setShowToolbar] = useState(true);
+  const editor = useSettingsStore((state) => state.editor);
+  const updateEditor = useSettingsStore((state) => state.updateEditor);
 
   return (
     <div className="space-y-6">
@@ -20,9 +19,9 @@ export function EditorSettings() {
         </h3>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Auto-save interval: {autoSaveInterval} seconds
+            Auto-save interval: {editor.autoSaveInterval} seconds
           </label>
-          <input type="range" min="10" max="300" step="10" value={autoSaveInterval} onChange={(e) => setAutoSaveInterval(parseInt(e.target.value))} className="w-full" />
+          <input type="range" min="10" max="300" step="10" value={editor.autoSaveInterval} onChange={(e) => updateEditor({ autoSaveInterval: parseInt(e.target.value) })} className="w-full" />
           <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
             <span>10s</span>
             <span>5 min</span>
@@ -37,9 +36,9 @@ export function EditorSettings() {
         </h3>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Undo depth: {undoDepth} steps
+            Undo depth: {editor.undoDepth} steps
           </label>
-          <input type="range" min="10" max="200" step="10" value={undoDepth} onChange={(e) => setUndoDepth(parseInt(e.target.value))} className="w-full" />
+          <input type="range" min="10" max="200" step="10" value={editor.undoDepth} onChange={(e) => updateEditor({ undoDepth: parseInt(e.target.value) })} className="w-full" />
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">More steps use more memory</p>
         </div>
       </div>
@@ -55,7 +54,7 @@ export function EditorSettings() {
             <div className="text-sm text-gray-500 dark:text-gray-400">Display toolbar in editor</div>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" checked={showToolbar} onChange={(e) => setShowToolbar(e.target.checked)} className="sr-only peer" />
+            <input type="checkbox" checked={editor.showToolbar} onChange={(e) => updateEditor({ showToolbar: e.target.checked })} className="sr-only peer" />
             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-gray-800 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
           </label>
         </div>
