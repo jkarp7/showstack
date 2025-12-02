@@ -162,10 +162,10 @@ export function PrintPreview({
   return (
     <div className="flex h-full gap-4">
       {/* Left Side - Preview Area */}
-      <div className="flex-1 bg-gray-800 border border-gray-700 rounded-lg overflow-hidden flex flex-col">
+      <div className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden flex flex-col">
         {/* Navigation Controls */}
         {totalPages > 0 && (
-          <div className="bg-gray-900 border-b border-gray-700 px-4 py-3 flex items-center justify-between">
+          <div className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
             <button
               onClick={() => setCurrentPageIndex(Math.max(0, currentPageIndex - 1))}
               disabled={currentPageIndex === 0}
@@ -173,7 +173,7 @@ export function PrintPreview({
             >
               ← Previous
             </button>
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
               Page {currentPageIndex + 1} of {totalPages}
             </div>
             <button
@@ -187,7 +187,7 @@ export function PrintPreview({
         )}
 
         {/* Page Preview */}
-        <div className="flex-1 overflow-auto bg-gray-700 p-2">
+        <div className="flex-1 overflow-auto bg-gray-200 dark:bg-gray-700 p-2">
           <div className="w-full h-full flex items-center justify-center">
             {totalPages > 0 && currentSection ? (
               <PageRenderer
@@ -209,7 +209,7 @@ export function PrintPreview({
       </div>
 
       {/* Right Side - Settings Panel */}
-      <div className="w-96 bg-gray-800 border border-gray-700 rounded-lg p-6 flex flex-col" style={{ maxHeight: 'calc(100vh - 300px)' }}>
+      <div className="w-96 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 flex flex-col" style={{ maxHeight: 'calc(100vh - 300px)' }}>
         {/* Header */}
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Print Settings</h3>
@@ -221,10 +221,10 @@ export function PrintPreview({
 
         {/* Page Settings */}
         <div className="mb-6">
-          <h4 className="text-sm font-semibold text-gray-300 uppercase mb-3">Page Settings</h4>
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase mb-3">Page Settings</h4>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Page Size</label>
+              <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Page Size</label>
               <select
                 value={template.pageSettings.pageSize}
                 onChange={(e) => onTemplateChange({
@@ -241,7 +241,7 @@ export function PrintPreview({
               </select>
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Orientation</label>
+              <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Orientation</label>
               <select
                 value={template.pageSettings.orientation}
                 onChange={(e) => onTemplateChange({
@@ -275,8 +275,8 @@ export function PrintPreview({
 
         {/* Section Info */}
         <div className="mb-6 pb-6 border-b border-gray-700">
-          <h4 className="text-sm font-semibold text-gray-300 uppercase mb-2">Sections</h4>
-          <p className="text-sm text-gray-400">
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase mb-2">Sections</h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             {template.sections.filter(s => s.enabled).length} sections enabled
           </p>
           <button

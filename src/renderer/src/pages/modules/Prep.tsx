@@ -923,7 +923,7 @@ export function Prep() {
                 </div>
 
                 {/* Notes */}
-                <div className="bg-white dark:bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                   <button
                     onClick={() => setNotesExpanded(!notesExpanded)}
                     className="w-full px-6 py-4 flex items-center gap-4 hover:bg-gray-750 transition"
@@ -943,7 +943,7 @@ export function Prep() {
                 </div>
 
                 {/* Revisions */}
-                <div className="bg-white dark:bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                   <div className="px-6 py-4 flex items-center justify-between">
                     <button
                       onClick={() => setRevisionsExpanded(!revisionsExpanded)}
@@ -1065,7 +1065,7 @@ export function Prep() {
                 </div>
 
                 {/* Equipment */}
-                <div className="bg-white dark:bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                   <button
                     onClick={() => setEquipmentExpanded(!equipmentExpanded)}
                     className="w-full px-6 py-4 flex items-center gap-4 hover:bg-gray-750 transition"

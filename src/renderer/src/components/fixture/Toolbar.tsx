@@ -17,7 +17,7 @@ export function Toolbar({ selectedCount, onAddFixture, onBulkEdit, onDeleteSelec
     <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center gap-2">
       <button
         onClick={onAddFixture}
-        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium transition"
+        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition"
       >
         + Add Fixture
       </button>
@@ -26,25 +26,25 @@ export function Toolbar({ selectedCount, onAddFixture, onBulkEdit, onDeleteSelec
         <>
           <button
             onClick={onBulkEdit}
-            className="px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded text-sm font-medium transition"
+            className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium transition"
           >
             Bulk Edit ({selectedCount})
           </button>
 
           <button
             onClick={onDeleteSelected}
-            className="px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded text-sm font-medium transition"
+            className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-sm font-medium transition"
           >
             Delete Selected ({selectedCount})
           </button>
 
-          <div className="h-6 w-px bg-gray-700 mx-2" />
+          <div className="h-6 w-px bg-gray-300 dark:bg-gray-700 mx-2" />
 
-          <button className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm font-medium transition">
+          <button className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm font-medium transition">
             Duplicate
           </button>
 
-          <button className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm font-medium transition">
+          <button className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm font-medium transition">
             Export CSV
           </button>
         </>
@@ -54,7 +54,7 @@ export function Toolbar({ selectedCount, onAddFixture, onBulkEdit, onDeleteSelec
       <div className="ml-auto flex items-center gap-2">
         <button
           onClick={onUserColumnSettings}
-          className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+          className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition"
           title="Define User Columns"
         >
           User Columns...

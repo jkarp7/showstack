@@ -94,6 +94,9 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
           const project = await window.api.projects.getById(currentProjectId);
           if (project?.name) {
             setProjectName(project.name);
+            // Update file store with project name for display in FileMenu
+            const { setFileName } = useFileStore.getState();
+            setFileName(project.name);
           }
         }
 
