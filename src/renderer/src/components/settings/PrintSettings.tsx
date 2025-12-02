@@ -1,11 +1,9 @@
-import { useState } from 'react';
 import { Printer, FileText, Save } from 'lucide-react';
+import { useSettingsStore } from '../../store/settingsStore';
 
 export function PrintSettings() {
-  const [paperSize, setPaperSize] = useState('letter');
-  const [orientation, setOrientation] = useState('portrait');
-  const [dpi, setDpi] = useState(300);
-  const [includeWatermark, setIncludeWatermark] = useState(false);
+  const print = useSettingsStore((state) => state.print);
+  const updatePrint = useSettingsStore((state) => state.updatePrint);
 
   return (
     <div className="space-y-6">
@@ -27,7 +25,7 @@ export function PrintSettings() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Paper Size</label>
-            <select value={paperSize} onChange={(e) => setPaperSize(e.target.value)} className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select value={print.paperSize} onChange={(e) => updatePrint({ paperSize: e.target.value as any })} className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="letter">Letter (8.5" × 11")</option>
               <option value="legal">Legal (8.5" × 14")</option>
               <option value="tabloid">Tabloid (11" × 17")</option>
@@ -41,7 +39,7 @@ export function PrintSettings() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Orientation</label>
-            <select value={orientation} onChange={(e) => setOrientation(e.target.value)} className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select value={print.orientation} onChange={(e) => updatePrint({ orientation: e.target.value as any })} className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="portrait">Portrait</option>
               <option value="landscape">Landscape</option>
             </select>
@@ -52,7 +50,7 @@ export function PrintSettings() {
 
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Resolution (DPI)</label>
-            <select value={dpi} onChange={(e) => setDpi(parseInt(e.target.value))} className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select value={print.dpi} onChange={(e) => updatePrint({ dpi: parseInt(e.target.value) as any })} className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="150">150 DPI (Draft)</option>
               <option value="300">300 DPI (Standard)</option>
               <option value="600">600 DPI (High Quality)</option>
@@ -80,7 +78,7 @@ export function PrintSettings() {
               <div className="text-sm text-gray-500 dark:text-gray-400">Add "DRAFT" watermark to PDFs for work-in-progress documents</div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" checked={includeWatermark} onChange={(e) => setIncludeWatermark(e.target.checked)} className="sr-only peer" />
+              <input type="checkbox" checked={print.includeWatermark} onChange={(e) => updatePrint({ includeWatermark: e.target.checked })} className="sr-only peer" />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-gray-800 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
           </div>

@@ -1,11 +1,9 @@
-import { useState } from 'react';
 import { Sliders, Code, Zap, Save } from 'lucide-react';
+import { useSettingsStore } from '../../store/settingsStore';
 
 export function AdvancedSettings() {
-  const [developerMode, setDeveloperMode] = useState(false);
-  const [memoryLimit, setMemoryLimit] = useState(2048);
-  const [cacheSize, setCacheSize] = useState(500);
-  const [renderQuality, setRenderQuality] = useState('high');
+  const advanced = useSettingsStore((state) => state.advanced);
+  const updateAdvanced = useSettingsStore((state) => state.updateAdvanced);
 
   return (
     <div className="space-y-6">
@@ -31,12 +29,12 @@ export function AdvancedSettings() {
             </p>
           </div>
           <label className="ml-4 relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" checked={developerMode} onChange={(e) => setDeveloperMode(e.target.checked)} className="sr-only peer" />
+            <input type="checkbox" checked={advanced.developerMode} onChange={(e) => updateAdvanced({ developerMode: e.target.checked })} className="sr-only peer" />
             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-gray-800 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
           </label>
         </div>
 
-        {developerMode && (
+        {advanced.developerMode && (
           <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
             <h4 className="font-medium text-purple-900 mb-2">Developer Tools Active</h4>
             <div className="space-y-2 text-sm text-purple-800">
@@ -80,9 +78,9 @@ export function AdvancedSettings() {
         <div className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Memory Limit: {memoryLimit} MB
+              Memory Limit: {advanced.memoryLimit} MB
             </label>
-            <input type="range" min="1024" max="8192" step="512" value={memoryLimit} onChange={(e) => setMemoryLimit(parseInt(e.target.value))} className="w-full" />
+            <input type="range" min="1024" max="8192" step="512" value={advanced.memoryLimit} onChange={(e) => updateAdvanced({ memoryLimit: parseInt(e.target.value) })} className="w-full" />
             <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
               <span>1 GB</span>
               <span>4 GB</span>
@@ -96,9 +94,9 @@ export function AdvancedSettings() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Cache Size: {cacheSize} MB
+              Cache Size: {advanced.cacheSize} MB
             </label>
-            <input type="range" min="100" max="2000" step="100" value={cacheSize} onChange={(e) => setCacheSize(parseInt(e.target.value))} className="w-full" />
+            <input type="range" min="100" max="2000" step="100" value={advanced.cacheSize} onChange={(e) => updateAdvanced({ cacheSize: parseInt(e.target.value) })} className="w-full" />
             <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
               <span>100 MB</span>
               <span>1 GB</span>
@@ -112,7 +110,7 @@ export function AdvancedSettings() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Render Quality</label>
-            <select value={renderQuality} onChange={(e) => setRenderQuality(e.target.value)} className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select value={advanced.renderQuality} onChange={(e) => updateAdvanced({ renderQuality: e.target.value as any })} className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="low">Low (Faster)</option>
               <option value="medium">Medium (Balanced)</option>
               <option value="high">High (Better Quality)</option>

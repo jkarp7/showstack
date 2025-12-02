@@ -104,24 +104,24 @@ export function WorkspacePreferences() {
             onClick={() => updateWorkspace({ units: 'imperial' })}
             className={`p-4 border-2 rounded-lg text-left transition-all ${
               workspace.units === 'imperial'
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-500/10'
                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
           >
-            <div className="font-medium text-gray-900 dark:text-white mb-1">Imperial</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Feet, inches (ft, in)</div>
+            <div className={`font-medium mb-1 ${workspace.units === 'imperial' ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-white'}`}>Imperial</div>
+            <div className={`text-sm ${workspace.units === 'imperial' ? 'text-blue-700 dark:text-blue-200' : 'text-gray-500 dark:text-gray-400'}`}>Feet, inches (ft, in)</div>
           </button>
 
           <button
             onClick={() => updateWorkspace({ units: 'metric' })}
             className={`p-4 border-2 rounded-lg text-left transition-all ${
               workspace.units === 'metric'
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-500/10'
                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
           >
-            <div className="font-medium text-gray-900 dark:text-white mb-1">Metric</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Meters, centimeters (m, cm)</div>
+            <div className={`font-medium mb-1 ${workspace.units === 'metric' ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-white'}`}>Metric</div>
+            <div className={`text-sm ${workspace.units === 'metric' ? 'text-blue-700 dark:text-blue-200' : 'text-gray-500 dark:text-gray-400'}`}>Meters, centimeters (m, cm)</div>
           </button>
         </div>
       </div>

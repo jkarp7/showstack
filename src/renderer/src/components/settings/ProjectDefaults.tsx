@@ -1,10 +1,9 @@
-import { useState } from 'react';
 import { FileText, Save } from 'lucide-react';
+import { useSettingsStore } from '../../store/settingsStore';
 
 export function ProjectDefaults() {
-  const [productionName, setProductionName] = useState('');
-  const [venue, setVenue] = useState('');
-  const [designer, setDesigner] = useState('');
+  const projectDefaults = useSettingsStore((state) => state.projectDefaults);
+  const updateProjectDefaults = useSettingsStore((state) => state.updateProjectDefaults);
 
   return (
     <div className="space-y-6">
@@ -22,15 +21,15 @@ export function ProjectDefaults() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Production Name Template</label>
-            <input type="text" value={productionName} onChange={(e) => setProductionName(e.target.value)} placeholder="Untitled Production" className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 dark:placeholder-gray-500" />
+            <input type="text" value={projectDefaults.productionName} onChange={(e) => updateProjectDefaults({ productionName: e.target.value })} placeholder="Untitled Production" className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 dark:placeholder-gray-500" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Venue</label>
-            <input type="text" value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="TBD" className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 dark:placeholder-gray-500" />
+            <input type="text" value={projectDefaults.venue} onChange={(e) => updateProjectDefaults({ venue: e.target.value })} placeholder="TBD" className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 dark:placeholder-gray-500" />
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Lighting Designer</label>
-            <input type="text" value={designer} onChange={(e) => setDesigner(e.target.value)} placeholder="From User Profile" className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 dark:placeholder-gray-500" />
+            <input type="text" value={projectDefaults.designer} onChange={(e) => updateProjectDefaults({ designer: e.target.value })} placeholder="From User Profile" className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 dark:placeholder-gray-500" />
           </div>
         </div>
       </div>
