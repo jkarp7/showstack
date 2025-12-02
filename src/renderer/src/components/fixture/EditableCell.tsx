@@ -52,7 +52,7 @@ export function EditableCell({ value, onChange, className, style, readOnly = fal
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          className="w-full bg-gray-700 border border-blue-500 rounded px-1 py-0.5 text-gray-900 dark:text-white focus:outline-none"
+          className="w-full bg-white dark:bg-gray-700 border border-blue-500 rounded px-1 py-0.5 text-gray-900 dark:text-white focus:outline-none"
         />
       ) : (
         <div
@@ -60,11 +60,11 @@ export function EditableCell({ value, onChange, className, style, readOnly = fal
           className={clsx(
             'rounded px-1 py-0.5 truncate',
             readOnly
-              ? 'cursor-default text-gray-400 italic'
-              : 'cursor-text hover:bg-gray-700'
+              ? 'cursor-default text-gray-500 dark:text-gray-400 italic'
+              : 'cursor-text hover:bg-gray-100 dark:hover:bg-gray-700'
           )}
         >
-          {value || <span className="text-gray-500">—</span>}
+          {value || <span className="text-gray-400 dark:text-gray-500">—</span>}
         </div>
       )}
     </div>

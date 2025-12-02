@@ -169,7 +169,7 @@ export function PrintPreview({
             <button
               onClick={() => setCurrentPageIndex(Math.max(0, currentPageIndex - 1))}
               disabled={currentPageIndex === 0}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed rounded text-sm transition"
+              className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded text-sm transition"
             >
               ← Previous
             </button>
@@ -179,7 +179,7 @@ export function PrintPreview({
             <button
               onClick={() => setCurrentPageIndex(Math.min(totalPages - 1, currentPageIndex + 1))}
               disabled={currentPageIndex === totalPages - 1}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed rounded text-sm transition"
+              className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded text-sm transition"
             >
               Next →
             </button>
@@ -213,7 +213,7 @@ export function PrintPreview({
         {/* Header */}
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Print Settings</h3>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             {template.name}
             {template.isDefault && <span className="ml-2 text-blue-400">• Default</span>}
           </p>
@@ -232,7 +232,7 @@ export function PrintPreview({
                   pageSettings: { ...template.pageSettings, pageSize: e.target.value as any },
                   updated_at: Date.now()
                 })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white"
               >
                 <option value="letter">Letter</option>
                 <option value="legal">Legal</option>
@@ -249,7 +249,7 @@ export function PrintPreview({
                   pageSettings: { ...template.pageSettings, orientation: e.target.value as any },
                   updated_at: Date.now()
                 })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white"
               >
                 <option value="portrait">Portrait</option>
                 <option value="landscape">Landscape</option>
@@ -265,23 +265,23 @@ export function PrintPreview({
                     pageSettings: { ...template.pageSettings, showPageNumbers: e.target.checked },
                     updated_at: Date.now()
                   })}
-                  className="w-4 h-4 bg-gray-700 border-gray-600 rounded"
+                  className="w-4 h-4 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded"
                 />
-                <span className="text-sm text-gray-300">Show page numbers</span>
+                <span className="text-sm text-gray-700 dark:text-gray-300">Show page numbers</span>
               </label>
             </div>
           </div>
         </div>
 
         {/* Section Info */}
-        <div className="mb-6 pb-6 border-b border-gray-700">
+        <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
           <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase mb-2">Sections</h4>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             {template.sections.filter(s => s.enabled).length} sections enabled
           </p>
           <button
             onClick={() => setShowSectionEditor(true)}
-            className="mt-3 w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded transition text-sm"
+            className="mt-3 w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition text-sm"
           >
             Arrange Sections
           </button>
@@ -291,13 +291,13 @@ export function PrintPreview({
         <div className="mt-auto flex gap-2">
           <button
             onClick={handleExportPDF}
-            className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-gray-900 dark:text-white rounded transition text-sm"
+            className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition text-sm"
           >
             Export PDF
           </button>
           <button
             onClick={handlePrint}
-            className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-gray-900 dark:text-white rounded transition text-sm"
+            className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition text-sm"
           >
             Print
           </button>
