@@ -30,8 +30,8 @@ export function ThemeAppearance() {
       </div>
 
       {/* Info: Changes apply immediately */}
-      <div className="bg-blue-50 dark:bg-blue-600/15 border border-blue-200 dark:border-blue-500/30 rounded-lg p-4">
-        <p className="text-sm text-blue-800 dark:text-blue-100">
+      <div className="bg-blue-50 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+        <p className="text-sm text-blue-800 dark:text-blue-200">
           ✨ <strong>Changes apply immediately</strong> - no need to save! Your preferences are automatically saved.
         </p>
       </div>

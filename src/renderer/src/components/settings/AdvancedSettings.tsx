@@ -56,12 +56,12 @@ export function AdvancedSettings() {
       </div>
 
       {/* Performance Warning - Now at top */}
-      <div className="bg-amber-50 dark:bg-amber-600/15 border border-amber-200 dark:border-amber-500/30 rounded-lg p-4">
+      <div className="bg-amber-50 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-700 rounded-lg p-4">
         <div className="flex items-start gap-2">
           <Zap className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
           <div>
-            <h4 className="font-medium text-amber-900 dark:text-amber-100 mb-1">Performance Impact</h4>
-            <p className="text-sm text-amber-800 dark:text-amber-100">
+            <h4 className="font-medium text-amber-900 dark:text-amber-200 mb-1">Performance Impact</h4>
+            <p className="text-sm text-amber-800 dark:text-amber-200">
               Changes to these settings may require an application restart to take full effect.
               Higher memory and cache limits improve performance but use more system resources.
             </p>
