@@ -7,7 +7,7 @@ interface SplashScreenProps {
 }
 
 export function SplashScreen({ onComplete }: SplashScreenProps) {
-  const { status, loading } = useUser();
+  const { license, status, loading } = useUser();
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState('Initializing...');
 
@@ -61,9 +61,12 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
     }
 
     return (
-      <div className="flex items-center gap-2 text-green-400">
-        <CheckCircle className="w-4 h-4" />
-        <span className="text-sm">{status.tier} License Active</span>
+      <div className="flex flex-col items-center gap-1 text-green-400">
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4" />
+          <span className="text-sm font-medium">{license?.name}</span>
+        </div>
+        <span className="text-xs text-gray-400">{license?.tier} License</span>
       </div>
     );
   };
@@ -115,7 +118,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
 
         {/* Copyright */}
         <div className="mt-12 text-gray-500 text-xs">
-          <p>© 2024 Josh Karp / Lytrix</p>
+          <p>© 2025 Lytrix</p>
           <p className="mt-1">All rights reserved</p>
         </div>
       </div>
