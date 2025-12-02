@@ -32,12 +32,12 @@ export function LicenseInfo() {
           </div>
         </div>
       ) : (
-        <div className="bg-amber-50 dark:bg-gray-800 border border-amber-200 dark:border-amber-500 rounded-lg p-4">
+        <div className="bg-amber-50 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-700 rounded-lg p-4">
           <div className="flex items-start gap-2">
             <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
             <div>
-              <h4 className="font-medium text-amber-900 dark:text-gray-200 mb-1">No Active License</h4>
-              <p className="text-sm text-amber-800 dark:text-gray-300 mb-3">
+              <h4 className="font-medium text-amber-900 dark:text-amber-200 mb-1">No Active License</h4>
+              <p className="text-sm text-amber-800 dark:text-amber-200 mb-3">
                 You don't have an active license. Purchase a license to unlock all features and receive updates.
               </p>
               <button className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-md text-sm font-medium transition-colors">
