@@ -27,7 +27,7 @@ export function PrintSettings() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Paper Size</label>
-            <select value={paperSize} onChange={(e) => setPaperSize(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select value={paperSize} onChange={(e) => setPaperSize(e.target.value)} className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="letter">Letter (8.5" × 11")</option>
               <option value="legal">Legal (8.5" × 14")</option>
               <option value="tabloid">Tabloid (11" × 17")</option>
@@ -41,7 +41,7 @@ export function PrintSettings() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Orientation</label>
-            <select value={orientation} onChange={(e) => setOrientation(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select value={orientation} onChange={(e) => setOrientation(e.target.value)} className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="portrait">Portrait</option>
               <option value="landscape">Landscape</option>
             </select>
@@ -52,7 +52,7 @@ export function PrintSettings() {
 
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Resolution (DPI)</label>
-            <select value={dpi} onChange={(e) => setDpi(parseInt(e.target.value))} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select value={dpi} onChange={(e) => setDpi(parseInt(e.target.value))} className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="150">150 DPI (Draft)</option>
               <option value="300">300 DPI (Standard)</option>
               <option value="600">600 DPI (High Quality)</option>
@@ -88,7 +88,7 @@ export function PrintSettings() {
       </div>
 
       <div className="flex justify-end">
-        <button onClick={() => console.log('Save')} className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded-md transition-colors font-medium">
+        <button onClick={() => console.log('Save')} className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium">
           <Save className="w-4 h-4" />
           <span>Save Settings</span>
         </button>

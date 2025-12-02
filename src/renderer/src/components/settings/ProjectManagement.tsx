@@ -69,14 +69,14 @@ export function ProjectManagement() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Archive after {archiveDays} days of inactivity
               </label>
-              <input type="number" value={archiveDays} onChange={(e) => setArchiveDays(parseInt(e.target.value))} min="30" max="365" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <input type="number" value={archiveDays} onChange={(e) => setArchiveDays(parseInt(e.target.value))} min="30" max="365" className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
           )}
         </div>
       </div>
 
       <div className="flex justify-end">
-        <button onClick={() => console.log('Save')} className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded-md transition-colors font-medium">
+        <button onClick={() => console.log('Save')} className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium">
           <Save className="w-4 h-4" />
           <span>Save Settings</span>
         </button>

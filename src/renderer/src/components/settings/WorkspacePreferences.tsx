@@ -30,7 +30,7 @@ export function WorkspacePreferences() {
           <select
             value={defaultView}
             onChange={(e) => setDefaultView(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="projects">Projects List</option>
             <option value="prep">Prep Module</option>
@@ -103,8 +103,8 @@ export function WorkspacePreferences() {
             onClick={() => setUnits('imperial')}
             className={`p-4 border-2 rounded-lg text-left transition-all ${
               units === 'imperial'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
           >
             <div className="font-medium text-gray-900 dark:text-white mb-1">Imperial</div>
@@ -115,8 +115,8 @@ export function WorkspacePreferences() {
             onClick={() => setUnits('metric')}
             className={`p-4 border-2 rounded-lg text-left transition-all ${
               units === 'metric'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
           >
             <div className="font-medium text-gray-900 dark:text-white mb-1">Metric</div>
@@ -126,7 +126,7 @@ export function WorkspacePreferences() {
       </div>
 
       <div className="flex justify-end">
-        <button onClick={handleSave} className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded-md transition-colors font-medium">
+        <button onClick={handleSave} className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium">
           <Save className="w-4 h-4" />
           <span>Save Preferences</span>
         </button>

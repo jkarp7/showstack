@@ -112,7 +112,7 @@ export function AdvancedSettings() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Render Quality</label>
-            <select value={renderQuality} onChange={(e) => setRenderQuality(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select value={renderQuality} onChange={(e) => setRenderQuality(e.target.value)} className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="low">Low (Faster)</option>
               <option value="medium">Medium (Balanced)</option>
               <option value="high">High (Better Quality)</option>
@@ -127,7 +127,7 @@ export function AdvancedSettings() {
       </div>
 
       <div className="flex justify-end">
-        <button onClick={() => console.log('Save')} className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded-md transition-colors font-medium">
+        <button onClick={() => console.log('Save')} className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium">
           <Save className="w-4 h-4" />
           <span>Save Settings</span>
         </button>
