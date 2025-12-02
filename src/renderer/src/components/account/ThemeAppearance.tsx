@@ -30,8 +30,8 @@ export function ThemeAppearance() {
       </div>
 
       {/* Info: Changes apply immediately */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <p className="text-sm text-blue-800 dark:text-blue-300">
+      <div className="bg-blue-50 dark:bg-blue-600/15 border border-blue-200 dark:border-blue-500/30 rounded-lg p-4">
+        <p className="text-sm text-blue-800 dark:text-blue-100">
           ✨ <strong>Changes apply immediately</strong> - no need to save! Your preferences are automatically saved.
         </p>
       </div>
@@ -48,39 +48,39 @@ export function ThemeAppearance() {
             onClick={() => setMode('light')}
             className={`p-4 border-2 rounded-lg transition-all ${
               mode === 'light'
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                ? 'border-blue-500 dark:border-blue-500 bg-blue-100 dark:bg-blue-600/25'
                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
           >
             <Sun className="w-8 h-8 mx-auto mb-2 text-amber-500" />
-            <div className="font-medium text-gray-900 dark:text-white">Light</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Light color scheme</div>
+            <div className={`font-medium ${mode === 'light' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}>Light</div>
+            <div className={`text-xs mt-1 ${mode === 'light' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}>Light color scheme</div>
           </button>
 
           <button
             onClick={() => setMode('dark')}
             className={`p-4 border-2 rounded-lg transition-all ${
               mode === 'dark'
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                ? 'border-blue-500 dark:border-blue-500 bg-blue-100 dark:bg-blue-600/25'
                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
           >
             <Moon className="w-8 h-8 mx-auto mb-2 text-indigo-500" />
-            <div className="font-medium text-gray-900 dark:text-white">Dark</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Dark color scheme</div>
+            <div className={`font-medium ${mode === 'dark' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}>Dark</div>
+            <div className={`text-xs mt-1 ${mode === 'dark' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}>Dark color scheme</div>
           </button>
 
           <button
             onClick={() => setMode('system')}
             className={`p-4 border-2 rounded-lg transition-all ${
               mode === 'system'
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                ? 'border-blue-500 dark:border-blue-500 bg-blue-100 dark:bg-blue-600/25'
                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
           >
             <Monitor className="w-8 h-8 mx-auto mb-2 text-gray-500 dark:text-gray-400" />
-            <div className="font-medium text-gray-900 dark:text-white">System</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Follow system theme</div>
+            <div className={`font-medium ${mode === 'system' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}>System</div>
+            <div className={`text-xs mt-1 ${mode === 'system' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}>Follow system theme</div>
           </button>
         </div>
       </div>
@@ -129,24 +129,24 @@ export function ThemeAppearance() {
             onClick={() => setUIDensity('comfortable')}
             className={`p-4 border-2 rounded-lg text-left transition-all ${
               uiDensity === 'comfortable'
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                ? 'border-blue-500 dark:border-blue-500 bg-blue-100 dark:bg-blue-600/25'
                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
           >
-            <div className="font-medium text-gray-900 dark:text-white mb-1">Comfortable</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">More spacing between elements</div>
+            <div className={`font-medium mb-1 ${uiDensity === 'comfortable' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}>Comfortable</div>
+            <div className={`text-sm ${uiDensity === 'comfortable' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}>More spacing between elements</div>
           </button>
 
           <button
             onClick={() => setUIDensity('compact')}
             className={`p-4 border-2 rounded-lg text-left transition-all ${
               uiDensity === 'compact'
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                ? 'border-blue-500 dark:border-blue-500 bg-blue-100 dark:bg-blue-600/25'
                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
           >
-            <div className="font-medium text-gray-900 dark:text-white mb-1">Compact</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Denser layout, more content visible</div>
+            <div className={`font-medium mb-1 ${uiDensity === 'compact' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}>Compact</div>
+            <div className={`text-sm ${uiDensity === 'compact' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}>Denser layout, more content visible</div>
           </button>
         </div>
       </div>
