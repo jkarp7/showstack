@@ -60,9 +60,11 @@ export function Prep() {
 
   const handleBackClick = () => {
     if (parentProjectId) {
-      navigate(`/project/${parentProjectId}`);
+      // Go back to module tool selection
+      navigate(`/project/${parentProjectId}/module/production`);
     } else {
-      navigate('/');
+      // Go back to module tool selection (no project context)
+      navigate('/module/production');
     }
   };
 
@@ -76,6 +78,44 @@ export function Prep() {
     loadProjects();
   }, []);
 
+  // Auto-load or create shop order when opened from a project
+  useEffect(() => {
+    const autoLoadProjectShopOrder = async () => {
+      if (parentProjectId && allProjects.length > 0 && !currentProject) {
+        // Find existing shop order for this parent project
+        const existingShopOrder = allProjects.find(
+          p => p.parent_project_id === parentProjectId
+        );
+
+        if (existingShopOrder) {
+          // Load the existing shop order
+          await loadProject(existingShopOrder.id);
+        } else {
+          // No shop order exists - create one automatically
+          const parentProject = projects.find(p => p.id === parentProjectId);
+          if (parentProject) {
+            try {
+              const newProject = await usePrepStore.getState().createProject({
+                production_name: parentProject.name,
+                parent_project_id: parentProjectId,
+                venue: parentProject.venue || undefined,
+                disciplines: ['lighting'] // Default to lighting
+              });
+
+              if (newProject) {
+                await loadProject(newProject.id);
+              }
+            } catch (error) {
+              console.error('Failed to auto-create shop order:', error);
+            }
+          }
+        }
+      }
+    };
+
+    autoLoadProjectShopOrder();
+  }, [parentProjectId, allProjects, currentProject, projects]);
+
   // Update file store when current project changes
   useEffect(() => {
     if (currentProject) {
@@ -88,7 +128,13 @@ export function Prep() {
   };
 
   const handleBackToList = () => {
-    clearCurrentProject();
+    if (parentProjectId) {
+      // Go back to module tool selection when in project context
+      navigate(`/project/${parentProjectId}/module/production`);
+    } else {
+      // Clear current project and show list when not in project context
+      clearCurrentProject();
+    }
   };
 
   const handleNewProject = () => {
