@@ -32,12 +32,27 @@ export function UserProfile() {
 
   const handleUploadAvatar = async () => {
     try {
-      if (typeof window !== 'undefined' && window.api?.dialog) {
-        const filePath = await window.api.dialog.openImage();
-        if (filePath) {
-          updateUserProfile({ avatarPath: filePath });
+      // Create a file input element
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/jpeg,image/jpg,image/png,image/gif,image/webp';
+
+      input.onchange = async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          // Use FileReader to convert to data URL
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const dataUrl = event.target?.result as string;
+            if (dataUrl) {
+              updateUserProfile({ avatarPath: dataUrl });
+            }
+          };
+          reader.readAsDataURL(file);
         }
-      }
+      };
+
+      input.click();
     } catch (error) {
       console.error('Failed to upload avatar:', error);
     }
@@ -95,7 +110,7 @@ export function UserProfile() {
             <div className="w-24 h-24 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center overflow-hidden">
               {userProfile.avatarPath ? (
                 <img
-                  src={`file://${userProfile.avatarPath}`}
+                  src={userProfile.avatarPath}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
