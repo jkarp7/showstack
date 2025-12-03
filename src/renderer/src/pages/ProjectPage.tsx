@@ -415,7 +415,8 @@ export function ProjectPage() {
           <div>
             <h2 className="text-2xl font-bold mb-6">Modules</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {enabledModules.includes('production') && (
+              {/* Show Production module if either 'production' or 'prep' (legacy) is enabled */}
+              {(enabledModules.includes('production') || enabledModules.includes('prep')) && (
                 <ModuleCard
                   name="ShowStack:Production"
                   description="Equipment management, shop orders, paperwork generation, and technical planning"
@@ -442,17 +443,6 @@ export function ProjectPage() {
                   icon="✏️"
                   route={`/project/${projectId}/module/design`}
                   isLocked={true}
-                />
-              )}
-
-              {/* Legacy prep module - redirect to production/shop-order */}
-              {enabledModules.includes('prep') && (
-                <ModuleCard
-                  name="ShowStack:Production"
-                  description="Equipment management, shop orders, paperwork generation, and technical planning"
-                  icon="🎬"
-                  route={`/project/${projectId}/module/production`}
-                  isLocked={false}
                 />
               )}
             </div>
