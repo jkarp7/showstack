@@ -32,22 +32,51 @@ export function UserProfile() {
 
   const handleUploadAvatar = async () => {
     try {
-      // Use Electron's dialog to select an image file
-      const result = await window.electron.ipcRenderer.invoke('dialog:openFile', {
-        title: 'Select Profile Picture',
-        filters: [
-          { name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'gif', 'webp'] }
-        ],
-        properties: ['openFile']
-      });
-
-      if (!result.canceled && result.filePaths[0]) {
-        const avatarPath = result.filePaths[0];
-        updateUserProfile({ avatarPath });
+      if (typeof window !== 'undefined' && window.api?.dialog) {
+        const filePath = await window.api.dialog.openImage();
+        if (filePath) {
+          updateUserProfile({ avatarPath: filePath });
+        }
       }
     } catch (error) {
       console.error('Failed to upload avatar:', error);
     }
+  };
+
+  // Phone number formatting
+  const formatPhoneNumber = (value: string): string => {
+    // Remove all non-numeric characters except + for international
+    const cleaned = value.replace(/[^\d+]/g, '');
+
+    // International format (starts with +)
+    if (cleaned.startsWith('+')) {
+      // Keep the + and format based on length
+      const digits = cleaned.slice(1);
+      if (digits.length <= 3) return cleaned;
+      if (digits.length <= 6) return `+${digits.slice(0, 3)} ${digits.slice(3)}`;
+      if (digits.length <= 10) return `+${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
+      return `+${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6, 10)} ${digits.slice(10, 14)}`;
+    }
+
+    // US format (10 digits)
+    if (cleaned.length <= 10) {
+      if (cleaned.length <= 3) return cleaned;
+      if (cleaned.length <= 6) return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
+      return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
+    }
+
+    // UK format (11 digits starting with 0)
+    if (cleaned.startsWith('0') && cleaned.length === 11) {
+      return `${cleaned.slice(0, 5)} ${cleaned.slice(5, 8)} ${cleaned.slice(8)}`;
+    }
+
+    // Default: just return cleaned with spacing
+    return cleaned;
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    setPhone(formatted);
   };
 
   return (
@@ -168,8 +197,8 @@ export function UserProfile() {
               <input
                 type="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 (555) 123-4567"
+                onChange={handlePhoneChange}
+                placeholder="+1 (555) 123-4567 or (555) 123-4567"
                 className="w-full pl-10 pr-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 dark:placeholder-gray-500"
               />
             </div>
