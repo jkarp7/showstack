@@ -62,6 +62,17 @@ export interface AdvancedSettings {
   renderQuality: RenderQuality;
 }
 
+// User Profile Settings
+export interface UserProfileSettings {
+  name: string;
+  email: string;
+  company: string;
+  role: string;
+  phone: string;
+  designerCredit: string;
+  avatarPath?: string; // Path to uploaded avatar image
+}
+
 // Complete Settings State
 export interface SettingsState {
   workspace: WorkspaceSettings;
@@ -70,6 +81,7 @@ export interface SettingsState {
   projectManagement: ProjectManagementSettings;
   print: PrintSettingsConfig;
   advanced: AdvancedSettings;
+  userProfile: UserProfileSettings;
 
   // Actions
   updateWorkspace: (settings: Partial<WorkspaceSettings>) => void;
@@ -78,6 +90,7 @@ export interface SettingsState {
   updateProjectManagement: (settings: Partial<ProjectManagementSettings>) => void;
   updatePrint: (settings: Partial<PrintSettingsConfig>) => void;
   updateAdvanced: (settings: Partial<AdvancedSettings>) => void;
+  updateUserProfile: (settings: Partial<UserProfileSettings>) => void;
   resetToDefaults: () => void;
 }
 
@@ -122,6 +135,15 @@ const defaultSettings = {
     cacheSize: 500,
     renderQuality: 'high' as const,
   },
+  userProfile: {
+    name: '',
+    email: '',
+    company: '',
+    role: '',
+    phone: '',
+    designerCredit: '',
+    avatarPath: undefined,
+  },
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -159,6 +181,11 @@ export const useSettingsStore = create<SettingsState>()(
       updateAdvanced: (settings) =>
         set((state) => ({
           advanced: { ...state.advanced, ...settings },
+        })),
+
+      updateUserProfile: (settings) =>
+        set((state) => ({
+          userProfile: { ...state.userProfile, ...settings },
         })),
 
       resetToDefaults: () => set(defaultSettings),

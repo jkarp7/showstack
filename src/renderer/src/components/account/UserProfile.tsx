@@ -1,22 +1,53 @@
 import { useState } from 'react';
-import { UserCircle, Mail, Building, Phone, Save, Camera } from 'lucide-react';
+import { UserCircle, Mail, Building, Phone, Save, Camera, Check } from 'lucide-react';
+import { useSettingsStore } from '../../store/settingsStore';
 
 export function UserProfile() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [company, setCompany] = useState('');
-  const [role, setRole] = useState('');
-  const [phone, setPhone] = useState('');
-  const [designerCredit, setDesignerCredit] = useState('');
+  const userProfile = useSettingsStore((state) => state.userProfile);
+  const updateUserProfile = useSettingsStore((state) => state.updateUserProfile);
+  const [saved, setSaved] = useState(false);
+
+  // Local state for form inputs
+  const [name, setName] = useState(userProfile.name);
+  const [email, setEmail] = useState(userProfile.email);
+  const [company, setCompany] = useState(userProfile.company);
+  const [role, setRole] = useState(userProfile.role);
+  const [phone, setPhone] = useState(userProfile.phone);
+  const [designerCredit, setDesignerCredit] = useState(userProfile.designerCredit);
 
   const handleSave = async () => {
-    // TODO: Implement save
-    console.log('Saving user profile...');
+    updateUserProfile({
+      name,
+      email,
+      company,
+      role,
+      phone,
+      designerCredit,
+    });
+
+    // Show success message
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   const handleUploadAvatar = async () => {
-    // TODO: Implement avatar upload
-    console.log('Upload avatar...');
+    try {
+      // Use Electron's dialog to select an image file
+      const result = await window.electron.ipcRenderer.invoke('dialog:openFile', {
+        title: 'Select Profile Picture',
+        filters: [
+          { name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'gif', 'webp'] }
+        ],
+        properties: ['openFile']
+      });
+
+      if (!result.canceled && result.filePaths[0]) {
+        const avatarPath = result.filePaths[0];
+        updateUserProfile({ avatarPath });
+      }
+    } catch (error) {
+      console.error('Failed to upload avatar:', error);
+    }
   };
 
   return (
@@ -28,16 +59,25 @@ export function UserProfile() {
       </div>
 
       {/* Avatar */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 rounded-lg p-6">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Profile Picture</h3>
         <div className="flex items-center gap-6">
           <div className="relative">
-            <div className="w-24 h-24 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center">
-              <UserCircle className="w-20 h-20 text-gray-400 dark:text-gray-500" />
+            <div className="w-24 h-24 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center overflow-hidden">
+              {userProfile.avatarPath ? (
+                <img
+                  src={`file://${userProfile.avatarPath}`}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <UserCircle className="w-20 h-20 text-gray-400 dark:text-gray-500" />
+              )}
             </div>
             <button
               onClick={handleUploadAvatar}
               className="absolute bottom-0 right-0 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors"
+              title="Upload photo"
             >
               <Camera className="w-4 h-4" />
             </button>
@@ -54,7 +94,7 @@ export function UserProfile() {
       </div>
 
       {/* Personal Information */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 rounded-lg p-6">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <UserCircle className="w-5 h-5 text-blue-600 dark:text-blue-500" />
           <span>Personal Information</span>
@@ -138,7 +178,7 @@ export function UserProfile() {
       </div>
 
       {/* Designer Credit */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 rounded-lg p-6">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Designer Credit</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
           This information will appear on shop orders and exported documents
@@ -162,7 +202,13 @@ export function UserProfile() {
       </div>
 
       {/* Save Button */}
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-3">
+        {saved && (
+          <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+            <Check className="w-4 h-4" />
+            <span className="text-sm font-medium">Saved!</span>
+          </div>
+        )}
         <button
           onClick={handleSave}
           className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium"
