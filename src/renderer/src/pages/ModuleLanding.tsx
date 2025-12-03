@@ -23,6 +23,13 @@ const MODULE_TOOLS: Record<ModuleType, ToolCard[]> = {
       isLocked: false
     },
     {
+      name: 'Shop Order',
+      description: 'Equipment orders and specifications for rental houses',
+      icon: '📋',
+      route: 'shop-order',
+      isLocked: false
+    },
+    {
       name: 'Blueprint',
       description: 'System drawings and rack elevations - Omnigraffle parity tool (Coming Soon)',
       icon: '📐',

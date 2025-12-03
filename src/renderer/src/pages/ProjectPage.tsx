@@ -418,7 +418,7 @@ export function ProjectPage() {
               {enabledModules.includes('production') && (
                 <ModuleCard
                   name="ShowStack:Production"
-                  description="Equipment management, channel hookup, and technical planning"
+                  description="Equipment management, shop orders, paperwork generation, and technical planning"
                   icon="🎬"
                   route={`/project/${projectId}/module/production`}
                   isLocked={false}
@@ -445,12 +445,13 @@ export function ProjectPage() {
                 />
               )}
 
+              {/* Legacy prep module - redirect to production/shop-order */}
               {enabledModules.includes('prep') && (
                 <ModuleCard
-                  name="ShowStack:Prep"
-                  description="Equipment orders and specifications for rental houses"
-                  icon="📋"
-                  route={`/project/${projectId}/module/prep`}
+                  name="ShowStack:Production"
+                  description="Equipment management, shop orders, paperwork generation, and technical planning"
+                  icon="🎬"
+                  route={`/project/${projectId}/module/production`}
                   isLocked={false}
                 />
               )}

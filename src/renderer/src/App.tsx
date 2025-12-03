@@ -47,21 +47,23 @@ function AppContent() {
         {/* Project-based routes */}
         <Route path="/project/:projectId" element={<ProjectPage />} />
         <Route path="/project/:projectId/module/production/system-docs" element={<SystemDocs />} />
+        <Route path="/project/:projectId/module/production/shop-order" element={<Prep />} />
         <Route path="/project/:projectId/module/production" element={<Navigate to="system-docs" replace />} />
         <Route path="/project/:projectId/module/design" element={<Navigate to="prep" replace />} />
-        <Route path="/project/:projectId/module/prep" element={<Prep />} />
+        <Route path="/project/:projectId/module/prep" element={<Navigate to="/project/:projectId/module/production/shop-order" replace />} />
         <Route path="/project/:projectId/module/manager" element={<Manager />} />
 
         {/* Direct module access (no project) */}
         <Route path="/module/production/system-docs" element={<SystemDocs />} />
-        <Route path="/module/prep" element={<Prep />} />
+        <Route path="/module/production/shop-order" element={<Prep />} />
+        <Route path="/module/prep" element={<Navigate to="/module/production/shop-order" replace />} />
         <Route path="/module/manager" element={<Manager />} />
         <Route path="/module/production" element={<Navigate to="/module/production/system-docs" replace />} />
         <Route path="/module/design" element={<Navigate to="/module/prep" replace />} />
 
         {/* Backwards compatibility - redirect old routes */}
         <Route path="/modules" element={<LandingPage />} />
-        <Route path="/modules/prep" element={<Navigate to="/module/prep" replace />} />
+        <Route path="/modules/prep" element={<Navigate to="/module/production/shop-order" replace />} />
         <Route path="/modules/production" element={<Navigate to="/module/production" replace />} />
         <Route path="/modules/manager" element={<Navigate to="/module/manager" replace />} />
         <Route path="/project/:projectId/module/production/equipment" element={<Navigate to="/project/:projectId/module/production/system-docs" replace />} />
