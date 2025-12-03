@@ -10,6 +10,7 @@ import { registerFileHandlers } from './ipc/files';
 import { registerWindowHandlers } from './ipc/windows';
 import { registerPrepHandlers } from './ipc/prep';
 import { registerLicenseHandlers } from './ipc/license';
+import { registerAdminHandlers } from './ipc/admin';
 import { backgroundVerifier } from './services/BackgroundVerifier';
 import { licenseService } from './services/LicenseService';
 
@@ -38,6 +39,7 @@ app.on('ready', async () => {
   registerWindowHandlers();
   registerPrepHandlers();
   registerLicenseHandlers();
+  registerAdminHandlers();
 
   // Start background license verification (non-blocking)
   backgroundVerifier.start();

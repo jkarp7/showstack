@@ -274,7 +274,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
     onClose();
   };
 
-  const inputClass = "w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm focus:outline-none focus:border-blue-500";
+  const inputClass = "w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:border-blue-500";
   const labelClass = "text-xs font-medium text-gray-300 mb-1";
 
   const totalFixturesInQueue = queue.reduce((sum, batch) => sum + batch.quantity, 0);
@@ -611,7 +611,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                   max="100"
                   value={quantity}
                   onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center text-lg font-bold focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-center text-lg font-bold focus:outline-none focus:border-blue-500"
                 />
               </div>
 
@@ -713,7 +713,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-white truncate">
+                          <div className="font-medium text-gray-900 dark:text-white truncate">
                             {batch.description}
                           </div>
                           <div className="text-gray-400 mt-0.5">

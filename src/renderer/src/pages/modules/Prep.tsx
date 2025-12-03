@@ -431,7 +431,7 @@ export function Prep() {
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={handleFieldBlur}
             onKeyDown={handleFieldKeyDown}
-            className={`w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white focus:outline-none ${className}`}
+            className={`w-full px-2 py-1 bg-white dark:bg-gray-600 border border-blue-500 rounded text-sm text-gray-900 dark:text-white focus:outline-none ${className}`}
             autoFocus
           />
         );
@@ -442,9 +442,9 @@ export function Prep() {
           onClick={() => handleFieldClick(field, value, fieldIsReadOnly)}
           className={`${
             fieldIsReadOnly
-              ? 'text-gray-400 cursor-not-allowed'
-              : 'cursor-pointer hover:text-gray-200 hover:bg-gray-700 rounded px-2 py-1 transition'
-          } ${!value && !fieldIsReadOnly ? 'italic text-gray-500' : 'text-gray-300'} ${className}`}
+              ? 'text-gray-400 dark:text-gray-400 cursor-not-allowed'
+              : 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded px-2 py-1 transition'
+          } ${!value && !fieldIsReadOnly ? 'italic text-gray-500 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300'} ${className}`}
         >
           {value || placeholder}
         </span>
@@ -466,7 +466,7 @@ export function Prep() {
               onChange={(e) => setEditValue(e.target.value)}
               onBlur={handleFieldBlur}
               onKeyDown={handleFieldKeyDown}
-              className={`w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white focus:outline-none ${className}`}
+              className={`w-full px-2 py-1 bg-white dark:bg-gray-600 border border-blue-500 rounded text-sm text-gray-900 dark:text-white focus:outline-none ${className}`}
               autoFocus
             />
           );
@@ -479,7 +479,7 @@ export function Prep() {
               onChange={(e) => setEditValue(e.target.value)}
               onBlur={handleFieldBlur}
               onKeyDown={handleFieldKeyDown}
-              className={`w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white focus:outline-none ${className}`}
+              className={`w-full px-2 py-1 bg-white dark:bg-gray-600 border border-blue-500 rounded text-sm text-gray-900 dark:text-white focus:outline-none ${className}`}
               autoFocus
             />
           );
@@ -515,7 +515,7 @@ export function Prep() {
         <span
           onClick={handleClick}
           onDoubleClick={handleDoubleClick}
-          className={`cursor-pointer hover:text-gray-200 hover:bg-gray-700 rounded px-2 py-1 transition ${!value ? 'italic text-gray-500' : 'text-gray-300'} ${className}`}
+          className={`cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded px-2 py-1 transition ${!value ? 'italic text-gray-500 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300'} ${className}`}
         >
           {value || placeholder}
         </span>
@@ -530,7 +530,7 @@ export function Prep() {
 
       return (
         <div>
-          {label && <span className="text-gray-500 text-sm">{label}:</span>}{' '}
+          {label && <span className="text-gray-500 dark:text-gray-500 text-sm">{label}:</span>}{' '}
           {isEditing ? (
             <input
               type="text"
@@ -538,7 +538,7 @@ export function Prep() {
               onChange={(e) => setEditValue(e.target.value)}
               onBlur={handleFieldBlur}
               onKeyDown={handleFieldKeyDown}
-              className="inline-block px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white focus:outline-none"
+              className="inline-block px-2 py-1 bg-white dark:bg-gray-600 border border-blue-500 rounded text-sm text-gray-900 dark:text-white focus:outline-none"
               autoFocus
             />
           ) : (
@@ -546,15 +546,15 @@ export function Prep() {
               onClick={() => handleFieldClick(field, value, fieldIsReadOnly)}
               className={`${
                 fieldIsReadOnly
-                  ? 'text-gray-400 cursor-default'
-                  : 'text-gray-300 cursor-pointer hover:text-gray-200 hover:bg-gray-700 rounded px-1 py-0.5 transition'
-              } ${!value && !fieldIsReadOnly ? 'italic text-gray-500' : ''}`}
+                  ? 'text-gray-400 dark:text-gray-400 cursor-default'
+                  : 'text-gray-700 dark:text-gray-300 cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded px-1 py-0.5 transition'
+              } ${!value && !fieldIsReadOnly ? 'italic text-gray-500 dark:text-gray-500' : ''}`}
             >
               {value || placeholder}
             </span>
           )}
           {fieldIsReadOnly && value && (
-            <span className="ml-2 text-xs text-blue-400">(from parent)</span>
+            <span className="ml-2 text-xs text-blue-600 dark:text-blue-400">(from parent)</span>
           )}
         </div>
       );
@@ -566,14 +566,14 @@ export function Prep() {
       : null;
 
     return (
-      <div className="h-screen flex flex-col bg-gray-900 text-white">
+      <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
         {/* Header with file operations */}
-        <header className="bg-gray-800 border-b border-gray-700 p-4">
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={handleBackToList}
-                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+                className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition"
               >
                 ← Back to Projects
               </button>
@@ -585,7 +585,7 @@ export function Prep() {
             </div>
             <button
               onClick={handleHomeClick}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition"
               title="Home (Projects)"
             >
               🏠
@@ -594,7 +594,7 @@ export function Prep() {
         </header>
 
         {/* Show name and badges */}
-        <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
           <div className="flex items-center gap-4">
             <h1 className="text-3xl font-bold">{currentProject.production_name}</h1>
             {currentProject.current_revision > 0 && (
@@ -604,12 +604,12 @@ export function Prep() {
             )}
             {isLinked && (
               <>
-                <span className="px-3 py-1.5 bg-blue-600/20 text-blue-400 text-sm rounded">
+                <span className="px-3 py-1.5 bg-blue-600/20 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 text-sm rounded">
                   Linked to Parent Project
                 </span>
                 <button
                   onClick={handleSyncFromParent}
-                  className="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-sm rounded transition"
+                  className="px-3 py-1.5 bg-blue-600/20 dark:bg-blue-600/20 hover:bg-blue-600/30 dark:hover:bg-blue-600/30 text-blue-600 dark:text-blue-400 text-sm rounded transition"
                   title="Sync dates and contacts from parent project"
                 >
                   🔄 Sync from Parent
@@ -620,15 +620,15 @@ export function Prep() {
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-gray-700 bg-gray-800">
+        <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <div className="max-w-6xl mx-auto px-6">
             <div className="flex gap-4">
               <button
                 onClick={() => setActiveTab('builder')}
                 className={`px-4 py-3 text-sm font-medium transition border-b-2 ${
                   activeTab === 'builder'
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-gray-400 hover:text-gray-300'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'
                 }`}
               >
                 Shop Order Builder
@@ -637,8 +637,8 @@ export function Prep() {
                 onClick={() => setActiveTab('output')}
                 className={`px-4 py-3 text-sm font-medium transition border-b-2 ${
                   activeTab === 'output'
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-gray-400 hover:text-gray-300'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'
                 }`}
               >
                 Print-Ready Output
@@ -652,36 +652,36 @@ export function Prep() {
             {activeTab === 'builder' && (
               <>
                 {/* Project Details */}
-                <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                   <button
                     onClick={() => setProjectDetailsExpanded(!projectDetailsExpanded)}
-                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-750 transition"
+                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-750 transition"
                   >
                     <div className="flex items-center gap-4">
-                      <span className="text-gray-400 text-lg">{projectDetailsExpanded ? '▼' : '▶'}</span>
+                      <span className="text-gray-600 dark:text-gray-400 text-lg">{projectDetailsExpanded ? '▼' : '▶'}</span>
                       <h2 className="text-xl font-bold">Project Details</h2>
                       {!projectDetailsExpanded && (
-                        <div className="flex items-center gap-6 text-sm text-gray-400 ml-4">
+                        <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400 ml-4">
                           <div>
                             <span className="text-gray-500">Show:</span>{' '}
-                            <span className="text-gray-300">{currentProject.production_name}</span>
+                            <span className="text-gray-700 dark:text-gray-300">{currentProject.production_name}</span>
                           </div>
                           {getFieldValue('venue') && (
                             <div>
                               <span className="text-gray-500">Venue:</span>{' '}
-                              <span className="text-gray-300">{getFieldValue('venue')}</span>
+                              <span className="text-gray-700 dark:text-gray-300">{getFieldValue('venue')}</span>
                             </div>
                           )}
                           <div>
                             <span className="text-gray-500">Disciplines:</span>{' '}
-                            <span className="text-gray-300">
+                            <span className="text-gray-700 dark:text-gray-300">
                               {disciplines.map((d) => d.charAt(0).toUpperCase()).join('/')}
                             </span>
                           </div>
                         </div>
                       )}
                     </div>
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
                       Created: {new Date(currentProject.created_at).toLocaleDateString()}
                       {latestRevision && (
                         <> | Last Revised: {new Date(latestRevision.revision_date).toLocaleDateString()}</>
@@ -694,11 +694,11 @@ export function Prep() {
 
               <div className="space-y-4">
                 {/* Production Info - 1 Row */}
-                <div className="flex items-center justify-between pb-3 border-b border-gray-700">
+                <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-8">
                     <div>
                       <span className="text-gray-500 text-sm">Show:</span>{' '}
-                      <span className="text-gray-300 font-medium text-base">{currentProject.production_name}</span>
+                      <span className="text-gray-700 dark:text-gray-300 font-medium text-base">{currentProject.production_name}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-gray-500 text-sm">Venue:</span>{' '}
@@ -717,19 +717,19 @@ export function Prep() {
                       )}
                     </div>
                   </div>
-                  <div className="text-xs text-gray-400">
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
                     <span className="text-gray-500">Disciplines:</span>{' '}
                     {disciplines.map((d) => d.charAt(0).toUpperCase()).join('/')}
                   </div>
                 </div>
 
                 {/* Parent Project Link */}
-                <div className="pb-3 border-b border-gray-700">
+                <div className="pb-3 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-4">
                     <span className="text-gray-500 text-sm">Parent Project:</span>
                     {currentProject.parent_project_id ? (
                       <div className="flex items-center gap-2">
-                        <span className="text-gray-300">
+                        <span className="text-gray-700 dark:text-gray-300">
                           {projects.find(p => p.id === currentProject.parent_project_id)?.name || 'Unknown Project'}
                         </span>
                         <button
@@ -749,7 +749,7 @@ export function Prep() {
                               handleLinkToParent(e.target.value);
                             }
                           }}
-                          className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm text-gray-300 hover:bg-gray-600 transition"
+                          className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-600 transition"
                         >
                           <option value="">+ Link to Project</option>
                           {projects
@@ -770,7 +770,7 @@ export function Prep() {
 
                 {/* Management - Each Person in a Row */}
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Management</h3>
+                  <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase mb-2">Management</h3>
                   <div className="space-y-2">
                     {/* GM Row */}
                     <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
@@ -813,7 +813,7 @@ export function Prep() {
 
                 {/* Design Team - Each Person in a Row */}
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Design Team</h3>
+                  <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase mb-2">Design Team</h3>
                   <div className="space-y-2">
                     {disciplines.includes('lighting') && (
                       <>
@@ -876,19 +876,19 @@ export function Prep() {
                     {disciplines.includes('audio') && isLinked && parentProject?.audio_designer && (
                       <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
                         <span className="text-gray-500">Audio Designer</span>
-                        <div className="text-gray-400">{parentProject.audio_designer}</div>
+                        <div className="text-gray-600 dark:text-gray-400">{parentProject.audio_designer}</div>
                         <div></div>
-                        <div className="text-gray-400">{parentProject.audio_designer_email || ''}</div>
-                        <div className="text-gray-400">{formatPhoneNumber(parentProject.audio_designer_phone) || ''}</div>
+                        <div className="text-gray-600 dark:text-gray-400">{parentProject.audio_designer_email || ''}</div>
+                        <div className="text-gray-600 dark:text-gray-400">{formatPhoneNumber(parentProject.audio_designer_phone) || ''}</div>
                       </div>
                     )}
                     {disciplines.includes('video') && isLinked && parentProject?.video_designer && (
                       <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
                         <span className="text-gray-500">Video Designer</span>
-                        <div className="text-gray-400">{parentProject.video_designer}</div>
+                        <div className="text-gray-600 dark:text-gray-400">{parentProject.video_designer}</div>
                         <div></div>
-                        <div className="text-gray-400">{parentProject.video_designer_email || ''}</div>
-                        <div className="text-gray-400">{formatPhoneNumber(parentProject.video_designer_phone) || ''}</div>
+                        <div className="text-gray-600 dark:text-gray-400">{parentProject.video_designer_email || ''}</div>
+                        <div className="text-gray-600 dark:text-gray-400">{formatPhoneNumber(parentProject.video_designer_phone) || ''}</div>
                       </div>
                     )}
                   </div>
@@ -896,7 +896,7 @@ export function Prep() {
 
                 {/* Show Dates - 2 Rows: Header and Values */}
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Show Dates</h3>
+                  <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase mb-2">Show Dates</h3>
                   <div className="grid grid-cols-7 gap-2 text-xs">
                     {/* Header Row */}
                     <div className="text-gray-500 font-medium">Prep Start</div>
@@ -923,12 +923,12 @@ export function Prep() {
                 </div>
 
                 {/* Notes */}
-                <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                   <button
                     onClick={() => setNotesExpanded(!notesExpanded)}
                     className="w-full px-6 py-4 flex items-center gap-4 hover:bg-gray-750 transition"
                   >
-                    <span className="text-gray-400 text-lg">{notesExpanded ? '▼' : '▶'}</span>
+                    <span className="text-gray-600 dark:text-gray-400 text-lg">{notesExpanded ? '▼' : '▶'}</span>
                     <h2 className="text-xl font-bold">Notes</h2>
                   </button>
 
@@ -943,15 +943,15 @@ export function Prep() {
                 </div>
 
                 {/* Revisions */}
-                <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                   <div className="px-6 py-4 flex items-center justify-between">
                     <button
                       onClick={() => setRevisionsExpanded(!revisionsExpanded)}
                       className="flex items-center gap-3 hover:bg-gray-750 rounded px-2 py-1 -ml-2 transition"
                     >
-                      <span className="text-gray-400 text-lg">{revisionsExpanded ? '▼' : '▶'}</span>
+                      <span className="text-gray-600 dark:text-gray-400 text-lg">{revisionsExpanded ? '▼' : '▶'}</span>
                       <h2 className="text-xl font-bold">Revisions</h2>
-                      <span className="text-sm text-gray-400">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
                         Rev {currentProject.current_revision} | {5 - currentProject.current_revision} remaining
                       </span>
                     </button>
@@ -960,7 +960,7 @@ export function Prep() {
                         <button
                           onClick={() => setShowRevisionZeroNotes(!showRevisionZeroNotes)}
                           disabled={isSettingRevisionZero}
-                          className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:text-gray-500 rounded text-sm font-medium transition"
+                          className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-200 dark:bg-gray-700 disabled:text-gray-500 rounded text-sm font-medium transition"
                         >
                           {isSettingRevisionZero ? 'Setting...' : 'Set Revision 0'}
                         </button>
@@ -968,7 +968,7 @@ export function Prep() {
                       <button
                         onClick={() => setShowRevisionNotes(!showRevisionNotes)}
                         disabled={isGeneratingRevision || currentProject.current_revision >= 5}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 rounded text-sm font-medium transition"
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 dark:bg-gray-700 disabled:text-gray-500 rounded text-sm font-medium transition"
                       >
                         {isGeneratingRevision ? 'Generating...' : 'Generate Revision'}
                       </button>
@@ -977,25 +977,25 @@ export function Prep() {
 
                   {/* Revision 0 Notes input */}
                   {showRevisionZeroNotes && (
-                    <div className="mx-6 mb-4 p-4 bg-gray-700 border border-gray-600 rounded">
+                    <div className="mx-6 mb-4 p-4 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded">
                       <label className="block text-sm font-medium mb-2">
                         Revision 0 Notes (optional)
                       </label>
-                      <p className="text-xs text-gray-400 mb-3">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
                         Set the current state as your baseline. Future revisions will show actual changes.
                       </p>
                       <textarea
                         value={revisionZeroNotes}
                         onChange={(e) => setRevisionZeroNotes(e.target.value)}
                         placeholder="Initial baseline for project..."
-                        className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+                        className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                         rows={3}
                       />
                       <div className="flex gap-2 mt-3">
                         <button
                           onClick={handleSetRevisionZero}
                           disabled={isSettingRevisionZero}
-                          className="px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-gray-700 rounded text-sm transition"
+                          className="px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-gray-200 dark:bg-gray-700 rounded text-sm transition"
                         >
                           Set Baseline
                         </button>
@@ -1005,7 +1005,7 @@ export function Prep() {
                             setRevisionZeroNotes('');
                           }}
                           disabled={isSettingRevisionZero}
-                          className="px-3 py-1.5 bg-gray-600 hover:bg-gray-500 rounded text-sm transition"
+                          className="px-3 py-1.5 bg-gray-300 dark:bg-gray-600 hover:bg-gray-500 rounded text-sm transition"
                         >
                           Cancel
                         </button>
@@ -1015,7 +1015,7 @@ export function Prep() {
 
                   {/* Generate Revision Notes input */}
                   {showRevisionNotes && (
-                    <div className="mx-6 mb-4 p-4 bg-gray-700 border border-gray-600 rounded">
+                    <div className="mx-6 mb-4 p-4 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded">
                       <label className="block text-sm font-medium mb-2">
                         Revision Notes (optional)
                       </label>
@@ -1023,14 +1023,14 @@ export function Prep() {
                         value={revisionNotes}
                         onChange={(e) => setRevisionNotes(e.target.value)}
                         placeholder="Describe the changes in this revision..."
-                        className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+                        className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                         rows={3}
                       />
                       <div className="flex gap-2 mt-3">
                         <button
                           onClick={handleGenerateRevision}
                           disabled={isGeneratingRevision}
-                          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 rounded text-sm transition"
+                          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 dark:bg-gray-700 rounded text-sm transition"
                         >
                           Create Revision
                         </button>
@@ -1040,7 +1040,7 @@ export function Prep() {
                             setRevisionNotes('');
                           }}
                           disabled={isGeneratingRevision}
-                          className="px-3 py-1.5 bg-gray-600 hover:bg-gray-500 rounded text-sm transition"
+                          className="px-3 py-1.5 bg-gray-300 dark:bg-gray-600 hover:bg-gray-500 rounded text-sm transition"
                         >
                           Cancel
                         </button>
@@ -1065,12 +1065,12 @@ export function Prep() {
                 </div>
 
                 {/* Equipment */}
-                <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                   <button
                     onClick={() => setEquipmentExpanded(!equipmentExpanded)}
                     className="w-full px-6 py-4 flex items-center gap-4 hover:bg-gray-750 transition"
                   >
-                    <span className="text-gray-400 text-lg">{equipmentExpanded ? '▼' : '▶'}</span>
+                    <span className="text-gray-600 dark:text-gray-400 text-lg">{equipmentExpanded ? '▼' : '▶'}</span>
                     <h2 className="text-xl font-bold">Equipment</h2>
                   </button>
 
@@ -1126,30 +1126,30 @@ export function Prep() {
 
   // Show project list
   return (
-    <div className="h-screen flex flex-col bg-gray-900 text-white">
-      <header className="bg-gray-800 border-b border-gray-700 p-4">
+    <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-700 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={handleBackClick}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
               title={parentProjectId ? "Back to Project" : "Back to Projects"}
             >
               ← Back
             </button>
             <h1 className="text-2xl font-bold">ShowStack:Prep</h1>
-            <span className="text-sm text-gray-400">Equipment Orders & Specifications</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Equipment Orders & Specifications</span>
           </div>
           <div className="flex gap-2">
             <button
               onClick={handleNewProject}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-medium transition"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-gray-900 dark:text-white font-medium transition"
             >
               + New Shop Order
             </button>
             <button
               onClick={handleHomeClick}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
               title="Home (Projects)"
             >
               🏠
@@ -1164,12 +1164,12 @@ export function Prep() {
             <div className="text-center py-12">
               <div className="text-6xl mb-4">📋</div>
               <h2 className="text-2xl font-bold mb-2">No Shop Orders Yet</h2>
-              <p className="text-gray-400 mb-6">
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
                 Create your first equipment order to get started
               </p>
               <button
                 onClick={handleNewProject}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded text-white font-medium transition"
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded text-gray-900 dark:text-white font-medium transition"
               >
                 Create First Shop Order
               </button>

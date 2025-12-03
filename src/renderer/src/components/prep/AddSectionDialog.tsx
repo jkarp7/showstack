@@ -54,7 +54,7 @@ export function AddSectionDialog({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4 text-white">Add Section</h2>
+        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Add Section</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -66,7 +66,7 @@ export function AddSectionDialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Moving Lights, LED Fixtures, Audio Consoles"
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
               autoFocus
             />
           </div>
@@ -76,7 +76,7 @@ export function AddSectionDialog({
             <select
               value={discipline}
               onChange={(e) => setDiscipline(e.target.value as Discipline)}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
             >
               {projectDisciplines.map((d) => (
                 <option key={d} value={d}>
@@ -104,14 +104,14 @@ export function AddSectionDialog({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white transition disabled:opacity-50"
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-gray-900 dark:text-white transition disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!name.trim() || isSubmitting}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-gray-900 dark:text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Adding...' : 'Add Section'}
             </button>

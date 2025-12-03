@@ -328,8 +328,8 @@ export function EquipmentItemTable({
 
   if (sortedItems.length === 0 && !isAddingRow) {
     return (
-      <div className="bg-gray-750 rounded p-4 text-center">
-        <p className="text-gray-400 text-sm mb-3">No equipment items in this section</p>
+      <div className="bg-gray-100 dark:bg-gray-750 rounded p-4 text-center">
+        <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">No equipment items in this section</p>
         <button
           onClick={handleStartAddingRow}
           className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm transition"
@@ -341,35 +341,35 @@ export function EquipmentItemTable({
   }
 
   return (
-    <div className="bg-gray-750 rounded overflow-hidden">
+    <div className="bg-gray-100 dark:bg-gray-750 rounded overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-gray-800 border-b border-gray-700">
+          <thead className="bg-gray-200 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700">
             <tr>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase">
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">
                 Description
               </th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-400 uppercase w-20">
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase w-20">
                 Active
               </th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-400 uppercase w-20">
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase w-20">
                 Spare
               </th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-400 uppercase w-20">
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase w-20">
                 Total
               </th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-400 uppercase w-20">
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase w-20">
                 Venue
               </th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-400 uppercase w-20">
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase w-20">
                 Rental
               </th>
-              <th className="px-3 py-2 text-right text-xs font-medium text-gray-400 uppercase w-32">
+              <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 dark:text-gray-400 uppercase w-32">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-700">
+          <tbody className="divide-y divide-gray-300 dark:divide-gray-700">
             {/* Existing Items */}
             {sortedItems.map((item, index) => (
               <tr
@@ -380,11 +380,11 @@ export function EquipmentItemTable({
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, index)}
                 onDragEnd={handleDragEnd}
-                className={`hover:bg-gray-800 transition group cursor-move ${
+                className={`hover:bg-gray-200 dark:hover:bg-gray-800 transition group cursor-move ${
                   dragOverIndex === index ? 'border-t-2 border-blue-500' : ''
                 } ${draggedItem?.id === item.id ? 'opacity-50' : ''}`}
               >
-                <td className="px-3 py-2 text-white">
+                <td className="px-3 py-2 text-gray-900 dark:text-white">
                   <div>
                     <div>{item.description}</div>
                     {/* Inline editable notes */}
@@ -396,13 +396,13 @@ export function EquipmentItemTable({
                         onBlur={handleNotesBlur}
                         onKeyDown={handleNotesKeyDown}
                         placeholder="Add notes..."
-                        className="w-full mt-1 px-2 py-1 bg-gray-600 border border-blue-500 rounded text-xs text-white placeholder-gray-400 focus:outline-none"
+                        className="w-full mt-1 px-2 py-1 bg-white dark:bg-gray-600 border border-blue-500 rounded text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none"
                         autoFocus
                       />
                     ) : (
                       <div
                         onClick={() => handleNotesClick(item.id, item.notes || '')}
-                        className="mt-1 text-xs text-gray-400 italic cursor-pointer hover:text-gray-300 hover:bg-gray-700 rounded px-1 py-0.5 transition"
+                        className="mt-1 text-xs text-gray-600 dark:text-gray-400 italic cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded px-1 py-0.5 transition"
                       >
                         {item.notes || '+ Add notes...'}
                       </div>
@@ -412,7 +412,7 @@ export function EquipmentItemTable({
 
                 {/* Active Qty - Editable */}
                 <td
-                  className="px-3 py-2 text-center cursor-pointer hover:bg-gray-700"
+                  className="px-3 py-2 text-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
                   onClick={() => handleQtyClick(item.id, 'active_qty', item.active_qty)}
                 >
                   {editingQty?.itemId === item.id && editingQty.field === 'active_qty' ? (
@@ -422,18 +422,18 @@ export function EquipmentItemTable({
                       onChange={(e) => handleQtyChange(e.target.value)}
                       onBlur={handleQtyBlur}
                       onKeyDown={handleQtyKeyDown}
-                      className="w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-center text-white focus:outline-none"
+                      className="w-full px-2 py-1 bg-white dark:bg-gray-600 border border-blue-500 rounded text-center text-gray-900 dark:text-white focus:outline-none"
                       autoFocus
                       min="0"
                     />
                   ) : (
-                    <span className="text-white">{item.active_qty}</span>
+                    <span className="text-gray-900 dark:text-white">{item.active_qty}</span>
                   )}
                 </td>
 
                 {/* Spare Qty - Editable */}
                 <td
-                  className="px-3 py-2 text-center cursor-pointer hover:bg-gray-700"
+                  className="px-3 py-2 text-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
                   onClick={() => handleQtyClick(item.id, 'spare_qty', item.spare_qty)}
                 >
                   {editingQty?.itemId === item.id && editingQty.field === 'spare_qty' ? (
@@ -443,23 +443,23 @@ export function EquipmentItemTable({
                       onChange={(e) => handleQtyChange(e.target.value)}
                       onBlur={handleQtyBlur}
                       onKeyDown={handleQtyKeyDown}
-                      className="w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-center text-white focus:outline-none"
+                      className="w-full px-2 py-1 bg-white dark:bg-gray-600 border border-blue-500 rounded text-center text-gray-900 dark:text-white focus:outline-none"
                       autoFocus
                       min="0"
                     />
                   ) : (
-                    <span className="text-white">{item.spare_qty}</span>
+                    <span className="text-gray-900 dark:text-white">{item.spare_qty}</span>
                   )}
                 </td>
 
                 {/* Total (calculated) */}
                 <td className="px-3 py-2 text-center">
-                  <span className="text-gray-400 font-medium">{item.total_qty}</span>
+                  <span className="text-gray-600 dark:text-gray-400 font-medium">{item.total_qty}</span>
                 </td>
 
                 {/* Venue Qty - Editable */}
                 <td
-                  className="px-3 py-2 text-center cursor-pointer hover:bg-gray-700"
+                  className="px-3 py-2 text-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
                   onClick={() => handleQtyClick(item.id, 'venue_qty', item.venue_qty)}
                 >
                   {editingQty?.itemId === item.id && editingQty.field === 'venue_qty' ? (
@@ -469,18 +469,18 @@ export function EquipmentItemTable({
                       onChange={(e) => handleQtyChange(e.target.value)}
                       onBlur={handleQtyBlur}
                       onKeyDown={handleQtyKeyDown}
-                      className="w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-center text-white focus:outline-none"
+                      className="w-full px-2 py-1 bg-white dark:bg-gray-600 border border-blue-500 rounded text-center text-gray-900 dark:text-white focus:outline-none"
                       autoFocus
                       min="0"
                     />
                   ) : (
-                    <span className="text-purple-400">{item.venue_qty}</span>
+                    <span className="text-purple-600 dark:text-purple-400">{item.venue_qty}</span>
                   )}
                 </td>
 
                 {/* Rental (calculated) */}
                 <td className="px-3 py-2 text-center">
-                  <span className="text-blue-400 font-medium">{calculateRentalQty(item)}</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">{calculateRentalQty(item)}</span>
                 </td>
 
                 {/* Actions */}
@@ -488,7 +488,7 @@ export function EquipmentItemTable({
                   <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition">
                     <button
                       onClick={() => onEditItem(item)}
-                      className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs text-white transition"
+                      className="px-2 py-1 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 rounded text-xs text-white transition"
                       title="Edit details (weight, power, notes)"
                     >
                       Edit
@@ -496,7 +496,7 @@ export function EquipmentItemTable({
                     <button
                       onClick={() => handleDelete(item.id)}
                       disabled={deletingId === item.id}
-                      className="px-2 py-1 bg-red-600/20 hover:bg-red-600/30 rounded text-xs text-red-400 transition disabled:opacity-50"
+                      className="px-2 py-1 bg-red-100 dark:bg-red-600/20 hover:bg-red-200 dark:hover:bg-red-600/30 rounded text-xs text-red-600 dark:text-red-400 transition disabled:opacity-50"
                     >
                       {deletingId === item.id ? '...' : 'Delete'}
                     </button>
@@ -507,7 +507,7 @@ export function EquipmentItemTable({
 
             {/* New Row Entry - at bottom */}
             {isAddingRow && (
-              <tr className="bg-blue-900/20 border-2 border-blue-500">
+              <tr className="bg-blue-100 dark:bg-blue-900/20 border-2 border-blue-500">
                 <td className="px-3 py-2">
                   <input
                     ref={descriptionInputRef}
@@ -516,7 +516,7 @@ export function EquipmentItemTable({
                     onChange={(e) => setNewRow({ ...newRow, description: e.target.value })}
                     onKeyDown={handleNewRowKeyDown}
                     placeholder="Enter equipment description..."
-                    className="w-full px-2 py-1 bg-gray-700 border border-blue-500 rounded text-white placeholder-gray-400 focus:outline-none"
+                    className="w-full px-2 py-1 bg-white dark:bg-gray-700 border border-blue-500 rounded text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none"
                     autoFocus
                   />
                 </td>
@@ -529,7 +529,7 @@ export function EquipmentItemTable({
                     }
                     onKeyDown={handleNewRowKeyDown}
                     min="0"
-                    className="w-full px-2 py-1 bg-gray-700 border border-blue-500 rounded text-center text-white focus:outline-none"
+                    className="w-full px-2 py-1 bg-white dark:bg-gray-700 border border-blue-500 rounded text-center text-gray-900 dark:text-white focus:outline-none"
                   />
                 </td>
                 <td className="px-3 py-2">
@@ -541,11 +541,11 @@ export function EquipmentItemTable({
                     }
                     onKeyDown={handleNewRowKeyDown}
                     min="0"
-                    className="w-full px-2 py-1 bg-gray-700 border border-blue-500 rounded text-center text-white focus:outline-none"
+                    className="w-full px-2 py-1 bg-white dark:bg-gray-700 border border-blue-500 rounded text-center text-gray-900 dark:text-white focus:outline-none"
                   />
                 </td>
                 <td className="px-3 py-2 text-center">
-                  <span className="text-gray-400 font-medium">{calculateNewRowTotals().total}</span>
+                  <span className="text-gray-600 dark:text-gray-400 font-medium">{calculateNewRowTotals().total}</span>
                 </td>
                 <td className="px-3 py-2">
                   <input
@@ -556,11 +556,11 @@ export function EquipmentItemTable({
                     }
                     onKeyDown={handleNewRowKeyDown}
                     min="0"
-                    className="w-full px-2 py-1 bg-gray-700 border border-purple-500 rounded text-center text-white focus:outline-none"
+                    className="w-full px-2 py-1 bg-white dark:bg-gray-700 border border-purple-500 rounded text-center text-gray-900 dark:text-white focus:outline-none"
                   />
                 </td>
                 <td className="px-3 py-2 text-center">
-                  <span className="text-blue-400 font-medium">
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">
                     {calculateNewRowTotals().rental}
                   </span>
                 </td>
@@ -576,7 +576,7 @@ export function EquipmentItemTable({
                     <button
                       onClick={handleCancelNewRow}
                       disabled={isSubmittingNewRow}
-                      className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs text-white transition disabled:opacity-50"
+                      className="px-2 py-1 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 rounded text-xs text-white transition disabled:opacity-50"
                     >
                       Cancel
                     </button>
@@ -588,7 +588,7 @@ export function EquipmentItemTable({
         </table>
       </div>
 
-      <div className="px-3 py-2 border-t border-gray-700 flex justify-between items-center">
+      <div className="px-3 py-2 border-t border-gray-300 dark:border-gray-700 flex justify-between items-center">
         <div className="flex gap-2">
           {!isAddingRow && (
             <>
@@ -610,12 +610,12 @@ export function EquipmentItemTable({
             </>
           )}
           {isAddingRow && (
-            <div className="text-xs text-blue-400">
+            <div className="text-xs text-blue-600 dark:text-blue-400">
               Press Enter to save, SHIFT+Enter to save & add another, Escape to cancel
             </div>
           )}
         </div>
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-gray-600 dark:text-gray-500">
           {sortedItems.length} item{sortedItems.length !== 1 ? 's' : ''}
         </div>
       </div>

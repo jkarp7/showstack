@@ -328,7 +328,7 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
               onDragStart={() => handleDragStart(section.type, false)}
               className="p-3 bg-gray-700 border border-gray-600 rounded cursor-move hover:bg-gray-600 hover:border-gray-500 transition-colors"
             >
-              <div className="font-medium text-sm text-gray-200">{section.label}</div>
+              <div className="font-medium text-sm text-gray-800 dark:text-gray-200">{section.label}</div>
               <div className="text-xs text-gray-400 mt-1">{section.description}</div>
             </div>
           ))}
@@ -339,7 +339,7 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
       <div className="flex-1 bg-gray-800 border border-gray-700 rounded-lg p-6 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 300px)' }}>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-white">{template.name}</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{template.name}</h3>
             <p className="text-sm text-gray-400">
               {template.sections.filter(s => s.enabled).length} sections enabled
               {template.isDefault && <span className="ml-2 text-blue-400">• System Default</span>}
@@ -356,7 +356,7 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
                   alert('Failed to create default layouts.');
                 }
               }}
-              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition text-sm"
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-gray-900 dark:text-white rounded transition text-sm"
             >
               Create Default Page Layouts
             </button>
@@ -365,13 +365,13 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
                 const defaultTemplate = createDefaultTemplate(currentProject.id);
                 onTemplateChange(defaultTemplate);
               }}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition"
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-900 dark:text-white rounded transition"
             >
               Reset to Default
             </button>
             <button
               onClick={() => setShowSaveDialog(true)}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-gray-900 dark:text-white rounded transition"
             >
               Save as Template
             </button>
@@ -391,7 +391,7 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
                   pageSettings: { ...template.pageSettings, pageSize: e.target.value as any },
                   updated_at: Date.now()
                 })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
               >
                 <option value="letter">Letter</option>
                 <option value="legal">Legal</option>
@@ -408,7 +408,7 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
                   pageSettings: { ...template.pageSettings, orientation: e.target.value as any },
                   updated_at: Date.now()
                 })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
               >
                 <option value="portrait">Portrait</option>
                 <option value="landscape">Landscape</option>
@@ -469,7 +469,7 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
                         {index + 1}
                       </div>
                       <div>
-                        <div className="font-medium text-gray-200">
+                        <div className="font-medium text-gray-800 dark:text-gray-200">
                           {getSectionLabel(section.type)}
                         </div>
                         {section.type === 'page-break' && (
@@ -535,7 +535,7 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
       {showSaveDialog && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-700">
-            <h3 className="text-xl font-bold mb-4 text-white">Save Template</h3>
+            <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Save Template</h3>
             <div className="mb-4">
               <label className="block text-sm text-gray-400 mb-2">Template Name</label>
               <input
@@ -543,21 +543,21 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
                 value={templateName}
                 onChange={(e) => setTemplateName(e.target.value)}
                 placeholder="Enter template name..."
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
                 autoFocus
               />
             </div>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowSaveDialog(false)}
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white transition"
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-gray-900 dark:text-white transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveTemplate}
                 disabled={!templateName.trim()}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-gray-900 dark:text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Save
               </button>

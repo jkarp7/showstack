@@ -99,3 +99,48 @@ export function getDefaultSettings(): AppSettings {
 export function resetSettings(): void {
   saveSettings(getDefaultSettings());
 }
+
+/**
+ * Get a specific setting value
+ */
+export function getSetting(key: string): string | null {
+  const db = getAppDatabase();
+
+  const result = db.exec(`
+    SELECT value FROM app_settings_kv WHERE key = ?
+  `, [key]);
+
+  if (!result[0] || result[0].values.length === 0) {
+    return null;
+  }
+
+  return result[0].values[0][0] as string;
+}
+
+/**
+ * Set a specific setting value
+ */
+export function setSetting(key: string, value: string): void {
+  const db = getAppDatabase();
+  const now = Date.now();
+
+  // Check if setting exists
+  const existing = db.exec(`SELECT key FROM app_settings_kv WHERE key = ?`, [key]);
+
+  if (existing[0] && existing[0].values.length > 0) {
+    // Update existing
+    db.run(`
+      UPDATE app_settings_kv
+      SET value = ?, updated_at = ?
+      WHERE key = ?
+    `, [value, now, key]);
+  } else {
+    // Insert new
+    db.run(`
+      INSERT INTO app_settings_kv (key, value, updated_at)
+      VALUES (?, ?, ?)
+    `, [key, value, now]);
+  }
+
+  saveAppDatabase();
+}

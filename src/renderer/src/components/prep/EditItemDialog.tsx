@@ -62,7 +62,7 @@ export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4 text-white">Edit Equipment Item</h2>
+        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Edit Equipment Item</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Description */}
@@ -75,7 +75,7 @@ export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="e.g., Robe Robin T1 Profile"
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
               autoFocus
             />
           </div>
@@ -89,7 +89,7 @@ export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
                 value={activeQty}
                 onChange={(e) => setActiveQty(parseInt(e.target.value) || 0)}
                 min="0"
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
               />
             </div>
 
@@ -100,7 +100,7 @@ export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
                 value={spareQty}
                 onChange={(e) => setSpareQty(parseInt(e.target.value) || 0)}
                 min="0"
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
               />
             </div>
 
@@ -113,7 +113,7 @@ export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
                 value={venueQty}
                 onChange={(e) => setVenueQty(parseInt(e.target.value) || 0)}
                 min="0"
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-purple-500"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-purple-500"
               />
             </div>
           </div>
@@ -123,7 +123,7 @@ export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <span className="text-gray-400">Total Needed:</span>{' '}
-                <span className="text-white font-medium">{activeQty + spareQty}</span>
+                <span className="text-gray-900 dark:text-white font-medium">{activeQty + spareQty}</span>
               </div>
               <div>
                 <span className="text-gray-400">Rental Qty:</span>{' '}
@@ -162,7 +162,7 @@ export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 placeholder="Optional"
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
               />
             </div>
 
@@ -176,7 +176,7 @@ export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
                 value={power}
                 onChange={(e) => setPower(e.target.value)}
                 placeholder="Optional"
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
               />
             </div>
 
@@ -187,7 +187,7 @@ export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
                 value={sortOrder}
                 onChange={(e) => setSortOrder(parseInt(e.target.value) || 0)}
                 min="0"
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
@@ -200,7 +200,7 @@ export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Optional notes about this equipment..."
               rows={3}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 resize-none"
             />
           </div>
 
@@ -210,14 +210,14 @@ export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white transition disabled:opacity-50"
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-gray-900 dark:text-white transition disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!description.trim() || isSubmitting}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-gray-900 dark:text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Saving...' : 'Save Changes'}
             </button>

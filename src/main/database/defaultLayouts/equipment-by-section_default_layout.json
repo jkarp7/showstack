@@ -1,0 +1,79 @@
+{
+  "template": {
+    "name": "Equipment List - ShowStack Default",
+    "description": "Equipment sections matching ShowStack Designer format",
+    "page_type": "equipment-by-section",
+    "grid_columns": 12,
+    "grid_rows": 24,
+    "grid_gap": 4,
+    "page_width": 816,
+    "page_height": 1056,
+    "is_default": true
+  },
+  "elements": [
+    {
+      "element_type": "text",
+      "config": {
+        "content": "SHOP ORDER - REVISION {revision_number}"
+      },
+      "grid_column": 0,
+      "grid_row": 0,
+      "column_span": 12,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 14,
+        "fontWeight": "bold",
+        "textAlign": "center",
+        "padding": 6
+      }
+    },
+    {
+      "element_type": "dataField",
+      "config": {
+        "fieldType": "production_name",
+        "showLabel": false
+      },
+      "grid_column": 0,
+      "grid_row": 1,
+      "column_span": 12,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 11,
+        "textAlign": "center",
+        "padding": 2
+      }
+    },
+    {
+      "element_type": "shape",
+      "config": {
+        "shapeType": "line",
+        "thickness": 1,
+        "color": "#000000"
+      },
+      "grid_column": 0,
+      "grid_row": 3,
+      "column_span": 12,
+      "row_span": 1,
+      "layer": 0,
+      "style": {}
+    },
+    {
+      "element_type": "equipment_list",
+      "config": {},
+      "grid_column": 0,
+      "grid_row": 4,
+      "column_span": 12,
+      "row_span": 20,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 9,
+        "padding": 0
+      }
+    }
+  ]
+}

@@ -716,15 +716,15 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
   const selectedGraphicData = graphics.find(g => g.id === selectedGraphic);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900 text-white">
+    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 p-4">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {!embedded && (
               <button
                 onClick={() => navigate('/modules')}
-                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+                className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
               >
                 ← Home
               </button>
@@ -735,11 +735,11 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                 {!embedded && (
                   <>
                     <span className="text-gray-500">•</span>
-                    <span className="text-lg text-gray-400">Label Designer</span>
+                    <span className="text-lg text-gray-600 dark:text-gray-400">Label Designer</span>
                   </>
                 )}
               </div>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 {currentDesign ? `Editing: ${currentDesign.name}` : 'Design professional labels'}
               </p>
             </div>
@@ -747,19 +747,19 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowLoadDialog(true)}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
             >
               📂 Load Design
             </button>
             <button
               onClick={() => setShowSaveDialog(true)}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
             >
               💾 Save Design
             </button>
             <button
               onClick={handleExportLabels}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
             >
               📄 Export PDF
             </button>
@@ -776,16 +776,16 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Panel - Tools & Settings */}
-        <div className="w-80 bg-gray-800 border-r border-gray-700 overflow-y-auto p-4">
+        <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto p-4">
           <div className="space-y-6">
             {/* Drawing Tools */}
             <div>
-              <h3 className="text-sm font-semibold mb-3 text-gray-400 uppercase">Drawing Tools</h3>
+              <h3 className="text-sm font-semibold mb-3 text-gray-600 dark:text-gray-400 uppercase">Drawing Tools</h3>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => setSelectedTool('text')}
                   className={`p-3 rounded text-sm transition ${
-                    selectedTool === 'text' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
+                    selectedTool === 'text' ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
                   📝 Text
@@ -793,7 +793,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                 <button
                   onClick={() => setSelectedTool('rectangle')}
                   className={`p-3 rounded text-sm transition ${
-                    selectedTool === 'rectangle' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
+                    selectedTool === 'rectangle' ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
                   ▭ Rectangle
@@ -801,7 +801,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                 <button
                   onClick={() => setSelectedTool('circle')}
                   className={`p-3 rounded text-sm transition ${
-                    selectedTool === 'circle' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
+                    selectedTool === 'circle' ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
                   ● Circle
@@ -809,7 +809,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                 <button
                   onClick={() => setSelectedTool('line')}
                   className={`p-3 rounded text-sm transition ${
-                    selectedTool === 'line' ? 'bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'
+                    selectedTool === 'line' ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
                   ─ Line
@@ -819,9 +819,9 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
 
             {/* Selected Graphic Properties */}
             {selectedGraphicData && (
-              <div className="bg-gray-700 rounded-lg p-4">
+              <div className="bg-gray-200 dark:bg-gray-700 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-gray-400 uppercase">
+                  <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase">
                     {selectedGraphicData.type} Properties
                   </h3>
                   <button
@@ -839,7 +839,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                       placeholder="Text"
                       value={selectedGraphicData.text || ''}
                       onChange={(e) => updateSelectedGraphic({ text: e.target.value })}
-                      className="w-full px-2 py-1 bg-gray-600 border border-gray-500 rounded text-sm"
+                      className="w-full px-2 py-1 bg-gray-300 dark:bg-gray-600 border border-gray-500 rounded text-sm"
                     />
                     <div className="flex gap-2">
                       <input
@@ -848,7 +848,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                         max="48"
                         value={selectedGraphicData.fontSize || 12}
                         onChange={(e) => updateSelectedGraphic({ fontSize: Number(e.target.value) })}
-                        className="w-20 px-2 py-1 bg-gray-600 border border-gray-500 rounded text-sm"
+                        className="w-20 px-2 py-1 bg-gray-300 dark:bg-gray-600 border border-gray-500 rounded text-sm"
                       />
                       <label className="flex items-center gap-1">
                         <input
@@ -870,14 +870,14 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                         placeholder="Width"
                         value={selectedGraphicData.width || 50}
                         onChange={(e) => updateSelectedGraphic({ width: Number(e.target.value) })}
-                        className="flex-1 px-2 py-1 bg-gray-600 border border-gray-500 rounded text-sm"
+                        className="flex-1 px-2 py-1 bg-gray-300 dark:bg-gray-600 border border-gray-500 rounded text-sm"
                       />
                       <input
                         type="number"
                         placeholder="Height"
                         value={selectedGraphicData.height || 30}
                         onChange={(e) => updateSelectedGraphic({ height: Number(e.target.value) })}
-                        className="flex-1 px-2 py-1 bg-gray-600 border border-gray-500 rounded text-sm"
+                        className="flex-1 px-2 py-1 bg-gray-300 dark:bg-gray-600 border border-gray-500 rounded text-sm"
                       />
                     </div>
                     <label className="flex items-center gap-1">
@@ -898,7 +898,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                       placeholder="Radius"
                       value={selectedGraphicData.radius || 20}
                       onChange={(e) => updateSelectedGraphic({ radius: Number(e.target.value) })}
-                      className="w-full px-2 py-1 bg-gray-600 border border-gray-500 rounded text-sm"
+                      className="w-full px-2 py-1 bg-gray-300 dark:bg-gray-600 border border-gray-500 rounded text-sm"
                     />
                     <label className="flex items-center gap-1">
                       <input
@@ -920,7 +920,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                       max="10"
                       value={selectedGraphicData.strokeWidth || 1}
                       onChange={(e) => updateSelectedGraphic({ strokeWidth: Number(e.target.value) })}
-                      className="w-20 px-2 py-1 bg-gray-600 border border-gray-500 rounded text-sm"
+                      className="w-20 px-2 py-1 bg-gray-300 dark:bg-gray-600 border border-gray-500 rounded text-sm"
                     />
                   </div>
                 )}
@@ -929,13 +929,13 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
 
             {/* Quick Templates */}
             <div>
-              <h3 className="text-sm font-semibold mb-3 text-gray-400 uppercase">Quick Templates</h3>
+              <h3 className="text-sm font-semibold mb-3 text-gray-600 dark:text-gray-400 uppercase">Quick Templates</h3>
               <div className="space-y-2">
                 {LABEL_TEMPLATES.filter(t => t.type !== 'custom').map(template => (
                   <button
                     key={template.type}
                     onClick={() => handleUseTemplate(template.type)}
-                    className="w-full px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition flex items-center gap-2"
+                    className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition flex items-center gap-2"
                   >
                     <span>{template.icon}</span>
                     <span>{template.name}</span>
@@ -946,13 +946,13 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
 
             {/* Quick Actions */}
             <div>
-              <h3 className="text-sm font-semibold mb-2 text-gray-400 uppercase">Quick Actions</h3>
+              <h3 className="text-sm font-semibold mb-2 text-gray-600 dark:text-gray-400 uppercase">Quick Actions</h3>
               <button
                 onClick={() => {
                   setGraphics([]);
                   setSelectedGraphic(null);
                 }}
-                className="w-full px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+                className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
               >
                 Clear All
               </button>
@@ -964,7 +964,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
               <select
                 value={printerType}
                 onChange={(e) => setPrinterType(e.target.value as PrinterType)}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
               >
                 {Object.entries(PRINTERS).map(([key, name]) => (
                   <option key={key} value={key}>{name}</option>
@@ -979,14 +979,14 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                 <select
                   value={averyTemplate}
                   onChange={(e) => setAveryTemplate(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 >
                   {AVERY_TEMPLATES.map(template => (
                     <option key={template.id} value={template.id}>{template.name}</option>
                   ))}
                 </select>
                 {currentAveryTemplate && (
-                  <div className="mt-2 text-xs text-gray-400">
+                  <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
                     {currentAveryTemplate.labelsPerSheet} labels per sheet
                     ({currentAveryTemplate.columns} × {currentAveryTemplate.rows})
                   </div>
@@ -1016,7 +1016,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                       max="100"
                       value={batchCount}
                       onChange={(e) => setBatchCount(Number(e.target.value))}
-                      className="w-20 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                      className="w-20 px-2 py-1 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                     />
                   </div>
                 )}
@@ -1026,17 +1026,17 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
         </div>
 
         {/* Right Panel - Canvas Preview */}
-        <div className="flex-1 overflow-y-auto p-8 bg-gray-900">
+        <div className="flex-1 overflow-y-auto p-8 bg-gray-100 dark:bg-gray-900">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Label Preview</h2>
-              <div className="text-sm text-gray-400">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
                 {Math.round(labelWidth / 96 * 10) / 10}" × {Math.round(labelHeight / 96 * 10) / 10}"
                 ({labelWidth}px × {labelHeight}px)
               </div>
             </div>
 
-            <div className="bg-gray-800 rounded-lg p-8 mb-6 flex justify-center">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 mb-6 flex justify-center">
               <canvas
                 ref={canvasRef}
                 width={labelWidth}
@@ -1052,7 +1052,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
               />
             </div>
 
-            <div className="text-sm text-gray-400 space-y-1">
+            <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
               <p>• Click to add {selectedTool} elements</p>
               <p>• Click and drag for rectangles and lines</p>
               <p>• Click an element to select and edit properties</p>
@@ -1064,7 +1064,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
       {/* Save Design Dialog */}
       {showSaveDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-md p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-md p-6">
             <h2 className="text-xl font-bold mb-4">Save Label Design</h2>
             <div className="space-y-4">
               <div>
@@ -1074,7 +1074,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                   value={saveDesignName}
                   onChange={(e) => setSaveDesignName(e.target.value)}
                   placeholder="My Cable Labels"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
                   autoFocus
                 />
               </div>
@@ -1085,13 +1085,13 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                   onChange={(e) => setSaveDesignDescription(e.target.value)}
                   placeholder="Description of this label design..."
                   rows={3}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
                 />
               </div>
               <div className="flex gap-2 justify-end">
                 <button
                   onClick={() => setShowSaveDialog(false)}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition"
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded transition"
                 >
                   Cancel
                 </button>
@@ -1111,14 +1111,14 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
       {/* Load Design Dialog */}
       {showLoadDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-2xl p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-2xl p-6">
             <h2 className="text-xl font-bold mb-4">Load Label Design</h2>
             {customDesigns.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
+              <div className="text-center py-12 text-gray-600 dark:text-gray-400">
                 <p className="mb-4">No saved designs yet</p>
                 <button
                   onClick={() => setShowLoadDialog(false)}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition"
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded transition"
                 >
                   Close
                 </button>
@@ -1129,14 +1129,14 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                   {customDesigns.map(design => (
                     <div
                       key={design.id}
-                      className="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer group"
+                      className="bg-gray-200 dark:bg-gray-700 rounded-lg p-4 hover:bg-gray-300 dark:bg-gray-600 transition cursor-pointer group"
                       onClick={() => handleLoadDesign(design)}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <h3 className="font-semibold mb-1">{design.name}</h3>
                           {design.description && (
-                            <p className="text-sm text-gray-400 mb-2">{design.description}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{design.description}</p>
                           )}
                           <div className="text-xs text-gray-500">
                             {PRINTERS[design.printerType]}
@@ -1161,7 +1161,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                 <div className="flex justify-end">
                   <button
                     onClick={() => setShowLoadDialog(false)}
-                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition"
+                    className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded transition"
                   >
                     Cancel
                   </button>
@@ -1173,7 +1173,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
       )}
 
       {/* Footer */}
-      <footer className="bg-gray-800 border-t border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-400">
+      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
         <div>ShowStack:Production - Label Designer</div>
         <div>{customDesigns.length} saved design{customDesigns.length !== 1 ? 's' : ''}</div>
       </footer>

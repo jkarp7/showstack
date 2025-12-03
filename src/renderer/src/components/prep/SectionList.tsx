@@ -156,9 +156,9 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
     : null;
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg">
-      <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">Equipment Sections</h3>
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Equipment Sections</h3>
         <button
           onClick={onAddSection}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm font-medium transition"
@@ -170,8 +170,8 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
       {sortedSections.length === 0 ? (
         <div className="p-8 text-center">
           <div className="text-4xl mb-3">📦</div>
-          <p className="text-gray-400 mb-4">No sections yet</p>
-          <p className="text-gray-500 text-sm mb-4">
+          <p className="text-gray-600 dark:text-gray-400 mb-4">No sections yet</p>
+          <p className="text-gray-600 dark:text-gray-500 text-sm mb-4">
             Organize your equipment into sections like "Moving Lights", "LED Fixtures", etc.
           </p>
           <button
@@ -182,7 +182,7 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
           </button>
         </div>
       ) : (
-        <div className="divide-y divide-gray-700">
+        <div className="divide-y divide-gray-200 dark:divide-gray-700">
           {sortedSections.map((section, index) => {
             const sectionItems = getItemsForSection(section.id);
             const isExpanded = expandedSections.has(section.id);
@@ -201,12 +201,12 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
                 }`}
               >
                 {/* Section Header */}
-                <div className="p-4 hover:bg-gray-750 transition flex items-center justify-between cursor-move">
+                <div className="p-4 hover:bg-gray-100 dark:hover:bg-gray-750 transition flex items-center justify-between cursor-move">
                   <div className="flex items-center gap-4 flex-1">
                     {/* Expand/Collapse Button */}
                     <button
                       onClick={() => toggleSection(section.id)}
-                      className="text-gray-400 hover:text-white transition"
+                      className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition"
                     >
                       {isExpanded ? '▼' : '▶'}
                     </button>
@@ -214,20 +214,20 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
                         <h4
-                          className="font-medium text-white cursor-pointer hover:text-blue-400 transition"
+                          className="font-medium text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition"
                           onClick={() => toggleSection(section.id)}
                         >
                           {section.name}
                         </h4>
-                        <span className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded capitalize">
+                        <span className="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded capitalize">
                           {section.discipline}
                         </span>
                         {Boolean(section.page_break) && (
-                          <span className="px-2 py-1 bg-purple-600/20 text-purple-400 text-xs rounded">
+                          <span className="px-2 py-1 bg-purple-100 dark:bg-purple-600/20 text-purple-600 dark:text-purple-400 text-xs rounded">
                             Page Break
                           </span>
                         )}
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-600 dark:text-gray-500">
                           {sectionItems.length} item{sectionItems.length !== 1 ? 's' : ''}
                         </span>
                       </div>
@@ -243,14 +243,14 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
                     </button>
                     <button
                       onClick={() => onEditSection(section)}
-                      className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm text-white transition"
+                      className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 rounded text-sm text-white transition"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(section.id)}
                       disabled={deletingId === section.id}
-                      className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 rounded text-sm text-red-400 transition disabled:opacity-50"
+                      className="px-3 py-1.5 bg-red-100 dark:bg-red-600/20 hover:bg-red-200 dark:hover:bg-red-600/30 rounded text-sm text-red-600 dark:text-red-400 transition disabled:opacity-50"
                     >
                       {deletingId === section.id ? '...' : 'Delete'}
                     </button>
@@ -259,7 +259,7 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
 
                 {/* Section Notes - Inline Editable */}
                 {isExpanded && (
-                  <div className="px-4 py-2 bg-gray-800/50">
+                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800/50">
                     {editingSectionNotes?.sectionId === section.id ? (
                       <textarea
                         value={editingSectionNotes.value}
@@ -268,13 +268,13 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
                         onKeyDown={handleSectionNotesKeyDown}
                         placeholder="Add section notes... (SHIFT+ENTER for new line, ENTER to save)"
                         rows={3}
-                        className="w-full px-2 py-1 bg-gray-600 border border-blue-500 rounded text-sm text-white placeholder-gray-400 focus:outline-none resize-none"
+                        className="w-full px-2 py-1 bg-white dark:bg-gray-600 border border-blue-500 rounded text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none resize-none"
                         autoFocus
                       />
                     ) : (
                       <div
                         onClick={() => handleSectionNotesClick(section.id, section.notes || '')}
-                        className="text-sm text-gray-300 italic cursor-pointer hover:text-gray-200 hover:bg-gray-700 rounded px-1 py-0.5 transition min-h-[24px] whitespace-pre-wrap"
+                        className="text-sm text-gray-600 dark:text-gray-300 italic cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded px-1 py-0.5 transition min-h-[24px] whitespace-pre-wrap"
                       >
                         {section.notes || '+ Add section notes...'}
                       </div>

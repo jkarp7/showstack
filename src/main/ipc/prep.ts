@@ -55,7 +55,7 @@ import {
   PageLayoutTemplate,
   LayoutElement,
 } from '../database/queries/layoutTemplates';
-import { seedDefaultPageLayouts } from '../database/seedDefaultLayouts';
+import { seedDefaultPageLayoutsFromJSON } from '../database/seedDefaultLayoutsFromJSON';
 import { prepFileService } from '../services/prepFileService';
 
 export function registerPrepHandlers(): void {
@@ -472,7 +472,7 @@ export function registerPrepHandlers(): void {
   // Seed default page layouts
   ipcMain.handle('prep:layoutTemplates:seedDefaults', async () => {
     try {
-      seedDefaultPageLayouts();
+      seedDefaultPageLayoutsFromJSON();
       return { success: true, message: 'Default page layouts created successfully' };
     } catch (error) {
       console.error('Error seeding default layouts:', error);

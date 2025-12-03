@@ -29,7 +29,7 @@ export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
       {/* Delete button (appears on hover) */}
       <button
         onClick={handleDelete}
-        className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center bg-red-600 hover:bg-red-700 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity z-10"
+        className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center bg-red-600 hover:bg-red-700 text-gray-900 dark:text-white rounded opacity-0 group-hover:opacity-100 transition-opacity z-10"
         title="Delete project"
       >
         ×
@@ -48,7 +48,7 @@ export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
       </div>
 
       {/* Project Info */}
-      <h3 className="text-lg font-bold mb-2 text-white truncate">{project.name}</h3>
+      <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white truncate">{project.name}</h3>
 
       {project.description && (
         <p className="text-sm text-gray-400 mb-3 line-clamp-2">{project.description}</p>

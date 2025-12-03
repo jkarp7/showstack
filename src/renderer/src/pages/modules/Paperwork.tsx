@@ -473,19 +473,19 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
     if (!projectData) return null;
 
     return (
-      <div className="mb-6 p-4 bg-gray-800 rounded-lg border-b-2 border-gray-600 print:bg-white print:border-black">
+      <div className="mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg border-b-2 border-gray-600 print:bg-white print:border-black">
         {metadata.showProjectName && (
           <h1 className="text-2xl font-bold mb-2">{projectName}</h1>
         )}
         <div className="grid grid-cols-2 gap-4 text-sm">
           {metadata.showVenue && projectData.venue && (
-            <div><span className="text-gray-400">Venue:</span> {projectData.venue}</div>
+            <div><span className="text-gray-600 dark:text-gray-400">Venue:</span> {projectData.venue}</div>
           )}
           {metadata.showDesigners && projectData.lighting_designer && (
-            <div><span className="text-gray-400">Lighting Designer:</span> {projectData.lighting_designer}</div>
+            <div><span className="text-gray-600 dark:text-gray-400">Lighting Designer:</span> {projectData.lighting_designer}</div>
           )}
           {metadata.showGeneratedDate && (
-            <div><span className="text-gray-400">Generated:</span> {new Date().toLocaleDateString()}</div>
+            <div><span className="text-gray-600 dark:text-gray-400">Generated:</span> {new Date().toLocaleDateString()}</div>
           )}
         </div>
       </div>
@@ -498,7 +498,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
         return (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-700 sticky top-0">
+              <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                 <tr>
                   <th className="px-3 py-2 text-left">Pos</th>
                   <th className="px-3 py-2 text-left">Unit</th>
@@ -515,7 +515,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
               </thead>
               <tbody>
                 {channelHookupData.map((row, i) => (
-                  <tr key={i} className="border-b border-gray-700 hover:bg-gray-800">
+                  <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-white dark:bg-gray-800">
                     <td className="px-3 py-2">{row.position}</td>
                     <td className="px-3 py-2">{row.unit}</td>
                     <td className="px-3 py-2">{row.type}</td>
@@ -538,10 +538,10 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
         return (
           <div className="space-y-6">
             {dimmerScheduleData.map((group, i) => (
-              <div key={i} className="bg-gray-800 rounded-lg p-4">
+              <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4">
                 <h3 className="text-lg font-semibold mb-3 text-blue-400">Dimmer: {group.dimmer}</h3>
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-700">
+                  <thead className="bg-gray-200 dark:bg-gray-700">
                     <tr>
                       <th className="px-3 py-2 text-left">Position</th>
                       <th className="px-3 py-2 text-left">Type</th>
@@ -552,7 +552,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                   </thead>
                   <tbody>
                     {group.fixtures.map((fixture, j) => (
-                      <tr key={j} className="border-b border-gray-700">
+                      <tr key={j} className="border-b border-gray-200 dark:border-gray-700">
                         <td className="px-3 py-2">{fixture.position}</td>
                         <td className="px-3 py-2">{fixture.type}</td>
                         <td className="px-3 py-2">{fixture.channel}</td>
@@ -571,10 +571,10 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
         return (
           <div className="space-y-6">
             {circuitListData.map((group, i) => (
-              <div key={i} className="bg-gray-800 rounded-lg p-4">
+              <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4">
                 <h3 className="text-lg font-semibold mb-3 text-blue-400">Circuit: {group.circuit}</h3>
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-700">
+                  <thead className="bg-gray-200 dark:bg-gray-700">
                     <tr>
                       <th className="px-3 py-2 text-left">Position</th>
                       <th className="px-3 py-2 text-left">Type</th>
@@ -585,7 +585,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                   </thead>
                   <tbody>
                     {group.fixtures.map((fixture, j) => (
-                      <tr key={j} className="border-b border-gray-700">
+                      <tr key={j} className="border-b border-gray-200 dark:border-gray-700">
                         <td className="px-3 py-2">{fixture.position}</td>
                         <td className="px-3 py-2">{fixture.type}</td>
                         <td className="px-3 py-2">{fixture.dimmer}</td>
@@ -604,7 +604,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
         return (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-700 sticky top-0">
+              <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                 <tr>
                   <th className="px-3 py-2 text-left">Universe</th>
                   <th className="px-3 py-2 text-left">Address</th>
@@ -616,7 +616,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
               </thead>
               <tbody>
                 {dmxAddressData.map((row, i) => (
-                  <tr key={i} className="border-b border-gray-700 hover:bg-gray-800">
+                  <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-white dark:bg-gray-800">
                     <td className="px-3 py-2">{row.universe}</td>
                     <td className="px-3 py-2">{row.address}</td>
                     <td className="px-3 py-2">{row.position}</td>
@@ -641,10 +641,10 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
         return (
           <div className="space-y-6">
             {/* Detailed breakdown by size */}
-            <div className="bg-gray-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">Gel Requirements - Detailed Breakdown</h3>
               <table className="w-full text-sm">
-                <thead className="bg-gray-700">
+                <thead className="bg-gray-200 dark:bg-gray-700">
                   <tr>
                     <th className="px-3 py-2 text-left">Color</th>
                     <th className="px-3 py-2 text-left">Gel Size</th>
@@ -654,25 +654,25 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 </thead>
                 <tbody>
                   {colorScheduleData.map((row, i) => (
-                    <tr key={i} className="border-b border-gray-700 hover:bg-gray-750">
+                    <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-750">
                       <td className="px-3 py-2 font-medium">{row.color}</td>
-                      <td className="px-3 py-2 text-gray-400">{row.size}</td>
+                      <td className="px-3 py-2 text-gray-600 dark:text-gray-400">{row.size}</td>
                       <td className="px-3 py-2">{row.cuts}</td>
                       <td className="px-3 py-2">{row.sheets}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <div className="mt-4 text-xs text-gray-400">
+              <div className="mt-4 text-xs text-gray-600 dark:text-gray-400">
                 * Calculations based on actual color frame sizes for fixture types
               </div>
             </div>
 
             {/* Summary by color */}
-            <div className="bg-gray-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">Total Sheets by Color</h3>
               <table className="w-full text-sm">
-                <thead className="bg-gray-700">
+                <thead className="bg-gray-200 dark:bg-gray-700">
                   <tr>
                     <th className="px-3 py-2 text-left">Color</th>
                     <th className="px-3 py-2 text-left">Total Sheets</th>
@@ -682,12 +682,12 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                   {Object.entries(colorTotals)
                     .sort(([a], [b]) => a.localeCompare(b))
                     .map(([color, sheets], i) => (
-                      <tr key={i} className="border-b border-gray-700 hover:bg-gray-750">
+                      <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-750">
                         <td className="px-3 py-2 font-medium">{color}</td>
                         <td className="px-3 py-2 font-bold text-yellow-400">{sheets}</td>
                       </tr>
                     ))}
-                  <tr className="bg-gray-700 font-bold">
+                  <tr className="bg-gray-200 dark:bg-gray-700 font-bold">
                     <td className="px-3 py-2">TOTAL</td>
                     <td className="px-3 py-2 text-yellow-400">
                       {Object.values(colorTotals).reduce((sum, n) => sum + n, 0)} sheets
@@ -701,10 +701,10 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
       case 'gobo-schedule':
         return (
-          <div className="bg-gray-800 rounded-lg p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
             <h3 className="text-lg font-semibold mb-4">Gobo Requirements</h3>
             <table className="w-full text-sm">
-              <thead className="bg-gray-700">
+              <thead className="bg-gray-200 dark:bg-gray-700">
                 <tr>
                   <th className="px-3 py-2 text-left">Gobo/Template</th>
                   <th className="px-3 py-2 text-left">Quantity Needed</th>
@@ -713,7 +713,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
               </thead>
               <tbody>
                 {goboScheduleData.map((row, i) => (
-                  <tr key={i} className="border-b border-gray-700 hover:bg-gray-750">
+                  <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-750">
                     <td className="px-3 py-2 font-medium">{row.gobo}</td>
                     <td className="px-3 py-2">{row.count}</td>
                     <td className="px-3 py-2">{row.size}</td>
@@ -721,7 +721,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 ))}
               </tbody>
             </table>
-            <div className="mt-4 text-xs text-gray-400">
+            <div className="mt-4 text-xs text-gray-600 dark:text-gray-400">
               * Size based on fixture type
             </div>
           </div>
@@ -731,12 +731,12 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
         return (
           <div className="space-y-6">
             {/* Voltage Selection */}
-            <div className="bg-gray-800 rounded-lg p-4 flex items-center gap-4">
-              <label className="text-sm font-medium text-gray-400">System Voltage:</label>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 flex items-center gap-4">
+              <label className="text-sm font-medium text-gray-600 dark:text-gray-400">System Voltage:</label>
               <select
                 value={voltage}
                 onChange={(e) => setVoltage(Number(e.target.value))}
-                className="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                className="px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
               >
                 <option value={120}>120V (US Standard)</option>
                 <option value={208}>208V (US 3-Phase)</option>
@@ -747,24 +747,24 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-gray-800 rounded-lg p-6">
-                <div className="text-gray-400 text-sm mb-2">Total Fixtures</div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
+                <div className="text-gray-600 dark:text-gray-400 text-sm mb-2">Total Fixtures</div>
                 <div className="text-3xl font-bold text-blue-400">{powerSummaryData.totalFixtures}</div>
               </div>
-              <div className="bg-gray-800 rounded-lg p-6">
-                <div className="text-gray-400 text-sm mb-2">Total Wattage</div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
+                <div className="text-gray-600 dark:text-gray-400 text-sm mb-2">Total Wattage</div>
                 <div className="text-3xl font-bold text-yellow-400">{powerSummaryData.totalWattage}W</div>
               </div>
-              <div className="bg-gray-800 rounded-lg p-6">
-                <div className="text-gray-400 text-sm mb-2">Total Amperage ({voltage}V)</div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
+                <div className="text-gray-600 dark:text-gray-400 text-sm mb-2">Total Amperage ({voltage}V)</div>
                 <div className="text-3xl font-bold text-red-400">{powerSummaryData.totalAmperage}A</div>
               </div>
             </div>
 
-            <div className="bg-gray-800 rounded-lg p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">Power Breakdown by Wattage</h3>
               <table className="w-full text-sm">
-                <thead className="bg-gray-700">
+                <thead className="bg-gray-200 dark:bg-gray-700">
                   <tr>
                     <th className="px-3 py-2 text-left">Wattage</th>
                     <th className="px-3 py-2 text-left">Count</th>
@@ -773,7 +773,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 </thead>
                 <tbody>
                   {powerSummaryData.breakdown.map((row, i) => (
-                    <tr key={i} className="border-b border-gray-700">
+                    <tr key={i} className="border-b border-gray-200 dark:border-gray-700">
                       <td className="px-3 py-2">{row.wattage}W</td>
                       <td className="px-3 py-2">{row.count}</td>
                       <td className="px-3 py-2">{row.totalWattage}W</td>
@@ -791,15 +791,15 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900 text-white">
+    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 p-4">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {!embedded && (
               <button
                 onClick={() => navigate('/modules')}
-                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+                className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
               >
                 ← Home
               </button>
@@ -810,11 +810,11 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 {!embedded && (
                   <>
                     <span className="text-gray-500">•</span>
-                    <span className="text-lg text-gray-400">Paperwork Generator</span>
+                    <span className="text-lg text-gray-600 dark:text-gray-400">Paperwork Generator</span>
                   </>
                 )}
               </div>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 {currentReport ? `${currentReport.name} • ` : ''}{fixtures.length} fixtures
               </p>
             </div>
@@ -822,31 +822,31 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowLoadDialog(true)}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
             >
               📂 Load Report
             </button>
             <button
               onClick={() => setShowSaveDialog(true)}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
             >
               💾 Save Report
             </button>
             <button
               onClick={() => setShowPageSetup(true)}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
             >
               📄 Page Setup
             </button>
             <button
               onClick={() => setShowMetadataOptions(true)}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
             >
               ⚙️ Options
             </button>
             <button
               onClick={handlePrint}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
             >
               🖨️ Print
             </button>
@@ -861,7 +861,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       </header>
 
       {/* Report Selection */}
-      <div className="bg-gray-800 border-b border-gray-700 px-4 py-3">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
         <div className="flex gap-2 overflow-x-auto">
           {REPORT_TEMPLATES.map(template => (
             <button
@@ -869,8 +869,8 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
               onClick={() => setSelectedReport(template.id)}
               className={`px-4 py-2 rounded whitespace-nowrap transition flex items-center gap-2 ${
                 selectedReport === template.id
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  ? 'bg-blue-600 text-gray-900 dark:text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:bg-gray-600'
               }`}
             >
               <span>{template.icon}</span>
@@ -881,8 +881,8 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       </div>
 
       {/* Report Description */}
-      <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
-        <p className="text-sm text-gray-400">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           {REPORT_TEMPLATES.find(t => t.id === selectedReport)?.description}
         </p>
         <div className="text-xs text-gray-500">
@@ -901,7 +901,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       {/* Page Setup Dialog */}
       {showPageSetup && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-2xl p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-2xl p-6">
             <h2 className="text-xl font-bold mb-4">Page Setup</h2>
             <div className="grid grid-cols-2 gap-6 mb-6">
               <div>
@@ -909,7 +909,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 <select
                   value={pageSetup.size}
                   onChange={(e) => setPageSetup({ ...pageSetup, size: e.target.value as PageSize })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
                 >
                   {Object.entries(PAGE_SIZES).map(([key, info]) => (
                     <option key={key} value={key}>{info.name}</option>
@@ -921,7 +921,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 <select
                   value={pageSetup.orientation}
                   onChange={(e) => setPageSetup({ ...pageSetup, orientation: e.target.value as Orientation })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
                 >
                   <option value="portrait">Portrait</option>
                   <option value="landscape">Landscape</option>
@@ -932,7 +932,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 <select
                   value={pageSetup.colorMode}
                   onChange={(e) => setPageSetup({ ...pageSetup, colorMode: e.target.value as ColorMode })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
                 >
                   <option value="color">Color</option>
                   <option value="bw">Black & White</option>
@@ -943,47 +943,47 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
               <h3 className="text-sm font-medium mb-3">Margins (inches)</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Top</label>
+                  <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Top</label>
                   <input
                     type="number"
                     step="0.25"
                     min="0"
                     value={pageSetup.marginTop}
                     onChange={(e) => setPageSetup({ ...pageSetup, marginTop: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                    className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Bottom</label>
+                  <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Bottom</label>
                   <input
                     type="number"
                     step="0.25"
                     min="0"
                     value={pageSetup.marginBottom}
                     onChange={(e) => setPageSetup({ ...pageSetup, marginBottom: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                    className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Left</label>
+                  <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Left</label>
                   <input
                     type="number"
                     step="0.25"
                     min="0"
                     value={pageSetup.marginLeft}
                     onChange={(e) => setPageSetup({ ...pageSetup, marginLeft: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                    className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Right</label>
+                  <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Right</label>
                   <input
                     type="number"
                     step="0.25"
                     min="0"
                     value={pageSetup.marginRight}
                     onChange={(e) => setPageSetup({ ...pageSetup, marginRight: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                    className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
                   />
                 </div>
               </div>
@@ -991,7 +991,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             <div className="flex gap-2 justify-end mt-6">
               <button
                 onClick={() => setShowPageSetup(false)}
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition"
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded transition"
               >
                 Close
               </button>
@@ -1003,7 +1003,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       {/* Metadata Options Dialog */}
       {showMetadataOptions && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-md p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-md p-6">
             <h2 className="text-xl font-bold mb-4">Report Options</h2>
             <div className="space-y-3 mb-6">
               <label className="flex items-center gap-2">
@@ -1073,7 +1073,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowMetadataOptions(false)}
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition"
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded transition"
               >
                 Close
               </button>
@@ -1085,7 +1085,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       {/* Save Report Dialog */}
       {showSaveDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-md p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-md p-6">
             <h2 className="text-xl font-bold mb-4">Save Custom Report</h2>
             <div className="space-y-4">
               <div>
@@ -1095,7 +1095,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                   value={saveReportName}
                   onChange={(e) => setSaveReportName(e.target.value)}
                   placeholder="My Channel Hookup"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
                   autoFocus
                 />
               </div>
@@ -1106,16 +1106,16 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                   onChange={(e) => setSaveReportDescription(e.target.value)}
                   placeholder="Description of this report configuration..."
                   rows={3}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                  className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
                 />
               </div>
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-gray-600 dark:text-gray-400">
                 Saves: Report type, page setup, and metadata options
               </div>
               <div className="flex gap-2 justify-end">
                 <button
                   onClick={() => setShowSaveDialog(false)}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition"
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded transition"
                 >
                   Cancel
                 </button>
@@ -1135,14 +1135,14 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       {/* Load Report Dialog */}
       {showLoadDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-2xl p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-2xl p-6">
             <h2 className="text-xl font-bold mb-4">Load Custom Report</h2>
             {customReports.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
+              <div className="text-center py-12 text-gray-600 dark:text-gray-400">
                 <p className="mb-4">No saved reports yet</p>
                 <button
                   onClick={() => setShowLoadDialog(false)}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition"
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded transition"
                 >
                   Close
                 </button>
@@ -1153,14 +1153,14 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                   {customReports.map(report => (
                     <div
                       key={report.id}
-                      className="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition cursor-pointer group"
+                      className="bg-gray-200 dark:bg-gray-700 rounded-lg p-4 hover:bg-gray-300 dark:bg-gray-600 transition cursor-pointer group"
                       onClick={() => handleLoadReport(report)}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <h3 className="font-semibold mb-1">{report.name}</h3>
                           {report.description && (
-                            <p className="text-sm text-gray-400 mb-2">{report.description}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{report.description}</p>
                           )}
                           <div className="text-xs text-gray-500">
                             {REPORT_TEMPLATES.find(t => t.id === report.reportType)?.name}
@@ -1186,7 +1186,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 <div className="flex justify-end">
                   <button
                     onClick={() => setShowLoadDialog(false)}
-                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition"
+                    className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded transition"
                   >
                     Cancel
                   </button>
@@ -1198,7 +1198,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       )}
 
       {/* Footer */}
-      <footer className="bg-gray-800 border-t border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-400">
+      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
         <div>ShowStack:Production - Paperwork Generator</div>
         <div>{customReports.length} saved report{customReports.length !== 1 ? 's' : ''} • v0.1.0-alpha</div>
       </footer>

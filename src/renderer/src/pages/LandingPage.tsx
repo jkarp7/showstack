@@ -57,25 +57,28 @@ export function LandingPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900 text-white">
+    <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 p-6">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">ShowStack</h1>
-            <p className="text-gray-400 text-sm mt-1">Production Management Suite</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Production Management Suite</p>
           </div>
           <div className="flex items-center gap-4">
             <button
-              onClick={() => setIsAccountDialogOpen(true)}
-              className="px-4 py-2 text-gray-300 hover:text-white transition"
+              onClick={() => navigate('/account')}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition"
             >
               Account
             </button>
-            <button className="px-4 py-2 text-gray-300 hover:text-white transition">
+            <button
+              onClick={() => navigate('/settings')}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition"
+            >
               Settings
             </button>
-            <button className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition">
+            <button className="px-4 py-2 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded transition">
               Sign Out
             </button>
           </div>
@@ -90,7 +93,7 @@ export function LandingPage() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl font-bold mb-2">Projects</h2>
-                <p className="text-gray-400">Your ShowStack projects</p>
+                <p className="text-gray-600 dark:text-gray-400">Your ShowStack projects</p>
               </div>
               <div className="flex gap-3">
                 <button
@@ -101,13 +104,13 @@ export function LandingPage() {
                       // Stay on landing page after opening file
                     });
                   }}
-                  className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition flex items-center gap-2"
+                  className="px-6 py-3 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded-lg font-medium transition flex items-center gap-2"
                 >
                   Open File...
                 </button>
                 <button
                   onClick={() => setIsNewProjectDialogOpen(true)}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition flex items-center gap-2"
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition flex items-center gap-2"
                 >
                   <span className="text-xl">+</span>
                   New Project
@@ -123,7 +126,7 @@ export function LandingPage() {
                   {projects.map((project) => (
                     <div
                       key={project.id}
-                      className="bg-gray-800 rounded-lg border border-gray-700 p-6 hover:border-blue-500 transition cursor-pointer group"
+                      className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:border-blue-500 transition cursor-pointer group"
                       onClick={() => handleOpenProject(project.id)}
                     >
                       <div className="flex items-start justify-between mb-3">
@@ -131,10 +134,10 @@ export function LandingPage() {
                           <img
                             src={project.logo_path}
                             alt={project.name}
-                            className="w-16 h-16 rounded-lg object-cover bg-gray-700"
+                            className="w-16 h-16 rounded-lg object-cover bg-gray-200 dark:bg-gray-700"
                           />
                         ) : (
-                          <div className="w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center text-3xl">
+                          <div className="w-16 h-16 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-3xl">
                             📁
                           </div>
                         )}
@@ -143,7 +146,7 @@ export function LandingPage() {
                             e.stopPropagation();
                             setProjectToDelete(project);
                           }}
-                          className="text-gray-500 hover:text-red-500 transition opacity-0 group-hover:opacity-100"
+                          className="text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-500 transition opacity-0 group-hover:opacity-100"
                           title="Delete project"
                         >
                           ×
@@ -151,9 +154,9 @@ export function LandingPage() {
                       </div>
                       <h3 className="text-lg font-semibold mb-2 truncate">{project.name}</h3>
                       {project.description && (
-                        <p className="text-sm text-gray-400 mb-2 line-clamp-2">{project.description}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">{project.description}</p>
                       )}
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-gray-500">
                         Created: {new Date(project.created_at).toLocaleDateString()}
                       </p>
                     </div>
@@ -161,29 +164,29 @@ export function LandingPage() {
                 </div>
               ) : (
                 /* Table view for more than 3 projects */
-                <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
                   <table className="w-full">
-                    <thead className="bg-gray-750 border-b border-gray-700">
+                    <thead className="bg-gray-50 dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                           Project Name
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                           Description
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                           Date Created
                         </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-700">
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                       {projects.map((project) => (
                         <tr
                           key={project.id}
-                          className="hover:bg-gray-750 cursor-pointer transition"
+                          className="hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer transition"
                           onClick={() => handleOpenProject(project.id)}
                         >
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -192,7 +195,7 @@ export function LandingPage() {
                                 <img
                                   src={project.logo_path}
                                   alt={project.name}
-                                  className="w-10 h-10 rounded-lg object-cover bg-gray-700 mr-3"
+                                  className="w-10 h-10 rounded-lg object-cover bg-gray-200 dark:bg-gray-700 mr-3"
                                 />
                               ) : (
                                 <span className="text-2xl mr-3">📁</span>
@@ -200,10 +203,10 @@ export function LandingPage() {
                               <span className="font-medium">{project.name}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-400 max-w-xs truncate">
+                          <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate">
                             {project.description || '-'}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-400 whitespace-nowrap">
+                          <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
                             {new Date(project.created_at).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 text-right">
@@ -212,7 +215,7 @@ export function LandingPage() {
                                 e.stopPropagation();
                                 setProjectToDelete(project);
                               }}
-                              className="text-gray-500 hover:text-red-500 transition text-sm"
+                              className="text-gray-600 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-500 transition text-sm"
                             >
                               Delete
                             </button>
@@ -224,15 +227,15 @@ export function LandingPage() {
                 </div>
               )
             ) : (
-              <div className="bg-gray-800 rounded-lg border border-gray-700 p-12 text-center">
+              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-12 text-center">
                 <div className="text-6xl mb-4">📂</div>
-                <p className="text-gray-400 text-lg mb-4">No projects yet</p>
-                <p className="text-gray-500 text-sm mb-6">
+                <p className="text-gray-600 dark:text-gray-400 text-lg mb-4">No projects yet</p>
+                <p className="text-gray-500 dark:text-gray-500 text-sm mb-6">
                   Create a new project to get started with ShowStack
                 </p>
                 <button
                   onClick={() => setIsNewProjectDialogOpen(true)}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition inline-flex items-center gap-2"
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition inline-flex items-center gap-2"
                 >
                   <span className="text-xl">+</span>
                   Create New Project
@@ -244,7 +247,7 @@ export function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-800 border-t border-gray-700 px-6 py-4 text-center text-sm text-gray-400">
+      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
         ShowStack v0.1.0-alpha | © 2025 Lytrix
       </footer>
 

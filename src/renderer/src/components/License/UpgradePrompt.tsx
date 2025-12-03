@@ -42,7 +42,7 @@ export function UpgradePrompt({ module, feature }: UpgradePromptProps) {
           // Open upgrade link - TODO: Replace with actual pricing URL
           window.open('https://showstack.app/pricing', '_blank');
         }}
-        className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        className="px-6 py-2 bg-blue-500 text-gray-900 dark:text-white rounded-lg hover:bg-blue-600 transition-colors"
       >
         View Upgrade Options
       </button>

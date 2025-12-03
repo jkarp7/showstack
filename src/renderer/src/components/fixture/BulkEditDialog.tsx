@@ -33,7 +33,7 @@ export function BulkEditDialog({ isOpen, selectedCount, onClose, onSubmit }: Bul
       <div className="bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-700">
-          <h2 className="text-xl font-semibold text-white">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             Bulk Edit {selectedCount} Fixture{selectedCount > 1 ? 's' : ''}
           </h2>
           <p className="text-sm text-gray-400 mt-1">
@@ -55,7 +55,7 @@ export function BulkEditDialog({ isOpen, selectedCount, onClose, onSubmit }: Bul
                   type="text"
                   value={updates.type || ''}
                   onChange={(e) => handleChange('type', e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                   placeholder="Leave blank to skip"
                 />
               </div>
@@ -69,7 +69,7 @@ export function BulkEditDialog({ isOpen, selectedCount, onClose, onSubmit }: Bul
                   type="text"
                   value={updates.purpose || ''}
                   onChange={(e) => handleChange('purpose', e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                   placeholder="Leave blank to skip"
                 />
               </div>
@@ -83,7 +83,7 @@ export function BulkEditDialog({ isOpen, selectedCount, onClose, onSubmit }: Bul
                   type="text"
                   value={updates.color || ''}
                   onChange={(e) => handleChange('color', e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                   placeholder="Leave blank to skip"
                 />
               </div>
@@ -97,7 +97,7 @@ export function BulkEditDialog({ isOpen, selectedCount, onClose, onSubmit }: Bul
                   type="text"
                   value={updates.gobo || ''}
                   onChange={(e) => handleChange('gobo', e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                   placeholder="Leave blank to skip"
                 />
               </div>
@@ -111,7 +111,7 @@ export function BulkEditDialog({ isOpen, selectedCount, onClose, onSubmit }: Bul
                   type="text"
                   value={updates.dimmer || ''}
                   onChange={(e) => handleChange('dimmer', e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                   placeholder="Leave blank to skip"
                 />
               </div>
@@ -125,7 +125,7 @@ export function BulkEditDialog({ isOpen, selectedCount, onClose, onSubmit }: Bul
                   type="text"
                   value={updates.circuit || ''}
                   onChange={(e) => handleChange('circuit', e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                   placeholder="Leave blank to skip"
                 />
               </div>
@@ -139,7 +139,7 @@ export function BulkEditDialog({ isOpen, selectedCount, onClose, onSubmit }: Bul
                   type="text"
                   value={updates.location || ''}
                   onChange={(e) => handleChange('location', e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                   placeholder="Leave blank to skip"
                 />
               </div>
@@ -153,7 +153,7 @@ export function BulkEditDialog({ isOpen, selectedCount, onClose, onSubmit }: Bul
                   type="text"
                   value={updates.system || ''}
                   onChange={(e) => handleChange('system', e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                  className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                   placeholder="Leave blank to skip"
                 />
               </div>
@@ -167,7 +167,7 @@ export function BulkEditDialog({ isOpen, selectedCount, onClose, onSubmit }: Bul
               <textarea
                 value={updates.notes || ''}
                 onChange={(e) => handleChange('notes', e.target.value)}
-                className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                 placeholder="Leave blank to skip"
                 rows={3}
               />
@@ -179,13 +179,13 @@ export function BulkEditDialog({ isOpen, selectedCount, onClose, onSubmit }: Bul
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white transition"
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-gray-900 dark:text-white transition"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white transition"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-gray-900 dark:text-white transition"
             >
               Update {selectedCount} Fixture{selectedCount > 1 ? 's' : ''}
             </button>

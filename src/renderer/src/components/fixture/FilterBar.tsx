@@ -30,19 +30,19 @@ export function FilterBar({
   const hasActiveFilters = searchQuery || locationFilter !== 'all' || typeFilter !== 'all' || statusFilter !== 'all';
 
   return (
-    <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center gap-2">
+    <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center gap-2">
       <input
         type="text"
         placeholder="Search fixtures..."
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm flex-1 text-white focus:outline-none focus:border-blue-500"
+        className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-sm flex-1 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
       />
 
       <select
         value={locationFilter}
         onChange={(e) => onLocationChange(e.target.value)}
-        className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+        className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
       >
         <option value="all">All Locations</option>
         {availableLocations.map((location) => (
@@ -55,7 +55,7 @@ export function FilterBar({
       <select
         value={typeFilter}
         onChange={(e) => onTypeChange(e.target.value)}
-        className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+        className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
       >
         <option value="all">All Types</option>
         {availableTypes.map((type) => (
@@ -68,7 +68,7 @@ export function FilterBar({
       <select
         value={statusFilter}
         onChange={(e) => onStatusChange(e.target.value)}
-        className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+        className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
       >
         <option value="all">All Status</option>
         {availableStatuses.map((status) => (
@@ -81,7 +81,7 @@ export function FilterBar({
       {hasActiveFilters && (
         <button
           onClick={onClearFilters}
-          className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm font-medium transition"
+          className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm font-medium transition"
         >
           Clear Filters
         </button>

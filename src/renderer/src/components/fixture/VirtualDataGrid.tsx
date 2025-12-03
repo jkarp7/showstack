@@ -260,11 +260,11 @@ export function VirtualDataGrid({
   }, [columnOrder, userColumnDefinitions]);
 
   return (
-    <div className="h-full flex flex-col bg-gray-900">
+    <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
       {/* Column Headers */}
       <div
         ref={headerRef}
-        className="flex items-center bg-gray-800 border-b border-gray-700 overflow-x-auto overflow-y-scroll"
+        className="flex items-center bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 overflow-x-auto overflow-y-scroll"
         style={{ height: HEADER_HEIGHT }}
         onScroll={handleHeaderScroll}
       >
@@ -279,7 +279,15 @@ export function VirtualDataGrid({
                 onSelectRows(new Set());
               }
             }}
-            className="w-4 h-4"
+            className="w-4 h-4 appearance-none rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 checked:bg-blue-600 checked:border-blue-600 transition-colors"
+            style={{
+              backgroundImage: (selectedRows.size === fixtures.length && fixtures.length > 0)
+                ? `url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e")`
+                : undefined,
+              backgroundSize: '100% 100%',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
           />
         </div>
         {orderedColumns.filter(col => columnVisibility[col.key]).map(col => {
@@ -291,7 +299,7 @@ export function VirtualDataGrid({
               onDragStart={(e) => handleDragStart(e, col.key)}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, col.key)}
-              className={`px-2 font-semibold text-sm text-gray-300 flex-shrink-0 cursor-move hover:bg-gray-700 transition relative ${
+              className={`px-2 font-semibold text-sm text-gray-700 dark:text-gray-300 flex-shrink-0 cursor-move hover:bg-gray-200 dark:hover:bg-gray-700 transition relative ${
                 draggedColumn === col.key ? 'opacity-50' : ''
               }`}
               style={{ width: `${colWidth}px` }}

@@ -124,21 +124,21 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
     <div className="space-y-6">
       {/* Header with Manage Templates button */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           Add standard language and notes for your shop order
         </p>
         <button
           onClick={onManageTemplates}
-          className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+          className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition"
         >
           Manage Templates
         </button>
       </div>
 
       {/* General Conditions */}
-      <div className="bg-gray-700/50 rounded-lg p-4">
+      <div className="bg-gray-100 dark:bg-gray-700/50 rounded-lg p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-base font-semibold text-white">General Conditions</h3>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white">General Conditions</h3>
           <div className="flex items-center gap-2">
             <select
               value={generalConditionsFormat}
@@ -147,7 +147,7 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
                 setGeneralConditionsFormat(newFormat);
                 handleSave('general_conditions', generalConditions, newFormat, generalConditionsId);
               }}
-              className="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-xs text-white"
+              className="px-2 py-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-xs text-gray-900 dark:text-white"
             >
               <option value="plain">Plain Text</option>
               <option value="bullets">Bullets</option>
@@ -155,7 +155,7 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
             </select>
             <button
               onClick={() => loadTemplate('general_conditions')}
-              className="px-2 py-1 bg-blue-600/20 hover:bg-blue-600/30 rounded text-xs text-blue-400 transition"
+              className="px-2 py-1 bg-blue-100 dark:bg-blue-600/20 hover:bg-blue-200 dark:hover:bg-blue-600/30 rounded text-xs text-blue-600 dark:text-blue-400 transition"
             >
               Load Template
             </button>
@@ -166,14 +166,14 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
           onChange={(e) => setGeneralConditions(e.target.value)}
           onBlur={() => handleSave('general_conditions', generalConditions, generalConditionsFormat, generalConditionsId)}
           placeholder="Add general conditions and terms..."
-          className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
+          className="w-full h-32 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
         />
       </div>
 
       {/* General Notes */}
-      <div className="bg-gray-700/50 rounded-lg p-4">
+      <div className="bg-gray-100 dark:bg-gray-700/50 rounded-lg p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-base font-semibold text-white">General Notes</h3>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white">General Notes</h3>
           <div className="flex items-center gap-2">
             <select
               value={generalNotesFormat}
@@ -182,7 +182,7 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
                 setGeneralNotesFormat(newFormat);
                 handleSave('general_notes', generalNotes, newFormat, generalNotesId);
               }}
-              className="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-xs text-white"
+              className="px-2 py-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-xs text-gray-900 dark:text-white"
             >
               <option value="plain">Plain Text</option>
               <option value="bullets">Bullets</option>
@@ -190,7 +190,7 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
             </select>
             <button
               onClick={() => loadTemplate('general_notes')}
-              className="px-2 py-1 bg-blue-600/20 hover:bg-blue-600/30 rounded text-xs text-blue-400 transition"
+              className="px-2 py-1 bg-blue-100 dark:bg-blue-600/20 hover:bg-blue-200 dark:hover:bg-blue-600/30 rounded text-xs text-blue-600 dark:text-blue-400 transition"
             >
               Load Template
             </button>
@@ -201,14 +201,14 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
           onChange={(e) => setGeneralNotes(e.target.value)}
           onBlur={() => handleSave('general_notes', generalNotes, generalNotesFormat, generalNotesId)}
           placeholder="Add general project notes..."
-          className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
+          className="w-full h-32 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
         />
       </div>
 
       {/* Fixture Notes */}
-      <div className="bg-gray-700/50 rounded-lg p-4">
+      <div className="bg-gray-100 dark:bg-gray-700/50 rounded-lg p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-base font-semibold text-white">Fixture Notes</h3>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white">Fixture Notes</h3>
           <div className="flex items-center gap-2">
             <select
               value={fixtureNotesFormat}
@@ -217,7 +217,7 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
                 setFixtureNotesFormat(newFormat);
                 handleSave('fixture_notes', fixtureNotes, newFormat, fixtureNotesId);
               }}
-              className="px-2 py-1 bg-gray-800 border border-gray-600 rounded text-xs text-white"
+              className="px-2 py-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-xs text-gray-900 dark:text-white"
             >
               <option value="plain">Plain Text</option>
               <option value="bullets">Bullets</option>
@@ -225,7 +225,7 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
             </select>
             <button
               onClick={() => loadTemplate('fixture_notes')}
-              className="px-2 py-1 bg-blue-600/20 hover:bg-blue-600/30 rounded text-xs text-blue-400 transition"
+              className="px-2 py-1 bg-blue-100 dark:bg-blue-600/20 hover:bg-blue-200 dark:hover:bg-blue-600/30 rounded text-xs text-blue-600 dark:text-blue-400 transition"
             >
               Load Template
             </button>
@@ -236,12 +236,12 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
           onChange={(e) => setFixtureNotes(e.target.value)}
           onBlur={() => handleSave('fixture_notes', fixtureNotes, fixtureNotesFormat, fixtureNotesId)}
           placeholder="Add notes about fixtures and equipment..."
-          className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
+          className="w-full h-32 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
         />
       </div>
 
       {isSaving && (
-        <div className="text-center text-sm text-gray-400">
+        <div className="text-center text-sm text-gray-600 dark:text-gray-400">
           Saving...
         </div>
       )}

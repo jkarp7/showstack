@@ -73,7 +73,7 @@ export function RevisionPanel({
       {/* Revisions list */}
       <div className="space-y-3">
         {sortedRevisions.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-600 dark:text-gray-500">
             <p>No revisions yet</p>
             <p className="text-sm mt-1">Generate your first revision to track changes</p>
           </div>
@@ -87,18 +87,18 @@ export function RevisionPanel({
             return (
               <div
                 key={revision.id}
-                className="border border-gray-600 rounded-lg overflow-hidden"
+                className="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden"
               >
-                <div className="px-4 py-3 bg-gray-700 flex items-center justify-between">
+                <div className="px-4 py-3 bg-gray-100 dark:bg-gray-700 flex items-center justify-between">
                   <button
                     onClick={() => setExpandedRevision(isExpanded ? null : revision.id)}
-                    className="flex-1 text-left hover:bg-gray-650 rounded px-2 py-1 -ml-2 transition"
+                    className="flex-1 text-left hover:bg-gray-200 dark:hover:bg-gray-600 rounded px-2 py-1 -ml-2 transition text-gray-900 dark:text-white"
                   >
                     <div>
                       <div className="font-medium">
                         Revision {revision.revision_number}
                       </div>
-                      <div className="text-xs text-gray-400 mt-1">
+                      <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                         {new Date(revision.revision_date).toLocaleString()} •{' '}
                         {changeLog.length} change{changeLog.length !== 1 ? 's' : ''}
                       </div>
@@ -112,35 +112,35 @@ export function RevisionPanel({
                           handleDeleteRevision(revision.id, revision.revision_number);
                         }}
                         disabled={deletingId === revision.id}
-                        className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 rounded text-xs text-red-400 transition disabled:opacity-50"
+                        className="px-3 py-1.5 bg-red-100 dark:bg-red-600/20 hover:bg-red-200 dark:hover:bg-red-600/30 rounded text-xs text-red-600 dark:text-red-400 transition disabled:opacity-50"
                         title="Delete this revision"
                       >
                         {deletingId === revision.id ? 'Deleting...' : 'Delete'}
                       </button>
                     )}
-                    <span className="text-gray-400">
+                    <span className="text-gray-600 dark:text-gray-400">
                       {isExpanded ? '▼' : '▶'}
                     </span>
                   </div>
                 </div>
 
                 {isExpanded && (
-                  <div className="p-4 bg-gray-750">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-750">
                     {revision.notes && (
-                      <div className="mb-3 p-3 bg-gray-700 rounded text-sm">
-                        <div className="text-gray-400 text-xs mb-1">Notes:</div>
+                      <div className="mb-3 p-3 bg-gray-100 dark:bg-gray-700 rounded text-sm text-gray-900 dark:text-white">
+                        <div className="text-gray-600 dark:text-gray-400 text-xs mb-1">Notes:</div>
                         {revision.notes}
                       </div>
                     )}
 
                     <div className="space-y-2">
                       {changeLog.length === 0 ? (
-                        <p className="text-sm text-gray-500">No changes detected</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-500">No changes detected</p>
                       ) : (
                         changeLog.map((change: ItemChange, idx: number) => (
                           <div
                             key={idx}
-                            className="text-sm p-2 bg-gray-700 rounded flex items-start gap-2"
+                            className="text-sm p-2 bg-gray-100 dark:bg-gray-700 rounded flex items-start gap-2 text-gray-900 dark:text-white"
                           >
                             <span className={`font-bold ${getChangeTypeColor(change.change_type)} mt-0.5`}>
                               {getChangeTypeSymbol(change.change_type)}
@@ -148,12 +148,12 @@ export function RevisionPanel({
                             <div className="flex-1">
                               <div className="font-medium">{change.description}</div>
                               {change.section_name && (
-                                <div className="text-xs text-gray-400 mt-1">
+                                <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                                   Section: {change.section_name}
                                 </div>
                               )}
                               {change.change_type === 'modification' && change.old_values && (
-                                <div className="text-xs text-gray-400 mt-1">
+                                <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                                   <div>Changes:</div>
                                   <ul className="ml-4 mt-1 space-y-0.5">
                                     {Object.entries(change.old_values).map(([key, oldVal]) => {
@@ -161,8 +161,8 @@ export function RevisionPanel({
                                       if (oldVal === newVal) return null;
                                       return (
                                         <li key={key}>
-                                          {key}: <span className="text-red-400">{String(oldVal)}</span>{' '}
-                                          → <span className="text-green-400">{String(newVal)}</span>
+                                          {key}: <span className="text-red-600 dark:text-red-400">{String(oldVal)}</span>{' '}
+                                          → <span className="text-green-600 dark:text-green-400">{String(newVal)}</span>
                                         </li>
                                       );
                                     })}

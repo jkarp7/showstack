@@ -43,7 +43,7 @@ export function UnsavedChangesDialog({
 
         <div className="mb-6">
           <p className="text-gray-300 mb-2">
-            Do you want to save changes to <span className="font-medium text-white">"{currentFileName}"</span> before {actionText[action]}?
+            Do you want to save changes to <span className="font-medium text-gray-900 dark:text-white">"{currentFileName}"</span> before {actionText[action]}?
           </p>
           <p className="text-sm text-gray-400 mt-3">
             Your changes will be lost if you don't save them.

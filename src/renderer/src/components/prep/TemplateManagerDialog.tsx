@@ -127,7 +127,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-gray-800 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="p-6 border-b border-gray-700">
-          <h2 className="text-xl font-bold text-white">Template Manager</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Template Manager</h2>
           <p className="text-sm text-gray-400 mt-1">
             Create and manage reusable note templates
           </p>
@@ -160,7 +160,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
               {/* New Template Button */}
               <button
                 onClick={handleCreateNew}
-                className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-medium transition mb-4"
+                className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-gray-900 dark:text-white font-medium transition mb-4"
               >
                 + New Template
               </button>
@@ -186,7 +186,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-white">{template.name}</span>
+                            <span className="font-medium text-gray-900 dark:text-white">{template.name}</span>
                             {template.is_default === 1 && (
                               <span className="px-2 py-0.5 bg-green-600/20 text-green-400 text-xs rounded">
                                 Default
@@ -209,7 +209,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
             <div>
               {(isCreating || editingTemplate) ? (
                 <div className="bg-gray-700/50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-white mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     {editingTemplate ? 'Edit Template' : 'New Template'}
                   </h3>
 
@@ -224,7 +224,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
                         value={formName}
                         onChange={(e) => setFormName(e.target.value)}
                         placeholder="e.g., Standard Lighting Conditions"
-                        className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                        className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
                       />
                     </div>
 
@@ -237,7 +237,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
                         value={formContent}
                         onChange={(e) => setFormContent(e.target.value)}
                         placeholder="Enter template content..."
-                        className="w-full h-64 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
+                        className="w-full h-64 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
                       />
                     </div>
 
@@ -263,7 +263,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
                     <div className="flex gap-2 pt-4">
                       <button
                         onClick={handleSave}
-                        className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-medium transition"
+                        className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-gray-900 dark:text-white font-medium transition"
                       >
                         {editingTemplate ? 'Update' : 'Create'}
                       </button>
@@ -277,7 +277,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
                       )}
                       <button
                         onClick={handleCancel}
-                        className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white transition"
+                        className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-gray-900 dark:text-white transition"
                       >
                         Cancel
                       </button>
@@ -298,7 +298,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
         <div className="p-6 border-t border-gray-700 flex justify-end">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white transition"
+            className="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded text-gray-900 dark:text-white transition"
           >
             Close
           </button>

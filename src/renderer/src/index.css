@@ -17,6 +17,14 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Theme CSS variables (set by ThemeProvider) */
+  --color-accent-primary: #3B82F6;
+  --color-accent-hover: #2563EB;
+  --color-accent-light: #DBEAFE;
+  --color-accent-dark: #1E40AF;
+  --font-scale: 1;
+  --ui-density: 1;
 }
 
 * {
@@ -31,9 +39,51 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  /* Apply font scale */
+  font-size: calc(1rem * var(--font-scale));
 }
 
 #root {
   width: 100%;
   height: 100vh;
 }
+
+/* Apply accent color to buttons with bg-blue-* classes */
+.bg-blue-600 {
+  background-color: var(--color-accent-primary) !important;
+}
+
+.bg-blue-700,
+.hover\:bg-blue-700:hover {
+  background-color: var(--color-accent-hover) !important;
+}
+
+.bg-blue-50 {
+  background-color: var(--color-accent-light) !important;
+}
+
+/* Dark mode override for bg-blue-50 */
+.dark .bg-blue-50 {
+  background-color: #0f172a !important; /* slate-900 */
+}
+
+/* Apply accent color to text with text-blue-* classes */
+.text-blue-600 {
+  color: var(--color-accent-primary) !important;
+}
+
+.text-blue-500 {
+  color: var(--color-accent-primary) !important;
+}
+
+/* Apply accent color to borders */
+.border-blue-500 {
+  border-color: var(--color-accent-primary) !important;
+}
+
+/* Apply UI density to padding/spacing */
+button,
+.btn {
+  padding: calc(0.5rem * var(--ui-density)) calc(1rem * var(--ui-density));
+}
+
