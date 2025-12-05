@@ -38,7 +38,8 @@ export const useFixtureStore = create<FixtureStore>((set, get) => ({
     }
 
     try {
-      const newFixture = await window.api.fixtures.create(fixture);
+      const { currentProjectId } = get();
+      const newFixture = await window.api.fixtures.create(fixture, currentProjectId || undefined);
       set((state) => ({
         fixtures: [...state.fixtures, newFixture],
       }));
@@ -57,9 +58,10 @@ export const useFixtureStore = create<FixtureStore>((set, get) => ({
     }
 
     try {
+      const { currentProjectId } = get();
       const newFixtures = [];
       for (const fixture of fixtures) {
-        const newFixture = await window.api.fixtures.create(fixture);
+        const newFixture = await window.api.fixtures.create(fixture, currentProjectId || undefined);
         newFixtures.push(newFixture);
       }
       set((state) => ({
