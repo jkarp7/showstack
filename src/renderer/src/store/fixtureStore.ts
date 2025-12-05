@@ -9,17 +9,23 @@ const hasAPI = (): boolean => {
 
 export const useFixtureStore = create<FixtureStore>((set, get) => ({
   fixtures: [],
+  currentProjectId: null,
 
-  // Load fixtures from database (call this on app init)
-  loadFixtures: async () => {
+  // Set current project ID
+  setCurrentProjectId: (projectId: string | null) => {
+    set({ currentProjectId: projectId });
+  },
+
+  // Load fixtures from database for a specific project
+  loadFixtures: async (projectId?: string) => {
     if (!hasAPI()) {
       console.warn('API not available, using empty fixtures');
       return;
     }
 
     try {
-      const fixtures = await window.api.fixtures.getAll();
-      set({ fixtures });
+      const fixtures = await window.api.fixtures.getAll(projectId);
+      set({ fixtures, currentProjectId: projectId || null });
     } catch (error) {
       console.error('Failed to load fixtures:', error);
     }

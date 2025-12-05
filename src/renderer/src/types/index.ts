@@ -101,7 +101,9 @@ export interface Fixture {
 
 export interface FixtureStore {
   fixtures: Fixture[];
-  loadFixtures: () => Promise<void>;
+  currentProjectId: string | null;
+  setCurrentProjectId: (projectId: string | null) => void;
+  loadFixtures: (projectId?: string) => Promise<void>;
   addFixture: (fixture: Partial<Fixture>) => Promise<void>;
   addMultipleFixtures: (fixtures: Partial<Fixture>[]) => Promise<void>;
   updateFixture: (id: string, updates: Partial<Fixture>) => Promise<void>;

@@ -21,7 +21,7 @@ interface EquipmentManagerProps {
 export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {}) {
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId?: string; moduleType?: string }>();
-  const { fixtures, loadFixtures, addMultipleFixtures, deleteMultiple, updateFixture } = useFixtureStore();
+  const { fixtures, loadFixtures, addMultipleFixtures, deleteMultiple, updateFixture, setCurrentProjectId } = useFixtureStore();
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [isAddFixtureDialogOpen, setIsAddFixtureDialogOpen] = useState(false);
   const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = useState(false);
@@ -63,7 +63,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
   // Function to reload all data (for file operations)
   const handleDataReload = async () => {
-    await loadFixtures();
+    await loadFixtures(currentProjectId);
 
     if (!window.api) return;
 
@@ -82,7 +82,9 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
   // Load fixtures and preferences from database on mount
   useEffect(() => {
-    loadFixtures();
+    // Set current project ID and load fixtures for this project
+    setCurrentProjectId(currentProjectId);
+    loadFixtures(currentProjectId);
 
     // Load project info and column preferences
     const loadProjectAndPreferences = async () => {
