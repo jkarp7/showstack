@@ -580,9 +580,46 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
     window.print();
   };
 
-  // Gel color database - Complete Rosco and LEE theatrical gels (490 colors)
+  // Gel color database - Complete GAM, LEE, and Rosco theatrical gels (628 colors)
   // Converted from manufacturer RGB values to hex format
   const gelColors: Record<string, string> = {
+    // GAM (G prefix)
+    'G105': '#BCFB93', 'G106': '#A5B7CD', 'G107': '#B4FCF7', 'G108': '#FFABA0',
+    'G110': '#E921A3', 'G120': '#ED3D95', 'G130': '#F15A9A', 'G140': '#B90DA4',
+    'G150': '#C00060', 'G155': '#FBAAD2', 'G160': '#FCA3D1', 'G170': '#FA67B4',
+    'G180': '#F91C5E', 'G190': '#FC8DAE', 'G195': '#FD91B7', 'G220': '#CE044B',
+    'G235': '#F93548', 'G245': '#D00615', 'G250': '#740010', 'G260': '#FC7C99',
+    'G270': '#6F0000', 'G280': '#FF0909', 'G290': '#E61100', 'G305': '#FE96AB',
+    'G315': '#FD473E', 'G320': '#FC5525', 'G323': '#FF2020', 'G325': '#FEAD96',
+    'G330': '#B6776D', 'G335': '#9F0000', 'G340': '#FED0A7', 'G343': '#701000',
+    'G345': '#FF0000', 'G350': '#FC6727', 'G360': '#F0CEB3', 'G363': '#FFDFAF',
+    'G364': '#DF9340', 'G365': '#F0CEB3', 'G370': '#705050', 'G375': '#FC7B36',
+    'G380': '#7C5245', 'G385': '#FDB488', 'G390': '#362729', 'G420': '#FDCA60',
+    'G440': '#FEE8BA', 'G450': '#E69D17', 'G460': '#F8FC52', 'G470': '#EFFF39',
+    'G480': '#F5EB1B', 'G510': '#FCF9BA', 'G520': '#C6FFA7', 'G535': '#60FF89',
+    'G540': '#91FF5C', 'G570': '#1AE20A', 'G650': '#006A00', 'G655': '#000C00',
+    'G660': '#00B304', 'G680': '#26B571', 'G685': '#002C10', 'G690': '#003820',
+    'G710': '#3A7661', 'G720': '#77E3FF', 'G725': '#005870', 'G730': '#00667B',
+    'G740': '#00A7E6', 'G750': '#0082A8', 'G760': '#226F77', 'G770': '#2F98A4',
+    'G780': '#36B0BE', 'G790': '#689DFF', 'G810': '#003EB0', 'G815': '#00346C',
+    'G820': '#93B9FF', 'G830': '#DBC6FF', 'G835': '#00005C', 'G840': '#5E00F9',
+    'G842': '#008AFF', 'G845': '#000058', 'G847': '#000060', 'G848': '#00006C',
+    'G850': '#4000AA', 'G860': '#9859FF', 'G870': '#00D3FF', 'G880': '#5800EC',
+    'G882': '#001C48', 'G885': '#0084A0', 'G888': '#001838', 'G890': '#020988',
+    'G905': '#00006C', 'G910': '#100064', 'G915': '#0C005C', 'G920': '#F1DBFF',
+    'G925': '#00000C', 'G930': '#000010', 'G940': '#071ABE', 'G945': '#45026C',
+    'G948': '#0C0020', 'G950': '#410262', 'G960': '#8A04D2', 'G970': '#AF22FB',
+    'G980': '#E0AAFD', 'G990': '#69049F', 'G995': '#24001C', 'G1510': '#FFFFFF',
+    'G1514': '#C7B8BD', 'G1515': '#A0A090', 'G1516': '#747474', 'G1517': '#646464',
+    'G1518': '#101010', 'G1520': '#000078', 'G1523': '#000060', 'G1526': '#001888',
+    'G1529': '#1414DC', 'G1532': '#70A0E0', 'G1535': '#6868D9', 'G1540': '#FF0000',
+    'G1543': '#E91800', 'G1546': '#D72000', 'G1549': '#5C2000', 'G1552': '#B85804',
+    'G1555': '#FC842C', 'G1556': '#3D1E1E', 'G1557': '#1E0808', 'G1558': '#100808',
+    'G1560': '#E1E15C', 'G1565': '#FF2100', 'G1570': '#D02F00', 'G1575': '#CA6800',
+    'G1580': '#681030', 'G1581': '#680F30', 'G1582': '#FF40EC', 'G1583': '#FF617F',
+    'G1584': '#FF81B8', 'G1585': '#3A5008', 'G1587': '#8EAA00', 'G1588': '#82A000',
+    'G1589': '#82A000', 'G1590': '#600000',
+
     // LEE Filters (L prefix)
     'L2': '#FF5BFC', 'L3': '#EDE2FF', 'L4': '#FFBB92', 'L7': '#FFFFB2',
     'L8': '#FF722C', 'L9': '#FFDB82', 'L10': '#F8FF22', 'L13': '#FFDC68',
@@ -944,14 +981,33 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                   </tr>
                 </thead>
                 <tbody>
-                  {colorScheduleData.map((row, i) => (
-                    <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-750">
-                      <td className="px-3 py-2 font-medium">{row.color}</td>
-                      <td className="px-3 py-2 text-gray-600 dark:text-gray-400">{row.size}</td>
-                      <td className="px-3 py-2">{row.cuts}</td>
-                      <td className="px-3 py-2">{row.sheets}</td>
-                    </tr>
-                  ))}
+                  {colorScheduleData.map((row, i) => {
+                    // Parse gel color code
+                    let gelCode = row.color.trim().toUpperCase();
+                    if (/^\d+$/.test(gelCode)) gelCode = 'R' + gelCode;
+                    const gelColor = gelColors[gelCode];
+
+                    return (
+                      <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-750">
+                        <td className="px-3 py-2 font-medium">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-4 h-4 rounded border border-gray-400 flex-shrink-0"
+                              style={{
+                                backgroundColor: gelColor || '#ddd',
+                                borderColor: '#999'
+                              }}
+                              title={gelColor ? `${row.color} (${gelColor})` : row.color}
+                            />
+                            <span>{row.color}</span>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 text-gray-600 dark:text-gray-400">{row.size}</td>
+                        <td className="px-3 py-2">{row.cuts}</td>
+                        <td className="px-3 py-2">{row.sheets}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
               <div className="mt-4 text-xs text-gray-600 dark:text-gray-400">
@@ -972,12 +1028,31 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 <tbody>
                   {Object.entries(colorTotals)
                     .sort(([a], [b]) => a.localeCompare(b))
-                    .map(([color, sheets], i) => (
-                      <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-750">
-                        <td className="px-3 py-2 font-medium">{color}</td>
-                        <td className="px-3 py-2 font-bold text-yellow-400">{sheets}</td>
-                      </tr>
-                    ))}
+                    .map(([color, sheets], i) => {
+                      // Parse gel color code
+                      let gelCode = color.trim().toUpperCase();
+                      if (/^\d+$/.test(gelCode)) gelCode = 'R' + gelCode;
+                      const gelColor = gelColors[gelCode];
+
+                      return (
+                        <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-750">
+                          <td className="px-3 py-2 font-medium">
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="w-4 h-4 rounded border border-gray-400 flex-shrink-0"
+                                style={{
+                                  backgroundColor: gelColor || '#ddd',
+                                  borderColor: '#999'
+                                }}
+                                title={gelColor ? `${color} (${gelColor})` : color}
+                              />
+                              <span>{color}</span>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2 font-bold text-yellow-400">{sheets}</td>
+                        </tr>
+                      );
+                    })}
                   <tr className="bg-gray-200 dark:bg-gray-700 font-bold">
                     <td className="px-3 py-2">TOTAL</td>
                     <td className="px-3 py-2 text-yellow-400">
