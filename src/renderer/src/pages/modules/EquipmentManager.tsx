@@ -252,6 +252,54 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     }
   };
 
+  // Handle export to CSV
+  const handleExportCSV = () => {
+    // Get visible columns
+    const visibleColumns = columnOrder
+      .filter(key => columnVisibility[key])
+      .map(key => {
+        const config = DEFAULT_COLUMN_ORDER.find(c => c === key);
+        return { key, label: userColumnDefinitions[key] || key };
+      });
+
+    // Build CSV header
+    const headers = visibleColumns.map(col => col.label).join(',');
+
+    // Build CSV rows
+    const rows = processedFixtures.map(fixture => {
+      return visibleColumns.map(col => {
+        let value = fixture[col.key as keyof Fixture];
+
+        // Handle special cases
+        if (value === undefined || value === null) return '';
+        if (Array.isArray(value)) return `"${value.join(', ')}"`;
+        if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+        if (typeof value === 'string' && value.includes(',')) return `"${value}"`;
+
+        return value;
+      }).join(',');
+    });
+
+    // Combine into CSV string
+    const csv = [headers, ...rows].join('\n');
+
+    // Create download link
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${projectName}_fixtures_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Handle print
+  const handlePrint = () => {
+    window.print();
+  };
+
   // Compute unique values for filter dropdowns and auto-fill suggestions
   const availableLocations = useMemo(() => {
     const locations = new Set<string>();
@@ -486,12 +534,30 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
               <p className="text-sm text-gray-600 dark:text-gray-400">Fixture Schedule</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <span className="text-sm text-gray-600 dark:text-gray-400">
               {processedFixtures.length} / {fixtures.length} fixtures
             </span>
             <span className="text-sm text-gray-600 dark:text-gray-400">•</span>
             <span className="text-sm text-gray-600 dark:text-gray-400">{selectedRows.size} selected</span>
+
+            <div className="h-6 w-px bg-gray-300 dark:bg-gray-700 mx-1" />
+
+            <button
+              onClick={handlePrint}
+              className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition flex items-center gap-2"
+              title="Print fixture schedule"
+            >
+              🖨️ Print
+            </button>
+
+            <button
+              onClick={handleExportCSV}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition flex items-center gap-2"
+              title="Export to CSV"
+            >
+              📄 Export CSV
+            </button>
           </div>
         </div>
 
