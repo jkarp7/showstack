@@ -1,0 +1,561 @@
+// Script to convert RGB gel colors to hex format
+
+const gelData = `Manufacturer,Number,Name,RED,GREEN,BLUE
+Rosco,-,- (no gel),255,255,255
+Rosco,3202,Full CTB,106,129,255
+Rosco,3203,3/4 CTB,131,156,255
+Rosco,3204,1/2 CTB,163,183,255
+Rosco,3206,1/3 CTB,181,196,255
+Rosco,3208,1/4 CTB,205,215,255
+Rosco,3216,1/8 CTB,235,240,255
+Rosco,3220,Double CTB,44,53,255
+Rosco,3407,Full CTO,255,173,73
+Rosco,3411,3/4 CTO,255,184,91
+Rosco,3408,1/2 CTO,255,213,133
+Rosco,3409,1/4 CTO,255,235,191
+Rosco,3410,1/8 CTO,255,245,216
+Rosco,3420,Double CTO,255,122,33
+Rosco,3441,Full CTS,255,187,77
+Rosco,3442,1/2 CTS,255,223,136
+Rosco,3443,1/4 CTS,255,243,193
+Rosco,3444,1/8 CTS,255,248,218
+Rosco,3304,Full Plusgreen,208,255,149
+Rosco,3315,1/2 Plusgreen,228,255,195
+Rosco,3316,1/4 Plusgreen,244,255,220
+Rosco,3317,1/8 Plusgreen,251,255,228
+Rosco,3308,Full Minusgreen,255,187,244
+Rosco,3309,3/4 Minusgreen,255,202,238
+Rosco,3313,1/2 Minusgreen,255,213,246
+Rosco,3314,1/4 Minusgreen,255,233,248
+Rosco,3318,1/8 Minusgreen,255,242,239
+Rosco,3310,Fluorofilter,255,136,64
+Rosco,3150,Industrial Vapor,255,252,99
+Rosco,3152,Urban Vapor,255,144,27
+Rosco,3107,Tough Y1,255,255,190
+Rosco,3134,Tough MT 54,255,237,171
+Rosco,3106,Tough MTY,255,169,64
+Rosco,3102,Tough MT2,255,194,80
+Rosco,4215,15 Blue,182,187,255
+Rosco,4230,30 Blue,131,139,255
+Rosco,4260,60 Blue,80,78,255
+Rosco,4290,90 Blue,44,33,255
+Rosco,4307,7 Cyan,232,253,255
+Rosco,4315,15 Cyan,213,249,255
+Rosco,4330,30 Cyan,170,231,255
+Rosco,4360,60 Cyan,117,216,255
+Rosco,4390,90 Cyan,78,195,255
+Rosco,4415,15 Green,216,255,185
+Rosco,4430,30 Green,179,255,135
+Rosco,4460,60 Green,134,255,86
+Rosco,4490,90 Green,98,255,59
+Rosco,4515,15 Yellow,251,255,179
+Rosco,4530,30 Yellow,247,255,133
+Rosco,4560,60 Yellow,246,255,76
+Rosco,4590,90 Yellow,251,255,49
+Rosco,4615,15 Red,255,213,194
+Rosco,4630,30 Red,255,176,141
+Rosco,4660,60 Red,255,127,77
+Rosco,4690,90 Red,255,87,37
+Rosco,4715,15 Magenta,251,206,255
+Rosco,4730,30 Magenta,246,160,255
+Rosco,4760,60 Magenta,234,94,255
+Rosco,4790,90 Magenta,235,73,255
+Rosco,4815,15 Pink,255,208,223
+Rosco,4830,30 Pink,255,166,190
+Rosco,4860,60 Pink,255,124,147
+Rosco,4890,90 Pink,255,86,96
+Rosco,4915,15 Lavender,208,187,255
+Rosco,4930,30 Lavender,184,147,255
+Rosco,4960,60 Lavender,138,83,255
+Rosco,4990,90 Lavender,99,46,255
+Rosco,2001,VS Red,255,35,7
+Rosco,2002,VS Orange,255,122,33
+Rosco,2003,VS Yellow,255,204,20
+Rosco,2004,VS Green,37,255,85
+Rosco,2005,VS Cyan,44,165,255
+Rosco,2006,VS Azure,20,31,255
+Rosco,2007,VS Blue,44,53,255
+Rosco,2008,VS Indigo,38,18,255
+Rosco,2009,VS Violet,116,31,255
+Rosco,2010,VS Magenta,235,73,255
+Rosco,1,Light Bastard Amber,255,171,121
+Rosco,2,Bastard Amber,255,218,165
+Rosco,302,Pale Bastard Amber,255,240,214
+Rosco,3,Dark Bastard Amber,255,188,115
+Rosco,303,Warm Peach,255,157,65
+Rosco,4,Medium Bastard Amber,255,192,134
+Rosco,304,Pale Apricot,255,205,155
+Rosco,5,Rose Tint,255,216,195
+Rosco,305,Rose Gold,255,206,168
+Rosco,6,No Color Straw,254,255,205
+Rosco,7,Pale Yellow,255,255,192
+Rosco,8,Pale Gold,255,238,173
+Rosco,9,Pale Amber Gold,255,220,122
+Rosco,10,Medium Yellow,243,255,46
+Rosco,310,Daffodil,250,255,89
+Rosco,11,Light Straw,255,237,67
+Rosco,12,Straw,254,255,44
+Rosco,312,Canary,255,244,25
+Rosco,13,Straw Tint,255,227,107
+Rosco,313,Light Relief Yellow,255,232,52
+Rosco,14,Medium Straw,255,216,39
+Rosco,15,Deep Straw,255,197,14
+Rosco,16,Light Amber,255,194,78
+Rosco,316,Gallo Gold,255,184,90
+Rosco,17,Light Flame,255,165,78
+Rosco,317,Apricot,255,161,68
+Rosco,18,Flame,255,172,69
+Rosco,318,Mayan Sun,255,132,65
+Rosco,19,Fire,255,61,0
+Rosco,20,Medium Amber,255,166,19
+Rosco,21,Golden Amber,255,129,9
+Rosco,321,Soft Golden Amber,255,150,51
+Rosco,22,Deep Amber,255,84,1
+Rosco,23,Orange,255,100,11
+Rosco,325,Henna Sky,255,74,13
+Rosco,24,Scarlet,255,68,21
+Rosco,324,Gypsy Red,255,65,27
+Rosco,25,Orange Red,255,52,4
+Rosco,26,Light Red,255,35,7
+Rosco,27,Medium Red,255,19,0
+Rosco,30,Light Salmon Pink,255,147,91
+Rosco,31,Salmon Pink,255,142,122
+Rosco,331,Shell Pink,255,176,149
+Rosco,32,Medium Salmon Pink,255,100,65
+Rosco,332,Cherry Rose,255,88,40
+Rosco,33,No Color Pink,255,200,226
+Rosco,333,Blush Pink,255,213,246
+Rosco,34,Flesh Pink,255,147,159
+Rosco,35,Light Pink,255,193,207
+Rosco,36,Medium Pink,255,147,167
+Rosco,336,Billington Pink,255,147,209
+Rosco,37,Pale Rose Pink,255,187,245
+Rosco,337,true Pink,255,172,217
+Rosco,38,Light Rose,255,185,213
+Rosco,39,Skelton Exotic Sangria,255,33,120
+Rosco,339,Broadway Pink,255,46,116
+Rosco,40,Light Salmon,255,113,44
+Rosco,41,Salmon,255,71,28
+Rosco,42,Deep Salmon,255,43,37
+Rosco,342,Rose Pink,255,40,43
+Rosco,43,Deep Pink,255,90,143
+Rosco,343,Neon Pink,255,79,125
+Rosco,44,Middle Rose,255,91,211
+Rosco,344,Follies Pink,255,80,231
+Rosco,45,Rose,255,52,68
+Rosco,46,Magenta,255,33,39
+Rosco,346,Tropical Magenta,255,41,205
+Rosco,47,Light Rose Purple,149,79,255
+Rosco,347,Belladonna Rose,158,6,255
+Rosco,48,Rose Purple,221,79,255
+Rosco,348,Purple Jazz,178,44,255
+Rosco,49,Medium Purple,248,24,255
+Rosco,349,Fisher Fuchsia,255,35,251
+Rosco,50,Mauve,255,82,63
+Rosco,51,Surprise Pink,203,181,255
+Rosco,351,Lavender Mist,221,202,255
+Rosco,52,Light Lavender,169,127,255
+Rosco,53,Pale Lavender,202,198,255
+Rosco,353,Lilly Lavender,123,104,255
+Rosco,54,Special Lavender,184,166,255
+Rosco,55,Lilac,132,126,255
+Rosco,355,Pale Violet,87,78,255
+Rosco,56,Gypsy Lavender,51,15,255
+Rosco,356,Middle Lavender,140,103,255
+Rosco,57,Lavender,123,86,255
+Rosco,357,Royal Lavender,59,17,255
+Rosco,58,Deep Lavender,84,39,255
+Rosco,358,Rose Indigo,77,9,255
+Rosco,59,Indigo,42,1,255
+Rosco,359,Medium Violet,41,18,255
+Rosco,60,No Color Blue,153,176,255
+Rosco,360,Clearwater,163,183,255
+Rosco,61,Mist Blue,170,192,255
+Rosco,361,Hemsley Blue,51,66,255
+Rosco,62,Booster Blue,125,163,255
+Rosco,362,Tipton Blue,114,139,255
+Rosco,63,Pale Blue,143,169,255
+Rosco,363,Aquamarine,130,179,255
+Rosco,64,Light Steel Blue,65,85,255
+Rosco,364,Blue Bell,86,111,255
+Rosco,65,Daylight Blue,55,103,255
+Rosco,365,Tharon Delft Blue,106,129,255
+Rosco,66,Cool Blue,149,195,255
+Rosco,366,Jordan Blue,59,107,255
+Rosco,67,Light Sky Blue,48,74,255
+Rosco,367,Slate Blue,56,80,255
+Rosco,68,Parry Sky Blue,29,37,255
+Rosco,368,Winkler Blue,45,58,255
+Rosco,69,Brilliant Blue,23,62,255
+Rosco,369,Tahitian Blue,36,86,255
+Rosco,70,Nile Blue,84,138,255
+Rosco,370,Italian Blue,31,134,255
+Rosco,71,Sea Blue,49,104,255
+Rosco,72,Azure Blue,59,120,255
+Rosco,73,Peacock Blue,56,133,255
+Rosco,74,Night Blue,16,9,255
+Rosco,374,Sea Green,46,146,255
+Rosco,75,Twilight Blue,20,67,255
+Rosco,375,Cerulean Blue,32,122,255
+Rosco,76,Light Green Blue,16,55,255
+Rosco,376,Bermuda Blue,49,112,255
+Rosco,77,Green Blue,20,53,255
+Rosco,377,Iris Purple,40,18,255
+Rosco,78,Trudy Blue,65,66,255
+Rosco,378,Alice Blue,62,60,255
+Rosco,79,Bright Blue,24,20,255
+Rosco,80,Primary Blue,20,31,255
+Rosco,81,Urban Blue,36,39,255
+Rosco,381,Baldassari Blue,31,24,255
+Rosco,82,Surprise Blue,38,26,255
+Rosco,382,Congo Blue,32,0,255
+Rosco,83,Medium Blue,19,15,255
+Rosco,383,Sapphire Blue,25,8,255
+Rosco,84,Zephyr Blue,39,42,255
+Rosco,384,Midnight Blue,20,2,255
+Rosco,85,Deep Blue,22,9,255
+Rosco,385,Royal Blue,25,0,255
+Rosco,86,Pea Green,138,255,78
+Rosco,386,Leaf Green,126,255,104
+Rosco,87,Pale Yellow Green,228,255,194
+Rosco,88,Light Green,208,255,150
+Rosco,388,Gaslight Green,194,255,136
+Rosco,89,Moss Green,96,255,116
+Rosco,389,Chroma Green,69,255,147
+Rosco,91,Primary Green,60,255,164
+Rosco,392,Pacific Green,47,156,255
+Rosco,92,Turquoise,120,255,254
+Rosco,93,Blue Green,92,211,255
+Rosco,393,Emerald Green,24,173,255
+Rosco,395,Teal Green,23,171,255
+Rosco,96,Lime,238,255,126
+Rosco,397,Pale Grey,255,254,246
+Rosco,398,Neutral Grey,241,248,255
+Rosco,99,Chocolate,255,196,141
+LEE,200,Double CTB,49,62,255
+LEE,201,Full CTB,100,123,255
+LEE,281,3/4 CTB,119,137,255
+LEE,202,1/2 CTB,155,178,255
+LEE,203,1/4 CTB,195,211,255
+LEE,218,1/8 CTB,224,234,255
+LEE,287,Double CTO,255,147,23
+LEE,204,Full CTO,255,191,77
+LEE,285,3/4 CTO,255,204,97
+LEE,205,1/2 CTO,255,223,139
+LEE,206,1/4 CTO,255,238,183
+LEE,223,1/8 CTO,255,246,213
+LEE,283,1 1/2 CTB,69,89,255
+LEE,286,1 1/2 CTO,255,167,40
+LEE,441,Full CTS,255,190,76
+LEE,442,1/2 CTS,255,224,133
+LEE,443,1/4 CTS,255,241,187
+LEE,444,1/8 CTS,255,248,222
+LEE,207,Full CTO + .3 ND,255,193,72
+LEE,208,Full CTO + .6 ND,255,190,75
+LEE,212,L.C.T. Yellow (Y1),255,255,190
+LEE,213,White Flame Green,213,255,208
+LEE,219,LEE Fluorescent Green,116,224,255
+LEE,230,Super Correction L.C.T. Yellow,255,229,150
+LEE,232,Super Correction W.F. Green,255,197,92
+LEE,236,H.M.I. (to Tungsten),255,189,90
+LEE,237,C.I.D. (to Tungsten),255,153,85
+LEE,238,C.S.I. (to Tungsten),255,169,148
+LEE,241,LEE Fluorescent 5700 Kelvin,113,182,255
+LEE,242,LEE Fluorescent 4300 Kelvin,156,255,242
+LEE,243,LEE Fluorescent 3600 Kelvin,174,255,199
+LEE,244,LEE Plus Green,207,255,158
+LEE,245,1/2 Plus Green,227,255,196
+LEE,246,1/4 Plus Green,240,255,221
+LEE,278,1/8 Plus Green,248,255,237
+LEE,247,LEE Minus Green,255,176,230
+LEE,248,1/2 Minus Green,255,211,240
+LEE,249,1/4 Minus Green,255,231,248
+LEE,279,1/8 Minus Green,255,242,248
+LEE,2,Rose Pink,255,91,252
+LEE,3,Lavender Tint,237,226,255
+LEE,4,Medium Bastard Amber,255,187,146
+LEE,7,Pale Yellow,255,255,178
+LEE,8,Dark Salmon,255,114,44
+LEE,9,Pale Amber Gold,255,219,130
+LEE,10,Medium Yellow,248,255,34
+LEE,13,Straw Tint,255,220,104
+LEE,15,Deep Straw,255,186,9
+LEE,17,Surprise Peach,255,150,63
+LEE,19,Fire,255,52,4
+LEE,20,Medium Amber,255,163,19
+LEE,21,Gold Amber,255,105,5
+LEE,22,Dark Amber,255,76,1
+LEE,24,Scarlet,255,63,34
+LEE,25,Sunset Red,255,86,21
+LEE,26,Bright Red,255,24,1
+LEE,27,Medium Red,255,16,5
+LEE,29,Plasa Red,255,25,0
+LEE,35,Light Pink,255,186,215
+LEE,36,Medium Pink,255,138,181
+LEE,46,Dark Magenta,255,30,56
+LEE,48,Rose Purple,182,63,255
+LEE,49,Medium Purple,170,16,255
+LEE,52,Light Lavender,145,112,255
+LEE,53,Paler Lavender,194,195,255
+LEE,58,Lavender,68,31,255
+LEE,61,Mist Blue,164,192,255
+LEE,63,Pale Blue,137,169,255
+LEE,68,Sky Blue,24,45,255
+LEE,71,Tokyo Blue,19,0,255
+LEE,75,Evening Blue,29,38,255
+LEE,79,Just Blue,19,24,255
+LEE,85,Deeper Blue,18,12,255
+LEE,88,Lime Green,176,255,68
+LEE,89,Moss Green,77,255,83
+LEE,90,Dark Yellow Green,28,255,62
+LEE,100,Spring Yellow,233,255,46
+LEE,101,Yellow,255,242,22
+LEE,102,Light Amber,255,225,50
+LEE,103,Straw,255,237,167
+LEE,104,Deep Amber,255,205,19
+LEE,105,Orange,255,131,3
+LEE,106,Primary Red,255,31,1
+LEE,107,Light Rose,255,148,143
+LEE,108,English Rose,255,169,97
+LEE,109,Light Salmon,255,161,153
+LEE,110,Middle Rose,255,157,201
+LEE,111,Dark Pink,255,105,163
+LEE,113,Magenta,255,30,40
+LEE,115,Peacock Blue,35,162,255
+LEE,116,Medium Blue-Green,9,135,255
+LEE,117,Steel Blue,119,181,255
+LEE,118,Light Blue,24,88,255
+LEE,119,Dark Blue,16,18,255
+LEE,120,Deep Blue,18,6,255
+LEE,121,LEE Green,135,255,73
+LEE,122,Fern Green,98,255,95
+LEE,124,Dark Green,31,255,113
+LEE,126,Mauve,156,10,255
+LEE,127,Smokey Pink,255,111,131
+LEE,128,Bright Pink,255,38,171
+LEE,131,Marine Blue,75,193,255
+LEE,132,Medium Blue,17,40,255
+LEE,134,Golden Amber,255,143,42
+LEE,135,Deep Golden Amber,255,69,0
+LEE,136,Pale Lavender,186,152,255
+LEE,137,Special Lavender,104,94,255
+LEE,138,Pale Green,193,255,132
+LEE,139,Primary Green,21,255,39
+LEE,140,Summer Blue,70,138,255
+LEE,141,Bright Blue,17,70,255
+LEE,142,Pale Violet,73,67,255
+LEE,143,Pale Navy Blue,49,100,255
+LEE,144,No Color Blue,51,119,255
+LEE,147,Apricot,255,162,65
+LEE,148,Bright Rose,255,51,73
+LEE,151,Gold Tint,255,192,159
+LEE,152,Pale Gold,255,206,161
+LEE,153,Pale Salmon,255,183,181
+LEE,154,Pale Rose,255,206,184
+LEE,156,Chocolate,255,196,108
+LEE,157,Pink,255,105,94
+LEE,158,Deep Orange,255,108,2
+LEE,159,No Color Straw,255,252,217
+LEE,161,Slate Blue,50,82,255
+LEE,162,Bastard Amber,255,221,181
+LEE,164,Flame Red,255,49,8
+LEE,165,Daylight Blue,36,72,255
+LEE,169,Lilac Tint,215,193,255
+LEE,170,Deep Lavender,167,116,255
+LEE,172,Lagoon Blue,17,99,255
+LEE,174,Dark Steel Blue,79,109,255
+LEE,176,Loving Amber,255,150,114
+LEE,179,Chrome Orange,255,168,9
+LEE,180,Dark Lavender,54,21,255
+LEE,181,Congo Blue,26,0,255
+LEE,182,Light Red,255,35,2
+LEE,183,Moonlight Blue,18,79,255
+LEE,192,Flesh Pink,255,107,148
+LEE,194,Surprise Pink,114,89,255
+LEE,195,Zenith Blue,19,13,255
+LEE,196,true Blue,63,102,255
+LEE,197,Alice Blue,40,47,255
+LEE,198,Palace Blue,26,17,255
+LEE,199,Regal Blue,65,29,255
+LEE,322,Soft Green,74,253,255
+LEE,323,Jade,37,237,255
+LEE,327,Forest Green,24,255,153
+LEE,328,Follies Pink,255,58,209
+LEE,332,Special Rose Pink,255,29,94
+LEE,343,Special Medium Lavender,52,15,255
+LEE,345,Fuchsia Pink,129,62,255
+LEE,352,Glacier Blue,40,90,255
+LEE,353,Lighter Blue,58,136,255
+LEE,354,Special Steel Blue,38,149,255
+LEE,363,Special Medium Blue,16,13,255
+LEE,366,Cornflower,64,83,255
+LEE,500,Double New Colour Blue,70,86,255
+LEE,501,New Colour Robertson Blue,129,146,255
+LEE,502,Half New Colour Blue,179,189,255
+LEE,503,Quarter New Colour Blue,214,220,255
+LEE,504,Waterfront Green,177,232,255
+LEE,505,Sally Green,183,255,61
+LEE,506,Marlene,255,214,161
+LEE,507,Madge,255,53,0
+LEE,508,Midnight Maya,34,10,255
+LEE,511,Bacon Brown,255,114,10
+LEE,512,Amber Delight,255,96,5
+LEE,513,Ice and a Slice,241,255,103
+LEE,514,Double G & T,238,255,65
+LEE,525,Argent Blue,42,55,255
+LEE,550,ALD Gold,101,255,2
+LEE,600,Arctic White,102,122,255
+LEE,601,Silver,136,148,255
+LEE,602,Platinum,152,168,255
+LEE,603,Moonlight White,159,175,255
+LEE,604,Full CT 85,255,181,87
+LEE,642,Half Mustard Yellow,255,225,3
+LEE,643,Quarter Mustard Yellow,255,226,13
+LEE,650,Industry Sodium,255,236,97
+LEE,651,HI Sodium,255,175,66
+LEE,652,Urban Sodium,255,121,24
+LEE,653,LO Sodium,255,143,28
+LEE,184,Cosmetic Peach,255,241,217
+LEE,186,Cosmetic Silver Rose,255,224,232
+LEE,187,Cosmetic Rouge,255,224,200
+LEE,188,Cosmetic Highlight,255,237,211
+LEE,189,Cosmetic Silver Moss,251,255,202
+LEE,191,Cosmetic Aqua Blue,234,253,255
+LEE,705,Lily Frost,140,98,255
+LEE,717,Shanklin Frost,102,122,255
+LEE,718,Half Shanklin Frost,155,174,255
+LEE,720,Durham Daylight Frost,88,107,255
+LEE,749,Hampshire Rose,255,206,186
+LEE,750,Durham Frost,255,254,254
+LEE,774,Soft Amber Key 1,255,208,149
+LEE,775,Soft Amber Key 2,255,181,102
+LEE,791,Moroccan Frost,255,178,146
+LEE,217,Blue Diffusion,255,252,250
+LEE,221,Blue Frost,255,250,251
+LEE,224,Daylight Blue Frost,125,140,255
+LEE,700,Perfect Lavender,47,13,255
+LEE,701,Provence,69,27,255
+LEE,702,Special Pale Lavender,184,173,255
+LEE,703,Cold Lavender,133,84,255
+LEE,704,Lily,160,120,255
+LEE,706,King Fals Lavender,52,25,255
+LEE,708,Cool Lavender,143,158,255
+LEE,709,Electric Lilac,118,121,255
+LEE,710,Spir Special Blue,50,49,255
+LEE,711,Cold Blue,88,103,255
+LEE,712,Bedford Blue,54,65,255
+LEE,713,J.Winter Blue,17,1,255
+LEE,714,Elysian Blue,24,29,255
+LEE,715,Cabana Blue,24,18,255
+LEE,716,Mikkel Blue,18,9,255
+LEE,719,Colour Wash Blue,60,73,255
+LEE,721,Berry Blue,18,22,255
+LEE,722,Bray Blue,15,23,255
+LEE,723,Virgin Blue,27,30,255
+LEE,724,Ocean Blue,55,113,255
+LEE,725,Old Steel Blue,123,173,255
+LEE,727,QFD Blue,5,79,255
+LEE,728,Steel Green,151,207,255
+LEE,729,Scuba Blue,3,102,255
+LEE,730,Liberty Green,191,253,255
+LEE,731,Dirty Ice,208,255,232
+LEE,733,Damp Squib,222,255,206
+LEE,735,Velvet Green,0,255,167
+LEE,736,Twickenham Green,12,255,37
+LEE,738,JAS Green,111,255,48
+LEE,740,Aurora Borealis Green,87,255,15
+LEE,741,Mustard Yellow,255,228,2
+LEE,742,Bram Brown,255,193,69
+LEE,744,Dirty White,255,198,80
+LEE,746,Brown,255,155,19
+LEE,747,Easy White,255,181,125
+LEE,748,Seedy Pink,255,118,163
+LEE,763,Wheat,255,245,174
+LEE,764,Sun Colour Straw,255,238,141
+LEE,765,LEE Yellow,255,240,102
+LEE,767,Oklahoma Yellow,255,220,12
+LEE,768,Egg Yolk Yellow,255,172,4
+LEE,770,Burnt Yellow,255,149,5
+LEE,773,Cardbox Amber,255,181,113
+LEE,776,Nectarine,255,171,86
+LEE,777,Rust,255,111,3
+LEE,778,Millennium Gold,255,90,3
+LEE,779,Bastard Pink,255,111,50
+LEE,780,AS Golden Amber,255,82,0
+LEE,781,Terry Red,255,59,2
+LEE,787,Marius Red,255,11,1
+LEE,789,Blood Red,255,34,0
+LEE,790,Moroccan Pink,255,178,141
+LEE,793,Vanity Fair,255,30,130
+LEE,794,Pretty Pink,255,144,226
+LEE,795,Magical Magenta,241,37,255
+LEE,797,Deep Purple,110,3,255
+LEE,798,Chrysalis Pink,58,7,255
+LEE,799,Special KH Lavender,25,0,255`;
+
+// Convert RGB to hex
+function rgbToHex(r, g, b) {
+  const toHex = (n) => {
+    const hex = Math.round(n).toString(16).padStart(2, '0');
+    return hex.toUpperCase();
+  };
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+// Parse CSV and convert to gel color object
+const lines = gelData.trim().split('\n');
+const gelColors = {};
+
+// Skip header row
+for (let i = 1; i < lines.length; i++) {
+  const parts = lines[i].split(',');
+  if (parts.length < 6) continue;
+
+  const manufacturer = parts[0];
+  const number = parts[1];
+  const r = parseInt(parts[3]);
+  const g = parseInt(parts[4]);
+  const b = parseInt(parts[5]);
+
+  // Skip invalid or "no gel" entries
+  if (number === '-' || !number) continue;
+
+  const hex = rgbToHex(r, g, b);
+
+  // Create gel code based on manufacturer
+  let gelCode;
+  if (manufacturer === 'Rosco') {
+    gelCode = 'R' + number;
+  } else if (manufacturer === 'LEE') {
+    gelCode = 'L' + number;
+  }
+
+  gelColors[gelCode] = hex;
+}
+
+// Output as TypeScript object
+console.log('const gelColors: Record<string, string> = {');
+
+// Sort by key for better organization
+const sortedKeys = Object.keys(gelColors).sort((a, b) => {
+  // Extract manufacturer prefix
+  const aPrefix = a.match(/^[A-Z]+/)[0];
+  const bPrefix = b.match(/^[A-Z]+/)[0];
+
+  if (aPrefix !== bPrefix) return aPrefix.localeCompare(bPrefix);
+
+  // Extract number
+  const aNum = parseInt(a.match(/\d+/)[0]);
+  const bNum = parseInt(b.match(/\d+/)[0]);
+
+  return aNum - bNum;
+});
+
+sortedKeys.forEach((key, index) => {
+  const comma = index < sortedKeys.length - 1 ? ',' : '';
+  console.log(`  '${key}': '${gelColors[key]}'${comma}`);
+});
+
+console.log('};');
+
+console.log(`\n// Total gels: ${sortedKeys.length}`);
