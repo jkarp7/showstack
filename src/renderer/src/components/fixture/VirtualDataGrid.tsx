@@ -179,7 +179,9 @@ export function VirtualDataGrid({
     columnKey: ColumnKey,
     direction: 'up' | 'down' | 'left' | 'right' | 'enter'
   ) => {
-    const visibleColumns = orderedColumns.filter(col => columnVisibility[col.key]);
+    // Get visible columns by filtering the ordered columns
+    const cols = getOrderedColumns(columnOrder);
+    const visibleColumns = cols.filter(col => columnVisibility[col.key]);
     const currentRowIndex = fixtures.findIndex(f => f.id === fixtureId);
     const currentColIndex = visibleColumns.findIndex(col => col.key === columnKey);
 
@@ -223,7 +225,7 @@ export function VirtualDataGrid({
         }
       }
     }
-  }, [fixtures, columnVisibility, orderedColumns]);
+  }, [fixtures, columnVisibility, columnOrder]);
 
   // Drag and drop handlers for column reordering
   const handleDragStart = useCallback((e: React.DragEvent, columnKey: ColumnKey) => {
