@@ -249,17 +249,15 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
   // Generate Channel Hookup data
   const channelHookupData = useMemo(() => {
     return sortedFixtures.map(fixture => ({
+      channel: fixture.channel || '-',
+      dimmer: fixture.dimmer || '-',
       position: fixture.position || '-',
       unit: fixture.unit || '-',
       type: fixture.type || '-',
-      purpose: fixture.purpose || '-',
-      channel: fixture.channel || '-',
-      dimmer: fixture.dimmer || '-',
-      circuit: fixture.circuit_number || fixture.circuit || '-',
-      color: fixture.color || '-',
-      gobo: fixture.gobo || '-',
       wattage: fixture.wattage || '-',
-      location: fixture.location || '-'
+      purpose: fixture.purpose || '-',
+      color: fixture.color || '-',
+      notes: fixture.notes || '-'
     }));
   }, [sortedFixtures]);
 
@@ -277,11 +275,14 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       .map(([dimmer, fixtures]) => ({
         dimmer,
         fixtures: fixtures.map(f => ({
-          position: f.position || '-',
-          type: f.type || '-',
           channel: f.channel || '-',
+          position: f.position || '-',
+          unit: f.unit || '-',
+          type: f.type || '-',
           wattage: f.wattage || '-',
-          color: f.color || '-'
+          purpose: f.purpose || '-',
+          color: f.color || '-',
+          notes: f.notes || '-'
         }))
       }));
   }, [fixtures]);
@@ -300,11 +301,15 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       .map(([circuit, fixtures]) => ({
         circuit,
         fixtures: fixtures.map(f => ({
-          position: f.position || '-',
-          type: f.type || '-',
           dimmer: f.dimmer || '-',
-          location: f.location || '-',
-          wattage: f.wattage || '-'
+          channel: f.channel || '-',
+          position: f.position || '-',
+          unit: f.unit || '-',
+          type: f.type || '-',
+          wattage: f.wattage || '-',
+          purpose: f.purpose || '-',
+          color: f.color || '-',
+          notes: f.notes || '-'
         }))
       }));
   }, [fixtures]);
@@ -322,12 +327,18 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
         return aAddr - bAddr;
       })
       .map(fixture => ({
-        universe: fixture.universe || '-',
-        address: fixture.dmx_address || '-',
+        address: fixture.universe && fixture.dmx_address
+          ? `${fixture.universe}/${fixture.dmx_address}`
+          : (fixture.dmx_address || '-'),
+        channel: fixture.channel || '-',
+        dimmer: fixture.dimmer || '-',
         position: fixture.position || '-',
+        unit: fixture.unit || '-',
         type: fixture.type || '-',
+        wattage: fixture.wattage || '-',
         purpose: fixture.purpose || '-',
-        channel: fixture.channel || '-'
+        color: fixture.color || '-',
+        notes: fixture.notes || '-'
       }));
   }, [fixtures]);
 
@@ -569,6 +580,30 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
     window.print();
   };
 
+  // Helper function to render color with swatch
+  const renderColorCell = (color: string) => {
+    if (color === '-' || !color) return <td className="px-3 py-2">-</td>;
+
+    // Try to parse color as a gel number (e.g., "R80" or "L201")
+    const isGelColor = /^[A-Z]\d+/.test(color);
+
+    return (
+      <td className="px-3 py-2">
+        <div className="flex items-center gap-2">
+          <div
+            className="w-4 h-4 rounded border border-gray-300 flex-shrink-0"
+            style={{
+              backgroundColor: isGelColor ? '#ddd' : color,
+              borderColor: '#999'
+            }}
+            title={color}
+          />
+          <span>{color}</span>
+        </div>
+      </td>
+    );
+  };
+
   const renderMetadataHeader = () => {
     if (!projectData) return null;
 
@@ -600,33 +635,29 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             <table className="w-full text-sm">
               <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                 <tr>
-                  <th className="px-3 py-2 text-left">Pos</th>
-                  <th className="px-3 py-2 text-left">Unit</th>
-                  <th className="px-3 py-2 text-left">Type</th>
-                  <th className="px-3 py-2 text-left">Purpose</th>
                   <th className="px-3 py-2 text-left">Chan</th>
                   <th className="px-3 py-2 text-left">Dim</th>
-                  <th className="px-3 py-2 text-left">Ckt</th>
+                  <th className="px-3 py-2 text-left">Position</th>
+                  <th className="px-3 py-2 text-left">Unit #</th>
+                  <th className="px-3 py-2 text-left">Type</th>
+                  <th className="px-3 py-2 text-left">Watt</th>
+                  <th className="px-3 py-2 text-left">Purpose</th>
                   <th className="px-3 py-2 text-left">Color</th>
-                  <th className="px-3 py-2 text-left">Gobo</th>
-                  <th className="px-3 py-2 text-left">W</th>
-                  <th className="px-3 py-2 text-left">Location</th>
+                  <th className="px-3 py-2 text-left">Notes</th>
                 </tr>
               </thead>
               <tbody>
                 {channelHookupData.map((row, i) => (
                   <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-white dark:bg-gray-800">
+                    <td className="px-3 py-2">{row.channel}</td>
+                    <td className="px-3 py-2">{row.dimmer}</td>
                     <td className="px-3 py-2">{row.position}</td>
                     <td className="px-3 py-2">{row.unit}</td>
                     <td className="px-3 py-2">{row.type}</td>
-                    <td className="px-3 py-2">{row.purpose}</td>
-                    <td className="px-3 py-2">{row.channel}</td>
-                    <td className="px-3 py-2">{row.dimmer}</td>
-                    <td className="px-3 py-2">{row.circuit}</td>
-                    <td className="px-3 py-2">{row.color}</td>
-                    <td className="px-3 py-2">{row.gobo}</td>
                     <td className="px-3 py-2">{row.wattage}</td>
-                    <td className="px-3 py-2">{row.location}</td>
+                    <td className="px-3 py-2">{row.purpose}</td>
+                    {renderColorCell(row.color)}
+                    <td className="px-3 py-2">{row.notes}</td>
                   </tr>
                 ))}
               </tbody>
@@ -643,21 +674,27 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 <table className="w-full text-sm">
                   <thead className="bg-gray-200 dark:bg-gray-700">
                     <tr>
+                      <th className="px-3 py-2 text-left">Chan</th>
                       <th className="px-3 py-2 text-left">Position</th>
+                      <th className="px-3 py-2 text-left">Unit #</th>
                       <th className="px-3 py-2 text-left">Type</th>
-                      <th className="px-3 py-2 text-left">Channel</th>
+                      <th className="px-3 py-2 text-left">Watt</th>
+                      <th className="px-3 py-2 text-left">Purpose</th>
                       <th className="px-3 py-2 text-left">Color</th>
-                      <th className="px-3 py-2 text-left">Wattage</th>
+                      <th className="px-3 py-2 text-left">Notes</th>
                     </tr>
                   </thead>
                   <tbody>
                     {group.fixtures.map((fixture, j) => (
                       <tr key={j} className="border-b border-gray-200 dark:border-gray-700">
-                        <td className="px-3 py-2">{fixture.position}</td>
-                        <td className="px-3 py-2">{fixture.type}</td>
                         <td className="px-3 py-2">{fixture.channel}</td>
-                        <td className="px-3 py-2">{fixture.color}</td>
+                        <td className="px-3 py-2">{fixture.position}</td>
+                        <td className="px-3 py-2">{fixture.unit}</td>
+                        <td className="px-3 py-2">{fixture.type}</td>
                         <td className="px-3 py-2">{fixture.wattage}</td>
+                        <td className="px-3 py-2">{fixture.purpose}</td>
+                        {renderColorCell(fixture.color)}
+                        <td className="px-3 py-2">{fixture.notes}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -676,21 +713,29 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 <table className="w-full text-sm">
                   <thead className="bg-gray-200 dark:bg-gray-700">
                     <tr>
+                      <th className="px-3 py-2 text-left">Dim</th>
+                      <th className="px-3 py-2 text-left">Chan</th>
                       <th className="px-3 py-2 text-left">Position</th>
+                      <th className="px-3 py-2 text-left">Unit #</th>
                       <th className="px-3 py-2 text-left">Type</th>
-                      <th className="px-3 py-2 text-left">Dimmer</th>
-                      <th className="px-3 py-2 text-left">Location</th>
-                      <th className="px-3 py-2 text-left">Wattage</th>
+                      <th className="px-3 py-2 text-left">Watt</th>
+                      <th className="px-3 py-2 text-left">Purpose</th>
+                      <th className="px-3 py-2 text-left">Color</th>
+                      <th className="px-3 py-2 text-left">Notes</th>
                     </tr>
                   </thead>
                   <tbody>
                     {group.fixtures.map((fixture, j) => (
                       <tr key={j} className="border-b border-gray-200 dark:border-gray-700">
-                        <td className="px-3 py-2">{fixture.position}</td>
-                        <td className="px-3 py-2">{fixture.type}</td>
                         <td className="px-3 py-2">{fixture.dimmer}</td>
-                        <td className="px-3 py-2">{fixture.location}</td>
+                        <td className="px-3 py-2">{fixture.channel}</td>
+                        <td className="px-3 py-2">{fixture.position}</td>
+                        <td className="px-3 py-2">{fixture.unit}</td>
+                        <td className="px-3 py-2">{fixture.type}</td>
                         <td className="px-3 py-2">{fixture.wattage}</td>
+                        <td className="px-3 py-2">{fixture.purpose}</td>
+                        {renderColorCell(fixture.color)}
+                        <td className="px-3 py-2">{fixture.notes}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -706,23 +751,31 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             <table className="w-full text-sm">
               <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                 <tr>
-                  <th className="px-3 py-2 text-left">Universe</th>
                   <th className="px-3 py-2 text-left">Address</th>
+                  <th className="px-3 py-2 text-left">Chan</th>
+                  <th className="px-3 py-2 text-left">Dim</th>
                   <th className="px-3 py-2 text-left">Position</th>
+                  <th className="px-3 py-2 text-left">Unit #</th>
                   <th className="px-3 py-2 text-left">Type</th>
+                  <th className="px-3 py-2 text-left">Watt</th>
                   <th className="px-3 py-2 text-left">Purpose</th>
-                  <th className="px-3 py-2 text-left">Channel</th>
+                  <th className="px-3 py-2 text-left">Color</th>
+                  <th className="px-3 py-2 text-left">Notes</th>
                 </tr>
               </thead>
               <tbody>
                 {dmxAddressData.map((row, i) => (
                   <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-white dark:bg-gray-800">
-                    <td className="px-3 py-2">{row.universe}</td>
                     <td className="px-3 py-2">{row.address}</td>
-                    <td className="px-3 py-2">{row.position}</td>
-                    <td className="px-3 py-2">{row.type}</td>
-                    <td className="px-3 py-2">{row.purpose}</td>
                     <td className="px-3 py-2">{row.channel}</td>
+                    <td className="px-3 py-2">{row.dimmer}</td>
+                    <td className="px-3 py-2">{row.position}</td>
+                    <td className="px-3 py-2">{row.unit}</td>
+                    <td className="px-3 py-2">{row.type}</td>
+                    <td className="px-3 py-2">{row.wattage}</td>
+                    <td className="px-3 py-2">{row.purpose}</td>
+                    {renderColorCell(row.color)}
+                    <td className="px-3 py-2">{row.notes}</td>
                   </tr>
                 ))}
               </tbody>
