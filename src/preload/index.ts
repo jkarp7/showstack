@@ -175,6 +175,12 @@ contextBridge.exposeInMainWorld('api', {
   windows: {
     openProject: (projectId: string) => ipcRenderer.invoke('window:openProject', projectId),
     getCurrentProjectId: () => ipcRenderer.invoke('window:getCurrentProjectId')
+  },
+
+  // Paperwork operations
+  paperwork: {
+    exportPDF: (htmlContent: string, filename: string, pageSettings: any) =>
+      ipcRenderer.invoke('paperwork:exportPDF', htmlContent, filename, pageSettings)
   }
 });
 
@@ -303,6 +309,9 @@ export interface ElectronAPI {
   windows: {
     openProject: (projectId: string) => Promise<void>;
     getCurrentProjectId: () => Promise<string | null>;
+  };
+  paperwork: {
+    exportPDF: (htmlContent: string, filename: string, pageSettings: any) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
   };
 }
 

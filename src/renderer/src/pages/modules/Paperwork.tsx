@@ -459,10 +459,110 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
     if (currentReport?.id === reportId) setCurrentReport(null);
   };
 
-  const handleExportPDF = () => {
-    const reportName = REPORT_TEMPLATES.find(t => t.id === selectedReport)?.name;
-    alert(`Exporting ${reportName} to PDF with ${pageSetup.size.toUpperCase()} ${pageSetup.orientation} layout...`);
-    // TODO: Implement PDF export
+  const handleExportPDF = async () => {
+    if (!window.api?.paperwork) {
+      alert('PDF export is not available');
+      return;
+    }
+
+    try {
+      const reportName = REPORT_TEMPLATES.find(t => t.id === selectedReport)?.name || 'Report';
+
+      // Get the rendered HTML content
+      const reportElement = document.querySelector('.report-content');
+      if (!reportElement) {
+        alert('Report content not found');
+        return;
+      }
+
+      // Create a complete HTML document with styles
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>${reportName} - ${projectName}</title>
+            <style>
+              * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                color: #1f2937;
+                background: white;
+                padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in;
+              }
+              table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 1rem;
+              }
+              th, td {
+                padding: 0.5rem;
+                text-align: left;
+                border-bottom: 1px solid #e5e7eb;
+              }
+              th {
+                background-color: #f3f4f6;
+                font-weight: 600;
+              }
+              h1 {
+                font-size: 1.5rem;
+                font-weight: bold;
+                margin-bottom: 0.5rem;
+              }
+              h2 {
+                font-size: 1.25rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+              }
+              h3 {
+                font-size: 1.125rem;
+                font-weight: 600;
+                margin-bottom: 0.75rem;
+                color: #3b82f6;
+              }
+              p {
+                margin-bottom: 0.5rem;
+              }
+              .grid {
+                display: grid;
+                gap: 1rem;
+              }
+              .card {
+                background: white;
+                border: 1px solid #e5e7eb;
+                border-radius: 0.5rem;
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+              }
+              @media print {
+                body { margin: 0; padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in; }
+                .card { page-break-inside: avoid; }
+              }
+            </style>
+          </head>
+          <body>
+            ${reportElement.innerHTML}
+          </body>
+        </html>
+      `;
+
+      const filename = `${projectName}_${reportName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+
+      const result = await window.api.paperwork.exportPDF(htmlContent, filename, pageSetup);
+
+      if (result.success) {
+        alert(`PDF exported successfully to:\n${result.filePath}`);
+      } else if (!result.canceled) {
+        alert('Failed to export PDF');
+      }
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      alert('An error occurred while exporting PDF');
+    }
   };
 
   const handlePrint = () => {
@@ -892,7 +992,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
       {/* Main Content - Report Display */}
       <main className="flex-1 overflow-auto p-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto report-content">
           {renderMetadataHeader()}
           {renderReport()}
         </div>
