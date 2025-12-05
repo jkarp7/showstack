@@ -580,23 +580,70 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
     window.print();
   };
 
+  // Gel color database (common theatrical gels)
+  const gelColors: Record<string, string> = {
+    // Roscolux
+    'R02': '#FFA885', 'R08': '#F9D5AA', 'R09': '#FFE5CC', 'R17': '#FFD4CC',
+    'R19': '#FF9980', 'R20': '#FFCC99', 'R23': '#FF9966', 'R26': '#FF6633',
+    'R33': '#FF3300', 'R43': '#FFC299', 'R51': '#FFDD99', 'R54': '#FFE5B3',
+    'R79': '#5599FF', 'R80': '#6699FF', 'R83': '#4D88FF', 'R92': '#FFCCFF',
+    'R99': '#FFE6E6', 'R119': '#3366CC', 'R132': '#FFE6CC', 'R161': '#99CCFF',
+    'R337': '#FFD4CC', 'R350': '#CCCCFF', 'R358': '#FFE5E5', 'R359': '#FFEEFF',
+    'R360': '#FFCCCC',
+    // GAM
+    'G100': '#FFE5CC', 'G150': '#FFD4B3', 'G180': '#FFB366', 'G205': '#FFCC99',
+    'G235': '#FF9980', 'G250': '#FF6633', 'G280': '#FF3300', 'G330': '#5599FF',
+    'G350': '#CCCCFF', 'G370': '#99CCFF', 'G385': '#6699FF', 'G395': '#FFD4CC',
+    'G470': '#FFCCFF', 'G480': '#FFE6E6', 'G490': '#FFEEFF', 'G530': '#66FF66',
+    'G570': '#FFFF66', 'G590': '#FF66CC', 'G640': '#3366CC', 'G720': '#99FFFF',
+    'G750': '#CCFF99', 'G860': '#FFCCCC', 'G890': '#FFE5E5', 'G940': '#CCCCCC',
+    // Lee
+    'L101': '#FFEECC', 'L102': '#FFDDAA', 'L103': '#FFE5CC', 'L104': '#FFEEDD',
+    'L105': '#FFD4B3', 'L106': '#FF9966', 'L107': '#FFB380', 'L108': '#FFCC99',
+    'L109': '#FFC299', 'L110': '#FF9980', 'L111': '#FF8866', 'L115': '#6699FF',
+    'L116': '#5588EE', 'L117': '#99BBFF', 'L118': '#3366CC', 'L119': '#3355BB',
+    'L120': '#4477DD', 'L126': '#FFE5E5', 'L127': '#FFD4D4', 'L128': '#FFC2C2',
+    'L132': '#FFE6CC', 'L135': '#FFB3CC', 'L136': '#FFCCFF', 'L137': '#FF99DD',
+    'L147': '#FFE5CC', 'L148': '#FFDDAA', 'L152': '#FFE5CC', 'L154': '#FFD4CC',
+    'L157': '#FFE5E5', 'L158': '#FFCCDD', 'L161': '#99CCFF', 'L162': '#BBDDFF',
+    'L164': '#FFCCCC', 'L170': '#FFE6E6', 'L172': '#CCCCFF', 'L174': '#CCBBFF',
+    'L176': '#FFD4CC', 'L179': '#FFCC99', 'L180': '#FFB366', 'L181': '#FFDDCC',
+    'L182': '#FFE5DD', 'L192': '#FFCCCC', 'L194': '#FFE5CC', 'L195': '#FF9980',
+    'L196': '#FFB399', 'L197': '#FFE6E6', 'L200': '#FFEECC', 'L201': '#FFEEDD',
+    'L202': '#FFDDAA', 'L203': '#FFE5CC', 'L204': '#FFEEDD', 'L205': '#FFD4CC',
+    'L206': '#FFCCAA', 'L223': '#FF3300', 'L224': '#FFE5CC', 'L225': '#FFDDBB',
+    'L226': '#FFE6DD', 'L236': '#FF9980', 'L247': '#FF6633', 'L248': '#FFCC99',
+    'L254': '#FFE5E5', 'L270': '#FFCCCC', 'L271': '#FFD4D4', 'L285': '#FFE5CC',
+    'L328': '#FFEEFF', 'L353': '#FFE5E5', 'L363': '#FFCCCC', 'L778': '#66FF66',
+    'L790': '#FFFF66',
+  };
+
   // Helper function to render color with swatch
   const renderColorCell = (color: string) => {
     if (color === '-' || !color) return <td className="px-3 py-2">-</td>;
 
-    // Try to parse color as a gel number (e.g., "R80" or "L201")
-    const isGelColor = /^[A-Z]\d+/.test(color);
+    // Parse gel color (supports R80, L201, G100, 80, etc.)
+    let gelCode = color.trim().toUpperCase();
+
+    // Add prefix if just a number
+    if (/^\d+$/.test(gelCode)) {
+      // Try common prefixes
+      gelCode = 'R' + gelCode; // Default to Roscolux
+    }
+
+    // Check if it's a known gel color
+    const gelColor = gelColors[gelCode];
 
     return (
       <td className="px-3 py-2">
         <div className="flex items-center gap-2">
           <div
-            className="w-4 h-4 rounded border border-gray-300 flex-shrink-0"
+            className="w-4 h-4 rounded border border-gray-400 flex-shrink-0"
             style={{
-              backgroundColor: isGelColor ? '#ddd' : color,
+              backgroundColor: gelColor || '#ddd',
               borderColor: '#999'
             }}
-            title={color}
+            title={gelColor ? `${color} (${gelColor})` : color}
           />
           <span>{color}</span>
         </div>
@@ -667,81 +714,79 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
       case 'dimmer-schedule':
         return (
-          <div className="space-y-6">
-            {dimmerScheduleData.map((group, i) => (
-              <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4">
-                <h3 className="text-lg font-semibold mb-3 text-blue-400">Dimmer: {group.dimmer}</h3>
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-200 dark:bg-gray-700">
-                    <tr>
-                      <th className="px-3 py-2 text-left">Chan</th>
-                      <th className="px-3 py-2 text-left">Position</th>
-                      <th className="px-3 py-2 text-left">Unit #</th>
-                      <th className="px-3 py-2 text-left">Type</th>
-                      <th className="px-3 py-2 text-left">Watt</th>
-                      <th className="px-3 py-2 text-left">Purpose</th>
-                      <th className="px-3 py-2 text-left">Color</th>
-                      <th className="px-3 py-2 text-left">Notes</th>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
+                <tr>
+                  <th className="px-3 py-2 text-left">Dim</th>
+                  <th className="px-3 py-2 text-left">Chan</th>
+                  <th className="px-3 py-2 text-left">Position</th>
+                  <th className="px-3 py-2 text-left">Unit #</th>
+                  <th className="px-3 py-2 text-left">Type</th>
+                  <th className="px-3 py-2 text-left">Watt</th>
+                  <th className="px-3 py-2 text-left">Purpose</th>
+                  <th className="px-3 py-2 text-left">Color</th>
+                  <th className="px-3 py-2 text-left">Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dimmerScheduleData.flatMap((group, i) =>
+                  group.fixtures.map((fixture, j) => (
+                    <tr key={`${i}-${j}`} className="border-b border-gray-200 dark:border-gray-700">
+                      <td className="px-3 py-2">{j === 0 ? group.dimmer : '""'}</td>
+                      <td className="px-3 py-2">{fixture.channel}</td>
+                      <td className="px-3 py-2">{fixture.position}</td>
+                      <td className="px-3 py-2">{fixture.unit}</td>
+                      <td className="px-3 py-2">{fixture.type}</td>
+                      <td className="px-3 py-2">{fixture.wattage}</td>
+                      <td className="px-3 py-2">{fixture.purpose}</td>
+                      {renderColorCell(fixture.color)}
+                      <td className="px-3 py-2">{fixture.notes}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {group.fixtures.map((fixture, j) => (
-                      <tr key={j} className="border-b border-gray-200 dark:border-gray-700">
-                        <td className="px-3 py-2">{fixture.channel}</td>
-                        <td className="px-3 py-2">{fixture.position}</td>
-                        <td className="px-3 py-2">{fixture.unit}</td>
-                        <td className="px-3 py-2">{fixture.type}</td>
-                        <td className="px-3 py-2">{fixture.wattage}</td>
-                        <td className="px-3 py-2">{fixture.purpose}</td>
-                        {renderColorCell(fixture.color)}
-                        <td className="px-3 py-2">{fixture.notes}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ))}
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         );
 
       case 'circuit-list':
         return (
-          <div className="space-y-6">
-            {circuitListData.map((group, i) => (
-              <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4">
-                <h3 className="text-lg font-semibold mb-3 text-blue-400">Circuit: {group.circuit}</h3>
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-200 dark:bg-gray-700">
-                    <tr>
-                      <th className="px-3 py-2 text-left">Dim</th>
-                      <th className="px-3 py-2 text-left">Chan</th>
-                      <th className="px-3 py-2 text-left">Position</th>
-                      <th className="px-3 py-2 text-left">Unit #</th>
-                      <th className="px-3 py-2 text-left">Type</th>
-                      <th className="px-3 py-2 text-left">Watt</th>
-                      <th className="px-3 py-2 text-left">Purpose</th>
-                      <th className="px-3 py-2 text-left">Color</th>
-                      <th className="px-3 py-2 text-left">Notes</th>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
+                <tr>
+                  <th className="px-3 py-2 text-left">Circuit</th>
+                  <th className="px-3 py-2 text-left">Dim</th>
+                  <th className="px-3 py-2 text-left">Chan</th>
+                  <th className="px-3 py-2 text-left">Position</th>
+                  <th className="px-3 py-2 text-left">Unit #</th>
+                  <th className="px-3 py-2 text-left">Type</th>
+                  <th className="px-3 py-2 text-left">Watt</th>
+                  <th className="px-3 py-2 text-left">Purpose</th>
+                  <th className="px-3 py-2 text-left">Color</th>
+                  <th className="px-3 py-2 text-left">Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {circuitListData.flatMap((group, i) =>
+                  group.fixtures.map((fixture, j) => (
+                    <tr key={`${i}-${j}`} className="border-b border-gray-200 dark:border-gray-700">
+                      <td className="px-3 py-2">{j === 0 ? group.circuit : '""'}</td>
+                      <td className="px-3 py-2">{fixture.dimmer}</td>
+                      <td className="px-3 py-2">{fixture.channel}</td>
+                      <td className="px-3 py-2">{fixture.position}</td>
+                      <td className="px-3 py-2">{fixture.unit}</td>
+                      <td className="px-3 py-2">{fixture.type}</td>
+                      <td className="px-3 py-2">{fixture.wattage}</td>
+                      <td className="px-3 py-2">{fixture.purpose}</td>
+                      {renderColorCell(fixture.color)}
+                      <td className="px-3 py-2">{fixture.notes}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {group.fixtures.map((fixture, j) => (
-                      <tr key={j} className="border-b border-gray-200 dark:border-gray-700">
-                        <td className="px-3 py-2">{fixture.dimmer}</td>
-                        <td className="px-3 py-2">{fixture.channel}</td>
-                        <td className="px-3 py-2">{fixture.position}</td>
-                        <td className="px-3 py-2">{fixture.unit}</td>
-                        <td className="px-3 py-2">{fixture.type}</td>
-                        <td className="px-3 py-2">{fixture.wattage}</td>
-                        <td className="px-3 py-2">{fixture.purpose}</td>
-                        {renderColorCell(fixture.color)}
-                        <td className="px-3 py-2">{fixture.notes}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ))}
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         );
 
