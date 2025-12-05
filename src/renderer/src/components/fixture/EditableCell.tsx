@@ -7,12 +7,23 @@ interface EditableCellProps {
   className?: string;
   style?: React.CSSProperties;
   readOnly?: boolean;
+  onNavigate?: (direction: 'up' | 'down' | 'left' | 'right' | 'enter') => void;
+  shouldFocus?: boolean;
 }
 
-export function EditableCell({ value, onChange, className, style, readOnly = false }: EditableCellProps) {
+export function EditableCell({
+  value,
+  onChange,
+  className,
+  style,
+  readOnly = false,
+  onNavigate,
+  shouldFocus = false
+}: EditableCellProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value || '');
   const inputRef = useRef<HTMLInputElement>(null);
+  const cellRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setEditValue(value || '');
@@ -25,6 +36,13 @@ export function EditableCell({ value, onChange, className, style, readOnly = fal
     }
   }, [isEditing]);
 
+  // Handle external focus trigger
+  useEffect(() => {
+    if (shouldFocus && !readOnly) {
+      setIsEditing(true);
+    }
+  }, [shouldFocus, readOnly]);
+
   const handleBlur = () => {
     setIsEditing(false);
     if (editValue !== value) {
@@ -32,10 +50,37 @@ export function EditableCell({ value, onChange, className, style, readOnly = fal
     }
   };
 
+  const commitAndNavigate = (direction: 'up' | 'down' | 'left' | 'right' | 'enter') => {
+    if (editValue !== value) {
+      onChange(editValue);
+    }
+    setIsEditing(false);
+    if (onNavigate) {
+      onNavigate(direction);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === 'Tab') {
+    if (e.key === 'Enter') {
       e.preventDefault();
-      handleBlur();
+      commitAndNavigate('enter');
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      commitAndNavigate(e.shiftKey ? 'left' : 'right');
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      commitAndNavigate('up');
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      commitAndNavigate('down');
+    } else if (e.key === 'ArrowLeft' && inputRef.current && inputRef.current.selectionStart === 0) {
+      // Only navigate if cursor is at the beginning
+      e.preventDefault();
+      commitAndNavigate('left');
+    } else if (e.key === 'ArrowRight' && inputRef.current && inputRef.current.selectionStart === inputRef.current.value.length) {
+      // Only navigate if cursor is at the end
+      e.preventDefault();
+      commitAndNavigate('right');
     } else if (e.key === 'Escape') {
       setEditValue(value);
       setIsEditing(false);

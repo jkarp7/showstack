@@ -224,6 +224,21 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     setSelectedRows(new Set());
   };
 
+  // Handle auto-numbering
+  const handleAutoNumber = async (field: keyof Fixture, start: number, increment: number) => {
+    const selectedFixtures = processedFixtures.filter(f => selectedRows.has(f.id));
+
+    const updatePromises = selectedFixtures.map((fixture, index) => {
+      const value = start + (index * increment);
+      return updateFixture(fixture.id, { [field]: value } as Partial<Fixture>);
+    });
+
+    await Promise.all(updatePromises);
+
+    // Clear selection after auto-number
+    setSelectedRows(new Set());
+  };
+
   // Handle user column definitions save
   const handleSaveUserColumnDefinitions = async (definitions: Record<string, string>) => {
     setUserColumnDefinitions(definitions);
@@ -493,6 +508,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
           await deleteMultiple(Array.from(selectedRows));
           setSelectedRows(new Set());
         }}
+        onDeselectAll={() => setSelectedRows(new Set())}
         onUserColumnSettings={() => setIsUserColumnSettingsOpen(true)}
         columnVisibility={columnVisibility}
         onColumnVisibilityChange={setColumnVisibility}
@@ -557,8 +573,10 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
       <BulkEditDialog
         isOpen={isBulkEditDialogOpen}
         selectedCount={selectedRows.size}
+        selectedIds={Array.from(selectedRows)}
         onClose={() => setIsBulkEditDialogOpen(false)}
         onSubmit={handleBulkEdit}
+        onAutoNumber={handleAutoNumber}
       />
 
       {/* User Column Settings Dialog */}

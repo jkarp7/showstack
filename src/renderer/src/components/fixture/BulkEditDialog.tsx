@@ -4,12 +4,18 @@ import { Fixture } from '../../types';
 interface BulkEditDialogProps {
   isOpen: boolean;
   selectedCount: number;
+  selectedIds: string[];
   onClose: () => void;
   onSubmit: (updates: Partial<Fixture>) => void;
+  onAutoNumber: (field: keyof Fixture, start: number, increment: number) => void;
 }
 
-export function BulkEditDialog({ isOpen, selectedCount, onClose, onSubmit }: BulkEditDialogProps) {
+export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, onSubmit, onAutoNumber }: BulkEditDialogProps) {
   const [updates, setUpdates] = useState<Partial<Fixture>>({});
+  const [showAutoNumber, setShowAutoNumber] = useState(false);
+  const [autoNumberField, setAutoNumberField] = useState<keyof Fixture>('channel');
+  const [autoNumberStart, setAutoNumberStart] = useState<number>(1);
+  const [autoNumberIncrement, setAutoNumberIncrement] = useState<number>(1);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,6 +25,12 @@ export function BulkEditDialog({ isOpen, selectedCount, onClose, onSubmit }: Bul
     );
     onSubmit(filteredUpdates as Partial<Fixture>);
     setUpdates({});
+    onClose();
+  };
+
+  const handleAutoNumberSubmit = () => {
+    onAutoNumber(autoNumberField, autoNumberStart, autoNumberIncrement);
+    setShowAutoNumber(false);
     onClose();
   };
 
@@ -171,6 +183,75 @@ export function BulkEditDialog({ isOpen, selectedCount, onClose, onSubmit }: Bul
                 placeholder="Leave blank to skip"
                 rows={3}
               />
+            </div>
+
+            {/* Auto-Number Section */}
+            <div className="border-t border-gray-600 pt-4">
+              <button
+                type="button"
+                onClick={() => setShowAutoNumber(!showAutoNumber)}
+                className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded text-sm font-medium transition flex items-center justify-center gap-2"
+              >
+                {showAutoNumber ? '▼' : '▶'} Auto-Number Fields
+              </button>
+
+              {showAutoNumber && (
+                <div className="mt-4 p-4 bg-gray-900 border border-gray-600 rounded space-y-3">
+                  <p className="text-sm text-gray-400">
+                    Automatically number selected fixtures in sequence.
+                  </p>
+
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        Field
+                      </label>
+                      <select
+                        value={autoNumberField as string}
+                        onChange={(e) => setAutoNumberField(e.target.value as keyof Fixture)}
+                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                      >
+                        <option value="channel">Channel</option>
+                        <option value="unit">Unit</option>
+                        <option value="unit_number">Unit Number</option>
+                        <option value="dmx_address">DMX Address</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        Start At
+                      </label>
+                      <input
+                        type="number"
+                        value={autoNumberStart}
+                        onChange={(e) => setAutoNumberStart(parseInt(e.target.value) || 1)}
+                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        Increment
+                      </label>
+                      <input
+                        type="number"
+                        value={autoNumberIncrement}
+                        onChange={(e) => setAutoNumberIncrement(parseInt(e.target.value) || 1)}
+                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAutoNumberSubmit}
+                    className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded text-sm font-medium transition"
+                  >
+                    Apply Auto-Number to {selectedCount} Fixture{selectedCount > 1 ? 's' : ''}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

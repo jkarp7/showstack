@@ -8,10 +8,12 @@ interface VirtualRowProps {
   isSelected: boolean;
   onClick: (e: React.MouseEvent) => void;
   onCellEdit: (fixtureId: string, field: keyof Fixture, value: string) => void;
+  onCellNavigate?: (fixtureId: string, columnKey: ColumnKey, direction: 'up' | 'down' | 'left' | 'right' | 'enter') => void;
   columnVisibility: ColumnVisibility;
   columnOrder: ColumnKey[];
   columnWidths: Partial<Record<ColumnKey, number>>;
   getColumnWidth: (col: any) => number;
+  focusedCell?: { fixtureId: string; columnKey: ColumnKey } | null;
 }
 
 export const VirtualRow = memo(function VirtualRow({
@@ -19,10 +21,12 @@ export const VirtualRow = memo(function VirtualRow({
   isSelected,
   onClick,
   onCellEdit,
+  onCellNavigate,
   columnVisibility,
   columnOrder,
   columnWidths,
   getColumnWidth,
+  focusedCell,
 }: VirtualRowProps) {
   // Get ordered column configs
   const orderedColumns = getOrderedColumns(columnOrder);
@@ -93,14 +97,17 @@ export const VirtualRow = memo(function VirtualRow({
       </div>
       {orderedColumns.filter(col => columnVisibility[col.key]).map(col => {
         const colWidth = getColumnWidth(col);
+        const isFocused = focusedCell?.fixtureId === fixture.id && focusedCell?.columnKey === col.key;
         return (
           <EditableCell
             key={col.key}
             value={getCellValue(col.key)}
             onChange={(val) => onCellEdit(fixture.id, col.key, val)}
+            onNavigate={(direction) => onCellNavigate?.(fixture.id, col.key, direction)}
             className="flex-shrink-0"
             style={{ width: `${colWidth}px` }}
             readOnly={isFieldReadOnly(col.key)}
+            shouldFocus={isFocused}
           />
         );
       })}
