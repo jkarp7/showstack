@@ -765,30 +765,44 @@ function renderLayoutElement(
     const label = config.showLabel && config.label ? config.label : '';
 
     // Special handling for logo field - render as image
-    if (config.fieldType === 'logo' && project.logo_storage_path) {
-      try {
-        // Read logo file and convert to base64 data URL
-        if (fs.existsSync(project.logo_storage_path)) {
-          const buffer = fs.readFileSync(project.logo_storage_path);
-          const ext = path.extname(project.logo_storage_path).toLowerCase();
-          const mimeTypes: Record<string, string> = {
-            '.jpg': 'image/jpeg',
-            '.jpeg': 'image/jpeg',
-            '.png': 'image/png',
-            '.gif': 'image/gif',
-            '.svg': 'image/svg+xml',
-            '.webp': 'image/webp'
-          };
-          const mimeType = mimeTypes[ext] || 'image/png';
-          const base64 = buffer.toString('base64');
-          const dataUrl = `data:${mimeType};base64,${base64}`;
+    if (config.fieldType === 'logo') {
+      console.log('[PDF] Logo field detected!');
+      console.log('[PDF] Project logo_storage_path:', project.logo_storage_path);
+      console.log('[PDF] Project logo_url:', project.logo_url);
+      console.log('[PDF] Project keys:', Object.keys(project));
 
-          return `<div style="${baseStyle} padding: 0;">
-            <img src="${dataUrl}" alt="Project Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
-          </div>`;
+      if (project.logo_storage_path) {
+        console.log('[PDF] logo_storage_path exists:', project.logo_storage_path);
+        try {
+          // Read logo file and convert to base64 data URL
+          if (fs.existsSync(project.logo_storage_path)) {
+            console.log('[PDF] File exists, reading...');
+            const buffer = fs.readFileSync(project.logo_storage_path);
+            const ext = path.extname(project.logo_storage_path).toLowerCase();
+            const mimeTypes: Record<string, string> = {
+              '.jpg': 'image/jpeg',
+              '.jpeg': 'image/jpeg',
+              '.png': 'image/png',
+              '.gif': 'image/gif',
+              '.svg': 'image/svg+xml',
+              '.webp': 'image/webp'
+            };
+            const mimeType = mimeTypes[ext] || 'image/png';
+            const base64 = buffer.toString('base64');
+            const dataUrl = `data:${mimeType};base64,${base64}`;
+            console.log('[PDF] Logo converted to data URL, length:', dataUrl.length);
+
+            return `<div style="${baseStyle} padding: 0;">
+              <img src="${dataUrl}" alt="Project Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+            </div>`;
+          } else {
+            console.log('[PDF] File does NOT exist at path:', project.logo_storage_path);
+          }
+        } catch (error) {
+          console.error('[PDF] Error loading logo:', error);
         }
-      } catch (error) {
-        console.error('Error loading logo for PDF:', error);
+      } else {
+        console.log('[PDF] No logo_storage_path in project');
       }
       return ''; // No logo or failed to load
     }
