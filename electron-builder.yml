@@ -1,0 +1,97 @@
+appId: com.lytrix.showstack-production
+productName: ShowStack Production
+copyright: Copyright © 2025 Lytrix / Josh Karp Designs
+
+directories:
+  output: release
+  buildResources: resources
+
+files:
+  - dist/**/*
+  - package.json
+  - "!**/*.ts"
+  - "!**/*.map"
+  - "!.git"
+  - "!.github"
+  - "!.vscode"
+  - "!src"
+  - "!proof-of-concept"
+  - "!docs"
+  - "!*.md"
+  - "!.gitignore"
+  - "!.eslintrc*"
+  - "!.prettierrc*"
+  - "!tsconfig.json"
+
+# Publish to GitHub Releases for auto-updates
+publish:
+  provider: github
+  owner: jkarp7
+  repo: showstack
+
+mac:
+  category: public.app-category.productivity
+  target:
+    - dmg
+    - zip
+  icon: resources/icon.icns
+  hardenedRuntime: false  # Set to true when you have code signing certificate
+  gatekeeperAssess: false
+  entitlements: null
+  entitlementsInherit: null
+  darkModeSupport: true
+
+dmg:
+  title: "ShowStack:Production ${version}"
+  icon: resources/icon.icns
+  background: resources/dmg-background.png
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+  window:
+    width: 540
+    height: 400
+
+win:
+  target:
+    - nsis
+    - portable
+  icon: resources/icon.ico
+  artifactName: "${productName}-Setup-${version}.${ext}"
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: "ShowStack:Production"
+
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Utility
+  icon: resources/icon.png
+  synopsis: "Modern production management software for live entertainment"
+  description: |
+    ShowStack:Production is a comprehensive lighting design and production
+    management tool for theater, concerts, and live events. Features include
+    fixture management, power distribution, label printing, and integration
+    with ETC Eos consoles and Vectorworks.
+
+appImage:
+  license: LICENSE
+
+# Code signing configuration (commented out until certificates are obtained)
+# mac:
+#   identity: "Developer ID Application: Your Name (TEAM_ID)"
+#
+# afterSign: scripts/notarize.js
+#
+# win:
+#   certificateFile: "path/to/certificate.pfx"
+#   certificatePassword: "${WINDOWS_CERTIFICATE_PASSWORD}"

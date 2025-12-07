@@ -5,6 +5,7 @@
   "author": "Josh Karp / Lytrix",
   "license": "UNLICENSED",
   "private": true,
+  "main": "dist/main/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/jkarp7/showstack.git"
@@ -13,7 +14,20 @@
     "dev:poc": "cd proof-of-concept && npm run dev",
     "build:poc": "cd proof-of-concept && npm run build",
     "test:poc": "cd proof-of-concept && npm test",
-    "install:all": "npm install && cd proof-of-concept && npm install"
+    "install:all": "npm install && cd proof-of-concept && npm install",
+    "dev": "concurrently \"npm run dev:renderer\" \"npm run dev:electron\"",
+    "dev:renderer": "cd proof-of-concept && npm run dev",
+    "dev:electron": "wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .",
+    "build": "npm run build:main && npm run build:preload && npm run build:renderer",
+    "build:main": "tsc --project tsconfig.json",
+    "build:preload": "tsc --project tsconfig.json",
+    "build:renderer": "cd proof-of-concept && npm run build && mkdir -p ../dist/renderer && cp -r dist/* ../dist/renderer/",
+    "dist": "npm run build && electron-builder",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:linux": "npm run build && electron-builder --linux",
+    "dist:all": "npm run build && electron-builder --mac --win --linux",
+    "clean": "rm -rf dist"
   },
   "keywords": [
     "lighting",
@@ -26,5 +40,14 @@
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^27.1.0",
+    "electron-builder": "^24.9.1",
+    "typescript": "^5.3.3",
+    "wait-on": "^7.2.0"
   }
 }
