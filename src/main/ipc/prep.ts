@@ -765,12 +765,12 @@ function renderLayoutElement(
     const label = config.showLabel && config.label ? config.label : '';
 
     // Special handling for logo field - render as image
-    if (config.fieldType === 'logo' && project.logo_path) {
+    if (config.fieldType === 'logo' && project.logo_storage_path) {
       try {
         // Read logo file and convert to base64 data URL
-        if (fs.existsSync(project.logo_path)) {
-          const buffer = fs.readFileSync(project.logo_path);
-          const ext = path.extname(project.logo_path).toLowerCase();
+        if (fs.existsSync(project.logo_storage_path)) {
+          const buffer = fs.readFileSync(project.logo_storage_path);
+          const ext = path.extname(project.logo_storage_path).toLowerCase();
           const mimeTypes: Record<string, string> = {
             '.jpg': 'image/jpeg',
             '.jpeg': 'image/jpeg',
