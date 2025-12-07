@@ -767,18 +767,22 @@ function renderLayoutElement(
     // Special handling for logo field - render as image
     if (config.fieldType === 'logo') {
       console.log('[PDF] Logo field detected!');
+      console.log('[PDF] Project logo_path:', (project as any).logo_path);
       console.log('[PDF] Project logo_storage_path:', project.logo_storage_path);
       console.log('[PDF] Project logo_url:', project.logo_url);
       console.log('[PDF] Project keys:', Object.keys(project));
 
-      if (project.logo_storage_path) {
-        console.log('[PDF] logo_storage_path exists:', project.logo_storage_path);
+      // Support both unified Project (logo_path) and legacy PrepProject (logo_storage_path)
+      const logoPath = (project as any).logo_path || project.logo_storage_path;
+
+      if (logoPath) {
+        console.log('[PDF] Using logo path:', logoPath);
         try {
           // Read logo file and convert to base64 data URL
-          if (fs.existsSync(project.logo_storage_path)) {
+          if (fs.existsSync(logoPath)) {
             console.log('[PDF] File exists, reading...');
-            const buffer = fs.readFileSync(project.logo_storage_path);
-            const ext = path.extname(project.logo_storage_path).toLowerCase();
+            const buffer = fs.readFileSync(logoPath);
+            const ext = path.extname(logoPath).toLowerCase();
             const mimeTypes: Record<string, string> = {
               '.jpg': 'image/jpeg',
               '.jpeg': 'image/jpeg',
@@ -796,13 +800,13 @@ function renderLayoutElement(
               <img src="${dataUrl}" alt="Project Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
             </div>`;
           } else {
-            console.log('[PDF] File does NOT exist at path:', project.logo_storage_path);
+            console.log('[PDF] File does NOT exist at path:', logoPath);
           }
         } catch (error) {
           console.error('[PDF] Error loading logo:', error);
         }
       } else {
-        console.log('[PDF] No logo_storage_path in project');
+        console.log('[PDF] No logo_path or logo_storage_path in project');
       }
       return ''; // No logo or failed to load
     }
