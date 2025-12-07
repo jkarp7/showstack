@@ -245,8 +245,27 @@ export const VirtualRow = memo(function VirtualRow({
     return String(value);
   };
 
-  // Helper function to get gel color hex value
-  const getGelColor = (colorValue: string): string | undefined => {
+  // Helper function to get gel color hex value(s) - supports dual colors like "L202+R119"
+  const getGelColor = (colorValue: string): string | string[] | undefined => {
+    if (!colorValue) return undefined;
+
+    // Check for dual colors (e.g., "L202+R119" or "L202 + R119")
+    const dualColorMatch = colorValue.match(/^([^+]+)\+(.+)$/);
+    if (dualColorMatch) {
+      const [, color1, color2] = dualColorMatch;
+      const gel1 = getSingleGelColor(color1.trim());
+      const gel2 = getSingleGelColor(color2.trim());
+      if (gel1 && gel2) {
+        return [gel1, gel2];
+      }
+    }
+
+    // Single color
+    return getSingleGelColor(colorValue);
+  };
+
+  // Helper to get a single gel color hex value
+  const getSingleGelColor = (colorValue: string): string | undefined => {
     if (!colorValue) return undefined;
 
     // Parse gel color code (same logic as Paperwork)
@@ -302,14 +321,45 @@ export const VirtualRow = memo(function VirtualRow({
               className="flex-shrink-0 flex items-center px-2"
               style={{ width: `${colWidth}px` }}
             >
-              <div
-                className="w-4 h-4 rounded border flex-shrink-0 mr-2"
-                style={{
-                  backgroundColor: gelColor || '#ddd',
-                  borderColor: '#999'
-                }}
-                title={gelColor ? `${cellValue} (${gelColor})` : cellValue}
-              />
+              {/* Color swatch - supports dual colors */}
+              {Array.isArray(gelColor) ? (
+                // Dual color swatch - overlapping diagonal squares
+                <div className="relative w-4 h-4 flex-shrink-0 mr-2" title={`${cellValue} (${gelColor[0]} + ${gelColor[1]})`}>
+                  {/* First color - top left */}
+                  <div
+                    className="absolute w-3 h-3 rounded-sm border border-gray-400 dark:border-gray-600"
+                    style={{
+                      backgroundColor: gelColor[0],
+                      top: 0,
+                      left: 0,
+                      zIndex: 2
+                    }}
+                  />
+                  {/* Second color - bottom right */}
+                  <div
+                    className="absolute w-3 h-3 rounded-sm border border-gray-400 dark:border-gray-600"
+                    style={{
+                      backgroundColor: gelColor[1],
+                      bottom: 0,
+                      right: 0,
+                      zIndex: 1
+                    }}
+                  />
+                </div>
+              ) : gelColor ? (
+                // Single color swatch
+                <div
+                  className="w-4 h-4 rounded border border-gray-400 dark:border-gray-600 flex-shrink-0 mr-2"
+                  style={{ backgroundColor: gelColor }}
+                  title={`${cellValue} (${gelColor})`}
+                />
+              ) : (
+                // No color found - show empty swatch
+                <div
+                  className="w-4 h-4 rounded border border-gray-400 dark:border-gray-600 flex-shrink-0 mr-2 bg-gray-200 dark:bg-gray-700"
+                  title={cellValue || 'No color'}
+                />
+              )}
               <EditableCell
                 value={cellValue}
                 onChange={(val) => onCellEdit(fixture.id, col.key, val)}
