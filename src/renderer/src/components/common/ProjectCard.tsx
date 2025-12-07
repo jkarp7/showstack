@@ -35,12 +35,12 @@ export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
         ×
       </button>
       {/* Project Logo/Preview */}
-      <div className="mb-4 flex items-center justify-center h-32 bg-gray-700 rounded-lg group-hover:bg-gray-650 transition overflow-hidden">
+      <div className="mb-4 flex items-center justify-center h-32 bg-gray-700 rounded-lg group-hover:bg-gray-650 transition overflow-hidden p-2">
         {project.logo_path ? (
           <img
             src={project.logo_path}
             alt={`${project.name} logo`}
-            className="w-full h-full object-cover"
+            className="max-w-full max-h-full object-contain"
           />
         ) : (
           <span className="text-4xl">📁</span>

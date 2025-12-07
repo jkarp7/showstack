@@ -862,23 +862,6 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
               <label className="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-650">
                 <input
                   type="checkbox"
-                  checked={enabledModules.includes('design')}
-                  onChange={() => toggleModule('design')}
-                  disabled={true}
-                  className="w-4 h-4"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">ShowStack:Design</span>
-                    <span className="px-2 py-0.5 bg-gray-600 text-xs rounded">Locked</span>
-                  </div>
-                  <p className="text-xs text-gray-400">Lighting design & visualization</p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-650">
-                <input
-                  type="checkbox"
                   checked={enabledModules.includes('production')}
                   onChange={() => toggleModule('production')}
                   className="w-4 h-4"
@@ -886,19 +869,6 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                 <div className="flex-1">
                   <div className="font-medium">ShowStack:Production</div>
                   <p className="text-xs text-gray-400">Fixture management & technical planning</p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-650">
-                <input
-                  type="checkbox"
-                  checked={enabledModules.includes('prep')}
-                  onChange={() => toggleModule('prep')}
-                  className="w-4 h-4"
-                />
-                <div className="flex-1">
-                  <div className="font-medium">ShowStack:Prep</div>
-                  <p className="text-xs text-gray-400">Equipment orders & specifications for rental houses</p>
                 </div>
               </label>
 

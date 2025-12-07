@@ -229,7 +229,8 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       case 'document_title':
         return section.config?.title || 'SHOP ORDER';
       case 'logo':
-        return ''; // TODO: Handle logo images
+        // Return logo path from project (logo_url or logo_storage_path)
+        return project.logo_url || project.logo_storage_path || '';
       default:
         return '';
     }
@@ -281,6 +282,25 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       const value = getDataFieldValue(config.fieldType);
       const label = config.showLabel && config.label ? config.label : '';
       const displayValue = value || '';
+
+      // Special handling for logo field - render as image
+      if (config.fieldType === 'logo' && value) {
+        return (
+          <div key={element.id} style={{...elementStyle, padding: 0}}>
+            <img
+              src={value}
+              alt="Project Logo"
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+                width: 'auto',
+                height: 'auto',
+                objectFit: 'contain',
+              }}
+            />
+          </div>
+        );
+      }
 
       // Don't render if no value and not showing label
       if (!value && !label) return null;
@@ -345,6 +365,28 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       }
     }
 
+    // Image elements
+    if (element.element_type === 'image') {
+      const src = config.src || '';
+      if (!src) return null;
+
+      return (
+        <div key={element.id} style={{...elementStyle, padding: 0}}>
+          <img
+            src={src}
+            alt={config.altText || 'Image'}
+            style={{
+              maxWidth: '100%',
+              maxHeight: '100%',
+              width: 'auto',
+              height: 'auto',
+              objectFit: config.objectFit || 'contain',
+            }}
+          />
+        </div>
+      );
+    }
+
     // Dynamic content: Equipment List
     if (element.element_type === 'equipment_list') {
       return (
@@ -387,7 +429,7 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       );
     }
 
-    // TODO: Handle table, image elements
+    // TODO: Handle table elements
     return null;
   }
 
