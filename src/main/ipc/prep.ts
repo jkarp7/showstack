@@ -43,6 +43,7 @@ import {
   deleteNoteTemplate,
   PrepNoteTemplate,
 } from '../database/queries/prep';
+import { getProjectById } from '../database/queries/projects';
 import {
   // Layout Templates (app-level user preferences)
   getAllLayoutTemplates,
@@ -770,11 +771,27 @@ function renderLayoutElement(
       console.log('[PDF] Project logo_path:', (project as any).logo_path);
       console.log('[PDF] Project logo_storage_path:', project.logo_storage_path);
       console.log('[PDF] Project logo_url:', project.logo_url);
-      console.log('[PDF] Project keys:', Object.keys(project));
+      console.log('[PDF] Project parent_project_id:', project.parent_project_id);
 
       // Support both unified Project (logo_path) and legacy PrepProject (logo_storage_path)
       // Prioritize logo_path as the unified field
-      const logoPath = project.logo_path || project.logo_storage_path;
+      let logoPath = project.logo_path || project.logo_storage_path;
+
+      // If no logo in prep project, check parent project
+      if (!logoPath && project.parent_project_id) {
+        console.log('[PDF] No logo in PrepProject, checking parent project...');
+        try {
+          const parentProject = getProjectById(project.parent_project_id);
+          if (parentProject?.logo_path) {
+            console.log('[PDF] Found logo in parent project:', parentProject.logo_path);
+            logoPath = parentProject.logo_path;
+          } else {
+            console.log('[PDF] Parent project has no logo');
+          }
+        } catch (error) {
+          console.error('[PDF] Error loading parent project:', error);
+        }
+      }
 
       if (logoPath) {
         console.log('[PDF] Using logo path:', logoPath);
