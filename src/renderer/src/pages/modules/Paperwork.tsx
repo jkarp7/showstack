@@ -350,17 +350,43 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       if (color === 'No Color') return acc;
 
       const gelInfo = getGelInfo(fixture.type || '');
-      const key = `${color}|||${gelInfo.size}|||${gelInfo.cutsPerSheet}`;
 
-      if (!acc[key]) {
-        acc[key] = {
-          color,
-          size: gelInfo.size,
-          cutsPerSheet: gelInfo.cutsPerSheet,
-          count: 0
-        };
+      // Check if this is a dual color (e.g., "R26+R119")
+      const dualColorMatch = color.match(/^([^+]+)\+(.+)$/);
+
+      if (dualColorMatch) {
+        // Split dual colors into individual colors
+        const [, color1, color2] = dualColorMatch;
+        const colors = [color1.trim(), color2.trim()];
+
+        colors.forEach(individualColor => {
+          const key = `${individualColor}|||${gelInfo.size}|||${gelInfo.cutsPerSheet}`;
+
+          if (!acc[key]) {
+            acc[key] = {
+              color: individualColor,
+              size: gelInfo.size,
+              cutsPerSheet: gelInfo.cutsPerSheet,
+              count: 0
+            };
+          }
+          acc[key].count++;
+        });
+      } else {
+        // Single color
+        const key = `${color}|||${gelInfo.size}|||${gelInfo.cutsPerSheet}`;
+
+        if (!acc[key]) {
+          acc[key] = {
+            color,
+            size: gelInfo.size,
+            cutsPerSheet: gelInfo.cutsPerSheet,
+            count: 0
+          };
+        }
+        acc[key].count++;
       }
-      acc[key].count++;
+
       return acc;
     }, {} as Record<string, { color: string; size: string; cutsPerSheet: number; count: number }>);
 
@@ -748,33 +774,88 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
     'R4960': '#8A53FF', 'R4990': '#632EFF'
   };
 
+  // Helper to get a single gel color hex value
+  const getSingleGelColor = (colorValue: string): string | undefined => {
+    if (!colorValue) return undefined;
+
+    // Parse gel color code
+    let gelCode = colorValue.trim().toUpperCase();
+
+    // If it's a number-only, default to Rosco (R prefix)
+    if (/^\d+$/.test(gelCode)) {
+      gelCode = 'R' + gelCode;
+    }
+
+    return gelColors[gelCode];
+  };
+
+  // Helper function to get gel color hex value(s) - supports dual colors like "L202+R119"
+  const getGelColor = (colorValue: string): string | string[] | undefined => {
+    if (!colorValue) return undefined;
+
+    // Check for dual colors (e.g., "L202+R119" or "L202 + R119")
+    const dualColorMatch = colorValue.match(/^([^+]+)\+(.+)$/);
+    if (dualColorMatch) {
+      const [, color1, color2] = dualColorMatch;
+      const gel1 = getSingleGelColor(color1.trim());
+      const gel2 = getSingleGelColor(color2.trim());
+      if (gel1 && gel2) {
+        return [gel1, gel2];
+      }
+    }
+
+    // Single color
+    return getSingleGelColor(colorValue);
+  };
+
   // Helper function to render color with swatch
   const renderColorCell = (color: string) => {
     if (color === '-' || !color) return <td className="px-3 py-2">-</td>;
 
-    // Parse gel color (supports R80, L201, G100, 80, etc.)
-    let gelCode = color.trim().toUpperCase();
-
-    // Add prefix if just a number
-    if (/^\d+$/.test(gelCode)) {
-      // Try common prefixes
-      gelCode = 'R' + gelCode; // Default to Roscolux
-    }
-
-    // Check if it's a known gel color
-    const gelColor = gelColors[gelCode];
+    const gelColor = getGelColor(color);
 
     return (
       <td className="px-3 py-2">
         <div className="flex items-center gap-2">
-          <div
-            className="w-4 h-4 rounded border border-gray-400 flex-shrink-0"
-            style={{
-              backgroundColor: gelColor || '#ddd',
-              borderColor: '#999'
-            }}
-            title={gelColor ? `${color} (${gelColor})` : color}
-          />
+          {/* Color swatch - supports dual colors */}
+          {Array.isArray(gelColor) ? (
+            // Dual color swatch - overlapping diagonal squares
+            <div className="relative w-4 h-4 flex-shrink-0" title={`${color} (${gelColor[0]} + ${gelColor[1]})`}>
+              {/* First color - top left */}
+              <div
+                className="absolute w-3 h-3 rounded-sm border border-gray-400 dark:border-gray-600"
+                style={{
+                  backgroundColor: gelColor[0],
+                  top: 0,
+                  left: 0,
+                  zIndex: 2
+                }}
+              />
+              {/* Second color - bottom right */}
+              <div
+                className="absolute w-3 h-3 rounded-sm border border-gray-400 dark:border-gray-600"
+                style={{
+                  backgroundColor: gelColor[1],
+                  bottom: 0,
+                  right: 0,
+                  zIndex: 1
+                }}
+              />
+            </div>
+          ) : gelColor ? (
+            // Single color swatch
+            <div
+              className="w-4 h-4 rounded border border-gray-400 dark:border-gray-600 flex-shrink-0"
+              style={{ backgroundColor: gelColor }}
+              title={`${color} (${gelColor})`}
+            />
+          ) : (
+            // No color found - show empty swatch
+            <div
+              className="w-4 h-4 rounded border border-gray-400 dark:border-gray-600 flex-shrink-0 bg-gray-200 dark:bg-gray-700"
+              title={color || 'No color'}
+            />
+          )}
           <span>{color}</span>
         </div>
       </td>
@@ -982,23 +1063,51 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 </thead>
                 <tbody>
                   {colorScheduleData.map((row, i) => {
-                    // Parse gel color code
-                    let gelCode = row.color.trim().toUpperCase();
-                    if (/^\d+$/.test(gelCode)) gelCode = 'R' + gelCode;
-                    const gelColor = gelColors[gelCode];
+                    const gelColor = getGelColor(row.color);
 
                     return (
                       <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-750">
                         <td className="px-3 py-2 font-medium">
                           <div className="flex items-center gap-2">
-                            <div
-                              className="w-4 h-4 rounded border border-gray-400 flex-shrink-0"
-                              style={{
-                                backgroundColor: gelColor || '#ddd',
-                                borderColor: '#999'
-                              }}
-                              title={gelColor ? `${row.color} (${gelColor})` : row.color}
-                            />
+                            {/* Color swatch - supports dual colors */}
+                            {Array.isArray(gelColor) ? (
+                              // Dual color swatch - overlapping diagonal squares
+                              <div className="relative w-4 h-4 flex-shrink-0" title={`${row.color} (${gelColor[0]} + ${gelColor[1]})`}>
+                                {/* First color - top left */}
+                                <div
+                                  className="absolute w-3 h-3 rounded-sm border border-gray-400 dark:border-gray-600"
+                                  style={{
+                                    backgroundColor: gelColor[0],
+                                    top: 0,
+                                    left: 0,
+                                    zIndex: 2
+                                  }}
+                                />
+                                {/* Second color - bottom right */}
+                                <div
+                                  className="absolute w-3 h-3 rounded-sm border border-gray-400 dark:border-gray-600"
+                                  style={{
+                                    backgroundColor: gelColor[1],
+                                    bottom: 0,
+                                    right: 0,
+                                    zIndex: 1
+                                  }}
+                                />
+                              </div>
+                            ) : gelColor ? (
+                              // Single color swatch
+                              <div
+                                className="w-4 h-4 rounded border border-gray-400 dark:border-gray-600 flex-shrink-0"
+                                style={{ backgroundColor: gelColor }}
+                                title={`${row.color} (${gelColor})`}
+                              />
+                            ) : (
+                              // No color found - show empty swatch
+                              <div
+                                className="w-4 h-4 rounded border border-gray-400 dark:border-gray-600 flex-shrink-0 bg-gray-200 dark:bg-gray-700"
+                                title={row.color || 'No color'}
+                              />
+                            )}
                             <span>{row.color}</span>
                           </div>
                         </td>
@@ -1029,23 +1138,51 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                   {Object.entries(colorTotals)
                     .sort(([a], [b]) => a.localeCompare(b))
                     .map(([color, sheets], i) => {
-                      // Parse gel color code
-                      let gelCode = color.trim().toUpperCase();
-                      if (/^\d+$/.test(gelCode)) gelCode = 'R' + gelCode;
-                      const gelColor = gelColors[gelCode];
+                      const gelColor = getGelColor(color);
 
                       return (
                         <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-750">
                           <td className="px-3 py-2 font-medium">
                             <div className="flex items-center gap-2">
-                              <div
-                                className="w-4 h-4 rounded border border-gray-400 flex-shrink-0"
-                                style={{
-                                  backgroundColor: gelColor || '#ddd',
-                                  borderColor: '#999'
-                                }}
-                                title={gelColor ? `${color} (${gelColor})` : color}
-                              />
+                              {/* Color swatch - supports dual colors */}
+                              {Array.isArray(gelColor) ? (
+                                // Dual color swatch - overlapping diagonal squares
+                                <div className="relative w-4 h-4 flex-shrink-0" title={`${color} (${gelColor[0]} + ${gelColor[1]})`}>
+                                  {/* First color - top left */}
+                                  <div
+                                    className="absolute w-3 h-3 rounded-sm border border-gray-400 dark:border-gray-600"
+                                    style={{
+                                      backgroundColor: gelColor[0],
+                                      top: 0,
+                                      left: 0,
+                                      zIndex: 2
+                                    }}
+                                  />
+                                  {/* Second color - bottom right */}
+                                  <div
+                                    className="absolute w-3 h-3 rounded-sm border border-gray-400 dark:border-gray-600"
+                                    style={{
+                                      backgroundColor: gelColor[1],
+                                      bottom: 0,
+                                      right: 0,
+                                      zIndex: 1
+                                    }}
+                                  />
+                                </div>
+                              ) : gelColor ? (
+                                // Single color swatch
+                                <div
+                                  className="w-4 h-4 rounded border border-gray-400 dark:border-gray-600 flex-shrink-0"
+                                  style={{ backgroundColor: gelColor }}
+                                  title={`${color} (${gelColor})`}
+                                />
+                              ) : (
+                                // No color found - show empty swatch
+                                <div
+                                  className="w-4 h-4 rounded border border-gray-400 dark:border-gray-600 flex-shrink-0 bg-gray-200 dark:bg-gray-700"
+                                  title={color || 'No color'}
+                                />
+                              )}
                               <span>{color}</span>
                             </div>
                           </td>
