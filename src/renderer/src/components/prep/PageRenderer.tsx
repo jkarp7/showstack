@@ -289,12 +289,15 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
         const getLogoUrl = (logoPath: string): string => {
           // If already a URL, return as-is
           if (logoPath.startsWith('http://') || logoPath.startsWith('https://') || logoPath.startsWith('file://')) {
+            console.log(`[PageRenderer] Logo already a URL: ${logoPath}`);
             return logoPath;
           }
           // Convert file system path to file:// URL
           // Handle Windows paths (backslashes) and normalize
           const normalizedPath = logoPath.replace(/\\/g, '/');
-          return `file://${normalizedPath.startsWith('/') ? '' : '/'}${normalizedPath}`;
+          const fileUrl = `file://${normalizedPath.startsWith('/') ? '' : '/'}${normalizedPath}`;
+          console.log(`[PageRenderer] Converted logo path: ${logoPath} -> ${fileUrl}`);
+          return fileUrl;
         };
 
         return (

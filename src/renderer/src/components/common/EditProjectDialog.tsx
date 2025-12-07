@@ -883,7 +883,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">ShowStack:Manager</span>
-                    <span className="px-2 py-0.5 bg-gray-600 text-xs rounded">Locked</span>
+                    <span className="px-2 py-0.5 bg-gray-400 dark:bg-gray-600 text-gray-900 dark:text-white text-xs rounded">Locked</span>
                   </div>
                   <p className="text-xs text-gray-600 dark:text-gray-400">Tour scheduling & logistics</p>
                 </div>

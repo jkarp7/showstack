@@ -269,7 +269,10 @@ export const VirtualRow = memo(function VirtualRow({
       const gel1 = getSingleGelColor(color1.trim());
       const gel2 = getSingleGelColor(color2.trim());
       if (gel1 && gel2) {
+        console.log(`[VirtualRow] Dual color detected: ${colorValue} -> [${gel1}, ${gel2}]`);
         return [gel1, gel2];
+      } else {
+        console.log(`[VirtualRow] Dual color pattern matched but colors not found: ${colorValue}`, { gel1, gel2 });
       }
     }
 
