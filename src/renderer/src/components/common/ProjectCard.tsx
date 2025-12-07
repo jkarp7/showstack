@@ -1,4 +1,5 @@
 import { Project } from '../store/projectStore';
+import { useState, useEffect } from 'react';
 
 interface ProjectCardProps {
   project: Project;
@@ -7,6 +8,41 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
+  const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
+
+  // Load logo as data URL
+  useEffect(() => {
+    const loadLogo = async () => {
+      if (!project.logo_path) {
+        setLogoDataUrl(null);
+        return;
+      }
+
+      // If already a data URL or http(s) URL, use as-is
+      if (
+        project.logo_path.startsWith('data:') ||
+        project.logo_path.startsWith('http://') ||
+        project.logo_path.startsWith('https://')
+      ) {
+        setLogoDataUrl(project.logo_path);
+        return;
+      }
+
+      // Read file as data URL
+      try {
+        if (typeof window !== 'undefined' && window.api?.files) {
+          const dataUrl = await window.api.files.readImageAsDataUrl(project.logo_path);
+          setLogoDataUrl(dataUrl);
+        }
+      } catch (error) {
+        console.error('[ProjectCard] Error loading logo:', error);
+        setLogoDataUrl(null);
+      }
+    };
+
+    loadLogo();
+  }, [project.logo_path]);
+
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
     return date.toLocaleDateString('en-US', {
@@ -19,22 +55,6 @@ export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDelete();
-  };
-
-  // Convert file system path to file:// URL for img src
-  const getLogoUrl = (logoPath: string | null | undefined): string | null => {
-    if (!logoPath) return null;
-    // If already a URL, return as-is
-    if (logoPath.startsWith('http://') || logoPath.startsWith('https://') || logoPath.startsWith('file://')) {
-      console.log(`[ProjectCard] Logo already a URL: ${logoPath}`);
-      return logoPath;
-    }
-    // Convert file system path to file:// URL
-    // Handle Windows paths (backslashes) and normalize
-    const normalizedPath = logoPath.replace(/\\/g, '/');
-    const fileUrl = `file://${normalizedPath.startsWith('/') ? '' : '/'}${normalizedPath}`;
-    console.log(`[ProjectCard] Converted logo path: ${logoPath} -> ${fileUrl}`);
-    return fileUrl;
   };
 
   return (
@@ -52,9 +72,9 @@ export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
       </button>
       {/* Project Logo/Preview */}
       <div className="mb-4 flex items-center justify-center h-32 bg-gray-700 rounded-lg group-hover:bg-gray-650 transition overflow-hidden p-2">
-        {getLogoUrl(project.logo_path) ? (
+        {logoDataUrl ? (
           <img
-            src={getLogoUrl(project.logo_path)!}
+            src={logoDataUrl}
             alt={`${project.name} logo`}
             className="max-w-full max-h-full object-contain"
           />

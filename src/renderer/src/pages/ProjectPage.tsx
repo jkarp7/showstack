@@ -10,6 +10,7 @@ export function ProjectPage() {
   const { projects, loadProjects, updateProject, setCurrentProject } = useProjectStore();
   const [project, setProject] = useState(projects.find(p => p.id === projectId) || null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!projects.length) {
@@ -25,6 +26,39 @@ export function ProjectPage() {
     }
   }, [projects, projectId, setCurrentProject]);
 
+  // Load logo as data URL
+  useEffect(() => {
+    const loadLogo = async () => {
+      if (!project?.logo_path) {
+        setLogoDataUrl(null);
+        return;
+      }
+
+      // If already a data URL or http(s) URL, use as-is
+      if (
+        project.logo_path.startsWith('data:') ||
+        project.logo_path.startsWith('http://') ||
+        project.logo_path.startsWith('https://')
+      ) {
+        setLogoDataUrl(project.logo_path);
+        return;
+      }
+
+      // Read file as data URL
+      try {
+        if (typeof window !== 'undefined' && window.api?.files) {
+          const dataUrl = await window.api.files.readImageAsDataUrl(project.logo_path);
+          setLogoDataUrl(dataUrl);
+        }
+      } catch (error) {
+        console.error('[ProjectPage] Error loading logo:', error);
+        setLogoDataUrl(null);
+      }
+    };
+
+    loadLogo();
+  }, [project?.logo_path]);
+
   const handleUpdateProject = async (projectId: string, updates: Partial<Project>) => {
     try {
       await updateProject(projectId, updates);
@@ -32,22 +66,6 @@ export function ProjectPage() {
     } catch (error) {
       console.error('Failed to update project:', error);
     }
-  };
-
-  // Convert file system path to file:// URL for img src
-  const getLogoUrl = (logoPath: string | null | undefined): string | null => {
-    if (!logoPath) return null;
-    // If already a URL, return as-is
-    if (logoPath.startsWith('http://') || logoPath.startsWith('https://') || logoPath.startsWith('file://')) {
-      console.log(`[ProjectPage] Logo already a URL: ${logoPath}`);
-      return logoPath;
-    }
-    // Convert file system path to file:// URL
-    // Handle Windows paths (backslashes) and normalize
-    const normalizedPath = logoPath.replace(/\\/g, '/');
-    const fileUrl = `file://${normalizedPath.startsWith('/') ? '' : '/'}${normalizedPath}`;
-    console.log(`[ProjectPage] Converted logo path: ${logoPath} -> ${fileUrl}`);
-    return fileUrl;
   };
 
   if (!project) {
@@ -103,9 +121,9 @@ export function ProjectPage() {
           </div>
           <div className="flex items-start gap-6">
             {/* Project Logo */}
-            {getLogoUrl(project.logo_path) ? (
+            {logoDataUrl ? (
               <img
-                src={getLogoUrl(project.logo_path)!}
+                src={logoDataUrl}
                 alt={project.name}
                 className="w-24 h-24 rounded-lg object-cover bg-gray-200 dark:bg-gray-700"
               />

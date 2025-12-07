@@ -1,5 +1,7 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { fileService, ProjectImportResult, ProjectConflictResolution } from '../services/fileService';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * Register file operation IPC handlers
@@ -159,6 +161,41 @@ export function registerFileHandlers(): void {
     // This will be implemented when we add the window close handler
     // For now, just return false (no unsaved changes)
     return false;
+  });
+
+  /**
+   * Read an image file and convert to base64 data URL
+   */
+  ipcMain.handle('file:readImageAsDataUrl', async (_, imagePath: string): Promise<string | null> => {
+    try {
+      if (!imagePath || !fs.existsSync(imagePath)) {
+        console.error('Image file not found:', imagePath);
+        return null;
+      }
+
+      // Read file as buffer
+      const buffer = fs.readFileSync(imagePath);
+
+      // Get file extension to determine MIME type
+      const ext = path.extname(imagePath).toLowerCase();
+      const mimeTypes: Record<string, string> = {
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.svg': 'image/svg+xml',
+        '.webp': 'image/webp'
+      };
+
+      const mimeType = mimeTypes[ext] || 'image/png';
+
+      // Convert to base64 data URL
+      const base64 = buffer.toString('base64');
+      return `data:${mimeType};base64,${base64}`;
+    } catch (error) {
+      console.error('Error reading image file:', error);
+      return null;
+    }
   });
 
   console.log('✅ File IPC handlers registered');

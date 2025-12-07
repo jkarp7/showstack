@@ -57,6 +57,7 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
   const [layout, setLayout] = useState<PageLayoutTemplate | null>(null);
   const [loading, setLoading] = useState(true);
   const [scale, setScale] = useState(1);
+  const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Page dimensions in pixels (at 96 DPI)
@@ -151,6 +152,39 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
 
     loadLayout();
   }, [section.type, project.id]);
+
+  // Load logo as data URL
+  useEffect(() => {
+    const loadLogo = async () => {
+      if (!project.logo_path) {
+        setLogoDataUrl(null);
+        return;
+      }
+
+      // If already a data URL or http(s) URL, use as-is
+      if (
+        project.logo_path.startsWith('data:') ||
+        project.logo_path.startsWith('http://') ||
+        project.logo_path.startsWith('https://')
+      ) {
+        setLogoDataUrl(project.logo_path);
+        return;
+      }
+
+      // Read file as data URL
+      try {
+        if (typeof window !== 'undefined' && window.api?.files) {
+          const dataUrl = await window.api.files.readImageAsDataUrl(project.logo_path);
+          setLogoDataUrl(dataUrl);
+        }
+      } catch (error) {
+        console.error('[PageRenderer] Error loading logo:', error);
+        setLogoDataUrl(null);
+      }
+    };
+
+    loadLogo();
+  }, [project.logo_path]);
 
   function getDataFieldValue(fieldType: DataFieldType): string {
     const formatDate = (timestamp?: string | number): string => {
@@ -284,26 +318,11 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       const displayValue = value || '';
 
       // Special handling for logo field - render as image
-      if (config.fieldType === 'logo' && value) {
-        // Convert file system path to file:// URL
-        const getLogoUrl = (logoPath: string): string => {
-          // If already a URL, return as-is
-          if (logoPath.startsWith('http://') || logoPath.startsWith('https://') || logoPath.startsWith('file://')) {
-            console.log(`[PageRenderer] Logo already a URL: ${logoPath}`);
-            return logoPath;
-          }
-          // Convert file system path to file:// URL
-          // Handle Windows paths (backslashes) and normalize
-          const normalizedPath = logoPath.replace(/\\/g, '/');
-          const fileUrl = `file://${normalizedPath.startsWith('/') ? '' : '/'}${normalizedPath}`;
-          console.log(`[PageRenderer] Converted logo path: ${logoPath} -> ${fileUrl}`);
-          return fileUrl;
-        };
-
+      if (config.fieldType === 'logo' && logoDataUrl) {
         return (
           <div key={element.id} style={{...elementStyle, padding: 0}}>
             <img
-              src={getLogoUrl(value)}
+              src={logoDataUrl}
               alt="Project Logo"
               style={{
                 maxWidth: '100%',

@@ -786,7 +786,8 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       gelCode = 'R' + gelCode;
     }
 
-    return gelColors[gelCode];
+    // Return the gel color if found, otherwise default to frosty white for frosts/diffusion
+    return gelColors[gelCode] || '#F5F5F5';
   };
 
   // Helper function to get gel color hex value(s) - supports dual colors like "L202+R119"
@@ -800,10 +801,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       const gel1 = getSingleGelColor(color1.trim());
       const gel2 = getSingleGelColor(color2.trim());
       if (gel1 && gel2) {
-        console.log(`[Paperwork] Dual color detected: ${colorValue} -> [${gel1}, ${gel2}]`);
         return [gel1, gel2];
-      } else {
-        console.log(`[Paperwork] Dual color pattern matched but colors not found: ${colorValue}`, { gel1, gel2 });
       }
     }
 
