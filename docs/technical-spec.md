@@ -1,9 +1,9 @@
 # ShowStack:Production Technical Specification
 ## LightWright 6 Competitor Module
 
-**Version:** 1.0-ALPHA  
-**Target Platform:** Electron Desktop Application  
-**Author:** Josh Karp / Lytrix  
+**Version:** 1.0-ALPHA
+**Target Platform:** Electron Desktop Application
+**Author:** Lytrix
 **Last Updated:** November 16, 2025
 
 ---

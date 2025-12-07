@@ -137,3 +137,22 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Electron build output
+dist/
+release/
+out/
+
+# Electron-builder cache
+.electron-builder-cache/
+
+# macOS code signing
+*.p12
+*.mobileprovision
+
+# Windows code signing
+*.pfx
+
+# App-specific
+.DS_Store
+Thumbs.db
