@@ -284,6 +284,7 @@ function runProjectMigrations(db: Database): void {
         pe_email TEXT,
         pe_phone TEXT,
         additional_contacts TEXT,
+        logo_path TEXT,
         logo_url TEXT,
         logo_storage_path TEXT,
         disciplines TEXT NOT NULL DEFAULT '["lighting"]',
@@ -328,6 +329,12 @@ function runProjectMigrations(db: Database): void {
         console.log(`Running migration: Adding ${field} to prep_projects`);
         db.run(`ALTER TABLE prep_projects ADD COLUMN ${field} TEXT`);
       }
+    }
+
+    // Add logo_path if missing (unified logo field with Project type)
+    if (!prepProjectsColumns.includes('logo_path')) {
+      console.log('Running migration: Adding logo_path to prep_projects');
+      db.run('ALTER TABLE prep_projects ADD COLUMN logo_path TEXT');
     }
   }
 
