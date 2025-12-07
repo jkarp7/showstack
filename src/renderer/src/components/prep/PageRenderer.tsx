@@ -156,25 +156,44 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
   // Load logo as data URL
   useEffect(() => {
     const loadLogo = async () => {
-      if (!project.logo_path) {
+      // Try to find logo path from PrepProject or parent Project
+      let logoPath = project.logo_path || (project as any).logo_storage_path;
+
+      // If no logo in PrepProject, check parent project
+      if (!logoPath && (project as any).parent_project_id) {
+        console.log('[PageRenderer] No logo in PrepProject, checking parent project...');
+        try {
+          const parentProject = await window.api.projects.getById((project as any).parent_project_id);
+          if (parentProject?.logo_path) {
+            console.log('[PageRenderer] Found logo in parent project:', parentProject.logo_path);
+            logoPath = parentProject.logo_path;
+          } else {
+            console.log('[PageRenderer] Parent project has no logo');
+          }
+        } catch (error) {
+          console.error('[PageRenderer] Error loading parent project:', error);
+        }
+      }
+
+      if (!logoPath) {
         setLogoDataUrl(null);
         return;
       }
 
       // If already a data URL or http(s) URL, use as-is
       if (
-        project.logo_path.startsWith('data:') ||
-        project.logo_path.startsWith('http://') ||
-        project.logo_path.startsWith('https://')
+        logoPath.startsWith('data:') ||
+        logoPath.startsWith('http://') ||
+        logoPath.startsWith('https://')
       ) {
-        setLogoDataUrl(project.logo_path);
+        setLogoDataUrl(logoPath);
         return;
       }
 
       // Read file as data URL
       try {
         if (typeof window !== 'undefined' && window.api?.files) {
-          const dataUrl = await window.api.files.readImageAsDataUrl(project.logo_path);
+          const dataUrl = await window.api.files.readImageAsDataUrl(logoPath);
           setLogoDataUrl(dataUrl);
         }
       } catch (error) {
@@ -184,7 +203,7 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
     };
 
     loadLogo();
-  }, [project.logo_path]);
+  }, [project.logo_path, (project as any).logo_storage_path, (project as any).parent_project_id]);
 
   function getDataFieldValue(fieldType: DataFieldType): string {
     const formatDate = (timestamp?: string | number): string => {
