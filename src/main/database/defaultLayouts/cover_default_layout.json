@@ -12,6 +12,26 @@
   },
   "elements": [
     {
+      "element_type": "dataField",
+      "config": {
+        "fieldType": "logo",
+        "showLabel": false
+      },
+      "grid_column": 4,
+      "grid_row": 0,
+      "column_span": 4,
+      "row_span": 2,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 11,
+        "textAlign": "center",
+        "color": "#000000",
+        "backgroundColor": "transparent",
+        "padding": 8
+      }
+    },
+    {
       "element_type": "text",
       "config": {
         "content": "{production_name}"
