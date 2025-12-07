@@ -285,10 +285,22 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
 
       // Special handling for logo field - render as image
       if (config.fieldType === 'logo' && value) {
+        // Convert file system path to file:// URL
+        const getLogoUrl = (logoPath: string): string => {
+          // If already a URL, return as-is
+          if (logoPath.startsWith('http://') || logoPath.startsWith('https://') || logoPath.startsWith('file://')) {
+            return logoPath;
+          }
+          // Convert file system path to file:// URL
+          // Handle Windows paths (backslashes) and normalize
+          const normalizedPath = logoPath.replace(/\\/g, '/');
+          return `file://${normalizedPath.startsWith('/') ? '' : '/'}${normalizedPath}`;
+        };
+
         return (
           <div key={element.id} style={{...elementStyle, padding: 0}}>
             <img
-              src={value}
+              src={getLogoUrl(value)}
               alt="Project Logo"
               style={{
                 maxWidth: '100%',

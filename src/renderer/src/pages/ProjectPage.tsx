@@ -34,6 +34,19 @@ export function ProjectPage() {
     }
   };
 
+  // Convert file system path to file:// URL for img src
+  const getLogoUrl = (logoPath: string | null | undefined): string | null => {
+    if (!logoPath) return null;
+    // If already a URL, return as-is
+    if (logoPath.startsWith('http://') || logoPath.startsWith('https://') || logoPath.startsWith('file://')) {
+      return logoPath;
+    }
+    // Convert file system path to file:// URL
+    // Handle Windows paths (backslashes) and normalize
+    const normalizedPath = logoPath.replace(/\\/g, '/');
+    return `file://${normalizedPath.startsWith('/') ? '' : '/'}${normalizedPath}`;
+  };
+
   if (!project) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
@@ -87,9 +100,9 @@ export function ProjectPage() {
           </div>
           <div className="flex items-start gap-6">
             {/* Project Logo */}
-            {project.logo_path ? (
+            {getLogoUrl(project.logo_path) ? (
               <img
-                src={project.logo_path}
+                src={getLogoUrl(project.logo_path)!}
                 alt={project.name}
                 className="w-24 h-24 rounded-lg object-cover bg-gray-200 dark:bg-gray-700"
               />

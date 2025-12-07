@@ -243,6 +243,21 @@ export const VirtualRow = memo(function VirtualRow({
     return String(value);
   };
 
+  // Helper to get a single gel color hex value
+  const getSingleGelColor = (colorValue: string): string | undefined => {
+    if (!colorValue) return undefined;
+
+    // Parse gel color code (same logic as Paperwork)
+    let gelCode = colorValue.trim().toUpperCase();
+
+    // If it's a number-only, default to Rosco (R prefix)
+    if (/^\d+$/.test(gelCode)) {
+      gelCode = 'R' + gelCode;
+    }
+
+    return gelColors[gelCode];
+  };
+
   // Helper function to get gel color hex value(s) - supports dual colors like "L202+R119"
   const getGelColor = (colorValue: string): string | string[] | undefined => {
     if (!colorValue) return undefined;
@@ -260,21 +275,6 @@ export const VirtualRow = memo(function VirtualRow({
 
     // Single color
     return getSingleGelColor(colorValue);
-  };
-
-  // Helper to get a single gel color hex value
-  const getSingleGelColor = (colorValue: string): string | undefined => {
-    if (!colorValue) return undefined;
-
-    // Parse gel color code (same logic as Paperwork)
-    let gelCode = colorValue.trim().toUpperCase();
-
-    // If it's a number-only, default to Rosco (R prefix)
-    if (/^\d+$/.test(gelCode)) {
-      gelCode = 'R' + gelCode;
-    }
-
-    return gelColors[gelCode];
   };
 
   const isFieldReadOnly = (key: ColumnKey): boolean => {
