@@ -9,10 +9,10 @@ import {
 } from '../database/queries/fixtures';
 
 export function registerFixtureHandlers(): void {
-  // Get all fixtures
-  ipcMain.handle('fixtures:getAll', async () => {
+  // Get all fixtures for a project
+  ipcMain.handle('fixtures:getAll', async (_event, projectId?: string) => {
     try {
-      return getAllFixtures();
+      return getAllFixtures(projectId);
     } catch (error) {
       console.error('Error getting fixtures:', error);
       throw error;
@@ -20,9 +20,9 @@ export function registerFixtureHandlers(): void {
   });
 
   // Create fixture
-  ipcMain.handle('fixtures:create', async (_event, fixture: Partial<Fixture>) => {
+  ipcMain.handle('fixtures:create', async (_event, fixture: Partial<Fixture>, projectId?: string) => {
     try {
-      return createFixture(fixture);
+      return createFixture(fixture, projectId);
     } catch (error) {
       console.error('Error creating fixture:', error);
       throw error;

@@ -15,12 +15,50 @@ export function LandingPage() {
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false);
+  const [logoDataUrls, setLogoDataUrls] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     // Migrate legacy recent files on first load
     migrateLegacyRecentFiles();
     loadProjects();
   }, [loadProjects]);
+
+  // Load logos as data URLs for all projects
+  useEffect(() => {
+    const loadLogos = async () => {
+      const newLogoMap = new Map<string, string>();
+
+      for (const project of projects) {
+        if (!project.logo_path) continue;
+
+        // If already a data URL or http(s) URL, use as-is
+        if (
+          project.logo_path.startsWith('data:') ||
+          project.logo_path.startsWith('http://') ||
+          project.logo_path.startsWith('https://')
+        ) {
+          newLogoMap.set(project.id, project.logo_path);
+          continue;
+        }
+
+        // Read file as data URL
+        try {
+          if (typeof window !== 'undefined' && window.api?.files) {
+            const dataUrl = await window.api.files.readImageAsDataUrl(project.logo_path);
+            if (dataUrl) {
+              newLogoMap.set(project.id, dataUrl);
+            }
+          }
+        } catch (error) {
+          console.error(`[LandingPage] Error loading logo for project ${project.id}:`, error);
+        }
+      }
+
+      setLogoDataUrls(newLogoMap);
+    };
+
+    loadLogos();
+  }, [projects]);
 
   const handleCreateProject = async (name: string, description: string, logoPath: string, enabledModules: string[]) => {
     try {
@@ -130,11 +168,11 @@ export function LandingPage() {
                       onClick={() => handleOpenProject(project.id)}
                     >
                       <div className="flex items-start justify-between mb-3">
-                        {project.logo_path ? (
+                        {logoDataUrls.get(project.id) ? (
                           <img
-                            src={project.logo_path}
+                            src={logoDataUrls.get(project.id)}
                             alt={project.name}
-                            className="w-16 h-16 rounded-lg object-cover bg-gray-200 dark:bg-gray-700"
+                            className="w-16 h-16 rounded-lg object-contain bg-gray-200 dark:bg-gray-700 p-1"
                           />
                         ) : (
                           <div className="w-16 h-16 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-3xl">
@@ -191,11 +229,11 @@ export function LandingPage() {
                         >
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
-                              {project.logo_path ? (
+                              {logoDataUrls.get(project.id) ? (
                                 <img
-                                  src={project.logo_path}
+                                  src={logoDataUrls.get(project.id)}
                                   alt={project.name}
-                                  className="w-10 h-10 rounded-lg object-cover bg-gray-200 dark:bg-gray-700 mr-3"
+                                  className="w-10 h-10 rounded-lg object-contain bg-gray-200 dark:bg-gray-700 mr-3 p-1"
                                 />
                               ) : (
                                 <span className="text-2xl mr-3">📁</span>

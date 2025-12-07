@@ -21,7 +21,7 @@ interface EquipmentManagerProps {
 export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {}) {
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId?: string; moduleType?: string }>();
-  const { fixtures, loadFixtures, addMultipleFixtures, deleteMultiple, updateFixture } = useFixtureStore();
+  const { fixtures, loadFixtures, addMultipleFixtures, deleteMultiple, updateFixture, setCurrentProjectId } = useFixtureStore();
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [isAddFixtureDialogOpen, setIsAddFixtureDialogOpen] = useState(false);
   const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = useState(false);
@@ -63,7 +63,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
   // Function to reload all data (for file operations)
   const handleDataReload = async () => {
-    await loadFixtures();
+    await loadFixtures(currentProjectId);
 
     if (!window.api) return;
 
@@ -82,7 +82,9 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
   // Load fixtures and preferences from database on mount
   useEffect(() => {
-    loadFixtures();
+    // Set current project ID and load fixtures for this project
+    setCurrentProjectId(currentProjectId);
+    loadFixtures(currentProjectId);
 
     // Load project info and column preferences
     const loadProjectAndPreferences = async () => {
@@ -222,6 +224,21 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     setSelectedRows(new Set());
   };
 
+  // Handle auto-numbering
+  const handleAutoNumber = async (field: keyof Fixture, start: number, increment: number) => {
+    const selectedFixtures = processedFixtures.filter(f => selectedRows.has(f.id));
+
+    const updatePromises = selectedFixtures.map((fixture, index) => {
+      const value = start + (index * increment);
+      return updateFixture(fixture.id, { [field]: value } as Partial<Fixture>);
+    });
+
+    await Promise.all(updatePromises);
+
+    // Clear selection after auto-number
+    setSelectedRows(new Set());
+  };
+
   // Handle user column definitions save
   const handleSaveUserColumnDefinitions = async (definitions: Record<string, string>) => {
     setUserColumnDefinitions(definitions);
@@ -233,6 +250,54 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     } catch (error) {
       console.error('Failed to save user column definitions:', error);
     }
+  };
+
+  // Handle export to CSV
+  const handleExportCSV = () => {
+    // Get visible columns
+    const visibleColumns = columnOrder
+      .filter(key => columnVisibility[key])
+      .map(key => {
+        const config = DEFAULT_COLUMN_ORDER.find(c => c === key);
+        return { key, label: userColumnDefinitions[key] || key };
+      });
+
+    // Build CSV header
+    const headers = visibleColumns.map(col => col.label).join(',');
+
+    // Build CSV rows
+    const rows = processedFixtures.map(fixture => {
+      return visibleColumns.map(col => {
+        let value = fixture[col.key as keyof Fixture];
+
+        // Handle special cases
+        if (value === undefined || value === null) return '';
+        if (Array.isArray(value)) return `"${value.join(', ')}"`;
+        if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+        if (typeof value === 'string' && value.includes(',')) return `"${value}"`;
+
+        return value;
+      }).join(',');
+    });
+
+    // Combine into CSV string
+    const csv = [headers, ...rows].join('\n');
+
+    // Create download link
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${projectName}_fixtures_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Handle print
+  const handlePrint = () => {
+    window.print();
   };
 
   // Compute unique values for filter dropdowns and auto-fill suggestions
@@ -469,12 +534,30 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
               <p className="text-sm text-gray-600 dark:text-gray-400">Fixture Schedule</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <span className="text-sm text-gray-600 dark:text-gray-400">
               {processedFixtures.length} / {fixtures.length} fixtures
             </span>
             <span className="text-sm text-gray-600 dark:text-gray-400">•</span>
             <span className="text-sm text-gray-600 dark:text-gray-400">{selectedRows.size} selected</span>
+
+            <div className="h-6 w-px bg-gray-300 dark:bg-gray-700 mx-1" />
+
+            <button
+              onClick={handlePrint}
+              className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition flex items-center gap-2"
+              title="Print fixture schedule"
+            >
+              🖨️ Print
+            </button>
+
+            <button
+              onClick={handleExportCSV}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition flex items-center gap-2"
+              title="Export to CSV"
+            >
+              📄 Export CSV
+            </button>
           </div>
         </div>
 
@@ -491,6 +574,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
           await deleteMultiple(Array.from(selectedRows));
           setSelectedRows(new Set());
         }}
+        onDeselectAll={() => setSelectedRows(new Set())}
         onUserColumnSettings={() => setIsUserColumnSettingsOpen(true)}
         columnVisibility={columnVisibility}
         onColumnVisibilityChange={setColumnVisibility}
@@ -555,8 +639,10 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
       <BulkEditDialog
         isOpen={isBulkEditDialogOpen}
         selectedCount={selectedRows.size}
+        selectedIds={Array.from(selectedRows)}
         onClose={() => setIsBulkEditDialogOpen(false)}
         onSubmit={handleBulkEdit}
+        onAutoNumber={handleAutoNumber}
       />
 
       {/* User Column Settings Dialog */}

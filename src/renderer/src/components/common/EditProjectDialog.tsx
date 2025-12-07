@@ -213,17 +213,17 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          <h2 className="text-2xl font-bold mb-6">Edit Project</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Edit Project</h2>
 
         <form onSubmit={handleSubmit}>
           {/* Basic Information */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-4 text-blue-400">Basic Information</h3>
+            <h3 className="text-lg font-semibold mb-4 text-blue-600 dark:text-blue-400">Basic Information</h3>
 
             <div className="mb-4">
-              <label htmlFor="project-name" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="project-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Project Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -231,28 +231,28 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                 placeholder="e.g., Hamilton National Tour 2025"
                 required
               />
             </div>
 
             <div className="mb-4">
-              <label htmlFor="project-description" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="project-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Description
               </label>
               <textarea
                 id="project-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 resize-none"
+                className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 resize-none"
                 placeholder="Optional description..."
                 rows={3}
               />
             </div>
 
             <div className="mb-4">
-              <label htmlFor="venue" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="venue" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Venue
               </label>
               <input
@@ -260,14 +260,14 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                 type="text"
                 value={venue}
                 onChange={(e) => setVenue(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                 placeholder="e.g., Richard Rodgers Theatre"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label htmlFor="venue-city" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="venue-city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Venue City
                 </label>
                 <input
@@ -275,12 +275,12 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                   type="text"
                   value={venueCity}
                   onChange={(e) => setVenueCity(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                   placeholder="e.g., New York"
                 />
               </div>
               <div>
-                <label htmlFor="venue-state" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="venue-state" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Venue State
                 </label>
                 <input
@@ -288,32 +288,32 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                   type="text"
                   value={venueState}
                   onChange={(e) => setVenueState(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                   placeholder="e.g., NY"
                 />
               </div>
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Show Logo
               </label>
               <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={handleLogoUpload}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition"
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded transition"
                 >
                   {logoPath ? 'Change Logo' : 'Upload Logo'}
                 </button>
                 {logoPath && (
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                     <span>✓</span>
                     <span className="truncate max-w-xs">{logoPath}</span>
                     <button
                       type="button"
                       onClick={() => setLogoPath('')}
-                      className="text-red-500 hover:text-red-400"
+                      className="text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400"
                     >
                       Remove
                     </button>
@@ -325,31 +325,31 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
 
           {/* Design Team */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-4 text-blue-400">Design Team</h3>
+            <h3 className="text-lg font-semibold mb-4 text-blue-600 dark:text-blue-400">Design Team</h3>
 
             {/* Lighting Designer */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-400 mb-2">Lighting Designer</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">Lighting Designer</label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <input
                   type="text"
                   value={lightingDesigner}
                   onChange={(e) => setLightingDesigner(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Name"
                 />
                 <input
                   type="email"
                   value={lightingDesignerEmail}
                   onChange={(e) => setLightingDesignerEmail(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Email"
                 />
                 <input
                   type="tel"
                   value={lightingDesignerPhone}
                   onChange={(e) => setLightingDesignerPhone(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Phone"
                 />
               </div>
@@ -365,7 +365,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                         updated[index].name = e.target.value;
                         setLightingAssociates(updated);
                       }}
-                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                       placeholder="Associate name"
                     />
                     <input
@@ -376,7 +376,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                         updated[index].email = e.target.value;
                         setLightingAssociates(updated);
                       }}
-                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                       placeholder="Email"
                     />
                     <div className="flex gap-2">
@@ -388,7 +388,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                           updated[index].phone = e.target.value;
                           setLightingAssociates(updated);
                         }}
-                        className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                        className="flex-1 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                         placeholder="Phone"
                       />
                       <button
@@ -404,7 +404,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                 <button
                   type="button"
                   onClick={() => setLightingAssociates([...lightingAssociates, {name: '', email: '', phone: ''}])}
-                  className="mt-2 px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-xs transition"
+                  className="mt-2 px-3 py-1 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded text-xs transition"
                 >
                   + Add Associate
                 </button>
@@ -413,27 +413,27 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
 
             {/* Audio Designer */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-400 mb-2">Audio Designer</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">Audio Designer</label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <input
                   type="text"
                   value={audioDesigner}
                   onChange={(e) => setAudioDesigner(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Name"
                 />
                 <input
                   type="email"
                   value={audioDesignerEmail}
                   onChange={(e) => setAudioDesignerEmail(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Email"
                 />
                 <input
                   type="tel"
                   value={audioDesignerPhone}
                   onChange={(e) => setAudioDesignerPhone(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Phone"
                 />
               </div>
@@ -449,7 +449,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                         updated[index].name = e.target.value;
                         setAudioAssociates(updated);
                       }}
-                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                       placeholder="Associate name"
                     />
                     <input
@@ -460,7 +460,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                         updated[index].email = e.target.value;
                         setAudioAssociates(updated);
                       }}
-                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                       placeholder="Email"
                     />
                     <div className="flex gap-2">
@@ -472,7 +472,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                           updated[index].phone = e.target.value;
                           setAudioAssociates(updated);
                         }}
-                        className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                        className="flex-1 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                         placeholder="Phone"
                       />
                       <button
@@ -488,7 +488,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                 <button
                   type="button"
                   onClick={() => setAudioAssociates([...audioAssociates, {name: '', email: '', phone: ''}])}
-                  className="mt-2 px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-xs transition"
+                  className="mt-2 px-3 py-1 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded text-xs transition"
                 >
                   + Add Associate
                 </button>
@@ -497,27 +497,27 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
 
             {/* Video Designer */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-400 mb-2">Video Designer</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">Video Designer</label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <input
                   type="text"
                   value={videoDesigner}
                   onChange={(e) => setVideoDesigner(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Name"
                 />
                 <input
                   type="email"
                   value={videoDesignerEmail}
                   onChange={(e) => setVideoDesignerEmail(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Email"
                 />
                 <input
                   type="tel"
                   value={videoDesignerPhone}
                   onChange={(e) => setVideoDesignerPhone(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Phone"
                 />
               </div>
@@ -533,7 +533,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                         updated[index].name = e.target.value;
                         setVideoAssociates(updated);
                       }}
-                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                       placeholder="Associate name"
                     />
                     <input
@@ -544,7 +544,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                         updated[index].email = e.target.value;
                         setVideoAssociates(updated);
                       }}
-                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                       placeholder="Email"
                     />
                     <div className="flex gap-2">
@@ -556,7 +556,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                           updated[index].phone = e.target.value;
                           setVideoAssociates(updated);
                         }}
-                        className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                        className="flex-1 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                         placeholder="Phone"
                       />
                       <button
@@ -572,7 +572,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                 <button
                   type="button"
                   onClick={() => setVideoAssociates([...videoAssociates, {name: '', email: '', phone: ''}])}
-                  className="mt-2 px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-xs transition"
+                  className="mt-2 px-3 py-1 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded text-xs transition"
                 >
                   + Add Associate
                 </button>
@@ -582,31 +582,31 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
 
           {/* Production Staff */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-4 text-blue-400">Production Staff</h3>
+            <h3 className="text-lg font-semibold mb-4 text-blue-600 dark:text-blue-400">Production Staff</h3>
 
             {/* Electrician */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-400 mb-2">Electrician</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">Electrician</label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <input
                   type="text"
                   value={electrician}
                   onChange={(e) => setElectrician(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Name"
                 />
                 <input
                   type="email"
                   value={electricianEmail}
                   onChange={(e) => setElectricianEmail(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Email"
                 />
                 <input
                   type="tel"
                   value={electricianPhone}
                   onChange={(e) => setElectricianPhone(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Phone"
                 />
               </div>
@@ -614,27 +614,27 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
 
             {/* Audio Tech */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-400 mb-2">Audio Tech</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">Audio Tech</label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <input
                   type="text"
                   value={audioTech}
                   onChange={(e) => setAudioTech(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Name"
                 />
                 <input
                   type="email"
                   value={audioTechEmail}
                   onChange={(e) => setAudioTechEmail(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Email"
                 />
                 <input
                   type="tel"
                   value={audioTechPhone}
                   onChange={(e) => setAudioTechPhone(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Phone"
                 />
               </div>
@@ -642,27 +642,27 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
 
             {/* Video Tech */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-400 mb-2">Video Tech</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">Video Tech</label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <input
                   type="text"
                   value={videoTech}
                   onChange={(e) => setVideoTech(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Name"
                 />
                 <input
                   type="email"
                   value={videoTechEmail}
                   onChange={(e) => setVideoTechEmail(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Email"
                 />
                 <input
                   type="tel"
                   value={videoTechPhone}
                   onChange={(e) => setVideoTechPhone(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Phone"
                 />
               </div>
@@ -670,20 +670,20 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
 
             {/* Production Manager */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-400 mb-2">Production Manager</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">Production Manager</label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
                 <input
                   type="text"
                   value={productionManager}
                   onChange={(e) => setProductionManager(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Name"
                 />
                 <input
                   type="text"
                   value={productionManagerCompany}
                   onChange={(e) => setProductionManagerCompany(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Company (optional)"
                 />
               </div>
@@ -692,14 +692,14 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                   type="email"
                   value={productionManagerEmail}
                   onChange={(e) => setProductionManagerEmail(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Email"
                 />
                 <input
                   type="tel"
                   value={productionManagerPhone}
                   onChange={(e) => setProductionManagerPhone(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Phone"
                 />
               </div>
@@ -707,20 +707,20 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
 
             {/* General Manager */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-400 mb-2">General Manager</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">General Manager</label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
                 <input
                   type="text"
                   value={generalManager}
                   onChange={(e) => setGeneralManager(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Name"
                 />
                 <input
                   type="text"
                   value={generalManagerCompany}
                   onChange={(e) => setGeneralManagerCompany(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Company (optional)"
                 />
               </div>
@@ -729,14 +729,14 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                   type="email"
                   value={generalManagerEmail}
                   onChange={(e) => setGeneralManagerEmail(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Email"
                 />
                 <input
                   type="tel"
                   value={generalManagerPhone}
                   onChange={(e) => setGeneralManagerPhone(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 text-sm"
                   placeholder="Phone"
                 />
               </div>
@@ -745,11 +745,11 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
 
           {/* Show Dates */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-4 text-blue-400">Show Dates</h3>
+            <h3 className="text-lg font-semibold mb-4 text-blue-600 dark:text-blue-400">Show Dates</h3>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <label htmlFor="prep-start" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="prep-start" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Prep Start
                 </label>
                 <input
@@ -757,12 +757,12 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                   type="date"
                   value={prepStart}
                   onChange={(e) => setPrepStart(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label htmlFor="prep-end" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="prep-end" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Prep End
                 </label>
                 <input
@@ -770,12 +770,12 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                   type="date"
                   value={prepEnd}
                   onChange={(e) => setPrepEnd(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label htmlFor="load-in" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="load-in" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Load In
                 </label>
                 <input
@@ -783,12 +783,12 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                   type="date"
                   value={loadIn}
                   onChange={(e) => setLoadIn(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label htmlFor="tech" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="tech" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Tech
                 </label>
                 <input
@@ -796,12 +796,12 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                   type="date"
                   value={tech}
                   onChange={(e) => setTech(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label htmlFor="previews" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="previews" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Previews
                 </label>
                 <input
@@ -809,12 +809,12 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                   type="date"
                   value={previews}
                   onChange={(e) => setPreviews(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label htmlFor="opening" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="opening" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Opening
                 </label>
                 <input
@@ -822,12 +822,12 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                   type="date"
                   value={opening}
                   onChange={(e) => setOpening(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label htmlFor="closing" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="closing" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Closing
                 </label>
                 <input
@@ -835,12 +835,12 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                   type="date"
                   value={closing}
                   onChange={(e) => setClosing(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label htmlFor="load-out" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="load-out" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Load Out
                 </label>
                 <input
@@ -848,7 +848,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                   type="date"
                   value={loadOut}
                   onChange={(e) => setLoadOut(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
                 />
               </div>
             </div>
@@ -856,27 +856,10 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
 
           {/* Module Selection */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-4 text-blue-400">Enabled Modules</h3>
+            <h3 className="text-lg font-semibold mb-4 text-blue-600 dark:text-blue-400">Enabled Modules</h3>
 
             <div className="space-y-2">
-              <label className="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-650">
-                <input
-                  type="checkbox"
-                  checked={enabledModules.includes('design')}
-                  onChange={() => toggleModule('design')}
-                  disabled={true}
-                  className="w-4 h-4"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">ShowStack:Design</span>
-                    <span className="px-2 py-0.5 bg-gray-600 text-xs rounded">Locked</span>
-                  </div>
-                  <p className="text-xs text-gray-400">Lighting design & visualization</p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-650">
+              <label className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-700 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-650">
                 <input
                   type="checkbox"
                   checked={enabledModules.includes('production')}
@@ -885,24 +868,11 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                 />
                 <div className="flex-1">
                   <div className="font-medium">ShowStack:Production</div>
-                  <p className="text-xs text-gray-400">Fixture management & technical planning</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Fixture management & technical planning</p>
                 </div>
               </label>
 
-              <label className="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-650">
-                <input
-                  type="checkbox"
-                  checked={enabledModules.includes('prep')}
-                  onChange={() => toggleModule('prep')}
-                  className="w-4 h-4"
-                />
-                <div className="flex-1">
-                  <div className="font-medium">ShowStack:Prep</div>
-                  <p className="text-xs text-gray-400">Equipment orders & specifications for rental houses</p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-650">
+              <label className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-700 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-650">
                 <input
                   type="checkbox"
                   checked={enabledModules.includes('manager')}
@@ -913,9 +883,9 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">ShowStack:Manager</span>
-                    <span className="px-2 py-0.5 bg-gray-600 text-xs rounded">Locked</span>
+                    <span className="px-2 py-0.5 bg-gray-400 dark:bg-gray-600 text-gray-900 dark:text-white text-xs rounded">Locked</span>
                   </div>
-                  <p className="text-xs text-gray-400">Tour scheduling & logistics</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Tour scheduling & logistics</p>
                 </div>
               </label>
             </div>
@@ -926,7 +896,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition"
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded transition"
             >
               Cancel
             </button>

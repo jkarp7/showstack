@@ -43,6 +43,7 @@ import {
   deleteNoteTemplate,
   PrepNoteTemplate,
 } from '../database/queries/prep';
+import { getProjectById } from '../database/queries/projects';
 import {
   // Layout Templates (app-level user preferences)
   getAllLayoutTemplates,
@@ -763,6 +764,70 @@ function renderLayoutElement(
   if (element_type === 'dataField') {
     const value = getDataFieldValue(config.fieldType, project);
     const label = config.showLabel && config.label ? config.label : '';
+
+    // Special handling for logo field - render as image
+    if (config.fieldType === 'logo') {
+      console.log('[PDF] Logo field detected!');
+      console.log('[PDF] Project logo_path:', (project as any).logo_path);
+      console.log('[PDF] Project logo_storage_path:', project.logo_storage_path);
+      console.log('[PDF] Project logo_url:', project.logo_url);
+      console.log('[PDF] Project parent_project_id:', project.parent_project_id);
+
+      // Support both unified Project (logo_path) and legacy PrepProject (logo_storage_path)
+      // Prioritize logo_path as the unified field
+      let logoPath = project.logo_path || project.logo_storage_path;
+
+      // If no logo in prep project, check parent project
+      if (!logoPath && project.parent_project_id) {
+        console.log('[PDF] No logo in PrepProject, checking parent project...');
+        try {
+          const parentProject = getProjectById(project.parent_project_id);
+          if (parentProject?.logo_path) {
+            console.log('[PDF] Found logo in parent project:', parentProject.logo_path);
+            logoPath = parentProject.logo_path;
+          } else {
+            console.log('[PDF] Parent project has no logo');
+          }
+        } catch (error) {
+          console.error('[PDF] Error loading parent project:', error);
+        }
+      }
+
+      if (logoPath) {
+        console.log('[PDF] Using logo path:', logoPath);
+        try {
+          // Read logo file and convert to base64 data URL
+          if (fs.existsSync(logoPath)) {
+            console.log('[PDF] File exists, reading...');
+            const buffer = fs.readFileSync(logoPath);
+            const ext = path.extname(logoPath).toLowerCase();
+            const mimeTypes: Record<string, string> = {
+              '.jpg': 'image/jpeg',
+              '.jpeg': 'image/jpeg',
+              '.png': 'image/png',
+              '.gif': 'image/gif',
+              '.svg': 'image/svg+xml',
+              '.webp': 'image/webp'
+            };
+            const mimeType = mimeTypes[ext] || 'image/png';
+            const base64 = buffer.toString('base64');
+            const dataUrl = `data:${mimeType};base64,${base64}`;
+            console.log('[PDF] Logo converted to data URL, length:', dataUrl.length);
+
+            return `<div style="${baseStyle} padding: 0;">
+              <img src="${dataUrl}" alt="Project Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+            </div>`;
+          } else {
+            console.log('[PDF] File does NOT exist at path:', logoPath);
+          }
+        } catch (error) {
+          console.error('[PDF] Error loading logo:', error);
+        }
+      } else {
+        console.log('[PDF] No logo_path or logo_storage_path in project');
+      }
+      return ''; // No logo or failed to load
+    }
 
     if (!value && !label) return '';
 

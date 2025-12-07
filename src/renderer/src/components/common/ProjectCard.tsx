@@ -1,4 +1,5 @@
 import { Project } from '../store/projectStore';
+import { useState, useEffect } from 'react';
 
 interface ProjectCardProps {
   project: Project;
@@ -7,6 +8,41 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
+  const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
+
+  // Load logo as data URL
+  useEffect(() => {
+    const loadLogo = async () => {
+      if (!project.logo_path) {
+        setLogoDataUrl(null);
+        return;
+      }
+
+      // If already a data URL or http(s) URL, use as-is
+      if (
+        project.logo_path.startsWith('data:') ||
+        project.logo_path.startsWith('http://') ||
+        project.logo_path.startsWith('https://')
+      ) {
+        setLogoDataUrl(project.logo_path);
+        return;
+      }
+
+      // Read file as data URL
+      try {
+        if (typeof window !== 'undefined' && window.api?.files) {
+          const dataUrl = await window.api.files.readImageAsDataUrl(project.logo_path);
+          setLogoDataUrl(dataUrl);
+        }
+      } catch (error) {
+        console.error('[ProjectCard] Error loading logo:', error);
+        setLogoDataUrl(null);
+      }
+    };
+
+    loadLogo();
+  }, [project.logo_path]);
+
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
     return date.toLocaleDateString('en-US', {
@@ -35,12 +71,12 @@ export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
         ×
       </button>
       {/* Project Logo/Preview */}
-      <div className="mb-4 flex items-center justify-center h-32 bg-gray-700 rounded-lg group-hover:bg-gray-650 transition overflow-hidden">
-        {project.logo_path ? (
+      <div className="mb-4 flex items-center justify-center h-32 bg-gray-700 rounded-lg group-hover:bg-gray-650 transition overflow-hidden p-2">
+        {logoDataUrl ? (
           <img
-            src={project.logo_path}
+            src={logoDataUrl}
             alt={`${project.name} logo`}
-            className="w-full h-full object-cover"
+            className="max-w-full max-h-full object-contain"
           />
         ) : (
           <span className="text-4xl">📁</span>

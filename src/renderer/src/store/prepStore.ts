@@ -179,6 +179,9 @@ export const usePrepStore = create<PrepStore>((set, get) => ({
             parentData = {
               parent_project_id: data.parent_project_id,
               venue: parentProject.venue,
+              // Map logo
+              logo_url: parentProject.logo_path,
+              logo_storage_path: parentProject.logo_path,
               // Map designers
               ld_name: parentProject.lighting_designer,
               ld_email: parentProject.lighting_designer_email,

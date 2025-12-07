@@ -6,13 +6,14 @@ interface ToolbarProps {
   onAddFixture: () => void;
   onBulkEdit: () => void;
   onDeleteSelected: () => void;
+  onDeselectAll: () => void;
   onUserColumnSettings: () => void;
   columnVisibility: ColumnVisibility;
   onColumnVisibilityChange: (visibility: ColumnVisibility) => void;
   userColumnDefinitions?: Record<string, string>;
 }
 
-export function Toolbar({ selectedCount, onAddFixture, onBulkEdit, onDeleteSelected, onUserColumnSettings, columnVisibility, onColumnVisibilityChange, userColumnDefinitions }: ToolbarProps) {
+export function Toolbar({ selectedCount, onAddFixture, onBulkEdit, onDeleteSelected, onDeselectAll, onUserColumnSettings, columnVisibility, onColumnVisibilityChange, userColumnDefinitions }: ToolbarProps) {
   return (
     <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center gap-2">
       <button
@@ -36,6 +37,13 @@ export function Toolbar({ selectedCount, onAddFixture, onBulkEdit, onDeleteSelec
             className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-sm font-medium transition"
           >
             Delete Selected ({selectedCount})
+          </button>
+
+          <button
+            onClick={onDeselectAll}
+            className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm font-medium transition"
+          >
+            Deselect All
           </button>
 
           <div className="h-6 w-px bg-gray-300 dark:bg-gray-700 mx-2" />

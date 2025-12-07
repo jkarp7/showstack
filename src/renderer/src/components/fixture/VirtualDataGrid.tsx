@@ -40,6 +40,7 @@ export function VirtualDataGrid({
   const [resizingColumn, setResizingColumn] = useState<ColumnKey | null>(null);
   const [resizeStartX, setResizeStartX] = useState(0);
   const [resizeStartWidth, setResizeStartWidth] = useState(0);
+  const [focusedCell, setFocusedCell] = useState<{ fixtureId: string; columnKey: ColumnKey } | null>(null);
 
   // Update container height on resize
   useEffect(() => {
@@ -171,6 +172,60 @@ export function VirtualDataGrid({
 
     onUpdateFixture(fixtureId, updates);
   }, [fixtures, onUpdateFixture]);
+
+  // Handle cell navigation (arrow keys)
+  const handleCellNavigate = useCallback((
+    fixtureId: string,
+    columnKey: ColumnKey,
+    direction: 'up' | 'down' | 'left' | 'right' | 'enter'
+  ) => {
+    // Get visible columns by filtering the ordered columns
+    const cols = getOrderedColumns(columnOrder);
+    const visibleColumns = cols.filter(col => columnVisibility[col.key]);
+    const currentRowIndex = fixtures.findIndex(f => f.id === fixtureId);
+    const currentColIndex = visibleColumns.findIndex(col => col.key === columnKey);
+
+    if (currentRowIndex === -1 || currentColIndex === -1) return;
+
+    let newRowIndex = currentRowIndex;
+    let newColIndex = currentColIndex;
+
+    switch (direction) {
+      case 'up':
+        newRowIndex = Math.max(0, currentRowIndex - 1);
+        break;
+      case 'down':
+      case 'enter':
+        newRowIndex = Math.min(fixtures.length - 1, currentRowIndex + 1);
+        break;
+      case 'left':
+        newColIndex = Math.max(0, currentColIndex - 1);
+        break;
+      case 'right':
+        newColIndex = Math.min(visibleColumns.length - 1, currentColIndex + 1);
+        break;
+    }
+
+    const newFixture = fixtures[newRowIndex];
+    const newColumn = visibleColumns[newColIndex];
+
+    if (newFixture && newColumn) {
+      setFocusedCell({ fixtureId: newFixture.id, columnKey: newColumn.key });
+
+      // Auto-scroll to the new row if it's not visible
+      const rowY = newRowIndex * ROW_HEIGHT;
+      if (containerRef.current) {
+        const containerTop = containerRef.current.scrollTop;
+        const containerBottom = containerTop + containerRef.current.clientHeight - HEADER_HEIGHT;
+
+        if (rowY < containerTop) {
+          containerRef.current.scrollTop = rowY;
+        } else if (rowY + ROW_HEIGHT > containerBottom) {
+          containerRef.current.scrollTop = rowY + ROW_HEIGHT - containerRef.current.clientHeight + HEADER_HEIGHT;
+        }
+      }
+    }
+  }, [fixtures, columnVisibility, columnOrder]);
 
   // Drag and drop handlers for column reordering
   const handleDragStart = useCallback((e: React.DragEvent, columnKey: ColumnKey) => {
@@ -333,10 +388,12 @@ export function VirtualDataGrid({
                 isSelected={selectedRows.has(fixture.id)}
                 onClick={(e) => handleRowClick(fixture.id, e)}
                 onCellEdit={handleCellEdit}
+                onCellNavigate={handleCellNavigate}
                 columnVisibility={columnVisibility}
                 columnOrder={columnOrder}
                 columnWidths={columnWidths}
                 getColumnWidth={getColumnWidth}
+                focusedCell={focusedCell}
               />
             ))}
           </div>

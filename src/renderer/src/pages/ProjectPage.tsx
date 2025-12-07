@@ -10,6 +10,7 @@ export function ProjectPage() {
   const { projects, loadProjects, updateProject, setCurrentProject } = useProjectStore();
   const [project, setProject] = useState(projects.find(p => p.id === projectId) || null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!projects.length) {
@@ -24,6 +25,39 @@ export function ProjectPage() {
       setCurrentProject(projectId!);
     }
   }, [projects, projectId, setCurrentProject]);
+
+  // Load logo as data URL
+  useEffect(() => {
+    const loadLogo = async () => {
+      if (!project?.logo_path) {
+        setLogoDataUrl(null);
+        return;
+      }
+
+      // If already a data URL or http(s) URL, use as-is
+      if (
+        project.logo_path.startsWith('data:') ||
+        project.logo_path.startsWith('http://') ||
+        project.logo_path.startsWith('https://')
+      ) {
+        setLogoDataUrl(project.logo_path);
+        return;
+      }
+
+      // Read file as data URL
+      try {
+        if (typeof window !== 'undefined' && window.api?.files) {
+          const dataUrl = await window.api.files.readImageAsDataUrl(project.logo_path);
+          setLogoDataUrl(dataUrl);
+        }
+      } catch (error) {
+        console.error('[ProjectPage] Error loading logo:', error);
+        setLogoDataUrl(null);
+      }
+    };
+
+    loadLogo();
+  }, [project?.logo_path]);
 
   const handleUpdateProject = async (projectId: string, updates: Partial<Project>) => {
     try {
@@ -87,11 +121,11 @@ export function ProjectPage() {
           </div>
           <div className="flex items-start gap-6">
             {/* Project Logo */}
-            {project.logo_path ? (
+            {logoDataUrl ? (
               <img
-                src={project.logo_path}
+                src={logoDataUrl}
                 alt={project.name}
-                className="w-24 h-24 rounded-lg object-cover bg-gray-200 dark:bg-gray-700"
+                className="w-24 h-24 rounded-lg object-contain bg-gray-200 dark:bg-gray-700 p-2"
               />
             ) : (
               <div className="w-24 h-24 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-4xl">
@@ -415,10 +449,11 @@ export function ProjectPage() {
           <div>
             <h2 className="text-2xl font-bold mb-6">Modules</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {enabledModules.includes('production') && (
+              {/* Show Production module if either 'production' or 'prep' (legacy) is enabled */}
+              {(enabledModules.includes('production') || enabledModules.includes('prep')) && (
                 <ModuleCard
                   name="ShowStack:Production"
-                  description="Equipment management, channel hookup, and technical planning"
+                  description="Equipment management, shop orders, paperwork generation, and technical planning"
                   icon="🎬"
                   route={`/project/${projectId}/module/production`}
                   isLocked={false}
@@ -442,16 +477,6 @@ export function ProjectPage() {
                   icon="✏️"
                   route={`/project/${projectId}/module/design`}
                   isLocked={true}
-                />
-              )}
-
-              {enabledModules.includes('prep') && (
-                <ModuleCard
-                  name="ShowStack:Prep"
-                  description="Equipment orders and specifications for rental houses"
-                  icon="📋"
-                  route={`/project/${projectId}/module/prep`}
-                  isLocked={false}
                 />
               )}
             </div>

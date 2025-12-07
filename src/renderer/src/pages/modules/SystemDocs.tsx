@@ -19,11 +19,11 @@ export function SystemDocs() {
 
   const handleBackClick = () => {
     if (routeProjectId) {
-      // Go back to project (list of modules)
-      navigate(`/project/${routeProjectId}`);
+      // Go back to module tool selection
+      navigate(`/project/${routeProjectId}/module/production`);
     } else {
-      // Go to shell (list of projects)
-      navigate('/');
+      // Go back to module tool selection (no project context)
+      navigate('/module/production');
     }
   };
 

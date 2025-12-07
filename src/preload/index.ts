@@ -22,8 +22,8 @@ interface Fixture {
 contextBridge.exposeInMainWorld('api', {
   // Fixture operations
   fixtures: {
-    getAll: () => ipcRenderer.invoke('fixtures:getAll'),
-    create: (fixture: Partial<Fixture>) => ipcRenderer.invoke('fixtures:create', fixture),
+    getAll: (projectId?: string) => ipcRenderer.invoke('fixtures:getAll', projectId),
+    create: (fixture: Partial<Fixture>, projectId?: string) => ipcRenderer.invoke('fixtures:create', fixture, projectId),
     update: (id: string, updates: Partial<Fixture>) =>
       ipcRenderer.invoke('fixtures:update', id, updates),
     delete: (id: string) => ipcRenderer.invoke('fixtures:delete', id),
@@ -63,7 +63,8 @@ contextBridge.exposeInMainWorld('api', {
     saveAs: (defaultName?: string, module?: string) => ipcRenderer.invoke('file:saveAs', defaultName, module),
     new: () => ipcRenderer.invoke('file:new'),
     validate: (filePath: string) => ipcRenderer.invoke('file:validate', filePath),
-    getFileName: (filePath: string) => ipcRenderer.invoke('file:getFileName', filePath)
+    getFileName: (filePath: string) => ipcRenderer.invoke('file:getFileName', filePath),
+    readImageAsDataUrl: (imagePath: string) => ipcRenderer.invoke('file:readImageAsDataUrl', imagePath)
   },
 
   // ShowStack:Prep operations
@@ -175,14 +176,20 @@ contextBridge.exposeInMainWorld('api', {
   windows: {
     openProject: (projectId: string) => ipcRenderer.invoke('window:openProject', projectId),
     getCurrentProjectId: () => ipcRenderer.invoke('window:getCurrentProjectId')
+  },
+
+  // Paperwork operations
+  paperwork: {
+    exportPDF: (htmlContent: string, filename: string, pageSettings: any) =>
+      ipcRenderer.invoke('paperwork:exportPDF', htmlContent, filename, pageSettings)
   }
 });
 
 // TypeScript declaration
 export interface ElectronAPI {
   fixtures: {
-    getAll: () => Promise<Fixture[]>;
-    create: (fixture: Partial<Fixture>) => Promise<Fixture>;
+    getAll: (projectId?: string) => Promise<Fixture[]>;
+    create: (fixture: Partial<Fixture>, projectId?: string) => Promise<Fixture>;
     update: (id: string, updates: Partial<Fixture>) => Promise<Fixture>;
     delete: (id: string) => Promise<void>;
     deleteMultiple: (ids: string[]) => Promise<void>;
@@ -213,6 +220,7 @@ export interface ElectronAPI {
     new: () => Promise<string>;
     validate: (filePath: string) => Promise<any>;
     getFileName: (filePath: string) => Promise<string>;
+    readImageAsDataUrl: (imagePath: string) => Promise<string | null>;
   };
   prep: {
     projects: {
@@ -303,6 +311,9 @@ export interface ElectronAPI {
   windows: {
     openProject: (projectId: string) => Promise<void>;
     getCurrentProjectId: () => Promise<string | null>;
+  };
+  paperwork: {
+    exportPDF: (htmlContent: string, filename: string, pageSettings: any) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
   };
 }
 

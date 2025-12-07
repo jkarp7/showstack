@@ -57,6 +57,7 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
   const [layout, setLayout] = useState<PageLayoutTemplate | null>(null);
   const [loading, setLoading] = useState(true);
   const [scale, setScale] = useState(1);
+  const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Page dimensions in pixels (at 96 DPI)
@@ -152,6 +153,58 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
     loadLayout();
   }, [section.type, project.id]);
 
+  // Load logo as data URL
+  useEffect(() => {
+    const loadLogo = async () => {
+      // Try to find logo path from PrepProject or parent Project
+      let logoPath = project.logo_path || (project as any).logo_storage_path;
+
+      // If no logo in PrepProject, check parent project
+      if (!logoPath && (project as any).parent_project_id) {
+        console.log('[PageRenderer] No logo in PrepProject, checking parent project...');
+        try {
+          const parentProject = await window.api.projects.getById((project as any).parent_project_id);
+          if (parentProject?.logo_path) {
+            console.log('[PageRenderer] Found logo in parent project:', parentProject.logo_path);
+            logoPath = parentProject.logo_path;
+          } else {
+            console.log('[PageRenderer] Parent project has no logo');
+          }
+        } catch (error) {
+          console.error('[PageRenderer] Error loading parent project:', error);
+        }
+      }
+
+      if (!logoPath) {
+        setLogoDataUrl(null);
+        return;
+      }
+
+      // If already a data URL or http(s) URL, use as-is
+      if (
+        logoPath.startsWith('data:') ||
+        logoPath.startsWith('http://') ||
+        logoPath.startsWith('https://')
+      ) {
+        setLogoDataUrl(logoPath);
+        return;
+      }
+
+      // Read file as data URL
+      try {
+        if (typeof window !== 'undefined' && window.api?.files) {
+          const dataUrl = await window.api.files.readImageAsDataUrl(logoPath);
+          setLogoDataUrl(dataUrl);
+        }
+      } catch (error) {
+        console.error('[PageRenderer] Error loading logo:', error);
+        setLogoDataUrl(null);
+      }
+    };
+
+    loadLogo();
+  }, [project.logo_path, (project as any).logo_storage_path, (project as any).parent_project_id]);
+
   function getDataFieldValue(fieldType: DataFieldType): string {
     const formatDate = (timestamp?: string | number): string => {
       if (!timestamp) return 'Not set';
@@ -229,7 +282,8 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       case 'document_title':
         return section.config?.title || 'SHOP ORDER';
       case 'logo':
-        return ''; // TODO: Handle logo images
+        // Return logo path from project (logo_url or logo_storage_path)
+        return project.logo_url || project.logo_storage_path || '';
       default:
         return '';
     }
@@ -281,6 +335,25 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       const value = getDataFieldValue(config.fieldType);
       const label = config.showLabel && config.label ? config.label : '';
       const displayValue = value || '';
+
+      // Special handling for logo field - render as image
+      if (config.fieldType === 'logo' && logoDataUrl) {
+        return (
+          <div key={element.id} style={{...elementStyle, padding: 0}}>
+            <img
+              src={logoDataUrl}
+              alt="Project Logo"
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+                width: 'auto',
+                height: 'auto',
+                objectFit: 'contain',
+              }}
+            />
+          </div>
+        );
+      }
 
       // Don't render if no value and not showing label
       if (!value && !label) return null;
@@ -345,6 +418,28 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       }
     }
 
+    // Image elements
+    if (element.element_type === 'image') {
+      const src = config.src || '';
+      if (!src) return null;
+
+      return (
+        <div key={element.id} style={{...elementStyle, padding: 0}}>
+          <img
+            src={src}
+            alt={config.altText || 'Image'}
+            style={{
+              maxWidth: '100%',
+              maxHeight: '100%',
+              width: 'auto',
+              height: 'auto',
+              objectFit: config.objectFit || 'contain',
+            }}
+          />
+        </div>
+      );
+    }
+
     // Dynamic content: Equipment List
     if (element.element_type === 'equipment_list') {
       return (
@@ -387,7 +482,7 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       );
     }
 
-    // TODO: Handle table, image elements
+    // TODO: Handle table elements
     return null;
   }
 

@@ -284,9 +284,9 @@ export function LayoutTemplateManager() {
         {/* Rename Dialog - will be used in future for Update functionality */}
         {showRenameDialog && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
-              <h3 className="text-lg font-semibold mb-4">Save Layout As</h3>
-              <p className="text-sm text-gray-600 mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Save Layout As</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                 Enter a name for your customized layout. This will create a new version
                 distinct from the system default.
               </p>
@@ -294,20 +294,20 @@ export function LayoutTemplateManager() {
                 type="text"
                 value={newLayoutName}
                 onChange={(e) => setNewLayoutName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
                 placeholder="Layout name"
                 autoFocus
               />
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowRenameDialog(false)}
-                  className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                  className="flex-1 px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirmUpdate}
-                  className="flex-1 px-4 py-2 text-gray-900 dark:text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+                  className="flex-1 px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
                   disabled={!newLayoutName.trim()}
                 >
                   Save
@@ -327,10 +327,10 @@ export function LayoutTemplateManager() {
         <div
           className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg ${
             notification.type === 'success'
-              ? 'bg-green-50 text-green-800 border border-green-200'
+              ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800'
               : notification.type === 'error'
-              ? 'bg-red-50 text-red-800 border border-red-200'
-              : 'bg-blue-50 text-blue-800 border border-blue-200'
+              ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800'
+              : 'bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800'
           }`}
         >
           {notification.type === 'success' ? (
@@ -352,19 +352,19 @@ export function LayoutTemplateManager() {
 
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Layout Template Management</h2>
-        <p className="text-gray-600">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Layout Template Management</h2>
+        <p className="text-gray-600 dark:text-gray-400">
           Export, import, and manage default page layout templates for ShowStack:Prep
         </p>
       </div>
 
       {/* Instructions */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
         <div className="flex items-start gap-2">
-          <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
           <div>
-            <h4 className="font-medium text-blue-900 mb-2">How to Use</h4>
-            <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+            <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">How to Use</h4>
+            <ol className="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">
               <li>Click <strong>Edit</strong> to customize layouts visually or <strong>Export</strong> to save as JSON files</li>
               <li>Edit exported JSON files in a text editor if needed</li>
               <li>Import modified JSON files to update default layouts</li>
@@ -375,13 +375,13 @@ export function LayoutTemplateManager() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-        <h3 className="text-sm font-semibold mb-3 text-gray-700">Quick Actions</h3>
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-6">
+        <h3 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">Quick Actions</h3>
         <div className="flex flex-wrap gap-3">
           <button
             onClick={handleExportAllLayouts}
             disabled={isLoading}
-            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-gray-900 dark:text-white text-sm rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Download className="w-4 h-4" />
             <span>Export All</span>
@@ -390,7 +390,7 @@ export function LayoutTemplateManager() {
           <button
             onClick={handleImportLayouts}
             disabled={isLoading}
-            className="flex items-center gap-2 px-3 py-2 bg-green-600 text-gray-900 dark:text-white text-sm rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Upload className="w-4 h-4" />
             <span>Import JSON</span>
@@ -399,7 +399,7 @@ export function LayoutTemplateManager() {
           <button
             onClick={handleResetToFactory}
             disabled={isLoading}
-            className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-gray-900 dark:text-white text-sm rounded-md hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white text-sm rounded-md hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw className="w-4 h-4" />
             <span>Reset to Factory</span>
@@ -409,12 +409,12 @@ export function LayoutTemplateManager() {
 
       {/* Default Layout Files Info */}
       {defaultLayoutFiles.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
           <div className="flex items-start gap-2">
-            <FileJson className="w-5 h-5 text-blue-600 mt-0.5" />
+            <FileJson className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
             <div>
-              <h4 className="font-medium text-blue-900 mb-2">Default Layout JSON Files</h4>
-              <ul className="text-sm text-blue-800 space-y-1">
+              <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Default Layout JSON Files</h4>
+              <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
                 {defaultLayoutFiles.map((file) => (
                   <li key={file} className="font-mono">
                     {file}
@@ -427,25 +427,25 @@ export function LayoutTemplateManager() {
       )}
 
       {/* Current Default Layouts */}
-      <div className="bg-white border border-gray-200 rounded-lg">
-        <div className="p-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold">Current Default Layouts</h3>
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Current Default Layouts</h3>
         </div>
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-gray-200 dark:divide-gray-700">
           {layouts.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
               No default layouts found. Use the "Reset to Factory Defaults" button to create them.
             </div>
           ) : (
             layouts.map((layout) => (
-              <div key={layout.id} className="p-4 hover:bg-gray-50 transition-colors">
+              <div key={layout.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <h4 className="font-medium text-gray-900">{layout.name}</h4>
+                    <h4 className="font-medium text-gray-900 dark:text-white">{layout.name}</h4>
                     {layout.description && (
-                      <p className="text-sm text-gray-600 mt-1">{layout.description}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{layout.description}</p>
                     )}
-                    <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                    <div className="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
                       <span>Type: <span className="font-mono">{layout.page_type}</span></span>
                       <span>Grid: {layout.grid_columns}x{layout.grid_rows}</span>
                       <span>Size: {layout.page_width}x{layout.page_height}px</span>
@@ -455,7 +455,7 @@ export function LayoutTemplateManager() {
                     <button
                       onClick={() => handleEditLayout(layout)}
                       disabled={isLoading}
-                      className="flex items-center gap-2 px-3 py-2 text-purple-600 hover:bg-purple-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center gap-2 px-3 py-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Edit2 className="w-4 h-4" />
                       <span className="text-sm">Edit</span>
@@ -463,7 +463,7 @@ export function LayoutTemplateManager() {
                     <button
                       onClick={() => handleExportLayout(layout.id)}
                       disabled={isLoading}
-                      className="flex items-center gap-2 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center gap-2 px-3 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Download className="w-4 h-4" />
                       <span className="text-sm">Export</span>

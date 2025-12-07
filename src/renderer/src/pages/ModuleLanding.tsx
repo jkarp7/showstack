@@ -23,6 +23,13 @@ const MODULE_TOOLS: Record<ModuleType, ToolCard[]> = {
       isLocked: false
     },
     {
+      name: 'Shop Order',
+      description: 'Equipment orders and specifications for rental houses',
+      icon: '📋',
+      route: 'shop-order',
+      isLocked: false
+    },
+    {
       name: 'Blueprint',
       description: 'System drawings and rack elevations - Omnigraffle parity tool (Coming Soon)',
       icon: '📐',
@@ -140,21 +147,21 @@ export function ModuleLanding() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900 text-gray-900 dark:text-white">
+    <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 p-6">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={handleBackClick}
-              className="text-gray-400 hover:text-gray-900 dark:text-white flex items-center gap-2"
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center gap-2"
             >
               ← Back to {projectId ? 'Project' : 'Home'}
             </button>
             {projectId && (
               <button
                 onClick={() => navigate('/')}
-                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
+                className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-sm transition"
                 title="Home (Projects)"
               >
                 🏠
@@ -162,8 +169,8 @@ export function ModuleLanding() {
             )}
           </div>
           <div>
-            <h1 className="text-3xl font-bold">{moduleName}</h1>
-            <p className="text-gray-400 text-sm mt-1">Choose a tool or open a recent file</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{moduleName}</h1>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Choose a tool or open a recent file</p>
           </div>
         </div>
       </header>
@@ -173,23 +180,23 @@ export function ModuleLanding() {
         <div className="max-w-7xl mx-auto p-8">
           {/* Tools Section */}
           <div className="mb-12">
-            <h2 className="text-2xl font-bold mb-6">Tools</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Tools</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {tools.map((tool) => (
                 <div
                   key={tool.route}
                   onClick={() => handleToolClick(tool)}
-                  className={`bg-gray-800 rounded-lg border border-gray-700 p-6 transition ${
+                  className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 transition ${
                     tool.isLocked
                       ? 'opacity-60 cursor-not-allowed'
-                      : 'hover:border-blue-500 cursor-pointer'
+                      : 'hover:border-blue-500 dark:hover:border-blue-400 cursor-pointer'
                   }`}
                 >
                   <div className="text-4xl mb-4">{tool.icon}</div>
-                  <h3 className="text-xl font-semibold mb-2">{tool.name}</h3>
-                  <p className="text-gray-400 text-sm">{tool.description}</p>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{tool.name}</h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">{tool.description}</p>
                   {tool.isLocked && (
-                    <div className="mt-4 text-yellow-500 text-sm flex items-center gap-2">
+                    <div className="mt-4 text-yellow-600 dark:text-yellow-500 text-sm flex items-center gap-2">
                       🔒 Coming Soon
                     </div>
                   )}
@@ -201,10 +208,10 @@ export function ModuleLanding() {
           {/* Recent Files Section */}
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">Recent Files</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Recent Files</h2>
               <button
                 onClick={handleOpenFile}
-                className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition"
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
               >
                 Open File...
               </button>
@@ -215,7 +222,7 @@ export function ModuleLanding() {
                 {recentFiles.map((file) => (
                   <div
                     key={file.filePath}
-                    className="bg-gray-800 rounded-lg border border-gray-700 p-6 hover:border-blue-500 transition cursor-pointer group"
+                    className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:border-blue-500 dark:hover:border-blue-400 transition cursor-pointer group"
                     onClick={() => handleOpenRecentFile(file.filePath)}
                   >
                     <div className="flex items-start justify-between mb-3">
@@ -225,32 +232,32 @@ export function ModuleLanding() {
                           e.stopPropagation();
                           handleRemoveRecentFile(file.filePath);
                         }}
-                        className="text-gray-500 hover:text-red-500 transition opacity-0 group-hover:opacity-100"
+                        className="text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition opacity-0 group-hover:opacity-100"
                         title="Remove from recent"
                       >
                         ×
                       </button>
                     </div>
-                    <h3 className="text-lg font-semibold mb-2 truncate">{file.projectName}</h3>
-                    <p className="text-xs text-gray-500">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 truncate">{file.projectName}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Created: {new Date(file.created).toLocaleDateString()}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Last opened: {new Date(file.lastOpened).toLocaleDateString()}
                     </p>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="bg-gray-800 rounded-lg border border-gray-700 p-12 text-center">
+              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-12 text-center">
                 <div className="text-6xl mb-4">📂</div>
-                <p className="text-gray-400 text-lg mb-4">No recent files</p>
-                <p className="text-gray-500 text-sm mb-6">
+                <p className="text-gray-600 dark:text-gray-400 text-lg mb-4">No recent files</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
                   Open an existing file or create a new one to get started
                 </p>
                 <button
                   onClick={handleOpenFile}
-                  className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition"
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
                 >
                   Open File...
                 </button>
