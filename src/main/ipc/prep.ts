@@ -764,6 +764,35 @@ function renderLayoutElement(
     const value = getDataFieldValue(config.fieldType, project);
     const label = config.showLabel && config.label ? config.label : '';
 
+    // Special handling for logo field - render as image
+    if (config.fieldType === 'logo' && project.logo_path) {
+      try {
+        // Read logo file and convert to base64 data URL
+        if (fs.existsSync(project.logo_path)) {
+          const buffer = fs.readFileSync(project.logo_path);
+          const ext = path.extname(project.logo_path).toLowerCase();
+          const mimeTypes: Record<string, string> = {
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.png': 'image/png',
+            '.gif': 'image/gif',
+            '.svg': 'image/svg+xml',
+            '.webp': 'image/webp'
+          };
+          const mimeType = mimeTypes[ext] || 'image/png';
+          const base64 = buffer.toString('base64');
+          const dataUrl = `data:${mimeType};base64,${base64}`;
+
+          return `<div style="${baseStyle} padding: 0;">
+            <img src="${dataUrl}" alt="Project Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+          </div>`;
+        }
+      } catch (error) {
+        console.error('Error loading logo for PDF:', error);
+      }
+      return ''; // No logo or failed to load
+    }
+
     if (!value && !label) return '';
 
     return `<div style="${baseStyle}">

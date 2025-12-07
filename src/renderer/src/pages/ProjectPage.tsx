@@ -125,7 +125,7 @@ export function ProjectPage() {
               <img
                 src={logoDataUrl}
                 alt={project.name}
-                className="w-24 h-24 rounded-lg object-cover bg-gray-200 dark:bg-gray-700"
+                className="w-24 h-24 rounded-lg object-contain bg-gray-200 dark:bg-gray-700 p-2"
               />
             ) : (
               <div className="w-24 h-24 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-4xl">
