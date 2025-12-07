@@ -218,9 +218,10 @@ export const SCHEMA = `
     -- Additional discipline contacts (JSON)
     additional_contacts TEXT,
 
-    -- Logo
+    -- Logo (unified with Project type)
+    logo_path TEXT,
     logo_url TEXT,
-    logo_storage_path TEXT,
+    logo_storage_path TEXT, -- Legacy field
 
     -- Disciplines (JSON array: ["lighting", "audio", "video", etc.])
     disciplines TEXT NOT NULL DEFAULT '["lighting"]',

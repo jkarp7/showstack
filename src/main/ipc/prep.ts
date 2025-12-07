@@ -773,7 +773,8 @@ function renderLayoutElement(
       console.log('[PDF] Project keys:', Object.keys(project));
 
       // Support both unified Project (logo_path) and legacy PrepProject (logo_storage_path)
-      const logoPath = (project as any).logo_path || project.logo_storage_path;
+      // Prioritize logo_path as the unified field
+      const logoPath = project.logo_path || project.logo_storage_path;
 
       if (logoPath) {
         console.log('[PDF] Using logo path:', logoPath);

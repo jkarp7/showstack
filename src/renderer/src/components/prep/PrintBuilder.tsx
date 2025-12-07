@@ -137,7 +137,7 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
       created_at: now,
       updated_at: now,
       pageSettings: {
-        pageSize: 'letter',
+        pageSize: 'Letter',
         orientation: 'portrait',
         margins: { top: 0.75, right: 0.75, bottom: 0.75, left: 0.75 },
         showPageNumbers: true,

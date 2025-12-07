@@ -44,8 +44,9 @@ export interface PrepProject {
   pe_email?: string;
   pe_phone?: string;
   additional_contacts?: string; // JSON
+  logo_path?: string; // Unified logo field (same as Project type)
   logo_url?: string;
-  logo_storage_path?: string;
+  logo_storage_path?: string; // Legacy field, kept for backwards compatibility
   disciplines: string; // JSON array
   current_revision: number;
   created_at: number;
@@ -110,9 +111,9 @@ export function createPrepProject(data: Partial<PrepProject>): PrepProject {
       ld_name, ld_email, ld_phone,
       ald_name, ald_email, ald_phone,
       pe_name, pe_email, pe_phone,
-      additional_contacts, logo_url, logo_storage_path,
+      additional_contacts, logo_path, logo_url, logo_storage_path,
       disciplines, current_revision, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
     [
       id,
@@ -149,6 +150,7 @@ export function createPrepProject(data: Partial<PrepProject>): PrepProject {
       data.pe_email || null,
       data.pe_phone || null,
       additionalContacts,
+      data.logo_path || null,
       data.logo_url || null,
       data.logo_storage_path || null,
       disciplines,
@@ -192,6 +194,7 @@ export function updatePrepProject(id: string, updates: Partial<PrepProject>): Pr
     'pe_email',
     'pe_phone',
     'additional_contacts',
+    'logo_path',
     'logo_url',
     'logo_storage_path',
     'disciplines',
