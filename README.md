@@ -198,7 +198,7 @@ This is currently a private project in early development. Contributions will be 
 
 ## 📄 License
 
-Copyright © 2025 Lytrix / Josh Karp Designs
+Copyright © 2025 Lytrix
 
 License TBD - Currently proprietary during development.
 
@@ -222,8 +222,8 @@ License TBD - Currently proprietary during development.
 
 ## 📞 Contact
 
-**Josh Karp**  
-Lytrix / Josh Karp Designs  
+**Josh Karp**
+Lytrix
 [jkarp.com](https://jkarp.com)
 
 ---

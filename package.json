@@ -2,7 +2,7 @@
   "name": "showstack-production",
   "version": "0.1.0-alpha",
   "description": "Modern production management software for live entertainment",
-  "author": "Josh Karp / Lytrix",
+  "author": "Lytrix",
   "license": "UNLICENSED",
   "private": true,
   "main": "dist/main/index.js",

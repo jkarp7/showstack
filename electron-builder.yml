@@ -1,6 +1,6 @@
 appId: com.lytrix.showstack-production
 productName: ShowStack Production
-copyright: Copyright © 2025 Lytrix / Josh Karp Designs
+copyright: Copyright © 2025 Lytrix
 
 directories:
   output: release

@@ -1,7 +1,7 @@
 # ShowStack:Production - Development Package Summary
 
-**Created:** November 16, 2025  
-**For:** Josh Karp / Lytrix
+**Created:** November 16, 2025
+**For:** Lytrix
 
 ---
 
