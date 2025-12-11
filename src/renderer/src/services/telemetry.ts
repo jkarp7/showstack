@@ -166,33 +166,54 @@ class TelemetryService {
   }
 
   /**
-   * Sync events to cloud backend
-   * TODO: Implement actual cloud sync (PostHog, custom backend, etc.)
+   * Sync events to cloud backend (PostHog)
    */
   private async syncToCloud(events: StoredEvent[]): Promise<void> {
-    // For now, just log that we would sync
-    // In production, this would POST to analytics backend
-    if (import.meta.env.DEV) {
-      console.log(`[Telemetry] Would sync ${events.length} events to cloud`);
+    const posthogKey = import.meta.env.VITE_POSTHOG_KEY;
+
+    // If no PostHog key configured, skip cloud sync (events remain local)
+    if (!posthogKey) {
+      if (import.meta.env.DEV) {
+        console.log(`[Telemetry] No PostHog key configured. ${events.length} events stored locally only.`);
+      }
+      return Promise.resolve();
     }
 
-    // Example implementation for PostHog:
-    // const response = await fetch('https://app.posthog.com/capture/', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({
-    //     api_key: 'YOUR_POSTHOG_KEY',
-    //     batch: events.map(e => ({
-    //       event: e.event.event,
-    //       properties: e.event.properties,
-    //       timestamp: new Date(e.event.timestamp).toISOString(),
-    //       distinct_id: e.event.anonymousId,
-    //     })),
-    //   }),
-    // });
+    try {
+      // PostHog batch API endpoint
+      const response = await fetch('https://us.i.posthog.com/batch/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          api_key: posthogKey,
+          batch: events.map(e => ({
+            event: e.event.event,
+            properties: {
+              ...e.event.properties,
+              $app_version: e.event.appVersion,
+              $os: e.event.platform,
+              $session_id: e.event.sessionId,
+            },
+            timestamp: new Date(e.event.timestamp).toISOString(),
+            distinct_id: e.event.anonymousId,
+          })),
+        }),
+      });
 
-    // For now, simulate success
-    return Promise.resolve();
+      if (!response.ok) {
+        throw new Error(`PostHog sync failed: ${response.status} ${response.statusText}`);
+      }
+
+      if (import.meta.env.DEV) {
+        console.log(`[Telemetry] Successfully synced ${events.length} events to PostHog`);
+      }
+    } catch (error) {
+      // Log error but don't throw - events will remain unsynced and retry later
+      console.error('[Telemetry] Failed to sync to PostHog:', error);
+      throw error; // Re-throw so events remain unsynced
+    }
   }
 
   /**
