@@ -12,7 +12,9 @@ import { Settings } from './pages/Settings';
 import { LicenseBanner } from './components/License/LicenseBanner';
 import { SplashScreen } from './components/SplashScreen';
 import { ThemeProvider } from './components/ThemeProvider';
+import { ConsentDialog } from './components/common/ConsentDialog';
 import { useUser } from './hooks/useUser';
+import { useSettingsStore } from './store/settingsStore';
 import { telemetry } from './services/telemetry';
 
 function AppContent() {
@@ -101,10 +103,23 @@ export default function App() {
     return !splashShown;
   });
 
+  // Show consent dialog on first launch
+  const [showConsent, setShowConsent] = useState(() => {
+    // Check if consent was already given (check if user has made a choice)
+    const consentShown = localStorage.getItem('showstack-consent-shown');
+    return !consentShown;
+  });
+
   const handleSplashComplete = () => {
     setShowSplash(false);
     // Mark splash as shown for this session
     sessionStorage.setItem('splashShown', 'true');
+  };
+
+  const handleConsentClose = () => {
+    setShowConsent(false);
+    // Mark consent dialog as shown
+    localStorage.setItem('showstack-consent-shown', 'true');
   };
 
   // Track app lifecycle with telemetry
@@ -144,7 +159,11 @@ export default function App() {
         {showSplash ? (
           <SplashScreen onComplete={handleSplashComplete} />
         ) : (
-          <AppContent />
+          <>
+            <AppContent />
+            {/* Show consent dialog on first launch after splash */}
+            {showConsent && <ConsentDialog onClose={handleConsentClose} />}
+          </>
         )}
       </Router>
     </ThemeProvider>
