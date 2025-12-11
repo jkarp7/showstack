@@ -354,16 +354,6 @@ function IntegrationButtons() {
 | Cloud Sync | ✅ | ❌ | ✅ |
 | Priority Support | ✅ | ❌ | ✅ |
 
-### Prep Module Features
-
-| Feature | Professional | Student | Institutional |
-|---------|-------------|---------|---------------|
-| Max Projects | Unlimited | 3 | 3 |
-| Logo Integration | ✅ | ❌ | ✅ |
-| Vendor Templates | ✅ | ❌ | ✅ |
-| Equipment Database | ✅ | ✅ | ✅ |
-| Bulk Operations | ✅ | ❌ | ✅ |
-
 ### Production Module Features
 
 | Feature | Professional | Student | Institutional |
