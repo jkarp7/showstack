@@ -41,7 +41,7 @@ When accessing the admin panel after setup:
 
 ### Layout Template Management
 
-The Layout Template Manager allows you to export, import, and manage default page layout templates used throughout ShowStack:Prep.
+The Layout Template Manager allows you to export, import, and manage default page layout templates used in the Production module's Shop Order tool.
 
 #### Viewing Current Layouts
 
@@ -175,7 +175,7 @@ This creates backup copies of all current layouts.
 3. Save changes
 
 **Option B: Use Layout Designer**
-1. Open ShowStack:Prep
+1. Open the Production module's Shop Order tool
 2. Access Print Builder → Manage Templates
 3. Create or edit a layout visually
 4. Save as default
@@ -190,7 +190,7 @@ The system validates and imports your changes.
 
 ### Step 4: Verify Changes
 
-1. Open ShowStack:Prep
+1. Open the Production module's Shop Order tool
 2. Create a test shop order
 3. Check that layouts render correctly
 4. Adjust as needed

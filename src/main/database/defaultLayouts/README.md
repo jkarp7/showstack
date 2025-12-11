@@ -1,10 +1,10 @@
 # Default Page Layouts
 
-This directory contains the default page layout templates used by ShowStack:Prep for shop order generation. These JSON files define the visual structure and content of each page type.
+This directory contains the default page layout templates used by the Production module's Shop Order tool for shop order generation. These JSON files define the visual structure and content of each page type.
 
 ## Overview
 
-When ShowStack:Prep is first launched or when "Reset to Factory Defaults" is triggered, these JSON files are loaded into the application database as default templates. Users can then customize these templates or create their own variations.
+When the Production module's Shop Order tool is first launched or when "Reset to Factory Defaults" is triggered, these JSON files are loaded into the application database as default templates. Users can then customize these templates or create their own variations.
 
 ## Files
 
@@ -257,7 +257,7 @@ This ensures consistent PDF export and printing.
 
 ### Option 3: Use Layout Designer
 
-1. Open ShowStack:Prep
+1. Open the Production module's Shop Order tool
 2. Access Print Builder → Manage Templates
 3. Create or edit layouts visually
 4. Export to JSON via Admin Panel
