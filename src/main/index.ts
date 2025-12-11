@@ -9,6 +9,7 @@ import { registerPreferencesHandlers } from './ipc/preferences';
 import { registerFileHandlers } from './ipc/files';
 import { registerWindowHandlers } from './ipc/windows';
 import { registerPrepHandlers } from './ipc/prep';
+import { registerPaperworkHandlers } from './ipc/paperwork';
 import { registerLicenseHandlers } from './ipc/license';
 import { registerAdminHandlers } from './ipc/admin';
 import { registerSettingsHandlers } from './ipc/settings';
@@ -39,6 +40,7 @@ app.on('ready', async () => {
   registerFileHandlers();
   registerWindowHandlers();
   registerPrepHandlers();
+  registerPaperworkHandlers();
   registerLicenseHandlers();
   registerAdminHandlers();
   registerSettingsHandlers();

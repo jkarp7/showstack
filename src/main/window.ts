@@ -40,18 +40,6 @@ export function createWindow(routePath: string = '/'): BrowserWindow {
     window.loadFile(indexPath, { hash: routePath });
   }
 
-  // Add F12 keyboard shortcut for DevTools toggle
-  window.webContents.on('before-input-event', (event, input) => {
-    if (input.key === 'F12' && input.type === 'keyDown') {
-      event.preventDefault();
-      if (window.webContents.isDevToolsOpened()) {
-        window.webContents.closeDevTools();
-      } else {
-        window.webContents.openDevTools();
-      }
-    }
-  });
-
   // Handle window close event - check for unsaved changes
   window.on('close', async (event) => {
     // Get isDirty state from renderer via executeJavaScript

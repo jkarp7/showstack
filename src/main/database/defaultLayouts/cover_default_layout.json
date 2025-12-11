@@ -1,0 +1,193 @@
+{
+  "template": {
+    "name": "Cover Page - ShowStack Default",
+    "description": "Professional cover page matching ShowStack Designer format",
+    "page_type": "cover",
+    "grid_columns": 12,
+    "grid_rows": 20,
+    "grid_gap": 8,
+    "page_width": 816,
+    "page_height": 1056,
+    "is_default": true
+  },
+  "elements": [
+    {
+      "element_type": "dataField",
+      "config": {
+        "fieldType": "logo",
+        "showLabel": false
+      },
+      "grid_column": 4,
+      "grid_row": 0,
+      "column_span": 4,
+      "row_span": 2,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 11,
+        "textAlign": "center",
+        "color": "#000000",
+        "backgroundColor": "transparent",
+        "padding": 8
+      }
+    },
+    {
+      "element_type": "text",
+      "config": {
+        "content": "{production_name}"
+      },
+      "grid_column": 0,
+      "grid_row": 2,
+      "column_span": 12,
+      "row_span": 2,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 20,
+        "fontWeight": "bold",
+        "textAlign": "center",
+        "color": "#000000",
+        "backgroundColor": "transparent",
+        "padding": 8
+      }
+    },
+    {
+      "element_type": "dataField",
+      "config": {
+        "fieldType": "ld_name",
+        "label": "Lighting Designer:",
+        "showLabel": true
+      },
+      "grid_column": 0,
+      "grid_row": 6,
+      "column_span": 12,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 12,
+        "fontWeight": "bold",
+        "textAlign": "center",
+        "color": "#000000",
+        "backgroundColor": "transparent",
+        "padding": 8
+      }
+    },
+    {
+      "element_type": "dataField",
+      "config": {
+        "fieldType": "venue",
+        "showLabel": false
+      },
+      "grid_column": 0,
+      "grid_row": 8,
+      "column_span": 12,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 11,
+        "textAlign": "center",
+        "color": "#000000",
+        "padding": 2
+      }
+    },
+    {
+      "element_type": "text",
+      "config": {
+        "content": "{venue_city}, {venue_state}"
+      },
+      "grid_column": 0,
+      "grid_row": 9,
+      "column_span": 12,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 11,
+        "textAlign": "center",
+        "color": "#000000",
+        "padding": 2
+      }
+    },
+    {
+      "element_type": "text",
+      "config": {
+        "content": "ELECTRICS SHOP ORDER"
+      },
+      "grid_column": 0,
+      "grid_row": 11,
+      "column_span": 12,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 13,
+        "fontWeight": "bold",
+        "textAlign": "center",
+        "textDecoration": "underline",
+        "color": "#000000",
+        "padding": 6
+      }
+    },
+    {
+      "element_type": "dataField",
+      "config": {
+        "fieldType": "order_date",
+        "showLabel": false
+      },
+      "grid_column": 0,
+      "grid_row": 13,
+      "column_span": 12,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 11,
+        "textAlign": "center",
+        "color": "#000000",
+        "padding": 2
+      }
+    },
+    {
+      "element_type": "dataField",
+      "config": {
+        "fieldType": "revision_date",
+        "label": "REVISION ISSUED:",
+        "showLabel": true
+      },
+      "grid_column": 0,
+      "grid_row": 17,
+      "column_span": 12,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 11,
+        "textAlign": "center",
+        "color": "#000000",
+        "padding": 2
+      }
+    },
+    {
+      "element_type": "dataField",
+      "config": {
+        "fieldType": "current_revision",
+        "label": "REVISION #",
+        "showLabel": true
+      },
+      "grid_column": 0,
+      "grid_row": 18,
+      "column_span": 12,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 11,
+        "textAlign": "center",
+        "color": "#000000",
+        "padding": 2
+      }
+    }
+  ]
+}
