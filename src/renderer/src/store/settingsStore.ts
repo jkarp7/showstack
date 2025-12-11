@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+// Helper function to generate UUID for anonymous ID
+function generateAnonymousId(): string {
+  return crypto.randomUUID();
+}
+
 // Workspace Preferences
 export interface WorkspaceSettings {
   defaultView: 'projects' | 'prep' | 'designer' | 'last';
@@ -62,6 +67,14 @@ export interface AdvancedSettings {
   renderQuality: RenderQuality;
 }
 
+// Privacy Settings
+export interface PrivacySettings {
+  telemetryEnabled: boolean;
+  crashReportsEnabled: boolean;
+  anonymousId: string; // Generated UUID
+  dataRetentionDays: number; // How long to keep local data
+}
+
 // User Profile Settings
 export interface UserProfileSettings {
   name: string;
@@ -81,6 +94,7 @@ export interface SettingsState {
   projectManagement: ProjectManagementSettings;
   print: PrintSettingsConfig;
   advanced: AdvancedSettings;
+  privacy: PrivacySettings;
   userProfile: UserProfileSettings;
 
   // Actions
@@ -90,6 +104,7 @@ export interface SettingsState {
   updateProjectManagement: (settings: Partial<ProjectManagementSettings>) => void;
   updatePrint: (settings: Partial<PrintSettingsConfig>) => void;
   updateAdvanced: (settings: Partial<AdvancedSettings>) => void;
+  updatePrivacy: (settings: Partial<PrivacySettings>) => void;
   updateUserProfile: (settings: Partial<UserProfileSettings>) => void;
   resetToDefaults: () => void;
 }
@@ -134,6 +149,12 @@ const defaultSettings = {
     memoryLimit: 2048,
     cacheSize: 500,
     renderQuality: 'high' as const,
+  },
+  privacy: {
+    telemetryEnabled: false,
+    crashReportsEnabled: false,
+    anonymousId: generateAnonymousId(),
+    dataRetentionDays: 90,
   },
   userProfile: {
     name: '',
@@ -181,6 +202,11 @@ export const useSettingsStore = create<SettingsState>()(
       updateAdvanced: (settings) =>
         set((state) => ({
           advanced: { ...state.advanced, ...settings },
+        })),
+
+      updatePrivacy: (settings) =>
+        set((state) => ({
+          privacy: { ...state.privacy, ...settings },
         })),
 
       updateUserProfile: (settings) =>

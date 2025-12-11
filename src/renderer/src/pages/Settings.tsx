@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings as SettingsIcon, ArrowLeft, Monitor, Edit3, FolderOpen, Users, Sliders, FileType, Printer } from 'lucide-react';
+import { Settings as SettingsIcon, ArrowLeft, Monitor, Edit3, FolderOpen, Users, Sliders, FileType, Printer, Shield } from 'lucide-react';
 import { WorkspacePreferences } from '../components/settings/WorkspacePreferences';
 import { EditorSettings } from '../components/settings/EditorSettings';
 import { ProjectManagement } from '../components/settings/ProjectManagement';
@@ -8,8 +8,9 @@ import { Collaboration } from '../components/settings/Collaboration';
 import { AdvancedSettings } from '../components/settings/AdvancedSettings';
 import { ProjectDefaults } from '../components/settings/ProjectDefaults';
 import { PrintSettings } from '../components/settings/PrintSettings';
+import { PrivacySettings } from '../components/settings/PrivacySettings';
 
-type Tab = 'workspace' | 'editor' | 'projects' | 'collaboration' | 'advanced' | 'defaults' | 'print';
+type Tab = 'workspace' | 'editor' | 'projects' | 'collaboration' | 'advanced' | 'defaults' | 'print' | 'privacy';
 
 export function Settings() {
   const navigate = useNavigate();
@@ -74,6 +75,10 @@ export function Settings() {
               <Users className="w-5 h-5" />
               <span>Collaboration</span>
             </button>
+            <button onClick={() => setActiveTab('privacy')} className={tabClass(activeTab === 'privacy')}>
+              <Shield className="w-5 h-5" />
+              <span>Privacy</span>
+            </button>
             <button onClick={() => setActiveTab('advanced')} className={tabClass(activeTab === 'advanced')}>
               <Sliders className="w-5 h-5" />
               <span>Advanced</span>
@@ -89,6 +94,7 @@ export function Settings() {
           {activeTab === 'projects' && <ProjectManagement />}
           {activeTab === 'print' && <PrintSettings />}
           {activeTab === 'collaboration' && <Collaboration />}
+          {activeTab === 'privacy' && <PrivacySettings />}
           {activeTab === 'advanced' && <AdvancedSettings />}
         </div>
       </div>

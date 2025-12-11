@@ -2,24 +2,37 @@
 
 **Modern production management software for live entertainment**
 
-ShowStack is a comprehensive desktop application suite designed for lighting designers, production electricians, and entertainment professionals. Built with modern technologies, it offers an offline-first alternative to legacy tools like LightWright 6.
+ShowStack is a comprehensive suite of tools designed for lighting designers, production electricians, and entertainment professionals. This repository contains the ShowStack:Production module - a modern alternative to LightWright 6.
 
 ---
 
 ## 🎯 Project Overview
 
-ShowStack is a modular Electron application providing specialized tools for production management:
+**ShowStack** is a comprehensive desktop application suite for live entertainment production management. Built with modern web technologies (Electron + React), it provides professional tools for lighting designers, production electricians, and tour managers.
 
-- **ShowStack:Production** - Complete lighting production suite including fixture management, shop orders, and paperwork (LightWright alternative)
-- **ShowStack:Manager** - Production logistics and budgeting (planned)
+### Current Modules
 
-### Key Features
+**ShowStack:Manager** - Tour & Venue Management *(coming soon)*
+- Tour scheduling and calendar
+- Venue information database
+- Crew and personnel tracking
 
-- ✅ **Offline-First Architecture** - All data stored locally in SQLite
-- ✅ **Module-Based Licensing** - Pay only for what you need
-- ✅ **Professional Output** - Print-ready PDFs with custom branding
-- ✅ **Modern UX** - Clean interface with full light/dark mode
-- ✅ **Cross-Platform** - Windows, macOS, and Linux support
+**ShowStack:Production** - Equipment & Documentation *(60% complete)*
+- Equipment Manager for fixture tracking
+- Shop Order tool with multi-discipline support
+- Professional paperwork generation
+- Label design and printing
+
+### Key Features (Alpha)
+
+- ✅ **Offline-first** - Works without internet, 14-day grace period
+- ✅ **Module-based licensing** - Pay only for what you need
+- ✅ **Dark mode** - Full light/dark theme support
+- ✅ **Privacy-first analytics** - Anonymous, opt-in telemetry with PostHog
+- ✅ **Developer mode** - Advanced debugging and feature flags
+- ✅ **Multi-window support** - Open multiple projects simultaneously
+- ✅ **Auto-save** - Never lose your work
+- ✅ **Export flexibility** - PDF, CSV, JSON formats
 
 ---
 
@@ -27,173 +40,114 @@ ShowStack is a modular Electron application providing specialized tools for prod
 
 ```
 showstack/
-├── docs/                        # Documentation (organized by category)
-│   ├── business/               # Business docs (pricing, technical spec)
-│   ├── development/            # Developer guides and architecture
-│   ├── user/                   # User-facing documentation
-│   ├── releases/               # Release process guides
-│   ├── planning/               # Future feature plans
-│   └── archive/                # Historical implementation docs
+├── docs/                   # Documentation
+│   ├── technical-spec.md   # Complete technical specification
+│   ├── pricing.md          # Pricing strategy & competitive analysis
+│   └── dev-setup.md        # Development environment setup
 │
-├── src/
-│   ├── main/                   # Electron main process
-│   │   ├── database/          # SQLite schema and queries
-│   │   ├── ipc/               # IPC handlers for renderer communication
-│   │   └── services/          # Business logic services
-│   ├── renderer/              # React frontend application
-│   │   └── src/
-│   │       ├── components/    # UI components (65+)
-│   │       ├── pages/         # Page-level components
-│   │       ├── store/         # Zustand state management
-│   │       ├── hooks/         # Custom React hooks
-│   │       └── types/         # TypeScript definitions
-│   ├── preload/               # Secure IPC bridge
-│   └── shared/                # Shared types (main + renderer)
+├── proof-of-concept/       # Working POC of virtual data grid
+│   ├── src/
+│   ├── package.json
+│   └── README.md
 │
-├── resources/                  # App icons and assets
-├── .github/workflows/         # CI/CD automation
-├── package.json
-└── README.md                  # This file
+├── src/                    # Main application (TBD - Phase 1)
+│   ├── main/              # Electron main process
+│   ├── renderer/          # React application
+│   └── preload/           # Preload scripts
+│
+├── .github/
+│   └── workflows/         # CI/CD pipelines
+│
+├── LICENSE
+├── README.md              # This file
+└── package.json           # Root package.json
 ```
 
 ---
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### Quick Start - Test the Proof of Concept
 
-- Node.js 20+
-- npm 10+
-
-### Installation
+The POC demonstrates the core virtual data grid:
 
 ```bash
-# Install dependencies
+cd proof-of-concept
 npm install
-
-# Run in development mode
 npm run dev
 ```
 
-The application will launch as an Electron desktop app.
+Opens at `http://localhost:5173` with 1,000 fixtures loaded.
 
-### Building for Distribution
+**What to try:**
+- Scroll performance (60 FPS with 10k+ fixtures)
+- In-cell editing (click, type, Tab, Enter)
+- Multi-select (Click, Shift+Click, Cmd/Ctrl+Click)
+- Add/delete fixtures
 
-```bash
-# Build for current platform
-npm run dist
+### Full App Development (Phase 1+)
 
-# Build for specific platforms
-npm run dist:mac     # macOS .dmg
-npm run dist:win     # Windows installer
-npm run dist:linux   # Linux AppImage
-```
-
-See [docs/releases/](docs/releases/) for detailed release guides.
+Coming soon! See [docs/dev-setup.md](docs/dev-setup.md) for environment setup.
 
 ---
 
-## 📊 Development Status
+## 📊 Status
 
 **Current Phase:** Alpha
 **Version:** 0.1.0-alpha
+**Status:** Ready for testing and feedback
 
-| Module | Status | Completion |
-|--------|--------|------------|
-| ShowStack:Production | 🚧 In Progress | 60% |
-| Core Infrastructure | ✅ Complete | 100% |
-| ShowStack:Manager | ⬜ Planned | 0% |
+### ✅ Completed Features
 
----
+**Core Infrastructure:**
+- ✅ Electron application with multi-window support
+- ✅ Two-database architecture (app.db + projects.db)
+- ✅ sql.js (SQLite compiled to WebAssembly)
+- ✅ Offline-first with 14-day grace period
+- ✅ Module-based licensing system
+- ✅ Dark mode support
+- ✅ Settings page with 8 configuration tabs
+- ✅ Admin panel for template management
 
-## ✅ ShowStack:Production Module
+**Modules:**
+- ✅ **Manager Module** (placeholder - tour/venue management coming)
+- ✅ **Production Module** (~60% complete)
+  - Equipment Manager (fixture CRUD)
+  - Shop Order tool with revisions
+  - Paperwork generation
+  - Labels designer
+- ✅ **Shop Order Tool** (~90% complete)
+  - Multi-discipline support
+  - Section-based equipment lists
+  - Revision management with notes
+  - PDF/CSV export
+  - Print builder with page layout
 
-### Completed Features
+**Privacy & Analytics:**
+- ✅ Privacy-first telemetry (PostHog)
+- ✅ User consent dialog
+- ✅ Anonymous analytics (opt-in only)
+- ✅ Data retention controls
+- ✅ Export/delete personal data
 
-#### Shop Order Tool
-- ✅ Equipment management with section-based organization
-- ✅ Multi-discipline support (lighting, audio, video, rigging, scenic, props)
-- ✅ Revision tracking (up to 5 revisions with change detection)
-- ✅ 3-tier notes system (general conditions, notes, fixture notes)
-- ✅ Drag-and-drop print builder with 11 customizable section types
-- ✅ Logo integration and professional PDF export
-- ✅ Contact and venue management with scheduling
-- ✅ Template system for page layouts
-- ✅ File import/export (.showstack files)
+**Developer Tools:**
+- ✅ Developer mode with DevTools
+- ✅ Feature flags system (13 experimental features)
+- ✅ Debug panels in all modules
+- ✅ F12 keyboard shortcut
+- ✅ Comprehensive documentation
 
-### In Development
+### 🚧 In Progress
+- 🚧 Equipment Manager fixture list UI (~40% remaining)
+- 🚧 Power distribution calculations
+- 🚧 Fixture library with manufacturers
 
-#### Fixture Management (Equipment Manager)
-- 🚧 Fixture database with 50+ columns (LightWright parity)
-- 🚧 Virtual data grid for 10,000+ fixtures
-- 🚧 Power management and circuit tracking
-- ⬜ DMX conflict detection (planned)
-- ⬜ Auto-complete for manufacturer, type, color, gobo (planned)
-- ⬜ Undo/redo system (planned)
-
-### Planned Features
-
-#### Label Designer
-- ⬜ Drag-and-drop label layout
-- ⬜ Multiple label sizes (Dymo, Brother, Zebra)
-- ⬜ Barcode/QR code support
-
-#### Paperwork Generator
-- ⬜ Custom report templates
-- ⬜ Magic sheets, channel hookups
-- ⬜ Instrument and dimmer schedules
-
-#### Advanced Integrations
-- ⬜ Vectorworks import/export with reconciliation
-- ⬜ ETC Eos console integration via OSC
-- ⬜ CSV import/export
-
----
-
-## ✅ Core Infrastructure
-
-### Licensing System
-- ✅ Offline-first validation (14-day grace period)
-- ✅ Module-based access control
-- ✅ Tier-based features (Professional, Student, Institutional)
-- ✅ Background verification
-- ✅ Visual status banners
-- ✅ Graceful degradation (read-only on expiration)
-
-### Settings & User Profile
-- ✅ 7 settings sections with full persistence
-- ✅ User profile management with photo upload
-- ✅ Workspace preferences (theme, density, units)
-- ✅ Editor settings (auto-save, undo limits)
-- ✅ Project defaults and management
-- ✅ Print settings configuration
-- ✅ Advanced settings (developer mode toggle)
-
-### Admin Panel
-- ✅ Password-protected access (Cmd/Ctrl+Shift+A)
-- ✅ License management interface
-- ✅ Page layout template import/export
-- ✅ Factory reset for templates
-- ✅ System diagnostics
-
-### Theme System
-- ✅ Full light/dark mode support
-- ✅ Dynamic theme switching
-- ✅ Persistent state across sessions
-
-### File Operations
-- ✅ Import/export projects as .showstack files
-- ✅ Recent files tracking
-- ✅ Auto-save functionality
-
----
-
-## ⬜ ShowStack:Manager Module (Planned)
-
-- ⬜ Tour logistics tracking
-- ⬜ Budget management
-- ⬜ Per diem calculation
-- ⬜ Multi-show coordination
+### ⬜ Planned (Post-Alpha)
+- ⬜ Eos integration (OSC)
+- ⬜ Vectorworks import/export
+- ⬜ Label printing (Dymo, Brother, Zebra)
+- ⬜ Cloud collaboration features
+- ⬜ Advanced reporting engine
 
 ---
 
@@ -205,98 +159,130 @@ See [docs/releases/](docs/releases/) for detailed release guides.
 |---------|---------------|----------------------|
 | Price | $845 one-time | $249/year |
 | Updates | $625 every 3-5 years | Continuous (included) |
-| Shop Orders | Basic | ✅ Advanced with print builder |
-| Fixture Management | ✅ | 🚧 In development |
-| Offline Mode | ✅ | ✅ 14-day grace period |
+| Collaboration | ❌ | ✅ Real-time |
+| Cloud Sync | ❌ | ✅ Optional |
 | Modern UI | ❌ (1990s) | ✅ (2025) |
-| Multi-Module | ❌ | ✅ Production, Manager |
-| Dark Mode | ❌ | ✅ Full support |
+| Offline Mode | ✅ | ✅ |
 
-**Cost Comparison:**
-- **Year 1:** 71% cheaper ($249 vs $845)
-- **3 Years:** 49% cheaper ($747 vs $1,470)
-
-See [docs/business/pricing.md](docs/business/pricing.md) for detailed market analysis.
+**Year 1:** 71% cheaper ($249 vs $845)  
+**3 Years:** 49% cheaper ($747 vs $1,470)
 
 ---
 
 ## 🛠️ Technology Stack
 
-### Desktop Application
-- **Electron** 39.2 - Cross-platform desktop framework
-- **Node.js** 20+ - Runtime environment
-- **TypeScript** 5.9 - Type-safe development
-- **Vite** 7.2 - Fast build tool
-- **Electron Builder** 26.0 - Application packaging
+### Desktop App (Electron)
+- **Runtime:** Node.js 20+
+- **Framework:** Electron 39.2+
+- **Database:** sql.js (SQLite → WebAssembly)
+- **Analytics:** PostHog (privacy-first, opt-in)
+- **Hardware:** electron-printer, osc-js
 
-### Frontend
-- **React** 19.2 - UI framework with concurrent features
-- **Zustand** 5.0 - Lightweight state management
-- **Tailwind CSS** 3.4 - Utility-first styling
-- **Lucide React** - Icon library
-- **React Router** 6.28 - Client-side routing
+### Frontend (React)
+- **Framework:** React 19+
+- **Language:** TypeScript 5.9+
+- **State:** Zustand (9 stores)
+- **UI:** Tailwind CSS + Radix UI
+- **Build:** Vite
+- **Routing:** React Router v6
 
-### Data Layer
-- **sql.js** 1.10 - SQLite compiled to WebAssembly
-- **Two-database architecture:**
-  - App DB: Licenses, settings, templates (never exported)
-  - Project DB: All project data (exportable)
-
-### Security
-- **bcryptjs** - Password hashing for admin panel
-- **contextBridge** - Secure IPC without nodeIntegration
-- **uuid** - Unique identifier generation
+### Backend (Optional Cloud Sync)
+- **API:** Express.js + PostgreSQL
+- **Auth:** JWT
+- **Realtime:** Socket.io
+- **Storage:** AWS S3 / Cloudflare R2
 
 ---
 
 ## 📖 Documentation
 
-### For Developers
-- **[Development Setup](docs/development/dev-setup.md)** - Environment setup and build process
-- **[Architecture Guide](docs/development/ARCHITECTURE.md)** - Frontend architecture and patterns
-- **[Claude Code Quickstart](docs/development/CLAUDE_CODE_QUICKSTART.md)** - Development with Claude Code
+### User Documentation
+- **[Project Status](PROJECT_STATUS.md)** - Complete feature tracking and development roadmap
 
-### For Users
-- **[Admin Panel User Guide](docs/user/ADMIN_PANEL_USER_GUIDE.md)** - Admin panel features
-- **[Licensing System](docs/user/LICENSING_SYSTEM_README.md)** - License management
+### Developer Documentation
+- **[Developer Mode Guide](DEVELOPER_MODE.md)** - Enable debugging, feature flags, and DevTools
+- **[Telemetry Implementation](TELEMETRY_IMPLEMENTATION_SUMMARY.md)** - Privacy-first analytics system
+- **[PostHog Setup](POSTHOG_SETUP.md)** - Analytics configuration and monitoring
 
-### Business & Planning
-- **[Technical Specification](docs/business/technical-spec.md)** - Complete feature specifications
-- **[Pricing Strategy](docs/business/pricing.md)** - Market analysis and revenue model
-- **[Project Status](PROJECT_STATUS.md)** - Complete feature tracking and roadmap
-- **[Future Plans](docs/planning/)** - Upcoming feature implementations
+### Project Planning
+- **[Technical Specification](docs/technical-spec.md)** - Complete feature specs, database schema, architecture
+- **[Pricing Strategy](docs/pricing.md)** - Market analysis, revenue model, go-to-market plan
+- **[Development Setup](docs/dev-setup.md)** - Environment setup, testing, building
+- **[POC README](proof-of-concept/README.md)** - Proof-of-concept documentation
 
-### Releases
-- **[Release Setup](docs/releases/ALPHA_BETA_RELEASE_SETUP.md)** - Overview of release process
-- **[Alpha Release Guide](docs/releases/alpha-release-guide.md)** - Manual release process
-- **[Beta Release Guide](docs/releases/beta-release-guide.md)** - Automated releases with GitHub Actions
+---
+
+## 🗺️ Roadmap
+
+### Phase 1: Foundation (Months 1-2)
+- [x] Proof-of-concept (virtual grid)
+- [ ] Electron app shell
+- [ ] SQLite database
+- [ ] CRUD operations
+- [ ] Sorting & filtering
+- [ ] Auto-complete
+
+### Phase 2: Power & Control (Months 3-4)
+- [ ] Dimmer rack configuration
+- [ ] Circuit management
+- [ ] DMX map visualization
+- [ ] Error checking
+- [ ] Multi-cable tracking
+
+### Phase 3-7: See [docs/technical-spec.md](docs/technical-spec.md)
 
 ---
 
 ## 🤝 Contributing
 
-ShowStack is in active development. See [CONTRIBUTING.md](CONTRIBUTING.md) for development workflow and coding standards.
+This is currently a private project in early development. Contributions will be welcomed once we reach beta.
 
-### Quick Contribution Guide
-
+### Development Workflow
 1. Fork the repository
-2. Create a feature branch from `develop`
-3. Make your changes with tests
-4. Submit a pull request to `develop`
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📊 Performance Targets
+
+- **Load time:** <2 seconds for 5,000 fixture project
+- **Grid rendering:** 60 FPS with virtual scrolling
+- **PDF generation:** <5 seconds for 50-page report
+- **Sync time:** <10 seconds for typical project
 
 ---
 
 ## 📄 License
 
-Copyright © 2025 Lytrix
+Copyright © 2025 Lytrix / Josh Karp Designs
+
 License TBD - Currently proprietary during development.
+
+---
+
+## 🎯 Success Metrics
+
+### Month 3 Target
+- ✅ Core spreadsheet interface complete
+- ✅ 10 beta testers
+- ✅ 60 FPS performance
+- ✅ Positive UX feedback
+
+### Month 12 Target (Launch)
+- 100+ paying customers
+- $10k+ MRR
+- NPS >50
+- Public launch at USITT or LDI
 
 ---
 
 ## 📞 Contact
 
-**Josh Karp**
-Lytrix
+**Josh Karp**  
+Lytrix / Josh Karp Designs  
 [jkarp.com](https://jkarp.com)
 
 ---

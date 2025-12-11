@@ -5,6 +5,15 @@ export function AdvancedSettings() {
   const advanced = useSettingsStore((state) => state.advanced);
   const updateAdvanced = useSettingsStore((state) => state.updateAdvanced);
 
+  const handleDeveloperModeToggle = async (enabled: boolean) => {
+    updateAdvanced({ developerMode: enabled });
+
+    // Notify main process to open/close DevTools
+    if (window.api?.settings?.developerModeChanged) {
+      await window.api.settings.developerModeChanged(enabled);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -29,15 +38,15 @@ export function AdvancedSettings() {
             </p>
           </div>
           <label className="ml-4 relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" checked={advanced.developerMode} onChange={(e) => updateAdvanced({ developerMode: e.target.checked })} className="sr-only peer" />
+            <input type="checkbox" checked={advanced.developerMode} onChange={(e) => handleDeveloperModeToggle(e.target.checked)} className="sr-only peer" />
             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-gray-800 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
           </label>
         </div>
 
         {advanced.developerMode && (
-          <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-            <h4 className="font-medium text-purple-900 mb-2">Developer Tools Active</h4>
-            <div className="space-y-2 text-sm text-purple-800">
+          <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+            <h4 className="font-medium text-purple-900 dark:text-purple-100 mb-2">Developer Tools Active</h4>
+            <div className="space-y-2 text-sm text-purple-800 dark:text-purple-200">
               <div className="flex items-center gap-2">
                 <Code className="w-4 h-4" />
                 <span>Press F12 to open DevTools</span>
@@ -49,6 +58,10 @@ export function AdvancedSettings() {
               <div className="flex items-center gap-2">
                 <Code className="w-4 h-4" />
                 <span>Console logging enabled</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Code className="w-4 h-4" />
+                <span>All experimental features unlocked</span>
               </div>
             </div>
           </div>

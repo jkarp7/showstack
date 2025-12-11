@@ -1,8 +1,29 @@
 import { useNavigate, useParams } from 'react-router-dom';
+import { DeveloperPanel } from '../../components/common/DeveloperPanel';
+import { useEffect, useState } from 'react';
+import { telemetry } from '../../services/telemetry';
 
 export function Manager() {
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId?: string }>();
+  const [moduleStartTime] = useState(Date.now());
+
+  // Track module usage
+  useEffect(() => {
+    telemetry.track('module_opened', {
+      module: 'manager',
+      projectId: routeProjectId || 'standalone',
+    });
+
+    return () => {
+      const duration = Math.floor((Date.now() - moduleStartTime) / 1000);
+      telemetry.track('module_closed', {
+        module: 'manager',
+        projectId: routeProjectId || 'standalone',
+        duration,
+      });
+    };
+  }, [routeProjectId, moduleStartTime]);
 
   const handleBackClick = () => {
     if (routeProjectId) {
@@ -57,6 +78,23 @@ export function Manager() {
           </div>
         </div>
       </main>
+
+      {/* Developer Panel */}
+      <DeveloperPanel
+        title="Manager Module Debug"
+        data={{
+          projectId: routeProjectId || 'standalone',
+          route: window.location.pathname,
+        }}
+        metrics={{
+          'Time Open (s)': Math.floor((Date.now() - moduleStartTime) / 1000),
+        }}
+      >
+        <div className="space-y-2">
+          <p>Manager module placeholder page</p>
+          <p className="text-xs text-purple-300">Coming soon: Tour management features</p>
+        </div>
+      </DeveloperPanel>
     </div>
   );
 }

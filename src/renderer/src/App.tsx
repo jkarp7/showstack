@@ -13,7 +13,10 @@ import { Settings } from './pages/Settings';
 import { LicenseBanner } from './components/License/LicenseBanner';
 import { SplashScreen } from './components/SplashScreen';
 import { ThemeProvider } from './components/ThemeProvider';
+import { ConsentDialog } from './components/common/ConsentDialog';
 import { useUser } from './hooks/useUser';
+import { useSettingsStore } from './store/settingsStore';
+import { telemetry } from './services/telemetry';
 
 function AppContent() {
   const { status } = useUser();
@@ -50,14 +53,18 @@ function AppContent() {
         <Route path="/project/:projectId/module/:moduleType" element={<ModuleLanding />} />
         <Route path="/project/:projectId/module/production/system-docs" element={<SystemDocs />} />
         <Route path="/project/:projectId/module/production/shop-order" element={<Prep />} />
+        <Route path="/project/:projectId/module/production" element={<Navigate to="system-docs" replace />} />
         <Route path="/project/:projectId/module/design" element={<Navigate to="prep" replace />} />
         <Route path="/project/:projectId/module/prep" element={<Navigate to="/project/:projectId/module/production/shop-order" replace />} />
+        <Route path="/project/:projectId/module/manager" element={<Manager />} />
 
         {/* Direct module access (no project) */}
         <Route path="/module/:moduleType" element={<ModuleLanding />} />
         <Route path="/module/production/system-docs" element={<SystemDocs />} />
         <Route path="/module/production/shop-order" element={<Prep />} />
         <Route path="/module/prep" element={<Navigate to="/module/production/shop-order" replace />} />
+        <Route path="/module/manager" element={<Manager />} />
+        <Route path="/module/production" element={<Navigate to="/module/production/system-docs" replace />} />
         <Route path="/module/design" element={<Navigate to="/module/prep" replace />} />
 
         {/* Backwards compatibility - redirect old routes */}
@@ -101,11 +108,55 @@ export default function App() {
     return !splashShown;
   });
 
+  // Show consent dialog on first launch
+  const [showConsent, setShowConsent] = useState(() => {
+    // Check if consent was already given (check if user has made a choice)
+    const consentShown = localStorage.getItem('showstack-consent-shown');
+    return !consentShown;
+  });
+
   const handleSplashComplete = () => {
     setShowSplash(false);
     // Mark splash as shown for this session
     sessionStorage.setItem('splashShown', 'true');
   };
+
+  const handleConsentClose = () => {
+    setShowConsent(false);
+    // Mark consent dialog as shown
+    localStorage.setItem('showstack-consent-shown', 'true');
+  };
+
+  // Track app lifecycle with telemetry
+  useEffect(() => {
+    const appStartTime = Date.now();
+
+    // Track app opened
+    telemetry.track('app_opened', {
+      platform: navigator.platform,
+      userAgent: navigator.userAgent,
+      viewport: {
+        width: window.innerWidth,
+        height: window.innerHeight,
+      },
+    });
+
+    // Track app closed (cleanup on unmount or page unload)
+    const handleBeforeUnload = () => {
+      const sessionDuration = Math.floor((Date.now() - appStartTime) / 1000); // in seconds
+      telemetry.track('app_closed', {
+        sessionDuration,
+        sessionDurationMinutes: Math.floor(sessionDuration / 60),
+      });
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      handleBeforeUnload(); // Also call on component unmount
+    };
+  }, []);
 
   return (
     <ThemeProvider>
@@ -113,7 +164,11 @@ export default function App() {
         {showSplash ? (
           <SplashScreen onComplete={handleSplashComplete} />
         ) : (
-          <AppContent />
+          <>
+            <AppContent />
+            {/* Show consent dialog on first launch after splash */}
+            {showConsent && <ConsentDialog onClose={handleConsentClose} />}
+          </>
         )}
       </Router>
     </ThemeProvider>

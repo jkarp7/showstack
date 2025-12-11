@@ -4,4 +4,5 @@
  */
 
 export * from './useDebounce';
+export * from './useDeveloperMode';
 export * from './useKeyPress';

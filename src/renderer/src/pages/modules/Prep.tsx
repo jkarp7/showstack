@@ -13,6 +13,8 @@ import { NotesPanel } from '../../components/prep/NotesPanel';
 import { TemplateManagerDialog } from '../../components/prep/TemplateManagerDialog';
 import { PrepFileMenu } from '../../components/prep/PrepFileMenu';
 import { PrintPreview } from '../../components/prep/PrintPreview';
+import { DeveloperPanel } from '../../components/common/DeveloperPanel';
+import { telemetry } from '../../services/telemetry';
 import { formatPhoneNumber } from '../../utils/phoneFormatter';
 import type { PrepSection, Discipline, PrepProject } from '../../types/prep';
 
@@ -22,6 +24,7 @@ export function Prep() {
   const { allProjects, currentProject, sections, revisions, currentTemplate, setCurrentTemplate, saveTemplate, loadAllProjects, loadProject, clearCurrentProject, updateProject, setRevisionZero, generateRevision, deleteRevision, syncFromParent } =
     usePrepStore();
   const { projects, loadProjects } = useProjectStore();
+  const [moduleStartTime] = useState(Date.now());
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   const [showAddSectionDialog, setShowAddSectionDialog] = useState(false);
   const [showEditSectionDialog, setShowEditSectionDialog] = useState(false);
@@ -77,6 +80,27 @@ export function Prep() {
     loadAllProjects();
     loadProjects();
   }, []);
+
+  // Track module usage
+  useEffect(() => {
+    telemetry.track('module_opened', {
+      module: 'prep',
+      tool: 'shop-order',
+      projectId: parentProjectId || 'standalone',
+    });
+
+    return () => {
+      const duration = Math.floor((Date.now() - moduleStartTime) / 1000);
+      telemetry.track('module_closed', {
+        module: 'prep',
+        tool: 'shop-order',
+        projectId: parentProjectId || 'standalone',
+        duration,
+        sectionsCount: sections.length,
+        revisionsCount: revisions.length,
+      });
+    };
+  }, [parentProjectId, moduleStartTime, sections.length, revisions.length]);
 
   // Auto-load or create shop order when opened from a project
   useEffect(() => {
@@ -1245,6 +1269,34 @@ export function Prep() {
         onProjectCreated={handleProjectCreated}
         parentProjectId={parentProjectId}
       />
+
+      {/* Developer Panel */}
+      <DeveloperPanel
+        title="Shop Order Tool"
+        data={{
+          projectId: parentProjectId || 'standalone',
+          currentProject: currentProject?.id || null,
+          projectsCount: allProjects.length,
+          sectionsCount: sections.length,
+          revisionsCount: revisions.length,
+          activeTab,
+          route: window.location.pathname,
+        }}
+        metrics={{
+          'Time Open (s)': Math.floor((Date.now() - moduleStartTime) / 1000),
+          'Total Sections': sections.length,
+          'Total Revisions': revisions.length,
+        }}
+      >
+        <div className="space-y-2">
+          <p className="text-xs">
+            {currentProject ? `Current: ${currentProject.production_name}` : 'No project selected'}
+          </p>
+          <p className="text-xs text-purple-300">
+            Equipment lists, revisions, and notes management
+          </p>
+        </div>
+      </DeveloperPanel>
     </div>
   );
 }
