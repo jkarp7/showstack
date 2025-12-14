@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Breadcrumbs } from '../components/common/Breadcrumbs';
 import { useFileStore } from '../store/fileStore';
 import { getRecentFiles, removeRecentFile, RecentFile } from '../utils/recentFiles';
 
@@ -148,26 +149,12 @@ export function ModuleLanding() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+      {/* Breadcrumbs */}
+      <Breadcrumbs />
+
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={handleBackClick}
-              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center gap-2"
-            >
-              ← Back to {projectId ? 'Project' : 'Home'}
-            </button>
-            {projectId && (
-              <button
-                onClick={() => navigate('/')}
-                className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-sm transition"
-                title="Home (Projects)"
-              >
-                🏠
-              </button>
-            )}
-          </div>
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{moduleName}</h1>
             <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Choose a tool or open a recent file</p>

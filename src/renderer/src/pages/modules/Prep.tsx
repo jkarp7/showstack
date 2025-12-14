@@ -11,7 +11,7 @@ import { EditSectionDialog } from '../../components/prep/EditSectionDialog';
 import { RevisionPanel } from '../../components/prep/RevisionPanel';
 import { NotesPanel } from '../../components/prep/NotesPanel';
 import { TemplateManagerDialog } from '../../components/prep/TemplateManagerDialog';
-import { PrepFileMenu } from '../../components/prep/PrepFileMenu';
+import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { PrintPreview } from '../../components/prep/PrintPreview';
 import { DeveloperPanel } from '../../components/common/DeveloperPanel';
 import { telemetry } from '../../services/telemetry';
@@ -637,31 +637,8 @@ export function Prep() {
 
     return (
       <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
-        {/* Header with file operations */}
-        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleBackToList}
-                className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition"
-              >
-                ← Back to Projects
-              </button>
-
-              {/* File Menu */}
-              <PrepFileMenu
-                onNewProject={() => setShowNewProjectDialog(true)}
-              />
-            </div>
-            <button
-              onClick={handleHomeClick}
-              className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition"
-              title="Home (Projects)"
-            >
-              🏠
-            </button>
-          </div>
-        </header>
+        {/* Breadcrumbs */}
+        <Breadcrumbs />
 
         {/* Show name and badges */}
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">

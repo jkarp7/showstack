@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ModuleCard } from '../components/common/ModuleCard';
 import { EditProjectDialog } from '../components/common/EditProjectDialog';
+import { Breadcrumbs } from '../components/common/Breadcrumbs';
 import { useProjectStore, Project } from '../store/projectStore';
 
 export function ProjectPage() {
@@ -88,36 +89,19 @@ export function ProjectPage() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+      {/* Breadcrumbs */}
+      <Breadcrumbs />
+
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-end mb-4">
             <button
-              onClick={() => navigate('/')}
-              className="text-gray-700 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center gap-2"
+              onClick={() => setIsEditDialogOpen(true)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium transition"
             >
-              ← Back to Projects
+              Edit Project
             </button>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate('/account')}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition"
-              >
-                Account
-              </button>
-              <button
-                onClick={() => navigate('/settings')}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition"
-              >
-                Settings
-              </button>
-              <button
-                onClick={() => setIsEditDialogOpen(true)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium transition"
-              >
-                Edit Project
-              </button>
-            </div>
           </div>
           <div className="flex items-start gap-6">
             {/* Project Logo */}

@@ -103,23 +103,6 @@ export function LandingPage() {
             <h1 className="text-3xl font-bold">ShowStack</h1>
             <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Production Management Suite</p>
           </div>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/account')}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition"
-            >
-              Account
-            </button>
-            <button
-              onClick={() => navigate('/settings')}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition"
-            >
-              Settings
-            </button>
-            <button className="px-4 py-2 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded transition">
-              Sign Out
-            </button>
-          </div>
         </div>
       </header>
 

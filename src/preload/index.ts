@@ -182,6 +182,19 @@ contextBridge.exposeInMainWorld('api', {
   paperwork: {
     exportPDF: (htmlContent: string, filename: string, pageSettings: any) =>
       ipcRenderer.invoke('paperwork:exportPDF', htmlContent, filename, pageSettings)
+  },
+
+  // Menu operations
+  menu: {
+    setState: (state: any) => ipcRenderer.invoke('menu:setState', state),
+    getState: () => ipcRenderer.invoke('menu:getState'),
+    reset: () => ipcRenderer.invoke('menu:reset'),
+    on: (channel: string, callback: (...args: any[]) => void) => {
+      ipcRenderer.on(channel, (event, ...args) => callback(...args));
+    },
+    off: (channel: string, callback: (...args: any[]) => void) => {
+      ipcRenderer.removeListener(channel, callback);
+    }
   }
 });
 
@@ -314,6 +327,13 @@ export interface ElectronAPI {
   };
   paperwork: {
     exportPDF: (htmlContent: string, filename: string, pageSettings: any) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
+  };
+  menu: {
+    setState: (state: any) => Promise<{ success: boolean }>;
+    getState: () => Promise<any>;
+    reset: () => Promise<{ success: boolean }>;
+    on: (channel: string, callback: (...args: any[]) => void) => void;
+    off: (channel: string, callback: (...args: any[]) => void) => void;
   };
 }
 

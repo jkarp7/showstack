@@ -7,7 +7,7 @@ import { SortBar } from '../../components/fixture/SortBar';
 import { AddFixtureDialog } from '../../components/fixture/AddFixtureDialog';
 import { BulkEditDialog } from '../../components/fixture/BulkEditDialog';
 import { UserColumnSettingsDialog } from '../../components/fixture/UserColumnSettingsDialog';
-import { FileMenu } from '../../components/common/FileMenu';
+import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { UnsavedChangesDialog, useUnsavedChangesDialog } from '../../components/common/UnsavedChangesDialog';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { useFileStore } from '../../store/fileStore';
@@ -509,18 +509,13 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+      {/* Breadcrumbs */}
+      {!embedded && <Breadcrumbs />}
+
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-4">
-            {!embedded && (
-              <button
-                onClick={() => navigate('/modules')}
-                className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition"
-              >
-                ← Home
-              </button>
-            )}
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold">{projectName}</h1>
@@ -540,29 +535,8 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
             </span>
             <span className="text-sm text-gray-600 dark:text-gray-400">•</span>
             <span className="text-sm text-gray-600 dark:text-gray-400">{selectedRows.size} selected</span>
-
-            <div className="h-6 w-px bg-gray-300 dark:bg-gray-700 mx-1" />
-
-            <button
-              onClick={handlePrint}
-              className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition flex items-center gap-2"
-              title="Print fixture schedule"
-            >
-              🖨️ Print
-            </button>
-
-            <button
-              onClick={handleExportCSV}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition flex items-center gap-2"
-              title="Export to CSV"
-            >
-              📄 Export CSV
-            </button>
           </div>
         </div>
-
-        {/* File Menu */}
-        <FileMenu onDataReload={handleDataReload} projectName={projectName} />
       </header>
 
       {/* Toolbar */}

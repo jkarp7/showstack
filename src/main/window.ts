@@ -1,5 +1,6 @@
 import { BrowserWindow, dialog } from 'electron';
 import { join } from 'path';
+import { initializeMenuForWindow } from './ipc/menu';
 
 export function createWindow(routePath: string = '/'): BrowserWindow {
   const window = new BrowserWindow({
@@ -17,6 +18,9 @@ export function createWindow(routePath: string = '/'): BrowserWindow {
       contextIsolation: true
     }
   });
+
+  // Initialize menu for this window
+  initializeMenuForWindow(window);
 
   // Maximize on start
   window.maximize();

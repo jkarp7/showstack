@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { EquipmentManager } from './EquipmentManager';
 import { Paperwork } from './Paperwork';
 import { LabelDesigner } from './LabelDesigner';
+import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { DeveloperPanel } from '../../components/common/DeveloperPanel';
 import { telemetry } from '../../services/telemetry';
 
@@ -58,42 +59,29 @@ export function SystemDocs() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+      {/* Breadcrumbs */}
+      <Breadcrumbs />
+
       {/* Tab Navigation */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center">
-          <button
-            onClick={handleBackClick}
-            className="px-4 py-3 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white border-r border-gray-200 dark:border-gray-700 transition"
-            title={routeProjectId ? "Back to Project" : "Back to Projects"}
-          >
-            ← Back
-          </button>
-          <div className="flex flex-1">
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  setTabSwitchCount(prev => prev + 1);
-                }}
-                className={`px-6 py-3 border-r border-gray-200 dark:border-gray-700 transition flex items-center gap-2 ${
-                  activeTab === tab.id
-                    ? 'bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white border-b-2 border-blue-500'
-                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              >
-                <span>{tab.icon}</span>
-                <span className="font-medium">{tab.name}</span>
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={handleHomeClick}
-            className="px-4 py-3 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white border-l border-gray-200 dark:border-gray-700 transition text-xl"
-            title="Home (Projects)"
-          >
-            🏠
-          </button>
+        <div className="flex">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setTabSwitchCount(prev => prev + 1);
+              }}
+              className={`px-6 py-3 border-r border-gray-200 dark:border-gray-700 transition flex items-center gap-2 ${
+                activeTab === tab.id
+                  ? 'bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white border-b-2 border-blue-500'
+                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <span>{tab.icon}</span>
+              <span className="font-medium">{tab.name}</span>
+            </button>
+          ))}
         </div>
       </div>
 

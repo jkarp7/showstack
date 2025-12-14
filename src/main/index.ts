@@ -13,6 +13,7 @@ import { registerPaperworkHandlers } from './ipc/paperwork';
 import { registerLicenseHandlers } from './ipc/license';
 import { registerAdminHandlers } from './ipc/admin';
 import { registerSettingsHandlers } from './ipc/settings';
+import { registerMenuHandlers } from './ipc/menu';
 import { backgroundVerifier } from './services/BackgroundVerifier';
 import { licenseService } from './services/LicenseService';
 
@@ -44,6 +45,7 @@ app.on('ready', async () => {
   registerLicenseHandlers();
   registerAdminHandlers();
   registerSettingsHandlers();
+  registerMenuHandlers();
 
   // Start background license verification (non-blocking)
   backgroundVerifier.start();
