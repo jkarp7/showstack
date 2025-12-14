@@ -3,7 +3,7 @@
  * Handles communication between renderer process and menu system
  */
 
-import { ipcMain, BrowserWindow } from 'electron';
+import { ipcMain, BrowserWindow, Menu } from 'electron';
 import { menuState, MenuStateData } from '../menu/menuState';
 import { buildMenu } from '../menu/menuTemplate';
 
@@ -64,11 +64,26 @@ export function registerMenuHandlers(): void {
 export function initializeMenuForWindow(window: BrowserWindow): void {
   // Build initial menu
   const menu = buildMenu(menuState.getState());
-  window.setMenu(menu);
+
+  console.log('🍔 Initializing menu for window, platform:', process.platform);
+  console.log('🍔 Menu has', menu.items.length, 'top-level items');
+
+  // On macOS, set application menu (global). On other platforms, set per-window.
+  if (process.platform === 'darwin') {
+    Menu.setApplicationMenu(menu);
+    console.log('✅ Application menu set for macOS');
+  } else {
+    window.setMenu(menu);
+    console.log('✅ Window menu set for', process.platform);
+  }
 
   // Subscribe to state changes
   menuState.onStateChange((state) => {
     const updatedMenu = buildMenu(state);
-    window.setMenu(updatedMenu);
+    if (process.platform === 'darwin') {
+      Menu.setApplicationMenu(updatedMenu);
+    } else {
+      window.setMenu(updatedMenu);
+    }
   });
 }

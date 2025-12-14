@@ -13,10 +13,12 @@ export function buildMenu(state: MenuStateData): Menu {
   const isMac = process.platform === 'darwin';
   const template: MenuItemConstructorOptions[] = [];
 
+  console.log('🏗️ Building menu for context:', state.context, 'isMac:', isMac);
+
   // macOS app menu
   if (isMac) {
     template.push({
-      label: app.name,
+      label: 'ShowStack',
       submenu: [
         { role: 'about' },
         { type: 'separator' },
