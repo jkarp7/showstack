@@ -195,6 +195,11 @@ contextBridge.exposeInMainWorld('api', {
     off: (channel: string, callback: (...args: any[]) => void) => {
       ipcRenderer.removeListener(channel, callback);
     }
+  },
+
+  // Shell operations
+  shell: {
+    openExternal: (url: string) => ipcRenderer.invoke('shell:openExternal', url)
   }
 });
 
@@ -334,6 +339,9 @@ export interface ElectronAPI {
     reset: () => Promise<{ success: boolean }>;
     on: (channel: string, callback: (...args: any[]) => void) => void;
     off: (channel: string, callback: (...args: any[]) => void) => void;
+  };
+  shell: {
+    openExternal: (url: string) => Promise<{ success: boolean; error?: string }>;
   };
 }
 

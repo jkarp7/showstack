@@ -9,7 +9,6 @@ export function createWindow(routePath: string = '/'): BrowserWindow {
     minWidth: 1200,
     minHeight: 700,
     show: false,
-    autoHideMenuBar: true,
     backgroundColor: '#1a1a1a',
     webPreferences: {
       preload: join(__dirname, '../preload/index.mjs'),

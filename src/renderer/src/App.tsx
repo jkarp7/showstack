@@ -17,10 +17,14 @@ import { ConsentDialog } from './components/common/ConsentDialog';
 import { useUser } from './hooks/useUser';
 import { useSettingsStore } from './store/settingsStore';
 import { telemetry } from './services/telemetry';
+import { useMenuHandlers } from './hooks/useMenuHandlers';
 
 function AppContent() {
   const { status } = useUser();
   const navigate = useNavigate();
+
+  // Set up menu event handlers
+  useMenuHandlers();
 
   // Keyboard shortcut for admin panel (Cmd/Ctrl+Shift+A)
   useEffect(() => {
