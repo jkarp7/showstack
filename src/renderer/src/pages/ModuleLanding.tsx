@@ -76,7 +76,13 @@ export function ModuleLanding() {
 
   useEffect(() => {
     loadRecentFiles();
-  }, [moduleType]);
+
+    // Update menu context
+    window.api?.menu?.setState({
+      context: 'module',
+      projectId: projectId,
+    });
+  }, [moduleType, projectId]);
 
   const loadRecentFiles = async () => {
     // Load recent files for this specific module type

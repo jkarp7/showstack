@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ModuleCard } from '../components/common/ModuleCard';
 import { EditProjectDialog } from '../components/common/EditProjectDialog';
 import { Breadcrumbs } from '../components/common/Breadcrumbs';
@@ -8,6 +8,7 @@ import { useProjectStore, Project } from '../store/projectStore';
 export function ProjectPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { projects, loadProjects, updateProject, setCurrentProject } = useProjectStore();
   const [project, setProject] = useState(projects.find(p => p.id === projectId) || null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -24,8 +25,25 @@ export function ProjectPage() {
     if (foundProject) {
       setProject(foundProject);
       setCurrentProject(projectId!);
+
+      // Update menu context
+      window.api?.menu?.setState({
+        context: 'project',
+        projectId: foundProject.id,
+        projectName: foundProject.name,
+      });
     }
-  }, [projects, projectId, setCurrentProject]);
+  }, [projects, projectId]);
+
+  // Check if we should open edit dialog from navigation state
+  useEffect(() => {
+    const state = location.state as { openEditDialog?: boolean } | null;
+    if (state?.openEditDialog) {
+      setIsEditDialogOpen(true);
+      // Clear the state so it doesn't reopen on refresh
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location]);
 
   // Load logo as data URL
   useEffect(() => {

@@ -456,7 +456,7 @@ export function ElementPalette({ onDragStart, onDragEnd }: ElementPaletteProps) 
       </div>
 
       {/* Footer Hint */}
-      <div className="p-3 border-t border-gray-700 bg-gray-750">
+      <div className="p-3 border-t border-gray-700 bg-gray-700">
         <p className="text-xs text-gray-400 text-center">
           💡 Drag elements onto the canvas to build your layout
         </p>

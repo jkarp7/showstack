@@ -60,7 +60,7 @@ export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
   return (
     <button
       onClick={onClick}
-      className="relative p-6 rounded-lg border-2 border-gray-700 bg-gray-800 hover:border-blue-500 hover:bg-gray-750 transition-all text-left group"
+      className="relative p-6 rounded-lg border-2 border-gray-700 bg-gray-800 hover:border-blue-500 hover:bg-gray-700 transition-all text-left group"
     >
       {/* Delete button (appears on hover) */}
       <button

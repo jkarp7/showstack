@@ -18,6 +18,7 @@ import { useUser } from './hooks/useUser';
 import { useSettingsStore } from './store/settingsStore';
 import { telemetry } from './services/telemetry';
 import { useMenuHandlers } from './hooks/useMenuHandlers';
+import { useProjectMenuHandlers } from './hooks/useProjectMenuHandlers';
 
 function AppContent() {
   const { status } = useUser();
@@ -25,6 +26,7 @@ function AppContent() {
 
   // Set up menu event handlers
   useMenuHandlers();
+  useProjectMenuHandlers();
 
   // Keyboard shortcut for admin panel (Cmd/Ctrl+Shift+A)
   useEffect(() => {
@@ -57,7 +59,6 @@ function AppContent() {
         <Route path="/project/:projectId/module/:moduleType" element={<ModuleLanding />} />
         <Route path="/project/:projectId/module/production/system-docs" element={<SystemDocs />} />
         <Route path="/project/:projectId/module/production/shop-order" element={<Prep />} />
-        <Route path="/project/:projectId/module/production" element={<Navigate to="system-docs" replace />} />
         <Route path="/project/:projectId/module/design" element={<Navigate to="prep" replace />} />
         <Route path="/project/:projectId/module/prep" element={<Navigate to="/project/:projectId/module/production/shop-order" replace />} />
         <Route path="/project/:projectId/module/manager" element={<Manager />} />

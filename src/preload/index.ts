@@ -200,6 +200,35 @@ contextBridge.exposeInMainWorld('api', {
   // Shell operations
   shell: {
     openExternal: (url: string) => ipcRenderer.invoke('shell:openExternal', url)
+  },
+
+  // Dimmer Rack operations
+  dimmerRacks: {
+    getAll: (projectId?: string) => ipcRenderer.invoke('dimmerRacks:getAll', projectId),
+    getById: (id: string) => ipcRenderer.invoke('dimmerRacks:getById', id),
+    create: (rack: any, projectId?: string) => ipcRenderer.invoke('dimmerRacks:create', rack, projectId),
+    update: (id: string, updates: any) => ipcRenderer.invoke('dimmerRacks:update', id, updates),
+    delete: (id: string) => ipcRenderer.invoke('dimmerRacks:delete', id),
+    getWithUsage: (projectId?: string) => ipcRenderer.invoke('dimmerRacks:getWithUsage', projectId)
+  },
+
+  // Dimmer Rack Module operations
+  dimmerRackModules: {
+    getByRackId: (rackId: string) => ipcRenderer.invoke('dimmerRackModules:getByRackId', rackId),
+    create: (module: any) => ipcRenderer.invoke('dimmerRackModules:create', module),
+    update: (id: string, updates: any) => ipcRenderer.invoke('dimmerRackModules:update', id, updates),
+    delete: (id: string) => ipcRenderer.invoke('dimmerRackModules:delete', id),
+    getTypeForCircuit: (rackId: string, circuit: number) => ipcRenderer.invoke('dimmerRackModules:getTypeForCircuit', rackId, circuit)
+  },
+
+  // PD Rack operations
+  pdRacks: {
+    getAll: (projectId?: string) => ipcRenderer.invoke('pdRacks:getAll', projectId),
+    getById: (id: string) => ipcRenderer.invoke('pdRacks:getById', id),
+    create: (rack: any, projectId?: string) => ipcRenderer.invoke('pdRacks:create', rack, projectId),
+    update: (id: string, updates: any) => ipcRenderer.invoke('pdRacks:update', id, updates),
+    delete: (id: string) => ipcRenderer.invoke('pdRacks:delete', id),
+    getWithUsage: (projectId?: string) => ipcRenderer.invoke('pdRacks:getWithUsage', projectId)
   }
 });
 
@@ -342,6 +371,29 @@ export interface ElectronAPI {
   };
   shell: {
     openExternal: (url: string) => Promise<{ success: boolean; error?: string }>;
+  };
+  dimmerRacks: {
+    getAll: (projectId?: string) => Promise<any[]>;
+    getById: (id: string) => Promise<any>;
+    create: (rack: any, projectId?: string) => Promise<any>;
+    update: (id: string, updates: any) => Promise<any>;
+    delete: (id: string) => Promise<void>;
+    getWithUsage: (projectId?: string) => Promise<any[]>;
+  };
+  dimmerRackModules: {
+    getByRackId: (rackId: string) => Promise<any[]>;
+    create: (module: any) => Promise<any>;
+    update: (id: string, updates: any) => Promise<any>;
+    delete: (id: string) => Promise<void>;
+    getTypeForCircuit: (rackId: string, circuit: number) => Promise<any>;
+  };
+  pdRacks: {
+    getAll: (projectId?: string) => Promise<any[]>;
+    getById: (id: string) => Promise<any>;
+    create: (rack: any, projectId?: string) => Promise<any>;
+    update: (id: string, updates: any) => Promise<any>;
+    delete: (id: string) => Promise<void>;
+    getWithUsage: (projectId?: string) => Promise<any[]>;
   };
 }
 

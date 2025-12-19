@@ -243,6 +243,75 @@ function runProjectMigrations(db: Database): void {
     }
   }
 
+  // Power rack assignment columns for fixtures
+  const powerRackColumns = [
+    { name: 'dimmer_rack_id', type: 'TEXT' },
+    { name: 'dimmer_module_number', type: 'INTEGER' },
+    { name: 'dimmer_channel_number', type: 'INTEGER' },
+    { name: 'pd_rack_id', type: 'TEXT' },
+    { name: 'pd_circuit_number', type: 'INTEGER' },
+    { name: 'pd_breaker_number', type: 'INTEGER' },
+  ];
+
+  for (const column of powerRackColumns) {
+    if (!fixturesColumns.includes(column.name)) {
+      console.log(`Running migration: Adding ${column.name} to fixtures`);
+      db.run(`ALTER TABLE fixtures ADD COLUMN ${column.name} ${column.type}`);
+    }
+  }
+
+  // Add rack identifier columns for dimmer racks
+  const dimmerRacksTableInfo = db.exec("PRAGMA table_info(dimmer_racks)");
+  if (dimmerRacksTableInfo[0]) {
+    const dimmerRacksColumns = dimmerRacksTableInfo[0].values.map(row => row[1]) || [];
+
+    if (!dimmerRacksColumns.includes('rack_identifier')) {
+      console.log('Running migration: Adding rack_identifier to dimmer_racks');
+      db.run('ALTER TABLE dimmer_racks ADD COLUMN rack_identifier TEXT'); // Can be single letter or string like "FOH", "ML", etc.
+    }
+  }
+
+  // Add rack identifier and dual voltage support for PD racks
+  const pdRacksTableInfo = db.exec("PRAGMA table_info(pd_racks)");
+  if (pdRacksTableInfo[0]) {
+    const pdRacksColumns = pdRacksTableInfo[0].values.map(row => row[1]) || [];
+
+    if (!pdRacksColumns.includes('rack_identifier')) {
+      console.log('Running migration: Adding rack_identifier to pd_racks');
+      db.run('ALTER TABLE pd_racks ADD COLUMN rack_identifier TEXT'); // Can be single letter or string like "FOH", "DECK", etc.
+    }
+
+    if (!pdRacksColumns.includes('is_dual_voltage')) {
+      console.log('Running migration: Adding is_dual_voltage to pd_racks');
+      db.run('ALTER TABLE pd_racks ADD COLUMN is_dual_voltage INTEGER DEFAULT 0');
+    }
+
+    if (!pdRacksColumns.includes('secondary_voltage')) {
+      console.log('Running migration: Adding secondary_voltage to pd_racks');
+      db.run('ALTER TABLE pd_racks ADD COLUMN secondary_voltage INTEGER');
+    }
+  }
+
+  // Create dimmer_rack_modules table if it doesn't exist
+  const dimmerRackModulesTableInfo = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='dimmer_rack_modules'");
+  if (!dimmerRackModulesTableInfo[0] || dimmerRackModulesTableInfo[0].values.length === 0) {
+    console.log('Running migration: Creating dimmer_rack_modules table');
+    db.run(`
+      CREATE TABLE dimmer_rack_modules (
+        id TEXT PRIMARY KEY,
+        rack_id TEXT NOT NULL,
+        start_circuit INTEGER NOT NULL,
+        end_circuit INTEGER NOT NULL,
+        module_type TEXT NOT NULL CHECK(module_type IN ('dimmer', 'relay', 'constant_current', 'thrupower')),
+        watts_per_circuit REAL DEFAULT 2400,
+        notes TEXT,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        FOREIGN KEY (rack_id) REFERENCES dimmer_racks(id) ON DELETE CASCADE
+      )
+    `);
+  }
+
   // Prep Projects table migrations
   const prepProjectsTableInfo = db.exec("PRAGMA table_info(prep_projects)");
   if (!prepProjectsTableInfo[0] || prepProjectsTableInfo[0].values.length === 0) {

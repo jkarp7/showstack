@@ -25,7 +25,7 @@ export function ModuleCard({ name, description, icon, route, isLocked = false }:
         relative p-8 rounded-lg border-2 text-left transition-all
         ${isLocked
           ? 'border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 cursor-not-allowed opacity-60'
-          : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-500 hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer'
+          : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-500 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer'
         }
       `}
     >

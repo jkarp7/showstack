@@ -15,6 +15,9 @@ import { registerAdminHandlers } from './ipc/admin';
 import { registerSettingsHandlers } from './ipc/settings';
 import { registerMenuHandlers, initializeApplicationMenu } from './ipc/menu';
 import { registerShellHandlers } from './ipc/shell';
+import { registerDimmerRackHandlers } from './ipc/dimmerRacks';
+import { registerDimmerRackModuleHandlers } from './ipc/dimmerRackModules';
+import { registerPDRackHandlers } from './ipc/pdRacks';
 import { backgroundVerifier } from './services/BackgroundVerifier';
 import { licenseService } from './services/LicenseService';
 
@@ -51,6 +54,9 @@ app.on('ready', async () => {
   registerSettingsHandlers();
   registerMenuHandlers();
   registerShellHandlers();
+  registerDimmerRackHandlers();
+  registerDimmerRackModuleHandlers();
+  registerPDRackHandlers();
 
   // Start background license verification (non-blocking)
   backgroundVerifier.start();

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useThemeStore } from '../store/themeStore';
 
 /**
  * Global menu event handlers
@@ -7,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
  */
 export function useMenuHandlers() {
   const navigate = useNavigate();
+  const { mode, setMode } = useThemeStore();
 
   useEffect(() => {
     if (!window.api?.menu) return;
@@ -17,12 +19,11 @@ export function useMenuHandlers() {
     const handleSettings = () => navigate('/settings');
     const handleAdmin = () => navigate('/admin');
 
-    // Theme handler
+    // Theme handler - use theme store instead of direct DOM manipulation
     const handleToggleDarkMode = () => {
-      document.documentElement.classList.toggle('dark');
-      // Save preference
-      const isDark = document.documentElement.classList.contains('dark');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      // Toggle between light and dark (don't use system mode for toggle)
+      const newMode = mode === 'dark' ? 'light' : 'dark';
+      setMode(newMode);
     };
 
     // Help handlers
@@ -76,5 +77,5 @@ export function useMenuHandlers() {
       window.api.menu.off('menu:help:updates', handleHelpUpdates);
       window.api.menu.off('menu:help:about', handleHelpAbout);
     };
-  }, [navigate]);
+  }, [navigate, mode, setMode]);
 }

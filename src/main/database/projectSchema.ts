@@ -90,6 +90,14 @@ export const PROJECT_SCHEMA = `
     wattage REAL,          -- Load
     amperage REAL,
 
+    -- Power Distribution Assignments
+    dimmer_rack_id TEXT,
+    dimmer_module_number INTEGER,
+    dimmer_channel_number INTEGER,
+    pd_rack_id TEXT,
+    pd_circuit_number INTEGER,
+    pd_breaker_number INTEGER,
+
     -- Color & Accessories (LightWright: Color, Gobo, Gobo Size, Accessory, Color Frame)
     color TEXT,
     color_frame TEXT,
@@ -158,6 +166,7 @@ export const PROJECT_SCHEMA = `
     updated_at INTEGER NOT NULL,
 
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+    -- Note: Foreign keys for power racks are added by migrations to handle existing databases
   );
 
   -- Indexes for performance
@@ -165,6 +174,70 @@ export const PROJECT_SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_fixtures_position ON fixtures(project_id, position);
   CREATE INDEX IF NOT EXISTS idx_fixtures_channel ON fixtures(project_id, channel);
   CREATE INDEX IF NOT EXISTS idx_fixtures_location ON fixtures(project_id, location);
+
+  -- Dimmer Racks table (power distribution for dimmed loads)
+  CREATE TABLE IF NOT EXISTS dimmer_racks (
+    id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL,
+
+    name TEXT NOT NULL,
+    rack_identifier TEXT, -- Identifier for circuit naming (e.g., "A", "FOH", "ML", "DECK")
+    manufacturer TEXT,
+    model TEXT,
+    circuit_count INTEGER NOT NULL CHECK(circuit_count IN (12, 24, 48, 96)),
+    module_type TEXT DEFAULT 'dimmer' CHECK(module_type IN ('dimmer', 'relay', 'constant_current')),
+    channels_per_module INTEGER DEFAULT 12,
+    watts_per_module REAL DEFAULT 2400,
+    location TEXT,
+    notes TEXT,
+
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+  );
+
+  -- Dimmer Rack Modules table (defines module types for circuit ranges)
+  CREATE TABLE IF NOT EXISTS dimmer_rack_modules (
+    id TEXT PRIMARY KEY,
+    rack_id TEXT NOT NULL,
+    start_circuit INTEGER NOT NULL,
+    end_circuit INTEGER NOT NULL,
+    module_type TEXT NOT NULL CHECK(module_type IN ('dimmer', 'relay', 'constant_current', 'thrupower')),
+    watts_per_circuit REAL DEFAULT 2400,
+    notes TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
+    FOREIGN KEY (rack_id) REFERENCES dimmer_racks(id) ON DELETE CASCADE
+  );
+
+  -- PD (Power Distribution) Racks table (direct power for non-dimmed loads)
+  CREATE TABLE IF NOT EXISTS pd_racks (
+    id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL,
+
+    name TEXT NOT NULL,
+    rack_identifier TEXT, -- Identifier for circuit naming (e.g., "Z", "FOH", "DECK")
+    voltage INTEGER NOT NULL CHECK(voltage IN (120, 208, 230, 240)),
+    is_dual_voltage INTEGER DEFAULT 0, -- Boolean: rack has both 120V and 208V outputs
+    secondary_voltage INTEGER, -- Secondary voltage if dual voltage (e.g., 208 when primary is 120)
+    circuit_count INTEGER NOT NULL CHECK(circuit_count IN (12, 24, 48, 96)),
+    phase_config TEXT CHECK(phase_config IN ('single', 'split', 'three')),
+    amps_per_breaker INTEGER DEFAULT 20,
+    location TEXT,
+    notes TEXT,
+
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+  );
+
+  -- Indexes for power racks
+  CREATE INDEX IF NOT EXISTS idx_dimmer_racks_project ON dimmer_racks(project_id);
+  CREATE INDEX IF NOT EXISTS idx_pd_racks_project ON pd_racks(project_id);
+  -- Note: Indexes on fixtures power columns are created by migrations to handle existing databases
 
   -- User Preferences table (per-project column settings, etc.)
   CREATE TABLE IF NOT EXISTS user_preferences (

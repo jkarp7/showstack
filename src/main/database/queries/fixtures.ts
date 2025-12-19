@@ -203,7 +203,8 @@ export function updateFixture(id: string, updates: Partial<Fixture>): Fixture {
     'position', 'unit_number', 'type', 'manufacturer', 'model', 'purpose',
     'channel', 'universe', 'dmx_address', 'dimmer', 'circuit', 'circuit_number',
     'color', 'gobo', 'accessories', 'location', 'system', 'wattage',
-    'status', 'notes', 'custom_fields'
+    'status', 'notes', 'custom_fields',
+    'dimmer_rack_id', 'dimmer_channel_number', 'pd_rack_id', 'pd_circuit_number'
   ];
 
   const fields = Object.keys(updates).filter(k =>
