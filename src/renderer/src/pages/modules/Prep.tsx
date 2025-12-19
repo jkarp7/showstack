@@ -11,12 +11,13 @@ import { EditSectionDialog } from '../../components/prep/EditSectionDialog';
 import { RevisionPanel } from '../../components/prep/RevisionPanel';
 import { NotesPanel } from '../../components/prep/NotesPanel';
 import { TemplateManagerDialog } from '../../components/prep/TemplateManagerDialog';
-import { PrepFileMenu } from '../../components/prep/PrepFileMenu';
+import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { PrintPreview } from '../../components/prep/PrintPreview';
 import { DeveloperPanel } from '../../components/common/DeveloperPanel';
 import { telemetry } from '../../services/telemetry';
 import { formatPhoneNumber } from '../../utils/phoneFormatter';
 import type { PrepSection, Discipline, PrepProject } from '../../types/prep';
+import { usePrepMenuHandlers } from '../../hooks/usePrepMenuHandlers';
 
 export function Prep() {
   const navigate = useNavigate();
@@ -80,6 +81,14 @@ export function Prep() {
     loadAllProjects();
     loadProjects();
   }, []);
+
+  // Update menu context when component mounts or project changes
+  useEffect(() => {
+    window.api?.menu?.setState({
+      context: 'prep',
+      projectId: currentProject?.id,
+    });
+  }, [currentProject]);
 
   // Track module usage
   useEffect(() => {
@@ -426,6 +435,21 @@ export function Prep() {
     setIsDatePickerMode(true);
   };
 
+  // Register menu handlers
+  usePrepMenuHandlers({
+    onNewProject: handleNewProject,
+    onAddSection: () => setShowAddSectionDialog(true),
+    onPrint: () => {
+      if (activeTab === 'output') {
+        window.print();
+      } else {
+        setActiveTab('output');
+        setTimeout(() => window.print(), 100);
+      }
+    },
+    hasProject: !!currentProject,
+  });
+
   // If a project is loaded, show the project view
   if (currentProject) {
     // Find parent project if linked
@@ -637,31 +661,8 @@ export function Prep() {
 
     return (
       <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
-        {/* Header with file operations */}
-        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleBackToList}
-                className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition"
-              >
-                ← Back to Projects
-              </button>
-
-              {/* File Menu */}
-              <PrepFileMenu
-                onNewProject={() => setShowNewProjectDialog(true)}
-              />
-            </div>
-            <button
-              onClick={handleHomeClick}
-              className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition"
-              title="Home (Projects)"
-            >
-              🏠
-            </button>
-          </div>
-        </header>
+        {/* Breadcrumbs */}
+        <Breadcrumbs />
 
         {/* Show name and badges */}
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
@@ -725,7 +726,7 @@ export function Prep() {
                 <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                   <button
                     onClick={() => setProjectDetailsExpanded(!projectDetailsExpanded)}
-                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-750 transition"
+                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                   >
                     <div className="flex items-center gap-4">
                       <span className="text-gray-600 dark:text-gray-400 text-lg">{projectDetailsExpanded ? '▼' : '▶'}</span>
@@ -996,7 +997,7 @@ export function Prep() {
                 <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                   <button
                     onClick={() => setNotesExpanded(!notesExpanded)}
-                    className="w-full px-6 py-4 flex items-center gap-4 hover:bg-gray-750 transition"
+                    className="w-full px-6 py-4 flex items-center gap-4 hover:bg-gray-700 transition"
                   >
                     <span className="text-gray-600 dark:text-gray-400 text-lg">{notesExpanded ? '▼' : '▶'}</span>
                     <h2 className="text-xl font-bold">Notes</h2>
@@ -1017,7 +1018,7 @@ export function Prep() {
                   <div className="px-6 py-4 flex items-center justify-between">
                     <button
                       onClick={() => setRevisionsExpanded(!revisionsExpanded)}
-                      className="flex items-center gap-3 hover:bg-gray-750 rounded px-2 py-1 -ml-2 transition"
+                      className="flex items-center gap-3 hover:bg-gray-700 rounded px-2 py-1 -ml-2 transition"
                     >
                       <span className="text-gray-600 dark:text-gray-400 text-lg">{revisionsExpanded ? '▼' : '▶'}</span>
                       <h2 className="text-xl font-bold">Revisions</h2>
@@ -1138,7 +1139,7 @@ export function Prep() {
                 <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                   <button
                     onClick={() => setEquipmentExpanded(!equipmentExpanded)}
-                    className="w-full px-6 py-4 flex items-center gap-4 hover:bg-gray-750 transition"
+                    className="w-full px-6 py-4 flex items-center gap-4 hover:bg-gray-700 transition"
                   >
                     <span className="text-gray-600 dark:text-gray-400 text-lg">{equipmentExpanded ? '▼' : '▶'}</span>
                     <h2 className="text-xl font-bold">Equipment</h2>

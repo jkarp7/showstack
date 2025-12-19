@@ -2,6 +2,8 @@ import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { Fixture } from '../types';
 import { VirtualRow } from './VirtualRow';
 import { COLUMN_CONFIGS, ColumnVisibility, ColumnKey, getOrderedColumns, applyUserColumnLabels } from '../../types/columns';
+import { DimmerRack, PDRack } from '../../types/power';
+import { autoLinkCircuit } from '../../utils/circuitParser';
 
 interface VirtualDataGridProps {
   fixtures: Fixture[];
@@ -14,6 +16,8 @@ interface VirtualDataGridProps {
   columnWidths: Partial<Record<ColumnKey, number>>;
   onColumnWidthChange: (widths: Partial<Record<ColumnKey, number>>) => void;
   userColumnDefinitions?: Record<string, string>;
+  dimmerRacks?: DimmerRack[];
+  pdRacks?: PDRack[];
 }
 
 const ROW_HEIGHT = 40; // pixels
@@ -31,6 +35,8 @@ export function VirtualDataGrid({
   columnWidths,
   onColumnWidthChange,
   userColumnDefinitions = {},
+  dimmerRacks = [],
+  pdRacks = [],
 }: VirtualDataGridProps) {
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -114,15 +120,50 @@ export function VirtualDataGrid({
     field: keyof Fixture,
     value: string
   ) => {
+    const fixture = fixtures.find(f => f.id === fixtureId);
     const updates: Partial<Fixture> = {};
 
     // Handle user columns stored in custom_fields
     if (typeof field === 'string' && field.startsWith('user')) {
-      const fixture = fixtures.find(f => f.id === fixtureId);
       updates.custom_fields = {
         ...fixture?.custom_fields,
         [field]: value
       };
+    }
+    // Handle circuit and circuit_number fields with auto-linking
+    else if (field === 'circuit' || field === 'circuit_number') {
+      // Set the edited field
+      if (field === 'circuit') {
+        updates.circuit = value;
+      } else {
+        const num = parseInt(value, 10);
+        updates.circuit_number = isNaN(num) ? undefined : num;
+      }
+
+      // Auto-link if we have both circuit and circuit_number
+      const circuit = field === 'circuit' ? value : (fixture?.circuit || '');
+      const circuitNumber = field === 'circuit_number'
+        ? (isNaN(parseInt(value, 10)) ? 0 : parseInt(value, 10))
+        : (fixture?.circuit_number || 0);
+
+      if (circuit && circuitNumber && (dimmerRacks.length > 0 || pdRacks.length > 0)) {
+        const linkResult = autoLinkCircuit(circuit, circuitNumber, dimmerRacks, pdRacks);
+
+        // Merge auto-linking results into updates
+        if (linkResult.dimmer_rack_id) {
+          updates.dimmer_rack_id = linkResult.dimmer_rack_id;
+          updates.dimmer_channel_number = linkResult.dimmer_channel_number;
+          // Clear PD fields if linking to dimmer
+          updates.pd_rack_id = null;
+          updates.pd_circuit_number = null;
+        } else if (linkResult.pd_rack_id) {
+          updates.pd_rack_id = linkResult.pd_rack_id;
+          updates.pd_circuit_number = linkResult.pd_circuit_number;
+          // Clear dimmer fields if linking to PD
+          updates.dimmer_rack_id = null;
+          updates.dimmer_channel_number = null;
+        }
+      }
     }
     // Handle Address field - parse "universe/dmx_address" format OR raw address number
     else if (field === 'address') {
@@ -171,7 +212,7 @@ export function VirtualDataGrid({
     }
 
     onUpdateFixture(fixtureId, updates);
-  }, [fixtures, onUpdateFixture]);
+  }, [fixtures, onUpdateFixture, dimmerRacks, pdRacks]);
 
   // Handle cell navigation (arrow keys)
   const handleCellNavigate = useCallback((

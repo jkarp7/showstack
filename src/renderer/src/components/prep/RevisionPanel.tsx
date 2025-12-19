@@ -125,7 +125,7 @@ export function RevisionPanel({
                 </div>
 
                 {isExpanded && (
-                  <div className="p-4 bg-gray-50 dark:bg-gray-750">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700">
                     {revision.notes && (
                       <div className="mb-3 p-3 bg-gray-100 dark:bg-gray-700 rounded text-sm text-gray-900 dark:text-white">
                         <div className="text-gray-600 dark:text-gray-400 text-xs mb-1">Notes:</div>

@@ -328,7 +328,7 @@ export function EquipmentItemTable({
 
   if (sortedItems.length === 0 && !isAddingRow) {
     return (
-      <div className="bg-gray-100 dark:bg-gray-750 rounded p-4 text-center">
+      <div className="bg-gray-100 dark:bg-gray-700 rounded p-4 text-center">
         <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">No equipment items in this section</p>
         <button
           onClick={handleStartAddingRow}
@@ -341,7 +341,7 @@ export function EquipmentItemTable({
   }
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-750 rounded overflow-hidden">
+    <div className="bg-gray-100 dark:bg-gray-700 rounded overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-200 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700">

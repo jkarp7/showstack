@@ -201,7 +201,7 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
                 }`}
               >
                 {/* Section Header */}
-                <div className="p-4 hover:bg-gray-100 dark:hover:bg-gray-750 transition flex items-center justify-between cursor-move">
+                <div className="p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center justify-between cursor-move">
                   <div className="flex items-center gap-4 flex-1">
                     {/* Expand/Collapse Button */}
                     <button

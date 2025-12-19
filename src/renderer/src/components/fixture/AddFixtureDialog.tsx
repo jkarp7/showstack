@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Fixture } from '../../types';
+import { DimmerRack, PDRack } from '../../types/power';
 
 interface AutoFillSuggestions {
   positions: string[];
@@ -51,6 +52,18 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
   const [status, setStatus] = useState('Active');
   const [notOnPlot, setNotOnPlot] = useState(false);
 
+  // Power rack assignments
+  const [dimmerRackId, setDimmerRackId] = useState<string>('');
+  const [dimmerModuleNumber, setDimmerModuleNumber] = useState<string>('');
+  const [dimmerChannelNumber, setDimmerChannelNumber] = useState<string>('');
+  const [pdRackId, setPdRackId] = useState<string>('');
+  const [pdCircuitNumber, setPdCircuitNumber] = useState<string>('');
+  const [pdBreakerNumber, setPdBreakerNumber] = useState<string>('');
+
+  // Available racks (loaded from database)
+  const [dimmerRacks, setDimmerRacks] = useState<DimmerRack[]>([]);
+  const [pdRacks, setPdRacks] = useState<PDRack[]>([]);
+
   // Auto-increment options
   const [autoIncrementUnit, setAutoIncrementUnit] = useState(true);
   const [autoIncrementChannel, setAutoIncrementChannel] = useState(true);
@@ -61,6 +74,26 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
 
   // Batch queue
   const [queue, setQueue] = useState<QueuedBatch[]>([]);
+
+  // Load power racks when dialog opens
+  useEffect(() => {
+    if (!isOpen || !window.api?.dimmerRacks || !window.api?.pdRacks) return;
+
+    const loadRacks = async () => {
+      try {
+        const [dimmer, pd] = await Promise.all([
+          window.api.dimmerRacks.getAll(),
+          window.api.pdRacks.getAll()
+        ]);
+        setDimmerRacks(dimmer);
+        setPdRacks(pd);
+      } catch (error) {
+        console.error('Failed to load power racks:', error);
+      }
+    };
+
+    loadRacks();
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -186,6 +219,38 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
         }
       }
 
+      // Handle power rack assignments
+      if (dimmerRackId) {
+        fixture.dimmer_rack_id = dimmerRackId;
+      }
+      if (dimmerModuleNumber) {
+        const moduleNum = parseInt(dimmerModuleNumber);
+        if (!isNaN(moduleNum)) {
+          fixture.dimmer_module_number = moduleNum;
+        }
+      }
+      if (dimmerChannelNumber) {
+        const channelNum = parseInt(dimmerChannelNumber);
+        if (!isNaN(channelNum)) {
+          fixture.dimmer_channel_number = channelNum;
+        }
+      }
+      if (pdRackId) {
+        fixture.pd_rack_id = pdRackId;
+      }
+      if (pdCircuitNumber) {
+        const circuitNum = parseInt(pdCircuitNumber);
+        if (!isNaN(circuitNum)) {
+          fixture.pd_circuit_number = circuitNum;
+        }
+      }
+      if (pdBreakerNumber) {
+        const breakerNum = parseInt(pdBreakerNumber);
+        if (!isNaN(breakerNum)) {
+          fixture.pd_breaker_number = breakerNum;
+        }
+      }
+
       fixtures.push(fixture);
     }
 
@@ -258,6 +323,12 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
     setNotes('');
     setStatus('Active');
     setNotOnPlot(false);
+    setDimmerRackId('');
+    setDimmerModuleNumber('');
+    setDimmerChannelNumber('');
+    setPdRackId('');
+    setPdCircuitNumber('');
+    setPdBreakerNumber('');
   };
 
   const handleClose = () => {
@@ -522,6 +593,107 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                   />
                 </div>
               </div>
+
+              {/* Power Distribution Section */}
+              {(dimmerRacks.length > 0 || pdRacks.length > 0) && (
+                <>
+                  <div className="pt-3 border-t border-gray-600">
+                    <h4 className="text-xs font-semibold text-gray-300 mb-2">Power Distribution</h4>
+                  </div>
+
+                  {/* Dimmer Rack Assignment */}
+                  {dimmerRacks.length > 0 && (
+                    <>
+                      <div>
+                        <label className={labelClass}>Dimmer Rack</label>
+                        <select
+                          value={dimmerRackId}
+                          onChange={(e) => setDimmerRackId(e.target.value)}
+                          className={inputClass}
+                        >
+                          <option value="">None</option>
+                          {dimmerRacks.map(rack => (
+                            <option key={rack.id} value={rack.id}>
+                              {rack.name} ({rack.circuit_count} circuits)
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {dimmerRackId && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className={labelClass}>Module #</label>
+                            <input
+                              type="number"
+                              value={dimmerModuleNumber}
+                              onChange={(e) => setDimmerModuleNumber(e.target.value)}
+                              className={inputClass}
+                              placeholder="Module"
+                            />
+                          </div>
+                          <div>
+                            <label className={labelClass}>Dimmer Channel #</label>
+                            <input
+                              type="number"
+                              value={dimmerChannelNumber}
+                              onChange={(e) => setDimmerChannelNumber(e.target.value)}
+                              className={inputClass}
+                              placeholder="Channel"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* PD Rack Assignment */}
+                  {pdRacks.length > 0 && (
+                    <>
+                      <div>
+                        <label className={labelClass}>PD Rack</label>
+                        <select
+                          value={pdRackId}
+                          onChange={(e) => setPdRackId(e.target.value)}
+                          className={inputClass}
+                        >
+                          <option value="">None</option>
+                          {pdRacks.map(rack => (
+                            <option key={rack.id} value={rack.id}>
+                              {rack.name} ({rack.voltage}V, {rack.circuit_count} circuits)
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {pdRackId && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className={labelClass}>PD Circuit #</label>
+                            <input
+                              type="number"
+                              value={pdCircuitNumber}
+                              onChange={(e) => setPdCircuitNumber(e.target.value)}
+                              className={inputClass}
+                              placeholder="Circuit"
+                            />
+                          </div>
+                          <div>
+                            <label className={labelClass}>Breaker #</label>
+                            <input
+                              type="number"
+                              value={pdBreakerNumber}
+                              onChange={(e) => setPdBreakerNumber(e.target.value)}
+                              className={inputClass}
+                              placeholder="Breaker"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
 
               {/* Color, Gobo, Accessories */}
               <div className="grid grid-cols-3 gap-2">

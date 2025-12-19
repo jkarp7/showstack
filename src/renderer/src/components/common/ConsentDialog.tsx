@@ -30,15 +30,15 @@ export function ConsentDialog({ onClose }: ConsentDialogProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 overflow-hidden">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-xl w-full max-h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="bg-blue-600 dark:bg-blue-700 px-6 py-4">
-          <h2 className="text-2xl font-bold text-white">Help Improve ShowStack</h2>
+        <div className="bg-blue-600 dark:bg-blue-700 px-6 py-4 flex-shrink-0">
+          <h2 className="text-xl font-bold text-white">Help Improve ShowStack</h2>
         </div>
 
-        {/* Content */}
-        <div className="px-6 py-6 space-y-4">
+        {/* Content - Scrollable */}
+        <div className="px-6 py-6 space-y-4 overflow-y-auto flex-1">
           <p className="text-gray-700 dark:text-gray-300">
             We'd like to collect anonymous usage data to understand which features
             are most valuable and identify bugs. Your privacy is important to us.
@@ -136,7 +136,7 @@ export function ConsentDialog({ onClose }: ConsentDialogProps) {
         </div>
 
         {/* Footer */}
-        <div className="bg-gray-50 dark:bg-gray-900 px-6 py-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700">
+        <div className="bg-gray-50 dark:bg-gray-900 px-6 py-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
           <button
             onClick={handleSkip}
             className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"

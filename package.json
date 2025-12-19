@@ -1,5 +1,6 @@
 {
   "name": "showstack-production",
+  "productName": "ShowStack",
   "version": "0.1.0-alpha",
   "description": "Modern production management software for live entertainment",
   "author": "Lytrix",

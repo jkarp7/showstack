@@ -13,8 +13,16 @@ import { registerPaperworkHandlers } from './ipc/paperwork';
 import { registerLicenseHandlers } from './ipc/license';
 import { registerAdminHandlers } from './ipc/admin';
 import { registerSettingsHandlers } from './ipc/settings';
+import { registerMenuHandlers, initializeApplicationMenu } from './ipc/menu';
+import { registerShellHandlers } from './ipc/shell';
+import { registerDimmerRackHandlers } from './ipc/dimmerRacks';
+import { registerDimmerRackModuleHandlers } from './ipc/dimmerRackModules';
+import { registerPDRackHandlers } from './ipc/pdRacks';
 import { backgroundVerifier } from './services/BackgroundVerifier';
 import { licenseService } from './services/LicenseService';
+
+// Set app name for macOS menu bar
+app.setName('ShowStack');
 
 // Disable hardware acceleration on Linux
 if (process.platform === 'linux') {
@@ -44,6 +52,11 @@ app.on('ready', async () => {
   registerLicenseHandlers();
   registerAdminHandlers();
   registerSettingsHandlers();
+  registerMenuHandlers();
+  registerShellHandlers();
+  registerDimmerRackHandlers();
+  registerDimmerRackModuleHandlers();
+  registerPDRackHandlers();
 
   // Start background license verification (non-blocking)
   backgroundVerifier.start();
@@ -52,6 +65,9 @@ app.on('ready', async () => {
   licenseService.checkAndVerifyIfNeeded().catch(err => {
     console.log('Initial license verification skipped (offline mode)');
   });
+
+  // Initialize application menu BEFORE creating any windows (critical for macOS)
+  initializeApplicationMenu();
 
   // Create landing window
   windowManager.createLandingWindow();

@@ -1067,7 +1067,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                     const gelColor = getGelColor(row.color);
 
                     return (
-                      <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-750">
+                      <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-700">
                         <td className="px-3 py-2 font-medium">
                           <div className="flex items-center gap-2">
                             {/* Color swatch - supports dual colors */}
@@ -1142,7 +1142,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                       const gelColor = getGelColor(color);
 
                       return (
-                        <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-750">
+                        <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-700">
                           <td className="px-3 py-2 font-medium">
                             <div className="flex items-center gap-2">
                               {/* Color swatch - supports dual colors */}
@@ -1217,7 +1217,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
               </thead>
               <tbody>
                 {goboScheduleData.map((row, i) => (
-                  <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-750">
+                  <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-700">
                     <td className="px-3 py-2 font-medium">{row.gobo}</td>
                     <td className="px-3 py-2">{row.count}</td>
                     <td className="px-3 py-2">{row.size}</td>

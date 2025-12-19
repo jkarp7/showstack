@@ -84,7 +84,7 @@ export function UserColumnSettingsDialog({
               })}
             </div>
 
-            <div className="mt-6 p-4 bg-gray-750 rounded border border-gray-600">
+            <div className="mt-6 p-4 bg-gray-700 rounded border border-gray-600">
               <h3 className="text-sm font-medium text-gray-300 mb-2">Examples:</h3>
               <ul className="text-xs text-gray-400 space-y-1">
                 <li>• User 1 → "Lamp Hours"</li>
