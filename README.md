@@ -17,10 +17,11 @@ ShowStack is a comprehensive suite of tools designed for lighting designers, pro
 - Venue information database
 - Crew and personnel tracking
 
-**ShowStack:Production** - Equipment & Documentation *(60% complete)*
-- Equipment Manager for fixture tracking
+**ShowStack:Production** - Equipment & Documentation *(70% complete)*
+- Equipment Manager for fixture tracking with power management
 - Shop Order tool with multi-discipline support
 - Professional paperwork generation
+- Power distribution tracking and analysis
 - Label design and printing
 
 ### Key Features (Alpha)
@@ -111,10 +112,11 @@ Coming soon! See [docs/dev-setup.md](docs/dev-setup.md) for environment setup.
 
 **Modules:**
 - ✅ **Manager Module** (placeholder - tour/venue management coming)
-- ✅ **Production Module** (~60% complete)
-  - Equipment Manager (fixture CRUD)
+- ✅ **Production Module** (~70% complete)
+  - Equipment Manager (fixture CRUD, power management)
   - Shop Order tool with revisions
   - Paperwork generation
+  - Power distribution tracking
   - Labels designer
 - ✅ **Shop Order Tool** (~90% complete)
   - Multi-discipline support
@@ -122,6 +124,12 @@ Coming soon! See [docs/dev-setup.md](docs/dev-setup.md) for environment setup.
   - Revision management with notes
   - PDF/CSV export
   - Print builder with page layout
+- ✅ **Power Management** (~100% complete)
+  - Dimmer rack and PD rack configuration
+  - Module-based capacity calculations
+  - Auto-linking fixtures to racks
+  - Real-time utilization tracking
+  - Phase balance monitoring
 
 **Privacy & Analytics:**
 - ✅ Privacy-first telemetry (PostHog)
@@ -138,9 +146,10 @@ Coming soon! See [docs/dev-setup.md](docs/dev-setup.md) for environment setup.
 - ✅ Comprehensive documentation
 
 ### 🚧 In Progress
-- 🚧 Equipment Manager fixture list UI (~40% remaining)
-- 🚧 Power distribution calculations
+- 🚧 Equipment Manager fixture list UI (~30% remaining)
+- 🚧 Customizable paperwork export headers
 - 🚧 Fixture library with manufacturers
+- 🚧 Auto-complete system for fixture fields
 
 ### ⬜ Planned (Post-Alpha)
 - ⬜ Eos integration (OSC)

@@ -239,6 +239,68 @@ export const PROJECT_SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_pd_racks_project ON pd_racks(project_id);
   -- Note: Indexes on fixtures power columns are created by migrations to handle existing databases
 
+  -- Infrastructure Equipment table (network switches, opto splitters, DMX gateways, etc.)
+  CREATE TABLE IF NOT EXISTS infrastructure_equipment (
+    id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL,
+
+    -- Core identification
+    name TEXT NOT NULL,
+    manufacturer TEXT,
+    model TEXT,
+    quantity INTEGER DEFAULT 1,
+    category TEXT, -- 'network', 'data_distribution', 'audio', 'video'
+
+    -- Network information (for network switches, routers, etc.)
+    ip_address TEXT,
+    mac_address TEXT,
+    subnet_mask TEXT,
+    gateway TEXT,
+    vlan_id INTEGER,
+    hostname TEXT,
+
+    -- Port assignments (JSON array)
+    -- Format: [{port: 1, connected_to: 'Device Name', type: 'ethernet/dmx/fiber', vlan: 10, status: 'active'}]
+    port_assignments TEXT, -- JSON
+    port_count INTEGER DEFAULT 0,
+
+    -- Power information
+    voltage INTEGER,
+    amperage REAL,
+    wattage REAL,
+    phase TEXT,
+
+    -- Power rack linking (same as fixtures)
+    dimmer_rack_id TEXT,
+    dimmer_channel_number INTEGER,
+    pd_rack_id TEXT,
+    pd_circuit_number INTEGER,
+    pd_breaker_number INTEGER,
+    circuit TEXT,
+    circuit_number INTEGER,
+
+    -- Location
+    location TEXT,
+    position_x REAL,
+    position_y REAL,
+    position_z REAL,
+
+    -- Notes & Status
+    notes TEXT,
+    status TEXT DEFAULT 'Active', -- 'Active', 'Spare', 'Needs Repair', 'Offline'
+
+    -- Metadata
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+  );
+
+  -- Indexes for infrastructure equipment
+  CREATE INDEX IF NOT EXISTS idx_infrastructure_project ON infrastructure_equipment(project_id);
+  CREATE INDEX IF NOT EXISTS idx_infrastructure_category ON infrastructure_equipment(project_id, category);
+  CREATE INDEX IF NOT EXISTS idx_infrastructure_location ON infrastructure_equipment(project_id, location);
+
   -- User Preferences table (per-project column settings, etc.)
   CREATE TABLE IF NOT EXISTS user_preferences (
     id TEXT PRIMARY KEY,
