@@ -7,17 +7,25 @@ import { SortBar } from '../../components/fixture/SortBar';
 import { AddFixtureDialog } from '../../components/fixture/AddFixtureDialog';
 import { BulkEditDialog } from '../../components/fixture/BulkEditDialog';
 import { UserColumnSettingsDialog } from '../../components/fixture/UserColumnSettingsDialog';
+import { InfrastructureToolbar } from '../../components/infrastructure/InfrastructureToolbar';
+import { AddInfrastructureDialog } from '../../components/infrastructure/AddInfrastructureDialog';
+import { EditInfrastructureDialog } from '../../components/infrastructure/EditInfrastructureDialog';
+import { ExportHeaderDialog, ExportHeaderOptions } from '../../components/fixture/ExportHeaderDialog';
 import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { UnsavedChangesDialog, useUnsavedChangesDialog } from '../../components/common/UnsavedChangesDialog';
 import { PowerSummaryPanel } from '../../components/power/PowerSummaryPanel';
 import { RackManager } from '../../components/power/RackManager';
 import { useFixtureStore } from '../../store/fixtureStore';
+import { useInfrastructureStore } from '../../store/infrastructureStore';
 import { useFileStore } from '../../store/fileStore';
 import { Fixture } from '../../types';
 import { DimmerRack, PDRack } from '../../types/power';
 import { DEFAULT_COLUMN_VISIBILITY, ColumnVisibility, DEFAULT_COLUMN_ORDER, ColumnKey } from '../../types/columns';
+import { DEFAULT_INFRASTRUCTURE_COLUMN_VISIBILITY, INFRASTRUCTURE_COLUMN_CONFIGS, InfrastructureColumnKey } from '../../types/infrastructureColumns';
+import { InfrastructureColumnVisibility } from '../../components/infrastructure/InfrastructureColumnVisibilityMenu';
 import { useEquipmentMenuHandlers } from '../../hooks/useEquipmentMenuHandlers';
 import { autoLinkCircuit } from '../../utils/circuitParser';
+import { Project, buildExportHeader, formatHeaderForCSV, formatHeaderForEos, formatHeaderForGrandMA } from '../../utils/exportHeaders';
 
 interface EquipmentManagerProps {
   embedded?: boolean;
@@ -27,13 +35,21 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId?: string; moduleType?: string }>();
   const { fixtures, loadFixtures, addMultipleFixtures, deleteMultiple, updateFixture, setCurrentProjectId } = useFixtureStore();
+  const { equipment: infrastructureEquipment, loadEquipment: loadInfrastructure } = useInfrastructureStore();
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'fixtures' | 'infrastructure' | 'power'>('fixtures');
+
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+  const [selectedInfrastructure, setSelectedInfrastructure] = useState<Set<string>>(new Set());
   const [isAddFixtureDialogOpen, setIsAddFixtureDialogOpen] = useState(false);
+  const [isAddInfrastructureDialogOpen, setIsAddInfrastructureDialogOpen] = useState(false);
+  const [isEditInfrastructureDialogOpen, setIsEditInfrastructureDialogOpen] = useState(false);
+  const [editingInfrastructureEquipment, setEditingInfrastructureEquipment] = useState<any | null>(null);
   const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = useState(false);
   const [isUserColumnSettingsOpen, setIsUserColumnSettingsOpen] = useState(false);
 
   // Power features state
-  const [showPowerSummary, setShowPowerSummary] = useState(false);
   const [isRackManagerOpen, setIsRackManagerOpen] = useState(false);
   const [dimmerRacks, setDimmerRacks] = useState<DimmerRack[]>([]);
   const [pdRacks, setPDRacks] = useState<PDRack[]>([]);
@@ -50,8 +66,13 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   // User column definitions
   const [userColumnDefinitions, setUserColumnDefinitions] = useState<Record<string, string>>({});
 
-  // Project name state
+  // Project state
+  const [project, setProject] = useState<Project>({ name: 'Untitled Project' });
   const [projectName, setProjectName] = useState<string>('Untitled Project');
+
+  // Export dialog state
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [exportFormat, setExportFormat] = useState<'csv' | 'eos' | 'grandma2' | 'grandma3'>('csv');
 
   // Sort state - now supports multi-column sort
   interface SortConfig {
@@ -66,7 +87,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  // Column visibility state
+  // Column visibility state (fixtures)
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(DEFAULT_COLUMN_VISIBILITY);
 
   // Column order state
@@ -74,6 +95,44 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
   // Column widths state (in pixels, null means use default from config)
   const [columnWidths, setColumnWidths] = useState<Partial<Record<ColumnKey, number>>>({});
+
+  // Infrastructure column visibility state
+  const [infrastructureColumnVisibility, setInfrastructureColumnVisibility] = useState<InfrastructureColumnVisibility>(DEFAULT_INFRASTRUCTURE_COLUMN_VISIBILITY);
+
+  // Calculate visible infrastructure columns
+  const visibleInfrastructureColumns = useMemo(() => {
+    return INFRASTRUCTURE_COLUMN_CONFIGS.filter(col => infrastructureColumnVisibility[col.key]);
+  }, [infrastructureColumnVisibility]);
+
+  // Helper function to render infrastructure cell value
+  const renderInfrastructureCellValue = (equipment: any, columnKey: InfrastructureColumnKey) => {
+    const value = equipment[columnKey];
+
+    // Special rendering for certain columns
+    if (columnKey === 'category' && value) {
+      return (
+        <span className="px-2 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-800">
+          {value}
+        </span>
+      );
+    }
+
+    if (columnKey === 'status') {
+      return (
+        <span className={`px-2 py-1 rounded-full text-xs ${
+          value === 'Active' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' :
+          value === 'Spare' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' :
+          value === 'Needs Repair' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' :
+          'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300'
+        }`}>
+          {value || 'N/A'}
+        </span>
+      );
+    }
+
+    // Default rendering
+    return value || '-';
+  };
 
   // Function to load power racks
   const loadRacks = async () => {
@@ -94,16 +153,18 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   // Function to reload all data (for file operations)
   const handleDataReload = async () => {
     await loadFixtures(currentProjectId);
+    await loadInfrastructure(currentProjectId);
     await loadRacks();
 
     if (!window.api) return;
 
     try {
-      // Load project name
+      // Load project data
       if (window.api.projects) {
-        const project = await window.api.projects.getById(currentProjectId);
-        if (project?.name) {
-          setProjectName(project.name);
+        const projectData = await window.api.projects.getById(currentProjectId);
+        if (projectData) {
+          setProject(projectData as Project);
+          setProjectName(projectData.name || 'Untitled Project');
         }
       }
     } catch (error) {
@@ -111,11 +172,12 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     }
   };
 
-  // Load fixtures and preferences from database on mount
+  // Load fixtures, infrastructure, and preferences from database on mount
   useEffect(() => {
-    // Set current project ID and load fixtures for this project
+    // Set current project ID and load data for this project
     setCurrentProjectId(currentProjectId);
     loadFixtures(currentProjectId);
+    loadInfrastructure(currentProjectId);
 
     // Update menu context
     window.api?.menu?.setState({
@@ -128,11 +190,12 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
       if (!window.api) return;
 
       try {
-        // Load project name
+        // Load project data
         if (window.api.projects) {
-          const project = await window.api.projects.getById(currentProjectId);
-          if (project?.name) {
-            setProjectName(project.name);
+          const projectData = await window.api.projects.getById(currentProjectId);
+          if (projectData) {
+            setProject(projectData as Project);
+            setProjectName(projectData.name || 'Untitled Project');
           }
         }
 
@@ -376,8 +439,32 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     }
   };
 
-  // Handle export to CSV
+  // Show export dialog
   const handleExportCSV = () => {
+    setExportFormat('csv');
+    setIsExportDialogOpen(true);
+  };
+
+  const handleExportEos = () => {
+    setExportFormat('eos');
+    setIsExportDialogOpen(true);
+  };
+
+  const handleExportGrandMA2 = () => {
+    setExportFormat('grandma2');
+    setIsExportDialogOpen(true);
+  };
+
+  const handleExportGrandMA3 = () => {
+    setExportFormat('grandma3');
+    setIsExportDialogOpen(true);
+  };
+
+  // Perform the actual export with headers
+  const performExport = (options: ExportHeaderOptions) => {
+    // Build export header
+    const header = buildExportHeader(options, project);
+
     // Get visible columns
     const visibleColumns = columnOrder
       .filter(key => columnVisibility[key])
@@ -386,37 +473,87 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
         return { key, label: userColumnDefinitions[key] || key };
       });
 
-    // Build CSV header
-    const headers = visibleColumns.map(col => col.label).join(',');
+    if (options.format === 'csv') {
+      // Build CSV with headers
+      const headerText = formatHeaderForCSV(header);
+      const columnHeaders = visibleColumns.map(col => col.label).join(',');
 
-    // Build CSV rows
-    const rows = processedFixtures.map(fixture => {
-      return visibleColumns.map(col => {
-        let value = fixture[col.key as keyof Fixture];
+      const rows = processedFixtures.map(fixture => {
+        return visibleColumns.map(col => {
+          let value = fixture[col.key as keyof Fixture];
 
-        // Handle special cases
-        if (value === undefined || value === null) return '';
-        if (Array.isArray(value)) return `"${value.join(', ')}"`;
-        if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-        if (typeof value === 'string' && value.includes(',')) return `"${value}"`;
+          // Handle special cases
+          if (value === undefined || value === null) return '';
+          if (Array.isArray(value)) return `"${value.join(', ')}"`;
+          if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+          if (typeof value === 'string' && value.includes(',')) return `"${value}"`;
 
-        return value;
-      }).join(',');
-    });
+          return value;
+        }).join(',');
+      });
 
-    // Combine into CSV string
-    const csv = [headers, ...rows].join('\n');
+      const csv = headerText + columnHeaders + '\n' + rows.join('\n');
 
-    // Create download link
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${projectName}_fixtures_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      // Download CSV
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${projectName}_fixtures_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else if (options.format === 'eos') {
+      // Build Eos format
+      const headerText = formatHeaderForEos(header);
+
+      // Eos format: Chan Patch <channel> <fixture_type> <universe>/<address>
+      const eosLines = processedFixtures
+        .filter(f => f.channel && f.universe && f.dmx_address)
+        .map(fixture => {
+          const type = fixture.type || 'Generic';
+          return `Chan Patch ${fixture.channel} "${type}" ${fixture.universe}/${fixture.dmx_address}`;
+        });
+
+      const eosContent = headerText + eosLines.join('\n');
+
+      // Download Eos file
+      const blob = new Blob([eosContent], { type: 'text/plain;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${projectName}_eos_${new Date().toISOString().split('T')[0]}.txt`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else if (options.format === 'grandma2' || options.format === 'grandma3') {
+      // Build GrandMA XML format
+      const headerText = formatHeaderForGrandMA(header);
+
+      // GrandMA format: Simple patch list XML
+      const fixtures = processedFixtures
+        .filter(f => f.channel && f.universe && f.dmx_address)
+        .map((fixture, idx) => {
+          const type = fixture.type || 'Generic';
+          return `  <Fixture id="${idx + 1}" name="${type}" channel="${fixture.channel}" universe="${fixture.universe}" address="${fixture.dmx_address}" />`;
+        });
+
+      const xmlContent = headerText + '<GrandMA>\n  <Fixtures>\n' + fixtures.join('\n') + '\n  </Fixtures>\n</GrandMA>';
+
+      // Download XML file
+      const blob = new Blob([xmlContent], { type: 'application/xml;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      const format = options.format === 'grandma2' ? 'gma2' : 'gma3';
+      link.setAttribute('download', `${projectName}_${format}_${new Date().toISOString().split('T')[0]}.xml`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   // Handle print
@@ -652,19 +789,22 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     onDeselectAll: handleDeselectAll,
     onPrint: handlePrint,
     onExportCSV: handleExportCSV,
-    // TODO: Implement console export handlers
-    // onExportEos: handleExportEos,
-    // onExportGrandMA2: handleExportGrandMA2,
-    // onExportGrandMA3: handleExportGrandMA3,
+    onExportEos: handleExportEos,
+    onExportGrandMA2: handleExportGrandMA2,
+    onExportGrandMA3: handleExportGrandMA3,
   });
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+    <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Breadcrumbs */}
-      {!embedded && <Breadcrumbs />}
+      {!embedded && (
+        <div className="flex-shrink-0">
+          <Breadcrumbs />
+        </div>
+      )}
 
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-4">
             <div>
@@ -690,80 +830,106 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
         </div>
       </header>
 
+      {/* Tabs */}
+      <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="flex space-x-8 px-6">
+          <button
+            onClick={() => setActiveTab('fixtures')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'fixtures'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
+            }`}
+          >
+            Fixtures
+          </button>
+          <button
+            onClick={() => setActiveTab('infrastructure')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'infrastructure'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
+            }`}
+          >
+            Infrastructure
+          </button>
+          <button
+            onClick={() => setActiveTab('power')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'power'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
+            }`}
+          >
+            Power Racks
+          </button>
+        </div>
+      </div>
+
+      {/* Fixtures Tab */}
+      {activeTab === 'fixtures' && (
+      <>
       {/* Toolbar */}
-      <Toolbar
-        selectedCount={selectedRows.size}
-        onAddFixture={() => setIsAddFixtureDialogOpen(true)}
-        onBulkEdit={() => setIsBulkEditDialogOpen(true)}
-        onDeleteSelected={async () => {
-          await deleteMultiple(Array.from(selectedRows));
-          setSelectedRows(new Set());
-        }}
-        onDeselectAll={() => setSelectedRows(new Set())}
-        onUserColumnSettings={() => setIsUserColumnSettingsOpen(true)}
-        columnVisibility={columnVisibility}
-        onColumnVisibilityChange={setColumnVisibility}
-        userColumnDefinitions={userColumnDefinitions}
-        showPowerSummary={showPowerSummary}
-        onTogglePowerSummary={() => setShowPowerSummary(!showPowerSummary)}
-        onManagePowerRacks={() => setIsRackManagerOpen(true)}
-      />
+      <div className="flex-shrink-0">
+        <Toolbar
+          selectedCount={selectedRows.size}
+          onAddFixture={() => setIsAddFixtureDialogOpen(true)}
+          onBulkEdit={() => setIsBulkEditDialogOpen(true)}
+          onDeleteSelected={async () => {
+            await deleteMultiple(Array.from(selectedRows));
+            setSelectedRows(new Set());
+          }}
+          onDeselectAll={() => setSelectedRows(new Set())}
+          onUserColumnSettings={() => setIsUserColumnSettingsOpen(true)}
+          columnVisibility={columnVisibility}
+          onColumnVisibilityChange={setColumnVisibility}
+          userColumnDefinitions={userColumnDefinitions}
+        />
+      </div>
 
       {/* Sort Bar */}
-      <SortBar
-        sortConfigs={sortConfigs}
-        onSort={handleSort}
-        onClearSort={() => setSortConfigs([])}
-      />
+      <div className="flex-shrink-0">
+        <SortBar
+          sortConfigs={sortConfigs}
+          onSort={handleSort}
+          onClearSort={() => setSortConfigs([])}
+        />
+      </div>
 
       {/* Filter Bar */}
-      <FilterBar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        locationFilter={locationFilter}
-        onLocationChange={setLocationFilter}
-        typeFilter={typeFilter}
-        onTypeChange={setTypeFilter}
-        statusFilter={statusFilter}
-        onStatusChange={setStatusFilter}
-        onClearFilters={handleClearFilters}
-        availableLocations={availableLocations}
-        availableTypes={availableTypes}
-        availableStatuses={availableStatuses}
-      />
+      <div className="flex-shrink-0">
+        <FilterBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          locationFilter={locationFilter}
+          onLocationChange={setLocationFilter}
+          typeFilter={typeFilter}
+          onTypeChange={setTypeFilter}
+          statusFilter={statusFilter}
+          onStatusChange={setStatusFilter}
+          onClearFilters={handleClearFilters}
+          availableLocations={availableLocations}
+          availableTypes={availableTypes}
+          availableStatuses={availableStatuses}
+        />
+      </div>
 
-      {/* Main Content - Virtual Data Grid with optional Power Summary Sidebar */}
-      <main className="flex-1 overflow-hidden flex">
-        {/* Equipment Table */}
-        <div className="flex-1 overflow-hidden">
-          <VirtualDataGrid
-            fixtures={processedFixtures}
-            selectedRows={selectedRows}
-            onSelectRows={setSelectedRows}
-            onUpdateFixture={updateFixture}
-            columnVisibility={columnVisibility}
-            columnOrder={columnOrder}
-            onColumnOrderChange={setColumnOrder}
-            columnWidths={columnWidths}
-            onColumnWidthChange={setColumnWidths}
-            userColumnDefinitions={userColumnDefinitions}
-            dimmerRacks={dimmerRacks}
-            pdRacks={pdRacks}
-          />
-        </div>
-
-        {/* Power Summary Sidebar */}
-        {showPowerSummary && (
-          <div className="w-96 border-l border-gray-200 dark:border-gray-700 overflow-y-auto bg-gray-100 dark:bg-gray-900">
-            <div className="p-4">
-              <PowerSummaryPanel
-                dimmerRacks={dimmerRacks}
-                pdRacks={pdRacks}
-                fixtures={fixtures}
-              />
-            </div>
-          </div>
-        )}
+      {/* Main Content - Virtual Data Grid */}
+      <main className="flex-1 min-h-0 overflow-hidden">
+        <VirtualDataGrid
+          fixtures={processedFixtures}
+          selectedRows={selectedRows}
+          onSelectRows={setSelectedRows}
+          onUpdateFixture={updateFixture}
+          columnVisibility={columnVisibility}
+          columnOrder={columnOrder}
+          onColumnOrderChange={setColumnOrder}
+          columnWidths={columnWidths}
+          onColumnWidthChange={setColumnWidths}
+          userColumnDefinitions={userColumnDefinitions}
+          dimmerRacks={dimmerRacks}
+          pdRacks={pdRacks}
+        />
       </main>
 
       {/* Status Bar */}
@@ -771,6 +937,149 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
         <div>Ready</div>
         <div>ShowStack:Production v0.1.0-alpha</div>
       </footer>
+      </>
+      )}
+
+      {/* Infrastructure Tab */}
+      {activeTab === 'infrastructure' && (
+        <>
+          {/* Infrastructure Toolbar */}
+          <div className="flex-shrink-0">
+            <InfrastructureToolbar
+              selectedCount={selectedInfrastructure.size}
+              onAddEquipment={() => setIsAddInfrastructureDialogOpen(true)}
+              onDeleteSelected={async () => {
+                const { deleteMultiple } = useInfrastructureStore.getState();
+                await deleteMultiple(Array.from(selectedInfrastructure));
+                setSelectedInfrastructure(new Set());
+              }}
+              onDeselectAll={() => setSelectedInfrastructure(new Set())}
+              columnVisibility={infrastructureColumnVisibility}
+              onColumnVisibilityChange={setInfrastructureColumnVisibility}
+            />
+          </div>
+
+          {/* Infrastructure Table */}
+          <main className="flex-1 min-h-0 overflow-y-auto">
+            <div className="min-w-full">
+              <table className="w-full border-collapse">
+                <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0 z-10">
+                  <tr>
+                    <th className="w-12 px-4 py-3 text-left">
+                      <input
+                        type="checkbox"
+                        checked={selectedInfrastructure.size === infrastructureEquipment.length && infrastructureEquipment.length > 0}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedInfrastructure(new Set(infrastructureEquipment.map(eq => eq.id)));
+                          } else {
+                            setSelectedInfrastructure(new Set());
+                          }
+                        }}
+                        className="rounded border-gray-300 dark:border-gray-600"
+                      />
+                    </th>
+                    {visibleInfrastructureColumns.map((column) => (
+                      <th key={column.key} className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        {column.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                  {infrastructureEquipment.length === 0 ? (
+                    <tr>
+                      <td colSpan={visibleInfrastructureColumns.length + 1} className="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                        <div className="flex flex-col items-center">
+                          <div className="text-5xl mb-3">📡</div>
+                          <p className="text-lg font-medium mb-1">No infrastructure equipment yet</p>
+                          <p className="text-sm">Click "Add Equipment" to get started</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    infrastructureEquipment.map((equipment) => (
+                      <tr
+                        key={equipment.id}
+                        className={`hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer ${
+                          selectedInfrastructure.has(equipment.id) ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                        }`}
+                        onDoubleClick={() => {
+                          setEditingInfrastructureEquipment(equipment);
+                          setIsEditInfrastructureDialogOpen(true);
+                        }}
+                      >
+                        <td className="px-4 py-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedInfrastructure.has(equipment.id)}
+                            onChange={(e) => {
+                              const newSelection = new Set(selectedInfrastructure);
+                              if (e.target.checked) {
+                                newSelection.add(equipment.id);
+                              } else {
+                                newSelection.delete(equipment.id);
+                              }
+                              setSelectedInfrastructure(newSelection);
+                            }}
+                            className="rounded border-gray-300 dark:border-gray-600"
+                          />
+                        </td>
+                        {visibleInfrastructureColumns.map((column) => (
+                          <td
+                            key={column.key}
+                            className={`px-4 py-3 text-sm ${
+                              column.key === 'name' ? 'text-gray-900 dark:text-white font-medium' :
+                              column.key === 'ip_address' ? 'text-gray-600 dark:text-gray-400 font-mono' :
+                              'text-gray-600 dark:text-gray-400'
+                            }`}
+                          >
+                            {renderInfrastructureCellValue(equipment, column.key)}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </main>
+
+          {/* Status Bar */}
+          <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+            <div>
+              {infrastructureEquipment.length} equipment | {selectedInfrastructure.size} selected
+            </div>
+            <div>ShowStack:Production v0.1.0-alpha</div>
+          </footer>
+        </>
+      )}
+
+      {/* Power Racks Tab */}
+      {activeTab === 'power' && (
+        <>
+          {/* Power Racks Toolbar */}
+          <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2">
+            <button
+              onClick={() => setIsRackManagerOpen(true)}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition"
+            >
+              Manage Racks...
+            </button>
+          </div>
+
+          {/* Power Summary Panel */}
+          <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+            <div className="p-6">
+              <PowerSummaryPanel
+                dimmerRacks={dimmerRacks}
+                pdRacks={pdRacks}
+                fixtures={fixtures}
+              />
+            </div>
+          </main>
+        </>
+      )}
 
       {/* Add Fixture Dialog */}
       <AddFixtureDialog
@@ -779,6 +1088,24 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
         onAdd={addMultipleFixtures}
         existingFixturesCount={fixtures.length}
         autoFillSuggestions={autoFillSuggestions}
+      />
+
+      {/* Add Infrastructure Dialog */}
+      <AddInfrastructureDialog
+        isOpen={isAddInfrastructureDialogOpen}
+        onClose={() => setIsAddInfrastructureDialogOpen(false)}
+        onAdd={useInfrastructureStore.getState().addEquipment}
+      />
+
+      {/* Edit Infrastructure Dialog */}
+      <EditInfrastructureDialog
+        isOpen={isEditInfrastructureDialogOpen}
+        onClose={() => {
+          setIsEditInfrastructureDialogOpen(false);
+          setEditingInfrastructureEquipment(null);
+        }}
+        onUpdate={useInfrastructureStore.getState().updateEquipment}
+        equipment={editingInfrastructureEquipment}
       />
 
       {/* Bulk Edit Dialog */}
@@ -797,6 +1124,15 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
         onClose={() => setIsUserColumnSettingsOpen(false)}
         onSave={handleSaveUserColumnDefinitions}
         initialDefinitions={userColumnDefinitions}
+      />
+
+      {/* Export Header Dialog */}
+      <ExportHeaderDialog
+        isOpen={isExportDialogOpen}
+        onClose={() => setIsExportDialogOpen(false)}
+        onExport={performExport}
+        defaultFormat={exportFormat}
+        projectName={projectName}
       />
 
       {/* Rack Manager Dialog */}

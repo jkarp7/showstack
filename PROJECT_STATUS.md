@@ -1,6 +1,6 @@
 # ShowStack Project Status
 
-**Last Updated:** December 18, 2024
+**Last Updated:** December 24, 2024
 **Current Version:** 0.1.0-alpha
 **Development Phase:** Alpha
 
@@ -300,6 +300,105 @@ Comprehensive power distribution tracking and management system.
 - ⬜ **Cable Run Visualization** - Visual cable path layout
 - ⬜ **Advanced Phase Balancing** - Automatic phase assignment suggestions
 - ⬜ **Power Distribution Reports** - Printable rack schedules and load reports
+
+---
+
+### ✅ Completed: Infrastructure Equipment Management
+
+Comprehensive tracking system for network equipment, data distribution, audio/video infrastructure with port assignment management.
+
+#### Core Functionality
+- ✅ **Infrastructure Equipment Tracking** - `src/renderer/src/pages/modules/EquipmentManager.tsx`
+  - Infrastructure tab in Equipment Manager
+  - Add, edit, delete infrastructure equipment
+  - Multi-select with bulk operations
+  - Double-click to edit equipment
+  - Category-based organization (network, data distribution, audio, video)
+
+- ✅ **Port Assignment Management** - `src/renderer/src/components/infrastructure/PortAssignmentEditor.tsx`
+  - Dynamic port count configuration (0-128 ports)
+  - Per-port detailed configuration:
+    - Port number and connection tracking
+    - Port types (ethernet, dmx, fiber, power, other)
+    - VLAN assignment for network ports
+    - Port status (active, inactive, error)
+    - Per-port notes
+  - Collapsible port detail views
+  - Expand/collapse all functionality
+
+- ✅ **Equipment Dialogs** - `src/renderer/src/components/infrastructure/`
+  - `AddInfrastructureDialog.tsx` - Full equipment creation form
+  - `EditInfrastructureDialog.tsx` - Edit existing equipment with pre-populated data
+  - Comprehensive field support:
+    - Core: name, manufacturer, model, quantity, category
+    - Network: IP address, MAC address, subnet, gateway, VLAN, hostname
+    - Power: voltage, amperage, wattage, phase
+    - Power rack linking (dimmer/PD racks)
+    - Location: location name, X/Y/Z coordinates
+    - Notes and status tracking
+
+- ✅ **Column Visibility System** - `src/renderer/src/components/infrastructure/InfrastructureColumnVisibilityMenu.tsx`
+  - 17 configurable columns organized by category
+  - Grouped visibility toggles (Network, Ports, Power, Location)
+  - Expandable column groups
+  - Persistent column preferences
+
+- ✅ **Infrastructure Toolbar** - `src/renderer/src/components/infrastructure/InfrastructureToolbar.tsx`
+  - Add equipment button
+  - Delete selected with count display
+  - Deselect all function
+  - Column visibility menu integration
+
+#### Database Schema
+- ✅ **Infrastructure Table** - `src/main/database/projectSchema.ts:infrastructure_equipment`
+  - 33 columns covering all equipment attributes
+  - JSON storage for port assignments
+  - Port count tracking
+  - Power rack linking support
+  - Location coordinates
+  - Full migration system with backward compatibility
+
+- ✅ **Query Functions** - `src/main/database/queries/infrastructure.ts`
+  - `getAllInfrastructure()` - Retrieve all equipment with JSON parsing
+  - `createInfrastructure()` - Create new equipment with validation
+  - `updateInfrastructure()` - Update equipment with selective field updates
+  - `deleteInfrastructure()` - Single equipment deletion
+  - `deleteMultipleInfrastructure()` - Batch deletion
+  - Proper undefined to null conversion for SQL.js compatibility
+
+- ✅ **IPC Integration** - `src/main/ipc/infrastructure.ts`
+  - Full CRUD IPC handlers
+  - Error handling and logging
+  - Integration with infrastructure store
+
+#### State Management
+- ✅ **Infrastructure Store** - `src/renderer/src/store/infrastructureStore.ts`
+  - Zustand-based state management
+  - Equipment loading and caching
+  - Add/update/delete operations
+  - File dirty flag integration
+  - Error handling and logging
+
+- ✅ **Type Definitions** - `src/renderer/src/types/infrastructure.ts`
+  - `PortAssignment` interface with full typing
+  - `InfrastructureEquipment` interface
+  - Column configuration types
+
+#### Integration
+- ✅ **Equipment Manager Integration**
+  - Three-tab interface: Fixtures | Infrastructure | Power Racks
+  - Seamless tab switching
+  - Shared selection patterns
+  - Consistent UI/UX with fixture management
+  - Dark mode support throughout
+
+#### Pending Enhancements
+- ⬜ **Port Linking** - Link ports to fixtures or other infrastructure
+- ⬜ **Port Usage Tracking** - Track which ports are actively in use
+- ⬜ **Port Validation** - IP address, VLAN range validation
+- ⬜ **Import/Export** - CSV import/export for infrastructure equipment
+- ⬜ **Port Status Monitoring** - Real-time port health checks
+- ⬜ **Network Topology Visualization** - Visual network layout
 
 ---
 
@@ -605,4 +704,4 @@ Production logistics and budgeting tools.
 
 ---
 
-**Last Updated:** December 10, 2024 by Claude Code
+**Last Updated:** December 24, 2024 by Claude Code

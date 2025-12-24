@@ -229,6 +229,15 @@ contextBridge.exposeInMainWorld('api', {
     update: (id: string, updates: any) => ipcRenderer.invoke('pdRacks:update', id, updates),
     delete: (id: string) => ipcRenderer.invoke('pdRacks:delete', id),
     getWithUsage: (projectId?: string) => ipcRenderer.invoke('pdRacks:getWithUsage', projectId)
+  },
+
+  // Infrastructure Equipment operations
+  infrastructure: {
+    getAll: (projectId: string) => ipcRenderer.invoke('infrastructure:getAll', projectId),
+    create: (equipment: any, projectId: string) => ipcRenderer.invoke('infrastructure:create', equipment, projectId),
+    update: (id: string, updates: any) => ipcRenderer.invoke('infrastructure:update', id, updates),
+    delete: (id: string) => ipcRenderer.invoke('infrastructure:delete', id),
+    deleteMultiple: (ids: string[]) => ipcRenderer.invoke('infrastructure:deleteMultiple', ids)
   }
 });
 
@@ -394,6 +403,13 @@ export interface ElectronAPI {
     update: (id: string, updates: any) => Promise<any>;
     delete: (id: string) => Promise<void>;
     getWithUsage: (projectId?: string) => Promise<any[]>;
+  };
+  infrastructure: {
+    getAll: (projectId: string) => Promise<any[]>;
+    create: (equipment: any, projectId: string) => Promise<any>;
+    update: (id: string, updates: any) => Promise<any>;
+    delete: (id: string) => Promise<void>;
+    deleteMultiple: (ids: string[]) => Promise<void>;
   };
 }
 

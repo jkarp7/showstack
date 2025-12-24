@@ -540,6 +540,63 @@ function runProjectMigrations(db: Database): void {
     db.run('CREATE INDEX IF NOT EXISTS idx_prep_note_templates_default ON prep_note_templates(type, is_default)');
   }
 
+  // Infrastructure Equipment table migration
+  const infrastructureTableInfo = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='infrastructure_equipment'");
+  if (!infrastructureTableInfo[0] || infrastructureTableInfo[0].values.length === 0) {
+    console.log('Running migration: Creating infrastructure_equipment table');
+    db.run(`
+      CREATE TABLE infrastructure_equipment (
+        id TEXT PRIMARY KEY,
+        project_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        manufacturer TEXT,
+        model TEXT,
+        quantity INTEGER DEFAULT 1,
+        category TEXT,
+        ip_address TEXT,
+        mac_address TEXT,
+        subnet_mask TEXT,
+        gateway TEXT,
+        vlan_id INTEGER,
+        hostname TEXT,
+        port_assignments TEXT,
+        port_count INTEGER DEFAULT 0,
+        voltage INTEGER,
+        amperage REAL,
+        wattage REAL,
+        phase TEXT,
+        dimmer_rack_id TEXT,
+        dimmer_channel_number INTEGER,
+        pd_rack_id TEXT,
+        pd_circuit_number INTEGER,
+        pd_breaker_number INTEGER,
+        circuit TEXT,
+        circuit_number INTEGER,
+        location TEXT,
+        position_x REAL,
+        position_y REAL,
+        position_z REAL,
+        notes TEXT,
+        status TEXT DEFAULT 'Active',
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+      )
+    `);
+    db.run('CREATE INDEX IF NOT EXISTS idx_infrastructure_project ON infrastructure_equipment(project_id)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_infrastructure_category ON infrastructure_equipment(project_id, category)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_infrastructure_location ON infrastructure_equipment(project_id, location)');
+  } else {
+    // If table exists, check if port_count column exists and add it if missing
+    const infrastructureColumns = db.exec("PRAGMA table_info(infrastructure_equipment)");
+    const columnNames = infrastructureColumns[0]?.values.map(row => row[1]) || [];
+
+    if (!columnNames.includes('port_count')) {
+      console.log('Running migration: Adding port_count to infrastructure_equipment');
+      db.run('ALTER TABLE infrastructure_equipment ADD COLUMN port_count INTEGER DEFAULT 0');
+    }
+  }
+
   console.log('✅ Project database migrations complete');
 }
 
