@@ -18,6 +18,7 @@ import { RackManager } from '../../components/power/RackManager';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { useInfrastructureStore } from '../../store/infrastructureStore';
 import { useFileStore } from '../../store/fileStore';
+import { useUndoRedoStore } from '../../store/undoRedoStore';
 import { Fixture } from '../../types';
 import { DimmerRack, PDRack } from '../../types/power';
 import { DEFAULT_COLUMN_VISIBILITY, ColumnVisibility, DEFAULT_COLUMN_ORDER, ColumnKey } from '../../types/columns';
@@ -34,8 +35,9 @@ interface EquipmentManagerProps {
 export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {}) {
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId?: string; moduleType?: string }>();
-  const { fixtures, loadFixtures, addMultipleFixtures, deleteMultiple, updateFixture, setCurrentProjectId } = useFixtureStore();
+  const { fixtures, loadFixtures, addMultipleFixtures, deleteMultiple, updateFixture, bulkUpdate, setCurrentProjectId } = useFixtureStore();
   const { equipment: infrastructureEquipment, loadEquipment: loadInfrastructure } = useInfrastructureStore();
+  const { undo, redo, canUndo, canRedo } = useUndoRedoStore();
 
   // Tab state
   const [activeTab, setActiveTab] = useState<'fixtures' | 'infrastructure' | 'power'>('fixtures');
@@ -179,6 +181,9 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     loadFixtures(currentProjectId);
     loadInfrastructure(currentProjectId);
 
+    // Clear undo/redo history when switching projects
+    useUndoRedoStore.getState().clearHistory();
+
     // Update menu context
     window.api?.menu?.setState({
       context: 'equipment',
@@ -219,6 +224,12 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
           const savedUserColumns = await window.api.preferences.get(currentProjectId, 'userColumnDefinitions');
           if (savedUserColumns) {
             setUserColumnDefinitions(savedUserColumns);
+          }
+
+          // Load infrastructure column preferences
+          const savedInfrastructureVisibility = await window.api.preferences.get(currentProjectId, 'infrastructureColumnVisibility');
+          if (savedInfrastructureVisibility) {
+            setInfrastructureColumnVisibility(savedInfrastructureVisibility);
           }
         }
       } catch (error) {
@@ -316,6 +327,14 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     });
   }, [selectedRows]);
 
+  // Update menu state when undo/redo availability changes
+  useEffect(() => {
+    window.api?.menu?.setState({
+      canUndo: canUndo(),
+      canRedo: canRedo(),
+    });
+  }, [canUndo, canRedo]);
+
   // Save column visibility when it changes
   useEffect(() => {
     const savePreference = async () => {
@@ -354,6 +373,19 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     };
     savePreference();
   }, [columnWidths, currentProjectId]);
+
+  // Save infrastructure column visibility when it changes
+  useEffect(() => {
+    const savePreference = async () => {
+      if (!window.api?.preferences) return;
+      try {
+        await window.api.preferences.set(currentProjectId, 'infrastructureColumnVisibility', infrastructureColumnVisibility);
+      } catch (error) {
+        console.error('Failed to save infrastructure column visibility:', error);
+      }
+    };
+    savePreference();
+  }, [infrastructureColumnVisibility, currentProjectId]);
 
   // Sort handler - supports multi-column sort with Shift key
   const handleSort = (field: string, addToExisting: boolean = false) => {
@@ -400,12 +432,8 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
   // Handle bulk edit submission
   const handleBulkEdit = async (updates: Partial<Fixture>) => {
-    // Update all selected fixtures
-    const updatePromises = Array.from(selectedRows).map(fixtureId =>
-      updateFixture(fixtureId, updates)
-    );
-
-    await Promise.all(updatePromises);
+    // Use bulkUpdate to group all changes into a single undo operation
+    await bulkUpdate(Array.from(selectedRows), updates);
 
     // Clear selection after bulk edit
     setSelectedRows(new Set());
@@ -415,12 +443,22 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   const handleAutoNumber = async (field: keyof Fixture, start: number, increment: number) => {
     const selectedFixtures = processedFixtures.filter(f => selectedRows.has(f.id));
 
-    const updatePromises = selectedFixtures.map((fixture, index) => {
+    // Build individual update operations for each fixture
+    // Use BulkUpdateFixturesCommand directly for different values per fixture
+    const { BulkUpdateFixturesCommand } = await import('../../commands/fixtureCommands');
+    const { useUndoRedoStore } = await import('../../store/undoRedoStore');
+
+    const fixtureUpdates = selectedFixtures.map((fixture, index) => {
       const value = start + (index * increment);
-      return updateFixture(fixture.id, { [field]: value } as Partial<Fixture>);
+      return {
+        id: fixture.id,
+        oldData: fixture,
+        newData: { [field]: value } as Partial<Fixture>,
+      };
     });
 
-    await Promise.all(updatePromises);
+    const command = new BulkUpdateFixturesCommand(fixtureUpdates);
+    await useUndoRedoStore.getState().executeCommand(command);
 
     // Clear selection after auto-number
     setSelectedRows(new Set());
@@ -787,6 +825,8 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     onBulkEdit: () => setIsBulkEditDialogOpen(true),
     onSelectAll: handleSelectAll,
     onDeselectAll: handleDeselectAll,
+    onUndo: undo,
+    onRedo: redo,
     onPrint: handlePrint,
     onExportCSV: handleExportCSV,
     onExportEos: handleExportEos,

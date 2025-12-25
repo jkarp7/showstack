@@ -58,10 +58,12 @@ export function AdminPanel() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <Shield className="w-12 h-12 text-gray-600 dark:text-gray-400 mx-auto mb-4 animate-pulse" />
-          <p className="text-gray-600 dark:text-gray-400">Loading admin panel...</p>
+      <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+        <div className="flex-1 min-h-0 flex items-center justify-center">
+          <div className="text-center">
+            <Shield className="w-12 h-12 text-gray-600 dark:text-gray-400 mx-auto mb-4 animate-pulse" />
+            <p className="text-gray-600 dark:text-gray-400">Loading admin panel...</p>
+          </div>
         </div>
       </div>
     );
@@ -70,11 +72,13 @@ export function AdminPanel() {
   if (!isAuthenticated) {
     return (
       <>
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-          <div className="text-center">
-            <Shield className="w-16 h-16 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Admin Panel</h1>
-            <p className="text-gray-600 dark:text-gray-400">Authentication required</p>
+        <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+          <div className="flex-1 min-h-0 flex items-center justify-center">
+            <div className="text-center">
+              <Shield className="w-16 h-16 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Admin Panel</h1>
+              <p className="text-gray-600 dark:text-gray-400">Authentication required</p>
+            </div>
           </div>
         </div>
         <PasswordPrompt
@@ -88,9 +92,9 @@ export function AdminPanel() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
@@ -115,11 +119,11 @@ export function AdminPanel() {
         </div>
       </header>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Tabs */}
-        <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
-          <nav className="-mb-px flex space-x-8 overflow-x-auto">
+      {/* Tabs - Fixed height section */}
+      <div className="flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
+            <nav className="-mb-px flex space-x-8 overflow-x-auto">
             <button
               onClick={() => setActiveTab('layouts')}
               className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
@@ -175,18 +179,24 @@ export function AdminPanel() {
               <Link2 className="w-5 h-5" />
               <span>Integration Settings</span>
             </button>
-          </nav>
-        </div>
-
-        {/* Tab Content */}
-        <div className="mt-6">
-          {activeTab === 'layouts' && <LayoutTemplateManager />}
-          {activeTab === 'application' && <ApplicationSettings />}
-          {activeTab === 'database' && <DatabaseManagement />}
-          {activeTab === 'audit' && <AuditLogging />}
-          {activeTab === 'integration' && <IntegrationSettings />}
+            </nav>
+          </div>
         </div>
       </div>
+
+      {/* Main scrollable content area */}
+      <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Tab Content */}
+          <div>
+            {activeTab === 'layouts' && <LayoutTemplateManager />}
+            {activeTab === 'application' && <ApplicationSettings />}
+            {activeTab === 'database' && <DatabaseManagement />}
+            {activeTab === 'audit' && <AuditLogging />}
+            {activeTab === 'integration' && <IntegrationSettings />}
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

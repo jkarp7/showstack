@@ -27,6 +27,8 @@ interface MetadataOptions {
   showProjectName: boolean;
   showPageNumbers: boolean;
   showGeneratedDate: boolean;
+  showLogo: boolean;
+  customTitle: string;
 }
 
 interface CustomReport {
@@ -102,11 +104,11 @@ const PAGE_SIZES = {
 const DEFAULT_PAGE_SETUP: PageSetup = {
   size: 'letter',
   orientation: 'portrait',
-  colorMode: 'color',
-  marginTop: 0.75,
-  marginBottom: 0.75,
-  marginLeft: 0.75,
-  marginRight: 0.75
+  colorMode: 'bw',
+  marginTop: 0.5,
+  marginBottom: 0.5,
+  marginLeft: 0.25,
+  marginRight: 0.25
 };
 
 const DEFAULT_METADATA: MetadataOptions = {
@@ -116,7 +118,9 @@ const DEFAULT_METADATA: MetadataOptions = {
   showProductionStaff: false,
   showProjectName: true,
   showPageNumbers: true,
-  showGeneratedDate: true
+  showGeneratedDate: true,
+  showLogo: false,
+  customTitle: ''
 };
 
 interface PaperworkProps {
@@ -811,20 +815,20 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
   // Helper function to render color with swatch
   const renderColorCell = (color: string) => {
-    if (color === '-' || !color) return <td className="px-3 py-2">-</td>;
+    if (color === '-' || !color) return <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">-</td>;
 
     const gelColor = getGelColor(color);
 
     return (
-      <td className="px-3 py-2">
-        <div className="flex items-center gap-2">
+      <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">
+        <div className="flex items-center gap-1">
           {/* Color swatch - supports dual colors */}
           {Array.isArray(gelColor) ? (
             // Dual color swatch - overlapping diagonal squares
-            <div className="relative w-4 h-4 flex-shrink-0" title={`${color} (${gelColor[0]} + ${gelColor[1]})`}>
+            <div className="relative w-3 h-3 flex-shrink-0 print:w-2 print:h-2" title={`${color} (${gelColor[0]} + ${gelColor[1]})`}>
               {/* First color - top left */}
               <div
-                className="absolute w-3 h-3 rounded-sm border border-gray-400 dark:border-gray-600"
+                className="absolute w-2 h-2 rounded-sm border border-gray-400 dark:border-gray-600 print:w-1.5 print:h-1.5"
                 style={{
                   backgroundColor: gelColor[0],
                   top: 0,
@@ -834,7 +838,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
               />
               {/* Second color - bottom right */}
               <div
-                className="absolute w-3 h-3 rounded-sm border border-gray-400 dark:border-gray-600"
+                className="absolute w-2 h-2 rounded-sm border border-gray-400 dark:border-gray-600 print:w-1.5 print:h-1.5"
                 style={{
                   backgroundColor: gelColor[1],
                   bottom: 0,
@@ -846,18 +850,18 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
           ) : gelColor ? (
             // Single color swatch
             <div
-              className="w-4 h-4 rounded border border-gray-400 dark:border-gray-600 flex-shrink-0"
+              className="w-3 h-3 rounded border border-gray-400 dark:border-gray-600 flex-shrink-0 print:w-2 print:h-2"
               style={{ backgroundColor: gelColor }}
               title={`${color} (${gelColor})`}
             />
           ) : (
             // No color found - show empty swatch
             <div
-              className="w-4 h-4 rounded border border-gray-400 dark:border-gray-600 flex-shrink-0 bg-gray-200 dark:bg-gray-700"
+              className="w-3 h-3 rounded border border-gray-400 dark:border-gray-600 flex-shrink-0 bg-gray-200 dark:bg-gray-700 print:w-2 print:h-2"
               title={color || 'No color'}
             />
           )}
-          <span>{color}</span>
+          <span className="text-xs print:text-[8pt]">{color}</span>
         </div>
       </td>
     );
@@ -866,20 +870,85 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
   const renderMetadataHeader = () => {
     if (!projectData) return null;
 
+    // Determine title to display
+    const reportTitle = metadata.customTitle ||
+      `${REPORT_TEMPLATES.find(t => t.id === selectedReport)?.name || 'Report'} - ${projectName}`;
+
+    // Build venue string
+    const venueStr = [
+      projectData.venue,
+      projectData.venue_city,
+      projectData.venue_state
+    ].filter(Boolean).join(', ');
+
     return (
-      <div className="mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg border-b-2 border-gray-600 print:bg-white print:border-black">
-        {metadata.showProjectName && (
-          <h1 className="text-2xl font-bold mb-2">{projectName}</h1>
-        )}
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          {metadata.showVenue && projectData.venue && (
-            <div><span className="text-gray-600 dark:text-gray-400">Venue:</span> {projectData.venue}</div>
+      <div className="mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-300 dark:border-gray-600 print:bg-white print:border-black print:mb-6">
+        <div className="flex items-start justify-between mb-4">
+          {/* Title Section */}
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 print:text-black">
+              {reportTitle}
+            </h1>
+            {metadata.showProjectName && projectName && (
+              <p className="text-lg text-gray-700 dark:text-gray-300 print:text-gray-800">
+                {projectName}
+              </p>
+            )}
+          </div>
+
+          {/* Logo Section */}
+          {metadata.showLogo && projectData.logo_path && (
+            <div className="ml-6">
+              <img
+                src={`file://${projectData.logo_path}`}
+                alt="Company Logo"
+                className="max-h-24 max-w-48 object-contain print:max-h-20"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            </div>
           )}
+        </div>
+
+        {/* Metadata Grid */}
+        <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm border-t border-gray-200 dark:border-gray-700 pt-4 print:border-gray-400">
+          {/* Venue Information */}
+          {metadata.showVenue && venueStr && (
+            <div>
+              <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Venue:</span>
+              <span className="ml-2 text-gray-900 dark:text-white print:text-black">{venueStr}</span>
+            </div>
+          )}
+
+          {/* Lighting Designer */}
           {metadata.showDesigners && projectData.lighting_designer && (
-            <div><span className="text-gray-600 dark:text-gray-400">Lighting Designer:</span> {projectData.lighting_designer}</div>
+            <div>
+              <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Lighting Designer:</span>
+              <span className="ml-2 text-gray-900 dark:text-white print:text-black">{projectData.lighting_designer}</span>
+              {projectData.lighting_designer_email && (
+                <div className="ml-2 text-xs text-gray-600 dark:text-gray-400 print:text-gray-700">
+                  {projectData.lighting_designer_email}
+                </div>
+              )}
+              {projectData.lighting_designer_phone && (
+                <div className="ml-2 text-xs text-gray-600 dark:text-gray-400 print:text-gray-700">
+                  {projectData.lighting_designer_phone}
+                </div>
+              )}
+            </div>
           )}
+
+          {/* Generated Date */}
           {metadata.showGeneratedDate && (
-            <div><span className="text-gray-600 dark:text-gray-400">Generated:</span> {new Date().toLocaleDateString()}</div>
+            <div>
+              <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Generated:</span>
+              <span className="ml-2 text-gray-900 dark:text-white print:text-black">
+                {new Date().toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </span>
+            </div>
           )}
         </div>
       </div>
@@ -891,32 +960,32 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       case 'channel-hookup':
         return (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
+            <table className="w-full text-xs border-collapse border border-gray-400 dark:border-gray-600 print:text-[8pt] print:border-black">
+              <thead className="bg-gray-800 dark:bg-gray-700 text-white print:bg-black print:text-white">
                 <tr>
-                  <th className="px-3 py-2 text-left">Chan</th>
-                  <th className="px-3 py-2 text-left">Dim</th>
-                  <th className="px-3 py-2 text-left">Position</th>
-                  <th className="px-3 py-2 text-left">Unit #</th>
-                  <th className="px-3 py-2 text-left">Type</th>
-                  <th className="px-3 py-2 text-left">Watt</th>
-                  <th className="px-3 py-2 text-left">Purpose</th>
-                  <th className="px-3 py-2 text-left">Color</th>
-                  <th className="px-3 py-2 text-left">Notes</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Chan</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Dim</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Position</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Unit #</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Type</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Watt</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Purpose</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Color</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Notes</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-white dark:bg-gray-800 print:bg-white">
                 {channelHookupData.map((row, i) => (
-                  <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-white dark:bg-gray-800">
-                    <td className="px-3 py-2">{row.channel}</td>
-                    <td className="px-3 py-2">{row.dimmer}</td>
-                    <td className="px-3 py-2">{row.position}</td>
-                    <td className="px-3 py-2">{row.unit}</td>
-                    <td className="px-3 py-2">{row.type}</td>
-                    <td className="px-3 py-2">{row.wattage}</td>
-                    <td className="px-3 py-2">{row.purpose}</td>
+                  <tr key={i} className={`border-b border-gray-300 dark:border-gray-700 print:border-black ${i % 2 === 0 ? 'bg-gray-50 dark:bg-gray-900 print:bg-gray-100' : 'bg-white dark:bg-gray-800 print:bg-white'}`}>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.channel}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.dimmer}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.position}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.unit}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.type}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.wattage}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.purpose}</td>
                     {renderColorCell(row.color)}
-                    <td className="px-3 py-2">{row.notes}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.notes}</td>
                   </tr>
                 ))}
               </tbody>
@@ -927,35 +996,38 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       case 'dimmer-schedule':
         return (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
+            <table className="w-full text-xs border-collapse border border-gray-400 dark:border-gray-600 print:text-[8pt] print:border-black">
+              <thead className="bg-gray-800 dark:bg-gray-700 text-white print:bg-black print:text-white">
                 <tr>
-                  <th className="px-3 py-2 text-left">Dim</th>
-                  <th className="px-3 py-2 text-left">Chan</th>
-                  <th className="px-3 py-2 text-left">Position</th>
-                  <th className="px-3 py-2 text-left">Unit #</th>
-                  <th className="px-3 py-2 text-left">Type</th>
-                  <th className="px-3 py-2 text-left">Watt</th>
-                  <th className="px-3 py-2 text-left">Purpose</th>
-                  <th className="px-3 py-2 text-left">Color</th>
-                  <th className="px-3 py-2 text-left">Notes</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Dim</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Chan</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Position</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Unit #</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Type</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Watt</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Purpose</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Color</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Notes</th>
                 </tr>
               </thead>
-              <tbody>
-                {dimmerScheduleData.flatMap((group, i) =>
-                  group.fixtures.map((fixture, j) => (
-                    <tr key={`${i}-${j}`} className="border-b border-gray-200 dark:border-gray-700">
-                      <td className="px-3 py-2">{j === 0 ? group.dimmer : '""'}</td>
-                      <td className="px-3 py-2">{fixture.channel}</td>
-                      <td className="px-3 py-2">{fixture.position}</td>
-                      <td className="px-3 py-2">{fixture.unit}</td>
-                      <td className="px-3 py-2">{fixture.type}</td>
-                      <td className="px-3 py-2">{fixture.wattage}</td>
-                      <td className="px-3 py-2">{fixture.purpose}</td>
-                      {renderColorCell(fixture.color)}
-                      <td className="px-3 py-2">{fixture.notes}</td>
-                    </tr>
-                  ))
+              <tbody className="bg-white dark:bg-gray-800 print:bg-white">
+                {dimmerScheduleData.flatMap((group, groupIdx) =>
+                  group.fixtures.map((fixture, fixtureIdx) => {
+                    const flatIdx = dimmerScheduleData.slice(0, groupIdx).reduce((sum, g) => sum + g.fixtures.length, 0) + fixtureIdx;
+                    return (
+                      <tr key={`${groupIdx}-${fixtureIdx}`} className={`border-b border-gray-300 dark:border-gray-700 print:border-black ${flatIdx % 2 === 0 ? 'bg-gray-50 dark:bg-gray-900 print:bg-gray-100' : 'bg-white dark:bg-gray-800 print:bg-white'}`}>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{fixtureIdx === 0 ? group.dimmer : '""'}</td>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{fixture.channel}</td>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{fixture.position}</td>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{fixture.unit}</td>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{fixture.type}</td>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{fixture.wattage}</td>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{fixture.purpose}</td>
+                        {renderColorCell(fixture.color)}
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{fixture.notes}</td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -965,37 +1037,40 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       case 'circuit-list':
         return (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
+            <table className="w-full text-xs border-collapse border border-gray-400 dark:border-gray-600 print:text-[8pt] print:border-black">
+              <thead className="bg-gray-800 dark:bg-gray-700 text-white print:bg-black print:text-white">
                 <tr>
-                  <th className="px-3 py-2 text-left">Circuit</th>
-                  <th className="px-3 py-2 text-left">Dim</th>
-                  <th className="px-3 py-2 text-left">Chan</th>
-                  <th className="px-3 py-2 text-left">Position</th>
-                  <th className="px-3 py-2 text-left">Unit #</th>
-                  <th className="px-3 py-2 text-left">Type</th>
-                  <th className="px-3 py-2 text-left">Watt</th>
-                  <th className="px-3 py-2 text-left">Purpose</th>
-                  <th className="px-3 py-2 text-left">Color</th>
-                  <th className="px-3 py-2 text-left">Notes</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Circuit</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Dim</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Chan</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Position</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Unit #</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Type</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Watt</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Purpose</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Color</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Notes</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-white dark:bg-gray-800 print:bg-white">
                 {circuitListData.flatMap((group, i) =>
-                  group.fixtures.map((fixture, j) => (
-                    <tr key={`${i}-${j}`} className="border-b border-gray-200 dark:border-gray-700">
-                      <td className="px-3 py-2">{j === 0 ? group.circuit : '""'}</td>
-                      <td className="px-3 py-2">{fixture.dimmer}</td>
-                      <td className="px-3 py-2">{fixture.channel}</td>
-                      <td className="px-3 py-2">{fixture.position}</td>
-                      <td className="px-3 py-2">{fixture.unit}</td>
-                      <td className="px-3 py-2">{fixture.type}</td>
-                      <td className="px-3 py-2">{fixture.wattage}</td>
-                      <td className="px-3 py-2">{fixture.purpose}</td>
-                      {renderColorCell(fixture.color)}
-                      <td className="px-3 py-2">{fixture.notes}</td>
-                    </tr>
-                  ))
+                  group.fixtures.map((fixture, j) => {
+                    const flatIdx = circuitListData.slice(0, i).reduce((sum, g) => sum + g.fixtures.length, 0) + j;
+                    return (
+                      <tr key={`${i}-${j}`} className={`border-b border-gray-300 dark:border-gray-700 print:border-black ${flatIdx % 2 === 0 ? 'bg-gray-50 dark:bg-gray-900 print:bg-gray-100' : 'bg-white dark:bg-gray-800 print:bg-white'}`}>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{j === 0 ? group.circuit : '""'}</td>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{fixture.dimmer}</td>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{fixture.channel}</td>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{fixture.position}</td>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{fixture.unit}</td>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{fixture.type}</td>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{fixture.wattage}</td>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{fixture.purpose}</td>
+                        {renderColorCell(fixture.color)}
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{fixture.notes}</td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -1005,34 +1080,34 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       case 'dmx-addresses':
         return (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
+            <table className="w-full text-xs border-collapse border border-gray-400 dark:border-gray-600 print:text-[8pt] print:border-black">
+              <thead className="bg-gray-800 dark:bg-gray-700 text-white print:bg-black print:text-white">
                 <tr>
-                  <th className="px-3 py-2 text-left">Address</th>
-                  <th className="px-3 py-2 text-left">Chan</th>
-                  <th className="px-3 py-2 text-left">Dim</th>
-                  <th className="px-3 py-2 text-left">Position</th>
-                  <th className="px-3 py-2 text-left">Unit #</th>
-                  <th className="px-3 py-2 text-left">Type</th>
-                  <th className="px-3 py-2 text-left">Watt</th>
-                  <th className="px-3 py-2 text-left">Purpose</th>
-                  <th className="px-3 py-2 text-left">Color</th>
-                  <th className="px-3 py-2 text-left">Notes</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Address</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Chan</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Dim</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Position</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Unit #</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Type</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Watt</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Purpose</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Color</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Notes</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-white dark:bg-gray-800 print:bg-white">
                 {dmxAddressData.map((row, i) => (
-                  <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-white dark:bg-gray-800">
-                    <td className="px-3 py-2">{row.address}</td>
-                    <td className="px-3 py-2">{row.channel}</td>
-                    <td className="px-3 py-2">{row.dimmer}</td>
-                    <td className="px-3 py-2">{row.position}</td>
-                    <td className="px-3 py-2">{row.unit}</td>
-                    <td className="px-3 py-2">{row.type}</td>
-                    <td className="px-3 py-2">{row.wattage}</td>
-                    <td className="px-3 py-2">{row.purpose}</td>
+                  <tr key={i} className={`border-b border-gray-300 dark:border-gray-700 print:border-black ${i % 2 === 0 ? 'bg-gray-50 dark:bg-gray-900 print:bg-gray-100' : 'bg-white dark:bg-gray-800 print:bg-white'}`}>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.address}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.channel}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.dimmer}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.position}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.unit}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.type}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.wattage}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.purpose}</td>
                     {renderColorCell(row.color)}
-                    <td className="px-3 py-2">{row.notes}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.notes}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1053,22 +1128,22 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             {/* Detailed breakdown by size */}
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">Gel Requirements - Detailed Breakdown</h3>
-              <table className="w-full text-sm">
-                <thead className="bg-gray-200 dark:bg-gray-700">
+              <table className="w-full text-xs border-collapse border border-gray-400 dark:border-gray-600 print:text-[8pt] print:border-black">
+                <thead className="bg-gray-800 dark:bg-gray-700 text-white print:bg-black print:text-white">
                   <tr>
-                    <th className="px-3 py-2 text-left">Color</th>
-                    <th className="px-3 py-2 text-left">Gel Size</th>
-                    <th className="px-3 py-2 text-left">Cuts Needed</th>
-                    <th className="px-3 py-2 text-left">Sheets Required</th>
+                    <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Color</th>
+                    <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Gel Size</th>
+                    <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Cuts Needed</th>
+                    <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Sheets Required</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="bg-white dark:bg-gray-800 print:bg-white">
                   {colorScheduleData.map((row, i) => {
                     const gelColor = getGelColor(row.color);
 
                     return (
-                      <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-700">
-                        <td className="px-3 py-2 font-medium">
+                      <tr key={i} className={`border-b border-gray-300 dark:border-gray-700 print:border-black ${i % 2 === 0 ? 'bg-gray-50 dark:bg-gray-900 print:bg-gray-100' : 'bg-white dark:bg-gray-800 print:bg-white'}`}>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0 font-medium">
                           <div className="flex items-center gap-2">
                             {/* Color swatch - supports dual colors */}
                             {Array.isArray(gelColor) ? (
@@ -1112,9 +1187,9 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                             <span>{row.color}</span>
                           </div>
                         </td>
-                        <td className="px-3 py-2 text-gray-600 dark:text-gray-400">{row.size}</td>
-                        <td className="px-3 py-2">{row.cuts}</td>
-                        <td className="px-3 py-2">{row.sheets}</td>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0 text-gray-600 dark:text-gray-400">{row.size}</td>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.cuts}</td>
+                        <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.sheets}</td>
                       </tr>
                     );
                   })}
@@ -1128,22 +1203,22 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             {/* Summary by color */}
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">Total Sheets by Color</h3>
-              <table className="w-full text-sm">
-                <thead className="bg-gray-200 dark:bg-gray-700">
+              <table className="w-full text-xs border-collapse border border-gray-400 dark:border-gray-600 print:text-[8pt] print:border-black">
+                <thead className="bg-gray-800 dark:bg-gray-700 text-white print:bg-black print:text-white">
                   <tr>
-                    <th className="px-3 py-2 text-left">Color</th>
-                    <th className="px-3 py-2 text-left">Total Sheets</th>
+                    <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Color</th>
+                    <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Total Sheets</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="bg-white dark:bg-gray-800 print:bg-white">
                   {Object.entries(colorTotals)
                     .sort(([a], [b]) => a.localeCompare(b))
                     .map(([color, sheets], i) => {
                       const gelColor = getGelColor(color);
 
                       return (
-                        <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-700">
-                          <td className="px-3 py-2 font-medium">
+                        <tr key={i} className={`border-b border-gray-300 dark:border-gray-700 print:border-black ${i % 2 === 0 ? 'bg-gray-50 dark:bg-gray-900 print:bg-gray-100' : 'bg-white dark:bg-gray-800 print:bg-white'}`}>
+                          <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0 font-medium">
                             <div className="flex items-center gap-2">
                               {/* Color swatch - supports dual colors */}
                               {Array.isArray(gelColor) ? (
@@ -1187,13 +1262,13 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                               <span>{color}</span>
                             </div>
                           </td>
-                          <td className="px-3 py-2 font-bold text-yellow-400">{sheets}</td>
+                          <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0 font-bold text-yellow-400">{sheets}</td>
                         </tr>
                       );
                     })}
-                  <tr className="bg-gray-200 dark:bg-gray-700 font-bold">
-                    <td className="px-3 py-2">TOTAL</td>
-                    <td className="px-3 py-2 text-yellow-400">
+                  <tr className="bg-gray-800 dark:bg-gray-700 text-white print:bg-black print:text-white font-bold border border-gray-300 dark:border-gray-700 print:border-black">
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">TOTAL</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0 text-yellow-400">
                       {Object.values(colorTotals).reduce((sum, n) => sum + n, 0)} sheets
                     </td>
                   </tr>
@@ -1207,20 +1282,20 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
         return (
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
             <h3 className="text-lg font-semibold mb-4">Gobo Requirements</h3>
-            <table className="w-full text-sm">
-              <thead className="bg-gray-200 dark:bg-gray-700">
+            <table className="w-full text-xs border-collapse border border-gray-400 dark:border-gray-600 print:text-[8pt] print:border-black">
+              <thead className="bg-gray-800 dark:bg-gray-700 text-white print:bg-black print:text-white">
                 <tr>
-                  <th className="px-3 py-2 text-left">Gobo/Template</th>
-                  <th className="px-3 py-2 text-left">Quantity Needed</th>
-                  <th className="px-3 py-2 text-left">Size</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Gobo/Template</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Quantity Needed</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Size</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-white dark:bg-gray-800 print:bg-white">
                 {goboScheduleData.map((row, i) => (
-                  <tr key={i} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-700">
-                    <td className="px-3 py-2 font-medium">{row.gobo}</td>
-                    <td className="px-3 py-2">{row.count}</td>
-                    <td className="px-3 py-2">{row.size}</td>
+                  <tr key={i} className={`border-b border-gray-300 dark:border-gray-700 print:border-black ${i % 2 === 0 ? 'bg-gray-50 dark:bg-gray-900 print:bg-gray-100' : 'bg-white dark:bg-gray-800 print:bg-white'}`}>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0 font-medium">{row.gobo}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.count}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.size}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1267,20 +1342,20 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">Power Breakdown by Wattage</h3>
-              <table className="w-full text-sm">
-                <thead className="bg-gray-200 dark:bg-gray-700">
+              <table className="w-full text-xs border-collapse border border-gray-400 dark:border-gray-600 print:text-[8pt] print:border-black">
+                <thead className="bg-gray-800 dark:bg-gray-700 text-white print:bg-black print:text-white">
                   <tr>
-                    <th className="px-3 py-2 text-left">Wattage</th>
-                    <th className="px-3 py-2 text-left">Count</th>
-                    <th className="px-3 py-2 text-left">Total Wattage</th>
+                    <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Wattage</th>
+                    <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Count</th>
+                    <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Total Wattage</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="bg-white dark:bg-gray-800 print:bg-white">
                   {powerSummaryData.breakdown.map((row, i) => (
-                    <tr key={i} className="border-b border-gray-200 dark:border-gray-700">
-                      <td className="px-3 py-2">{row.wattage}W</td>
-                      <td className="px-3 py-2">{row.count}</td>
-                      <td className="px-3 py-2">{row.totalWattage}W</td>
+                    <tr key={i} className={`border-b border-gray-300 dark:border-gray-700 print:border-black ${i % 2 === 0 ? 'bg-gray-50 dark:bg-gray-900 print:bg-gray-100' : 'bg-white dark:bg-gray-800 print:bg-white'}`}>
+                      <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.wattage}W</td>
+                      <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.count}</td>
+                      <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.totalWattage}W</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1295,9 +1370,9 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+    <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {!embedded && (
@@ -1365,7 +1440,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       </header>
 
       {/* Report Selection */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex-shrink-0">
         <div className="flex gap-2 overflow-x-auto">
           {REPORT_TEMPLATES.map(template => (
             <button
@@ -1385,18 +1460,18 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       </div>
 
       {/* Report Description */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-1.5 flex items-center justify-between flex-shrink-0">
+        <p className="text-xs text-gray-600 dark:text-gray-400">
           {REPORT_TEMPLATES.find(t => t.id === selectedReport)?.description}
         </p>
-        <div className="text-xs text-gray-500">
+        <div className="text-[10px] text-gray-500">
           {PAGE_SIZES[pageSetup.size].name} • {pageSetup.orientation} • {pageSetup.colorMode === 'color' ? 'Color' : 'B&W'}
         </div>
       </div>
 
       {/* Main Content - Report Display */}
-      <main className="flex-1 overflow-auto p-6">
-        <div className="max-w-7xl mx-auto report-content">
+      <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4">
+        <div className="max-w-full mx-auto report-content">
           {renderMetadataHeader()}
           {renderReport()}
         </div>
@@ -1509,6 +1584,24 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-md p-6">
             <h2 className="text-xl font-bold mb-4">Report Options</h2>
+
+            {/* Custom Title Input */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">
+                Custom Title (Optional)
+              </label>
+              <input
+                type="text"
+                value={metadata.customTitle}
+                onChange={(e) => setMetadata({ ...metadata, customTitle: e.target.value })}
+                placeholder={`${REPORT_TEMPLATES.find(t => t.id === selectedReport)?.name || 'Report'} - ${projectName}`}
+                className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Leave blank to use default title
+              </p>
+            </div>
+
             <div className="space-y-3 mb-6">
               <label className="flex items-center gap-2">
                 <input
@@ -1572,6 +1665,15 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                   className="w-4 h-4"
                 />
                 <span>Show Generated Date</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={metadata.showLogo}
+                  onChange={(e) => setMetadata({ ...metadata, showLogo: e.target.checked })}
+                  className="w-4 h-4"
+                />
+                <span>Show Company Logo</span>
               </label>
             </div>
             <div className="flex gap-2 justify-end">
