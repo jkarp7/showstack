@@ -1,6 +1,6 @@
 # ShowStack Project Status
 
-**Last Updated:** December 24, 2024
+**Last Updated:** December 25, 2024
 **Current Version:** 0.1.0-alpha
 **Development Phase:** Alpha
 
@@ -171,37 +171,50 @@ Core fixture database and virtual grid for managing lighting plots.
   - Module configuration for mixed rack types
   - Circuit parser and auto-linking
 
-#### In Development
-- 🚧 **Add Fixture Dialog** - `src/renderer/src/components/fixture/AddFixtureDialog.tsx`
-  - Status: Dialog exists but incomplete
-  - Needs: All field types, validation, manufacturer auto-complete
+- ✅ **Add Fixture Dialog** - `src/renderer/src/components/fixture/AddFixtureDialog.tsx`
+  - Full fixture creation form with all 68+ fields
+  - Input validation and type checking
+  - Integration with fixture store
 
-- 🚧 **Bulk Edit Dialog** - `src/renderer/src/components/fixture/BulkEditDialog.tsx`
-  - Status: Basic UI
-  - Needs: Multi-field editing, undo/redo
+- ✅ **Bulk Edit Dialog** - `src/renderer/src/components/fixture/BulkEditDialog.tsx`
+  - Comprehensive field coverage (30+ editable fields)
+  - 7 collapsible sections (Basic, Control, Power, Color/Accessories, Location, Focus, Other)
+  - Typed inputs (number, dropdown, textarea) with validation
+  - Enhanced auto-numbering supporting 6 fields (channel, address, unit, position, circuit, dimmer)
+  - Multi-fixture editing with field-level control
 
-- 🚧 **Column Visibility Menu** - `src/renderer/src/components/fixture/ColumnVisibilityMenu.tsx`
-  - Status: Basic toggle UI
-  - Needs: Column reordering, presets, user column configurations
+- ✅ **Column Visibility Menu** - `src/renderer/src/components/fixture/ColumnVisibilityMenu.tsx`
+  - Toggle column visibility with persistent user preferences
+  - Fixture and infrastructure column configurations
+  - Project-scoped preference storage
+  - Real-time column show/hide updates
 
-#### Pending Tasks
-- ⬜ **Auto-complete System** - Manufacturer, type, color, gobo
-- ⬜ **Undo/Redo System** - Command pattern implementation
-- ⬜ **DMX Conflict Detection** - Highlight conflicts in grid
-- ⬜ **Paperwork Export Headers** - Customizable headers for exported paperwork including:
-  - Show name
-  - Company/project logo
-  - Designer info (name, email, phone)
-  - Venue info (name, city, state)
-  - Paperwork title (custom per export)
+#### Core Features Completed
+- ✅ **Undo/Redo System** - `src/renderer/src/store/undoRedoStore.ts`
+  - Command pattern implementation for all fixture and infrastructure operations
+  - Keyboard shortcuts (Cmd+Z undo, Cmd+Shift+Z redo)
+  - Menu integration with dynamic enable/disable states
+  - 100-item history limit with automatic trimming
+  - History clearing on project changes
+  - Commands: Add, Update, Delete, Bulk Update, Bulk Delete (fixtures + infrastructure)
+  - Ref-based event handlers to prevent listener duplication
+  - React.StrictMode disabled to prevent double-mounting issues in development
+
+#### Core Features In Development
+- 🚧 **Paperwork Generator & Headers** - Customizable report generation with headers
+- 🚧 **Label Designer** - Drag-and-drop label creation for equipment/cables
+
+#### Future Enhancements
+- 💡 **Auto-complete System** - Manufacturer, type, color, gobo database (deferred - requires extensive fixture database)
+- 💡 **DMX Conflict Detection** - Highlight conflicts in grid (waiting for Vectorworks integration)
 
 ---
 
-### ⬜ Planned: Label Designer
+### 🚧 In Development: Label Designer
 
 Drag-and-drop label creation for various printer types.
 
-- ⬜ **Label Designer Page** - `src/renderer/src/pages/modules/LabelDesigner.tsx`
+- 🚧 **Label Designer Page** - `src/renderer/src/pages/modules/LabelDesigner.tsx`
   - Drag-and-drop label layout
   - Custom label templates
   - Data field placement
@@ -211,11 +224,11 @@ Drag-and-drop label creation for various printer types.
 
 ---
 
-### ⬜ Planned: Paperwork Generator
+### 🚧 In Development: Paperwork Generator
 
-Custom report and paperwork templates.
+Custom report and paperwork templates with configurable headers.
 
-- ⬜ **Paperwork Page** - `src/renderer/src/pages/modules/Paperwork.tsx`
+- 🚧 **Paperwork Page** - `src/renderer/src/pages/modules/Paperwork.tsx`
   - Custom report templates
   - Magic sheets
   - Channel hookups
@@ -224,6 +237,18 @@ Custom report and paperwork templates.
   - Circuit layouts
   - Color schedules
   - Accessory schedules
+
+- 🚧 **Customizable Headers**
+  - Field selection: Choose which header fields to display (show name, designer info, venue info, etc.)
+  - Field positioning: Drag-and-drop placement of header fields
+  - Per-export configuration: Different header layouts for different report types
+  - Available fields:
+    - Show name
+    - Company/project logo
+    - Designer info (name, email, phone)
+    - Venue info (name, city, state)
+    - Paperwork title (custom per export)
+    - Date/revision info
 
 ---
 
@@ -646,10 +671,11 @@ Production logistics and budgeting tools.
 ## 🎯 Current Development Priorities
 
 ### Immediate (Next 2 Weeks)
-1. Add customizable headers to Equipment Manager paperwork exports
-2. Implement auto-complete for manufacturer, type, color, gobo
-3. Add undo/redo system
-4. Implement DMX conflict detection
+1. ✅ ~~Add undo/redo system~~ - COMPLETED
+2. Add customizable headers to Equipment Manager paperwork exports
+3. Complete Paperwork Generator with template system
+4. Implement auto-complete for manufacturer, type, color, gobo (deferred - requires database)
+5. Implement DMX conflict detection (waiting for Vectorworks integration)
 
 ### Short-term (Next 1-2 Months)
 1. Complete Label Designer module
@@ -704,4 +730,4 @@ Production logistics and budgeting tools.
 
 ---
 
-**Last Updated:** December 24, 2024 by Claude Code
+**Last Updated:** December 25, 2024 by Claude Code

@@ -716,9 +716,9 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
   const selectedGraphicData = graphics.find(g => g.id === selectedGraphic);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+    <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {!embedded && (
@@ -774,7 +774,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
       </header>
 
       {/* Main Content */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Left Panel - Tools & Settings */}
         <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto p-4">
           <div className="space-y-6">
@@ -1173,7 +1173,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
       )}
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 flex-shrink-0">
         <div>ShowStack:Production - Label Designer</div>
         <div>{customDesigns.length} saved design{customDesigns.length !== 1 ? 's' : ''}</div>
       </footer>

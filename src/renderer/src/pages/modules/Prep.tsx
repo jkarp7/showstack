@@ -660,12 +660,14 @@ export function Prep() {
       : null;
 
     return (
-      <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+      <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
         {/* Breadcrumbs */}
-        <Breadcrumbs />
+        <div className="flex-shrink-0">
+          <Breadcrumbs />
+        </div>
 
         {/* Show name and badges */}
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex-shrink-0">
           <div className="flex items-center gap-4">
             <h1 className="text-3xl font-bold">{currentProject.production_name}</h1>
             {currentProject.current_revision > 0 && (
@@ -691,7 +693,7 @@ export function Prep() {
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0">
           <div className="max-w-6xl mx-auto px-6">
             <div className="flex gap-4">
               <button
@@ -718,7 +720,7 @@ export function Prep() {
           </div>
         </div>
 
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-6">
           <div className="max-w-6xl mx-auto space-y-6">
             {activeTab === 'builder' && (
               <>
@@ -1197,8 +1199,8 @@ export function Prep() {
 
   // Show project list
   return (
-    <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-700 p-4">
+    <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-700 p-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
@@ -1229,7 +1231,7 @@ export function Prep() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-auto p-6">
+      <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-6">
         <div className="max-w-6xl mx-auto">
           {allProjects.length === 0 ? (
             <div className="text-center py-12">

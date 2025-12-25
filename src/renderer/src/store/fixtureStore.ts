@@ -1,6 +1,14 @@
 import { create } from 'zustand';
 import { Fixture, FixtureStore } from '../types';
 import { useFileStore } from './fileStore';
+import { useUndoRedoStore } from './undoRedoStore';
+import {
+  AddFixtureCommand,
+  UpdateFixtureCommand,
+  DeleteFixtureCommand,
+  BulkUpdateFixturesCommand,
+  BulkDeleteFixturesCommand,
+} from '../commands/fixtureCommands';
 
 // Type guard for window.api
 const hasAPI = (): boolean => {
@@ -39,13 +47,9 @@ export const useFixtureStore = create<FixtureStore>((set, get) => ({
 
     try {
       const { currentProjectId } = get();
-      const newFixture = await window.api.fixtures.create(fixture, currentProjectId || undefined);
-      set((state) => ({
-        fixtures: [...state.fixtures, newFixture],
-      }));
-
-      // Mark file as dirty
-      useFileStore.getState().setDirty(true);
+      const fixtureData = { ...fixture, project_id: currentProjectId || undefined };
+      const command = new AddFixtureCommand(fixtureData);
+      await useUndoRedoStore.getState().executeCommand(command);
     } catch (error) {
       console.error('Failed to add fixture:', error);
     }
@@ -59,17 +63,13 @@ export const useFixtureStore = create<FixtureStore>((set, get) => ({
 
     try {
       const { currentProjectId } = get();
-      const newFixtures = [];
+      // Add each fixture as a separate command
+      // This allows individual undo operations
       for (const fixture of fixtures) {
-        const newFixture = await window.api.fixtures.create(fixture, currentProjectId || undefined);
-        newFixtures.push(newFixture);
+        const fixtureData = { ...fixture, project_id: currentProjectId || undefined };
+        const command = new AddFixtureCommand(fixtureData);
+        await useUndoRedoStore.getState().executeCommand(command);
       }
-      set((state) => ({
-        fixtures: [...state.fixtures, ...newFixtures],
-      }));
-
-      // Mark file as dirty
-      useFileStore.getState().setDirty(true);
     } catch (error) {
       console.error('Failed to add fixtures:', error);
     }
@@ -82,17 +82,43 @@ export const useFixtureStore = create<FixtureStore>((set, get) => ({
     }
 
     try {
-      const updatedFixture = await window.api.fixtures.update(id, updates);
-      set((state) => ({
-        fixtures: state.fixtures.map((f) =>
-          f.id === id ? updatedFixture : f
-        ),
-      }));
+      const oldFixture = get().fixtures.find((f) => f.id === id);
+      if (!oldFixture) {
+        console.error('Fixture not found:', id);
+        return;
+      }
 
-      // Mark file as dirty
-      useFileStore.getState().setDirty(true);
+      const command = new UpdateFixtureCommand(id, oldFixture, updates);
+      await useUndoRedoStore.getState().executeCommand(command);
     } catch (error) {
       console.error('Failed to update fixture:', error);
+    }
+  },
+
+  bulkUpdate: async (fixtureIds, updates) => {
+    if (!hasAPI()) {
+      console.warn('API not available');
+      return;
+    }
+
+    try {
+      const fixtureUpdates = fixtureIds
+        .map((id) => {
+          const oldFixture = get().fixtures.find((f) => f.id === id);
+          if (!oldFixture) return null;
+          return { id, oldData: oldFixture, newData: updates };
+        })
+        .filter((update): update is { id: string; oldData: Fixture; newData: Partial<Fixture> } => update !== null);
+
+      if (fixtureUpdates.length === 0) {
+        console.error('No fixtures found to update');
+        return;
+      }
+
+      const command = new BulkUpdateFixturesCommand(fixtureUpdates);
+      await useUndoRedoStore.getState().executeCommand(command);
+    } catch (error) {
+      console.error('Failed to bulk update fixtures:', error);
     }
   },
 
@@ -103,13 +129,14 @@ export const useFixtureStore = create<FixtureStore>((set, get) => ({
     }
 
     try {
-      await window.api.fixtures.delete(id);
-      set((state) => ({
-        fixtures: state.fixtures.filter((f) => f.id !== id),
-      }));
+      const fixture = get().fixtures.find((f) => f.id === id);
+      if (!fixture) {
+        console.error('Fixture not found:', id);
+        return;
+      }
 
-      // Mark file as dirty
-      useFileStore.getState().setDirty(true);
+      const command = new DeleteFixtureCommand(fixture);
+      await useUndoRedoStore.getState().executeCommand(command);
     } catch (error) {
       console.error('Failed to delete fixture:', error);
     }
@@ -122,13 +149,14 @@ export const useFixtureStore = create<FixtureStore>((set, get) => ({
     }
 
     try {
-      await window.api.fixtures.deleteMultiple(ids);
-      set((state) => ({
-        fixtures: state.fixtures.filter((f) => !ids.includes(f.id)),
-      }));
+      const fixtures = get().fixtures.filter((f) => ids.includes(f.id));
+      if (fixtures.length === 0) {
+        console.error('No fixtures found to delete');
+        return;
+      }
 
-      // Mark file as dirty
-      useFileStore.getState().setDirty(true);
+      const command = new BulkDeleteFixturesCommand(fixtures);
+      await useUndoRedoStore.getState().executeCommand(command);
     } catch (error) {
       console.error('Failed to delete multiple fixtures:', error);
     }

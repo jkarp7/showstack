@@ -23,9 +23,9 @@ export function Settings() {
   }`;
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
@@ -46,9 +46,8 @@ export function Settings() {
         </div>
       </header>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Tabs */}
+      {/* Tabs - Fixed height section */}
+      <div className="flex-shrink-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
           <nav className="-mb-px flex space-x-8 overflow-x-auto">
             <button onClick={() => setActiveTab('workspace')} className={tabClass(activeTab === 'workspace')}>
@@ -85,9 +84,13 @@ export function Settings() {
             </button>
           </nav>
         </div>
+      </div>
 
-        {/* Tab Content */}
-        <div className="mt-6">
+      {/* Main scrollable content area */}
+      <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Tab Content */}
+          <div>
           {activeTab === 'workspace' && <WorkspacePreferences />}
           {activeTab === 'editor' && <EditorSettings />}
           {activeTab === 'defaults' && <ProjectDefaults />}
@@ -97,7 +100,8 @@ export function Settings() {
           {activeTab === 'privacy' && <PrivacySettings />}
           {activeTab === 'advanced' && <AdvancedSettings />}
         </div>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

@@ -58,12 +58,14 @@ export function SystemDocs() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+    <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Breadcrumbs */}
-      <Breadcrumbs />
+      <div className="flex-shrink-0">
+        <Breadcrumbs />
+      </div>
 
       {/* Tab Navigation */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         <div className="flex">
           {tabs.map(tab => (
             <button
@@ -86,7 +88,7 @@ export function SystemDocs() {
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 min-h-0 overflow-hidden">
         {activeTab === 'equipment' && <EquipmentManager embedded />}
         {activeTab === 'paperwork' && <Paperwork embedded />}
         {activeTab === 'labels' && <LabelDesigner embedded />}

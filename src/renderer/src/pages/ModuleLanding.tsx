@@ -17,17 +17,17 @@ interface ToolCard {
 const MODULE_TOOLS: Record<ModuleType, ToolCard[]> = {
   production: [
     {
-      name: 'System Docs',
-      description: 'Equipment Manager, Paperwork Generator, and Label Designer - Lightwright parity tool',
-      icon: '📊',
-      route: 'system-docs',
-      isLocked: false
-    },
-    {
       name: 'Shop Order',
       description: 'Equipment orders and specifications for rental houses',
       icon: '📋',
       route: 'shop-order',
+      isLocked: false
+    },
+    {
+      name: 'System Docs',
+      description: 'Equipment Manager, Paperwork Generator, and Label Designer - Lightwright parity tool',
+      icon: '📊',
+      route: 'system-docs',
       isLocked: false
     },
     {
@@ -154,12 +154,14 @@ export function ModuleLanding() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+    <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Breadcrumbs */}
-      <Breadcrumbs />
+      <div className="flex-shrink-0">
+        <Breadcrumbs />
+      </div>
 
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 flex-shrink-0">
         <div className="max-w-7xl mx-auto">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{moduleName}</h1>
@@ -169,7 +171,7 @@ export function ModuleLanding() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
         <div className="max-w-7xl mx-auto p-8">
           {/* Tools Section */}
           <div className="mb-12">
@@ -261,7 +263,7 @@ export function ModuleLanding() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-800 border-t border-gray-700 px-6 py-4 text-center text-sm text-gray-400">
+      <footer className="bg-gray-800 border-t border-gray-700 px-6 py-4 text-center text-sm text-gray-400 flex-shrink-0">
         ShowStack v0.1.0-alpha | © 2025 Lytrix
       </footer>
     </div>
