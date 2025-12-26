@@ -277,6 +277,7 @@ export type PrintSectionType =
   | 'notes'
   | 'revision-summary'
   | 'custom-text'
+  | 'paperwork-header'
   | 'page-break';
 
 export interface PrintSection {
@@ -401,7 +402,26 @@ export type DataFieldType =
   | 'pe_phone'
   | 'current_revision'
   | 'disciplines'
-  | 'logo';
+  | 'logo'
+  // Paperwork-specific fields
+  | 'report_title'
+  | 'revision_date'
+  | 'generated_date'
+  // Fixture summary fields
+  | 'total_fixtures'
+  | 'total_wattage'
+  | 'total_amperage'
+  | 'universe_count'
+  | 'fixture_type_count'
+  // Infrastructure summary fields
+  | 'total_infrastructure'
+  | 'network_equipment_count'
+  | 'audio_equipment_count'
+  | 'video_equipment_count'
+  | 'data_distribution_count'
+  | 'total_ports'
+  | 'active_infrastructure'
+  | 'inactive_infrastructure';
 
 // Shape types for visual elements
 export type ShapeType = 'rectangle' | 'line' | 'divider';
