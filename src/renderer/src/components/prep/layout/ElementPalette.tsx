@@ -253,6 +253,140 @@ const paletteElements: PaletteElement[] = [
     category: 'data'
   },
 
+  // Paperwork-specific fields
+  {
+    type: 'dataField',
+    subType: 'report_title',
+    label: 'Report Title',
+    description: 'Dynamic report title',
+    icon: '📋',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'revision_date',
+    label: 'Revision Date',
+    description: 'Last revision date',
+    icon: '📅',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'generated_date',
+    label: 'Generated Date',
+    description: 'Report generation date',
+    icon: '🕒',
+    category: 'data'
+  },
+
+  // Fixture summary fields
+  {
+    type: 'dataField',
+    subType: 'total_fixtures',
+    label: 'Total Fixtures',
+    description: 'Count of all fixtures',
+    icon: '💡',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'total_wattage',
+    label: 'Total Wattage',
+    description: 'Sum of fixture wattage',
+    icon: '⚡',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'total_amperage',
+    label: 'Total Amperage',
+    description: 'Sum of fixture amperage',
+    icon: '🔌',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'universe_count',
+    label: 'Universe Count',
+    description: 'DMX universes in use',
+    icon: '🌐',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'fixture_type_count',
+    label: 'Fixture Types',
+    description: 'Unique fixture types',
+    icon: '🏷️',
+    category: 'data'
+  },
+
+  // Infrastructure summary fields
+  {
+    type: 'dataField',
+    subType: 'total_infrastructure',
+    label: 'Total Infrastructure',
+    description: 'All infrastructure equipment',
+    icon: '🔧',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'network_equipment_count',
+    label: 'Network Equipment',
+    description: 'Network devices count',
+    icon: '🌐',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'audio_equipment_count',
+    label: 'Audio Equipment',
+    description: 'Audio devices count',
+    icon: '🔊',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'video_equipment_count',
+    label: 'Video Equipment',
+    description: 'Video devices count',
+    icon: '📹',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'data_distribution_count',
+    label: 'Data Distribution',
+    description: 'Data distribution count',
+    icon: '📡',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'total_ports',
+    label: 'Total Ports',
+    description: 'All configured ports',
+    icon: '🔌',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'active_infrastructure',
+    label: 'Active Equipment',
+    description: 'Active infrastructure',
+    icon: '✅',
+    category: 'data'
+  },
+  {
+    type: 'dataField',
+    subType: 'inactive_infrastructure',
+    label: 'Inactive Equipment',
+    description: 'Inactive infrastructure',
+    icon: '❌',
+    category: 'data'
+  },
+
   // Content Elements
   {
     type: 'text',

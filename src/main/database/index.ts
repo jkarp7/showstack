@@ -5,6 +5,10 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { APP_SCHEMA } from './appSchema';
 import { PROJECT_SCHEMA } from './projectSchema';
 import { seedDefaultPageLayouts } from './seedDefaultLayouts';
+import { seedDefaultPageLayoutsFromJSON } from './seedDefaultLayoutsFromJSON';
+import { createLayoutTemplate } from './queries/layoutTemplates';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Two separate databases
 let appDb: Database | null = null;
@@ -91,7 +95,7 @@ function runAppMigrations(db: Database): void {
 
     if (layoutCount === 0) {
       console.log('No default page layouts found - seeding defaults...');
-      seedDefaultPageLayouts();
+      seedDefaultPageLayoutsFromJSON();
       console.log('✅ Default page layouts seeded');
     } else {
       // Migration: Add v2 layouts with dynamic content if they don't exist
@@ -116,12 +120,64 @@ function runAppMigrations(db: Database): void {
         `);
 
         // Create new v2 layouts with dynamic content
-        seedDefaultPageLayouts();
+        seedDefaultPageLayoutsFromJSON();
 
         // Save after migration
         saveAppDatabase();
 
         console.log('✅ V2 layouts with dynamic content added (old layouts preserved as v1)');
+      }
+
+      // Migration: Add paperwork-header layout if it doesn't exist
+      const paperworkHeaderResult = db.exec(`
+        SELECT COUNT(*) as count FROM page_layout_templates
+        WHERE page_type = 'paperwork-header' AND is_default = 1
+      `);
+      const hasPaperworkHeader = (paperworkHeaderResult[0]?.values[0]?.[0] || 0) > 0;
+
+      if (!hasPaperworkHeader) {
+        console.log('Adding paperwork-header default layout...');
+
+        // Load just the paperwork-header layout from JSON
+        const layoutPath = path.join(__dirname, 'database', 'defaultLayouts', 'paperwork-header_default_layout.json');
+
+        if (fs.existsSync(layoutPath)) {
+          try {
+            const fileContent = fs.readFileSync(layoutPath, 'utf-8');
+            const data = JSON.parse(fileContent);
+
+            const templateData = {
+              name: data.template.name,
+              description: data.template.description,
+              page_type: data.template.page_type,
+              grid_columns: data.template.grid_columns,
+              grid_rows: data.template.grid_rows,
+              grid_gap: data.template.grid_gap,
+              page_width: data.template.page_width,
+              page_height: data.template.page_height,
+              is_default: data.template.is_default
+            };
+
+            const elementsData = data.elements.map((el: any) => ({
+              element_type: el.element_type,
+              config: JSON.stringify(el.config),
+              grid_column: el.grid_column,
+              grid_row: el.grid_row,
+              column_span: el.column_span,
+              row_span: el.row_span,
+              layer: el.layer || 0,
+              style: JSON.stringify(el.style)
+            }));
+
+            createLayoutTemplate(templateData, elementsData);
+            saveAppDatabase();
+            console.log('✅ Paperwork-header layout added');
+          } catch (error) {
+            console.error('❌ Error adding paperwork-header layout:', error);
+          }
+        } else {
+          console.warn('⚠️  paperwork-header_default_layout.json not found');
+        }
       }
     }
 

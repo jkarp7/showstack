@@ -1,55 +1,34 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFixtureStore } from '../../store/fixtureStore';
+import { useInfrastructureStore } from '../../store/infrastructureStore';
 import { Fixture } from '../../types';
-
-type ReportType = 'channel-hookup' | 'dimmer-schedule' | 'circuit-list' | 'dmx-addresses' |
-                  'power-summary' | 'color-schedule' | 'gobo-schedule';
-type PageSize = 'letter' | 'legal' | 'a4' | 'tabloid';
-type Orientation = 'portrait' | 'landscape';
-type ColorMode = 'color' | 'bw';
-
-interface PageSetup {
-  size: PageSize;
-  orientation: Orientation;
-  colorMode: ColorMode;
-  marginTop: number;
-  marginBottom: number;
-  marginLeft: number;
-  marginRight: number;
-}
-
-interface MetadataOptions {
-  showVenue: boolean;
-  showDates: boolean;
-  showDesigners: boolean;
-  showProductionStaff: boolean;
-  showProjectName: boolean;
-  showPageNumbers: boolean;
-  showGeneratedDate: boolean;
-  showLogo: boolean;
-  customTitle: string;
-}
-
-interface CustomReport {
-  id: string;
-  name: string;
-  description: string;
-  reportType: ReportType;
-  pageSetup: PageSetup;
-  metadata: MetadataOptions;
-  created: number;
-  updated: number;
-}
-
-interface ReportTemplate {
-  id: ReportType;
-  name: string;
-  description: string;
-  icon: string;
-}
+import {
+  ReportType,
+  PageSize,
+  Orientation,
+  ColorMode,
+  PageSetup,
+  MetadataOptions,
+  CustomReport,
+  ReportTemplate,
+  DEFAULT_PAGE_SETUP,
+  DEFAULT_METADATA,
+  HeaderLayoutConfig,
+  DEFAULT_HEADER_LAYOUT,
+  loadHeaderLayout,
+  saveHeaderLayout,
+  migrateMetadataToHeaderLayout
+} from '../../types/paperwork';
+import { HeaderRenderer } from '../../components/paperwork/HeaderRenderer';
+import { HeaderLayoutSelector } from '../../components/paperwork/HeaderLayoutSelector';
+import { HeaderPreview } from '../../components/paperwork/HeaderPreview';
+import { PaperworkHeaderDesigner } from '../../components/paperwork/PaperworkHeaderDesigner';
+import { HeaderFromTemplate } from '../../components/paperwork/HeaderFromTemplate';
+import { mapPaperworkToTemplateData } from '../../utils/paperwork/dataFieldMapper';
 
 const REPORT_TEMPLATES: ReportTemplate[] = [
+  // Fixture Reports
   {
     id: 'channel-hookup',
     name: 'Channel Hookup',
@@ -91,6 +70,37 @@ const REPORT_TEMPLATES: ReportTemplate[] = [
     name: 'Power Summary',
     description: 'Calculate total power consumption and requirements',
     icon: '⚙️'
+  },
+  // Infrastructure Reports
+  {
+    id: 'infrastructure-list',
+    name: 'Infrastructure Equipment List',
+    description: 'Complete infrastructure equipment inventory',
+    icon: '🔧'
+  },
+  {
+    id: 'network-summary',
+    name: 'Network Summary',
+    description: 'Network equipment with IP addresses and configuration',
+    icon: '🌐'
+  },
+  {
+    id: 'port-assignments',
+    name: 'Port Assignments',
+    description: 'Detailed port configuration for all equipment',
+    icon: '🔌'
+  },
+  {
+    id: 'infrastructure-power',
+    name: 'Infrastructure Power',
+    description: 'Power requirements and consumption',
+    icon: '⚡'
+  },
+  {
+    id: 'infrastructure-location',
+    name: 'Infrastructure by Location',
+    description: 'Equipment organized by physical location',
+    icon: '📍'
   }
 ];
 
@@ -99,28 +109,6 @@ const PAGE_SIZES = {
   legal: { name: 'Legal (8.5" × 14")', width: 8.5, height: 14 },
   a4: { name: 'A4 (210mm × 297mm)', width: 8.27, height: 11.69 },
   tabloid: { name: 'Tabloid (11" × 17")', width: 11, height: 17 }
-};
-
-const DEFAULT_PAGE_SETUP: PageSetup = {
-  size: 'letter',
-  orientation: 'portrait',
-  colorMode: 'bw',
-  marginTop: 0.5,
-  marginBottom: 0.5,
-  marginLeft: 0.25,
-  marginRight: 0.25
-};
-
-const DEFAULT_METADATA: MetadataOptions = {
-  showVenue: true,
-  showDates: true,
-  showDesigners: true,
-  showProductionStaff: false,
-  showProjectName: true,
-  showPageNumbers: true,
-  showGeneratedDate: true,
-  showLogo: false,
-  customTitle: ''
 };
 
 interface PaperworkProps {
@@ -132,6 +120,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
   const { projectId: routeProjectId } = useParams<{ projectId?: string }>();
   const currentProjectId = routeProjectId || 'default-project';
   const { fixtures, loadFixtures } = useFixtureStore();
+  const { equipment: infrastructure, loadEquipment } = useInfrastructureStore();
   const [selectedReport, setSelectedReport] = useState<ReportType>('channel-hookup');
   const [projectName, setProjectName] = useState<string>('Untitled Project');
   const [projectData, setProjectData] = useState<any>(null);
@@ -139,8 +128,14 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
   // Page setup and metadata
   const [pageSetup, setPageSetup] = useState<PageSetup>(DEFAULT_PAGE_SETUP);
   const [metadata, setMetadata] = useState<MetadataOptions>(DEFAULT_METADATA);
+  const [headerLayout, setHeaderLayout] = useState<HeaderLayoutConfig>(DEFAULT_HEADER_LAYOUT);
   const [showPageSetup, setShowPageSetup] = useState(false);
   const [showMetadataOptions, setShowMetadataOptions] = useState(false);
+
+  // Phase 2: Visual Editor state
+  const [useVisualEditor, setUseVisualEditor] = useState(false);
+  const [showHeaderDesigner, setShowHeaderDesigner] = useState(false);
+  const [headerTemplateId, setHeaderTemplateId] = useState<string | null>(null);
 
   // Custom reports
   const [customReports, setCustomReports] = useState<CustomReport[]>([]);
@@ -153,9 +148,17 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
   // Power calculation voltage
   const [voltage, setVoltage] = useState<number>(120);
 
-  // Load fixtures, project info, and custom reports
+  // Batch export/print
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [selectedReportsForBatch, setSelectedReportsForBatch] = useState<Set<ReportType>>(new Set([selectedReport]));
+  const [isBatchProcessing, setIsBatchProcessing] = useState(false);
+  const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0, reportName: '' });
+
+  // Load fixtures, infrastructure, project info, and custom reports
   useEffect(() => {
     loadFixtures();
+    loadEquipment(currentProjectId);
 
     const loadProjectInfo = async () => {
       if (!window.api?.projects) return;
@@ -182,9 +185,22 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       }
     };
 
+    // Load header layout from localStorage
+    const savedLayout = loadHeaderLayout(currentProjectId);
+    if (savedLayout) {
+      setHeaderLayout(savedLayout);
+    } else {
+      setHeaderLayout(DEFAULT_HEADER_LAYOUT);
+    }
+
     loadProjectInfo();
     loadCustomReports();
-  }, [loadFixtures, currentProjectId]);
+  }, [loadFixtures, loadEquipment, currentProjectId]);
+
+  // Save header layout to localStorage when it changes
+  useEffect(() => {
+    saveHeaderLayout(currentProjectId, headerLayout);
+  }, [currentProjectId, headerLayout]);
 
   // Helper function to determine gel size and cuts per sheet based on fixture type
   const getGelInfo = (fixtureType: string): { size: string; cutsPerSheet: number } => {
@@ -459,6 +475,139 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
     };
   }, [fixtures, voltage]);
 
+  // Infrastructure data generation functions
+  const infrastructureListData = useMemo(() => {
+    return infrastructure
+      .map(eq => ({
+        name: eq.name,
+        manufacturer: eq.manufacturer || '-',
+        model: eq.model || '-',
+        category: eq.category || '-',
+        quantity: eq.quantity,
+        ip_address: eq.ip_address || '-',
+        location: eq.location || '-',
+        status: eq.status
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [infrastructure]);
+
+  const networkSummaryData = useMemo(() => {
+    return infrastructure
+      .filter(eq => eq.category === 'network')
+      .map(eq => ({
+        name: eq.name,
+        ip_address: eq.ip_address || '-',
+        mac_address: eq.mac_address || '-',
+        subnet_mask: eq.subnet_mask || '-',
+        gateway: eq.gateway || '-',
+        vlan_id: eq.vlan_id?.toString() || '-',
+        hostname: eq.hostname || '-',
+        port_count: eq.port_count || 0
+      }))
+      .sort((a, b) => {
+        // Sort by IP address if available, otherwise by name
+        if (a.ip_address !== '-' && b.ip_address !== '-') {
+          return a.ip_address.localeCompare(b.ip_address);
+        }
+        return a.name.localeCompare(b.name);
+      });
+  }, [infrastructure]);
+
+  const portAssignmentsData = useMemo(() => {
+    const ports: Array<{
+      equipment: string;
+      port: number;
+      connected_to: string;
+      type: string;
+      vlan: string;
+      status: string;
+      notes: string;
+    }> = [];
+
+    infrastructure.forEach(eq => {
+      if (eq.port_assignments && eq.port_assignments.length > 0) {
+        eq.port_assignments.forEach(port => {
+          ports.push({
+            equipment: eq.name,
+            port: port.port,
+            connected_to: port.connected_to || '-',
+            type: port.type || '-',
+            vlan: port.vlan?.toString() || '-',
+            status: port.status || '-',
+            notes: port.notes || '-'
+          });
+        });
+      }
+    });
+
+    return ports.sort((a, b) => {
+      // First sort by equipment name, then by port number
+      const equipmentCompare = a.equipment.localeCompare(b.equipment);
+      return equipmentCompare !== 0 ? equipmentCompare : a.port - b.port;
+    });
+  }, [infrastructure]);
+
+  const infrastructurePowerData = useMemo(() => {
+    const equipmentWithPower = infrastructure
+      .filter(eq => eq.voltage || eq.amperage || eq.wattage)
+      .map(eq => ({
+        name: eq.name,
+        voltage: eq.voltage || '-',
+        amperage: eq.amperage || '-',
+        wattage: eq.wattage || '-',
+        phase: eq.phase || '-',
+        circuit: eq.circuit || '-'
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    // Calculate totals
+    const totalWattage = infrastructure.reduce((sum, eq) => sum + (eq.wattage || 0), 0);
+    const totalAmperage = infrastructure.reduce((sum, eq) => sum + (eq.amperage || 0), 0);
+
+    return {
+      equipment: equipmentWithPower,
+      totalWattage: totalWattage.toFixed(0),
+      totalAmperage: totalAmperage.toFixed(2)
+    };
+  }, [infrastructure]);
+
+  const infrastructureLocationData = useMemo(() => {
+    // Group equipment by location
+    const byLocation: Record<string, Array<{
+      name: string;
+      category: string;
+      quantity: number;
+      status: string;
+    }>> = {};
+
+    infrastructure.forEach(eq => {
+      const location = eq.location || 'Unassigned';
+      if (!byLocation[location]) {
+        byLocation[location] = [];
+      }
+      byLocation[location].push({
+        name: eq.name,
+        category: eq.category || '-',
+        quantity: eq.quantity,
+        status: eq.status
+      });
+    });
+
+    // Sort equipment within each location
+    Object.values(byLocation).forEach(equipmentList => {
+      equipmentList.sort((a, b) => a.name.localeCompare(b.name));
+    });
+
+    // Convert to array and sort by location name
+    return Object.entries(byLocation)
+      .map(([location, equipment]) => ({
+        location,
+        equipment,
+        totalCount: equipment.reduce((sum, eq) => sum + eq.quantity, 0)
+      }))
+      .sort((a, b) => a.location.localeCompare(b.location));
+  }, [infrastructure]);
+
   const handleSaveReport = () => {
     const report: CustomReport = {
       id: currentReport?.id || `report-${Date.now()}`,
@@ -466,7 +615,8 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       description: saveReportDescription,
       reportType: selectedReport,
       pageSetup,
-      metadata,
+      metadata, // Keep for backward compatibility
+      headerLayout, // NEW
       created: currentReport?.created || Date.now(),
       updated: Date.now()
     };
@@ -489,6 +639,15 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
     setSelectedReport(report.reportType);
     setPageSetup(report.pageSetup);
     setMetadata(report.metadata);
+
+    // Load header layout with migration support
+    if (report.headerLayout) {
+      setHeaderLayout(report.headerLayout);
+    } else {
+      // Migrate from old metadata format
+      setHeaderLayout(migrateMetadataToHeaderLayout(report.metadata));
+    }
+
     setShowLoadDialog(false);
   };
 
@@ -500,114 +659,207 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
     if (currentReport?.id === reportId) setCurrentReport(null);
   };
 
-  const handleExportPDF = async () => {
+  const handleExportPDF = () => {
+    // Initialize with current report selected
+    setSelectedReportsForBatch(new Set([selectedReport]));
+    setShowExportDialog(true);
+  };
+
+  const handlePrint = () => {
+    // Initialize with current report selected
+    setSelectedReportsForBatch(new Set([selectedReport]));
+    setShowPrintDialog(true);
+  };
+
+  // Batch export selected reports to PDF
+  const handleBatchExport = async () => {
+    if (selectedReportsForBatch.size === 0) {
+      alert('Please select at least one report to export');
+      return;
+    }
+
     if (!window.api?.paperwork) {
       alert('PDF export is not available');
       return;
     }
 
+    setShowExportDialog(false);
+    setIsBatchProcessing(true);
+    const reportsToExport = Array.from(selectedReportsForBatch);
+    const totalReports = reportsToExport.length;
+    let successCount = 0;
+    let failCount = 0;
+
     try {
-      const reportName = REPORT_TEMPLATES.find(t => t.id === selectedReport)?.name || 'Report';
+      for (let i = 0; i < reportsToExport.length; i++) {
+        const reportType = reportsToExport[i];
+        const reportTemplate = REPORT_TEMPLATES.find(t => t.id === reportType);
+        const reportName = reportTemplate?.name || 'Report';
 
-      // Get the rendered HTML content
-      const reportElement = document.querySelector('.report-content');
-      if (!reportElement) {
-        alert('Report content not found');
-        return;
+        setBatchProgress({ current: i + 1, total: totalReports, reportName });
+
+        // Temporarily switch to this report
+        const previousReport = selectedReport;
+        setSelectedReport(reportType);
+
+        // Wait for React to render the new report
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Get the rendered HTML content
+        const reportElement = document.querySelector('.report-content');
+        if (!reportElement) {
+          console.error(`Report content not found for ${reportName}`);
+          failCount++;
+          setSelectedReport(previousReport);
+          continue;
+        }
+
+        // Create HTML document with styles (same as single export)
+        const htmlContent = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <title>${reportName} - ${projectName}</title>
+              <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body {
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                  color: #1f2937;
+                  background: white;
+                  padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in;
+                }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+                th, td { padding: 0.5rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+                th { background-color: #f3f4f6; font-weight: 600; }
+                h1 { font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem; }
+                h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+                h3 { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem; color: #3b82f6; }
+                p { margin-bottom: 0.5rem; }
+                .grid { display: grid; gap: 1rem; }
+                .card {
+                  background: white;
+                  border: 1px solid #e5e7eb;
+                  border-radius: 0.5rem;
+                  padding: 1.5rem;
+                  margin-bottom: 1.5rem;
+                }
+                @media print {
+                  body { margin: 0; padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in; }
+                  .card { page-break-inside: avoid; }
+                }
+              </style>
+            </head>
+            <body>
+              ${reportElement.innerHTML}
+            </body>
+          </html>
+        `;
+
+        const filename = `${projectName}_${reportName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+
+        try {
+          const result = await window.api.paperwork.exportPDF(htmlContent, filename, pageSetup);
+          if (result.success) {
+            successCount++;
+          } else if (!result.canceled) {
+            failCount++;
+          }
+        } catch (error) {
+          console.error(`Error exporting ${reportName}:`, error);
+          failCount++;
+        }
+
+        // Restore previous report
+        setSelectedReport(previousReport);
       }
 
-      // Create a complete HTML document with styles
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <title>${reportName} - ${projectName}</title>
-            <style>
-              * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-              }
-              body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-                color: #1f2937;
-                background: white;
-                padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in;
-              }
-              table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-bottom: 1rem;
-              }
-              th, td {
-                padding: 0.5rem;
-                text-align: left;
-                border-bottom: 1px solid #e5e7eb;
-              }
-              th {
-                background-color: #f3f4f6;
-                font-weight: 600;
-              }
-              h1 {
-                font-size: 1.5rem;
-                font-weight: bold;
-                margin-bottom: 0.5rem;
-              }
-              h2 {
-                font-size: 1.25rem;
-                font-weight: 600;
-                margin-bottom: 0.5rem;
-              }
-              h3 {
-                font-size: 1.125rem;
-                font-weight: 600;
-                margin-bottom: 0.75rem;
-                color: #3b82f6;
-              }
-              p {
-                margin-bottom: 0.5rem;
-              }
-              .grid {
-                display: grid;
-                gap: 1rem;
-              }
-              .card {
-                background: white;
-                border: 1px solid #e5e7eb;
-                border-radius: 0.5rem;
-                padding: 1.5rem;
-                margin-bottom: 1.5rem;
-              }
-              @media print {
-                body { margin: 0; padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in; }
-                .card { page-break-inside: avoid; }
-              }
-            </style>
-          </head>
-          <body>
-            ${reportElement.innerHTML}
-          </body>
-        </html>
-      `;
-
-      const filename = `${projectName}_${reportName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
-
-      const result = await window.api.paperwork.exportPDF(htmlContent, filename, pageSetup);
-
-      if (result.success) {
-        alert(`PDF exported successfully to:\n${result.filePath}`);
-      } else if (!result.canceled) {
-        alert('Failed to export PDF');
+      // Show summary
+      let message = `Batch export complete!\n\nSuccessfully exported: ${successCount} report(s)`;
+      if (failCount > 0) {
+        message += `\nFailed: ${failCount} report(s)`;
       }
+      alert(message);
+
     } catch (error) {
-      console.error('Error exporting PDF:', error);
-      alert('An error occurred while exporting PDF');
+      console.error('Batch export error:', error);
+      alert('An error occurred during batch export');
+    } finally {
+      setIsBatchProcessing(false);
+      setBatchProgress({ current: 0, total: 0, reportName: '' });
     }
   };
 
-  const handlePrint = () => {
-    window.print();
+  // Batch print selected reports
+  const handleBatchPrint = async () => {
+    if (selectedReportsForBatch.size === 0) {
+      alert('Please select at least one report to print');
+      return;
+    }
+
+    if (!confirm(`This will print ${selectedReportsForBatch.size} report(s). Continue?`)) {
+      return;
+    }
+
+    setShowPrintDialog(false);
+    setIsBatchProcessing(true);
+    const reportsToPrint = Array.from(selectedReportsForBatch);
+    const totalReports = reportsToPrint.length;
+
+    try {
+      for (let i = 0; i < reportsToPrint.length; i++) {
+        const reportType = reportsToPrint[i];
+        const reportTemplate = REPORT_TEMPLATES.find(t => t.id === reportType);
+        const reportName = reportTemplate?.name || 'Report';
+
+        setBatchProgress({ current: i + 1, total: totalReports, reportName });
+
+        // Temporarily switch to this report
+        const previousReport = selectedReport;
+        setSelectedReport(reportType);
+
+        // Wait for React to render the new report
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Print
+        window.print();
+
+        // Wait a bit before switching to next report
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Restore previous report
+        setSelectedReport(previousReport);
+      }
+
+      alert(`Batch print complete! ${totalReports} report(s) sent to printer.`);
+
+    } catch (error) {
+      console.error('Batch print error:', error);
+      alert('An error occurred during batch printing');
+    } finally {
+      setIsBatchProcessing(false);
+      setBatchProgress({ current: 0, total: 0, reportName: '' });
+    }
+  };
+
+  // Toggle report selection for batch operations
+  const toggleReportSelection = (reportType: ReportType) => {
+    const newSelection = new Set(selectedReportsForBatch);
+    if (newSelection.has(reportType)) {
+      newSelection.delete(reportType);
+    } else {
+      newSelection.add(reportType);
+    }
+    setSelectedReportsForBatch(newSelection);
+  };
+
+  // Select/deselect all reports for batch operations
+  const toggleSelectAll = () => {
+    if (selectedReportsForBatch.size === REPORT_TEMPLATES.length) {
+      setSelectedReportsForBatch(new Set());
+    } else {
+      setSelectedReportsForBatch(new Set(REPORT_TEMPLATES.map(t => t.id)));
+    }
   };
 
   // Gel color database - Complete GAM, LEE, and Rosco theatrical gels (628 colors)
@@ -867,91 +1119,43 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
     );
   };
 
+  // Prepare template data for visual editor
+  const templateData = useMemo(() => {
+    if (!projectData) return null;
+
+    return mapPaperworkToTemplateData(
+      projectData,
+      fixtures,
+      infrastructure,
+      selectedReport,
+      headerLayout.fields.customTitle
+    );
+  }, [projectData, fixtures, infrastructure, selectedReport, headerLayout.fields.customTitle]);
+
   const renderMetadataHeader = () => {
     if (!projectData) return null;
 
-    // Determine title to display
-    const reportTitle = metadata.customTitle ||
-      `${REPORT_TEMPLATES.find(t => t.id === selectedReport)?.name || 'Report'} - ${projectName}`;
+    // Phase 2: Use visual editor template if enabled
+    if (useVisualEditor && headerTemplateId && templateData) {
+      return (
+        <HeaderFromTemplate
+          templateId={headerTemplateId}
+          templateData={templateData}
+          pageSize={pageSetup.size}
+          orientation={pageSetup.orientation}
+        />
+      );
+    }
 
-    // Build venue string
-    const venueStr = [
-      projectData.venue,
-      projectData.venue_city,
-      projectData.venue_state
-    ].filter(Boolean).join(', ');
-
+    // Phase 1: Use preset-based renderer
     return (
-      <div className="mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-300 dark:border-gray-600 print:bg-white print:border-black print:mb-6">
-        <div className="flex items-start justify-between mb-4">
-          {/* Title Section */}
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 print:text-black">
-              {reportTitle}
-            </h1>
-            {metadata.showProjectName && projectName && (
-              <p className="text-lg text-gray-700 dark:text-gray-300 print:text-gray-800">
-                {projectName}
-              </p>
-            )}
-          </div>
-
-          {/* Logo Section */}
-          {metadata.showLogo && projectData.logo_path && (
-            <div className="ml-6">
-              <img
-                src={`file://${projectData.logo_path}`}
-                alt="Company Logo"
-                className="max-h-24 max-w-48 object-contain print:max-h-20"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Metadata Grid */}
-        <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm border-t border-gray-200 dark:border-gray-700 pt-4 print:border-gray-400">
-          {/* Venue Information */}
-          {metadata.showVenue && venueStr && (
-            <div>
-              <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Venue:</span>
-              <span className="ml-2 text-gray-900 dark:text-white print:text-black">{venueStr}</span>
-            </div>
-          )}
-
-          {/* Lighting Designer */}
-          {metadata.showDesigners && projectData.lighting_designer && (
-            <div>
-              <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Lighting Designer:</span>
-              <span className="ml-2 text-gray-900 dark:text-white print:text-black">{projectData.lighting_designer}</span>
-              {projectData.lighting_designer_email && (
-                <div className="ml-2 text-xs text-gray-600 dark:text-gray-400 print:text-gray-700">
-                  {projectData.lighting_designer_email}
-                </div>
-              )}
-              {projectData.lighting_designer_phone && (
-                <div className="ml-2 text-xs text-gray-600 dark:text-gray-400 print:text-gray-700">
-                  {projectData.lighting_designer_phone}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Generated Date */}
-          {metadata.showGeneratedDate && (
-            <div>
-              <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Generated:</span>
-              <span className="ml-2 text-gray-900 dark:text-white print:text-black">
-                {new Date().toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
+      <HeaderRenderer
+        layout={headerLayout}
+        reportType={selectedReport}
+        reportTemplates={REPORT_TEMPLATES}
+        projectData={projectData}
+        projectName={projectName}
+      />
     );
   };
 
@@ -1364,6 +1568,189 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
           </div>
         );
 
+      case 'infrastructure-list':
+        return (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs border-collapse border border-gray-400 dark:border-gray-600 print:text-[8pt] print:border-black">
+              <thead className="bg-gray-800 dark:bg-gray-700 text-white print:bg-black print:text-white">
+                <tr>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Name</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Manufacturer</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Model</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Category</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Qty</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">IP Address</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Location</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Status</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 print:bg-white">
+                {infrastructureListData.map((row, i) => (
+                  <tr key={i} className={`border-b border-gray-300 dark:border-gray-700 print:border-black ${i % 2 === 0 ? 'bg-gray-50 dark:bg-gray-900 print:bg-gray-100' : 'bg-white dark:bg-gray-800 print:bg-white'}`}>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.name}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.manufacturer}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.model}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.category}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.quantity}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.ip_address}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.location}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+
+      case 'network-summary':
+        return (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs border-collapse border border-gray-400 dark:border-gray-600 print:text-[8pt] print:border-black">
+              <thead className="bg-gray-800 dark:bg-gray-700 text-white print:bg-black print:text-white">
+                <tr>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Name</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">IP Address</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">MAC Address</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Subnet</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Gateway</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">VLAN</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Hostname</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Ports</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 print:bg-white">
+                {networkSummaryData.map((row, i) => (
+                  <tr key={i} className={`border-b border-gray-300 dark:border-gray-700 print:border-black ${i % 2 === 0 ? 'bg-gray-50 dark:bg-gray-900 print:bg-gray-100' : 'bg-white dark:bg-gray-800 print:bg-white'}`}>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.name}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.ip_address}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.mac_address}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.subnet_mask}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.gateway}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.vlan_id}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.hostname}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.port_count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+
+      case 'port-assignments':
+        return (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs border-collapse border border-gray-400 dark:border-gray-600 print:text-[8pt] print:border-black">
+              <thead className="bg-gray-800 dark:bg-gray-700 text-white print:bg-black print:text-white">
+                <tr>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Equipment</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Port</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Connected To</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Type</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">VLAN</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Status</th>
+                  <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Notes</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 print:bg-white">
+                {portAssignmentsData.map((row, i) => (
+                  <tr key={i} className={`border-b border-gray-300 dark:border-gray-700 print:border-black ${i % 2 === 0 ? 'bg-gray-50 dark:bg-gray-900 print:bg-gray-100' : 'bg-white dark:bg-gray-800 print:bg-white'}`}>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.equipment}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.port}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.connected_to}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.type}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.vlan}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.status}</td>
+                    <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.notes}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+
+      case 'infrastructure-power':
+        return (
+          <div className="space-y-6">
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
+                <div className="text-gray-600 dark:text-gray-400 text-sm mb-2">Total Wattage</div>
+                <div className="text-3xl font-bold text-yellow-400">{infrastructurePowerData.totalWattage}W</div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
+                <div className="text-gray-600 dark:text-gray-400 text-sm mb-2">Total Amperage</div>
+                <div className="text-3xl font-bold text-red-400">{infrastructurePowerData.totalAmperage}A</div>
+              </div>
+            </div>
+
+            {/* Equipment Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs border-collapse border border-gray-400 dark:border-gray-600 print:text-[8pt] print:border-black">
+                <thead className="bg-gray-800 dark:bg-gray-700 text-white print:bg-black print:text-white">
+                  <tr>
+                    <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Equipment</th>
+                    <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Voltage</th>
+                    <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Amperage</th>
+                    <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Wattage</th>
+                    <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Phase</th>
+                    <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Circuit</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 print:bg-white">
+                  {infrastructurePowerData.equipment.map((row, i) => (
+                    <tr key={i} className={`border-b border-gray-300 dark:border-gray-700 print:border-black ${i % 2 === 0 ? 'bg-gray-50 dark:bg-gray-900 print:bg-gray-100' : 'bg-white dark:bg-gray-800 print:bg-white'}`}>
+                      <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.name}</td>
+                      <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.voltage}</td>
+                      <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.amperage}</td>
+                      <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.wattage}</td>
+                      <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.phase}</td>
+                      <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{row.circuit}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
+      case 'infrastructure-location':
+        return (
+          <div className="space-y-6">
+            {infrastructureLocationData.map((locationGroup, idx) => (
+              <div key={idx} className="bg-white dark:bg-gray-800 rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
+                  {locationGroup.location}
+                  <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                    ({locationGroup.totalCount} total)
+                  </span>
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs border-collapse border border-gray-400 dark:border-gray-600 print:text-[8pt] print:border-black">
+                    <thead className="bg-gray-800 dark:bg-gray-700 text-white print:bg-black print:text-white">
+                      <tr>
+                        <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Name</th>
+                        <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Category</th>
+                        <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Quantity</th>
+                        <th className="px-2 py-1 text-left border border-gray-400 dark:border-gray-600 font-bold text-xs print:border-black print:text-[9pt]">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white dark:bg-gray-800 print:bg-white">
+                      {locationGroup.equipment.map((eq, i) => (
+                        <tr key={i} className={`border-b border-gray-300 dark:border-gray-700 print:border-black ${i % 2 === 0 ? 'bg-gray-50 dark:bg-gray-900 print:bg-gray-100' : 'bg-white dark:bg-gray-800 print:bg-white'}`}>
+                          <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{eq.name}</td>
+                          <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{eq.category}</td>
+                          <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{eq.quantity}</td>
+                          <td className="px-2 py-0.5 border border-gray-300 dark:border-gray-700 print:border-black print:py-0">{eq.status}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
       default:
         return null;
     }
@@ -1448,8 +1835,8 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
               onClick={() => setSelectedReport(template.id)}
               className={`px-4 py-2 rounded whitespace-nowrap transition flex items-center gap-2 ${
                 selectedReport === template.id
-                  ? 'bg-blue-600 text-gray-900 dark:text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:bg-gray-600'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
             >
               <span>{template.icon}</span>
@@ -1582,98 +1969,80 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       {/* Metadata Options Dialog */}
       {showMetadataOptions && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-md p-6">
-            <h2 className="text-xl font-bold mb-4">Report Options</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+            <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-white">Report Options</h2>
 
-            {/* Custom Title Input */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">
-                Custom Title (Optional)
-              </label>
-              <input
-                type="text"
-                value={metadata.customTitle}
-                onChange={(e) => setMetadata({ ...metadata, customTitle: e.target.value })}
-                placeholder={`${REPORT_TEMPLATES.find(t => t.id === selectedReport)?.name || 'Report'} - ${projectName}`}
-                className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white"
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Leave blank to use default title
+            {/* Editor Mode Toggle */}
+            <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Header Editor Mode</h3>
+                <button
+                  onClick={() => setUseVisualEditor(!useVisualEditor)}
+                  className="text-xs px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded transition"
+                >
+                  Switch to {useVisualEditor ? 'Simple' : 'Advanced'} Editor
+                </button>
+              </div>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                {useVisualEditor
+                  ? 'Advanced Editor: Design custom header layouts with drag-and-drop positioning'
+                  : 'Simple Editor: Choose from preset header layouts with field toggles'}
               </p>
             </div>
 
-            <div className="space-y-3 mb-6">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={metadata.showProjectName}
-                  onChange={(e) => setMetadata({ ...metadata, showProjectName: e.target.checked })}
-                  className="w-4 h-4"
-                />
-                <span>Show Project Name</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={metadata.showVenue}
-                  onChange={(e) => setMetadata({ ...metadata, showVenue: e.target.checked })}
-                  className="w-4 h-4"
-                />
-                <span>Show Venue</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={metadata.showDates}
-                  onChange={(e) => setMetadata({ ...metadata, showDates: e.target.checked })}
-                  className="w-4 h-4"
-                />
-                <span>Show Show Dates</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={metadata.showDesigners}
-                  onChange={(e) => setMetadata({ ...metadata, showDesigners: e.target.checked })}
-                  className="w-4 h-4"
-                />
-                <span>Show Designers</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={metadata.showProductionStaff}
-                  onChange={(e) => setMetadata({ ...metadata, showProductionStaff: e.target.checked })}
-                  className="w-4 h-4"
-                />
-                <span>Show Production Staff</span>
-              </label>
-              <label className="flex items-center gap-2">
+            {/* Simple Editor (Phase 1) */}
+            {!useVisualEditor && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Left Column - Header Layout Selector */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Header Layout</h3>
+                  <HeaderLayoutSelector
+                    currentLayout={headerLayout}
+                    onChange={setHeaderLayout}
+                  />
+                </div>
+
+                {/* Right Column - Preview */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Live Preview</h3>
+                  <HeaderPreview layout={headerLayout} />
+                </div>
+              </div>
+            )}
+
+            {/* Advanced Editor (Phase 2) */}
+            {useVisualEditor && (
+              <div className="mb-6 p-6 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Visual Header Designer</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Design custom header layouts with complete control over positioning, styling, and data fields.
+                  Includes access to fixture and infrastructure summary data.
+                </p>
+                <button
+                  onClick={() => setShowHeaderDesigner(true)}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition flex items-center gap-2"
+                >
+                  <span>🎨</span>
+                  {headerTemplateId ? 'Edit Header Template' : 'Create Header Template'}
+                </button>
+                {headerTemplateId && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    Current template ID: {headerTemplateId.substring(0, 8)}...
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Legacy page number option (not part of header) */}
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mb-6">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={metadata.showPageNumbers}
                   onChange={(e) => setMetadata({ ...metadata, showPageNumbers: e.target.checked })}
-                  className="w-4 h-4"
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <span>Show Page Numbers</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={metadata.showGeneratedDate}
-                  onChange={(e) => setMetadata({ ...metadata, showGeneratedDate: e.target.checked })}
-                  className="w-4 h-4"
-                />
-                <span>Show Generated Date</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={metadata.showLogo}
-                  onChange={(e) => setMetadata({ ...metadata, showLogo: e.target.checked })}
-                  className="w-4 h-4"
-                />
-                <span>Show Company Logo</span>
+                <span className="text-sm text-gray-700 dark:text-gray-300">Show Page Numbers</span>
               </label>
             </div>
             <div className="flex gap-2 justify-end">
@@ -1801,6 +2170,177 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             )}
           </div>
         </div>
+      )}
+
+      {/* Export Selection Dialog */}
+      {showExportDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-2xl max-h-[80vh] overflow-y-auto p-6">
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Export Reports to PDF</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Select which reports you want to export. Each will be saved as a separate PDF file.
+            </p>
+
+            <div className="mb-4">
+              <button
+                onClick={toggleSelectAll}
+                className="text-sm px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition"
+              >
+                {selectedReportsForBatch.size === REPORT_TEMPLATES.length ? 'Deselect All' : 'Select All'}
+              </button>
+              <span className="ml-3 text-sm text-gray-600 dark:text-gray-400">
+                {selectedReportsForBatch.size} of {REPORT_TEMPLATES.length} selected
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+              {REPORT_TEMPLATES.map(template => (
+                <label
+                  key={template.id}
+                  className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition ${
+                    selectedReportsForBatch.has(template.id)
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedReportsForBatch.has(template.id)}
+                    onChange={() => toggleReportSelection(template.id)}
+                    className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{template.icon}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{template.name}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{template.description}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setShowExportDialog(false)}
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBatchExport}
+                disabled={selectedReportsForBatch.size === 0}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded transition"
+              >
+                Export {selectedReportsForBatch.size} Report{selectedReportsForBatch.size !== 1 ? 's' : ''}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Print Selection Dialog */}
+      {showPrintDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-full max-w-2xl max-h-[80vh] overflow-y-auto p-6">
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Print Reports</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Select which reports you want to print. Each report will be sent to your printer.
+            </p>
+
+            <div className="mb-4">
+              <button
+                onClick={toggleSelectAll}
+                className="text-sm px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition"
+              >
+                {selectedReportsForBatch.size === REPORT_TEMPLATES.length ? 'Deselect All' : 'Select All'}
+              </button>
+              <span className="ml-3 text-sm text-gray-600 dark:text-gray-400">
+                {selectedReportsForBatch.size} of {REPORT_TEMPLATES.length} selected
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+              {REPORT_TEMPLATES.map(template => (
+                <label
+                  key={template.id}
+                  className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition ${
+                    selectedReportsForBatch.has(template.id)
+                      ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedReportsForBatch.has(template.id)}
+                    onChange={() => toggleReportSelection(template.id)}
+                    className="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{template.icon}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{template.name}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{template.description}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setShowPrintDialog(false)}
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBatchPrint}
+                disabled={selectedReportsForBatch.size === 0}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded transition"
+              >
+                Print {selectedReportsForBatch.size} Report{selectedReportsForBatch.size !== 1 ? 's' : ''}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Batch Processing Progress Overlay */}
+      {isBatchProcessing && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Processing Reports</h3>
+            <div className="space-y-4">
+              <div className="text-gray-700 dark:text-gray-300">
+                Processing: <span className="font-semibold">{batchProgress.reportName}</span>
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+                <div
+                  className="bg-blue-600 h-4 rounded-full transition-all duration-300"
+                  style={{ width: `${(batchProgress.current / batchProgress.total) * 100}%` }}
+                ></div>
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                {batchProgress.current} of {batchProgress.total} reports
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Paperwork Header Designer Modal (Phase 2) */}
+      {showHeaderDesigner && templateData && (
+        <PaperworkHeaderDesigner
+          isOpen={showHeaderDesigner}
+          onClose={() => setShowHeaderDesigner(false)}
+          currentTemplateId={headerTemplateId || undefined}
+          onSave={(templateId) => {
+            setHeaderTemplateId(templateId);
+            setShowHeaderDesigner(false);
+          }}
+          templateData={templateData}
+        />
       )}
 
       {/* Footer */}
