@@ -210,17 +210,23 @@ Core fixture database and virtual grid for managing lighting plots.
 
 ---
 
-### 🚧 In Development: Label Designer
+### 🚧 In Development: Label Designer (75% Complete)
 
-Drag-and-drop label creation for various printer types.
+Drag-and-drop label creation for various printer types with HTML5 Canvas.
 
-- 🚧 **Label Designer Page** - `src/renderer/src/pages/modules/LabelDesigner.tsx`
-  - Drag-and-drop label layout
-  - Custom label templates
-  - Data field placement
-  - Barcode/QR code support
-  - Multiple label sizes (Dymo, Brother, Zebra)
-  - Preview and print
+- ✅ **Label Designer Page** - `src/renderer/src/pages/modules/LabelDesigner.tsx` (1,182 lines)
+  - ✅ Drag-and-drop label layout with canvas-based WYSIWYG editor
+  - ✅ Drawing tools: text, rectangle, circle, line
+  - ✅ Template system: cable, circuit, fixture, dimmer labels
+  - ✅ Custom label designs with save/load (localStorage)
+  - ✅ Avery template support (5 predefined templates)
+  - ✅ Printer type selection (Dymo, Brother, Zebra, Avery sheets)
+  - ✅ Batch printing mode
+  - ✅ Element inspector with property editing
+  - ⬜ **PDF export** - handleExportLabels() needs implementation
+  - ⬜ **Actual printing** - handlePrintLabels() needs IPC integration
+  - ⬜ **Barcode/QR code generation** - Mentioned but not implemented
+  - ⬜ **Printer driver integration** - No direct printer communication
 
 ---
 
@@ -659,41 +665,119 @@ Production logistics and budgeting tools.
 
 ---
 
-## ⬜ PLANNED: Future Enhancements
+## ✅ COMPLETED: Developer Mode
 
-### Cloud Sync (Optional)
+Full developer mode implementation with DevTools integration.
+
+- ✅ **Developer Mode Toggle** - `src/renderer/src/components/settings/AdvancedSettings.tsx`
+  - Settings store integration with developerMode flag
+  - Visual feedback in settings UI
+  - Per-window DevTools control
+
+- ✅ **IPC Handlers** - `src/main/ipc/settings.ts`
+  - `settings:developer-mode-changed` - Opens/closes DevTools for all windows
+  - `settings:toggle-devtools` - Toggle DevTools for specific window
+  - Menu integration in View menu
+
+- ✅ **Developer Panel** - `src/renderer/src/components/common/DeveloperPanel.tsx`
+  - State inspector with JSON display
+  - Performance metrics display
+  - Log to console functionality
+  - Export debug data to JSON
+  - Collapsible interface
+
+- ✅ **Hook** - `src/renderer/src/hooks/useDeveloperMode.ts`
+  - Access developer mode state from any component
+
+- ⬜ **Feature Flag System** - Not yet connected to developer mode
+
+---
+
+## 🚧 IN PROGRESS: Telemetry & Analytics (60% Complete)
+
+Privacy-first telemetry system with PostHog integration.
+
+- ✅ **Telemetry Service** - `src/renderer/src/services/telemetry.ts` (327 lines)
+  - Event tracking with localStorage buffering
+  - Batch syncing (50 events or 60 seconds)
+  - PostHog REST API integration (fetch-based)
+  - Privacy-first architecture (opt-in required)
+  - Anonymous ID generation (crypto.randomUUID)
+  - Session tracking
+  - Auto-flush before app close
+  - Data retention management (90 days default)
+
+- ✅ **UI Components**
+  - `ConsentDialog.tsx` - Full consent dialog implementation
+  - `PrivacySettings.tsx` - Privacy settings with telemetry toggles
+  - App.tsx integrates telemetry for app lifecycle events
+
+- ✅ **Configuration**
+  - Environment variable setup (VITE_POSTHOG_KEY)
+  - PostHog setup documentation (`POSTHOG_SETUP.md` - 336 lines)
+  - Settings store integration
+
+- ⬜ **PostHog SDK** - NOT installed (uses raw fetch() instead of posthog-js)
+- ⬜ **API Key Configuration** - .env.local needs PostHog project key
+- ⬜ **Extended Event Tracking** - Only app_opened/app_closed currently tracked
+- ⬜ **Error Tracking** - Beyond console.log
+- ⬜ **Performance Metrics** - Placeholder code only
+- ⬜ **Analytics Dashboard** - Admin panel integration not implemented
+
+---
+
+## ⬜ PLANNED: Cloud Sync & Collaboration
+
+**Status:** UI mockups only (2% complete) - No backend implementation
+
 - ⬜ **Backend API** - Express.js + PostgreSQL
-- ⬜ **Real-time Sync** - Socket.io integration
+- ⬜ **Real-time Sync** - Socket.io or WebSocket integration
 - ⬜ **Conflict Resolution** - Automatic merge or manual resolution
 - ⬜ **File Storage** - AWS S3 or Cloudflare R2 for assets
-- ⬜ **User Authentication** - JWT-based auth
 - ⬜ **Team Collaboration** - Multi-user access, permissions
 
-### Telemetry & Analytics
-- ⬜ **Telemetry System** - See `docs/planning/TELEMETRY_DEVMODE_IMPLEMENTATION.md`
-  - PostHog integration
-  - Privacy-first approach (opt-in, anonymous)
-  - Usage analytics
-  - Error tracking
-  - Performance metrics
-  - Analytics dashboard in admin panel
+**Existing UI Mockups (Non-functional):**
+- `IntegrationSettings.tsx` - Cloud storage toggle UI, provider selection (Dropbox, Google Drive, OneDrive, S3)
+- `Collaboration.tsx` - Placeholder settings panel
+- All backend functions are TODO stubs
 
-### Developer Features
-- ⬜ **Developer Mode Enhancements** - See `docs/planning/TELEMETRY_DEVMODE_IMPLEMENTATION.md`
-  - Electron DevTools integration
-  - Debug panels
-  - State inspector
-  - Performance metrics
-  - Feature flag system
+---
 
-### Testing & Quality
+## ⬜ PLANNED: User Authentication
+
+**Status:** UI placeholder only (2% complete) - Login page bypasses auth
+
+- ⬜ **JWT Authentication** - jsonwebtoken package not installed
+- ⬜ **Authentication Service** - No auth backend
+- ⬜ **Session Management** - No session tracking
+- ⬜ **Password Hashing** - For user credentials (bcryptjs only used for admin password)
+- ⬜ **User Registration** - No registration flow
+- ⬜ **Password Reset** - No reset functionality
+
+**Existing UI (Non-functional):**
+- `Login.tsx` - Login form with "Skip login (development)" that bypasses everything
+- handleLogin() just navigates to /modules without validation
+
+**Note:** License system (LicenseService.ts) handles feature access control but is NOT user authentication
+
+---
+
+## ⬜ PLANNED: Testing & Quality
+
+**Status:** Not implemented (0% complete)
+
 - ⬜ **Unit Tests** - Vitest test suite
 - ⬜ **Component Tests** - React Testing Library
 - ⬜ **Integration Tests** - End-to-end critical flows
 - ⬜ **E2E Tests** - Playwright user journeys
 - ⬜ **Performance Tests** - Load testing with 10k+ fixtures
 
-### Documentation
+**Current State:** Zero test files in src/ directory, no testing framework installed
+
+---
+
+## ⬜ PLANNED: Documentation
+
 - ⬜ **User Manual** - Comprehensive user guide
 - ⬜ **Video Tutorials** - Feature walkthrough videos
 - ⬜ **API Documentation** - IPC handler reference
