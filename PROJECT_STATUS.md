@@ -863,6 +863,197 @@ Privacy-first telemetry system with PostHog integration.
 
 ---
 
+## 🎙️ User Feedback - New Feature Requests (December 27, 2024)
+
+Based on user testing session, the following features have been identified as high-priority additions:
+
+### 🔴 CRITICAL: Multi-User Collaboration Workflow
+
+**Problem**: Current architecture doesn't support common workflow where multiple people work on same project by passing file back and forth (via email, Dropbox, etc.)
+
+**Impact**: **URGENT** - Lightwright's new platform has native cloud collaboration. This is now a competitive requirement.
+
+**Proposed Solutions**:
+- **Option A (Quick)**: File-based merge/reconciliation system (4-6 weeks)
+  - Import/compare two .showstack files
+  - Side-by-side diff of changes
+  - Selective merge capability
+  - No backend required, offline-first
+- **Option B (Medium)**: Change tracking with conflict detection (8-10 weeks)
+  - Change log in database
+  - Export includes change history
+  - Automatic conflict detection
+  - Manual resolution UI
+- **Option C (Full)**: Real-time cloud collaboration (16-20 weeks)
+  - Complete backend rewrite
+  - WebSocket-based sync
+  - Operational Transformation or CRDT
+  - Requires subscription model
+
+**Recommendation**: Start with Option A to ship quickly, evaluate Option C based on market response.
+
+**Related Issues**: #33
+
+---
+
+### 📋 Equipment Manager Enhancements
+
+#### High Priority
+- ⬜ **Filter out capability** - Hide fixtures matching criteria (1-2 days)
+- ⬜ **Color flags for designations** - Visual indicators for hot circuits, special fixtures (2-3 days)
+- ⬜ **Point circuit notation** - Support circuits like "1.2", "1.3" for power thru/daisy chains (3-4 days)
+- ⬜ **Auto-complete from project data** - Suggest values based on existing fixtures (3-4 days)
+- ⬜ **Click-to-edit infrastructure** - Double-click infrastructure rows to edit (1 day)
+- ⬜ **Multi-color row highlighting** - Color-code fixtures by user criteria (2 days)
+
+#### Medium Priority
+- ⬜ **Combined fields on reports** - Concatenate fields (e.g., "Type + Accessory") (2-3 days)
+- ⬜ **Remove focus columns** - Clean up planned features that won't be implemented (1 hour)
+
+**Estimated Total**: 2-3 weeks
+
+---
+
+### 🏷️ Label Designer Enhancements
+
+- ⬜ **Custom background colors** - User-selectable label background (1 day)
+- ⬜ **Background images** - Support logo/image backgrounds on labels (1-2 days)
+
+**Estimated Total**: 2-3 days
+
+---
+
+### ⚡ Power Management Enhancements
+
+- ⬜ **Power service assignment** - Designate services (A, B, C, etc.) (2 days)
+- ⬜ **Phase distribution templates** - Save/load phase configurations (AB vs AC phasing) (3-4 days)
+- ⬜ **Custom phase labels** - User-defined phase naming (1, 2, 3 or A, B, C) (1 day)
+
+**Estimated Total**: 1 week
+
+---
+
+### 📄 Paperwork Enhancements
+
+- ⬜ **Color printing support** - Enable color in system docs paperwork (1 day)
+- ⬜ **Gel color swatches** - Visual color chips for gel/color fields (2-3 days)
+  - Requires gel color database integration
+
+**Estimated Total**: 3-4 days
+
+---
+
+### 🔧 Maintenance Menu System (NEW - Major Feature)
+
+**Overview**: Lightwright 6 parity feature - custom categorization system for grouping fixtures.
+
+#### Core Functionality
+- Menu bar "Maintenance" menu with entry for every column (including user-defined)
+- Each menu item opens dialog with 4 tabs:
+  - **Notes**: General category notes
+  - **Physical**: Physical characteristics, handling
+  - **Vectorworks**: CAD-specific notes, layer assignments
+  - **Position**: Location-specific notes
+- Create custom categories/families:
+  - Examples: "ALL Incandescent", "ALL Moving Lights", "FOH Fixtures"
+  - Rule-based auto-assignment (e.g., Type contains "MAC" → "Moving Lights")
+  - Manual assignment override
+- Category integration:
+  - Show on labels
+  - Group on paperwork
+  - Drive shop order automation (Equipment Manager → Shop Order)
+  - Color-coded visual indicators
+  - Filter/search by category
+
+#### Database Schema
+```typescript
+// New tables
+- custom_categories (id, project_id, name, column_name, color)
+- category_rules (id, category_id, rule_type, rule_value)
+- category_metadata (id, category_id, notes, physical_notes, vectorworks_notes, position_notes)
+- fixture_category_assignments (fixture_id, category_id)
+```
+
+#### Implementation Phases
+1. **Phase 1: Core System** (5-7 days)
+   - Database schema
+   - Category CRUD operations
+   - Rule engine for auto-assignment
+2. **Phase 2: Maintenance Menu UI** (3-4 days)
+   - Menu bar integration
+   - Category dialogs with 4 tabs
+   - Manual assignment
+3. **Phase 3: Integration** (4-5 days)
+   - Labels integration
+   - Paperwork grouping
+   - Shop order sections
+   - Color flags
+4. **Phase 4: Advanced** (2-3 days)
+   - User-defined columns support
+   - Category-based auto-complete
+   - Import/export
+
+**Estimated Total**: 3-4 weeks
+
+**Strategic Value**:
+- **CRITICAL for shop order automation** - Provides grouping mechanism
+- Lightwright 6 parity
+- Enables sophisticated workflow customization
+- Foundation for Equipment Manager → Shop Order automation (#29)
+
+**Related Issues**: #29 (shop order automation), #14 (auto-complete)
+
+---
+
+### 🖥️ UI/UX Improvements
+
+#### Quick Fixes
+- ⬜ **Remove recent files from Production Landing** - Current flow broken (1 hour)
+
+#### Menu Bar Reorganization
+- ⬜ **Evaluate menu bar access** - Move common functions to menu for easier access
+  - Add fixture/infrastructure
+  - Generate paperwork
+  - Export options
+  - Settings access
+
+**Estimated Total**: 2-3 days
+
+---
+
+## 🚨 STRATEGIC URGENCY: Cloud Collaboration
+
+**Context**: Lightwright's January 2026 launch includes native cloud collaboration as flagship feature. This fundamentally changes market expectations.
+
+**Decision Point**: ShowStack must choose positioning:
+
+### Option 1: "Own It Outright" (Current Strategy)
+- Maintain offline-first, file-based architecture
+- Implement file merge/reconciliation (Option A above)
+- Position as "no subscription, own your data" alternative
+- **Pros**: Unique market position, no backend costs, faster to market
+- **Cons**: Perceived as "outdated" vs Lightwright's cloud features
+
+### Option 2: "Cloud-Enabled Pro" (Strategic Pivot)
+- Implement real-time collaboration (Option C above)
+- Requires subscription model for infrastructure costs
+- Compete head-to-head with Lightwright
+- **Pros**: Feature parity, modern positioning
+- **Cons**: 16-20 week development, operational costs, subscription pricing
+
+### Recommended Hybrid Approach
+1. **Immediate (4-6 weeks)**: Ship Option A (file merge) to address workflow pain
+2. **Evaluate (Month 2-3)**: Gather user feedback on collaboration needs
+3. **Strategic Decision (Month 3)**: Choose Option 1 or Option 2 based on:
+   - User demand for real-time collaboration
+   - Willingness to pay subscription
+   - Competitive pressure from Lightwright adoption
+   - Available development resources
+
+**Timeline Pressure**: Lightwright launches January 2026 (4 weeks from now). Quick action needed.
+
+---
+
 ## 🎯 Current Development Priorities
 
 ### Immediate (Next 2 Weeks)
@@ -939,7 +1130,7 @@ Privacy-first telemetry system with PostHog integration.
 
 ---
 
-**Last Updated:** December 26, 2024 by Claude Code
+**Last Updated:** December 27, 2024 by Claude Code
 
 ---
 
