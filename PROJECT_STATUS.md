@@ -1,5 +1,6 @@
 # ShowStack Project Status
 
+**Created:** December 18, 2024
 **Last Updated:** December 28, 2024
 **Current Version:** 0.1.0-alpha
 **Development Phase:** Alpha
@@ -25,6 +26,90 @@ This document tracks the development status of all ShowStack feature domains and
 ## 🚧 Lighting Features (Lighting Edition)
 
 The Lighting feature domain is a comprehensive lighting production suite that includes fixture management, shop orders, and paperwork generation - a modern alternative to LightWright 6. Available in Lighting, Designer, Production, and Complete editions.
+
+### 🚧 In Development: Fixture Management (Equipment Manager)
+
+Core fixture database and virtual grid for managing lighting plots.
+
+#### Completed Components
+- ✅ **Virtual Data Grid** - `src/renderer/src/components/fixture/VirtualDataGrid.tsx`
+  - Virtual scrolling for 10,000+ fixtures
+  - 60 FPS performance
+  - Auto-linking circuits to racks
+  - Multi-select support
+  - In-cell editing
+
+- ✅ **Equipment Manager Page** - `src/renderer/src/pages/modules/EquipmentManager.tsx`
+  - Full fixture CRUD operations
+  - Power rack management
+  - Auto-linking on page load
+  - Export functionality (CSV, EOS, GrandMA)
+
+- ✅ **Fixture Database** - `src/main/database/projectSchema.ts:fixtures`
+  - 68+ columns including power rack assignments
+  - LightWright parity achieved
+  - Full IPC handler integration
+
+- ✅ **Power Management** - `src/renderer/src/components/power/`
+  - Power Summary panel with utilization tracking
+  - Dimmer rack and PD rack management
+  - Module configuration for mixed rack types
+  - Circuit parser and auto-linking
+
+- ✅ **Add Fixture Dialog** - `src/renderer/src/components/fixture/AddFixtureDialog.tsx`
+  - Full fixture creation form with all 68+ fields
+  - Input validation and type checking
+  - Integration with fixture store
+
+- ✅ **Bulk Edit Dialog** - `src/renderer/src/components/fixture/BulkEditDialog.tsx`
+  - Comprehensive field coverage (30+ editable fields)
+  - 7 collapsible sections (Basic, Control, Power, Color/Accessories, Location, Focus, Other)
+  - Typed inputs (number, dropdown, textarea) with validation
+  - Enhanced auto-numbering supporting 6 fields (channel, address, unit, position, circuit, dimmer)
+  - Multi-fixture editing with field-level control
+
+- ✅ **Column Visibility Menu** - `src/renderer/src/components/fixture/ColumnVisibilityMenu.tsx`
+  - Toggle column visibility with persistent user preferences
+  - Fixture and infrastructure column configurations
+  - Project-scoped preference storage
+  - Real-time column show/hide updates
+
+#### Core Features Completed
+- ✅ **Undo/Redo System** - `src/renderer/src/store/undoRedoStore.ts`
+  - Command pattern implementation for all fixture and infrastructure operations
+  - Keyboard shortcuts (Cmd+Z undo, Cmd+Shift+Z redo)
+  - Menu integration with dynamic enable/disable states
+  - 100-item history limit with automatic trimming
+  - History clearing on project changes
+  - Commands: Add, Update, Delete, Bulk Update, Bulk Delete (fixtures + infrastructure)
+  - Ref-based event handlers to prevent listener duplication
+  - React.StrictMode disabled to prevent double-mounting issues in development
+
+#### Future Enhancements
+- 💡 **Auto-complete System** - Manufacturer, type, color, gobo database (deferred - requires extensive fixture database)
+- 💡 **DMX Conflict Detection** - Highlight conflicts in grid (waiting for Vectorworks integration)
+
+---
+
+### 🚧 In Development: Label Designer (75% Complete)
+
+Drag-and-drop label creation for various printer types with HTML5 Canvas.
+
+- ✅ **Label Designer Page** - `src/renderer/src/pages/modules/LabelDesigner.tsx` (1,182 lines)
+  - ✅ Drag-and-drop label layout with canvas-based WYSIWYG editor
+  - ✅ Drawing tools: text, rectangle, circle, line
+  - ✅ Template system: cable, circuit, fixture, dimmer labels
+  - ✅ Custom label designs with save/load (localStorage)
+  - ✅ Avery template support (5 predefined templates)
+  - ✅ Printer type selection (Dymo, Brother, Zebra, Avery sheets)
+  - ✅ Batch printing mode
+  - ✅ Element inspector with property editing
+  - ⬜ **PDF export** - handleExportLabels() needs implementation
+  - ⬜ **Actual printing** - handlePrintLabels() needs IPC integration
+  - ⬜ **Barcode/QR code generation** - Mentioned but not implemented
+  - ⬜ **Printer driver integration** - No direct printer communication
+
+---
 
 ### ✅ Completed: Shop Order Tool
 
@@ -146,94 +231,6 @@ Complete shop order and equipment specification builder with professional PDF ou
 
 ---
 
-### 🚧 In Development: Fixture Management (Equipment Manager)
-
-Core fixture database and virtual grid for managing lighting plots.
-
-#### Completed Components
-- ✅ **Virtual Data Grid** - `src/renderer/src/components/fixture/VirtualDataGrid.tsx`
-  - Virtual scrolling for 10,000+ fixtures
-  - 60 FPS performance
-  - Auto-linking circuits to racks
-  - Multi-select support
-  - In-cell editing
-
-- ✅ **Equipment Manager Page** - `src/renderer/src/pages/modules/EquipmentManager.tsx`
-  - Full fixture CRUD operations
-  - Power rack management
-  - Auto-linking on page load
-  - Export functionality (CSV, EOS, GrandMA)
-
-- ✅ **Fixture Database** - `src/main/database/projectSchema.ts:fixtures`
-  - 68+ columns including power rack assignments
-  - LightWright parity achieved
-  - Full IPC handler integration
-
-- ✅ **Power Management** - `src/renderer/src/components/power/`
-  - Power Summary panel with utilization tracking
-  - Dimmer rack and PD rack management
-  - Module configuration for mixed rack types
-  - Circuit parser and auto-linking
-
-- ✅ **Add Fixture Dialog** - `src/renderer/src/components/fixture/AddFixtureDialog.tsx`
-  - Full fixture creation form with all 68+ fields
-  - Input validation and type checking
-  - Integration with fixture store
-
-- ✅ **Bulk Edit Dialog** - `src/renderer/src/components/fixture/BulkEditDialog.tsx`
-  - Comprehensive field coverage (30+ editable fields)
-  - 7 collapsible sections (Basic, Control, Power, Color/Accessories, Location, Focus, Other)
-  - Typed inputs (number, dropdown, textarea) with validation
-  - Enhanced auto-numbering supporting 6 fields (channel, address, unit, position, circuit, dimmer)
-  - Multi-fixture editing with field-level control
-
-- ✅ **Column Visibility Menu** - `src/renderer/src/components/fixture/ColumnVisibilityMenu.tsx`
-  - Toggle column visibility with persistent user preferences
-  - Fixture and infrastructure column configurations
-  - Project-scoped preference storage
-  - Real-time column show/hide updates
-
-#### Core Features Completed
-- ✅ **Undo/Redo System** - `src/renderer/src/store/undoRedoStore.ts`
-  - Command pattern implementation for all fixture and infrastructure operations
-  - Keyboard shortcuts (Cmd+Z undo, Cmd+Shift+Z redo)
-  - Menu integration with dynamic enable/disable states
-  - 100-item history limit with automatic trimming
-  - History clearing on project changes
-  - Commands: Add, Update, Delete, Bulk Update, Bulk Delete (fixtures + infrastructure)
-  - Ref-based event handlers to prevent listener duplication
-  - React.StrictMode disabled to prevent double-mounting issues in development
-
-#### Core Features In Development
-- ✅ **Paperwork Generator & Headers** - Customizable report generation with headers (Phase 1 & 2 complete)
-- 🚧 **Label Designer** - Drag-and-drop label creation for equipment/cables
-
-#### Future Enhancements
-- 💡 **Auto-complete System** - Manufacturer, type, color, gobo database (deferred - requires extensive fixture database)
-- 💡 **DMX Conflict Detection** - Highlight conflicts in grid (waiting for Vectorworks integration)
-
----
-
-### 🚧 In Development: Label Designer (75% Complete)
-
-Drag-and-drop label creation for various printer types with HTML5 Canvas.
-
-- ✅ **Label Designer Page** - `src/renderer/src/pages/modules/LabelDesigner.tsx` (1,182 lines)
-  - ✅ Drag-and-drop label layout with canvas-based WYSIWYG editor
-  - ✅ Drawing tools: text, rectangle, circle, line
-  - ✅ Template system: cable, circuit, fixture, dimmer labels
-  - ✅ Custom label designs with save/load (localStorage)
-  - ✅ Avery template support (5 predefined templates)
-  - ✅ Printer type selection (Dymo, Brother, Zebra, Avery sheets)
-  - ✅ Batch printing mode
-  - ✅ Element inspector with property editing
-  - ⬜ **PDF export** - handleExportLabels() needs implementation
-  - ⬜ **Actual printing** - handlePrintLabels() needs IPC integration
-  - ⬜ **Barcode/QR code generation** - Mentioned but not implemented
-  - ⬜ **Printer driver integration** - No direct printer communication
-
----
-
 ### ✅ Completed: Paperwork Generator (Phase 1 & 2)
 
 Custom report and paperwork templates with fully customizable headers using visual layout designer.
@@ -292,31 +289,6 @@ Custom report and paperwork templates with fully customizable headers using visu
   - Templates stored in app database
   - Edit/export/import via admin panel
   - Toggle between simple (Phase 1) and advanced (Phase 2) editors
-
----
-
-### ⬜ Planned: Vectorworks Integration
-
-Import/export fixtures from Vectorworks with reconciliation.
-
-- ⬜ **Vectorworks Import/Export**
-  - XML import from Vectorworks
-  - Reconciliation workflow (detect changes)
-  - Export back to Vectorworks
-  - Field mapping configuration
-
----
-
-### ⬜ Planned: Console Integration
-
-ETC Eos console communication via OSC.
-
-- ⬜ **ETC Eos Integration**
-  - OSC communication library (osc-js)
-  - Patch import from console
-  - Send patch updates to console
-  - Channel number sync
-  - Fixture type mapping
 
 ---
 
@@ -470,6 +442,31 @@ Comprehensive tracking system for network equipment, data distribution, audio/vi
 
 ---
 
+### ⬜ Planned: Vectorworks Integration
+
+Import/export fixtures from Vectorworks with reconciliation.
+
+- ⬜ **Vectorworks Import/Export**
+  - XML import from Vectorworks
+  - Reconciliation workflow (detect changes)
+  - Export back to Vectorworks
+  - Field mapping configuration
+
+---
+
+### ⬜ Planned: Console Integration
+
+ETC Eos console communication via OSC.
+
+- ⬜ **ETC Eos Integration**
+  - OSC communication library (osc-js)
+  - Patch import from console
+  - Send patch updates to console
+  - Channel number sync
+  - Fixture type mapping
+
+---
+
 ### ⬜ Planned: Advanced Features
 
 Additional production tools.
@@ -479,6 +476,39 @@ Additional production tools.
 - ⬜ **DMX Map Visualization** - Visual DMX universe layout
 - ⬜ **Focus Charts** - Custom focus chart generation
 - ⬜ **Work Notes** - Tracking installation notes, issues, changes
+
+---
+
+## 🚧 IN PROGRESS: Telemetry & Analytics (60% Complete)
+
+Privacy-first telemetry system with PostHog integration.
+
+- ✅ **Telemetry Service** - `src/renderer/src/services/telemetry.ts` (327 lines)
+  - Event tracking with localStorage buffering
+  - Batch syncing (50 events or 60 seconds)
+  - PostHog REST API integration (fetch-based)
+  - Privacy-first architecture (opt-in required)
+  - Anonymous ID generation (crypto.randomUUID)
+  - Session tracking
+  - Auto-flush before app close
+  - Data retention management (90 days default)
+
+- ✅ **UI Components**
+  - `ConsentDialog.tsx` - Full consent dialog implementation
+  - `PrivacySettings.tsx` - Privacy settings with telemetry toggles
+  - App.tsx integrates telemetry for app lifecycle events
+
+- ✅ **Configuration**
+  - Environment variable setup (VITE_POSTHOG_KEY)
+  - PostHog setup documentation (`POSTHOG_SETUP.md` - 336 lines)
+  - Settings store integration
+
+- ⬜ **PostHog SDK** - NOT installed (uses raw fetch() instead of posthog-js)
+- ⬜ **API Key Configuration** - .env.local needs PostHog project key
+- ⬜ **Extended Event Tracking** - Only app_opened/app_closed currently tracked
+- ⬜ **Error Tracking** - Beyond console.log
+- ⬜ **Performance Metrics** - Placeholder code only
+- ⬜ **Analytics Dashboard** - Admin panel integration not implemented
 
 ---
 
@@ -579,7 +609,7 @@ Additional production tools.
 
 - ✅ **Theme Constants** - `src/renderer/src/constants/theme.ts`
   - Centralized color palette
-  - Module-specific colors
+  - Edition-specific colors
   - UI pattern definitions
 
 ### File Operations
@@ -653,26 +683,6 @@ Additional production tools.
 
 ---
 
-## ⬜ PLANNED: Tour & Production Features
-
-Production logistics and budgeting tools for tour and production management. Available in Production and Complete editions.
-
-- ⬜ **Tour Features**
-  - Tour calendar
-  - Venue database
-  - Per diem calculator
-  - Equipment manifests
-  - Multi-show coordination
-
-- ⬜ **Production Features**
-  - Budget tracking and forecasting
-  - Crew roster management
-  - Equipment inventory tracking
-  - Vendor contact management
-  - Purchase orders and invoicing
-
----
-
 ## ✅ COMPLETED: Developer Mode
 
 Full developer mode implementation with DevTools integration.
@@ -698,39 +708,6 @@ Full developer mode implementation with DevTools integration.
   - Access developer mode state from any component
 
 - ⬜ **Feature Flag System** - Not yet connected to developer mode
-
----
-
-## 🚧 IN PROGRESS: Telemetry & Analytics (60% Complete)
-
-Privacy-first telemetry system with PostHog integration.
-
-- ✅ **Telemetry Service** - `src/renderer/src/services/telemetry.ts` (327 lines)
-  - Event tracking with localStorage buffering
-  - Batch syncing (50 events or 60 seconds)
-  - PostHog REST API integration (fetch-based)
-  - Privacy-first architecture (opt-in required)
-  - Anonymous ID generation (crypto.randomUUID)
-  - Session tracking
-  - Auto-flush before app close
-  - Data retention management (90 days default)
-
-- ✅ **UI Components**
-  - `ConsentDialog.tsx` - Full consent dialog implementation
-  - `PrivacySettings.tsx` - Privacy settings with telemetry toggles
-  - App.tsx integrates telemetry for app lifecycle events
-
-- ✅ **Configuration**
-  - Environment variable setup (VITE_POSTHOG_KEY)
-  - PostHog setup documentation (`POSTHOG_SETUP.md` - 336 lines)
-  - Settings store integration
-
-- ⬜ **PostHog SDK** - NOT installed (uses raw fetch() instead of posthog-js)
-- ⬜ **API Key Configuration** - .env.local needs PostHog project key
-- ⬜ **Extended Event Tracking** - Only app_opened/app_closed currently tracked
-- ⬜ **Error Tracking** - Beyond console.log
-- ⬜ **Performance Metrics** - Placeholder code only
-- ⬜ **Analytics Dashboard** - Admin panel integration not implemented
 
 ---
 
@@ -767,6 +744,26 @@ Privacy-first telemetry system with PostHog integration.
 - handleLogin() just navigates to /modules without validation
 
 **Note:** License system (LicenseService.ts) handles feature access control but is NOT user authentication
+
+---
+
+## ⬜ PLANNED: Tour & Production Features
+
+Production logistics and budgeting tools for tour and production management. Available in Production and Complete editions.
+
+- ⬜ **Tour Features**
+  - Tour calendar
+  - Venue database
+  - Per diem calculator
+  - Equipment manifests
+  - Multi-show coordination
+
+- ⬜ **Production Features**
+  - Budget tracking and forecasting
+  - Crew roster management
+  - Equipment inventory tracking
+  - Vendor contact management
+  - Purchase orders and invoicing
 
 ---
 
@@ -965,214 +962,6 @@ Based on user testing session, the following features have been identified as hi
 - **Modern appearance** - Clean, floating toolbars, collapsible panels, dark mode optimized
 - **Speed-first design** - Keyboard shortcuts, command palette, inline editing, power user features
 
-#### Core Architecture
-
-**Unified Component Structure**:
-```
-src/renderer/src/components/unified-editor/
-├── UnifiedLayoutEditor.tsx          # Main wrapper, context-aware
-├── toolbar/
-│   ├── FloatingToolbar.tsx         # Context-aware tools, always accessible
-│   ├── QuickActions.tsx            # Cmd+K command palette
-│   └── ModeToggle.tsx              # Edit ⇄ Preview mode
-├── panels/
-│   ├── LeftPanel.tsx               # Collapsible structure panel
-│   │   ├── StructureTree.tsx       # Layers/sections
-│   │   ├── ComponentLibrary.tsx    # Drag templates
-│   │   └── FieldSelector.tsx       # Data fields (context-specific)
-│   └── RightPanel.tsx              # Collapsible properties panel
-│       ├── TextProperties.tsx      # Font, size, style, color, alignment
-│       ├── ShapeProperties.tsx     # Fill, border, corner radius, opacity
-│       ├── ImageProperties.tsx     # Source, fit, border
-│       ├── TableProperties.tsx     # Columns, styling, grouping
-│       ├── BarcodeProperties.tsx   # QR/Code128/Code39 (labels)
-│       └── PageProperties.tsx      # Size, orientation, margins, background
-├── canvas/
-│   ├── Canvas.tsx                  # Main design surface
-│   ├── Grid.tsx                    # Configurable grid
-│   ├── SnapGuides.tsx              # Alignment helpers
-│   └── elements/
-│       ├── TextElement.tsx         # Inline editable text
-│       ├── ShapeElement.tsx        # Rectangles, circles, lines
-│       ├── ImageElement.tsx        # Logo, graphics
-│       ├── TableElement.tsx        # Data tables
-│       └── BarcodeElement.tsx      # QR codes, barcodes
-└── controls/
-    ├── FontSelector.tsx            # Font family dropdown
-    ├── ColorPicker.tsx             # Presets + custom + eyedropper
-    ├── NumberInput.tsx             # With slider dual control
-    ├── Slider.tsx                  # Range input
-    ├── ToggleButton.tsx            # Bold/italic/underline/strikethrough
-    └── StyleControls.tsx           # Grouped formatting buttons
-```
-
-#### New Formatting Features
-
-**Text Formatting** (currently missing):
-- ✅ Font family selector (Inter, Helvetica, Arial, Roboto, Roboto Mono, Courier)
-- ✅ Font size (6-144pt) with presets (8, 10, 12, 14, 16, 18, 24, 36)
-- ✅ Style toggles: Bold, Italic, Underline, Strikethrough
-- ✅ Color picker with presets (Black, White, Blue, Red, Green, Amber, Gray)
-- ✅ Alignment: Left, Center, Right
-- ✅ Line height control
-- ✅ Letter spacing control
-
-**Shape Formatting** (currently missing):
-- ✅ Fill enabled/disabled toggle
-- ✅ Fill color with opacity slider (0-100%)
-- ✅ Fill type: Solid, Gradient, Pattern
-- ✅ Border enabled/disabled toggle
-- ✅ Border color, width, style (solid/dashed/dotted)
-- ✅ Corner radius (0-100px)
-- ✅ Shadow effects (optional)
-
-**Image Formatting**:
-- ✅ Fit modes: Cover, Contain, Fill, None
-- ✅ Border controls
-- ✅ Position controls
-
-**Table Formatting**:
-- ✅ Column selection
-- ✅ Header style (background, text color, font size)
-- ✅ Row striping with alternating colors
-- ✅ Grouping and sorting controls
-
-**Barcode/QR Code** (label-specific):
-- ✅ Type selector: QR Code, Code 128, Code 39
-- ✅ Data template variables (e.g., `{equipment.id}`)
-- ✅ Size control
-- ✅ Error correction level (QR)
-
-#### Context-Specific Adaptations
-
-**Paperwork Context** (`context="paperwork-report"`):
-- Available elements: Text, Shape, Image, Table, Data Field
-- Left panel: Report type selector, field checkboxes, grouping/sorting
-- Focus: Multi-page documents, data tables, headers/footers
-
-**Label Context** (`context="label"`):
-- Available elements: Text, Shape, Image, Barcode, Data Field
-- Left panel: Label size presets (2×4", 4×6", 4×8"), equipment fields
-- Focus: Small format, barcode generation, variable data
-
-**Shop Order Context** (`context="shop-order"`):
-- Available elements: Text, Shape, Image, Table, Section divider
-- Left panel: Section list, notes blocks, revision markers
-- Focus: Professional documents, notes, revision tracking
-
-#### UX Improvements
-
-**Visual Design**:
-- ✅ Three-panel layout (Content | Canvas | Properties)
-- ✅ Floating toolbar (Figma-style, always accessible)
-- ✅ Collapsible side panels (VS Code-style)
-- ✅ Dark mode optimized (primary for theater environments)
-- ✅ High contrast, WCAG AAA accessibility
-- ✅ Large touch targets (56×56px min for tablet/glove use)
-
-**Interaction Patterns**:
-- ✅ Inline text editing (double-click to edit)
-- ✅ Smart guides and snapping (pink/blue alignment helpers)
-- ✅ Multi-select with Cmd+Click
-- ✅ Drag-and-drop from component library
-- ✅ Keyboard shortcuts for all actions
-- ✅ Command palette (Cmd+K) for power users
-- ✅ Preview ⇄ Edit mode toggle
-
-**Keyboard Shortcuts**:
-```
-TEXT FORMATTING
-Cmd+B          Bold
-Cmd+I          Italic
-Cmd+U          Underline
-Cmd+Shift+>    Increase font size
-Cmd+Shift+<    Decrease font size
-
-ALIGNMENT
-Cmd+Shift+L    Align left
-Cmd+Shift+E    Align center
-Cmd+Shift+R    Align right
-
-ELEMENTS
-T              Add text
-R              Add rectangle
-L              Add line
-I              Add image
-B              Add barcode (labels)
-D              Add data field
-
-CANVAS
-Cmd+Z          Undo
-Cmd+Shift+Z    Redo
-Cmd+D          Duplicate
-Delete         Delete selected
-
-TOOLS
-Cmd+K          Command palette
-Cmd+/          Show shortcuts
-Cmd+P          Preview mode
-Cmd+S          Save template
-```
-
-**Responsive Design**:
-- Desktop (≥1400px): Three-panel layout
-- Compact (<1400px): Full-width canvas, drawer panels
-- Tablet: Touch-optimized, larger buttons (56×56px)
-
-#### Multi-Discipline Support
-
-**Current**: Lighting-specific fields (Channel, Dimmer, Color, Gobo, etc.)
-
-**Phase 2 Expansion**:
-- Audio fields: Input/Output, Channel strip, Mic type, Phantom power, Zone, Mix bus
-- Video fields: Input/Output, Resolution, Signal type, Routing, Pixel mapping, Layer
-- Unified field selector adapts to discipline
-
-#### Unified Data Model
-
-```typescript
-interface LayoutElement {
-  id: string;
-  type: 'text' | 'shape' | 'image' | 'table' | 'barcode' | 'dataField';
-  position: { x: number; y: number };
-  size: { width: number; height: number };
-
-  // NEW: Text properties
-  text?: {
-    content: string;
-    font: string;
-    fontSize: number;
-    fontWeight: 'normal' | 'bold';
-    fontStyle: 'normal' | 'italic';
-    textDecoration: 'none' | 'underline' | 'line-through';
-    color: string;
-    alignment: 'left' | 'center' | 'right';
-    lineHeight: number;
-    letterSpacing: number;
-  };
-
-  // NEW: Shape properties
-  shape?: {
-    type: 'rectangle' | 'circle' | 'line';
-    fill: {
-      enabled: boolean;
-      color: string;
-      opacity: number;
-      type: 'solid' | 'gradient' | 'pattern';
-    };
-    border: {
-      enabled: boolean;
-      color: string;
-      width: number;
-      style: 'solid' | 'dashed' | 'dotted';
-    };
-    cornerRadius: number;
-  };
-
-  // Existing: Image, table, barcode, dataField...
-}
-```
-
 #### Implementation Phases
 
 **Phase 1: Core Refactor** (2 weeks)
@@ -1261,15 +1050,6 @@ interface LayoutElement {
   - Drive shop order automation (Equipment Manager → Shop Order)
   - Color-coded visual indicators
   - Filter/search by category
-
-#### Database Schema
-```typescript
-// New tables
-- custom_categories (id, project_id, name, column_name, color)
-- category_rules (id, category_id, rule_type, rule_value)
-- category_metadata (id, category_id, notes, physical_notes, vectorworks_notes, position_notes)
-- fixture_category_assignments (fixture_id, category_id)
-```
 
 #### Implementation Phases
 1. **Phase 1: Core System** (5-7 days)
@@ -1386,7 +1166,7 @@ interface LayoutElement {
 
 ### Long-term (6-12 Months) - **Market Differentiation**
 1. **Real-time multi-user collaboration** (strategic decision - requires cloud backend)
-2. ShowStack:Manager module (tour logistics, budgeting)
+2. Tour & Production features (logistics, budgeting)
 3. Advanced features (focus charts, work notes, cable tracking)
 4. Roll printer support for label printing
 5. Public launch at USITT or LDI 2026
@@ -1422,13 +1202,10 @@ interface LayoutElement {
 ---
 
 **For detailed implementation plans, see:**
-- [Telemetry & DevMode Plan](docs/planning/TELEMETRY_DEVMODE_IMPLEMENTATION.md)
+- [Naming & Editions Guide](docs/architecture/naming-and-editions.md)
+- [Migration to Unified Licensing](docs/architecture/migration-unified-licensing.md)
 - [Architecture Guide](docs/development/ARCHITECTURE.md)
 - [Technical Specification](docs/business/technical-spec.md)
-
----
-
-**Last Updated:** December 27, 2024 by Claude Code
 
 ---
 
@@ -1437,3 +1214,7 @@ interface LayoutElement {
 - [Lightwright Platform Overhaul Announcement](https://www.usitt.org/news/lightwright-unveils-historic-platform-overhaul-introducing-real-time-collaboration-a-new-era-of-data-management)
 - [Lightwright New Features | Live Design](https://www.livedesignonline.com/b2b-experience/lightwright-unveils-historic-platform-overhaul-introducing-real-time-collaboration)
 - [Lightwright Official Site](https://www.lightwright.com/)
+
+---
+
+**Last Updated:** December 28, 2024 by Claude Code
