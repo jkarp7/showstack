@@ -2,140 +2,187 @@
 
 Welcome to the ShowStack documentation! This directory contains all project documentation organized by category.
 
+**Last Updated:** December 28, 2024
+
 ---
 
-## 📚 Documentation Index
+## 📁 Documentation Structure
+
+### `/architecture` - System Architecture & Strategy
+Strategic architecture decisions and implementation guides for the unified application.
+
+- **`migration-unified-licensing.md`** - Technical guide for implementing license-based feature access
+- **`naming-and-editions.md`** - Edition structure, pricing, and naming conventions
+
+### `/features` - Feature Specifications
+Detailed specifications and analysis for specific features and integrations.
+
+- **`migration-sound-features.md`** - Complete specification for Sound Edition features
+- **`minotaur-parity-analysis.md`** - Analysis of Minotaur competitor for sound features
+
+### `/business` - Business Documentation
+Business plans, pricing strategy, and technical specifications.
+
+- **`pricing.md`** - Pricing strategy and edition tiers
+- **`summary.md`** - Business overview and market positioning
+- **`technical-spec.md`** - Technical specifications for stakeholders
+
+### `/development` - Developer Guides
+Documentation for developers working on ShowStack.
+
+- **`ARCHITECTURE.md`** - System architecture overview
+- **`CLAUDE_CODE_QUICKSTART.md`** - Quick start guide for Claude Code
+- **`dev-setup.md`** - Development environment setup
+
+### `/user` - User Documentation
+End-user facing documentation and guides.
+
+- **`ADMIN_PANEL_USER_GUIDE.md`** - Admin panel user guide
+- **`LICENSING_SYSTEM_README.md`** - License management guide
+
+### `/releases` - Release Documentation
+Alpha and beta release setup and guides.
+
+- **`ALPHA_BETA_RELEASE_SETUP.md`** - Release setup instructions
+- **`alpha-release-guide.md`** - Alpha release checklist
+- **`beta-release-guide.md`** - Beta release checklist
+
+### `/mockups` - Design Mockups
+Visual mockups and UI/UX designs.
+
+- **`unified-editor-mockup.md`** - Unified visual editor system mockup
+
+### `/github-issues` - Issue Templates
+Pre-written GitHub issue content ready to be created.
+
+- **`unified-editor-issues.md`** - Unified visual editor implementation issues
+
+### `/archive` - Historical Documentation
+Completed implementation plans and archived strategic documents.
+
+- Implementation plans for completed features (Undo/Redo, Telemetry, Developer Mode)
+- Historical architecture decisions
+- Migration guides for completed migrations
+
+---
+
+## 🎯 Quick Start
 
 ### For Developers
+1. Read [`/development/ARCHITECTURE.md`](development/ARCHITECTURE.md) - Understand the system
+2. Read [`/architecture/migration-unified-licensing.md`](architecture/migration-unified-licensing.md) - Learn the license system
+3. Read [`/development/dev-setup.md`](development/dev-setup.md) - Set up your environment
 
-**[development/](development/)**
-- **[dev-setup.md](development/dev-setup.md)** - Development environment setup and build process
-- **[ARCHITECTURE.md](development/ARCHITECTURE.md)** - Frontend architecture, module patterns, and coding guidelines
-- **[CLAUDE_CODE_QUICKSTART.md](development/CLAUDE_CODE_QUICKSTART.md)** - Quick start guide for developing with Claude Code
+### For Business Stakeholders
+1. Read [`/business/summary.md`](business/summary.md) - Business overview
+2. Read [`/architecture/naming-and-editions.md`](architecture/naming-and-editions.md) - Edition strategy
+3. Read [`/business/pricing.md`](business/pricing.md) - Pricing strategy
 
-### For Users
-
-**[user/](user/)**
-- **[ADMIN_PANEL_USER_GUIDE.md](user/ADMIN_PANEL_USER_GUIDE.md)** - Complete guide to admin panel features
-- **[LICENSING_SYSTEM_README.md](user/LICENSING_SYSTEM_README.md)** - License management and activation guide
-
-### Business & Strategy
-
-**[business/](business/)**
-- **[technical-spec.md](business/technical-spec.md)** - Complete technical specifications and feature details
-- **[pricing.md](business/pricing.md)** - Pricing strategy, competitive analysis, and revenue model
-- **[summary.md](business/summary.md)** - Executive summary of the project
-
-### Release Guides
-
-**[releases/](releases/)**
-- **[ALPHA_BETA_RELEASE_SETUP.md](releases/ALPHA_BETA_RELEASE_SETUP.md)** - Overview of the release process
-- **[alpha-release-guide.md](releases/alpha-release-guide.md)** - Manual alpha release process
-- **[beta-release-guide.md](releases/beta-release-guide.md)** - Automated beta releases with GitHub Actions
-
-### Future Planning
-
-**[planning/](planning/)**
-- **[TELEMETRY_DEVMODE_IMPLEMENTATION.md](planning/TELEMETRY_DEVMODE_IMPLEMENTATION.md)** - Implementation plan for telemetry and developer mode features
-
-### Historical Documentation
-
-**[archive/](archive/)**
-
-Completed implementation summaries and session notes:
-- **PHASE_1_DEVELOPMENT_GUIDE.md** - Phase 1 planning (completed)
-- **ADMIN_PANEL_MIGRATION.md** - Admin panel implementation session notes
-- **FILE_OPERATIONS_PLAN.md** - File operations implementation plan
-- **PREP_MODULE_IMPLEMENTATION.md** - Shop Order tool implementation summary
-- **PRINT_BUILDER_IMPLEMENTATION.md** - Print builder feature summary
+### For Feature Development
+1. Read [`/architecture/migration-unified-licensing.md`](architecture/migration-unified-licensing.md) - Feature flag system
+2. Check [`/features/`](features/) for specific feature specs
+3. Review [`/mockups/`](mockups/) for UI designs
 
 ---
 
-## 🎯 Quick Links
+## 📊 Current Development Status
 
-### Getting Started
-1. [Development Setup](development/dev-setup.md) - Set up your dev environment
-2. [Architecture Guide](development/ARCHITECTURE.md) - Understand the codebase structure
-3. [Project Status](../PROJECT_STATUS.md) - See what's completed and what's planned
-
-### For Contributors
-1. [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines and workflow
-2. [Code Standards](development/ARCHITECTURE.md#code-standards) - Coding conventions
-3. [Current Priorities](../PROJECT_STATUS.md#current-development-priorities) - What to work on
-
-### For Users
-1. [Admin Panel Guide](user/ADMIN_PANEL_USER_GUIDE.md) - Learn admin features
-2. [License Management](user/LICENSING_SYSTEM_README.md) - Manage your license
-
-### For Release Management
-1. [Alpha Release Process](releases/alpha-release-guide.md) - Manual releases
-2. [Beta Release Process](releases/beta-release-guide.md) - Automated releases
-3. [Release Setup](releases/ALPHA_BETA_RELEASE_SETUP.md) - Overview
+See **`../PROJECT_STATUS.md`** (root directory) for the comprehensive development status including:
+- Feature completion status
+- Implementation priorities
+- Competitive analysis
+- User feedback tracking
 
 ---
 
-## 📝 Documentation Standards
+## 🏗️ Architecture Overview
 
-When adding new documentation:
+ShowStack is a **unified application** with **license-based editions**:
 
-1. **Choose the right category:**
-   - `development/` - Developer guides, architecture, setup
-   - `user/` - User-facing documentation
-   - `business/` - Business strategy, specs, pricing
-   - `releases/` - Release process guides
-   - `planning/` - Future feature plans
-   - `archive/` - Completed implementation docs
+### Core Concept
+- **One Application** - Single download, single codebase
+- **Multiple Editions** - Features activated via license key
+- **Six Feature Domains** - Lighting, Sound, Video, Production, Tour, Producer
+- **Clean UI** - Only shows licensed features
 
-2. **Use clear formatting:**
-   - Start with a clear title and summary
-   - Use headings (H2, H3) for structure
-   - Include code examples where relevant
-   - Add links to related files/sections
+### Edition Structure
+| Edition | Features | Price |
+|---------|----------|-------|
+| Lighting Edition | Lighting design & management | $249/year |
+| Sound Edition | Sound system design | $199/year |
+| Video Edition | Video/projection design | $199/year |
+| Designer Edition | Lighting + Sound + Video | $449/year |
+| Production Edition | All design + Production + Tour | $599/year |
+| Complete Edition | All 6 feature domains | $999/year |
 
-3. **Keep it up-to-date:**
-   - Update docs when features change
-   - Archive completed implementation docs
-   - Reference PROJECT_STATUS.md for current state
+---
 
-4. **Link appropriately:**
-   - Link from README.md
-   - Link from PROJECT_STATUS.md if relevant
-   - Cross-reference related docs
+## 📝 Contributing to Documentation
+
+### Adding New Documentation
+
+1. **Determine the category** - Which folder does it belong in?
+2. **Use clear naming** - Use descriptive, kebab-case filenames
+3. **Add frontmatter** - Include date, status, and purpose at the top
+4. **Update this README** - Add your new doc to the appropriate section
+
+### Archiving Documentation
+
+When a feature is complete or a decision is final:
+
+1. Move implementation plans to `/archive`
+2. Add a note indicating completion status
+3. Update this README if it was referenced here
+
+### Documentation Standards
+
+- **Markdown format** - Use GitHub-flavored Markdown
+- **Clear headers** - Use proper header hierarchy (h1 → h2 → h3)
+- **Status indicators** - Use ✅ (complete), 🚧 (in progress), ⬜ (planned)
+- **Last updated dates** - Include "Last Updated" in frontmatter
+- **Links** - Use relative links to other docs
 
 ---
 
 ## 🔍 Finding Documentation
 
 ### By Topic
+- **Architecture decisions**: `/architecture`
+- **Feature specs**: `/features`
+- **Business info**: `/business`
+- **Developer guides**: `/development`
+- **User guides**: `/user`
+- **Completed work**: `/archive`
 
-**Architecture & Code:**
-- [Frontend Architecture](development/ARCHITECTURE.md)
-- [Module Development](development/ARCHITECTURE.md#module-development-guidelines)
-- [Code Standards](development/ARCHITECTURE.md#code-standards)
+### By Status
+- **Current/Active**: All folders except `/archive`
+- **Historical/Complete**: `/archive`
 
-**Features:**
-- [Completed Features](../PROJECT_STATUS.md#completed-features)
-- [In Progress Features](../PROJECT_STATUS.md#in-progress)
-- [Planned Features](../PROJECT_STATUS.md#planned-features)
-
-**Processes:**
-- [Development Workflow](../CONTRIBUTING.md#development-workflow)
-- [Testing Strategy](../CONTRIBUTING.md#testing)
-- [Release Process](releases/)
-
-**Business:**
-- [Technical Specs](business/technical-spec.md)
-- [Pricing Strategy](business/pricing.md)
-- [Market Analysis](business/pricing.md)
+### By Audience
+- **Developers**: `/development`, `/architecture`
+- **Business**: `/business`, `/architecture/naming-and-editions.md`
+- **Users**: `/user`
+- **Designers**: `/mockups`
 
 ---
 
 ## 📧 Questions?
 
-- **Technical questions:** Check [development/](development/) docs first
-- **User questions:** Check [user/](user/) docs first
-- **Can't find what you need?** Open an issue on GitHub
+If you can't find what you're looking for:
+
+1. Check **`../PROJECT_STATUS.md`** for current development status
+2. Search the docs folder: `grep -r "search term" docs/`
+3. Check the `/archive` for historical context
 
 ---
 
-**Last Updated:** December 10, 2024
+## 📚 Related Documentation
+
+- **`../README.md`** - Project README (root)
+- **`../PROJECT_STATUS.md`** - Development status (root)
+- **`../CONTRIBUTING.md`** - Contribution guidelines (root)
+
+---
+
+**Documentation maintained by the ShowStack team**
+**Last major reorganization:** December 28, 2024
