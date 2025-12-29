@@ -572,81 +572,395 @@ All features from Lighting, Sound, and Video editions combined. Users can work a
 
 ## 🎬 Production Edition
 
-**Price:** $599/year
+**Price:** $599/year (66% cheaper than Propared's $1,750/year)
 **Includes:** All design features (Lighting + Sound + Video) + Production Management + Tour Logistics
-**Target Users:** Production Managers, Technical Directors, Tour Managers
+**Target Users:** Production Managers, Technical Directors, Tour Managers, Producing Organizations
+**Competes With:** Propared (production management software for arts organizations)
 
 **Status:** Planned for Year 3 (2027-2028)
 
-### ⬜ Planned: Tour Features
+**Competitive Advantage:** Only platform integrating technical design tools with production management. ShowStack users can flow data from lighting/sound/video design directly into budgets, schedules, and inventory—eliminating duplicate data entry and reducing errors.
 
-Production logistics tools for touring productions. Available in Production and Complete editions.
+**See:** `docs/features/propared-parity-analysis.md` for detailed competitive analysis
 
-- ⬜ **Tour Calendar**
-  - Multi-show scheduling
-  - Load-in/load-out tracking
+---
+
+### ⬜ Planned: Production Scheduling
+
+Comprehensive production calendar system for managing rehearsals, performances, load-in/load-out, and technical rehearsals.
+
+**Core Features:**
+- ⬜ **Production Calendar** (8-10 weeks)
+  - Multi-view calendar (year, month, week, day, timeline, list)
+  - Event types: rehearsal, performance, load-in, load-out, focus, tech, notes session
+  - Drag-and-drop event creation and editing
+  - Event templates (e.g., "Standard Tech Day", "Dress Rehearsal")
+  - Recurring events with customizable patterns
+  - Conflict detection (double-booked venue, crew, equipment)
+  - Color-coding by department or event type
+  - Export to iCal, Google Calendar, Outlook
+  - Print-friendly views
+
+- ⬜ **Event Templates**
+  - Reusable event structures (Tech Day, Load-In Day, Performance Day)
+  - One-click event creation from templates
+  - Share templates across projects
+
+- ⬜ **Integration with Labor & Budget**
+  - Calendar events automatically calculate crew hours
+  - Labor costs update budget in real-time
+  - Crew booking synced with calendar
+
+**Propared Parity:** Full parity with Propared's scheduling features
+**Effort Estimate:** 8-10 weeks
+
+---
+
+### ⬜ Planned: Budget Tracking & Management
+
+Comprehensive budget system with line-item tracking, real-time cost updates, and integration with labor, equipment, and vendor costs.
+
+**Core Features:**
+- ⬜ **Budget Builder** (6-8 weeks)
+  - Line-item budgets with categories (Labor, Equipment, Venue, Materials, Transportation, Other)
+  - Estimated vs. actual tracking
+  - Variance analysis (over/under budget)
+  - Budget templates (save and reuse)
+  - Department-level budgets
+  - Multi-project budget rollups
+  - Export to Excel, PDF
+
+- ⬜ **Labor Cost Integration**
+  - Automatic cost calculation from crew bookings
+  - Overtime rules applied automatically (1.5× time-and-a-half, 2× double-time)
+  - Weekly hour tracking with overtime warnings
+  - Real-time updates (calendar event added → Labor hours increase → Budget updates)
+
+- ⬜ **Equipment Cost Integration**
+  - Equipment items from shop orders auto-populate budget
+  - Rental costs (daily, weekly, per-show rates)
+  - Purchase costs for capital expenses
+  - Shipping/freight costs
+
+- ⬜ **Vendor Cost Integration**
+  - Purchase orders linked to budget line items
+  - Invoice tracking updates actual costs
+  - Payment status reflected in budget
+
+**Unique Advantage:** ShowStack's budget automatically updates when design data changes (e.g., adding fixtures increases rental costs and labor hours for focus)
+
+**Propared Parity:** Full parity plus design tool integration
+**Effort Estimate:** 6-8 weeks
+
+---
+
+### ⬜ Planned: Labor & Crew Management
+
+Comprehensive crew database, position management, booking system, and payroll integration.
+
+**Core Features:**
+- ⬜ **Crew Database** (8-10 weeks)
+  - Crew member profiles (contact info, emergency contacts, W-9 status)
+  - Position/role assignments with pay rates
+  - Department tags (lighting, sound, video, production, stage, wardrobe, props)
+  - Availability calendar
+  - Skills and certifications tracking
+  - Document storage (contracts, resumes)
+
+- ⬜ **Position Management**
+  - Pre-populated positions (ME, A1, Video Engineer, PM, etc.)
+  - Custom position creation
+  - Default pay rates by position
+  - Overtime multipliers (configurable)
+
+- ⬜ **Crew Booking System**
+  - Book crew from calendar events
+  - Drag-and-drop crew assignment
+  - Conflict detection (crew double-booked)
+  - Availability checking
+  - Booking status workflow (requested → tentative → confirmed)
+  - Bulk booking (assign multiple crew to same event)
+  - Weekly hour tracking per crew member
+  - Overtime warnings
+
+- ⬜ **Payroll Integration**
+  - CSV export for payroll systems (ADP, Gusto, QuickBooks)
+  - Weekly or custom date range exports
+  - Columns: Name, Position, Regular Hours, OT Hours, Total Hours, Pay Rate, Total Earnings
+  - Summary totals by department or project
+
+**Propared Parity:** Full parity with Propared's labor management
+**Effort Estimate:** 8-10 weeks
+
+---
+
+### ⬜ Planned: Inventory Management (Extended)
+
+Extend existing fixture and infrastructure tracking to include props, costumes, scenery, video equipment, and general production inventory.
+
+**Core Features:**
+- ⬜ **Multi-Department Inventory** (6-8 weeks)
+  - Props, costumes, scenery, wardrobe, tools, consumables, general equipment
+  - Ownership tracking (owned, rented, borrowed)
+  - Rental vendor linkage with daily/weekly rates
+  - Condition tracking (new, good, fair, poor, repair needed)
+  - Location tracking (storage location)
+  - Photo support (multiple images per item)
+  - Tag system for categorization
+
+- ⬜ **QR Code System**
+  - Generate unique QR code for each inventory item
+  - Print QR labels (via existing label designer)
+  - Scan QR code to view item details
+  - Check-out/check-in workflow
+  - Mobile scanning support (future mobile app)
+
+- ⬜ **Rental & Borrowed Tracking**
+  - Rental period tracking (start date, end date)
+  - Automatic cost calculation (days × daily rate OR weeks × weekly rate)
+  - Rental return tracking with late fee calculation
+  - Borrowed items (from/to, dates, return confirmation)
+
+- ⬜ **Allocation & Conflict Detection**
+  - Allocate inventory to specific projects/shows
+  - Check availability across date ranges
+  - Detect conflicts (item allocated to multiple shows on same dates)
+  - Reservation system (hold items for future shows)
+  - Visual warnings when item is double-booked
+
+**Unique Advantage:** ShowStack already tracks lighting fixtures (68+ fields) and infrastructure equipment with port-level detail—extending this to all production inventory creates a unified system
+
+**Propared Parity:** Parity plus integration with existing technical equipment tracking
+**Effort Estimate:** 6-8 weeks
+
+---
+
+### ⬜ Planned: Vendor Management
+
+Comprehensive vendor database, purchase order system, and invoice tracking.
+
+**Core Features:**
+- ⬜ **Vendor Database** (6-8 weeks)
+  - Vendor profiles (name, type, contact info, payment terms, tax ID)
+  - Vendor types: equipment rental, consumables, services, fabrication, trucking
+  - Rating/review system (1-5 stars)
+  - Document storage (contracts, W-9)
+  - Search and filter by type, rating, location
+
+- ⬜ **Purchase Order System**
+  - Create PO from shop order items or manually
+  - Auto-generate PO numbers (e.g., PO-2025-001)
+  - Multi-line item support
+  - Professional PDF export
+  - Email PO to vendor
+  - Track PO status (draft, sent, confirmed, received, paid, cancelled)
+  - Link to budget line items
+
+- ⬜ **Invoice Tracking**
+  - Link invoice to PO
+  - Track payment status (received, approved, paid, overdue, disputed)
+  - Overdue warnings
+  - Payment history
+  - Export to accounting software
+
+- ⬜ **PO Workflow**
+  1. Create PO from shop order or manually
+  2. Generate professional PDF
+  3. Send to vendor via email
+  4. Vendor confirms → Status: confirmed
+  5. Items received → Status: received
+  6. Invoice received → Link invoice
+  7. Payment made → Status: paid
+
+**Unique Advantage:** PO line items auto-populate from shop orders, eliminating duplicate data entry
+
+**Propared Gap:** Propared has limited vendor management; ShowStack's integration with shop orders provides superior workflow
+**Effort Estimate:** 6-8 weeks
+
+---
+
+### ⬜ Planned: Tour Logistics
+
+Tools for managing touring productions, including tour calendar, venue database, per diem tracking, and equipment manifests.
+
+**Core Features:**
+- ⬜ **Tour Calendar** (8-12 weeks)
+  - Visual tour calendar (timeline view)
+  - Tour date tracking (load-in, focus, tech, performances, strike, load-out)
   - Travel days and dark days
+  - Multi-show coordination
+  - Export tour schedule to PDF/iCal
 
 - ⬜ **Venue Database**
-  - Venue information library
-  - Technical specifications
+  - Venue profiles (name, address, capacity, stage dimensions, grid height)
+  - Technical specs (loading dock, power available, etc.)
   - Contact information
-  - Historical notes
+  - Historical notes ("Great load-in, 2hr drive from hotel")
+  - Photo storage
+  - Search and filter (by city, state, capacity, type)
 
 - ⬜ **Per Diem Calculator**
-  - Crew per diem tracking
-  - Currency conversion
-  - Expense reporting
+  - Track per diem by crew member and date
+  - Standard per diem rates by city/state
+  - Custom per diem rates
+  - Meal type tracking (breakfast, lunch, dinner, full day)
+  - Currency conversion (for international tours)
+  - Export for expense reporting
+  - Weekly/monthly summaries
 
 - ⬜ **Equipment Manifests**
-  - Tour inventory tracking
-  - Packing lists
-  - Shipping manifests
+  - Packing lists (what equipment goes on tour)
+  - Truck packing diagrams
+  - Equipment tracking (which truck, which case)
+  - Check-in/check-out workflow
+  - Damage tracking
+  - Replacement tracking
+  - Pull from existing fixture/equipment inventory
+  - Mark items as "on tour"
+  - Conflict detection (item needed in two places)
 
-- ⬜ **Multi-show Coordination**
-  - Rep plot management
-  - Show-specific configurations
-  - Quick changeover planning
+**Unique Advantage:** Tour manifests pull directly from ShowStack's comprehensive equipment tracking (fixtures, infrastructure, props, etc.)
 
+**Propared Gap:** Propared has limited tour-specific features; ShowStack's tour module is purpose-built
 **Effort Estimate:** 8-12 weeks
 
 ---
 
-### ⬜ Planned: Production Features
+### ⬜ Planned: Production Books & Sharing (Lower Priority)
 
-Budget and crew management tools for production management. Available in Production and Complete editions.
+Web-based information sharing portal for production schedules, notes, rosters, and documents.
 
-- ⬜ **Budget Tracking and Forecasting**
-  - Line-item budgets
-  - Actual vs. projected tracking
-  - Expense categorization
-  - Financial reports
+**Core Features:**
+- ⬜ **Production Book Builder** (6-8 weeks)
+  - Cover page (show title, dates, contact info)
+  - Production schedule
+  - Crew roster with contact information
+  - Venue information
+  - Technical specifications
+  - Equipment lists
+  - Notes and instructions
+  - Attachments (PDFs, images, documents)
 
-- ⬜ **Crew Roster Management**
-  - Crew contact database
-  - Role assignments
-  - Availability tracking
-  - Call sheets
+- ⬜ **Web Sharing Portal**
+  - Public or password-protected sharing
+  - No login required for viewers
+  - Mobile-responsive design
+  - Real-time updates (when project data changes, portal updates)
+  - Embedded calendar (iCal subscription)
+  - Download sections as PDF
+  - Contact crew directly from roster
 
-- ⬜ **Equipment Inventory Tracking**
-  - Company inventory database
-  - Rental vs. owned tracking
-  - Maintenance schedules
-  - Depreciation tracking
+- ⬜ **Access Control**
+  - Public link (anyone with URL can view)
+  - Password-protected (require password to view)
+  - Expiration dates (link expires after date)
+  - View-only (no editing)
 
-- ⬜ **Vendor Contact Management**
-  - Vendor database
-  - Contact information
-  - Quote tracking
-  - Vendor performance notes
+**Note:** Lower priority—can use existing PDF exports initially. Production books provide nice-to-have web sharing but are not essential for core production management.
 
-- ⬜ **Purchase Orders and Invoicing**
-  - PO generation
-  - Invoice tracking
-  - Payment status
-  - Vendor reconciliation
+**Propared Parity:** Full parity with Propared's production books
+**Effort Estimate:** 6-8 weeks
 
-**Effort Estimate:** 12-16 weeks
+---
+
+### ⬜ Planned: Reporting & Analytics
+
+Comprehensive reporting system for budgets, labor, schedules, and production metrics.
+
+**Core Reports:**
+- ⬜ **Budget Reports**
+  - Budget summary (estimated vs. actual)
+  - Variance analysis
+  - Department rollup
+  - Cost by category
+  - Vendor spending report
+
+- ⬜ **Labor Reports**
+  - Crew hours summary
+  - Overtime report
+  - Payroll export (CSV)
+  - Labor cost by project
+  - Weekly hours by crew member
+
+- ⬜ **Schedule Reports**
+  - Production calendar (PDF)
+  - Crew call sheet
+  - Daily schedule
+  - Weekly schedule
+  - Conflict report (double-bookings)
+
+- ⬜ **Inventory Reports**
+  - Equipment allocation
+  - Rental costs
+  - Inventory by department
+  - Missing/damaged equipment
+  - Maintenance schedule
+
+- ⬜ **Tour Reports**
+  - Tour schedule
+  - Venue contact list
+  - Per diem summary
+  - Equipment manifest
+  - Travel logistics
+
+**Effort Estimate:** 4-6 weeks (ongoing - reports added as features are implemented)
+
+---
+
+### Development Timeline
+
+**Phase 1: Core Production Features** (Year 3, 2027-2028)
+- Production Scheduling (8-10 weeks)
+- Budget Tracking (6-8 weeks)
+- Labor Management (8-10 weeks)
+- **Total:** 22-28 weeks (5-7 months)
+- **Deliverable:** Production Edition v1.0 with 70% Propared parity
+
+**Phase 2: Enhanced Features** (Year 3-4, 2028)
+- Inventory Extensions (6-8 weeks)
+- Vendor Management (6-8 weeks)
+- Tour Logistics (8-12 weeks)
+- **Total:** 20-28 weeks (5-7 months)
+- **Deliverable:** Production Edition v2.0 with 90% Propared parity
+
+**Phase 3: Advanced Features** (Year 4+, 2029+)
+- Production Books (6-8 weeks)
+- Advanced Reporting (4-6 weeks)
+- Mobile App (12-16 weeks, optional)
+- **Total:** 22-30 weeks (5.5-7.5 months)
+- **Deliverable:** Production Edition v3.0 with 100% Propared parity + unique advantages
+
+**Total Development Investment:** 64-86 weeks (16-21 months) for full feature parity
+
+---
+
+### Unique ShowStack Advantages
+
+**1. Technical Design Integration**
+- Fixture plot → Equipment list → Shop order → Budget → Schedule
+- Labor hours for focus call calculated from fixture count
+- Rental costs from shop order feed budget automatically
+- Inventory allocation includes technical equipment
+
+**2. Pricing Advantage**
+- **ShowStack Production Edition:** $599/year (Lighting + Sound + Video + Production + Tour)
+- **Propared alone:** $1,750/user/year (production management only)
+- **Cost Savings:** 66% cheaper while offering MORE features
+
+**3. Offline-First Architecture**
+- Works fully offline (SQLite database)
+- No internet required for day-to-day work
+- Fast performance (no cloud latency)
+- Data ownership (files on user's machine)
+
+**4. Comprehensive Reporting**
+- 12+ technical reports already implemented
+- Production reports added to existing system
+- Professional PDF export for all documents
+
+**See Also:**
+- `docs/features/propared-parity-analysis.md` - Detailed competitive analysis
+- `docs/features/migration-production-features.md` - Complete feature specifications
 
 ---
 
