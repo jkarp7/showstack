@@ -1,26 +1,30 @@
 # ShowStack Project Status
 
-**Last Updated:** December 26, 2024
+**Last Updated:** December 28, 2024
 **Current Version:** 0.1.0-alpha
 **Development Phase:** Alpha
 
-This document tracks the development status of all ShowStack features and modules. It serves as the central source of truth for what's completed, in progress, and planned.
+This document tracks the development status of all ShowStack feature domains and editions. It serves as the central source of truth for what's completed, in progress, and planned.
 
 ---
 
 ## 📊 Overall Progress
 
-| Module | Status | Completion |
-|--------|--------|------------|
-| ShowStack:Production | 🚧 In Progress | 70% |
+| Feature Domain | Status | Completion |
+|----------------|--------|------------|
+| Lighting Features | 🚧 In Progress | 70% |
 | Core Infrastructure | ✅ Complete | 100% |
-| ShowStack:Manager | ⬜ Planned | 0% |
+| Sound Features | ⬜ Planned | 0% |
+| Video Features | ⬜ Planned | 0% |
+| Production Features | ⬜ Planned | 0% |
+| Tour Features | ⬜ Planned | 5% |
+| Producer Features | ⬜ Planned | 0% |
 
 ---
 
-## 🚧 ShowStack:Production Module
+## 🚧 Lighting Features (Lighting Edition)
 
-The Production module is a comprehensive lighting production suite that includes fixture management, shop orders, and paperwork generation - a modern alternative to LightWright 6.
+The Lighting feature domain is a comprehensive lighting production suite that includes fixture management, shop orders, and paperwork generation - a modern alternative to LightWright 6. Available in Lighting, Designer, Production, and Complete editions.
 
 ### ✅ Completed: Shop Order Tool
 
@@ -484,7 +488,7 @@ Additional production tools.
 - ✅ **LicenseService** - `src/main/services/LicenseService.ts`
   - Offline-first validation
   - 14-day grace period without internet
-  - Module-based access control (Production, Manager)
+  - Edition-based access control (Lighting, Sound, Video, Designer, Production, Complete)
   - Tier-based features (Professional, Student, Institutional)
   - Background verification (non-blocking)
   - Graceful degradation (read-only on expiration)
@@ -501,7 +505,7 @@ Additional production tools.
   - Account dialog with license section
 
 - ✅ **License Hooks** - `src/renderer/src/hooks/`
-  - `useModuleAccess.ts` - Check module permissions
+  - `useModuleAccess.ts` - Check edition permissions (Note: May need refactoring to useEditionAccess)
   - `useFeature.ts` - Feature flag access
   - `useEditPermission.ts` - Edit permission checks
   - `useUser.ts` - User info from license
@@ -649,19 +653,23 @@ Additional production tools.
 
 ---
 
-## ⬜ PLANNED: ShowStack:Manager Module
+## ⬜ PLANNED: Tour & Production Features
 
-Production logistics and budgeting tools.
+Production logistics and budgeting tools for tour and production management. Available in Production and Complete editions.
 
-- ⬜ **Manager Page** - `src/renderer/src/pages/modules/Manager.tsx`
+- ⬜ **Tour Features**
   - Tour calendar
   - Venue database
-  - Budget tracking
   - Per diem calculator
+  - Equipment manifests
+  - Multi-show coordination
+
+- ⬜ **Production Features**
+  - Budget tracking and forecasting
   - Crew roster management
   - Equipment inventory tracking
   - Vendor contact management
-  - Multi-show coordination
+  - Purchase orders and invoicing
 
 ---
 
@@ -1390,16 +1398,17 @@ interface LayoutElement {
 
 ### Architecture Decisions
 - **Offline-first**: All data stored locally in SQLite (sql.js)
-- **Module-based**: Separate modules with independent licensing
+- **Unified application**: Single app with license-based edition access
 - **Two-database approach**: App DB (never exported) + Project DB (exportable)
 - **Electron + React**: Cross-platform desktop with modern web tech
 - **Zustand over Redux**: Simpler state management
 - **TypeScript strict mode**: Full type safety throughout
 
-### Module Structure
-- **Production Module**: Includes Shop Order tool, Fixture Management, Label Designer, Paperwork Generator
-- **Manager Module**: Separate logistics and budgeting tools
-- **Licensing**: Module-based (Production, Manager) with tier-based features (Professional, Student, Institutional)
+### Edition Structure
+- **Six Feature Domains**: Lighting, Sound, Video, Production, Tour, Producer
+- **Six Professional Editions**: Lighting, Sound, Video, Designer, Production, Complete
+- **License-Based Activation**: Features unlocked via license key, UI only shows licensed features
+- **Data Preservation**: Project files contain all data; visible features depend on edition license
 
 ### Known Limitations
 - **No cloud sync yet**: Planned for future release
