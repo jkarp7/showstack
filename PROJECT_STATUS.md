@@ -943,6 +943,295 @@ Based on user testing session, the following features have been identified as hi
 
 ---
 
+### 🎨 Unified Visual Editor System (NEW - Major Refactor)
+
+**Overview**: Consolidate all visual editing (Paperwork, Labels, Shop Orders) into a single, modern, production-grade editor with comprehensive formatting controls.
+
+**Vision**: Transform Paperwork tab from "preview mode" to "layout editor mode" - similar to LightWright's layout tab but with drag-and-drop visual design capabilities.
+
+**See**: `docs/mockups/unified-editor-mockup.md` for detailed visual mockups
+
+#### Strategic Goals
+- **One editor for all contexts** - Paperwork headers, full reports, labels, shop orders
+- **Professional UX** - Optimized for production electricians/audio/video techs working in theaters and shops
+- **Modern appearance** - Clean, floating toolbars, collapsible panels, dark mode optimized
+- **Speed-first design** - Keyboard shortcuts, command palette, inline editing, power user features
+
+#### Core Architecture
+
+**Unified Component Structure**:
+```
+src/renderer/src/components/unified-editor/
+├── UnifiedLayoutEditor.tsx          # Main wrapper, context-aware
+├── toolbar/
+│   ├── FloatingToolbar.tsx         # Context-aware tools, always accessible
+│   ├── QuickActions.tsx            # Cmd+K command palette
+│   └── ModeToggle.tsx              # Edit ⇄ Preview mode
+├── panels/
+│   ├── LeftPanel.tsx               # Collapsible structure panel
+│   │   ├── StructureTree.tsx       # Layers/sections
+│   │   ├── ComponentLibrary.tsx    # Drag templates
+│   │   └── FieldSelector.tsx       # Data fields (context-specific)
+│   └── RightPanel.tsx              # Collapsible properties panel
+│       ├── TextProperties.tsx      # Font, size, style, color, alignment
+│       ├── ShapeProperties.tsx     # Fill, border, corner radius, opacity
+│       ├── ImageProperties.tsx     # Source, fit, border
+│       ├── TableProperties.tsx     # Columns, styling, grouping
+│       ├── BarcodeProperties.tsx   # QR/Code128/Code39 (labels)
+│       └── PageProperties.tsx      # Size, orientation, margins, background
+├── canvas/
+│   ├── Canvas.tsx                  # Main design surface
+│   ├── Grid.tsx                    # Configurable grid
+│   ├── SnapGuides.tsx              # Alignment helpers
+│   └── elements/
+│       ├── TextElement.tsx         # Inline editable text
+│       ├── ShapeElement.tsx        # Rectangles, circles, lines
+│       ├── ImageElement.tsx        # Logo, graphics
+│       ├── TableElement.tsx        # Data tables
+│       └── BarcodeElement.tsx      # QR codes, barcodes
+└── controls/
+    ├── FontSelector.tsx            # Font family dropdown
+    ├── ColorPicker.tsx             # Presets + custom + eyedropper
+    ├── NumberInput.tsx             # With slider dual control
+    ├── Slider.tsx                  # Range input
+    ├── ToggleButton.tsx            # Bold/italic/underline/strikethrough
+    └── StyleControls.tsx           # Grouped formatting buttons
+```
+
+#### New Formatting Features
+
+**Text Formatting** (currently missing):
+- ✅ Font family selector (Inter, Helvetica, Arial, Roboto, Roboto Mono, Courier)
+- ✅ Font size (6-144pt) with presets (8, 10, 12, 14, 16, 18, 24, 36)
+- ✅ Style toggles: Bold, Italic, Underline, Strikethrough
+- ✅ Color picker with presets (Black, White, Blue, Red, Green, Amber, Gray)
+- ✅ Alignment: Left, Center, Right
+- ✅ Line height control
+- ✅ Letter spacing control
+
+**Shape Formatting** (currently missing):
+- ✅ Fill enabled/disabled toggle
+- ✅ Fill color with opacity slider (0-100%)
+- ✅ Fill type: Solid, Gradient, Pattern
+- ✅ Border enabled/disabled toggle
+- ✅ Border color, width, style (solid/dashed/dotted)
+- ✅ Corner radius (0-100px)
+- ✅ Shadow effects (optional)
+
+**Image Formatting**:
+- ✅ Fit modes: Cover, Contain, Fill, None
+- ✅ Border controls
+- ✅ Position controls
+
+**Table Formatting**:
+- ✅ Column selection
+- ✅ Header style (background, text color, font size)
+- ✅ Row striping with alternating colors
+- ✅ Grouping and sorting controls
+
+**Barcode/QR Code** (label-specific):
+- ✅ Type selector: QR Code, Code 128, Code 39
+- ✅ Data template variables (e.g., `{equipment.id}`)
+- ✅ Size control
+- ✅ Error correction level (QR)
+
+#### Context-Specific Adaptations
+
+**Paperwork Context** (`context="paperwork-report"`):
+- Available elements: Text, Shape, Image, Table, Data Field
+- Left panel: Report type selector, field checkboxes, grouping/sorting
+- Focus: Multi-page documents, data tables, headers/footers
+
+**Label Context** (`context="label"`):
+- Available elements: Text, Shape, Image, Barcode, Data Field
+- Left panel: Label size presets (2×4", 4×6", 4×8"), equipment fields
+- Focus: Small format, barcode generation, variable data
+
+**Shop Order Context** (`context="shop-order"`):
+- Available elements: Text, Shape, Image, Table, Section divider
+- Left panel: Section list, notes blocks, revision markers
+- Focus: Professional documents, notes, revision tracking
+
+#### UX Improvements
+
+**Visual Design**:
+- ✅ Three-panel layout (Content | Canvas | Properties)
+- ✅ Floating toolbar (Figma-style, always accessible)
+- ✅ Collapsible side panels (VS Code-style)
+- ✅ Dark mode optimized (primary for theater environments)
+- ✅ High contrast, WCAG AAA accessibility
+- ✅ Large touch targets (56×56px min for tablet/glove use)
+
+**Interaction Patterns**:
+- ✅ Inline text editing (double-click to edit)
+- ✅ Smart guides and snapping (pink/blue alignment helpers)
+- ✅ Multi-select with Cmd+Click
+- ✅ Drag-and-drop from component library
+- ✅ Keyboard shortcuts for all actions
+- ✅ Command palette (Cmd+K) for power users
+- ✅ Preview ⇄ Edit mode toggle
+
+**Keyboard Shortcuts**:
+```
+TEXT FORMATTING
+Cmd+B          Bold
+Cmd+I          Italic
+Cmd+U          Underline
+Cmd+Shift+>    Increase font size
+Cmd+Shift+<    Decrease font size
+
+ALIGNMENT
+Cmd+Shift+L    Align left
+Cmd+Shift+E    Align center
+Cmd+Shift+R    Align right
+
+ELEMENTS
+T              Add text
+R              Add rectangle
+L              Add line
+I              Add image
+B              Add barcode (labels)
+D              Add data field
+
+CANVAS
+Cmd+Z          Undo
+Cmd+Shift+Z    Redo
+Cmd+D          Duplicate
+Delete         Delete selected
+
+TOOLS
+Cmd+K          Command palette
+Cmd+/          Show shortcuts
+Cmd+P          Preview mode
+Cmd+S          Save template
+```
+
+**Responsive Design**:
+- Desktop (≥1400px): Three-panel layout
+- Compact (<1400px): Full-width canvas, drawer panels
+- Tablet: Touch-optimized, larger buttons (56×56px)
+
+#### Multi-Discipline Support
+
+**Current**: Lighting-specific fields (Channel, Dimmer, Color, Gobo, etc.)
+
+**Phase 2 Expansion**:
+- Audio fields: Input/Output, Channel strip, Mic type, Phantom power, Zone, Mix bus
+- Video fields: Input/Output, Resolution, Signal type, Routing, Pixel mapping, Layer
+- Unified field selector adapts to discipline
+
+#### Unified Data Model
+
+```typescript
+interface LayoutElement {
+  id: string;
+  type: 'text' | 'shape' | 'image' | 'table' | 'barcode' | 'dataField';
+  position: { x: number; y: number };
+  size: { width: number; height: number };
+
+  // NEW: Text properties
+  text?: {
+    content: string;
+    font: string;
+    fontSize: number;
+    fontWeight: 'normal' | 'bold';
+    fontStyle: 'normal' | 'italic';
+    textDecoration: 'none' | 'underline' | 'line-through';
+    color: string;
+    alignment: 'left' | 'center' | 'right';
+    lineHeight: number;
+    letterSpacing: number;
+  };
+
+  // NEW: Shape properties
+  shape?: {
+    type: 'rectangle' | 'circle' | 'line';
+    fill: {
+      enabled: boolean;
+      color: string;
+      opacity: number;
+      type: 'solid' | 'gradient' | 'pattern';
+    };
+    border: {
+      enabled: boolean;
+      color: string;
+      width: number;
+      style: 'solid' | 'dashed' | 'dotted';
+    };
+    cornerRadius: number;
+  };
+
+  // Existing: Image, table, barcode, dataField...
+}
+```
+
+#### Implementation Phases
+
+**Phase 1: Core Refactor** (2 weeks)
+- Extract common editor components from Prep's LayoutDesigner
+- Create UnifiedLayoutEditor wrapper
+- Implement context-aware element library
+- Build floating toolbar and collapsible panels
+- Add keyboard shortcut system
+
+**Phase 2: Text & Shape Formatting** (1 week)
+- FontSelector, ColorPicker, StyleControls
+- TextProperties panel with full formatting
+- ShapeProperties panel with fill/border/radius
+- Inline text editing
+- Color preset library
+
+**Phase 3: Paperwork Integration** (1 week)
+- Replace Paperwork tab preview with editor
+- Field selector panel (left)
+- Column configuration
+- Grouping/sorting controls
+- Template library (system + custom)
+
+**Phase 4: Label Integration** (1 week)
+- Barcode element support (QR, Code128, Code39)
+- Label size presets (2×4", 4×6", 4×8")
+- Variable data fields
+- Batch generation support
+
+**Phase 5: Polish & UX** (1 week)
+- Smart snap guides
+- Command palette (Cmd+K)
+- Preview mode improvements
+- Dark mode refinements
+- Keyboard shortcut help overlay
+- Touch optimization for tablets
+
+**Estimated Total**: 6 weeks
+
+#### Benefits
+
+**For Users**:
+- Consistent UX across all paperwork/label tasks
+- Professional-grade formatting control
+- Faster workflow with keyboard shortcuts
+- Works in dark theaters and bright shops
+
+**For Development**:
+- Single codebase for all visual editing (~40% less code)
+- Easier maintenance and bug fixes
+- New features benefit all contexts
+- Better testability
+
+**Competitive Advantage**:
+- Modern visual editor vs. LightWright's settings-based approach
+- Drag-and-drop WYSIWYG beats form-based configuration
+- Production-optimized UX (keyboard-first, dark mode, touch-friendly)
+
+#### Related Files
+
+**Mockup**: `docs/mockups/unified-editor-mockup.md`
+**Existing Editor**: `src/renderer/src/components/prep/layout/LayoutDesigner.tsx`
+**Paperwork Page**: `src/renderer/src/pages/modules/Paperwork.tsx`
+**Label Designer**: `src/renderer/src/pages/modules/LabelDesigner.tsx`
+
+---
+
 ### 🔧 Maintenance Menu System (NEW - Major Feature)
 
 **Overview**: Lightwright 6 parity feature - custom categorization system for grouping fixtures.

@@ -1,0 +1,423 @@
+# Unified Layout Editor - Visual Mockup
+
+## Full Editor Layout - Paperwork Context
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│ ShowStack:Production > System Docs > Paperwork > Channel Hookup                     [- □ ×] │
+├─────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                             │
+│  ┌────────────┐  ┌─────────────────────────────────────────────────┐  ┌────────────────┐  │
+│  │  CONTENT   │  │           CANVAS AREA                           │  │  PROPERTIES    │  │
+│  │            │  │                                                 │  │                │  │
+│  │ 📐 Layout  │  │  ╔═══════════════════════════════════════════╗ │  │ 📄 PAGE        │  │
+│  │ ──────────│  │  ║  Floating Toolbar                         ║ │  │ ────────────── │  │
+│  │ □ Header   │  │  ║ [T][□][○][─][⊞][🖼] │ [↶][↷] [100% ▼]  ║ │  │ Size:          │  │
+│  │ □ Body     │  │  ╚═══════════════════════════════════════════╝ │  │ [Letter    ▼]  │  │
+│  │ □ Footer   │  │                                                 │  │                │  │
+│  │            │  │  ┌────────────────────────────────────────────┐│  │ Orientation:   │  │
+│  │ 📊 Fields  │  │  │ ╭─────────────────────────────────────────╮││  │ ○ Portrait     │  │
+│  │ ──────────│  │  │ │         CHANNEL HOOKUP                  │││  │ ○ Landscape    │  │
+│  │ Search:    │  │  │ │   Production: Hamlet • Designer: J.Doe │││  │                │  │
+│  │ [______]   │  │  │ ╰─────────────────────────────────────────╯││  │ Background:    │  │
+│  │            │  │  │ ┌─────────────────────────────────────────┐││  │ [⬜] #FFFFFF   │  │
+│  │ ☑ Channel  │  │  │ │ Ch │ Dimmer │ Type      │ Color │ Loc  │││  │                │  │
+│  │ ☑ Dimmer   │  │  │ ├────┼────────┼───────────┼───────┼──────┤││  │ Margins:       │  │
+│  │ ☑ Type     │  │  │ │ 1  │ 101    │ S4 19°    │ R02   │ FOH  │││  │ [0.5"] all     │  │
+│  │ ☑ Color    │  │  │ │ 2  │ 102    │ S4 26°    │ R80   │ FOH  │││  │                │  │
+│  │ ☑ Location │  │  │ │ 3  │ 103    │ S4 36°    │ L201  │ SR   │││  ├────────────────┤
+│  │ ☐ Circuit  │  │  │ │ 4  │ 104    │ Par 64    │ R80   │ SR   │││  │                │  │
+│  │ ☐ Gobo     │  │  │ └─────────────────────────────────────────┘││  │ ✏️ TEXT       │  │
+│  │ ☐ Wattage  │  │  │                                             ││  │ ────────────── │  │
+│  │            │  │  │ ┌───────────────┐                           ││  │ Selected:      │  │
+│  │ ⚙️ Options │  │  │ │ Page 1 of 1   │                           ││  │ "CHANNEL       │  │
+│  │ ──────────│  │  │ └───────────────┘                           ││  │  HOOKUP"       │  │
+│  │ Group by:  │  │  │                                             ││  │                │  │
+│  │ [None   ▼] │  │  └────────────────────────────────────────────┘│  │ Font:          │  │
+│  │            │  │                                                 │  │ [Inter     ▼]  │  │
+│  │ Sort by:   │  │  [👁️ Preview] [✏️ Edit Mode - Active]          │  │                │  │
+│  │ [Channel▼] │  │                                                 │  │ Size:          │  │
+│  │            │  │  Zoom: [25%][50%][100%][150%][200%][Fit]       │  │ ┌──────┐       │  │
+│  │ 📚 Library │  │                                                 │  │ │ 24   │ pt    │  │
+│  │ ──────────│  │                                                 │  │ └──────┘       │  │
+│  │ SYSTEM     │  │                                                 │  │ ████████░░ 24pt│  │
+│  │ • Standard │  │                                                 │  │                │  │
+│  │ • Minimal  │  │                                                 │  │ Style:         │  │
+│  │ • Detailed │  │                                                 │  │ [B][I][U][S]   │  │
+│  │            │  │                                                 │  │                │  │
+│  │ CUSTOM     │  │                                                 │  │ Color:         │  │
+│  │ + My Rpt 1 │  │                                                 │  │ [⬛] #000000    │  │
+│  │ + House    │  │                                                 │  │                │  │
+│  │            │  │                                                 │  │ Align:         │  │
+│  └────────────┘  │                                                 │  │ [≡][≡][≡]      │  │
+│                  │                                                 │  │  L  C  R       │  │
+│                  └─────────────────────────────────────────────────┘  │                │  │
+│                                                                        │ Spacing:       │  │
+│  [💾 Save Template] [📄 Export PDF] [🖨️ Print] [⚙️ Settings]           │ Line: [1.5 ]   │  │
+│                                                                        │ Letter: [0 ]px │  │
+│  💾 Saved 2 minutes ago                                Cmd+K for help │                │  │
+└─────────────────────────────────────────────────────────────────────┴────────────────┘
+```
+
+## Left Panel - Component Library View
+
+```
+┌────────────────┐
+│ 📚 COMPONENTS  │
+│ ────────────── │
+│                │
+│ BASIC          │
+│ ┌────────────┐ │
+│ │ Text Block │ │
+│ │ ────────── │ │
+│ │ Title here │ │
+│ └────────────┘ │
+│                │
+│ ┌────────────┐ │
+│ │ Rectangle  │ │
+│ │ ┌────────┐ │ │
+│ │ │        │ │ │
+│ │ └────────┘ │ │
+│ └────────────┘ │
+│                │
+│ ┌────────────┐ │
+│ │ Logo Box   │ │
+│ │  [IMAGE]   │ │
+│ │            │ │
+│ └────────────┘ │
+│                │
+│ DATA           │
+│ ┌────────────┐ │
+│ │ Data Table │ │
+│ │ Ch Dim Type│ │
+│ │ 1  101 S4  │ │
+│ │ 2  102 S4  │ │
+│ └────────────┘ │
+│                │
+│ ┌────────────┐ │
+│ │ Data Field │ │
+│ │ {field}    │ │
+│ └────────────┘ │
+│                │
+│ LABEL-ONLY     │
+│ ┌────────────┐ │
+│ │ QR Code    │ │
+│ │ ▪▪▪▪▪▪▪▪▪  │ │
+│ │ ▪▪▪▪▪▪▪▪▪  │ │
+│ └────────────┘ │
+└────────────────┘
+```
+
+## Right Panel - Shape Properties
+
+```
+┌────────────────┐
+│ □ RECTANGLE    │
+│ ────────────── │
+│                │
+│ Position & Size│
+│ X: [50  ] px   │
+│ Y: [100 ] px   │
+│ W: [200 ] px   │
+│ H: [100 ] px   │
+│                │
+│ ── FILL ────── │
+│ ☑ Enabled      │
+│                │
+│ Color:         │
+│ ┌────┐         │
+│ │⬜  │ #FFFFFF │
+│ └────┘         │
+│                │
+│ Opacity:       │
+│ ████████░░ 80% │
+│                │
+│ Type:          │
+│ ● Solid        │
+│ ○ Gradient     │
+│ ○ Pattern      │
+│                │
+│ ── BORDER ──── │
+│ ☑ Enabled      │
+│                │
+│ Color:         │
+│ ┌────┐         │
+│ │⬛  │ #000000 │
+│ └────┘         │
+│                │
+│ Width:         │
+│ [2    ] px     │
+│ ██░░░░░░░░  2px│
+│                │
+│ Style:         │
+│ [Solid     ▼]  │
+│                │
+│ Corner Radius: │
+│ [4    ] px     │
+│ ██░░░░░░░░  4px│
+│                │
+│ ── EFFECTS ─── │
+│ ☐ Shadow       │
+│ ☐ Opacity      │
+└────────────────┘
+```
+
+## Floating Toolbar - Expanded
+
+```
+╔═══════════════════════════════════════════════════════════════════════╗
+║  [T]  [□]  [○]  [─]  [⊞]  [🖼]  │  [↶]  [↷]  │  [100% ▼]  │  [🎨]    ║
+║  Text Rect Circle Line Table Image  Undo Redo   Zoom       Theme     ║
+║                                                                       ║
+║  Tooltip on hover: "Add Text (T)"                                    ║
+╚═══════════════════════════════════════════════════════════════════════╝
+```
+
+## Label Designer Context
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│ ShowStack:Production > System Docs > Labels > Equipment Label          │
+├─────────────────────────────────────────────────────────────────────────┤
+│  ┌────────────┐  ┌─────────────────────────────────┐  ┌──────────────┐ │
+│  │  CONTENT   │  │        CANVAS                   │  │ PROPERTIES   │ │
+│  │            │  │                                 │  │              │ │
+│  │ 📐 Layout  │  │  [T][□][▯][🖼] │ [↶][↷] [100%] │  │ 🏷️ LABEL    │ │
+│  │ ──────────│  │                                 │  │ ──────────── │ │
+│  │ □ Header   │  │  ┌─────────────────────────┐   │  │ Size:        │ │
+│  │ □ Body     │  │  │ ┌─────────────────────┐ │   │  │ [4×6"    ▼]  │ │
+│  │            │  │  │ │  ETC Source 4 19°   │ │   │  │ • 2×4"       │ │
+│  │ 🔧 Fields  │  │  │ │                     │ │   │  │ • 4×6"       │ │
+│  │ ──────────│  │  │ │  ▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪  │ │   │  │ • 4×8"       │ │
+│  │ ☑ Name     │  │  │ │  ▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪  │ │   │  │ • Custom     │ │
+│  │ ☑ Type     │  │  │ │  ▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪▪  │ │   │  │              │ │
+│  │ ☑ Barcode  │  │  │ │                     │ │   │  ├──────────────┤
+│  │ ☑ ID       │  │  │ │  ID: EQ-2024-0042   │ │   │  │              │ │
+│  │ ☐ Location │  │  │ │  Ch: 1  Dim: 101    │ │   │  │ ▯ BARCODE   │ │
+│  │            │  │  │ └─────────────────────┘ │   │  │ ──────────── │ │
+│  │ 📚 Library │  │  └─────────────────────────┘   │  │ Type:        │ │
+│  │ ──────────│  │                                 │  │ [QR Code ▼]  │ │
+│  │ PRESETS    │  │  [👁️ Preview] [✏️ Edit]        │  │ • QR Code    │ │
+│  │ • Standard │  │                                 │  │ • Code128    │ │
+│  │ • Compact  │  │                                 │  │ • Code39     │ │
+│  │ • Barcode  │  │                                 │  │              │ │
+│  │   Only     │  │                                 │  │ Data:        │ │
+│  │            │  │                                 │  │ {equip.id}   │ │
+│  │ CUSTOM     │  │                                 │  │              │ │
+│  │ + Fixture  │  │                                 │  │ Size:        │ │
+│  │ + Cable    │  │                                 │  │ [100 ] px    │ │
+│  └────────────┘  └─────────────────────────────────┘  │              │ │
+│                                                        │ Error Corr:  │ │
+│  [💾 Save] [🖨️ Print Sheet] [📊 Batch Generate]        │ [Medium  ▼]  │ │
+└─────────────────────────────────────────────────────┴──────────────┘
+```
+
+## Command Palette (Cmd+K)
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ > _                                                     │
+├─────────────────────────────────────────────────────────┤
+│ 🔍 QUICK ACTIONS                                        │
+│                                                         │
+│ ⌘  Add Text Element                                    │
+│ ⌘  Add Rectangle                                       │
+│ ⌘  Add Table                                           │
+│ ⌘  Group Selection                              Cmd+G  │
+│ ⌘  Duplicate Selected                           Cmd+D  │
+│ ⌘  Delete Selected                              Del    │
+│                                                         │
+│ 📄 TEMPLATES                                            │
+│                                                         │
+│ ⌘  Load Standard Header                                │
+│ ⌘  Load Minimal Header                                 │
+│ ⌘  Save as Custom Template                             │
+│                                                         │
+│ 🎨 STYLING                                              │
+│                                                         │
+│ ⌘  Toggle Bold                                  Cmd+B  │
+│ ⌘  Toggle Italic                                Cmd+I  │
+│ ⌘  Align Left                            Cmd+Shift+L  │
+│ ⌘  Align Center                          Cmd+Shift+E  │
+│                                                         │
+│ ⚙️ SETTINGS                                             │
+│                                                         │
+│ ⌘  Page Setup                                          │
+│ ⌘  Export PDF                                          │
+│ ⌘  Show Keyboard Shortcuts                      Cmd+/  │
+└─────────────────────────────────────────────────────────┘
+```
+
+## Color Picker Component
+
+```
+┌──────────────────┐
+│ COLOR PICKER     │
+├──────────────────┤
+│ PRESETS          │
+│ ┌───┬───┬───┬───┐│
+│ │⬛ │⬜ │🟦 │🟥 ││
+│ └───┴───┴───┴───┘│
+│ ┌───┬───┬───┬───┐│
+│ │🟩 │🟨 │🟪 │🟧 ││
+│ └───┴───┴───┴───┘│
+│                  │
+│ CUSTOM           │
+│ Hex: [#000000]   │
+│                  │
+│ ┌──────────────┐ │
+│ │ ╱╲           │ │
+│ │ ╲╱  Color    │ │
+│ │    Wheel     │ │
+│ │              │ │
+│ └──────────────┘ │
+│                  │
+│ RGB              │
+│ R: [0  ] ██░░░░  │
+│ G: [0  ] ██░░░░  │
+│ B: [0  ] ██░░░░  │
+│                  │
+│ [👁️ Eyedropper]  │
+└──────────────────┘
+```
+
+## Responsive Breakpoints
+
+### Compact Mode (< 1400px width)
+```
+┌─────────────────────────────────────────┐
+│ ShowStack > Paperwork > Channel Hookup  │
+├─────────────────────────────────────────┤
+│ [☰ Panels] [T][□][─] │ [↶][↷] [100%]   │
+│                                         │
+│ ┌─────────────────────────────────────┐ │
+│ │                                     │ │
+│ │      CANVAS (Full Width)            │ │
+│ │                                     │ │
+│ │  Properties panel becomes drawer    │ │
+│ │  that slides over from right        │ │
+│ │                                     │ │
+│ └─────────────────────────────────────┘ │
+│                                         │
+│ [Properties ▼] [Fields ▼]               │
+└─────────────────────────────────────────┘
+```
+
+## Dark Mode
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ █████████████████████████████████████████████████████  │ Dark header
+│ ███ System Docs > Paperwork > Channel Hookup ████████  │
+├─────────────────────────────────────────────────────────┤
+│  ███████████  ███████████████████████████  ████████████ │
+│  █ CONTENT █  █     CANVAS (Dark)     █  █ PROPERTIES █ │
+│  █         █  █                       █  █            █ │
+│  █ Layout  █  █  ╔═══════════════════╗█  █ Page      █ │
+│  █ ──────  █  █  ║ [T][□][○] Light   ║█  █ ──────    █ │
+│  █ □ Header█  █  ╚═══════════════════╝█  █ Size:     █ │
+│  █ □ Body  █  █                       █  █ Letter    █ │
+│  █         █  █  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█  █           █ │
+│  █ Fields  █  █  ▓                   ▓█  █ BG:       █ │
+│  █ ──────  █  █  ▓ Dark canvas with ▓█  █ [⬛] #1A1A █ │
+│  █ ☑ Chan  █  █  ▓ lighter grid     ▓█  █           █ │
+│  █ ☑ Dimmer█  █  ▓                   ▓█  █           █ │
+│  █ ☑ Type  █  █  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█  █           █ │
+│  ███████████  ███████████████████████████  ████████████ │
+│                                                         │
+│  ███████████████████████████████████████████████████   │
+└─────────────────────────────────────────────────────────┘
+```
+
+## Element Selection & Multi-select
+
+```
+Canvas with multiple elements selected:
+
+┌─────────────────────────────────────┐
+│                                     │
+│  ┌────────────────┐                 │
+│  │ Selected Text  │  ← Blue outline │
+│  └────────────────┘                 │
+│    ◉ ─────── ◉  ← Resize handles   │
+│                                     │
+│  ╔════════════════╗                 │
+│  ║ Also Selected  ║  ← Multi-select │
+│  ╚════════════════╝  with Cmd+Click│
+│    ◉ ─────── ◉                      │
+│                                     │
+│  [Unselected item]  ← No outline    │
+│                                     │
+└─────────────────────────────────────┘
+
+Right Panel shows:
+┌──────────────┐
+│ 🔷 MULTIPLE  │
+│ ────────────│
+│ 2 selected   │
+│              │
+│ Common:      │
+│ Color:       │
+│ [⬛] #000000  │
+│              │
+│ Font:        │
+│ (Mixed)      │
+└──────────────┘
+```
+
+## Snap Guides in Action
+
+```
+┌─────────────────────────────────────┐
+│         │                           │
+│         │  Vertical guide (pink)    │
+│  ┌──────┼──────┐                    │
+│  │ Text │      │ ← Dragging element │
+│  └──────┼──────┘                    │
+│         │                           │
+│ ────────┼────────── Horizontal      │
+│         │            guide (pink)   │
+│  ┌──────┴──────┐                    │
+│  │ Anchored    │ ← Aligned element  │
+│  └─────────────┘                    │
+│                                     │
+│  "Distance: 20px" ← Tooltip         │
+└─────────────────────────────────────┘
+```
+
+## Mobile/Tablet Considerations
+
+```
+Tablet (iPad) - Touch-optimized:
+
+┌─────────────────────────────────┐
+│ [☰] Paperwork [⚙️]              │
+├─────────────────────────────────┤
+│                                 │
+│  Larger touch targets (56×56px)│
+│                                 │
+│  ┌──┬──┬──┬──┬──┐              │
+│  │T │□ │─ │⊞ │🖼│  Big buttons │
+│  └──┴──┴──┴──┴──┘              │
+│                                 │
+│  Full-width canvas              │
+│                                 │
+│  Properties drawer from bottom  │
+│                                 │
+└─────────────────────────────────┘
+```
+
+---
+
+## Key Design Principles Shown
+
+1. **Three-panel layout** - Content | Canvas | Properties
+2. **Floating toolbar** - Context-aware tools always accessible
+3. **Collapsible panels** - Maximize canvas space when needed
+4. **Live preview** - See real data while editing
+5. **Context switching** - Same editor, different tools per context (Paperwork vs Labels)
+6. **Keyboard-first** - All actions have shortcuts, Cmd+K palette
+7. **Professional aesthetics** - Clean, modern, production-ready
+8. **Dark mode support** - Critical for theater environments
+9. **Touch-friendly** - Works on tablets in the shop/field
+10. **Smart assistance** - Snap guides, alignment helpers, distance indicators
