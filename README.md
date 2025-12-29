@@ -8,15 +8,32 @@ ShowStack is a comprehensive suite of tools designed for lighting designers, pro
 
 ## 🎯 Project Overview
 
-**ShowStack:Production** is a desktop application (Electron) for managing lighting plots, power distribution, and production paperwork. It provides:
+**ShowStack** is a comprehensive desktop application suite for live entertainment production management. Built with modern web technologies (Electron + React), it provides professional tools for lighting designers, production electricians, and tour managers.
 
-- ✅ Virtual spreadsheet interface handling 10,000+ fixtures
-- ✅ Real-time collaboration (optional cloud sync)
-- ✅ ETC Eos console integration (OSC)
-- ✅ Vectorworks import/export with reconciliation
-- ✅ Professional label printing (Dymo, Brother, Zebra)
-- ✅ Power & DMX management with error checking
-- ✅ Custom paperwork generation with branding
+### Current Modules
+
+**ShowStack:Manager** - Tour & Venue Management *(coming soon)*
+- Tour scheduling and calendar
+- Venue information database
+- Crew and personnel tracking
+
+**ShowStack:Production** - Equipment & Documentation *(70% complete)*
+- Equipment Manager for fixture tracking with power management
+- Shop Order tool with multi-discipline support
+- Professional paperwork generation
+- Power distribution tracking and analysis
+- Label design and printing
+
+### Key Features (Alpha)
+
+- ✅ **Offline-first** - Works without internet, 14-day grace period
+- ✅ **Module-based licensing** - Pay only for what you need
+- ✅ **Dark mode** - Full light/dark theme support
+- ✅ **Privacy-first analytics** - Anonymous, opt-in telemetry with PostHog
+- ✅ **Developer mode** - Advanced debugging and feature flags
+- ✅ **Multi-window support** - Open multiple projects simultaneously
+- ✅ **Auto-save** - Never lose your work
+- ✅ **Export flexibility** - PDF, CSV, JSON formats
 
 ---
 
@@ -77,29 +94,69 @@ Coming soon! See [docs/dev-setup.md](docs/dev-setup.md) for environment setup.
 
 ## 📊 Status
 
-**Current Phase:** Pre-Alpha  
-**POC Status:** ✅ Complete (virtual grid validated)  
-**Phase 1 Status:** 🚧 In Development
+**Current Phase:** Alpha
+**Version:** 0.1.0-alpha
+**Status:** Ready for testing and feedback
 
-### Completed
-- ✅ Technical specification
-- ✅ Pricing strategy
-- ✅ Proof-of-concept (virtual data grid)
-- ✅ Database schema design
-- ✅ Architecture decisions
+### ✅ Completed Features
 
-### In Progress
-- 🚧 Electron app setup
-- 🚧 Database layer (SQLite)
-- 🚧 Core CRUD operations
+**Core Infrastructure:**
+- ✅ Electron application with multi-window support
+- ✅ Two-database architecture (app.db + projects.db)
+- ✅ sql.js (SQLite compiled to WebAssembly)
+- ✅ Offline-first with 14-day grace period
+- ✅ Module-based licensing system
+- ✅ Dark mode support
+- ✅ Settings page with 8 configuration tabs
+- ✅ Admin panel for template management
 
-### Planned
-- ⬜ Sorting & filtering
-- ⬜ Power management
-- ⬜ Eos integration
-- ⬜ Vectorworks sync
-- ⬜ Label designer
-- ⬜ Report generation
+**Modules:**
+- ✅ **Manager Module** (placeholder - tour/venue management coming)
+- ✅ **Production Module** (~70% complete)
+  - Equipment Manager (fixture CRUD, power management)
+  - Shop Order tool with revisions
+  - Paperwork generation
+  - Power distribution tracking
+  - Labels designer
+- ✅ **Shop Order Tool** (~90% complete)
+  - Multi-discipline support
+  - Section-based equipment lists
+  - Revision management with notes
+  - PDF/CSV export
+  - Print builder with page layout
+- ✅ **Power Management** (~100% complete)
+  - Dimmer rack and PD rack configuration
+  - Module-based capacity calculations
+  - Auto-linking fixtures to racks
+  - Real-time utilization tracking
+  - Phase balance monitoring
+
+**Privacy & Analytics:**
+- ✅ Privacy-first telemetry (PostHog)
+- ✅ User consent dialog
+- ✅ Anonymous analytics (opt-in only)
+- ✅ Data retention controls
+- ✅ Export/delete personal data
+
+**Developer Tools:**
+- ✅ Developer mode with DevTools
+- ✅ Feature flags system (13 experimental features)
+- ✅ Debug panels in all modules
+- ✅ F12 keyboard shortcut
+- ✅ Comprehensive documentation
+
+### 🚧 In Progress
+- 🚧 Equipment Manager fixture list UI (~30% remaining)
+- 🚧 Customizable paperwork export headers
+- 🚧 Fixture library with manufacturers
+- 🚧 Auto-complete system for fixture fields
+
+### ⬜ Planned (Post-Alpha)
+- ⬜ Eos integration (OSC)
+- ⬜ Vectorworks import/export
+- ⬜ Label printing (Dymo, Brother, Zebra)
+- ⬜ Cloud collaboration features
+- ⬜ Advanced reporting engine
 
 ---
 
@@ -125,16 +182,18 @@ Coming soon! See [docs/dev-setup.md](docs/dev-setup.md) for environment setup.
 
 ### Desktop App (Electron)
 - **Runtime:** Node.js 20+
-- **Framework:** Electron 27+
-- **Database:** better-sqlite3 (local)
+- **Framework:** Electron 39.2+
+- **Database:** sql.js (SQLite → WebAssembly)
+- **Analytics:** PostHog (privacy-first, opt-in)
 - **Hardware:** electron-printer, osc-js
 
 ### Frontend (React)
-- **Framework:** React 18+
-- **Language:** TypeScript 5+
-- **State:** Zustand
+- **Framework:** React 19+
+- **Language:** TypeScript 5.9+
+- **State:** Zustand (9 stores)
 - **UI:** Tailwind CSS + Radix UI
 - **Build:** Vite
+- **Routing:** React Router v6
 
 ### Backend (Optional Cloud Sync)
 - **API:** Express.js + PostgreSQL
@@ -146,6 +205,15 @@ Coming soon! See [docs/dev-setup.md](docs/dev-setup.md) for environment setup.
 
 ## 📖 Documentation
 
+### User Documentation
+- **[Project Status](PROJECT_STATUS.md)** - Complete feature tracking and development roadmap
+
+### Developer Documentation
+- **[Developer Mode Guide](DEVELOPER_MODE.md)** - Enable debugging, feature flags, and DevTools
+- **[Telemetry Implementation](TELEMETRY_IMPLEMENTATION_SUMMARY.md)** - Privacy-first analytics system
+- **[PostHog Setup](POSTHOG_SETUP.md)** - Analytics configuration and monitoring
+
+### Project Planning
 - **[Technical Specification](docs/technical-spec.md)** - Complete feature specs, database schema, architecture
 - **[Pricing Strategy](docs/pricing.md)** - Market analysis, revenue model, go-to-market plan
 - **[Development Setup](docs/dev-setup.md)** - Environment setup, testing, building

@@ -1,0 +1,213 @@
+{
+  "template": {
+    "name": "Paperwork Header - ShowStack Default",
+    "description": "Standard header layout for paperwork reports with title, project info, venue, and designer details",
+    "page_type": "paperwork-header",
+    "grid_columns": 12,
+    "grid_rows": 8,
+    "grid_gap": 4,
+    "page_width": 816,
+    "page_height": 264,
+    "is_default": true
+  },
+  "elements": [
+    {
+      "element_type": "text",
+      "config": {
+        "content": "{report_title}"
+      },
+      "grid_column": 0,
+      "grid_row": 0,
+      "column_span": 9,
+      "row_span": 2,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 20,
+        "fontWeight": "bold",
+        "textAlign": "left",
+        "color": "#000000",
+        "backgroundColor": "transparent",
+        "padding": 8
+      }
+    },
+    {
+      "element_type": "dataField",
+      "config": {
+        "fieldType": "logo",
+        "showLabel": false
+      },
+      "grid_column": 9,
+      "grid_row": 0,
+      "column_span": 3,
+      "row_span": 2,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 11,
+        "textAlign": "right",
+        "color": "#000000",
+        "backgroundColor": "transparent",
+        "padding": 4
+      }
+    },
+    {
+      "element_type": "dataField",
+      "config": {
+        "fieldType": "production_name",
+        "showLabel": false
+      },
+      "grid_column": 0,
+      "grid_row": 2,
+      "column_span": 12,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 14,
+        "fontWeight": "normal",
+        "textAlign": "left",
+        "color": "#374151",
+        "backgroundColor": "transparent",
+        "padding": 4
+      }
+    },
+    {
+      "element_type": "shape",
+      "config": {
+        "shapeType": "line"
+      },
+      "grid_column": 0,
+      "grid_row": 3,
+      "column_span": 12,
+      "row_span": 0,
+      "layer": 0,
+      "style": {
+        "borderColor": "#D1D5DB",
+        "borderWidth": 1
+      }
+    },
+    {
+      "element_type": "dataField",
+      "config": {
+        "fieldType": "venue",
+        "label": "Venue:",
+        "showLabel": true
+      },
+      "grid_column": 0,
+      "grid_row": 4,
+      "column_span": 6,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 10,
+        "textAlign": "left",
+        "color": "#000000",
+        "backgroundColor": "transparent",
+        "padding": 4
+      }
+    },
+    {
+      "element_type": "dataField",
+      "config": {
+        "fieldType": "ld_name",
+        "label": "Lighting Designer:",
+        "showLabel": true
+      },
+      "grid_column": 6,
+      "grid_row": 4,
+      "column_span": 6,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 10,
+        "textAlign": "left",
+        "color": "#000000",
+        "backgroundColor": "transparent",
+        "padding": 4
+      }
+    },
+    {
+      "element_type": "text",
+      "config": {
+        "content": "{venue_city}, {venue_state}"
+      },
+      "grid_column": 0,
+      "grid_row": 5,
+      "column_span": 6,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 9,
+        "textAlign": "left",
+        "color": "#6B7280",
+        "backgroundColor": "transparent",
+        "padding": 4
+      }
+    },
+    {
+      "element_type": "dataField",
+      "config": {
+        "fieldType": "ld_email",
+        "showLabel": false
+      },
+      "grid_column": 6,
+      "grid_row": 5,
+      "column_span": 6,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 9,
+        "textAlign": "left",
+        "color": "#6B7280",
+        "backgroundColor": "transparent",
+        "padding": 4
+      }
+    },
+    {
+      "element_type": "dataField",
+      "config": {
+        "fieldType": "generated_date",
+        "label": "Generated:",
+        "showLabel": true
+      },
+      "grid_column": 0,
+      "grid_row": 6,
+      "column_span": 6,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 9,
+        "textAlign": "left",
+        "color": "#6B7280",
+        "backgroundColor": "transparent",
+        "padding": 4
+      }
+    },
+    {
+      "element_type": "dataField",
+      "config": {
+        "fieldType": "ld_phone",
+        "showLabel": false
+      },
+      "grid_column": 6,
+      "grid_row": 6,
+      "column_span": 6,
+      "row_span": 1,
+      "layer": 0,
+      "style": {
+        "fontFamily": "Arial",
+        "fontSize": 9,
+        "textAlign": "left",
+        "color": "#6B7280",
+        "backgroundColor": "transparent",
+        "padding": 4
+      }
+    }
+  ]
+}
