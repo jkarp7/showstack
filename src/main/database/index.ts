@@ -6,6 +6,7 @@ import { APP_SCHEMA } from './appSchema';
 import { PROJECT_SCHEMA } from './projectSchema';
 import { seedDefaultPageLayouts } from './seedDefaultLayouts';
 import { seedDefaultPageLayoutsFromJSON } from './seedDefaultLayoutsFromJSON';
+import { seedPaperworkTemplates } from './seedPaperworkTemplates';
 import { createLayoutTemplate } from './queries/layoutTemplates';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -43,7 +44,7 @@ export async function initDatabase(): Promise<void> {
   appDb.exec(APP_SCHEMA);
 
   // Run app database migrations
-  runAppMigrations(appDb);
+  await runAppMigrations(appDb);
 
   // Save app database
   saveAppDatabase();
@@ -85,7 +86,7 @@ export async function initDatabase(): Promise<void> {
 /**
  * Migrations for app-level database
  */
-function runAppMigrations(db: Database): void {
+async function runAppMigrations(db: Database): Promise<void> {
   // App database migrations (for licenses and settings)
 
   try {
@@ -180,6 +181,10 @@ function runAppMigrations(db: Database): void {
         }
       }
     }
+
+    // Seed paperwork templates if needed
+    console.log('🌱 Checking paperwork template seeding...');
+    await seedPaperworkTemplates();
 
     console.log('✅ App database migrations complete');
   } catch (error) {
