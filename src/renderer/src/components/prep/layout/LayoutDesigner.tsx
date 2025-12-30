@@ -751,7 +751,14 @@ function FloatingElementPalette({
   onDragEnd?: () => void;
 }) {
   const [isCollapsed, setIsCollapsed] = useState(true); // Start collapsed
-  const [position, setPosition] = useState({ x: 20, y: 100 });
+  const [position, setPosition] = useState(() => {
+    // Anchor to right side of screen, aligned with toolbar
+    // Palette width is ~320px, add 20px padding from edge
+    return {
+      x: window.innerWidth - 320 - 20,
+      y: 100 // Align with toolbar area
+    };
+  });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const paletteRef = useRef<HTMLDivElement>(null);
