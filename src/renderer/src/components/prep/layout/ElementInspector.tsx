@@ -27,6 +27,17 @@ export function ElementInspector({
   maxRows
 }: ElementInspectorProps) {
   const [activeSection, setActiveSection] = useState<'config' | 'style' | 'position'>('config');
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+
+  const toggleSection = (sectionId: string) => {
+    const newCollapsed = new Set(collapsedSections);
+    if (newCollapsed.has(sectionId)) {
+      newCollapsed.delete(sectionId);
+    } else {
+      newCollapsed.add(sectionId);
+    }
+    setCollapsedSections(newCollapsed);
+  };
 
   if (!element) {
     return (
@@ -269,12 +280,18 @@ export function ElementInspector({
         {activeSection === 'style' && (
           <>
             {/* Typography */}
-            <ConfigSection title="Typography">
+            <CollapsibleSection
+              id="typography"
+              title="Typography"
+              icon="🔤"
+              isCollapsed={collapsedSections.has('typography')}
+              onToggle={toggleSection}
+            >
               <FormField label="Font Family">
                 <select
                   value={element.style.fontFamily || 'Arial'}
                   onChange={(e) => updateStyle({ fontFamily: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="Arial">Arial</option>
                   <option value="Helvetica">Helvetica</option>
@@ -292,7 +309,7 @@ export function ElementInspector({
                   onChange={(e) => updateStyle({ fontSize: parseInt(e.target.value) })}
                   min="6"
                   max="72"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </FormField>
 
@@ -300,7 +317,7 @@ export function ElementInspector({
                 <select
                   value={element.style.fontWeight || 'normal'}
                   onChange={(e) => updateStyle({ fontWeight: e.target.value as any })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="normal">Normal</option>
                   <option value="bold">Bold</option>
@@ -316,7 +333,7 @@ export function ElementInspector({
                 <select
                   value={element.style.textAlign || 'left'}
                   onChange={(e) => updateStyle({ textAlign: e.target.value as any })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="left">Left</option>
                   <option value="center">Center</option>
@@ -324,10 +341,16 @@ export function ElementInspector({
                   <option value="justify">Justify</option>
                 </select>
               </FormField>
-            </ConfigSection>
+            </CollapsibleSection>
 
             {/* Colors */}
-            <ConfigSection title="Colors">
+            <CollapsibleSection
+              id="colors"
+              title="Colors"
+              icon="🎨"
+              isCollapsed={collapsedSections.has('colors')}
+              onToggle={toggleSection}
+            >
               <FormField label="Text Color">
                 <input
                   type="color"
@@ -353,10 +376,16 @@ export function ElementInspector({
                   </button>
                 </div>
               </FormField>
-            </ConfigSection>
+            </CollapsibleSection>
 
             {/* Borders */}
-            <ConfigSection title="Borders">
+            <CollapsibleSection
+              id="borders"
+              title="Borders"
+              icon="🔲"
+              isCollapsed={collapsedSections.has('borders')}
+              onToggle={toggleSection}
+            >
               <FormField label="Border Width (px)">
                 <input
                   type="number"
@@ -400,10 +429,16 @@ export function ElementInspector({
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 />
               </FormField>
-            </ConfigSection>
+            </CollapsibleSection>
 
             {/* Spacing */}
-            <ConfigSection title="Spacing">
+            <CollapsibleSection
+              id="spacing"
+              title="Spacing"
+              icon="📏"
+              isCollapsed={collapsedSections.has('spacing')}
+              onToggle={toggleSection}
+            >
               <FormField label="Padding (px)">
                 <input
                   type="number"
@@ -429,14 +464,20 @@ export function ElementInspector({
                   {Math.round((element.style.opacity || 1) * 100)}%
                 </div>
               </FormField>
-            </ConfigSection>
+            </CollapsibleSection>
           </>
         )}
 
         {activeSection === 'position' && (
           <>
             {/* Grid Position */}
-            <ConfigSection title="Grid Position">
+            <CollapsibleSection
+              id="grid-position"
+              title="Grid Position"
+              icon="📍"
+              isCollapsed={collapsedSections.has('grid-position')}
+              onToggle={toggleSection}
+            >
               <FormField label="Column">
                 <input
                   type="number"
@@ -458,10 +499,16 @@ export function ElementInspector({
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 />
               </FormField>
-            </ConfigSection>
+            </CollapsibleSection>
 
             {/* Size */}
-            <ConfigSection title="Size">
+            <CollapsibleSection
+              id="size"
+              title="Size"
+              icon="📐"
+              isCollapsed={collapsedSections.has('size')}
+              onToggle={toggleSection}
+            >
               <FormField label="Column Span">
                 <input
                   type="number"
@@ -483,10 +530,16 @@ export function ElementInspector({
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 />
               </FormField>
-            </ConfigSection>
+            </CollapsibleSection>
 
             {/* Layer */}
-            <ConfigSection title="Layer">
+            <CollapsibleSection
+              id="layer"
+              title="Layer"
+              icon="📚"
+              isCollapsed={collapsedSections.has('layer')}
+              onToggle={toggleSection}
+            >
               <FormField label="Z-Index">
                 <input
                   type="number"
@@ -498,7 +551,7 @@ export function ElementInspector({
               <div className="text-xs text-gray-500">
                 Higher numbers appear on top
               </div>
-            </ConfigSection>
+            </CollapsibleSection>
           </>
         )}
       </div>
@@ -507,10 +560,60 @@ export function ElementInspector({
 }
 
 // Helper Components
+function CollapsibleSection({
+  id,
+  title,
+  icon,
+  children,
+  isCollapsed,
+  onToggle,
+  defaultExpanded = true
+}: {
+  id: string;
+  title: string;
+  icon?: string;
+  children: React.ReactNode;
+  isCollapsed: boolean;
+  onToggle: (id: string) => void;
+  defaultExpanded?: boolean;
+}) {
+  const collapsed = isCollapsed;
+
+  return (
+    <div className="border border-gray-700 rounded-lg overflow-hidden bg-gray-750">
+      <button
+        onClick={() => onToggle(id)}
+        className="w-full flex items-center justify-between p-3 hover:bg-gray-700 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          {icon && <span className="text-base">{icon}</span>}
+          <h4 className="text-xs font-semibold text-gray-300 uppercase">{title}</h4>
+        </div>
+        <svg
+          className={`w-4 h-4 text-gray-400 transition-transform ${
+            collapsed ? '-rotate-90' : ''
+          }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {!collapsed && (
+        <div className="p-3 pt-0 space-y-3 border-t border-gray-700/50">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Legacy ConfigSection for backward compatibility
 function ConfigSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div>
-      <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">{title}</h4>
+    <div className="border border-gray-700 rounded-lg p-3 bg-gray-750">
+      <h4 className="text-xs font-semibold text-gray-300 uppercase mb-3">{title}</h4>
       <div className="space-y-3">
         {children}
       </div>

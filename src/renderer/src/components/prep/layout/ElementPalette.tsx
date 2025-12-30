@@ -466,6 +466,8 @@ interface ElementPaletteProps {
 export function ElementPalette({ onDragStart, onDragEnd }: ElementPaletteProps) {
   const [activeCategory, setActiveCategory] = useState<'all' | 'data' | 'content' | 'visual'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  const [draggedElement, setDraggedElement] = useState<PaletteElement | null>(null);
 
   const filteredElements = paletteElements.filter(element => {
     const matchesCategory = activeCategory === 'all' || element.category === activeCategory;
@@ -477,6 +479,28 @@ export function ElementPalette({ onDragStart, onDragEnd }: ElementPaletteProps) 
 
   const getCategoryCount = (category: 'data' | 'content' | 'visual') => {
     return paletteElements.filter(e => e.category === category).length;
+  };
+
+  const toggleSection = (category: string) => {
+    const newCollapsed = new Set(collapsedSections);
+    if (newCollapsed.has(category)) {
+      newCollapsed.delete(category);
+    } else {
+      newCollapsed.add(category);
+    }
+    setCollapsedSections(newCollapsed);
+  };
+
+  const groupedElements = {
+    data: filteredElements.filter(e => e.category === 'data'),
+    content: filteredElements.filter(e => e.category === 'content'),
+    visual: filteredElements.filter(e => e.category === 'visual')
+  };
+
+  const categoryConfig = {
+    data: { title: 'Data Fields', icon: '📊', color: 'blue' },
+    content: { title: 'Content Elements', icon: '📝', color: 'green' },
+    visual: { title: 'Visual Elements', icon: '🎨', color: 'purple' }
   };
 
   return (
@@ -542,10 +566,112 @@ export function ElementPalette({ onDragStart, onDragEnd }: ElementPaletteProps) 
       {/* Elements List */}
       <div className="flex-1 overflow-y-auto p-4">
         {filteredElements.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 text-sm">
-            No elements found
+          <div className="text-center py-12 text-gray-500">
+            <div className="text-4xl mb-3">🔍</div>
+            <div className="text-sm font-medium">No elements found</div>
+            <div className="text-xs text-gray-600 mt-1">Try adjusting your search or filters</div>
+          </div>
+        ) : activeCategory === 'all' ? (
+          // Grouped view with collapsible sections
+          <div className="space-y-4">
+            {(Object.keys(groupedElements) as Array<keyof typeof groupedElements>).map(category => {
+              const elements = groupedElements[category];
+              if (elements.length === 0) return null;
+
+              const config = categoryConfig[category];
+              const isCollapsed = collapsedSections.has(category);
+
+              return (
+                <div key={category} className="space-y-2">
+                  {/* Section Header */}
+                  <button
+                    onClick={() => toggleSection(category)}
+                    className="w-full flex items-center justify-between p-2 bg-gray-700 hover:bg-gray-650 rounded-lg transition-colors group"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{config.icon}</span>
+                      <span className="text-sm font-semibold text-gray-200">
+                        {config.title}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        ({elements.length})
+                      </span>
+                    </div>
+                    <svg
+                      className={`w-4 h-4 text-gray-400 transition-transform ${
+                        isCollapsed ? '-rotate-90' : ''
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {/* Section Elements */}
+                  {!isCollapsed && (
+                    <div className="space-y-2 pl-2">
+                      {elements.map((element, index) => (
+                        <div
+                          key={`${element.type}-${element.subType || index}`}
+                          draggable
+                          onDragStart={(e) => {
+                            e.dataTransfer.effectAllowed = 'copy';
+                            e.dataTransfer.setData('application/json', JSON.stringify(element));
+                            setDraggedElement(element);
+                            onDragStart(element);
+                          }}
+                          onDragEnd={() => {
+                            setDraggedElement(null);
+                            onDragEnd?.();
+                          }}
+                          className={`p-3 bg-gray-700/50 border-2 rounded-lg cursor-move transition-all group shadow-sm hover:shadow-md ${
+                            draggedElement === element
+                              ? 'border-blue-500 opacity-50'
+                              : 'border-gray-600 hover:border-blue-400 hover:bg-gray-700'
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="text-2xl flex-shrink-0 group-hover:scale-110 transition-transform">
+                              {element.icon}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-sm text-gray-200 truncate">
+                                {element.label}
+                              </div>
+                              <div className="text-xs text-gray-400 mt-0.5 line-clamp-2">
+                                {element.description}
+                              </div>
+                              <div className="flex items-center gap-1 mt-1.5">
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                  config.color === 'blue'
+                                    ? 'bg-blue-900/60 text-blue-300'
+                                    : config.color === 'green'
+                                    ? 'bg-green-900/60 text-green-300'
+                                    : 'bg-purple-900/60 text-purple-300'
+                                }`}>
+                                  {element.type}
+                                </span>
+                              </div>
+                            </div>
+                            {/* Drag handle indicator */}
+                            <div className="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
+                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         ) : (
+          // Simple list view for single category
           <div className="space-y-2">
             {filteredElements.map((element, index) => (
               <div
@@ -554,33 +680,47 @@ export function ElementPalette({ onDragStart, onDragEnd }: ElementPaletteProps) 
                 onDragStart={(e) => {
                   e.dataTransfer.effectAllowed = 'copy';
                   e.dataTransfer.setData('application/json', JSON.stringify(element));
+                  setDraggedElement(element);
                   onDragStart(element);
                 }}
-                onDragEnd={() => onDragEnd?.()}
-                className="p-3 bg-gray-700 border border-gray-600 rounded cursor-move hover:bg-gray-650 hover:border-blue-500 transition-all group"
+                onDragEnd={() => {
+                  setDraggedElement(null);
+                  onDragEnd?.();
+                }}
+                className={`p-3 bg-gray-700/50 border-2 rounded-lg cursor-move transition-all group shadow-sm hover:shadow-md ${
+                  draggedElement === element
+                    ? 'border-blue-500 opacity-50'
+                    : 'border-gray-600 hover:border-blue-400 hover:bg-gray-700'
+                }`}
               >
                 <div className="flex items-start gap-3">
                   <div className="text-2xl flex-shrink-0 group-hover:scale-110 transition-transform">
                     {element.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm text-gray-800 dark:text-gray-200 truncate">
+                    <div className="font-medium text-sm text-gray-200 truncate">
                       {element.label}
                     </div>
-                    <div className="text-xs text-gray-400 mt-0.5">
+                    <div className="text-xs text-gray-400 mt-0.5 line-clamp-2">
                       {element.description}
                     </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className={`text-xs px-2 py-0.5 rounded ${
+                    <div className="flex items-center gap-1 mt-1.5">
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                         element.category === 'data'
-                          ? 'bg-blue-900/50 text-blue-300'
+                          ? 'bg-blue-900/60 text-blue-300'
                           : element.category === 'content'
-                          ? 'bg-green-900/50 text-green-300'
-                          : 'bg-purple-900/50 text-purple-300'
+                          ? 'bg-green-900/60 text-green-300'
+                          : 'bg-purple-900/60 text-purple-300'
                       }`}>
                         {element.type}
                       </span>
                     </div>
+                  </div>
+                  {/* Drag handle indicator */}
+                  <div className="flex flex-col gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
+                    <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                    <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                    <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
                   </div>
                 </div>
               </div>
