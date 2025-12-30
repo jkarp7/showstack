@@ -466,6 +466,7 @@ interface ElementPaletteProps {
 export function ElementPalette({ onDragStart, onDragEnd }: ElementPaletteProps) {
   const [activeCategory, setActiveCategory] = useState<'all' | 'data' | 'content' | 'visual'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchExpanded, setSearchExpanded] = useState(false);
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
   const [draggedElement, setDraggedElement] = useState<PaletteElement | null>(null);
 
@@ -507,19 +508,48 @@ export function ElementPalette({ onDragStart, onDragEnd }: ElementPaletteProps) 
     <div className="w-80 bg-gray-800 border border-gray-700 rounded-lg flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-gray-700">
-        <h3 className="text-sm font-semibold text-gray-300 uppercase mb-3">Element Library</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-gray-300 uppercase">Element Library</h3>
 
-        {/* Search */}
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search elements..."
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500"
-        />
+          {/* Search Icon/Bar */}
+          {!searchExpanded ? (
+            <button
+              onClick={() => setSearchExpanded(true)}
+              className="p-2 hover:bg-gray-700 rounded transition-colors"
+              title="Search elements"
+            >
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 flex-1 ml-3">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search..."
+                autoFocus
+                className="flex-1 px-3 py-1.5 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500"
+              />
+              <button
+                onClick={() => {
+                  setSearchExpanded(false);
+                  setSearchQuery('');
+                }}
+                className="p-1.5 hover:bg-gray-700 rounded transition-colors"
+                title="Close search"
+              >
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Category Tabs */}
-        <div className="flex gap-1 mt-3">
+        <div className="flex gap-1">
           <button
             onClick={() => setActiveCategory('all')}
             className={`flex-1 px-2 py-1.5 text-xs rounded transition ${
@@ -727,13 +757,6 @@ export function ElementPalette({ onDragStart, onDragEnd }: ElementPaletteProps) 
             ))}
           </div>
         )}
-      </div>
-
-      {/* Footer Hint */}
-      <div className="p-3 border-t border-gray-700 bg-gray-700">
-        <p className="text-xs text-gray-400 text-center">
-          💡 Drag elements onto the canvas to build your layout
-        </p>
       </div>
     </div>
   );

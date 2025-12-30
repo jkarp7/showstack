@@ -750,7 +750,7 @@ function FloatingElementPalette({
   onDragStart: (element: any) => void;
   onDragEnd?: () => void;
 }) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true); // Start collapsed
   const [position, setPosition] = useState({ x: 20, y: 100 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
