@@ -69,6 +69,10 @@ export function LayoutDesigner({
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [availableTemplates, setAvailableTemplates] = useState<PageLayoutTemplate[]>([]);
   const [isLoadingDefault, setIsLoadingDefault] = useState(true);
+  const [zoom, setZoom] = useState(100);
+  const [showGrid, setShowGrid] = useState(true);
+  const [history, setHistory] = useState<PageLayoutTemplate[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
 
   // Load default layout and available layouts on mount
   useEffect(() => {
@@ -329,6 +333,44 @@ export function LayoutDesigner({
     onClose();
   }, [hasChanges, onClose]);
 
+  // Undo/Redo handlers
+  const handleUndo = useCallback(() => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      setTemplate(history[newIndex]);
+      setHasChanges(true);
+    }
+  }, [history, historyIndex]);
+
+  const handleRedo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      setTemplate(history[newIndex]);
+      setHasChanges(true);
+    }
+  }, [history, historyIndex]);
+
+  // Add to history when template changes
+  useEffect(() => {
+    // Don't add to history if we're just loading
+    if (isLoadingDefault) return;
+
+    // Trim history if we're not at the end and add new state
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(template);
+
+    // Limit history to 50 entries
+    if (newHistory.length > 50) {
+      newHistory.shift();
+    } else {
+      setHistoryIndex(historyIndex + 1);
+    }
+
+    setHistory(newHistory);
+  }, [template.elements, template.updated_at]);
+
   return (
     <div className="fixed inset-0 bg-black/90 z-50 flex flex-col">
       {/* Header */}
@@ -406,17 +448,107 @@ export function LayoutDesigner({
           onDragEnd={handlePaletteDragEnd}
         />
 
-        {/* Center: Canvas */}
-        <LayoutCanvas
-          template={template}
-          currentProject={currentProject}
-          selectedElementId={selectedElementId}
-          onElementSelect={setSelectedElementId}
-          onElementDrop={handleElementDrop}
-          onElementMove={handleElementMove}
-          onElementResize={handleElementResize}
-          onElementDelete={handleElementDelete}
-        />
+        {/* Center: Canvas with Floating Toolbar */}
+        <div className="flex-1 relative">
+          <LayoutCanvas
+            template={template}
+            currentProject={currentProject}
+            selectedElementId={selectedElementId}
+            onElementSelect={setSelectedElementId}
+            onElementDrop={handleElementDrop}
+            onElementMove={handleElementMove}
+            onElementResize={handleElementResize}
+            onElementDelete={handleElementDelete}
+            zoom={zoom}
+            showGrid={showGrid}
+          />
+
+          {/* Floating Toolbar */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+            <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-2xl px-4 py-2 flex items-center gap-3">
+              {/* Undo/Redo */}
+              <div className="flex items-center gap-1 pr-3 border-r border-gray-700">
+                <button
+                  onClick={handleUndo}
+                  disabled={historyIndex <= 0}
+                  className="p-2 rounded hover:bg-gray-700 text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title="Undo (Ctrl+Z)"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                  </svg>
+                </button>
+                <button
+                  onClick={handleRedo}
+                  disabled={historyIndex >= history.length - 1}
+                  className="p-2 rounded hover:bg-gray-700 text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title="Redo (Ctrl+Y)"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Zoom Controls */}
+              <div className="flex items-center gap-2 pr-3 border-r border-gray-700">
+                <button
+                  onClick={() => setZoom(Math.max(50, zoom - 10))}
+                  className="p-2 rounded hover:bg-gray-700 text-gray-300 transition-colors"
+                  title="Zoom Out"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+                  </svg>
+                </button>
+                <div className="flex items-center gap-1">
+                  {[50, 75, 100, 150, 200].map((zoomLevel) => (
+                    <button
+                      key={zoomLevel}
+                      onClick={() => setZoom(zoomLevel)}
+                      className={`px-2 py-1 text-xs rounded transition-colors ${
+                        zoom === zoomLevel
+                          ? 'bg-blue-600 text-white'
+                          : 'text-gray-400 hover:bg-gray-700 hover:text-gray-300'
+                      }`}
+                    >
+                      {zoomLevel}%
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setZoom(Math.min(200, zoom + 10))}
+                  className="p-2 rounded hover:bg-gray-700 text-gray-300 transition-colors"
+                  title="Zoom In"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Grid Toggle */}
+              <button
+                onClick={() => setShowGrid(!showGrid)}
+                className={`p-2 rounded transition-colors ${
+                  showGrid
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-400 hover:bg-gray-700 hover:text-gray-300'
+                }`}
+                title="Toggle Grid"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                </svg>
+              </button>
+
+              {/* Element Count */}
+              <div className="pl-3 border-l border-gray-700 text-xs text-gray-400">
+                {template.elements.length} {template.elements.length === 1 ? 'element' : 'elements'}
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Right: Inspector */}
         <ElementInspector

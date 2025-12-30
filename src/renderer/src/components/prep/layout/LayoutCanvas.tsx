@@ -115,6 +115,8 @@ interface LayoutCanvasProps {
   onElementMove: (elementId: string, gridColumn: number, gridRow: number) => void;
   onElementResize: (elementId: string, columnSpan: number, rowSpan: number) => void;
   onElementDelete: (elementId: string) => void;
+  zoom?: number;
+  showGrid?: boolean;
 }
 
 export function LayoutCanvas({
@@ -125,10 +127,13 @@ export function LayoutCanvas({
   onElementDrop,
   onElementMove,
   onElementResize,
-  onElementDelete
+  onElementDelete,
+  zoom: externalZoom,
+  showGrid: externalShowGrid
 }: LayoutCanvasProps) {
-  const [showGrid, setShowGrid] = useState(true);
-  const [zoom, setZoom] = useState(100);
+  // Use external zoom/grid if provided, otherwise use defaults
+  const zoom = externalZoom ?? 100;
+  const showGrid = externalShowGrid ?? true;
   const [draggedElement, setDraggedElement] = useState<string | null>(null);
   const [dragOverCell, setDragOverCell] = useState<{ col: number; row: number } | null>(null);
   const [resizeHandle, setResizeHandle] = useState<'se' | 'e' | 's' | null>(null);
