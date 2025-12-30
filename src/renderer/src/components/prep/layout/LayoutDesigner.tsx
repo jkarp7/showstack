@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ElementPalette } from './ElementPalette';
 import { LayoutCanvas } from './LayoutCanvas';
@@ -441,31 +441,10 @@ export function LayoutDesigner({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex gap-4 p-4 overflow-hidden">
-        {/* Left: Element Palette */}
-        <ElementPalette
-          onDragStart={handlePaletteDragStart}
-          onDragEnd={handlePaletteDragEnd}
-        />
-
-        {/* Center: Canvas with Floating Toolbar */}
-        <div className="flex-1 relative">
-          <LayoutCanvas
-            template={template}
-            currentProject={currentProject}
-            selectedElementId={selectedElementId}
-            onElementSelect={setSelectedElementId}
-            onElementDrop={handleElementDrop}
-            onElementMove={handleElementMove}
-            onElementResize={handleElementResize}
-            onElementDelete={handleElementDelete}
-            zoom={zoom}
-            showGrid={showGrid}
-          />
-
-          {/* Floating Toolbar */}
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
-            <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-2xl px-4 py-2 flex items-center gap-3">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Toolbar - Fixed position */}
+        <div className="bg-gray-800 border-b border-gray-700 px-6 py-3">
+          <div className="flex items-center gap-6">
               {/* Undo/Redo */}
               <div className="flex items-center gap-1 pr-3 border-r border-gray-700">
                 <button
@@ -542,21 +521,47 @@ export function LayoutDesigner({
                 </svg>
               </button>
 
-              {/* Element Count */}
-              <div className="pl-3 border-l border-gray-700 text-xs text-gray-400">
-                {template.elements.length} {template.elements.length === 1 ? 'element' : 'elements'}
-              </div>
+            {/* Element Count */}
+            <div className="pl-3 border-l border-gray-700 text-xs text-gray-400">
+              {template.elements.length} {template.elements.length === 1 ? 'element' : 'elements'}
             </div>
           </div>
         </div>
 
-        {/* Right: Inspector */}
-        <ElementInspector
-          element={selectedElement}
-          onUpdate={handleElementUpdate}
-          onDelete={() => selectedElementId && handleElementDelete(selectedElementId)}
-          maxColumns={template.grid_columns}
-          maxRows={template.grid_rows}
+        {/* Canvas Area: 2/3 canvas, 1/3 inspector */}
+        <div className="flex-1 flex gap-4 p-4 overflow-hidden">
+          {/* Canvas (2/3 width) */}
+          <div className="flex-[2] relative">
+            <LayoutCanvas
+              template={template}
+              currentProject={currentProject}
+              selectedElementId={selectedElementId}
+              onElementSelect={setSelectedElementId}
+              onElementDrop={handleElementDrop}
+              onElementMove={handleElementMove}
+              onElementResize={handleElementResize}
+              onElementDelete={handleElementDelete}
+              zoom={zoom}
+              showGrid={showGrid}
+            />
+          </div>
+
+          {/* Inspector (1/3 width) */}
+          <div className="flex-1">
+            <ElementInspector
+              element={selectedElement}
+              onUpdate={handleElementUpdate}
+              onDelete={() => selectedElementId && handleElementDelete(selectedElementId)}
+              maxColumns={template.grid_columns}
+              maxRows={template.grid_rows}
+            />
+          </div>
+        </div>
+
+        {/* Floating Element Palette */}
+        <FloatingElementPalette
+          onDragStart={handlePaletteDragStart}
+          onDragEnd={handlePaletteDragEnd}
         />
       </div>
 
@@ -735,4 +740,104 @@ function createDefaultStyle(elementType: string): any {
     default:
       return baseStyle;
   }
+}
+
+// Floating Element Palette Component
+function FloatingElementPalette({
+  onDragStart,
+  onDragEnd
+}: {
+  onDragStart: (element: any) => void;
+  onDragEnd?: () => void;
+}) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [position, setPosition] = useState({ x: 20, y: 100 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const paletteRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('.palette-content')) {
+      return; // Don't drag if clicking inside the palette content
+    }
+
+    setIsDragging(true);
+    setDragOffset({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
+  };
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (isDragging) {
+      setPosition({
+        x: e.clientX - dragOffset.x,
+        y: e.clientY - dragOffset.y
+      });
+    }
+  }, [isDragging, dragOffset]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, handleMouseMove, handleMouseUp]);
+
+  return (
+    <div
+      ref={paletteRef}
+      className="fixed z-50 shadow-2xl"
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        cursor: isDragging ? 'grabbing' : 'default'
+      }}
+    >
+      {/* Header - Draggable */}
+      <div
+        onMouseDown={handleMouseDown}
+        className="bg-gray-800 border border-gray-700 rounded-t-lg px-4 py-2 flex items-center justify-between cursor-grab active:cursor-grabbing"
+      >
+        <div className="flex items-center gap-2">
+          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+          </svg>
+          <span className="text-sm font-semibold text-gray-300">Elements</span>
+        </div>
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="p-1 hover:bg-gray-700 rounded transition-colors"
+          title={isCollapsed ? 'Expand' : 'Collapse'}
+        >
+          <svg
+            className={`w-4 h-4 text-gray-400 transition-transform ${isCollapsed ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Palette Content */}
+      {!isCollapsed && (
+        <div className="palette-content">
+          <ElementPalette
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+          />
+        </div>
+      )}
+    </div>
+  );
 }
