@@ -177,18 +177,6 @@ export function LayoutCanvas({
     }
   };
 
-  const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 10, 200));
-  };
-
-  const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 10, 50));
-  };
-
-  const handleZoomReset = () => {
-    setZoom(100);
-  };
-
   const getElementAtPosition = (col: number, row: number): LayoutElement | null => {
     return template.elements.find(el =>
       col >= el.grid_column &&
@@ -200,54 +188,6 @@ export function LayoutCanvas({
 
   return (
     <div className="flex-1 bg-gray-900 rounded-lg border border-gray-700 flex flex-col overflow-hidden">
-      {/* Toolbar */}
-      <div className="bg-gray-800 border-b border-gray-700 p-3 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-400">Grid:</span>
-            <button
-              onClick={() => setShowGrid(!showGrid)}
-              className={`px-3 py-1 text-xs rounded transition ${
-                showGrid
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-            >
-              {showGrid ? 'Visible' : 'Hidden'}
-            </button>
-          </div>
-
-          <div className="text-xs text-gray-500">
-            {template.grid_columns} × {template.grid_rows} grid
-          </div>
-        </div>
-
-        {/* Zoom Controls */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-400">Zoom:</span>
-          <button
-            onClick={handleZoomOut}
-            disabled={zoom <= 50}
-            className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            −
-          </button>
-          <button
-            onClick={handleZoomReset}
-            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-gray-900 dark:text-white text-xs transition min-w-16"
-          >
-            {zoom}%
-          </button>
-          <button
-            onClick={handleZoomIn}
-            disabled={zoom >= 200}
-            className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            +
-          </button>
-        </div>
-      </div>
-
       {/* Canvas */}
       <div className="flex-1 overflow-auto p-8 bg-gray-850">
         <div className="flex items-center justify-center min-h-full">
@@ -381,22 +321,81 @@ export function LayoutCanvas({
                           e.preventDefault(); // Still need to prevent default even if occupied
                         }
                       }}
-                      className={`border-gray-200 transition-colors ${
+                      className={`transition-all duration-200 ${
                         isDragOver && !isOccupied
-                          ? 'bg-blue-100 border-2 border-blue-400'
+                          ? 'bg-blue-200/60 border-2 border-blue-500 border-dashed shadow-lg animate-pulse'
+                          : isDragOver && isOccupied
+                          ? 'bg-red-200/40 border-2 border-red-400 border-dashed'
+                          : draggedElement || dragOverCell
+                          ? !isOccupied
+                            ? 'bg-green-100/30 border border-green-300/50'
+                            : 'bg-red-50/20 border border-red-300/30'
                           : 'border border-transparent'
                       }`}
                       style={{
                         gridColumn: isOccupied ? `span ${element.column_span}` : undefined,
                         gridRow: isOccupied ? `span ${element.row_span}` : undefined,
-                        cursor: isOccupied ? 'default' : 'crosshair',
+                        cursor: isOccupied ? 'not-allowed' : 'crosshair',
                         minHeight: isOccupied ? undefined : '20px'
                       }}
-                    />
+                    >
+                      {/* Drop Zone Indicator */}
+                      {isDragOver && !isOccupied && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="bg-blue-500 text-white px-2 py-1 rounded text-xs shadow-lg">
+                            Drop here
+                          </div>
+                        </div>
+                      )}
+                      {isDragOver && isOccupied && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="bg-red-500 text-white px-2 py-1 rounded text-xs shadow-lg">
+                            Occupied
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   );
                 })
               )}
             </div>
+
+            {/* Ghost Element Preview - Shows where element will drop */}
+            {dragOverCell && draggedElement && (() => {
+              const element = template.elements.find(el => el.id === draggedElement);
+              if (!element) return null;
+
+              // Check if drop location is valid (not occupied)
+              const targetElement = getElementAtPosition(dragOverCell.col, dragOverCell.row);
+              const isValidDrop = !targetElement;
+
+              return (
+                <div
+                  className={`absolute pointer-events-none border-2 rounded ${
+                    isValidDrop
+                      ? 'border-blue-500 bg-blue-100/40 border-dashed'
+                      : 'border-red-500 bg-red-100/40 border-dashed'
+                  }`}
+                  style={{
+                    left: `${dragOverCell.col * cellWidth * (zoom / 100)}px`,
+                    top: `${dragOverCell.row * cellHeight * (zoom / 100)}px`,
+                    width: `${element.column_span * cellWidth * (zoom / 100)}px`,
+                    height: `${element.row_span * cellHeight * (zoom / 100)}px`,
+                    zIndex: 9998
+                  }}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className={`text-xs font-medium px-2 py-1 rounded ${
+                      isValidDrop
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-red-500 text-white'
+                    }`}>
+                      {isValidDrop ? '✓ Drop' : '✗ Occupied'}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Elements */}
             {template.elements
@@ -411,9 +410,11 @@ export function LayoutCanvas({
                     onElementSelect(element.id);
                   }}
                   className={`absolute cursor-move transition-all ${
-                    selectedElementId === element.id
-                      ? 'ring-2 ring-blue-500 ring-offset-2'
-                      : 'hover:ring-2 hover:ring-gray-400'
+                    draggedElement === element.id
+                      ? 'opacity-40 scale-95 ring-2 ring-blue-400 ring-dashed'
+                      : selectedElementId === element.id
+                      ? 'ring-2 ring-blue-500 ring-offset-2 shadow-xl'
+                      : 'hover:ring-2 hover:ring-gray-400 hover:shadow-md'
                   }`}
                   style={{
                     left: `${element.grid_column * cellWidth * (zoom / 100)}px`,
