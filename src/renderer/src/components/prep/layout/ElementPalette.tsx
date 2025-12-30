@@ -508,21 +508,24 @@ export function ElementPalette({ onDragStart, onDragEnd }: ElementPaletteProps) 
     <div className="w-80 bg-gray-800 border border-gray-700 rounded-lg flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-gray-700">
-        <h3 className="text-sm font-semibold text-gray-300 uppercase mb-3">Element Library</h3>
+        {/* Header with Search Icon */}
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-gray-300 uppercase">Element Library</h3>
+          {!searchExpanded && (
+            <button
+              onClick={() => setSearchExpanded(true)}
+              className="p-1.5 hover:bg-gray-700 rounded transition-colors"
+              title="Search elements"
+            >
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+          )}
+        </div>
 
-        {/* Search Icon/Bar */}
-        {!searchExpanded ? (
-          <button
-            onClick={() => setSearchExpanded(true)}
-            className="w-full p-2 hover:bg-gray-700 rounded transition-colors flex items-center justify-center gap-2 mb-3"
-            title="Search elements"
-          >
-            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <span className="text-xs text-gray-400">Search elements...</span>
-          </button>
-        ) : (
+        {/* Search Bar (appears below when expanded) */}
+        {searchExpanded && (
           <div className="flex items-center gap-2 mb-3">
             <input
               type="text"

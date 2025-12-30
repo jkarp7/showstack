@@ -427,8 +427,15 @@ export function LayoutCanvas({
                     fontSize: `${(element.style.fontSize || 12) * (zoom / 100)}px`,
                     fontFamily: element.style.fontFamily || 'Arial',
                     fontWeight: element.style.fontWeight || 'normal',
+                    fontStyle: element.style.fontStyle || 'normal',
                     textAlign: element.style.textAlign || 'left',
-                    padding: `${(element.style.padding || 8) * (zoom / 100)}px`,
+                    textDecoration: element.style.textDecoration || 'none',
+                    lineHeight: element.style.lineHeight || 1.5,
+                    letterSpacing: element.style.letterSpacing ? `${element.style.letterSpacing * (zoom / 100)}px` : 'normal',
+                    // Individual padding support - use individual if set, otherwise use unified
+                    padding: element.style.paddingTop !== undefined
+                      ? `${element.style.paddingTop * (zoom / 100)}px ${element.style.paddingRight * (zoom / 100)}px ${element.style.paddingBottom * (zoom / 100)}px ${element.style.paddingLeft * (zoom / 100)}px`
+                      : `${(element.style.padding || 8) * (zoom / 100)}px`,
                     borderWidth: `${(element.style.borderWidth || 0) * (zoom / 100)}px`,
                     borderStyle: element.style.borderStyle || 'none',
                     borderColor: element.style.borderColor || '#000',

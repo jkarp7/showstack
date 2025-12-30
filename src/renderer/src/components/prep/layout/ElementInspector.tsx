@@ -10,6 +10,7 @@ import type {
   DataFieldType,
   ShapeType
 } from '../../../types/prep';
+import { ColorPicker } from './ColorPicker';
 
 interface ElementInspectorProps {
   element: LayoutElement | null;
@@ -302,31 +303,129 @@ export function ElementInspector({
                 </select>
               </FormField>
 
-              <FormField label="Font Size (px)">
+              <FormField label="Font Size">
+                {/* Preset Buttons Grid */}
+                <div className="grid grid-cols-4 gap-1 mb-2">
+                  {[8, 10, 12, 14, 16, 18, 24, 36].map(size => (
+                    <button
+                      key={size}
+                      onClick={() => updateStyle({ fontSize: size })}
+                      className={`px-2 py-1.5 text-xs rounded transition ${
+                        element.style.fontSize === size
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                      type="button"
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom Input */}
                 <input
                   type="number"
                   value={element.style.fontSize || 12}
                   onChange={(e) => updateStyle({ fontSize: parseInt(e.target.value) })}
                   min="6"
-                  max="72"
+                  max="144"
+                  placeholder="Custom size"
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </FormField>
 
-              <FormField label="Font Weight">
-                <select
-                  value={element.style.fontWeight || 'normal'}
-                  onChange={(e) => updateStyle({ fontWeight: e.target.value as any })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <FormField label="Bold">
+                <button
+                  onClick={() => updateStyle({
+                    fontWeight: element.style.fontWeight === 'bold' ? 'normal' : 'bold'
+                  })}
+                  className={`w-full px-3 py-2 rounded font-bold transition ${
+                    element.style.fontWeight === 'bold'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                  type="button"
                 >
-                  <option value="normal">Normal</option>
-                  <option value="bold">Bold</option>
-                  <option value="300">Light</option>
-                  <option value="500">Medium</option>
-                  <option value="600">Semi Bold</option>
-                  <option value="700">Bold</option>
-                  <option value="900">Black</option>
-                </select>
+                  {element.style.fontWeight === 'bold' ? 'Bold (On)' : 'Bold (Off)'}
+                </button>
+              </FormField>
+
+              <FormField label="Text Style">
+                <div className="grid grid-cols-3 gap-1">
+                  {/* Italic Toggle */}
+                  <button
+                    onClick={() => updateStyle({
+                      fontStyle: element.style.fontStyle === 'italic' ? 'normal' : 'italic'
+                    })}
+                    className={`px-3 py-2 rounded italic transition text-sm ${
+                      element.style.fontStyle === 'italic'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
+                    title="Italic"
+                    type="button"
+                  >
+                    I
+                  </button>
+
+                  {/* Underline Toggle */}
+                  <button
+                    onClick={() => updateStyle({
+                      textDecoration: element.style.textDecoration === 'underline' ? 'none' : 'underline'
+                    })}
+                    className={`px-3 py-2 rounded underline transition text-sm ${
+                      element.style.textDecoration === 'underline'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
+                    title="Underline"
+                    type="button"
+                  >
+                    U
+                  </button>
+
+                  {/* Strikethrough Toggle */}
+                  <button
+                    onClick={() => updateStyle({
+                      textDecoration: element.style.textDecoration === 'line-through' ? 'none' : 'line-through'
+                    })}
+                    className={`px-3 py-2 rounded line-through transition text-sm ${
+                      element.style.textDecoration === 'line-through'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
+                    title="Strikethrough"
+                    type="button"
+                  >
+                    S
+                  </button>
+                </div>
+              </FormField>
+
+              <FormField label="Line Height">
+                <input
+                  type="range"
+                  value={element.style.lineHeight || 1.5}
+                  onChange={(e) => updateStyle({ lineHeight: parseFloat(e.target.value) })}
+                  min="0.8"
+                  max="3.0"
+                  step="0.1"
+                  className="w-full"
+                />
+                <div className="text-xs text-gray-400 mt-1 text-center">
+                  {(element.style.lineHeight || 1.5).toFixed(1)}
+                </div>
+              </FormField>
+
+              <FormField label="Letter Spacing (px)">
+                <input
+                  type="number"
+                  value={element.style.letterSpacing || 0}
+                  onChange={(e) => updateStyle({ letterSpacing: parseInt(e.target.value) })}
+                  min="-2"
+                  max="10"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </FormField>
 
               <FormField label="Text Align">
@@ -352,40 +451,68 @@ export function ElementInspector({
               onToggle={toggleSection}
             >
               <FormField label="Text Color">
-                <input
-                  type="color"
+                <ColorPicker
                   value={element.style.color || '#000000'}
-                  onChange={(e) => updateStyle({ color: e.target.value })}
-                  className="w-full h-10 bg-gray-700 border border-gray-600 rounded cursor-pointer"
+                  onChange={(color) => updateStyle({ color })}
+                  label=""
                 />
               </FormField>
 
               <FormField label="Background Color">
-                <div className="flex gap-2">
-                  <input
-                    type="color"
-                    value={element.style.backgroundColor || '#ffffff'}
-                    onChange={(e) => updateStyle({ backgroundColor: e.target.value })}
-                    className="flex-1 h-10 bg-gray-700 border border-gray-600 rounded cursor-pointer"
-                  />
-                  <button
-                    onClick={() => updateStyle({ backgroundColor: 'transparent' })}
-                    className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-900 dark:text-white text-xs rounded transition"
-                  >
-                    Clear
-                  </button>
-                </div>
+                <ColorPicker
+                  value={element.style.backgroundColor || '#ffffff'}
+                  onChange={(color) => updateStyle({ backgroundColor: color })}
+                  allowTransparent={true}
+                  label=""
+                />
               </FormField>
             </CollapsibleSection>
 
-            {/* Borders */}
+            {/* Fill & Borders */}
             <CollapsibleSection
-              id="borders"
-              title="Borders"
+              id="fill-borders"
+              title="Fill & Borders"
               icon="🔲"
-              isCollapsed={collapsedSections.has('borders')}
+              isCollapsed={collapsedSections.has('fill-borders')}
               onToggle={toggleSection}
             >
+              {/* Fill Controls - Show for shapes only */}
+              {element.element_type === 'shape' && (
+                <div className="mb-4 pb-4 border-b border-gray-700">
+                  <h5 className="text-xs font-semibold text-gray-400 uppercase mb-3">Fill</h5>
+
+                  <FormField label="">
+                    <label className="flex items-center gap-2 cursor-pointer mb-3">
+                      <input
+                        type="checkbox"
+                        checked={element.style.backgroundColor !== 'transparent'}
+                        onChange={(e) => updateStyle({
+                          backgroundColor: e.target.checked ? '#000000' : 'transparent'
+                        })}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm text-gray-300">Enable fill</span>
+                    </label>
+                  </FormField>
+
+                  {element.style.backgroundColor !== 'transparent' && (
+                    <FormField label="Fill Color">
+                      <ColorPicker
+                        value={element.style.backgroundColor || '#000000'}
+                        onChange={(color) => updateStyle({ backgroundColor: color })}
+                        showOpacity={true}
+                        opacity={element.style.opacity}
+                        onOpacityChange={(opacity) => updateStyle({ opacity })}
+                        label=""
+                      />
+                    </FormField>
+                  )}
+                </div>
+              )}
+
+              {/* Border Controls */}
+              <h5 className="text-xs font-semibold text-gray-400 uppercase mb-3">Border</h5>
+
               <FormField label="Border Width (px)">
                 <input
                   type="number"
@@ -411,11 +538,10 @@ export function ElementInspector({
               </FormField>
 
               <FormField label="Border Color">
-                <input
-                  type="color"
+                <ColorPicker
                   value={element.style.borderColor || '#000000'}
-                  onChange={(e) => updateStyle({ borderColor: e.target.value })}
-                  className="w-full h-10 bg-gray-700 border border-gray-600 rounded cursor-pointer"
+                  onChange={(color) => updateStyle({ borderColor: color })}
+                  label=""
                 />
               </FormField>
 
@@ -439,15 +565,102 @@ export function ElementInspector({
               isCollapsed={collapsedSections.has('spacing')}
               onToggle={toggleSection}
             >
-              <FormField label="Padding (px)">
-                <input
-                  type="number"
-                  value={element.style.padding || 8}
-                  onChange={(e) => updateStyle({ padding: parseInt(e.target.value) })}
-                  min="0"
-                  max="100"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
-                />
+              <FormField label="Padding">
+                {/* Link Padding Checkbox */}
+                <label className="flex items-center gap-2 cursor-pointer mb-2">
+                  <input
+                    type="checkbox"
+                    checked={element.style.paddingTop === undefined}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        // Link padding - use unified value
+                        const unified = element.style.padding || 8;
+                        updateStyle({
+                          padding: unified,
+                          paddingTop: undefined,
+                          paddingRight: undefined,
+                          paddingBottom: undefined,
+                          paddingLeft: undefined
+                        });
+                      } else {
+                        // Unlink - convert to individual
+                        const current = element.style.padding || 8;
+                        updateStyle({
+                          padding: undefined,
+                          paddingTop: current,
+                          paddingRight: current,
+                          paddingBottom: current,
+                          paddingLeft: current
+                        });
+                      }
+                    }}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm text-gray-300">Link padding</span>
+                </label>
+
+                {/* Unified Padding (when linked) */}
+                {element.style.paddingTop === undefined && (
+                  <input
+                    type="number"
+                    value={element.style.padding || 8}
+                    onChange={(e) => updateStyle({ padding: parseInt(e.target.value) })}
+                    min="0"
+                    max="100"
+                    placeholder="All sides"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+                  />
+                )}
+
+                {/* Individual Padding (when unlinked) */}
+                {element.style.paddingTop !== undefined && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-xs text-gray-400 mb-1 block">Top</label>
+                      <input
+                        type="number"
+                        value={element.style.paddingTop || 0}
+                        onChange={(e) => updateStyle({ paddingTop: parseInt(e.target.value) })}
+                        min="0"
+                        max="100"
+                        className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 mb-1 block">Right</label>
+                      <input
+                        type="number"
+                        value={element.style.paddingRight || 0}
+                        onChange={(e) => updateStyle({ paddingRight: parseInt(e.target.value) })}
+                        min="0"
+                        max="100"
+                        className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 mb-1 block">Bottom</label>
+                      <input
+                        type="number"
+                        value={element.style.paddingBottom || 0}
+                        onChange={(e) => updateStyle({ paddingBottom: parseInt(e.target.value) })}
+                        min="0"
+                        max="100"
+                        className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 mb-1 block">Left</label>
+                      <input
+                        type="number"
+                        value={element.style.paddingLeft || 0}
+                        onChange={(e) => updateStyle({ paddingLeft: parseInt(e.target.value) })}
+                        min="0"
+                        max="100"
+                        className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
               </FormField>
 
               <FormField label="Opacity">
