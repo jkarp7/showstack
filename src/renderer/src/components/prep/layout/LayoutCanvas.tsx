@@ -131,6 +131,8 @@ export function LayoutCanvas({
   const [zoom, setZoom] = useState(100);
   const [draggedElement, setDraggedElement] = useState<string | null>(null);
   const [dragOverCell, setDragOverCell] = useState<{ col: number; row: number } | null>(null);
+  const [resizeHandle, setResizeHandle] = useState<'se' | 'e' | 's' | null>(null);
+  const [snapGuides, setSnapGuides] = useState<{ x: number[]; y: number[] }>({ x: [], y: [] });
   const canvasRef = useRef<HTMLDivElement>(null);
 
   // Calculate cell dimensions based on page size and grid
@@ -289,19 +291,61 @@ export function LayoutCanvas({
               transformOrigin: 'center'
             }}
           >
-            {/* Grid */}
+            {/* Grid - Enhanced with better visibility */}
             {showGrid && (
+              <>
+                {/* Fine grid lines */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    backgroundImage: `
+                      linear-gradient(to right, rgba(203, 213, 225, 0.4) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(203, 213, 225, 0.4) 1px, transparent 1px)
+                    `,
+                    backgroundSize: `${cellWidth * (zoom / 100)}px ${cellHeight * (zoom / 100)}px`
+                  }}
+                />
+                {/* Bold grid lines every 4 cells for better visual hierarchy */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    backgroundImage: `
+                      linear-gradient(to right, rgba(148, 163, 184, 0.6) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(148, 163, 184, 0.6) 1px, transparent 1px)
+                    `,
+                    backgroundSize: `${cellWidth * 4 * (zoom / 100)}px ${cellHeight * 4 * (zoom / 100)}px`
+                  }}
+                />
+              </>
+            )}
+
+            {/* Snap Guides - Show when dragging elements */}
+            {snapGuides.x.map((x, i) => (
               <div
-                className="absolute inset-0 pointer-events-none"
+                key={`snap-x-${i}`}
+                className="absolute pointer-events-none bg-blue-500 opacity-50"
                 style={{
-                  backgroundImage: `
-                    linear-gradient(to right, #e5e7eb 1px, transparent 1px),
-                    linear-gradient(to bottom, #e5e7eb 1px, transparent 1px)
-                  `,
-                  backgroundSize: `${cellWidth * (zoom / 100)}px ${cellHeight * (zoom / 100)}px`
+                  left: `${x * (zoom / 100)}px`,
+                  top: 0,
+                  width: '1px',
+                  height: '100%',
+                  zIndex: 9999
                 }}
               />
-            )}
+            ))}
+            {snapGuides.y.map((y, i) => (
+              <div
+                key={`snap-y-${i}`}
+                className="absolute pointer-events-none bg-blue-500 opacity-50"
+                style={{
+                  top: `${y * (zoom / 100)}px`,
+                  left: 0,
+                  height: '1px',
+                  width: '100%',
+                  zIndex: 9999
+                }}
+              />
+            ))}
 
             {/* Grid Cells (Drop Zones) */}
             <div className="absolute inset-0 grid"
@@ -420,13 +464,44 @@ export function LayoutCanvas({
                     )}
                   </div>
 
-                  {/* Selection Indicator */}
+                  {/* Selection Indicator and Resize Handles */}
                   {selectedElementId === element.id && (
-                    <div className="absolute -top-6 left-0 bg-blue-500 text-gray-900 dark:text-white px-2 py-0.5 rounded text-xs whitespace-nowrap pointer-events-none">
-                      {element.element_type}
-                      {' '}
-                      ({element.column_span}×{element.row_span})
-                    </div>
+                    <>
+                      {/* Element info label */}
+                      <div className="absolute -top-6 left-0 bg-blue-500 text-white px-2 py-0.5 rounded text-xs whitespace-nowrap pointer-events-none shadow-lg">
+                        {element.element_type}
+                        {' '}
+                        ({element.column_span}×{element.row_span})
+                      </div>
+
+                      {/* Resize Handles */}
+                      {/* Bottom-right corner handle */}
+                      <div
+                        className="absolute -bottom-1 -right-1 w-3 h-3 bg-white border-2 border-blue-500 rounded-sm cursor-se-resize hover:scale-125 transition-transform shadow-md"
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          setResizeHandle('se');
+                        }}
+                      />
+
+                      {/* Right edge handle */}
+                      <div
+                        className="absolute top-1/2 -translate-y-1/2 -right-1 w-3 h-6 bg-white border-2 border-blue-500 rounded-sm cursor-e-resize hover:scale-125 transition-transform shadow-md"
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          setResizeHandle('e');
+                        }}
+                      />
+
+                      {/* Bottom edge handle */}
+                      <div
+                        className="absolute left-1/2 -translate-x-1/2 -bottom-1 w-6 h-3 bg-white border-2 border-blue-500 rounded-sm cursor-s-resize hover:scale-125 transition-transform shadow-md"
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          setResizeHandle('s');
+                        }}
+                      />
+                    </>
                   )}
                 </div>
               ))}
