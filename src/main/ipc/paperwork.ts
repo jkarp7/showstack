@@ -1,7 +1,76 @@
 import { ipcMain, BrowserWindow, dialog } from 'electron';
 import * as fs from 'fs';
+import * as paperworkTemplateQueries from '../database/queries/paperworkTemplates';
 
 export function registerPaperworkHandlers(): void {
+  // ============================================
+  // PAPERWORK TEMPLATE HANDLERS
+  // ============================================
+
+  // Get all templates (optionally filtered by report type)
+  ipcMain.handle('paperwork-templates:getAll', async (_event, reportType?: string) => {
+    try {
+      return paperworkTemplateQueries.getAllPaperworkTemplates(reportType);
+    } catch (error) {
+      console.error('Error getting paperwork templates:', error);
+      throw error;
+    }
+  });
+
+  // Get template by ID
+  ipcMain.handle('paperwork-templates:getById', async (_event, id: string) => {
+    try {
+      return paperworkTemplateQueries.getPaperworkTemplateById(id);
+    } catch (error) {
+      console.error('Error getting paperwork template:', error);
+      throw error;
+    }
+  });
+
+  // Create new template
+  ipcMain.handle('paperwork-templates:create', async (_event, data: any) => {
+    try {
+      return paperworkTemplateQueries.createPaperworkTemplate(data);
+    } catch (error) {
+      console.error('Error creating paperwork template:', error);
+      throw error;
+    }
+  });
+
+  // Update template
+  ipcMain.handle('paperwork-templates:update', async (_event, id: string, updates: any) => {
+    try {
+      return paperworkTemplateQueries.updatePaperworkTemplate(id, updates);
+    } catch (error) {
+      console.error('Error updating paperwork template:', error);
+      throw error;
+    }
+  });
+
+  // Delete template
+  ipcMain.handle('paperwork-templates:delete', async (_event, id: string) => {
+    try {
+      return paperworkTemplateQueries.deletePaperworkTemplate(id);
+    } catch (error) {
+      console.error('Error deleting paperwork template:', error);
+      throw error;
+    }
+  });
+
+  // Duplicate template
+  ipcMain.handle('paperwork-templates:duplicate', async (_event, id: string, newName?: string) => {
+    try {
+      return paperworkTemplateQueries.duplicatePaperworkTemplate(id, newName);
+    } catch (error) {
+      console.error('Error duplicating paperwork template:', error);
+      throw error;
+    }
+  });
+
+  // ============================================
+  // PDF EXPORT HANDLER
+  // ============================================
+
   // Export Paperwork Report to PDF
   ipcMain.handle('paperwork:exportPDF', async (_event, htmlContent: string, filename: string, pageSettings: any) => {
     try {
