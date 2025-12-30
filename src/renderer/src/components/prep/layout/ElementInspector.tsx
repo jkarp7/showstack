@@ -42,7 +42,7 @@ export function ElementInspector({
 
   if (!element) {
     return (
-      <div className="w-80 bg-gray-800 border border-gray-700 rounded-lg p-6 flex items-center justify-center">
+      <div className="flex-1 bg-gray-800 border border-gray-700 rounded-lg p-6 flex items-center justify-center">
         <div className="text-center text-gray-500">
           <div className="text-4xl mb-2">👆</div>
           <div className="text-sm">Select an element to edit</div>
@@ -74,7 +74,7 @@ export function ElementInspector({
   };
 
   return (
-    <div className="w-80 bg-gray-800 border border-gray-700 rounded-lg flex flex-col h-full">
+    <div className="flex-1 bg-gray-800 border border-gray-700 rounded-lg flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-gray-700">
         <div className="flex items-center justify-between mb-3">
@@ -288,11 +288,13 @@ export function ElementInspector({
               isCollapsed={collapsedSections.has('typography')}
               onToggle={toggleSection}
             >
-              <FormField label="Font Family">
+              {/* Font Family and Size - Side by Side */}
+              <div className="grid grid-cols-2 gap-2">
+                {/* Font Family */}
                 <select
                   value={element.style.fontFamily || 'Arial'}
                   onChange={(e) => updateStyle({ fontFamily: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="Arial">Arial</option>
                   <option value="Helvetica">Helvetica</option>
@@ -301,106 +303,159 @@ export function ElementInspector({
                   <option value="Courier New">Courier New</option>
                   <option value="Verdana">Verdana</option>
                 </select>
-              </FormField>
 
-              <FormField label="Font Size">
-                {/* Preset Buttons Grid */}
-                <div className="grid grid-cols-4 gap-1 mb-2">
-                  {[8, 10, 12, 14, 16, 18, 24, 36].map(size => (
-                    <button
-                      key={size}
-                      onClick={() => updateStyle({ fontSize: size })}
-                      className={`px-2 py-1.5 text-xs rounded transition ${
-                        element.style.fontSize === size
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      }`}
-                      type="button"
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Custom Input */}
-                <input
-                  type="number"
+                {/* Font Size */}
+                <select
                   value={element.style.fontSize || 12}
                   onChange={(e) => updateStyle({ fontSize: parseInt(e.target.value) })}
-                  min="6"
-                  max="144"
-                  placeholder="Custom size"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </FormField>
+                  className="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="8">8pt</option>
+                  <option value="10">10pt</option>
+                  <option value="12">12pt</option>
+                  <option value="14">14pt</option>
+                  <option value="16">16pt</option>
+                  <option value="18">18pt</option>
+                  <option value="24">24pt</option>
+                  <option value="36">36pt</option>
+                  <option value="48">48pt</option>
+                  <option value="72">72pt</option>
+                </select>
+              </div>
 
-              <FormField label="Bold">
+              {/* Text Style - 4 Button Row (B, I, U, S) */}
+              <div className="grid grid-cols-4 gap-1">
+                {/* Bold Toggle */}
                 <button
                   onClick={() => updateStyle({
                     fontWeight: element.style.fontWeight === 'bold' ? 'normal' : 'bold'
                   })}
-                  className={`w-full px-3 py-2 rounded font-bold transition ${
+                  className={`px-3 py-2 rounded font-bold transition text-sm ${
                     element.style.fontWeight === 'bold'
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                   }`}
+                  title="Bold"
                   type="button"
                 >
-                  {element.style.fontWeight === 'bold' ? 'Bold (On)' : 'Bold (Off)'}
+                  B
                 </button>
-              </FormField>
 
-              <FormField label="Text Style">
-                <div className="grid grid-cols-3 gap-1">
-                  {/* Italic Toggle */}
-                  <button
-                    onClick={() => updateStyle({
-                      fontStyle: element.style.fontStyle === 'italic' ? 'normal' : 'italic'
-                    })}
-                    className={`px-3 py-2 rounded italic transition text-sm ${
-                      element.style.fontStyle === 'italic'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    }`}
-                    title="Italic"
-                    type="button"
-                  >
-                    I
-                  </button>
+                {/* Italic Toggle */}
+                <button
+                  onClick={() => updateStyle({
+                    fontStyle: element.style.fontStyle === 'italic' ? 'normal' : 'italic'
+                  })}
+                  className={`px-3 py-2 rounded italic transition text-sm ${
+                    element.style.fontStyle === 'italic'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                  title="Italic"
+                  type="button"
+                >
+                  I
+                </button>
 
-                  {/* Underline Toggle */}
-                  <button
-                    onClick={() => updateStyle({
-                      textDecoration: element.style.textDecoration === 'underline' ? 'none' : 'underline'
-                    })}
-                    className={`px-3 py-2 rounded underline transition text-sm ${
-                      element.style.textDecoration === 'underline'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    }`}
-                    title="Underline"
-                    type="button"
-                  >
-                    U
-                  </button>
+                {/* Underline Toggle */}
+                <button
+                  onClick={() => updateStyle({
+                    textDecoration: element.style.textDecoration === 'underline' ? 'none' : 'underline'
+                  })}
+                  className={`px-3 py-2 rounded underline transition text-sm ${
+                    element.style.textDecoration === 'underline'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                  title="Underline"
+                  type="button"
+                >
+                  U
+                </button>
 
-                  {/* Strikethrough Toggle */}
-                  <button
-                    onClick={() => updateStyle({
-                      textDecoration: element.style.textDecoration === 'line-through' ? 'none' : 'line-through'
-                    })}
-                    className={`px-3 py-2 rounded line-through transition text-sm ${
-                      element.style.textDecoration === 'line-through'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    }`}
-                    title="Strikethrough"
-                    type="button"
-                  >
-                    S
-                  </button>
-                </div>
-              </FormField>
+                {/* Strikethrough Toggle */}
+                <button
+                  onClick={() => updateStyle({
+                    textDecoration: element.style.textDecoration === 'line-through' ? 'none' : 'line-through'
+                  })}
+                  className={`px-3 py-2 rounded line-through transition text-sm ${
+                    element.style.textDecoration === 'line-through'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                  title="Strikethrough"
+                  type="button"
+                >
+                  S
+                </button>
+              </div>
+
+              {/* Text Alignment - 4 Icon Buttons */}
+              <div className="grid grid-cols-4 gap-1">
+                {/* Left Align */}
+                <button
+                  onClick={() => updateStyle({ textAlign: 'left' })}
+                  className={`px-3 py-2 rounded transition flex items-center justify-center ${
+                    element.style.textAlign === 'left' || !element.style.textAlign
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                  title="Align Left"
+                  type="button"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h10M4 18h14" />
+                  </svg>
+                </button>
+
+                {/* Center Align */}
+                <button
+                  onClick={() => updateStyle({ textAlign: 'center' })}
+                  className={`px-3 py-2 rounded transition flex items-center justify-center ${
+                    element.style.textAlign === 'center'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                  title="Align Center"
+                  type="button"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M7 12h10M5 18h14" />
+                  </svg>
+                </button>
+
+                {/* Right Align */}
+                <button
+                  onClick={() => updateStyle({ textAlign: 'right' })}
+                  className={`px-3 py-2 rounded transition flex items-center justify-center ${
+                    element.style.textAlign === 'right'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                  title="Align Right"
+                  type="button"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M10 12h10M6 18h14" />
+                  </svg>
+                </button>
+
+                {/* Justify */}
+                <button
+                  onClick={() => updateStyle({ textAlign: 'justify' })}
+                  className={`px-3 py-2 rounded transition flex items-center justify-center ${
+                    element.style.textAlign === 'justify'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                  title="Justify"
+                  type="button"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+              </div>
 
               <FormField label="Line Height">
                 <input
@@ -426,19 +481,6 @@ export function ElementInspector({
                   max="10"
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-              </FormField>
-
-              <FormField label="Text Align">
-                <select
-                  value={element.style.textAlign || 'left'}
-                  onChange={(e) => updateStyle({ textAlign: e.target.value as any })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="left">Left</option>
-                  <option value="center">Center</option>
-                  <option value="right">Right</option>
-                  <option value="justify">Justify</option>
-                </select>
               </FormField>
             </CollapsibleSection>
 
