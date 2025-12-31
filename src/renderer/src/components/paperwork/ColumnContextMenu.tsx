@@ -42,6 +42,40 @@ export function ColumnContextMenu({
   onOrganizationChange
 }: ColumnContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
+  const [adjustedPosition, setAdjustedPosition] = React.useState(position);
+
+  // Adjust position to keep menu within viewport bounds
+  useEffect(() => {
+    if (!menuRef.current) return;
+
+    const menuRect = menuRef.current.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    let { x, y } = position;
+
+    // Adjust horizontal position if menu would go off right edge
+    if (x + menuRect.width > viewportWidth) {
+      x = viewportWidth - menuRect.width - 10; // 10px padding from edge
+    }
+
+    // Adjust vertical position if menu would go off bottom edge
+    if (y + menuRect.height > viewportHeight) {
+      y = viewportHeight - menuRect.height - 10; // 10px padding from edge
+    }
+
+    // Ensure menu doesn't go off left edge
+    if (x < 10) {
+      x = 10;
+    }
+
+    // Ensure menu doesn't go off top edge
+    if (y < 10) {
+      y = 10;
+    }
+
+    setAdjustedPosition({ x, y });
+  }, [position]);
 
   // Close on click outside
   useEffect(() => {
@@ -77,8 +111,8 @@ export function ColumnContextMenu({
         ref={menuRef}
         style={{
           position: 'fixed',
-          top: position.y,
-          left: position.x,
+          top: adjustedPosition.y,
+          left: adjustedPosition.x,
           zIndex: 9999
         }}
         className="bg-gray-800 border border-gray-700 rounded-lg shadow-xl min-w-48 py-2 text-white"
@@ -186,8 +220,8 @@ export function ColumnContextMenu({
         ref={menuRef}
         style={{
           position: 'fixed',
-          top: position.y,
-          left: position.x,
+          top: adjustedPosition.y,
+          left: adjustedPosition.x,
           zIndex: 9999
         }}
         className="bg-gray-800 border border-gray-700 rounded-lg shadow-xl min-w-64 py-2 text-white"

@@ -210,7 +210,7 @@ export function ReportTableRenderer({
                     <th
                       key={col.id}
                       style={{ width: `${col.width}%` }}
-                      className="border border-gray-300 px-2 py-1 text-left text-sm font-semibold"
+                      className="border-t border-b border-gray-300 px-2 py-1 text-left text-sm font-semibold bg-transparent"
                     >
                       {col.label}
                     </th>
@@ -224,7 +224,7 @@ export function ReportTableRenderer({
                   {visibleColumns.map(col => (
                     <td
                       key={col.id}
-                      className="border border-gray-300 px-2 py-1 text-sm"
+                      className="border-b border-gray-200 px-2 py-1 text-sm"
                     >
                       {renderCellValue(item, col, columns)}
                     </td>

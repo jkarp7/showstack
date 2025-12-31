@@ -123,10 +123,10 @@ export function InteractiveTableHeader({
         position: 'relative'
       }}
       className={`
-        bg-gray-800 text-white px-4 py-3 text-left text-sm font-semibold
-        border-b-2 border-gray-700 select-none transition-opacity
+        bg-transparent text-black px-2 py-1 text-left text-sm font-semibold
+        border-t border-b border-gray-300 select-none transition-opacity
         ${!isResizing ? 'cursor-grab active:cursor-grabbing' : ''}
-        ${isDropTarget ? 'bg-blue-600' : ''}
+        ${isDropTarget ? 'bg-blue-100' : ''}
       `}
     >
       <div className="flex items-center justify-between">
