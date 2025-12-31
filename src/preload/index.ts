@@ -184,6 +184,16 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.invoke('paperwork:exportPDF', htmlContent, filename, pageSettings)
   },
 
+  // Paperwork Template operations
+  paperworkTemplates: {
+    getAll: (reportType?: string) => ipcRenderer.invoke('paperwork-templates:getAll', reportType),
+    getById: (id: string) => ipcRenderer.invoke('paperwork-templates:getById', id),
+    create: (data: any) => ipcRenderer.invoke('paperwork-templates:create', data),
+    update: (id: string, updates: any) => ipcRenderer.invoke('paperwork-templates:update', id, updates),
+    delete: (id: string) => ipcRenderer.invoke('paperwork-templates:delete', id),
+    duplicate: (id: string, newName?: string) => ipcRenderer.invoke('paperwork-templates:duplicate', id, newName)
+  },
+
   // Menu operations
   menu: {
     setState: (state: any) => ipcRenderer.invoke('menu:setState', state),
@@ -370,6 +380,14 @@ export interface ElectronAPI {
   };
   paperwork: {
     exportPDF: (htmlContent: string, filename: string, pageSettings: any) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
+  };
+  paperworkTemplates: {
+    getAll: (reportType?: string) => Promise<any[]>;
+    getById: (id: string) => Promise<any | null>;
+    create: (data: any) => Promise<any>;
+    update: (id: string, updates: any) => Promise<any>;
+    delete: (id: string) => Promise<void>;
+    duplicate: (id: string, newName?: string) => Promise<any>;
   };
   menu: {
     setState: (state: any) => Promise<{ success: boolean }>;
