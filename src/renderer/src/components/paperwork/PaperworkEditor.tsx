@@ -6,9 +6,8 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { PaperworkTemplate, ReportType } from '../../types/paperworkTemplate';
 import { PaperworkColumnConfig, ReportOrganization } from '../../types/paperworkTemplate';
+import { ReportTypeSelector } from './ReportTypeSelector';
 import { PaperworkTemplateLibrary } from './PaperworkTemplateLibrary';
-import { ColumnConfigurationPanel } from './ColumnConfigurationPanel';
-import { GroupingSortingControls } from './GroupingSortingControls';
 import { ReportTableRenderer } from './ReportTableRenderer';
 import { usePaperworkTemplates, useActiveTemplate } from '../../hooks/usePaperworkTemplates';
 import { getReportData } from '../../utils/paperwork/dataConnector';
@@ -19,13 +18,15 @@ interface PaperworkEditorProps {
   projectId?: string;
   onExport?: (template: PaperworkTemplate) => void;
   onHeaderDesign?: (template: PaperworkTemplate) => void;
+  onReportTypeChange?: (reportType: ReportType) => void;
 }
 
 export function PaperworkEditor({
   reportType,
   projectId = 'default-project',
   onExport,
-  onHeaderDesign
+  onHeaderDesign,
+  onReportTypeChange
 }: PaperworkEditorProps) {
   // Template management
   const {
@@ -149,18 +150,33 @@ export function PaperworkEditor({
   }, [activeTemplate, onExport]);
 
   return (
-    <div className="flex h-screen bg-gray-900 text-gray-100">
+    <div className="flex h-full bg-gray-900 text-gray-100">
       {/* Template Library Sidebar */}
       {showLibrary && (
         <div className="w-80 border-r border-gray-700 flex flex-col">
-          <PaperworkTemplateLibrary
-            reportType={reportType}
-            templates={templates}
-            activeTemplateId={activeTemplate?.id}
-            onLoadTemplate={handleLoadTemplate}
-            onDeleteTemplate={deleteTemplate}
-            onDuplicateTemplate={duplicateTemplate}
-          />
+          {/* Report Type Selector */}
+          <div className="p-4 border-b border-gray-700 flex-shrink-0">
+            <ReportTypeSelector
+              value={reportType}
+              onChange={(newReportType) => {
+                if (onReportTypeChange) {
+                  onReportTypeChange(newReportType);
+                }
+              }}
+            />
+          </div>
+
+          {/* Template Library */}
+          <div className="flex-1 overflow-hidden">
+            <PaperworkTemplateLibrary
+              reportType={reportType}
+              templates={templates}
+              activeTemplateId={activeTemplate?.id}
+              onLoadTemplate={handleLoadTemplate}
+              onDeleteTemplate={deleteTemplate}
+              onDuplicateTemplate={duplicateTemplate}
+            />
+          </div>
         </div>
       )}
 
@@ -239,35 +255,6 @@ export function PaperworkEditor({
         {/* Editor Content */}
         {activeTemplate ? (
           <div className="flex-1 flex overflow-hidden">
-            {/* Configuration Panel */}
-            <div className="w-96 border-r border-gray-700 flex flex-col overflow-hidden">
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                {/* Grouping & Sorting */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-400 uppercase mb-3">
-                    Organization
-                  </h3>
-                  <GroupingSortingControls
-                    organization={activeTemplate.organization}
-                    columns={activeTemplate.columns}
-                    onChange={handleOrganizationChange}
-                  />
-                </div>
-
-                {/* Column Configuration */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-400 uppercase mb-3">
-                    Columns
-                  </h3>
-                  <ColumnConfigurationPanel
-                    columns={activeTemplate.columns}
-                    reportType={reportType}
-                    onChange={handleColumnsChange}
-                  />
-                </div>
-              </div>
-            </div>
-
             {/* Live Preview */}
             <div className="flex-1 bg-gray-850 overflow-hidden flex flex-col">
               {/* Preview Controls */}

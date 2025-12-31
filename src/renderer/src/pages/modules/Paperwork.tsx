@@ -268,28 +268,8 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
         </header>
       )}
 
-      {/* Report Type Tabs */}
-      <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex-shrink-0">
-        <div className="flex gap-2 overflow-x-auto">
-          {REPORT_TEMPLATES.map(template => (
-            <button
-              key={template.id}
-              onClick={() => setSelectedReport(template.id as ReportType)}
-              className={`px-4 py-2 rounded whitespace-nowrap transition flex items-center gap-2 ${
-                selectedReport === template.id
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-            >
-              <span>{template.icon}</span>
-              <span className="text-sm">{template.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Main Editor */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 min-h-0 overflow-hidden">
         <PaperworkEditor
           reportType={selectedReport}
           projectId={currentProjectId}
@@ -298,6 +278,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             setCurrentTemplate(template);
             setShowHeaderDesigner(true);
           }}
+          onReportTypeChange={setSelectedReport}
         />
       </div>
 
