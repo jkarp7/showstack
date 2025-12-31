@@ -8,6 +8,7 @@ import { PaperworkColumnConfig, ColumnFormatType, ReportOrganization } from '../
 import { OrganizedReportData, ReportDataItem } from '../../utils/paperwork/reportOrganizer';
 import { InteractiveTableHeader } from './InteractiveTableHeader';
 import { ColumnContextMenu } from './ColumnContextMenu';
+import { ColumnMergeDialog } from './ColumnMergeDialog';
 
 interface ReportTableRendererProps {
   columns: PaperworkColumnConfig[];
@@ -35,6 +36,7 @@ export function ReportTableRenderer({
     column?: PaperworkColumnConfig;
     type: 'column' | 'organization';
   } | null>(null);
+  const [mergeDialogColumn, setMergeDialogColumn] = useState<PaperworkColumnConfig | null>(null);
 
   const visibleColumns = columns.filter(c => c.visible);
 
@@ -124,10 +126,30 @@ export function ReportTableRenderer({
   }, [columns, onColumnsChange]);
 
   const handleMergeColumn = useCallback((columnId: string) => {
-    // This will open the merge dialog (to be implemented)
-    console.log('Merge column:', columnId);
-    // TODO: Open ColumnMergeDialog
-  }, []);
+    const column = columns.find(c => c.id === columnId);
+    if (column) {
+      setMergeDialogColumn(column);
+    }
+  }, [columns]);
+
+  const handleConfirmMerge = useCallback((mergedColumnIds: string[], separator: string) => {
+    if (!onColumnsChange || !mergeDialogColumn) return;
+
+    const updatedColumns = columns.map(col => {
+      if (col.id === mergeDialogColumn.id) {
+        // Update primary column with merge info
+        return { ...col, combinedWith: mergedColumnIds, separator };
+      }
+      if (mergedColumnIds.includes(col.id)) {
+        // Hide merged columns
+        return { ...col, visible: false };
+      }
+      return col;
+    });
+
+    onColumnsChange(updatedColumns);
+    setMergeDialogColumn(null);
+  }, [columns, mergeDialogColumn, onColumnsChange]);
 
   const handleUnmergeColumn = useCallback((columnId: string) => {
     if (!onColumnsChange) return;
@@ -230,6 +252,17 @@ export function ReportTableRenderer({
           organization={organization}
           visibleColumns={visibleColumns}
           onOrganizationChange={onOrganizationChange}
+        />
+      )}
+
+      {/* Merge Dialog */}
+      {mergeDialogColumn && (
+        <ColumnMergeDialog
+          primaryColumn={mergeDialogColumn}
+          availableColumns={visibleColumns.filter(c => c.id !== mergeDialogColumn.id)}
+          previewData={data.groups[0]?.items || []}
+          onConfirm={handleConfirmMerge}
+          onCancel={() => setMergeDialogColumn(null)}
         />
       )}
     </div>
