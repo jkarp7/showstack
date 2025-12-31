@@ -7,6 +7,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { PaperworkTemplate, ReportType } from '../../types/paperworkTemplate';
 import { PaperworkColumnConfig, ReportOrganization } from '../../types/paperworkTemplate';
 import { ReportTypeSelector } from './ReportTypeSelector';
+import { ColumnVisibilityControls } from './ColumnVisibilityControls';
 import { PaperworkTemplateLibrary } from './PaperworkTemplateLibrary';
 import { ReportTableRenderer } from './ReportTableRenderer';
 import { usePaperworkTemplates, useActiveTemplate } from '../../hooks/usePaperworkTemplates';
@@ -176,6 +177,17 @@ export function PaperworkEditor({
               }}
             />
           </div>
+
+          {/* Column Visibility Controls */}
+          {activeTemplate && (
+            <div className="flex-shrink-0">
+              <ColumnVisibilityControls
+                reportType={reportType}
+                columns={activeTemplate.columns}
+                onChange={handleColumnsChange}
+              />
+            </div>
+          )}
 
           {/* Template Library */}
           <div className="flex-1 overflow-hidden">
