@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { PaperworkColumnConfig, ReportType } from '../../types/paperworkTemplate';
-import { COLUMN_DEFAULTS } from '../../utils/paperwork/columnDefaults';
+import { getAllAvailableColumns } from '../../utils/paperwork/columnDefaults';
 
 interface ColumnVisibilityControlsProps {
   reportType: ReportType;
@@ -20,8 +20,8 @@ export function ColumnVisibilityControls({
 }: ColumnVisibilityControlsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Get all available columns for this report type
-  const availableColumns = COLUMN_DEFAULTS[reportType] || [];
+  // Get all available columns for this report type (includes all equipment manager fields)
+  const availableColumns = getAllAvailableColumns(reportType);
 
   // Get current column visibility map
   const visibilityMap = new Map(columns.map(col => [col.field, col.visible]));

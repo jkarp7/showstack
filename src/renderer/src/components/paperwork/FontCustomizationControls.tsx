@@ -21,26 +21,68 @@ const FONT_FAMILIES = [
   { value: 'Tahoma, sans-serif', label: 'Tahoma' }
 ];
 
+const FONT_SIZES = [6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 24];
+
+const SPACING_PRESETS = [
+  { value: 1.0, label: 'Compact' },
+  { value: 1.5, label: 'Cozy' },
+  { value: 2.0, label: 'Roomy' }
+];
+
 export function FontCustomizationControls({ fontStyle = {}, onChange }: FontCustomizationControlsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [customHeaderSize, setCustomHeaderSize] = useState('');
+  const [customBodySize, setCustomBodySize] = useState('');
 
   const currentFont = fontStyle.fontFamily || 'Arial, sans-serif';
-  const currentFontSize = fontStyle.fontSize || 10;
   const currentHeaderFontSize = fontStyle.headerFontSize || 11;
+  const currentFontSize = fontStyle.fontSize || 10;
   const currentFontWeight = fontStyle.fontWeight || 'normal';
   const currentFontStyleValue = fontStyle.fontStyle || 'normal';
-  const currentLineHeight = fontStyle.lineHeight || 1.2;
+  const currentLineHeight = fontStyle.lineHeight || 1.5;
 
   const handleFontFamilyChange = (fontFamily: string) => {
     onChange({ ...fontStyle, fontFamily });
   };
 
-  const handleFontSizeChange = (fontSize: number) => {
-    onChange({ ...fontStyle, fontSize });
+  const handleHeaderFontSizeChange = (value: string) => {
+    const size = Number(value);
+    if (value === 'custom') {
+      setCustomHeaderSize('');
+      return;
+    }
+    if (!isNaN(size) && size > 0) {
+      onChange({ ...fontStyle, headerFontSize: size });
+      setCustomHeaderSize('');
+    }
   };
 
-  const handleHeaderFontSizeChange = (headerFontSize: number) => {
-    onChange({ ...fontStyle, headerFontSize });
+  const handleCustomHeaderSizeChange = (value: string) => {
+    setCustomHeaderSize(value);
+    const size = Number(value);
+    if (!isNaN(size) && size > 0) {
+      onChange({ ...fontStyle, headerFontSize: size });
+    }
+  };
+
+  const handleFontSizeChange = (value: string) => {
+    const size = Number(value);
+    if (value === 'custom') {
+      setCustomBodySize('');
+      return;
+    }
+    if (!isNaN(size) && size > 0) {
+      onChange({ ...fontStyle, fontSize: size });
+      setCustomBodySize('');
+    }
+  };
+
+  const handleCustomBodySizeChange = (value: string) => {
+    setCustomBodySize(value);
+    const size = Number(value);
+    if (!isNaN(size) && size > 0) {
+      onChange({ ...fontStyle, fontSize: size });
+    }
   };
 
   const handleFontWeightChange = (fontWeight: 'normal' | 'bold') => {
@@ -51,9 +93,13 @@ export function FontCustomizationControls({ fontStyle = {}, onChange }: FontCust
     onChange({ ...fontStyle, fontStyle: fontStyleValue });
   };
 
-  const handleLineHeightChange = (lineHeight: number) => {
+  const handleSpacingChange = (lineHeight: number) => {
     onChange({ ...fontStyle, lineHeight });
   };
+
+  // Check if current size is in preset list
+  const headerSizeInPresets = FONT_SIZES.includes(currentHeaderFontSize);
+  const bodySizeInPresets = FONT_SIZES.includes(currentFontSize);
 
   return (
     <div className="border-b border-gray-700">
@@ -85,36 +131,66 @@ export function FontCustomizationControls({ fontStyle = {}, onChange }: FontCust
             </select>
           </div>
 
-          {/* Font Size */}
-          <div>
-            <label className="text-xs text-gray-400 mb-1 block">
-              Body Font Size: {currentFontSize}pt
-            </label>
-            <input
-              type="range"
-              min="6"
-              max="16"
-              step="0.5"
-              value={currentFontSize}
-              onChange={(e) => handleFontSizeChange(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
           {/* Header Font Size */}
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">
-              Header Font Size: {currentHeaderFontSize}pt
-            </label>
-            <input
-              type="range"
-              min="7"
-              max="18"
-              step="0.5"
-              value={currentHeaderFontSize}
-              onChange={(e) => handleHeaderFontSizeChange(Number(e.target.value))}
-              className="w-full"
-            />
+            <label className="text-xs text-gray-400 mb-1 block">Header Font Size</label>
+            <div className="flex gap-2">
+              <select
+                value={headerSizeInPresets ? currentHeaderFontSize : 'custom'}
+                onChange={(e) => handleHeaderFontSizeChange(e.target.value)}
+                className="flex-1 px-2 py-1.5 text-sm bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+              >
+                {FONT_SIZES.map(size => (
+                  <option key={size} value={size}>
+                    {size}pt
+                  </option>
+                ))}
+                <option value="custom">Custom...</option>
+              </select>
+              {(!headerSizeInPresets || customHeaderSize !== '') && (
+                <input
+                  type="number"
+                  min="6"
+                  max="72"
+                  step="0.5"
+                  value={customHeaderSize !== '' ? customHeaderSize : currentHeaderFontSize}
+                  onChange={(e) => handleCustomHeaderSizeChange(e.target.value)}
+                  placeholder="Custom"
+                  className="w-20 px-2 py-1.5 text-sm bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Body Font Size */}
+          <div>
+            <label className="text-xs text-gray-400 mb-1 block">Body Font Size</label>
+            <div className="flex gap-2">
+              <select
+                value={bodySizeInPresets ? currentFontSize : 'custom'}
+                onChange={(e) => handleFontSizeChange(e.target.value)}
+                className="flex-1 px-2 py-1.5 text-sm bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+              >
+                {FONT_SIZES.map(size => (
+                  <option key={size} value={size}>
+                    {size}pt
+                  </option>
+                ))}
+                <option value="custom">Custom...</option>
+              </select>
+              {(!bodySizeInPresets || customBodySize !== '') && (
+                <input
+                  type="number"
+                  min="6"
+                  max="72"
+                  step="0.5"
+                  value={customBodySize !== '' ? customBodySize : currentFontSize}
+                  onChange={(e) => handleCustomBodySizeChange(e.target.value)}
+                  placeholder="Custom"
+                  className="w-20 px-2 py-1.5 text-sm bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                />
+              )}
+            </div>
           </div>
 
           {/* Font Weight */}
@@ -171,20 +247,24 @@ export function FontCustomizationControls({ fontStyle = {}, onChange }: FontCust
             </div>
           </div>
 
-          {/* Line Height */}
+          {/* Spacing */}
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">
-              Line Height: {currentLineHeight.toFixed(1)}
-            </label>
-            <input
-              type="range"
-              min="1.0"
-              max="2.0"
-              step="0.1"
-              value={currentLineHeight}
-              onChange={(e) => handleLineHeightChange(Number(e.target.value))}
-              className="w-full"
-            />
+            <label className="text-xs text-gray-400 mb-1 block">Spacing</label>
+            <div className="flex gap-2">
+              {SPACING_PRESETS.map(preset => (
+                <button
+                  key={preset.value}
+                  onClick={() => handleSpacingChange(preset.value)}
+                  className={`flex-1 px-3 py-1.5 text-xs rounded transition ${
+                    currentLineHeight === preset.value
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Reset Button */}
