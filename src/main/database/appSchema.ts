@@ -85,4 +85,43 @@ export const APP_SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_layout_templates_user ON page_layout_templates(user_id);
   CREATE INDEX IF NOT EXISTS idx_layout_templates_type ON page_layout_templates(page_type);
   CREATE INDEX IF NOT EXISTS idx_layout_elements_template ON page_layout_elements(template_id);
+
+  -- ============================================
+  -- PAPERWORK TEMPLATES (REPORT CONFIGURATIONS)
+  -- ============================================
+
+  -- Paperwork Templates (column configurations for all 12 report types)
+  -- Stored at app level so users can reuse templates across projects
+  CREATE TABLE IF NOT EXISTS paperwork_templates (
+    id TEXT PRIMARY KEY,
+    user_id TEXT,
+    name TEXT NOT NULL,
+    description TEXT,
+    report_type TEXT NOT NULL, -- 'channel-hookup', 'dimmer-schedule', etc.
+
+    -- References to page_layout_templates for header/footer
+    header_template_id TEXT,
+    footer_template_id TEXT,
+
+    -- Column configuration (JSON array of PaperworkColumnConfig)
+    column_config TEXT NOT NULL,
+
+    -- Organization configuration (JSON object of ReportOrganization)
+    organization_config TEXT NOT NULL,
+
+    -- Page setup (JSON object of PageSetup)
+    page_setup TEXT NOT NULL,
+
+    is_system INTEGER DEFAULT 0, -- System templates cannot be deleted
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
+    FOREIGN KEY (header_template_id) REFERENCES page_layout_templates(id),
+    FOREIGN KEY (footer_template_id) REFERENCES page_layout_templates(id)
+  );
+
+  -- Indexes for paperwork templates
+  CREATE INDEX IF NOT EXISTS idx_paperwork_templates_type ON paperwork_templates(report_type);
+  CREATE INDEX IF NOT EXISTS idx_paperwork_templates_user ON paperwork_templates(user_id);
+  CREATE INDEX IF NOT EXISTS idx_paperwork_templates_system ON paperwork_templates(is_system);
 `;
