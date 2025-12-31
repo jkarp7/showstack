@@ -117,100 +117,107 @@ export function ColumnContextMenu({
           left: adjustedPosition.x,
           zIndex: 9999
         }}
-        className="bg-gray-800 border border-gray-700 rounded-lg shadow-xl min-w-48 py-2 text-white"
+        className="bg-gray-800 border border-gray-700 rounded-lg shadow-xl min-w-56 text-white overflow-hidden"
       >
         {/* Column name header */}
-        <div className="px-4 py-2 text-sm font-semibold text-gray-400 border-b border-gray-700">
+        <div className="px-4 py-2 text-sm font-semibold text-gray-400 border-b border-gray-700 flex-shrink-0">
           {column.label}
         </div>
 
-        {/* Group and sort options */}
-        <button
-          onClick={() => {
-            onGroupByColumn?.(column.id);
-            onClose();
-          }}
-          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
-        >
-          <span>○</span>
-          <span>Group By This Column</span>
-        </button>
+        {/* Scrollable menu content */}
+        <div className="max-h-96 overflow-y-auto py-2">
+          {/* Merge/Unmerge options - at the top for visibility */}
+          {!isMerged && mergeableColumns.length > 0 && (
+            <>
+              <button
+                onClick={() => {
+                  onMergeColumn?.(column.id);
+                  onClose();
+                }}
+                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
+              >
+                <span className="text-lg">⋈</span>
+                <span className="font-medium">Merge with...</span>
+              </button>
+              <div className="border-t border-gray-700 my-2" />
+            </>
+          )}
 
-        <button
-          onClick={() => {
-            onSortByColumn?.(column.id, 'asc');
-            onClose();
-          }}
-          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
-        >
-          <span>↑</span>
-          <span>Sort Ascending</span>
-        </button>
+          {isMerged && (
+            <>
+              <button
+                onClick={() => {
+                  onUnmergeColumn?.(column.id);
+                  onClose();
+                }}
+                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
+              >
+                <span className="text-lg">⋉</span>
+                <span className="font-medium">Unmerge Columns</span>
+              </button>
+              <div className="border-t border-gray-700 my-2" />
+            </>
+          )}
 
-        <button
-          onClick={() => {
-            onSortByColumn?.(column.id, 'desc');
-            onClose();
-          }}
-          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
-        >
-          <span>↓</span>
-          <span>Sort Descending</span>
-        </button>
-
-        <div className="border-t border-gray-700 my-2" />
-
-        {/* Column operations */}
-        <button
-          onClick={() => {
-            onHideColumn?.(column.id);
-            onClose();
-          }}
-          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
-        >
-          <span>✓</span>
-          <span>Hide Column</span>
-        </button>
-
-        <button
-          onClick={() => {
-            onResizeToContent?.(column.id);
-            onClose();
-          }}
-          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
-        >
-          <span>⟷</span>
-          <span>Resize to Content</span>
-        </button>
-
-        <div className="border-t border-gray-700 my-2" />
-
-        {/* Merge options */}
-        {!isMerged && mergeableColumns.length > 0 && (
+          {/* Column operations */}
           <button
             onClick={() => {
-              onMergeColumn?.(column.id);
+              onHideColumn?.(column.id);
               onClose();
             }}
             className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
           >
-            <span>→</span>
-            <span>Merge with...</span>
+            <span>👁️</span>
+            <span>Hide Column</span>
           </button>
-        )}
 
-        {isMerged && (
           <button
             onClick={() => {
-              onUnmergeColumn?.(column.id);
+              onResizeToContent?.(column.id);
               onClose();
             }}
             className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
           >
-            <span>←</span>
-            <span>Unmerge</span>
+            <span>↔️</span>
+            <span>Resize to Content</span>
           </button>
-        )}
+
+          <div className="border-t border-gray-700 my-2" />
+
+          {/* Group and sort options */}
+          <button
+            onClick={() => {
+              onGroupByColumn?.(column.id);
+              onClose();
+            }}
+            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
+          >
+            <span>📁</span>
+            <span>Group By This Column</span>
+          </button>
+
+          <button
+            onClick={() => {
+              onSortByColumn?.(column.id, 'asc');
+              onClose();
+            }}
+            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
+          >
+            <span>↑</span>
+            <span>Sort Ascending</span>
+          </button>
+
+          <button
+            onClick={() => {
+              onSortByColumn?.(column.id, 'desc');
+              onClose();
+            }}
+            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
+          >
+            <span>↓</span>
+            <span>Sort Descending</span>
+          </button>
+        </div>
       </div>,
       document.body
     );
