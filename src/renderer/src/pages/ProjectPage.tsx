@@ -108,10 +108,12 @@ export function ProjectPage() {
   return (
     <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Breadcrumbs */}
-      <Breadcrumbs />
+      <div className="flex-shrink-0">
+        <Breadcrumbs />
+      </div>
 
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
+      <header className="flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-end mb-4">
             <button
@@ -160,7 +162,7 @@ export function ProjectPage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 min-h-0 overflow-auto">
         <div className="max-w-7xl mx-auto p-8">
           {/* Project Metadata Section */}
           {(project.lighting_designer || project.audio_designer || project.video_designer ||
@@ -487,7 +489,7 @@ export function ProjectPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
+      <footer className="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
         ShowStack v0.1.0-alpha | © 2025 Lytrix
       </footer>
 
