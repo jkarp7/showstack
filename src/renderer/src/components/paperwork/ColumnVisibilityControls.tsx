@@ -28,19 +28,21 @@ export function ColumnVisibilityControls({
 
   // Handle toggle visibility
   const handleToggleColumn = (field: string) => {
-    const updatedColumns = columns.map(col =>
-      col.field === field ? { ...col, visible: !col.visible } : col
-    );
-
-    // If column doesn't exist in template yet, add it from defaults
     const existingFields = new Set(columns.map(c => c.field));
     const defaultColumn = availableColumns.find(c => c.field === field);
 
-    if (!existingFields.has(field) && defaultColumn) {
-      updatedColumns.push({ ...defaultColumn, visible: true });
-    }
+    if (!defaultColumn) return;
 
-    onChange(updatedColumns);
+    if (existingFields.has(field)) {
+      // Toggle existing column
+      const updatedColumns = columns.map(col =>
+        col.field === field ? { ...col, visible: !col.visible } : col
+      );
+      onChange(updatedColumns);
+    } else {
+      // Add new column from defaults
+      onChange([...columns, { ...defaultColumn, visible: true }]);
+    }
   };
 
   // Count visible columns
@@ -87,8 +89,13 @@ export function ColumnVisibilityControls({
           <div className="border-t border-gray-700 p-2 flex gap-2">
             <button
               onClick={() => {
-                const allVisible = columns.map(col => ({ ...col, visible: true }));
-                onChange(allVisible);
+                // Show all available columns
+                const existingFields = new Set(columns.map(c => c.field));
+                const allColumns = availableColumns.map(defCol => {
+                  const existing = columns.find(c => c.field === defCol.field);
+                  return existing ? { ...existing, visible: true } : { ...defCol, visible: true };
+                });
+                onChange(allColumns);
               }}
               className="flex-1 px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded transition"
             >

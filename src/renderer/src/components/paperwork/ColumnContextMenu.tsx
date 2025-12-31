@@ -4,6 +4,7 @@
  */
 
 import React, { useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { PaperworkColumnConfig, ReportOrganization } from '../../types/paperworkTemplate';
 
 interface ColumnContextMenuProps {
@@ -45,7 +46,8 @@ export function ColumnContextMenu({
   const [adjustedPosition, setAdjustedPosition] = React.useState(position);
 
   // Adjust position to keep menu within viewport bounds
-  useEffect(() => {
+  // Use layoutEffect to run synchronously before paint
+  React.useLayoutEffect(() => {
     if (!menuRef.current) return;
 
     const menuRect = menuRef.current.getBoundingClientRect();
@@ -106,7 +108,7 @@ export function ColumnContextMenu({
     const isMerged = column.combinedWith && column.combinedWith.length > 0;
     const mergeableColumns = allColumns.filter(c => c.id !== column.id && c.visible);
 
-    return (
+    return createPortal(
       <div
         ref={menuRef}
         style={{
@@ -209,13 +211,14 @@ export function ColumnContextMenu({
             <span>Unmerge</span>
           </button>
         )}
-      </div>
+      </div>,
+      document.body
     );
   }
 
   // Render organization menu (table body)
   if (organization && onOrganizationChange) {
-    return (
+    return createPortal(
       <div
         ref={menuRef}
         style={{
@@ -324,7 +327,8 @@ export function ColumnContextMenu({
             </label>
           </>
         )}
-      </div>
+      </div>,
+      document.body
     );
   }
 
