@@ -292,6 +292,8 @@ export function PaperworkEditor({
                     columns={activeTemplate.columns}
                     data={organizedData}
                     reportType={reportType}
+                    onColumnsChange={handleColumnsChange}
+                    editable={true}
                   />
                 </div>
               </div>
