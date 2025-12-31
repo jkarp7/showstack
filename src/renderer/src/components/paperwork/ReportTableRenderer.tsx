@@ -9,6 +9,7 @@ import { OrganizedReportData, ReportDataItem } from '../../utils/paperwork/repor
 import { InteractiveTableHeader } from './InteractiveTableHeader';
 import { ColumnContextMenu } from './ColumnContextMenu';
 import { ColumnMergeDialog } from './ColumnMergeDialog';
+import { getColumnDisplayLabel } from '../../utils/paperwork/columnUtils';
 
 interface ReportTableRendererProps {
   columns: PaperworkColumnConfig[];
@@ -212,7 +213,7 @@ export function ReportTableRenderer({
                       style={{ width: `${col.width}%` }}
                       className="border-t border-b border-gray-300 px-2 py-1 text-left text-sm font-semibold bg-transparent"
                     >
-                      {col.label}
+                      {getColumnDisplayLabel(col)}
                     </th>
                   ))
                 )}

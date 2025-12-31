@@ -5,6 +5,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { PaperworkColumnConfig } from '../../types/paperworkTemplate';
+import { getColumnDisplayLabel } from '../../utils/paperwork/columnUtils';
 
 interface InteractiveTableHeaderProps {
   column: PaperworkColumnConfig;
@@ -130,7 +131,7 @@ export function InteractiveTableHeader({
       `}
     >
       <div className="flex items-center justify-between">
-        <span>{column.label}</span>
+        <span>{getColumnDisplayLabel(column)}</span>
 
         {/* Resize Handle */}
         {columnIndex < totalColumns - 1 && (

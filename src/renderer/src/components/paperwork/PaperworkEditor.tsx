@@ -8,6 +8,7 @@ import { PaperworkTemplate, ReportType } from '../../types/paperworkTemplate';
 import { PaperworkColumnConfig, ReportOrganization } from '../../types/paperworkTemplate';
 import { ReportTypeSelector } from './ReportTypeSelector';
 import { ColumnVisibilityControls } from './ColumnVisibilityControls';
+import { ColumnNameSettings } from './ColumnNameSettings';
 import { PaperworkTemplateLibrary } from './PaperworkTemplateLibrary';
 import { ReportTableRenderer } from './ReportTableRenderer';
 import { usePaperworkTemplates, useActiveTemplate } from '../../hooks/usePaperworkTemplates';
@@ -183,6 +184,16 @@ export function PaperworkEditor({
             <div className="flex-shrink-0">
               <ColumnVisibilityControls
                 reportType={reportType}
+                columns={activeTemplate.columns}
+                onChange={handleColumnsChange}
+              />
+            </div>
+          )}
+
+          {/* Column Name Settings */}
+          {activeTemplate && (
+            <div className="flex-shrink-0">
+              <ColumnNameSettings
                 columns={activeTemplate.columns}
                 onChange={handleColumnsChange}
               />

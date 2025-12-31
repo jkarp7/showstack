@@ -11,12 +11,20 @@ import { ReportType } from './paperwork';
 export type ColumnFormatType = 'text' | 'number' | 'power' | 'boolean' | 'date' | 'color';
 
 /**
+ * Column display mode for header labels
+ */
+export type ColumnDisplayMode = 'full' | 'short' | 'custom';
+
+/**
  * Column configuration for paperwork report tables
  */
 export interface PaperworkColumnConfig {
   id: string;
   field: string; // 'channel', 'dimmer', 'position', etc.
-  label: string;
+  label: string; // Full label
+  shortLabel?: string; // Short/abbreviated label
+  customLabel?: string; // User-defined custom label
+  displayMode?: ColumnDisplayMode; // Which label to display (default: 'full')
   width: number; // percentage
   visible: boolean;
   format?: ColumnFormatType;
