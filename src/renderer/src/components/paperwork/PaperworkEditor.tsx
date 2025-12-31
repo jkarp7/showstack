@@ -37,7 +37,7 @@ export function PaperworkEditor({
     duplicateTemplate
   } = usePaperworkTemplates({ reportType, autoLoad: true });
 
-  const { activeTemplate, setActiveTemplate } = useActiveTemplate();
+  const { activeTemplate, loadTemplate: setActiveTemplate, updateActiveTemplate } = useActiveTemplate();
 
   // Editor state
   const [showLibrary, setShowLibrary] = useState(true);
@@ -72,27 +72,17 @@ export function PaperworkEditor({
   const handleColumnsChange = useCallback((newColumns: PaperworkColumnConfig[]) => {
     if (!activeTemplate) return;
 
-    const updatedTemplate = {
-      ...activeTemplate,
-      columns: newColumns
-    };
-
-    setActiveTemplate(updatedTemplate);
+    updateActiveTemplate({ columns: newColumns });
     setHasUnsavedChanges(true);
-  }, [activeTemplate, setActiveTemplate]);
+  }, [activeTemplate, updateActiveTemplate]);
 
   // Handle organization changes
   const handleOrganizationChange = useCallback((newOrganization: ReportOrganization) => {
     if (!activeTemplate) return;
 
-    const updatedTemplate = {
-      ...activeTemplate,
-      organization: newOrganization
-    };
-
-    setActiveTemplate(updatedTemplate);
+    updateActiveTemplate({ organization: newOrganization });
     setHasUnsavedChanges(true);
-  }, [activeTemplate, setActiveTemplate]);
+  }, [activeTemplate, updateActiveTemplate]);
 
   // Save template
   const handleSaveTemplate = useCallback(async () => {
