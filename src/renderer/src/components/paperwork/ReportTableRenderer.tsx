@@ -4,15 +4,18 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { PaperworkColumnConfig, ColumnFormatType } from '../../types/paperworkTemplate';
+import { PaperworkColumnConfig, ColumnFormatType, ReportOrganization } from '../../types/paperworkTemplate';
 import { OrganizedReportData, ReportDataItem } from '../../utils/paperwork/reportOrganizer';
 import { InteractiveTableHeader } from './InteractiveTableHeader';
+import { ColumnContextMenu } from './ColumnContextMenu';
 
 interface ReportTableRendererProps {
   columns: PaperworkColumnConfig[];
   data: OrganizedReportData;
   reportType: string;
+  organization?: ReportOrganization;
   onColumnsChange?: (columns: PaperworkColumnConfig[]) => void;
+  onOrganizationChange?: (organization: ReportOrganization) => void;
   editable?: boolean;
 }
 
@@ -20,11 +23,18 @@ export function ReportTableRenderer({
   columns,
   data,
   reportType,
+  organization,
   onColumnsChange,
+  onOrganizationChange,
   editable = false
 }: ReportTableRendererProps) {
   const [draggedColumnIndex, setDraggedColumnIndex] = useState<number | null>(null);
   const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    position: { x: number; y: number };
+    column?: PaperworkColumnConfig;
+    type: 'column' | 'organization';
+  } | null>(null);
 
   const visibleColumns = columns.filter(c => c.visible);
 
@@ -51,11 +61,92 @@ export function ReportTableRenderer({
     setDropTargetIndex(null);
   }, [columns, onColumnsChange]);
 
-  // Handle context menu (placeholder for now)
+  // Handle column context menu
   const handleContextMenu = useCallback((columnId: string, event: React.MouseEvent) => {
-    // Will be connected to ColumnContextMenu component later
-    console.log('Context menu for column:', columnId);
+    event.preventDefault();
+    const column = columns.find(c => c.id === columnId);
+    if (column) {
+      setContextMenu({
+        position: { x: event.clientX, y: event.clientY },
+        column,
+        type: 'column'
+      });
+    }
+  }, [columns]);
+
+  // Handle table body context menu
+  const handleTableContextMenu = useCallback((event: React.MouseEvent) => {
+    if (!editable || !organization) return;
+    event.preventDefault();
+    setContextMenu({
+      position: { x: event.clientX, y: event.clientY },
+      type: 'organization'
+    });
+  }, [editable, organization]);
+
+  // Context menu actions - Column operations
+  const handleGroupByColumn = useCallback((columnId: string) => {
+    if (!onOrganizationChange || !organization) return;
+    const column = columns.find(c => c.id === columnId);
+    if (column) {
+      onOrganizationChange({ ...organization, groupBy: column.field });
+    }
+  }, [columns, organization, onOrganizationChange]);
+
+  const handleSortByColumn = useCallback((columnId: string, direction: 'asc' | 'desc') => {
+    if (!onOrganizationChange || !organization) return;
+    const column = columns.find(c => c.id === columnId);
+    if (column) {
+      onOrganizationChange({
+        ...organization,
+        sortBy: column.field,
+        sortDirection: direction
+      });
+    }
+  }, [columns, organization, onOrganizationChange]);
+
+  const handleHideColumn = useCallback((columnId: string) => {
+    if (!onColumnsChange) return;
+    const updatedColumns = columns.map(col =>
+      col.id === columnId ? { ...col, visible: false } : col
+    );
+    onColumnsChange(updatedColumns);
+  }, [columns, onColumnsChange]);
+
+  const handleResizeToContent = useCallback((columnId: string) => {
+    // Auto-resize logic - set to a reasonable width based on content
+    // For now, set to 15% as a default
+    if (!onColumnsChange) return;
+    const updatedColumns = columns.map(col =>
+      col.id === columnId ? { ...col, width: 15 } : col
+    );
+    onColumnsChange(updatedColumns);
+  }, [columns, onColumnsChange]);
+
+  const handleMergeColumn = useCallback((columnId: string) => {
+    // This will open the merge dialog (to be implemented)
+    console.log('Merge column:', columnId);
+    // TODO: Open ColumnMergeDialog
   }, []);
+
+  const handleUnmergeColumn = useCallback((columnId: string) => {
+    if (!onColumnsChange) return;
+    const column = columns.find(c => c.id === columnId);
+    if (!column || !column.combinedWith) return;
+
+    // Restore visibility of merged columns
+    const mergedColumnIds = column.combinedWith;
+    const updatedColumns = columns.map(col => {
+      if (col.id === columnId) {
+        return { ...col, combinedWith: undefined, separator: undefined };
+      }
+      if (mergedColumnIds.includes(col.id)) {
+        return { ...col, visible: true };
+      }
+      return col;
+    });
+    onColumnsChange(updatedColumns);
+  }, [columns, onColumnsChange]);
 
   if (!data || data.groups.length === 0) {
     return (
@@ -66,7 +157,7 @@ export function ReportTableRenderer({
   }
 
   return (
-    <div className="bg-white text-black report-content p-8">
+    <div className="bg-white text-black report-content p-8" onContextMenu={handleTableContextMenu}>
       {data.groups.map((group, groupIndex) => (
         <div key={groupIndex} className="mb-8">
           {data.hasGroups && (
@@ -122,6 +213,25 @@ export function ReportTableRenderer({
           </table>
         </div>
       ))}
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <ColumnContextMenu
+          position={contextMenu.position}
+          onClose={() => setContextMenu(null)}
+          column={contextMenu.column}
+          allColumns={columns}
+          onGroupByColumn={handleGroupByColumn}
+          onSortByColumn={handleSortByColumn}
+          onHideColumn={handleHideColumn}
+          onResizeToContent={handleResizeToContent}
+          onMergeColumn={handleMergeColumn}
+          onUnmergeColumn={handleUnmergeColumn}
+          organization={organization}
+          visibleColumns={visibleColumns}
+          onOrganizationChange={onOrganizationChange}
+        />
+      )}
     </div>
   );
 }

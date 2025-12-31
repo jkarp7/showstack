@@ -21,6 +21,7 @@ export interface PaperworkColumnConfig {
   visible: boolean;
   format?: ColumnFormatType;
   combinedWith?: string[]; // e.g., ['position', 'unit'] -> "FOH 1"
+  separator?: string; // Separator for merged columns (default: ' • ')
 }
 
 /**

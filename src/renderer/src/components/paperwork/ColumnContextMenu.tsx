@@ -1,0 +1,298 @@
+/**
+ * ColumnContextMenu
+ * Right-click context menu for column and organization options
+ */
+
+import React, { useRef, useEffect } from 'react';
+import { PaperworkColumnConfig, ReportOrganization } from '../../types/paperworkTemplate';
+
+interface ColumnContextMenuProps {
+  position: { x: number; y: number };
+  onClose: () => void;
+
+  // Column-specific menu (when right-clicking a column header)
+  column?: PaperworkColumnConfig;
+  allColumns?: PaperworkColumnConfig[];
+  onGroupByColumn?: (columnId: string) => void;
+  onSortByColumn?: (columnId: string, direction: 'asc' | 'desc') => void;
+  onHideColumn?: (columnId: string) => void;
+  onResizeToContent?: (columnId: string) => void;
+  onMergeColumn?: (columnId: string) => void;
+  onUnmergeColumn?: (columnId: string) => void;
+
+  // Organization menu (when right-clicking table body)
+  organization?: ReportOrganization;
+  visibleColumns?: PaperworkColumnConfig[];
+  onOrganizationChange?: (organization: ReportOrganization) => void;
+}
+
+export function ColumnContextMenu({
+  position,
+  onClose,
+  column,
+  allColumns = [],
+  onGroupByColumn,
+  onSortByColumn,
+  onHideColumn,
+  onResizeToContent,
+  onMergeColumn,
+  onUnmergeColumn,
+  organization,
+  visibleColumns = [],
+  onOrganizationChange
+}: ColumnContextMenuProps) {
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [onClose]);
+
+  // Close on escape key
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
+
+  // Render column header menu
+  if (column) {
+    const isMerged = column.combinedWith && column.combinedWith.length > 0;
+    const mergeableColumns = allColumns.filter(c => c.id !== column.id && c.visible);
+
+    return (
+      <div
+        ref={menuRef}
+        style={{
+          position: 'fixed',
+          top: position.y,
+          left: position.x,
+          zIndex: 9999
+        }}
+        className="bg-gray-800 border border-gray-700 rounded-lg shadow-xl min-w-48 py-2 text-white"
+      >
+        {/* Column name header */}
+        <div className="px-4 py-2 text-sm font-semibold text-gray-400 border-b border-gray-700">
+          {column.label}
+        </div>
+
+        {/* Group and sort options */}
+        <button
+          onClick={() => {
+            onGroupByColumn?.(column.id);
+            onClose();
+          }}
+          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
+        >
+          <span>○</span>
+          <span>Group By This Column</span>
+        </button>
+
+        <button
+          onClick={() => {
+            onSortByColumn?.(column.id, 'asc');
+            onClose();
+          }}
+          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
+        >
+          <span>↑</span>
+          <span>Sort Ascending</span>
+        </button>
+
+        <button
+          onClick={() => {
+            onSortByColumn?.(column.id, 'desc');
+            onClose();
+          }}
+          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
+        >
+          <span>↓</span>
+          <span>Sort Descending</span>
+        </button>
+
+        <div className="border-t border-gray-700 my-2" />
+
+        {/* Column operations */}
+        <button
+          onClick={() => {
+            onHideColumn?.(column.id);
+            onClose();
+          }}
+          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
+        >
+          <span>✓</span>
+          <span>Hide Column</span>
+        </button>
+
+        <button
+          onClick={() => {
+            onResizeToContent?.(column.id);
+            onClose();
+          }}
+          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
+        >
+          <span>⟷</span>
+          <span>Resize to Content</span>
+        </button>
+
+        <div className="border-t border-gray-700 my-2" />
+
+        {/* Merge options */}
+        {!isMerged && mergeableColumns.length > 0 && (
+          <button
+            onClick={() => {
+              onMergeColumn?.(column.id);
+              onClose();
+            }}
+            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
+          >
+            <span>→</span>
+            <span>Merge with...</span>
+          </button>
+        )}
+
+        {isMerged && (
+          <button
+            onClick={() => {
+              onUnmergeColumn?.(column.id);
+              onClose();
+            }}
+            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
+          >
+            <span>←</span>
+            <span>Unmerge</span>
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  // Render organization menu (table body)
+  if (organization && onOrganizationChange) {
+    return (
+      <div
+        ref={menuRef}
+        style={{
+          position: 'fixed',
+          top: position.y,
+          left: position.x,
+          zIndex: 9999
+        }}
+        className="bg-gray-800 border border-gray-700 rounded-lg shadow-xl min-w-64 py-2 text-white"
+      >
+        {/* Menu header */}
+        <div className="px-4 py-2 text-sm font-semibold text-gray-400 border-b border-gray-700">
+          Organization
+        </div>
+
+        {/* Group By */}
+        <div className="px-4 py-2">
+          <label className="text-xs text-gray-400 mb-1 block">Group By</label>
+          <select
+            value={organization.groupBy || 'none'}
+            onChange={(e) => {
+              const value = e.target.value === 'none' ? undefined : e.target.value;
+              onOrganizationChange({ ...organization, groupBy: value });
+            }}
+            className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+          >
+            <option value="none">None</option>
+            {visibleColumns.map(col => (
+              <option key={col.id} value={col.field}>
+                {col.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Sort By */}
+        <div className="px-4 py-2">
+          <label className="text-xs text-gray-400 mb-1 block">Sort By</label>
+          <select
+            value={organization.sortBy || ''}
+            onChange={(e) => {
+              onOrganizationChange({ ...organization, sortBy: e.target.value || undefined });
+            }}
+            className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+          >
+            <option value="">None</option>
+            {visibleColumns.map(col => (
+              <option key={col.id} value={col.field}>
+                {col.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Sort Direction */}
+        <div className="px-4 py-2">
+          <label className="text-xs text-gray-400 mb-1 block">Sort Direction</label>
+          <select
+            value={organization.sortDirection || 'asc'}
+            onChange={(e) => {
+              onOrganizationChange({
+                ...organization,
+                sortDirection: e.target.value as 'asc' | 'desc'
+              });
+            }}
+            className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </div>
+
+        <div className="border-t border-gray-700 my-2" />
+
+        {/* Checkboxes */}
+        {organization.groupBy && (
+          <>
+            <label className="px-4 py-2 flex items-center gap-2 hover:bg-gray-700 cursor-pointer transition">
+              <input
+                type="checkbox"
+                checked={organization.showGroupHeaders ?? true}
+                onChange={(e) => {
+                  onOrganizationChange({
+                    ...organization,
+                    showGroupHeaders: e.target.checked
+                  });
+                }}
+                className="w-4 h-4"
+              />
+              <span className="text-sm">Show Group Headers</span>
+            </label>
+
+            <label className="px-4 py-2 flex items-center gap-2 hover:bg-gray-700 cursor-pointer transition">
+              <input
+                type="checkbox"
+                checked={organization.groupPageBreaks ?? false}
+                onChange={(e) => {
+                  onOrganizationChange({
+                    ...organization,
+                    groupPageBreaks: e.target.checked
+                  });
+                }}
+                className="w-4 h-4"
+              />
+              <span className="text-sm">Page Break Between Groups</span>
+            </label>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  return null;
+}
