@@ -1,0 +1,365 @@
+# Phase 3: Paperwork Template System - Testing Guide
+
+**Branch:** `feature/phase-3-paperwork-template-system`
+**Status:** Days 1-7 Complete, Day 8 Ready for Manual Testing
+**Last Updated:** December 30, 2024 - 7:45 PM
+
+## ✅ Day 8 Setup Complete
+
+- [x] Template seeding verified (12 system templates)
+- [x] Test data created (84 fixtures + 13 infrastructure items)
+- [x] Preload API fixed and operational
+- [x] All components rendering without errors
+- [x] App loading successfully at http://localhost:5173/
+- [x] All IPC handlers registered
+- [ ] **READY FOR MANUAL UI TESTING**
+
+---
+
+## ✅ Completed (Days 1-7)
+
+### Database Infrastructure
+- [x] `paperwork_templates` table created in app database
+- [x] Full CRUD query operations implemented
+- [x] IPC handlers registered for template management
+- [x] System template seeding (12 templates) working on first launch
+
+### Renderer Components
+- [x] Type definitions (`paperworkTemplate.ts`)
+- [x] Column configuration panel with drag-and-drop
+- [x] Grouping & sorting controls
+- [x] Report table renderer with formatting
+- [x] Data connector (bridge to Zustand stores)
+- [x] Report organizer (grouping/sorting logic)
+- [x] Template library UI
+- [x] PaperworkEditor (integrated split-view editor)
+- [x] Refactored Paperwork.tsx (2353 → 409 lines, 82% reduction)
+
+### Default Configurations
+- [x] Column defaults for all 12 report types
+- [x] System templates with descriptions
+
+---
+
+## 🧪 Day 8: Testing & Polish Checklist
+
+### Test Data Available
+
+**Fixtures:** 84 items (sufficient for all fixture reports)
+
+**Infrastructure:** 13 items across 5 categories:
+- Network: 4 switches (Cisco, Netgear, Ubiquiti)
+- DMX: 3 nodes (ETC Response Gateway, Pathway Pathport)
+- Control: 2 lighting consoles (ETC Eos Ti, Eos RPU)
+- Media: 2 servers (disguise vx 4)
+- Power: 2 PDUs (Leviton, APC)
+
+### Testing Procedure
+
+#### 1. Template System Verification
+
+**Navigate to Paperwork Module:**
+1. Launch app (already running at `http://localhost:5173/`)
+2. Open default project
+3. Navigate to Paperwork module
+
+**Verify System Templates:**
+1. Check template library sidebar shows 12 system templates
+2. Verify each template has:
+   - Correct name
+   - Description
+   - "System" badge/indicator
+   - Lock icon (cannot delete system templates)
+
+**Expected System Templates:**
+- Channel Hookup
+- Dimmer Schedule
+- Circuit List
+- DMX Addresses
+- Power Summary
+- Color Schedule
+- Gobo Schedule
+- Infrastructure List
+- Network Summary
+- Port Assignments
+- Infrastructure Power
+- Infrastructure Location
+
+#### 2. Fixture Reports Testing (7 reports)
+
+For each fixture report type, verify:
+
+**Channel Hookup:**
+- [ ] Template loads correctly
+- [ ] All 84 fixtures display
+- [ ] Columns: channel, dimmer, position, unit, type, wattage, purpose, color, notes
+- [ ] Default sort by channel (ascending)
+- [ ] Data displays correctly (no "undefined" or null values)
+
+**Dimmer Schedule:**
+- [ ] Template loads
+- [ ] Sort by dimmer works
+- [ ] Columns show: dimmer, channel, position, unit, type, wattage, color
+
+**Circuit List:**
+- [ ] Template loads
+- [ ] Sort by circuit works
+- [ ] Circuit numbers display correctly
+
+**DMX Addresses:**
+- [ ] Template loads
+- [ ] Universe and DMX address columns populated
+- [ ] Sort by universe/address works
+
+**Power Summary:**
+- [ ] Aggregates by fixture type
+- [ ] Shows quantity counts
+- [ ] Calculates total wattage and amperage
+- [ ] Formatting: "1,234W" and "10.5A"
+
+**Color Schedule:**
+- [ ] Groups by color
+- [ ] Shows quantity per color
+- [ ] Lists fixtures using each color
+
+**Gobo Schedule:**
+- [ ] Groups by gobo pattern
+- [ ] Shows quantity per gobo
+- [ ] Lists fixtures using each gobo
+
+#### 3. Infrastructure Reports Testing (5 reports)
+
+**Infrastructure List:**
+- [ ] Shows all 13 infrastructure items
+- [ ] Columns: name, type, manufacturer, model, location, status, notes
+- [ ] All categories visible (network, dmx, control, media, power)
+
+**Network Summary:**
+- [ ] Shows 4 network switches
+- [ ] IP addresses display correctly (192.168.1.x)
+- [ ] MAC addresses formatted properly
+- [ ] Hostnames visible
+
+**Port Assignments:**
+- [ ] Port counts display for switches (28, 24, 24 ports)
+- [ ] Port information shows correctly
+
+**Infrastructure Power:**
+- [ ] Voltage displays (120V, 208V)
+- [ ] Wattage and amperage calculations correct
+- [ ] Circuit assignments visible
+
+**Infrastructure Location:**
+- [ ] Groups by location
+- [ ] All locations visible (FOH Rack, Stage Right, etc.)
+- [ ] Equipment listed under correct locations
+
+#### 4. Column Configuration Testing
+
+For any report:
+- [ ] Open column configuration panel
+- [ ] Drag columns to reorder - verify order changes
+- [ ] Adjust column width slider - verify width changes in preview
+- [ ] Toggle column visibility - verify column hides/shows
+- [ ] Changes reflect in live preview immediately
+
+#### 5. Grouping & Sorting Testing
+
+**Grouping:**
+- [ ] Select "Group By" dropdown
+- [ ] Choose a groupable field (e.g., "Position" for Channel Hookup)
+- [ ] Verify data groups correctly
+- [ ] Group headers display with item counts
+- [ ] Toggle "Show Group Headers" - verify headers hide/show
+- [ ] Toggle "Page Break Between Groups" - verify visual separation
+
+**Sorting:**
+- [ ] Select "Sort By" dropdown
+- [ ] Choose different fields
+- [ ] Toggle Ascending/Descending
+- [ ] Verify natural sort (e.g., "Channel 1" < "Channel 10" not "Channel 2")
+- [ ] Verify numeric sorting for number fields
+- [ ] Verify alphabetical sorting for text fields
+
+#### 6. Template Operations Testing
+
+**Save Template:**
+- [ ] Make changes to columns/organization
+- [ ] Click "Save" button
+- [ ] Verify "Unsaved changes" indicator disappears
+- [ ] Reload template - changes persist
+
+**Save As New Template:**
+- [ ] Load system template
+- [ ] Make customizations
+- [ ] Click "Save As..."
+- [ ] Enter new name
+- [ ] Verify new template appears in library
+- [ ] Verify it's marked as custom (not system)
+
+**Duplicate Template:**
+- [ ] Right-click/select any template
+- [ ] Choose "Duplicate"
+- [ ] Verify copy created with "(Copy)" suffix
+- [ ] Verify duplicate is editable
+
+**Delete Custom Template:**
+- [ ] Select a custom template
+- [ ] Click delete
+- [ ] Verify confirmation dialog
+- [ ] Confirm deletion
+- [ ] Verify template removed from library
+- [ ] Try to delete system template - verify error/prevention
+
+**Load Template:**
+- [ ] Click different templates in library
+- [ ] Verify editor updates immediately
+- [ ] Verify preview updates with template data
+- [ ] Verify unsaved changes warning if switching with edits
+
+#### 7. Live Preview Testing
+
+- [ ] Changes to columns update preview instantly
+- [ ] Changes to grouping update preview instantly
+- [ ] Changes to sorting update preview instantly
+- [ ] Zoom slider works (50%-150%)
+- [ ] Preview shows accurate page layout
+- [ ] Data formatting correct (numbers, dates, power units)
+
+#### 8. Header/Footer Designer Integration
+
+- [ ] Click "Design Header" button
+- [ ] Header designer modal opens
+- [ ] Grid-based layout designer loads
+- [ ] Can place data fields
+- [ ] Can add text elements
+- [ ] Can add images
+- [ ] Changes save to template
+- [ ] Header appears in report preview
+
+#### 9. PDF Export Testing
+
+- [ ] Click "Export PDF" button
+- [ ] Save dialog appears
+- [ ] PDF generates successfully
+- [ ] Open PDF - verify:
+  - [ ] Header renders correctly
+  - [ ] Table data present and formatted
+  - [ ] Page breaks work
+  - [ ] Footer renders (if configured)
+  - [ ] Multi-page reports paginate correctly
+
+#### 10. Batch Export Testing
+
+- [ ] Open batch export dialog
+- [ ] Select multiple report types
+- [ ] Click "Export All"
+- [ ] Verify all reports generate
+- [ ] Verify each uses correct template
+- [ ] Verify PDFs created for each
+
+#### 11. Performance Testing
+
+**With 84 Fixtures:**
+- [ ] Template loads in < 500ms
+- [ ] Preview updates in < 300ms
+- [ ] Column reorder feels instant
+- [ ] Grouping/sorting applies quickly
+- [ ] No UI lag or freezing
+
+**Stress Test (if time permits):**
+- Create additional test data (200+ fixtures)
+- Verify performance remains acceptable
+- Check for memory leaks (long session)
+
+#### 12. Edge Cases & Error Handling
+
+- [ ] Empty report (no data) - shows "No data" message
+- [ ] Invalid column field - graceful fallback
+- [ ] Malformed template data - error message
+- [ ] Network error during template save - retry/error
+- [ ] Attempt to modify system template - prevented
+- [ ] Attempt to delete system template - prevented
+
+#### 13. UI/UX Polish
+
+- [ ] All text legible (contrast, size)
+- [ ] Icons clear and meaningful
+- [ ] Hover states work
+- [ ] Active states clear
+- [ ] Loading states where appropriate
+- [ ] Error messages helpful
+- [ ] Success feedback clear
+- [ ] Responsive to window resize
+- [ ] Keyboard navigation works
+- [ ] Tab order logical
+
+---
+
+## 🐛 Known Issues / To Fix
+
+*Document any issues found during testing here*
+
+### Critical
+- [ ] None yet
+
+### Major
+- [ ] None yet
+
+### Minor
+- [ ] None yet
+
+### Nice to Have
+- [ ] None yet
+
+---
+
+## 📊 Test Results Summary
+
+**Fixture Reports (7):**
+- [ ] Channel Hookup
+- [ ] Dimmer Schedule
+- [ ] Circuit List
+- [ ] DMX Addresses
+- [ ] Power Summary
+- [ ] Color Schedule
+- [ ] Gobo Schedule
+
+**Infrastructure Reports (5):**
+- [ ] Infrastructure List
+- [ ] Network Summary
+- [ ] Port Assignments
+- [ ] Infrastructure Power
+- [ ] Infrastructure Location
+
+**Template Operations:**
+- [ ] Load
+- [ ] Save
+- [ ] Save As
+- [ ] Duplicate
+- [ ] Delete
+
+**UI Features:**
+- [ ] Column Configuration
+- [ ] Grouping
+- [ ] Sorting
+- [ ] Live Preview
+- [ ] Header Designer
+- [ ] PDF Export
+- [ ] Batch Export
+
+---
+
+## 🚀 Next Steps After Testing
+
+1. Fix any critical/major issues found
+2. Polish UI based on feedback
+3. Update documentation
+4. Create PR for merge to `develop`
+5. Plan Phase 4 (Label Integration)
+
+---
+
+## 📝 Notes
+
+*Add testing observations here*
