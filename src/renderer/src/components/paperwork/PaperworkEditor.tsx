@@ -37,7 +37,7 @@ export function PaperworkEditor({
     duplicateTemplate
   } = usePaperworkTemplates({ reportType, autoLoad: true });
 
-  const { activeTemplate, loadTemplate: setActiveTemplate, updateActiveTemplate } = useActiveTemplate();
+  const { activeTemplate, loadTemplate, updateActiveTemplate } = useActiveTemplate();
 
   // Editor state
   const [showLibrary, setShowLibrary] = useState(true);
@@ -63,10 +63,10 @@ export function PaperworkEditor({
 
   // Handle template load
   const handleLoadTemplate = useCallback((template: PaperworkTemplate) => {
-    setActiveTemplate(template);
+    loadTemplate(template);
     setTemplateName(template.name);
     setHasUnsavedChanges(false);
-  }, [setActiveTemplate]);
+  }, [loadTemplate]);
 
   // Handle column changes
   const handleColumnsChange = useCallback((newColumns: PaperworkColumnConfig[]) => {
