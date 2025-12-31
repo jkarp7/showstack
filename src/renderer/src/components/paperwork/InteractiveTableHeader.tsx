@@ -11,6 +11,7 @@ interface InteractiveTableHeaderProps {
   column: PaperworkColumnConfig;
   columnIndex: number;
   totalColumns: number;
+  headerStyle?: React.CSSProperties;
   onResize?: (columnId: string, newWidth: number) => void;
   onReorder?: (fromIndex: number, toIndex: number) => void;
   onContextMenu?: (columnId: string, event: React.MouseEvent) => void;
@@ -22,6 +23,7 @@ export function InteractiveTableHeader({
   column,
   columnIndex,
   totalColumns,
+  headerStyle = {},
   onResize,
   onReorder,
   onContextMenu,
@@ -121,10 +123,11 @@ export function InteractiveTableHeader({
       style={{
         width: `${column.width}%`,
         opacity: isDragging ? 0.5 : 1,
-        position: 'relative'
+        position: 'relative',
+        ...headerStyle
       }}
       className={`
-        bg-transparent text-black px-2 py-1 text-left text-sm font-semibold
+        bg-transparent text-black px-2 py-1 text-left font-semibold
         border-t border-b border-gray-300 select-none transition-opacity
         ${!isResizing ? 'cursor-grab active:cursor-grabbing' : ''}
         ${isDropTarget ? 'bg-blue-100' : ''}

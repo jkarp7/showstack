@@ -44,6 +44,18 @@ export interface ReportOrganization {
 }
 
 /**
+ * Font style options
+ */
+export interface FontStyle {
+  fontFamily?: string; // e.g., 'Arial', 'Times New Roman', 'Helvetica'
+  fontSize?: number; // Base font size in points (default: 10)
+  headerFontSize?: number; // Header font size in points (default: 11)
+  fontWeight?: 'normal' | 'bold';
+  fontStyle?: 'normal' | 'italic';
+  lineHeight?: number; // Line height multiplier (default: 1.2)
+}
+
+/**
  * Page setup configuration
  */
 export interface PageSetup {
@@ -54,6 +66,7 @@ export interface PageSetup {
   marginRight: number;
   marginBottom: number;
   marginLeft: number;
+  fontStyle?: FontStyle; // Font customization settings
 }
 
 /**

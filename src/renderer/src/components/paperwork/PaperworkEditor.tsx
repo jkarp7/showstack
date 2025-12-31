@@ -9,6 +9,7 @@ import { PaperworkColumnConfig, ReportOrganization } from '../../types/paperwork
 import { ReportTypeSelector } from './ReportTypeSelector';
 import { ColumnVisibilityControls } from './ColumnVisibilityControls';
 import { ColumnNameSettings } from './ColumnNameSettings';
+import { FontCustomizationControls } from './FontCustomizationControls';
 import { PaperworkTemplateLibrary } from './PaperworkTemplateLibrary';
 import { ReportTableRenderer } from './ReportTableRenderer';
 import { usePaperworkTemplates, useActiveTemplate } from '../../hooks/usePaperworkTemplates';
@@ -95,6 +96,19 @@ export function PaperworkEditor({
     if (!activeTemplate) return;
 
     updateActiveTemplate({ organization: newOrganization });
+    setHasUnsavedChanges(true);
+  }, [activeTemplate, updateActiveTemplate]);
+
+  // Handle font style changes
+  const handleFontStyleChange = useCallback((newFontStyle: any) => {
+    if (!activeTemplate) return;
+
+    updateActiveTemplate({
+      pageSetup: {
+        ...activeTemplate.pageSetup,
+        fontStyle: newFontStyle
+      }
+    });
     setHasUnsavedChanges(true);
   }, [activeTemplate, updateActiveTemplate]);
 
@@ -196,6 +210,16 @@ export function PaperworkEditor({
               <ColumnNameSettings
                 columns={activeTemplate.columns}
                 onChange={handleColumnsChange}
+              />
+            </div>
+          )}
+
+          {/* Font Customization Controls */}
+          {activeTemplate && (
+            <div className="flex-shrink-0">
+              <FontCustomizationControls
+                fontStyle={activeTemplate.pageSetup.fontStyle}
+                onChange={handleFontStyleChange}
               />
             </div>
           )}
@@ -327,6 +351,7 @@ export function PaperworkEditor({
                     data={organizedData}
                     reportType={reportType}
                     organization={activeTemplate.organization}
+                    fontStyle={activeTemplate.pageSetup.fontStyle}
                     onColumnsChange={handleColumnsChange}
                     onOrganizationChange={handleOrganizationChange}
                     editable={true}

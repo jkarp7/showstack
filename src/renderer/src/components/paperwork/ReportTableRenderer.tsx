@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { PaperworkColumnConfig, ColumnFormatType, ReportOrganization } from '../../types/paperworkTemplate';
+import { PaperworkColumnConfig, ColumnFormatType, ReportOrganization, FontStyle } from '../../types/paperworkTemplate';
 import { OrganizedReportData, ReportDataItem } from '../../utils/paperwork/reportOrganizer';
 import { InteractiveTableHeader } from './InteractiveTableHeader';
 import { ColumnContextMenu } from './ColumnContextMenu';
@@ -16,6 +16,7 @@ interface ReportTableRendererProps {
   data: OrganizedReportData;
   reportType: string;
   organization?: ReportOrganization;
+  fontStyle?: FontStyle;
   onColumnsChange?: (columns: PaperworkColumnConfig[]) => void;
   onOrganizationChange?: (organization: ReportOrganization) => void;
   editable?: boolean;
@@ -26,6 +27,7 @@ export function ReportTableRenderer({
   data,
   reportType,
   organization,
+  fontStyle,
   onColumnsChange,
   onOrganizationChange,
   editable = false
@@ -40,6 +42,19 @@ export function ReportTableRenderer({
   const [mergeDialogColumn, setMergeDialogColumn] = useState<PaperworkColumnConfig | null>(null);
 
   const visibleColumns = columns.filter(c => c.visible);
+
+  // Build style object from font settings
+  const tableStyle = {
+    fontFamily: fontStyle?.fontFamily || 'Arial, sans-serif',
+    fontSize: `${fontStyle?.fontSize || 10}pt`,
+    fontWeight: fontStyle?.fontWeight || 'normal',
+    fontStyle: fontStyle?.fontStyle || 'normal',
+    lineHeight: fontStyle?.lineHeight || 1.2
+  };
+
+  const headerStyle = {
+    fontSize: `${fontStyle?.headerFontSize || 11}pt`
+  };
 
   // Handle column resize
   const handleResize = useCallback((columnId: string, newWidth: number) => {
@@ -180,7 +195,7 @@ export function ReportTableRenderer({
   }
 
   return (
-    <div className="bg-white text-black report-content p-8" onContextMenu={handleTableContextMenu}>
+    <div className="bg-white text-black report-content p-8" onContextMenu={handleTableContextMenu} style={tableStyle}>
       {data.groups.map((group, groupIndex) => (
         <div key={groupIndex} className="mb-8">
           {data.hasGroups && (
@@ -189,7 +204,7 @@ export function ReportTableRenderer({
             </h3>
           )}
 
-          <table className="w-full border-collapse">
+          <table className="w-full border-collapse" style={tableStyle}>
             <thead>
               <tr className="bg-gray-100">
                 {editable ? (
@@ -199,6 +214,7 @@ export function ReportTableRenderer({
                       column={col}
                       columnIndex={index}
                       totalColumns={visibleColumns.length}
+                      headerStyle={headerStyle}
                       onResize={handleResize}
                       onReorder={handleReorder}
                       onContextMenu={handleContextMenu}
@@ -210,8 +226,8 @@ export function ReportTableRenderer({
                   visibleColumns.map(col => (
                     <th
                       key={col.id}
-                      style={{ width: `${col.width}%` }}
-                      className="border-t border-b border-gray-300 px-2 py-1 text-left text-sm font-semibold bg-transparent"
+                      style={{ width: `${col.width}%`, ...headerStyle }}
+                      className="border-t border-b border-gray-300 px-2 py-1 text-left font-semibold bg-transparent"
                     >
                       {getColumnDisplayLabel(col)}
                     </th>
