@@ -3,7 +3,7 @@
  * Integrated editor for creating and customizing paperwork report templates
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { PaperworkTemplate, ReportType } from '../../types/paperworkTemplate';
 import { PaperworkColumnConfig, ReportOrganization } from '../../types/paperworkTemplate';
 import { ReportTypeSelector } from './ReportTypeSelector';
@@ -45,6 +45,17 @@ export function PaperworkEditor({
   const [previewScale, setPreviewScale] = useState(100);
   const [templateName, setTemplateName] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Auto-load default system template when report type changes
+  useEffect(() => {
+    if (templates.length > 0 && !templatesLoading) {
+      // Find the first system template for this report type
+      const defaultTemplate = templates.find(t => t.isSystem);
+      if (defaultTemplate && (!activeTemplate || activeTemplate.reportType !== reportType)) {
+        handleLoadTemplate(defaultTemplate);
+      }
+    }
+  }, [reportType, templates, templatesLoading]);
 
   // Get report data for preview
   const reportData = useMemo(() => {
