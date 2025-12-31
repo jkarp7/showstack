@@ -4,7 +4,7 @@
 **Last Updated:** December 30, 2024
 **Current Version:** 0.1.0-alpha
 **Development Phase:** Alpha
-**Active Branch:** `feature/phase-3-paperwork-template-system`
+**Active Branch:** `feature/unified-visual-editor`
 
 This document tracks the development status of all ShowStack feature domains and editions. It serves as the central source of truth for what's completed, in progress, and planned.
 
