@@ -90,6 +90,17 @@ npm run dev
   - Replaced window.prompt() with custom modal dialog for Save As
   - Enhanced error handling with console logging and user alerts
   - Auto-load next template after deletion
+- [x] **PDF Export**: Fixed blank page issue with proper table rendering
+  - Import renderToStaticMarkup from react-dom/server
+  - Render ReportTableRenderer component to HTML
+  - Apply template font settings and styling
+  - Include report title, project name, and date
+- [x] **Batch Export**: Updated to use template system
+  - Load all templates at start of batch export
+  - Find system template for each selected report type
+  - Use same rendering approach as single export
+  - Progress dialog shows current report being exported
+  - Handle errors gracefully and continue with next report
 
 ---
 
@@ -136,7 +147,7 @@ Refer to **`PHASE_3_TESTING_GUIDE.md`** for the complete testing procedure. Key 
 - [x] Template duplication
 - [x] Custom template deletion
 - [x] PDF export (single report) - formatting improvements needed later
-- [ ] Batch export (multiple reports)
+- [x] Batch export (multiple reports)
 - [ ] Header designer integration
 
 #### 4. Performance
@@ -154,7 +165,7 @@ Refer to **`PHASE_3_TESTING_GUIDE.md`** for the complete testing procedure. Key 
 ## 🐛 Known Issues
 
 ### Critical
-- **Batch Export**: Needs to be updated to work with new template system
+- None
 
 ### Major
 - **Header Designer Integration**: "Design Header" button exists but integration not complete
