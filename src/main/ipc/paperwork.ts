@@ -72,7 +72,7 @@ export function registerPaperworkHandlers(): void {
   // ============================================
 
   // Export Paperwork Report to PDF
-  ipcMain.handle('paperwork:exportPDF', async (_event, htmlContent: string, filename: string, pageSettings: any, headerTemplate?: string, footerTemplate?: string) => {
+  ipcMain.handle('paperwork:exportPDF', async (_event, htmlContent: string, filename: string, pageSettings: any) => {
     try {
       // Show save dialog
       const mainWindow = BrowserWindow.getFocusedWindow();
@@ -115,25 +115,18 @@ export function registerPaperworkHandlers(): void {
         'tabloid': 'Tabloid',
       };
 
-      // Calculate margins to account for header/footer
-      const headerHeight = headerTemplate ? (pageSettings.headerHeight || 264) : 0;
-      const footerHeight = footerTemplate ? (pageSettings.footerHeight || 50) : 0;
-
       // Generate PDF with proper page settings
       const pdfData = await pdfWindow.webContents.printToPDF({
         pageSize: pageSizeMap[pageSettings.size] || 'Letter',
         landscape: pageSettings.orientation === 'landscape',
         printBackground: true,
-        marginsType: 0, // Custom margins
+        marginsType: 1, // No margins (we handle them in CSS)
         margins: {
-          top: (pageSettings.marginTop || 0) + headerHeight,
-          bottom: (pageSettings.marginBottom || 0) + footerHeight,
+          top: pageSettings.marginTop || 0,
+          bottom: pageSettings.marginBottom || 0,
           left: pageSettings.marginLeft || 0,
           right: pageSettings.marginRight || 0,
         },
-        displayHeaderFooter: !!(headerTemplate || footerTemplate),
-        headerTemplate: headerTemplate || '',
-        footerTemplate: footerTemplate || '',
       });
 
       // Save PDF to file

@@ -125,17 +125,15 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       const dataRange = calculateDataRange(template.reportType, reportData);
       const userName = 'User'; // TODO: Get from user preferences/settings
 
-      // Render header and footer templates for printToPDF
-      let headerTemplate = '';
-      let footerTemplate = '';
-
+      // Render header and footer HTML (will be embedded with fixed positioning)
+      let headerHTML = '';
       if (template.headerTemplateId) {
         console.log('Rendering header template:', template.headerTemplateId);
-        headerTemplate = await renderHeaderTemplate(template.headerTemplateId, headerData) || '';
+        headerHTML = await renderHeaderHTML(template.headerTemplateId, headerData) || '';
       }
-      footerTemplate = renderFooterTemplate(userName, dataRange);
+      const footerHTML = renderFooterHTML(userName, dataRange);
 
-      // Create HTML document (without header/footer - they'll be added by printToPDF)
+      // Create HTML document with fixed headers/footers for print
       const htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -151,6 +149,31 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 color: #000;
                 background: white;
               }
+
+              /* Fixed header/footer for print */
+              @media print {
+                .page-header {
+                  position: fixed;
+                  top: 0;
+                  left: 0;
+                  right: 0;
+                  z-index: 1000;
+                }
+
+                .page-footer {
+                  position: fixed;
+                  bottom: 0;
+                  left: 0;
+                  right: 0;
+                  z-index: 1000;
+                }
+
+                .report-content {
+                  margin-top: 300px; /* Space for header */
+                  margin-bottom: 80px; /* Space for footer */
+                }
+              }
+
               table {
                 width: 100%;
                 border-collapse: collapse;
@@ -177,15 +200,14 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 margin-bottom: 16px;
                 font-size: 14pt;
               }
-              @media print {
-                body {
-                  margin: 0;
-                }
-              }
             </style>
           </head>
           <body>
-            ${tableHTML}
+            ${headerHTML}
+            <div class="report-content">
+              ${tableHTML}
+            </div>
+            ${footerHTML}
           </body>
         </html>
       `;
@@ -194,19 +216,10 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
       console.log('Calling PDF export API with filename:', filename);
 
-      // Add header/footer heights to pageSetup
-      const pageSettingsWithHeaders = {
-        ...pageSetup,
-        headerHeight: template.headerTemplateId ? 264 : 0,
-        footerHeight: 50,
-      };
-
       const result = await window.api.paperwork.exportPDF(
         htmlContent,
         filename,
-        pageSettingsWithHeaders,
-        headerTemplate,
-        footerTemplate
+        pageSetup
       );
 
       if (result.success) {
