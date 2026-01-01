@@ -61,7 +61,7 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
       {
         id: uuidv4(),
         template_id: templateId,
-        element_type: 'data-field',
+        element_type: 'dataField',
         config: JSON.stringify({
           fieldType: 'report_title',
           label: 'Report Title',
@@ -87,7 +87,7 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
       {
         id: uuidv4(),
         template_id: templateId,
-        element_type: 'data-field',
+        element_type: 'dataField',
         config: JSON.stringify({
           fieldType: 'production_name',
           label: 'Show Name',
@@ -137,7 +137,7 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
       {
         id: uuidv4(),
         template_id: templateId,
-        element_type: 'data-field',
+        element_type: 'dataField',
         config: JSON.stringify({
           fieldType: 'generated_date',
           label: 'Date',
@@ -163,7 +163,7 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
       {
         id: uuidv4(),
         template_id: templateId,
-        element_type: 'data-field',
+        element_type: 'dataField',
         config: JSON.stringify({
           fieldType: 'ld_name',
           label: 'Lighting Designer',
@@ -189,7 +189,7 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
       {
         id: uuidv4(),
         template_id: templateId,
-        element_type: 'data-field',
+        element_type: 'dataField',
         config: JSON.stringify({
           fieldType: 'pe_name',
           label: 'Associate LD',
@@ -215,7 +215,7 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
       {
         id: uuidv4(),
         template_id: templateId,
-        element_type: 'data-field',
+        element_type: 'dataField',
         config: JSON.stringify({
           fieldType: 'venue',
           label: 'Venue',

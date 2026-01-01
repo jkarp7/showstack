@@ -10,7 +10,7 @@ import type { PaperworkTemplate } from '../../types/paperworkTemplate';
 interface LayoutElement {
   id: string;
   template_id: string;
-  element_type: 'text' | 'data-field' | 'shape' | 'image';
+  element_type: 'text' | 'dataField' | 'shape' | 'image';
   config: string; // JSON string
   grid_column: number;
   grid_row: number;
@@ -177,7 +177,7 @@ function renderElement(element: LayoutElement, template: LayoutTemplate, data: H
   try {
     const config = JSON.parse(element.config);
 
-    if (element.element_type === 'data-field') {
+    if (element.element_type === 'dataField') {
       const fieldValue = resolveDataField(config.fieldType, data);
       const prefix = config.prefix || '';
       const suffix = config.suffix || '';
