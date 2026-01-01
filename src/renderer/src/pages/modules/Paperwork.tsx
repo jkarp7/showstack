@@ -16,6 +16,7 @@ import { PaperworkHeaderDesigner } from '../../components/paperwork/PaperworkHea
 import { ReportTableRenderer } from '../../components/paperwork/ReportTableRenderer';
 import { getReportData } from '../../utils/paperwork/dataConnector';
 import { organizeReportData } from '../../utils/paperwork/reportOrganizer';
+import { renderHeaderHTML, renderFooterHTML, calculateDataRange } from '../../utils/paperwork/headerRenderer';
 
 const REPORT_TEMPLATES = [
   { id: 'channel-hookup', name: 'Channel Hookup', icon: '📊' },
@@ -113,6 +114,24 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
       console.log('Table HTML rendered, length:', tableHTML.length);
 
+      // Render header from template if available
+      let headerHTML = '';
+      if (template.headerTemplateId) {
+        console.log('Rendering header template:', template.headerTemplateId);
+        headerHTML = await renderHeaderHTML(template.headerTemplateId, {
+          reportTitle: template.name,
+          productionName: projectName,
+          date: new Date().toLocaleDateString(),
+        }) || '';
+      }
+
+      // Calculate data range for footer
+      const dataRange = calculateDataRange(template.reportType, reportData);
+      const userName = 'User'; // TODO: Get from user preferences/settings
+
+      // Render footer
+      const footerHTML = renderFooterHTML(userName, dataRange);
+
       // Create HTML document
       const htmlContent = `
         <!DOCTYPE html>
@@ -129,15 +148,6 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 color: #000;
                 background: white;
                 padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in;
-              }
-              h1 {
-                font-size: 20pt;
-                margin-bottom: 8pt;
-                color: #1f2937;
-              }
-              p {
-                margin-bottom: 12pt;
-                color: #6b7280;
               }
               table {
                 width: 100%;
@@ -174,9 +184,9 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             </style>
           </head>
           <body>
-            <h1>${template.name}</h1>
-            <p>${projectName} - ${new Date().toLocaleDateString()}</p>
+            ${headerHTML}
             ${tableHTML}
+            ${footerHTML}
           </body>
         </html>
       `;
@@ -264,12 +274,29 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             />
           );
 
+          // Render header from template if available
+          let headerHTML = '';
+          if (template.headerTemplateId) {
+            headerHTML = await renderHeaderHTML(template.headerTemplateId, {
+              reportTitle: template.name,
+              productionName: projectName,
+              date: new Date().toLocaleDateString(),
+            }) || '';
+          }
+
+          // Calculate data range for footer
+          const dataRange = calculateDataRange(reportType, reportData);
+          const userName = 'User'; // TODO: Get from user preferences/settings
+
+          // Render footer
+          const footerHTML = renderFooterHTML(userName, dataRange);
+
           // Create report section with page break
           const reportSection = `
             <section class="report-section">
-              <h1>${template.name}</h1>
-              <p class="report-meta">${projectName} - ${new Date().toLocaleDateString()}</p>
+              ${headerHTML}
               ${tableHTML}
+              ${footerHTML}
             </section>
           `;
 
