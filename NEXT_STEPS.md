@@ -101,6 +101,14 @@ npm run dev
   - Use same rendering approach as single export
   - Progress dialog shows current report being exported
   - Handle errors gracefully and continue with next report
+  - Batch export button added to editor toolbar for better discoverability
+- [x] **Header Designer Integration**: Completed integration with Layout Designer
+  - Fixed prop interface mismatch between components
+  - Load project data, fixtures, and infrastructure for live preview
+  - Map paperwork data to Prep template format with summaries
+  - Load existing header template if headerTemplateId is set
+  - Save headerTemplateId back to paperwork template on save
+  - Full data preview with fixture/infrastructure statistics
 
 ---
 
@@ -148,7 +156,7 @@ Refer to **`PHASE_3_TESTING_GUIDE.md`** for the complete testing procedure. Key 
 - [x] Custom template deletion
 - [x] PDF export (single report) - formatting improvements needed later
 - [x] Batch export (multiple reports)
-- [ ] Header designer integration
+- [x] Header designer integration
 
 #### 4. Performance
 - [ ] Template loads < 500ms
@@ -168,10 +176,7 @@ Refer to **`PHASE_3_TESTING_GUIDE.md`** for the complete testing procedure. Key 
 - None
 
 ### Major
-- **Header Designer Integration**: "Design Header" button exists but integration not complete
-  - Need to implement connection to Layout Designer
-  - Need to pass template data to designer
-  - Need to handle return from designer
+- None
 
 ### Minor
 - **PDF Formatting**: Export works but formatting improvements needed later
