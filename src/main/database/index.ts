@@ -8,6 +8,7 @@ import { seedDefaultPageLayouts } from './seedDefaultLayouts';
 import { seedDefaultPageLayoutsFromJSON } from './seedDefaultLayoutsFromJSON';
 import { seedPaperworkTemplates } from './seedPaperworkTemplates';
 import { seedPaperworkHeaderTemplate } from './seedPaperworkHeader';
+import { updatePaperworkTemplateHeaders } from './updatePaperworkTemplateHeaders';
 import { createLayoutTemplate } from './queries/layoutTemplates';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -189,6 +190,9 @@ async function runAppMigrations(db: Database): Promise<void> {
 
     // Seed default paperwork header template
     seedPaperworkHeaderTemplate();
+
+    // Update existing paperwork templates to reference the default header
+    updatePaperworkTemplateHeaders();
 
     console.log('✅ App database migrations complete');
   } catch (error) {
