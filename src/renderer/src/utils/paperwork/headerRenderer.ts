@@ -120,12 +120,18 @@ function calculateElementStyle(
   element: LayoutElement,
   template: LayoutTemplate
 ): string {
-  const columnWidth = template.page_width / template.grid_columns;
-  const rowHeight = template.page_height / template.grid_rows;
   const gap = template.grid_gap;
 
-  const left = element.grid_column * columnWidth + element.grid_column * gap;
-  const top = element.grid_row * rowHeight + element.grid_row * gap;
+  // Calculate column/row sizes accounting for gaps
+  // Total width = columns * columnWidth + (columns - 1) * gap
+  const columnWidth = (template.page_width - (template.grid_columns - 1) * gap) / template.grid_columns;
+  const rowHeight = (template.page_height - (template.grid_rows - 1) * gap) / template.grid_rows;
+
+  // Position = (column index) * (column width + gap)
+  const left = element.grid_column * (columnWidth + gap);
+  const top = element.grid_row * (rowHeight + gap);
+
+  // Size = (span) * column width + (span - 1) * gap
   const width = element.column_span * columnWidth + (element.column_span - 1) * gap;
   const height = element.row_span * rowHeight + (element.row_span - 1) * gap;
 
@@ -180,7 +186,7 @@ function renderElement(element: LayoutElement, template: LayoutTemplate, data: H
 }
 
 /**
- * Render header template as HTML
+ * Render header template as HTML for inline display
  */
 export async function renderHeaderHTML(
   templateId: string,
@@ -213,7 +219,76 @@ export async function renderHeaderHTML(
 }
 
 /**
- * Render footer HTML
+ * Render header template for Electron's printToPDF headerTemplate option
+ * Uses special classes like <span class="pageNumber"></span> that are replaced by Electron
+ */
+export async function renderHeaderTemplate(
+  templateId: string,
+  data: HeaderData
+): Promise<string | null> {
+  const headerLayout = await loadHeaderTemplate(templateId);
+
+  if (!headerLayout) {
+    return null;
+  }
+
+  const { template, elements } = headerLayout;
+
+  // Render elements with special handling for page numbers
+  const elementsHTML = elements
+    .map(element => {
+      const style = calculateElementStyle(element, template);
+      let content = '';
+
+      try {
+        const config = JSON.parse(element.config);
+
+        if (element.element_type === 'dataField') {
+          const fieldValue = resolveDataField(config.fieldType, data);
+          const prefix = config.prefix || '';
+          const suffix = config.suffix || '';
+
+          // Special handling for page numbers in header template
+          if (config.fieldType === 'page_number') {
+            content = `${prefix}<span class="pageNumber"></span>${suffix}`;
+          } else if (config.fieldType === 'total_pages') {
+            content = `${prefix}<span class="totalPages"></span>${suffix}`;
+          } else {
+            content = `${prefix}${fieldValue}${suffix}`;
+          }
+        } else if (element.element_type === 'text') {
+          // Replace placeholders with Electron's special classes
+          let textContent = config.content || '';
+          textContent = textContent
+            .replace('{page}', '<span class="pageNumber"></span>')
+            .replace('{total}', '<span class="totalPages"></span>')
+            .replace('{date}', data.date || new Date().toLocaleDateString());
+          content = textContent;
+        }
+      } catch (e) {
+        console.warn('Failed to parse element config:', element.id);
+      }
+
+      return `<div style="${style}">${content}</div>`;
+    })
+    .join('\n');
+
+  return `
+    <div style="
+      position: relative;
+      width: ${template.page_width}px;
+      height: ${template.page_height}px;
+      margin: 0 auto;
+      font-size: 10px;
+      -webkit-print-color-adjust: exact;
+    ">
+      ${elementsHTML}
+    </div>
+  `;
+}
+
+/**
+ * Render footer HTML for inline display
  */
 export function renderFooterHTML(
   userName: string,
@@ -232,6 +307,29 @@ export function renderFooterHTML(
         <div>${userName} • ShowStack</div>
         <div>${dataRange}</div>
       </div>
+    </div>
+  `;
+}
+
+/**
+ * Render footer template for Electron's printToPDF footerTemplate option
+ */
+export function renderFooterTemplate(
+  userName: string,
+  dataRange: string
+): string {
+  return `
+    <div style="
+      width: 100%;
+      padding: 10px 20px;
+      font-size: 9px;
+      color: #6b7280;
+      display: flex;
+      justify-content: space-between;
+      -webkit-print-color-adjust: exact;
+    ">
+      <div>${userName} • ShowStack</div>
+      <div>${dataRange}</div>
     </div>
   `;
 }

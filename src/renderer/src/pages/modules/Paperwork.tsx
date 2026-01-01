@@ -16,7 +16,7 @@ import { PaperworkHeaderDesigner } from '../../components/paperwork/PaperworkHea
 import { ReportTableRenderer } from '../../components/paperwork/ReportTableRenderer';
 import { getReportData } from '../../utils/paperwork/dataConnector';
 import { organizeReportData } from '../../utils/paperwork/reportOrganizer';
-import { renderHeaderHTML, renderFooterHTML, calculateDataRange } from '../../utils/paperwork/headerRenderer';
+import { renderHeaderHTML, renderFooterHTML, renderHeaderTemplate, renderFooterTemplate, calculateDataRange } from '../../utils/paperwork/headerRenderer';
 
 const REPORT_TEMPLATES = [
   { id: 'channel-hookup', name: 'Channel Hookup', icon: '📊' },
@@ -114,25 +114,28 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
       console.log('Table HTML rendered, length:', tableHTML.length);
 
-      // Render header from template if available
-      let headerHTML = '';
-      if (template.headerTemplateId) {
-        console.log('Rendering header template:', template.headerTemplateId);
-        headerHTML = await renderHeaderHTML(template.headerTemplateId, {
-          reportTitle: template.name,
-          productionName: projectName,
-          date: new Date().toLocaleDateString(),
-        }) || '';
-      }
+      // Prepare header/footer data
+      const headerData = {
+        reportTitle: template.name,
+        productionName: projectName,
+        date: new Date().toLocaleDateString(),
+      };
 
       // Calculate data range for footer
       const dataRange = calculateDataRange(template.reportType, reportData);
       const userName = 'User'; // TODO: Get from user preferences/settings
 
-      // Render footer
-      const footerHTML = renderFooterHTML(userName, dataRange);
+      // Render header and footer templates for printToPDF
+      let headerTemplate = '';
+      let footerTemplate = '';
 
-      // Create HTML document
+      if (template.headerTemplateId) {
+        console.log('Rendering header template:', template.headerTemplateId);
+        headerTemplate = await renderHeaderTemplate(template.headerTemplateId, headerData) || '';
+      }
+      footerTemplate = renderFooterTemplate(userName, dataRange);
+
+      // Create HTML document (without header/footer - they'll be added by printToPDF)
       const htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -147,7 +150,6 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 line-height: ${template.pageSetup.fontStyle?.lineHeight || 1.2};
                 color: #000;
                 background: white;
-                padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in;
               }
               table {
                 width: 100%;
@@ -178,15 +180,12 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
               @media print {
                 body {
                   margin: 0;
-                  padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in;
                 }
               }
             </style>
           </head>
           <body>
-            ${headerHTML}
             ${tableHTML}
-            ${footerHTML}
           </body>
         </html>
       `;
@@ -194,7 +193,21 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       const filename = `${projectName}_${template.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
 
       console.log('Calling PDF export API with filename:', filename);
-      const result = await window.api.paperwork.exportPDF(htmlContent, filename, pageSetup);
+
+      // Add header/footer heights to pageSetup
+      const pageSettingsWithHeaders = {
+        ...pageSetup,
+        headerHeight: template.headerTemplateId ? 264 : 0,
+        footerHeight: 50,
+      };
+
+      const result = await window.api.paperwork.exportPDF(
+        htmlContent,
+        filename,
+        pageSettingsWithHeaders,
+        headerTemplate,
+        footerTemplate
+      );
 
       if (result.success) {
         console.log('PDF exported successfully');
