@@ -219,7 +219,7 @@ export function ReportTableRenderer({
             </h3>
           )}
 
-          <table className="w-full border-collapse" style={tableStyle}>
+          <table className="w-full border-collapse data-table" style={tableStyle}>
             <thead>
               <tr className="bg-gray-100">
                 {editable ? (

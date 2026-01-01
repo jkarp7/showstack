@@ -125,7 +125,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       const dataRange = calculateDataRange(template.reportType, reportData);
       const userName = 'User'; // TODO: Get from user preferences/settings
 
-      // Render header and footer HTML (will be embedded with fixed positioning)
+      // Render header and footer HTML
       let headerHTML = '';
       if (template.headerTemplateId) {
         console.log('Rendering header template:', template.headerTemplateId);
@@ -133,7 +133,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       }
       const footerHTML = renderFooterHTML(userName, dataRange);
 
-      // Create HTML document with fixed headers/footers for print
+      // Create HTML document with table-based layout for repeating headers
       const htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -150,64 +150,97 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 background: white;
               }
 
-              /* Fixed header/footer for print */
-              @media print {
-                .page-header {
-                  position: fixed;
-                  top: 0;
-                  left: 0;
-                  right: 0;
-                  z-index: 1000;
-                }
-
-                .page-footer {
-                  position: fixed;
-                  bottom: 0;
-                  left: 0;
-                  right: 0;
-                  z-index: 1000;
-                }
-
-                .report-content {
-                  margin-top: 300px; /* Space for header */
-                  margin-bottom: 80px; /* Space for footer */
-                }
+              /* Wrapper table for repeating headers */
+              .report-wrapper {
+                width: 100%;
+                border-collapse: collapse;
               }
 
-              table {
+              .report-wrapper thead {
+                display: table-header-group; /* Ensures thead repeats on each page */
+              }
+
+              .report-wrapper tfoot {
+                display: table-footer-group; /* Ensures tfoot repeats on each page */
+              }
+
+              .report-wrapper tbody {
+                display: table-row-group;
+              }
+
+              .report-wrapper td {
+                border: none;
+                padding: 0;
+                vertical-align: top;
+              }
+
+              /* Data table styling */
+              table.data-table {
                 width: 100%;
                 border-collapse: collapse;
                 margin-bottom: 1rem;
               }
-              th, td {
+
+              table.data-table th,
+              table.data-table td {
                 padding: 8px;
                 text-align: left;
                 border: 1px solid #d1d5db;
               }
-              th {
+
+              table.data-table th {
                 background-color: transparent;
                 font-weight: ${template.pageSetup.fontStyle?.fontWeight || 'bold'};
                 font-size: ${template.pageSetup.fontStyle?.headerFontSize || 11}pt;
                 border-top: 1px solid #9ca3af;
                 border-bottom: 1px solid #9ca3af;
               }
-              td {
+
+              table.data-table td {
                 font-size: ${template.pageSetup.fontStyle?.fontSize || 10}pt;
               }
+
               h3 {
                 color: #2563eb;
                 margin-top: 20px;
                 margin-bottom: 16px;
                 font-size: 14pt;
               }
+
+              @media print {
+                .report-wrapper thead {
+                  display: table-header-group;
+                }
+                .report-wrapper tfoot {
+                  display: table-footer-group;
+                }
+              }
             </style>
           </head>
           <body>
-            ${headerHTML}
-            <div class="report-content">
-              ${tableHTML}
-            </div>
-            ${footerHTML}
+            <table class="report-wrapper">
+              <thead>
+                <tr>
+                  <td>
+                    ${headerHTML}
+                  </td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    ${tableHTML}
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td>
+                    ${footerHTML}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
           </body>
         </html>
       `;
