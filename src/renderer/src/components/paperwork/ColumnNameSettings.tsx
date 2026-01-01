@@ -44,7 +44,6 @@ export function ColumnNameSettings({ columns, onChange, reportType }: ColumnName
 
   // Handle global display mode change
   const handleGlobalModeChange = (mode: ColumnDisplayMode) => {
-    console.log('🎨 Changing display mode to:', mode);
     setGlobalMode(mode);
 
     // Update displayMode and merge in shortLabel from defaults if missing
@@ -58,7 +57,6 @@ export function ColumnNameSettings({ columns, onChange, reportType }: ColumnName
       };
     });
 
-    console.log('🎨 Updated columns:', updatedColumns.slice(0, 3).map(c => ({ id: c.id, label: c.label, shortLabel: c.shortLabel, displayMode: c.displayMode })));
     onChange(updatedColumns);
   };
 

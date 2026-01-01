@@ -43,18 +43,6 @@ export function ReportTableRenderer({
 
   const visibleColumns = columns.filter(c => c.visible);
 
-  // Debug: Log column display modes
-  React.useEffect(() => {
-    if (visibleColumns.length > 0) {
-      console.log('📊 Table columns displayMode:', visibleColumns.slice(0, 3).map(c => ({
-        id: c.id,
-        label: c.label,
-        shortLabel: c.shortLabel,
-        displayMode: c.displayMode
-      })));
-    }
-  }, [columns]);
-
   // Build style object from font settings
   const tableStyle = {
     fontFamily: fontStyle?.fontFamily || 'Arial, sans-serif',
@@ -110,15 +98,12 @@ export function ReportTableRenderer({
   const handleContextMenu = useCallback((columnId: string, event: React.MouseEvent) => {
     event.preventDefault();
     const column = columns.find(c => c.id === columnId);
-    console.log('📋 handleContextMenu called for columnId:', columnId, 'found column:', column?.label);
     if (column) {
-      const menuState = {
+      setContextMenu({
         position: { x: event.clientX, y: event.clientY },
         column,
         type: 'column' as const
-      };
-      console.log('📋 Setting contextMenu state:', menuState);
-      setContextMenu(menuState);
+      });
     }
   }, [columns]);
 
@@ -285,26 +270,23 @@ export function ReportTableRenderer({
       ))}
 
       {/* Context Menu */}
-      {contextMenu && (() => {
-        console.log('🎨 Rendering ColumnContextMenu component with contextMenu:', contextMenu);
-        return (
-          <ColumnContextMenu
-            position={contextMenu.position}
-            onClose={() => setContextMenu(null)}
-            column={contextMenu.column}
-            allColumns={columns}
-            onGroupByColumn={handleGroupByColumn}
-            onSortByColumn={handleSortByColumn}
-            onHideColumn={handleHideColumn}
-            onResizeToContent={handleResizeToContent}
-            onMergeColumn={handleMergeColumn}
-            onUnmergeColumn={handleUnmergeColumn}
-            organization={organization}
-            visibleColumns={visibleColumns}
-            onOrganizationChange={onOrganizationChange}
-          />
-        );
-      })()}
+      {contextMenu && (
+        <ColumnContextMenu
+          position={contextMenu.position}
+          onClose={() => setContextMenu(null)}
+          column={contextMenu.column}
+          allColumns={columns}
+          onGroupByColumn={handleGroupByColumn}
+          onSortByColumn={handleSortByColumn}
+          onHideColumn={handleHideColumn}
+          onResizeToContent={handleResizeToContent}
+          onMergeColumn={handleMergeColumn}
+          onUnmergeColumn={handleUnmergeColumn}
+          organization={organization}
+          visibleColumns={visibleColumns}
+          onOrganizationChange={onOrganizationChange}
+        />
+      )}
 
       {/* Merge Dialog */}
       {mergeDialogColumn && (() => {

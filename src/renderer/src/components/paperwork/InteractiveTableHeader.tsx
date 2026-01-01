@@ -111,11 +111,10 @@ export function InteractiveTableHeader({
   const handleContextMenuClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation(); // Prevent event from bubbling to table body
-    console.log('🔍 Context menu triggered for column:', column.label, 'at position:', e.clientX, e.clientY);
     if (onContextMenu) {
       onContextMenu(column.id, e);
     }
-  }, [column.id, onContextMenu]);
+  }, [column.id, column.label, onContextMenu]);
 
   return (
     <th
