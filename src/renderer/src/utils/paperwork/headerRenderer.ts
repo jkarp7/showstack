@@ -74,7 +74,7 @@ export async function loadHeaderTemplate(templateId: string): Promise<{
     const elementsQuery = `
       SELECT id, template_id, element_type, config, grid_column, grid_row,
              column_span, row_span, layer, style
-      FROM layout_elements
+      FROM page_layout_elements
       WHERE template_id = ?
       ORDER BY layer ASC, grid_row ASC, grid_column ASC
     `;

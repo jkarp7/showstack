@@ -52,7 +52,7 @@ export function seedPaperworkHeaderTemplate(): void {
     // Insert elements
     for (const element of headerLayout.elements) {
       db.run(
-        `INSERT INTO layout_elements (
+        `INSERT INTO page_layout_elements (
           id, template_id, element_type, config,
           grid_column, grid_row, column_span, row_span,
           layer, style, created_at, updated_at
