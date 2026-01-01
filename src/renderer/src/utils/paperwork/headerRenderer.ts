@@ -43,46 +43,33 @@ interface HeaderData {
 }
 
 /**
- * Load header template from database
+ * Load header template from database using Prep API
  */
 export async function loadHeaderTemplate(templateId: string): Promise<{
   template: LayoutTemplate;
   elements: LayoutElement[];
 } | null> {
   try {
-    if (!window.api?.database) {
-      console.error('Database API not available');
+    if (!window.api?.prep?.layoutTemplates) {
+      console.error('Prep layout templates API not available');
       return null;
     }
 
-    // Load template
-    const templateQuery = `
-      SELECT id, name, page_type, grid_columns, grid_rows, grid_gap, page_width, page_height
-      FROM page_layout_templates
-      WHERE id = ?
-    `;
-    const templateResult = await window.api.database.query(templateQuery, [templateId]);
+    // Load template using Prep API
+    const template = await window.api.prep.layoutTemplates.getById(templateId);
 
-    if (!templateResult || templateResult.length === 0) {
+    if (!template) {
       console.error('Header template not found:', templateId);
       return null;
     }
 
-    const template = templateResult[0] as LayoutTemplate;
+    // Load elements using Prep API
+    const elements = await window.api.prep.layoutTemplates.getElements(templateId);
 
-    // Load elements
-    const elementsQuery = `
-      SELECT id, template_id, element_type, config, grid_column, grid_row,
-             column_span, row_span, layer, style
-      FROM page_layout_elements
-      WHERE template_id = ?
-      ORDER BY layer ASC, grid_row ASC, grid_column ASC
-    `;
-    const elementsResult = await window.api.database.query(elementsQuery, [templateId]);
-
-    const elements = (elementsResult || []) as LayoutElement[];
-
-    return { template, elements };
+    return {
+      template: template as LayoutTemplate,
+      elements: (elements || []) as LayoutElement[]
+    };
   } catch (error) {
     console.error('Error loading header template:', error);
     return null;
