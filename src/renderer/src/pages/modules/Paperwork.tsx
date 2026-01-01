@@ -125,7 +125,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       const dataRange = calculateDataRange(template.reportType, reportData);
       const userName = 'User'; // TODO: Get from user preferences/settings
 
-      // Render header and footer HTML
+      // Render header and footer HTML with print-friendly grid layout
       let headerHTML = '';
       if (template.headerTemplateId) {
         console.log('Rendering header template:', template.headerTemplateId);

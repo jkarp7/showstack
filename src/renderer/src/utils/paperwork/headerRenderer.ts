@@ -186,7 +186,7 @@ function renderElement(element: LayoutElement, template: LayoutTemplate, data: H
 }
 
 /**
- * Render header template as HTML for inline display
+ * Render header template as HTML for print (simplified layout without absolute positioning)
  */
 export async function renderHeaderHTML(
   templateId: string,
@@ -200,20 +200,62 @@ export async function renderHeaderHTML(
 
   const { template, elements } = headerLayout;
 
-  // Render all elements
-  const elementsHTML = elements
-    .map(element => renderElement(element, template, data))
-    .join('\n');
+  // Group elements by row for simpler rendering
+  const elementsByRow: { [key: number]: any[] } = {};
+  elements.forEach(element => {
+    if (!elementsByRow[element.grid_row]) {
+      elementsByRow[element.grid_row] = [];
+    }
+    elementsByRow[element.grid_row].push(element);
+  });
+
+  // Sort rows
+  const sortedRows = Object.keys(elementsByRow).map(Number).sort((a, b) => a - b);
+
+  // Render rows
+  const rowsHTML = sortedRows.map(rowIndex => {
+    const rowElements = elementsByRow[rowIndex].sort((a, b) => a.grid_column - b.grid_column);
+
+    const cellsHTML = rowElements.map(element => {
+      const config = JSON.parse(element.config);
+      const style = JSON.parse(element.style);
+      let content = '';
+
+      if (element.element_type === 'dataField') {
+        const fieldValue = resolveDataField(config.fieldType, data);
+        const prefix = config.prefix || '';
+        const suffix = config.suffix || '';
+        content = `${prefix}${fieldValue}${suffix}`;
+      } else if (element.element_type === 'text') {
+        content = renderTextContent(config.content || '', data);
+      }
+
+      return `
+        <div style="
+          grid-column: span ${element.column_span};
+          font-family: ${style.fontFamily || 'Arial'};
+          font-size: ${style.fontSize || 12}pt;
+          font-weight: ${style.fontWeight || 'normal'};
+          text-align: ${style.textAlign || 'left'};
+          color: ${style.color || '#000000'};
+        ">
+          ${content}
+        </div>
+      `;
+    }).join('');
+
+    return cellsHTML;
+  }).join('');
 
   return `
-    <div class="page-header" style="
-      position: relative;
-      width: ${template.page_width}px;
-      height: ${template.page_height}px;
-      margin: 0 auto;
-      margin-bottom: 20px;
+    <div style="
+      display: grid;
+      grid-template-columns: repeat(${template.grid_columns}, 1fr);
+      gap: ${template.grid_gap}px;
+      width: 100%;
+      padding: 10px;
     ">
-      ${elementsHTML}
+      ${rowsHTML}
     </div>
   `;
 }
