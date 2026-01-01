@@ -8,7 +8,7 @@ export default defineConfig({
   main: {
     build: {
       rollupOptions: {
-        external: ['sql.js'],
+        external: ['sql.js', 'puppeteer'],
         plugins: [
           {
             name: 'copy-default-layouts',
