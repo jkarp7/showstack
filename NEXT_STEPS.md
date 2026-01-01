@@ -83,6 +83,13 @@ npm run dev
 - [x] **Event Handling**: Fixed context menu and dialog rendering
   - Added stopPropagation to prevent event bubbling
   - React Portal for merge dialog with proper z-index
+- [x] **Template Save/Load/Duplication**: Fixed signature mismatches and improved UX
+  - Fixed prop mismatches between PaperworkEditor and PaperworkTemplateLibrary
+  - Added wrapper functions for duplicate/delete/create operations
+  - Save button auto-creates copy when editing system templates
+  - Replaced window.prompt() with custom modal dialog for Save As
+  - Enhanced error handling with console logging and user alerts
+  - Auto-load next template after deletion
 
 ---
 
@@ -123,11 +130,11 @@ Refer to **`PHASE_3_TESTING_GUIDE.md`** for the complete testing procedure. Key 
 - [x] Column configuration (drag-reorder, width adjustment, visibility toggles)
 - [x] Column merging (3+ columns with dialog)
 - [x] Column label display modes (Full/Short/Custom)
-- [ ] Grouping and sorting controls
-- [ ] Live preview updates
-- [ ] Template save/load operations
-- [ ] Template duplication
-- [ ] Custom template deletion
+- [x] Grouping and sorting controls
+- [x] Live preview updates
+- [x] Template save/load operations
+- [x] Template duplication
+- [x] Custom template deletion
 - [ ] Header designer integration
 - [ ] PDF export (single report)
 - [ ] Batch export (multiple reports)
@@ -146,16 +153,18 @@ Refer to **`PHASE_3_TESTING_GUIDE.md`** for the complete testing procedure. Key 
 
 ## 🐛 Known Issues
 
-*None documented yet - to be populated during testing*
-
 ### Critical
-- None
+- **PDF Export**: Shows blank page - needs investigation
+- **Batch Export**: Not implemented yet - needs reimplementation
 
 ### Major
-- None
+- **Header Designer Integration**: "Design Header" button exists but integration not complete
+  - Need to implement connection to Layout Designer
+  - Need to pass template data to designer
+  - Need to handle return from designer
 
 ### Minor
-- None
+- None currently identified
 
 ---
 
