@@ -48,6 +48,8 @@ export function PaperworkEditor({
   const [previewScale, setPreviewScale] = useState(100);
   const [templateName, setTemplateName] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showSaveAsDialog, setShowSaveAsDialog] = useState(false);
+  const [saveAsName, setSaveAsName] = useState('');
 
   // Auto-load default system template when report type changes
   useEffect(() => {
@@ -112,21 +114,69 @@ export function PaperworkEditor({
     setHasUnsavedChanges(true);
   }, [activeTemplate, updateActiveTemplate]);
 
-  // Save template
-  const handleSaveTemplate = useCallback(async () => {
-    if (!activeTemplate) return;
+  // Save as new template
+  const handleSaveAsNewTemplate = useCallback(async (name: string) => {
+    if (!activeTemplate) {
+      alert('No template to save');
+      return;
+    }
 
     try {
+      console.log('Creating new template:', name);
+      const result = await createTemplate({
+        name,
+        reportType,
+        columns: activeTemplate.columns,
+        organization: activeTemplate.organization,
+        pageSetup: activeTemplate.pageSetup,
+        isSystem: false
+      });
+
+      if (result) {
+        setHasUnsavedChanges(false);
+        // Load the newly created template
+        loadTemplate(result);
+        setTemplateName(result.name);
+        alert(`Template "${name}" created successfully!`);
+        console.log('Template created:', result);
+      } else {
+        alert('Failed to create template - check console for errors');
+      }
+    } catch (error) {
+      console.error('Failed to create template:', error);
+      alert(`Error creating template: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }, [activeTemplate, reportType, createTemplate, loadTemplate]);
+
+  // Save template
+  const handleSaveTemplate = useCallback(async () => {
+    if (!activeTemplate) {
+      alert('No template to save');
+      return;
+    }
+
+    // If this is a system template, create a copy instead of updating
+    if (activeTemplate.isSystem) {
+      const newName = `${activeTemplate.name} (Custom)`;
+      await handleSaveAsNewTemplate(newName);
+      return;
+    }
+
+    try {
+      let result;
       if (activeTemplate.id) {
-        // Update existing template
-        await updateTemplate(activeTemplate.id, {
+        // Update existing custom template
+        console.log('Updating template:', activeTemplate.id);
+        result = await updateTemplate(activeTemplate.id, {
           name: templateName || activeTemplate.name,
           columns: activeTemplate.columns,
-          organization: activeTemplate.organization
+          organization: activeTemplate.organization,
+          pageSetup: activeTemplate.pageSetup
         });
       } else {
         // Create new template
-        await createTemplate({
+        console.log('Creating new template');
+        result = await createTemplate({
           name: templateName || `Custom ${reportType}`,
           reportType,
           columns: activeTemplate.columns,
@@ -136,31 +186,81 @@ export function PaperworkEditor({
         });
       }
 
-      setHasUnsavedChanges(false);
+      if (result) {
+        setHasUnsavedChanges(false);
+        // Update active template to reflect saved state
+        loadTemplate(result);
+        setTemplateName(result.name);
+        alert('Template saved successfully!');
+        console.log('Template saved:', result);
+      } else {
+        alert('Failed to save template - check console for errors');
+      }
     } catch (error) {
       console.error('Failed to save template:', error);
+      alert(`Error saving template: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-  }, [activeTemplate, templateName, reportType, updateTemplate, createTemplate]);
+  }, [activeTemplate, templateName, reportType, updateTemplate, createTemplate, handleSaveAsNewTemplate, loadTemplate]);
 
-  // Save as new template
-  const handleSaveAsNewTemplate = useCallback(async (name: string) => {
-    if (!activeTemplate) return;
-
+  // Handle template duplication
+  const handleDuplicateTemplate = useCallback(async (template: PaperworkTemplate) => {
     try {
-      await createTemplate({
-        name,
-        reportType,
-        columns: activeTemplate.columns,
-        organization: activeTemplate.organization,
-        pageSetup: activeTemplate.pageSetup,
-        isSystem: false
-      });
-
-      setHasUnsavedChanges(false);
+      console.log('Duplicating template:', template.id, template.name);
+      const newName = `${template.name} (Copy)`;
+      const result = await duplicateTemplate(template.id, newName);
+      if (result) {
+        // Load the duplicated template
+        handleLoadTemplate(result);
+        alert(`Template "${newName}" created successfully!`);
+        console.log('Template duplicated:', result);
+      } else {
+        alert('Failed to duplicate template - check console for errors');
+      }
     } catch (error) {
-      console.error('Failed to create template:', error);
+      console.error('Failed to duplicate template:', error);
+      alert(`Error duplicating template: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-  }, [activeTemplate, reportType, createTemplate]);
+  }, [duplicateTemplate, handleLoadTemplate]);
+
+  // Handle template deletion
+  const handleDeleteTemplate = useCallback(async (templateId: string) => {
+    try {
+      console.log('Deleting template:', templateId);
+      const success = await deleteTemplate(templateId);
+      if (success) {
+        // If we deleted the active template, clear it
+        if (activeTemplate?.id === templateId) {
+          // Load the first available template
+          if (templates.length > 1) {
+            const nextTemplate = templates.find(t => t.id !== templateId);
+            if (nextTemplate) {
+              handleLoadTemplate(nextTemplate);
+            }
+          }
+        }
+        alert('Template deleted successfully!');
+        console.log('Template deleted:', templateId);
+      } else {
+        alert('Failed to delete template - check console for errors');
+      }
+    } catch (error) {
+      console.error('Failed to delete template:', error);
+      alert(`Error deleting template: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }, [deleteTemplate, activeTemplate, templates, handleLoadTemplate]);
+
+  // Handle template creation
+  const handleCreateNewTemplate = useCallback(() => {
+    // Create a blank template based on current report type
+    if (!activeTemplate) {
+      alert('No template loaded to base new template on');
+      return;
+    }
+
+    // Prompt for name
+    setSaveAsName(`New ${reportType} Template`);
+    setShowSaveAsDialog(true);
+  }, [activeTemplate, reportType]);
 
   // Handle header design
   const handleHeaderDesign = useCallback(() => {
@@ -230,12 +330,12 @@ export function PaperworkEditor({
             {/* Template Library */}
             <div className="flex-shrink-0">
               <PaperworkTemplateLibrary
-                reportType={reportType}
                 templates={templates}
-                activeTemplateId={activeTemplate?.id}
+                currentTemplate={activeTemplate}
                 onLoadTemplate={handleLoadTemplate}
-                onDeleteTemplate={deleteTemplate}
-                onDuplicateTemplate={duplicateTemplate}
+                onDeleteTemplate={handleDeleteTemplate}
+                onDuplicateTemplate={handleDuplicateTemplate}
+                onCreateNew={handleCreateNewTemplate}
               />
             </div>
           </div>
@@ -285,8 +385,8 @@ export function PaperworkEditor({
 
             <button
               onClick={() => {
-                const name = window.prompt('Template name:', `${templateName} (Copy)`);
-                if (name) handleSaveAsNewTemplate(name);
+                setSaveAsName(`${templateName || activeTemplate?.name || 'Template'} (Copy)`);
+                setShowSaveAsDialog(true);
               }}
               disabled={!activeTemplate}
               className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-600 rounded-lg transition-colors"
@@ -380,6 +480,57 @@ export function PaperworkEditor({
           </div>
         )}
       </div>
+
+      {/* Save As Dialog */}
+      {showSaveAsDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-8" style={{ zIndex: 10000 }}>
+          <div className="bg-gray-800 rounded-lg w-full max-w-md shadow-xl text-white">
+            <div className="p-6 border-b border-gray-700">
+              <h2 className="text-xl font-bold">Save Template As...</h2>
+            </div>
+            <div className="p-6">
+              <label className="block text-sm font-semibold text-gray-300 mb-2">
+                Template Name:
+              </label>
+              <input
+                type="text"
+                value={saveAsName}
+                onChange={(e) => setSaveAsName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && saveAsName.trim()) {
+                    handleSaveAsNewTemplate(saveAsName.trim());
+                    setShowSaveAsDialog(false);
+                  } else if (e.key === 'Escape') {
+                    setShowSaveAsDialog(false);
+                  }
+                }}
+                autoFocus
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="p-6 border-t border-gray-700 flex justify-end gap-3">
+              <button
+                onClick={() => setShowSaveAsDialog(false)}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (saveAsName.trim()) {
+                    handleSaveAsNewTemplate(saveAsName.trim());
+                    setShowSaveAsDialog(false);
+                  }
+                }}
+                disabled={!saveAsName.trim()}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded transition"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
