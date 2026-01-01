@@ -212,18 +212,22 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
     const reportsToExport = Array.from(selectedReportsForBatch);
     const totalReports = reportsToExport.length;
-    let successCount = 0;
 
     try {
       // Load all templates first
       const allTemplates = await window.api.paperworkTemplates.getAll();
+
+      // Collect all report sections
+      const reportSections: string[] = [];
+      let defaultFontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif';
+      let defaultFontSize = 10;
 
       for (let i = 0; i < reportsToExport.length; i++) {
         const reportType = reportsToExport[i];
         const reportTemplate = REPORT_TEMPLATES.find(t => t.id === reportType);
         const reportName = reportTemplate?.name || 'Report';
 
-        setBatchProgress({ current: i + 1, total: totalReports, reportName });
+        setBatchProgress({ current: i + 1, total: totalReports, reportName: `Preparing ${reportName}...` });
 
         try {
           // Find the system template for this report type
@@ -232,6 +236,12 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
           if (!template) {
             console.error(`No template found for report type: ${reportType}`);
             continue;
+          }
+
+          // Store first template's font settings for consistency
+          if (i === 0) {
+            defaultFontFamily = template.pageSetup.fontStyle?.fontFamily || defaultFontFamily;
+            defaultFontSize = template.pageSetup.fontStyle?.fontSize || defaultFontSize;
           }
 
           console.log(`Batch export: Rendering ${reportName} using template:`, template.name);
@@ -254,90 +264,139 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             />
           );
 
-          // Create HTML document
-          const htmlContent = `
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <meta charset="utf-8">
-                <title>${template.name} - ${projectName}</title>
-                <style>
-                  * { margin: 0; padding: 0; box-sizing: border-box; }
-                  body {
-                    font-family: ${template.pageSetup.fontStyle?.fontFamily || '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif'};
-                    font-size: ${template.pageSetup.fontStyle?.fontSize || 10}pt;
-                    line-height: ${template.pageSetup.fontStyle?.lineHeight || 1.2};
-                    color: #000;
-                    background: white;
-                    padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in;
-                  }
-                  h1 {
-                    font-size: 20pt;
-                    margin-bottom: 8pt;
-                    color: #1f2937;
-                  }
-                  p {
-                    margin-bottom: 12pt;
-                    color: #6b7280;
-                  }
-                  table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 1rem;
-                  }
-                  th, td {
-                    padding: 8px;
-                    text-align: left;
-                    border: 1px solid #d1d5db;
-                  }
-                  th {
-                    background-color: transparent;
-                    font-weight: ${template.pageSetup.fontStyle?.fontWeight || 'bold'};
-                    font-size: ${template.pageSetup.fontStyle?.headerFontSize || 11}pt;
-                    border-top: 1px solid #9ca3af;
-                    border-bottom: 1px solid #9ca3af;
-                  }
-                  td {
-                    font-size: ${template.pageSetup.fontStyle?.fontSize || 10}pt;
-                  }
-                  h3 {
-                    color: #2563eb;
-                    margin-top: 20px;
-                    margin-bottom: 16px;
-                    font-size: 14pt;
-                  }
-                  @media print {
-                    body {
-                      margin: 0;
-                      padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in;
-                    }
-                  }
-                </style>
-              </head>
-              <body>
-                <h1>${template.name}</h1>
-                <p>${projectName} - ${new Date().toLocaleDateString()}</p>
-                ${tableHTML}
-              </body>
-            </html>
+          // Create report section with page break
+          const reportSection = `
+            <section class="report-section">
+              <h1>${template.name}</h1>
+              <p class="report-meta">${projectName} - ${new Date().toLocaleDateString()}</p>
+              ${tableHTML}
+            </section>
           `;
 
-          const filename = `${projectName}_${reportName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
-
-          const result = await window.api.paperwork.exportPDF(htmlContent, filename, pageSetup);
-          if (result.success) {
-            successCount++;
-            console.log(`Batch export: Successfully exported ${reportName}`);
-          }
+          reportSections.push(reportSection);
         } catch (error) {
-          console.error(`Error exporting ${reportName}:`, error);
+          console.error(`Error rendering ${reportName}:`, error);
         }
-
-        // Small delay between exports
-        await new Promise(resolve => setTimeout(resolve, 100));
       }
 
-      alert(`Successfully exported ${successCount} of ${totalReports} reports`);
+      if (reportSections.length === 0) {
+        alert('No reports were successfully generated');
+        return;
+      }
+
+      // Update progress for export
+      setBatchProgress({ current: totalReports, total: totalReports, reportName: 'Generating PDF...' });
+
+      // Combine all sections into a single HTML document
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Batch Export - ${projectName}</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body {
+                font-family: ${defaultFontFamily};
+                font-size: ${defaultFontSize}pt;
+                line-height: 1.2;
+                color: #000;
+                background: white;
+                padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in;
+              }
+
+              /* Report section styling */
+              .report-section {
+                page-break-before: always;
+                counter-reset: page 1; /* Reset page counter for each report */
+              }
+
+              .report-section:first-child {
+                page-break-before: avoid; /* Don't break before first report */
+              }
+
+              h1 {
+                font-size: 20pt;
+                margin-bottom: 8pt;
+                color: #1f2937;
+              }
+
+              .report-meta {
+                margin-bottom: 12pt;
+                color: #6b7280;
+                font-size: ${defaultFontSize}pt;
+              }
+
+              table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 1rem;
+              }
+
+              th, td {
+                padding: 8px;
+                text-align: left;
+                border: 1px solid #d1d5db;
+              }
+
+              th {
+                background-color: transparent;
+                font-weight: bold;
+                font-size: ${defaultFontSize + 1}pt;
+                border-top: 1px solid #9ca3af;
+                border-bottom: 1px solid #9ca3af;
+              }
+
+              td {
+                font-size: ${defaultFontSize}pt;
+              }
+
+              h3 {
+                color: #2563eb;
+                margin-top: 20px;
+                margin-bottom: 16px;
+                font-size: 14pt;
+              }
+
+              @media print {
+                body {
+                  margin: 0;
+                  padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in;
+                }
+
+                .report-section {
+                  page-break-before: always;
+                }
+
+                .report-section:first-child {
+                  page-break-before: avoid;
+                }
+              }
+
+              /* Page counter for each report section */
+              @page {
+                @bottom-center {
+                  content: counter(page);
+                }
+              }
+            </style>
+          </head>
+          <body>
+            ${reportSections.join('\n')}
+          </body>
+        </html>
+      `;
+
+      const filename = `${projectName}_Batch_Export_${new Date().toISOString().split('T')[0]}.pdf`;
+
+      const result = await window.api.paperwork.exportPDF(htmlContent, filename, pageSetup);
+
+      if (result.success) {
+        alert(`Successfully exported ${reportSections.length} reports to a single PDF`);
+        console.log('Batch export: Successfully created combined PDF');
+      } else {
+        alert('Batch export failed');
+      }
     } catch (error) {
       console.error('Batch export error:', error);
       alert('Batch export failed');
