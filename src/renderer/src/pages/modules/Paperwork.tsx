@@ -215,6 +215,9 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
     let successCount = 0;
 
     try {
+      // Load all templates first
+      const allTemplates = await window.api.paperworkTemplates.getAll();
+
       for (let i = 0; i < reportsToExport.length; i++) {
         const reportType = reportsToExport[i];
         const reportTemplate = REPORT_TEMPLATES.find(t => t.id === reportType);
@@ -222,34 +225,109 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
         setBatchProgress({ current: i + 1, total: totalReports, reportName });
 
-        // Get report data
-        const reportData = getReportData(reportType, currentProjectId);
-
-        // Create simple HTML (simplified for now)
-        const htmlContent = `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta charset="utf-8">
-              <title>${reportName} - ${projectName}</title>
-              <style>
-                body { font-family: sans-serif; padding: 1in; }
-                h1 { margin-bottom: 1rem; }
-              </style>
-            </head>
-            <body>
-              <h1>${reportName}</h1>
-              <p>${reportData.length} items</p>
-            </body>
-          </html>
-        `;
-
-        const filename = `${projectName}_${reportName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
-
         try {
+          // Find the system template for this report type
+          const template = allTemplates.find(t => t.reportType === reportType && t.isSystem);
+
+          if (!template) {
+            console.error(`No template found for report type: ${reportType}`);
+            continue;
+          }
+
+          console.log(`Batch export: Rendering ${reportName} using template:`, template.name);
+
+          // Get report data
+          const reportData = getReportData(reportType, currentProjectId);
+          const organizedData = organizeReportData(reportData, template.organization, template.columns);
+
+          console.log(`Batch export: ${reportName} has ${reportData.length} items`);
+
+          // Render the table to HTML using React server-side rendering
+          const tableHTML = renderToStaticMarkup(
+            <ReportTableRenderer
+              columns={template.columns}
+              data={organizedData}
+              reportType={template.reportType}
+              organization={template.organization}
+              fontStyle={template.pageSetup.fontStyle}
+              editable={false}
+            />
+          );
+
+          // Create HTML document
+          const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <meta charset="utf-8">
+                <title>${template.name} - ${projectName}</title>
+                <style>
+                  * { margin: 0; padding: 0; box-sizing: border-box; }
+                  body {
+                    font-family: ${template.pageSetup.fontStyle?.fontFamily || '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif'};
+                    font-size: ${template.pageSetup.fontStyle?.fontSize || 10}pt;
+                    line-height: ${template.pageSetup.fontStyle?.lineHeight || 1.2};
+                    color: #000;
+                    background: white;
+                    padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in;
+                  }
+                  h1 {
+                    font-size: 20pt;
+                    margin-bottom: 8pt;
+                    color: #1f2937;
+                  }
+                  p {
+                    margin-bottom: 12pt;
+                    color: #6b7280;
+                  }
+                  table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 1rem;
+                  }
+                  th, td {
+                    padding: 8px;
+                    text-align: left;
+                    border: 1px solid #d1d5db;
+                  }
+                  th {
+                    background-color: transparent;
+                    font-weight: ${template.pageSetup.fontStyle?.fontWeight || 'bold'};
+                    font-size: ${template.pageSetup.fontStyle?.headerFontSize || 11}pt;
+                    border-top: 1px solid #9ca3af;
+                    border-bottom: 1px solid #9ca3af;
+                  }
+                  td {
+                    font-size: ${template.pageSetup.fontStyle?.fontSize || 10}pt;
+                  }
+                  h3 {
+                    color: #2563eb;
+                    margin-top: 20px;
+                    margin-bottom: 16px;
+                    font-size: 14pt;
+                  }
+                  @media print {
+                    body {
+                      margin: 0;
+                      padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in;
+                    }
+                  }
+                </style>
+              </head>
+              <body>
+                <h1>${template.name}</h1>
+                <p>${projectName} - ${new Date().toLocaleDateString()}</p>
+                ${tableHTML}
+              </body>
+            </html>
+          `;
+
+          const filename = `${projectName}_${reportName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+
           const result = await window.api.paperwork.exportPDF(htmlContent, filename, pageSetup);
           if (result.success) {
             successCount++;
+            console.log(`Batch export: Successfully exported ${reportName}`);
           }
         } catch (error) {
           console.error(`Error exporting ${reportName}:`, error);

@@ -135,9 +135,9 @@ Refer to **`PHASE_3_TESTING_GUIDE.md`** for the complete testing procedure. Key 
 - [x] Template save/load operations
 - [x] Template duplication
 - [x] Custom template deletion
-- [ ] Header designer integration
-- [ ] PDF export (single report)
+- [x] PDF export (single report) - formatting improvements needed later
 - [ ] Batch export (multiple reports)
+- [ ] Header designer integration
 
 #### 4. Performance
 - [ ] Template loads < 500ms
@@ -154,8 +154,7 @@ Refer to **`PHASE_3_TESTING_GUIDE.md`** for the complete testing procedure. Key 
 ## 🐛 Known Issues
 
 ### Critical
-- **PDF Export**: Shows blank page - needs investigation
-- **Batch Export**: Not implemented yet - needs reimplementation
+- **Batch Export**: Needs to be updated to work with new template system
 
 ### Major
 - **Header Designer Integration**: "Design Header" button exists but integration not complete
@@ -164,7 +163,10 @@ Refer to **`PHASE_3_TESTING_GUIDE.md`** for the complete testing procedure. Key 
   - Need to handle return from designer
 
 ### Minor
-- None currently identified
+- **PDF Formatting**: Export works but formatting improvements needed later
+  - Better table styling
+  - Header/footer customization
+  - Page breaks for grouped data
 
 ---
 
