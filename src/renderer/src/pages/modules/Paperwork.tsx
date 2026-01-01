@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { useInfrastructureStore } from '../../store/infrastructureStore';
@@ -89,19 +90,28 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
     }
 
     try {
+      console.log('Starting PDF export for template:', template.name);
+
       // Get report data
       const reportData = getReportData(template.reportType, currentProjectId);
       const organizedData = organizeReportData(reportData, template.organization, template.columns);
 
-      // Create hidden element for rendering
-      const tempContainer = document.createElement('div');
-      tempContainer.className = 'report-content';
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
-      document.body.appendChild(tempContainer);
+      console.log('Report data loaded:', reportData.length, 'items');
+      console.log('Organized data:', organizedData);
 
-      // Render to hidden element (simplified - would need actual rendering)
-      tempContainer.innerHTML = `<div class="report-preview">${template.name} Report</div>`;
+      // Render the table to HTML using React server-side rendering
+      const tableHTML = renderToStaticMarkup(
+        <ReportTableRenderer
+          columns={template.columns}
+          data={organizedData}
+          reportType={template.reportType}
+          organization={template.organization}
+          fontStyle={template.pageSetup.fontStyle}
+          editable={false}
+        />
+      );
+
+      console.log('Table HTML rendered, length:', tableHTML.length);
 
       // Create HTML document
       const htmlContent = `
@@ -113,31 +123,68 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             <style>
               * { margin: 0; padding: 0; box-sizing: border-box; }
               body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-                color: #1f2937;
+                font-family: ${template.pageSetup.fontStyle?.fontFamily || '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif'};
+                font-size: ${template.pageSetup.fontStyle?.fontSize || 10}pt;
+                line-height: ${template.pageSetup.fontStyle?.lineHeight || 1.2};
+                color: #000;
                 background: white;
                 padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in;
               }
-              table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
-              th, td { padding: 0.5rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
-              th { background-color: #f3f4f6; font-weight: 600; }
+              h1 {
+                font-size: 20pt;
+                margin-bottom: 8pt;
+                color: #1f2937;
+              }
+              p {
+                margin-bottom: 12pt;
+                color: #6b7280;
+              }
+              table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 1rem;
+              }
+              th, td {
+                padding: 8px;
+                text-align: left;
+                border: 1px solid #d1d5db;
+              }
+              th {
+                background-color: transparent;
+                font-weight: ${template.pageSetup.fontStyle?.fontWeight || 'bold'};
+                font-size: ${template.pageSetup.fontStyle?.headerFontSize || 11}pt;
+                border-top: 1px solid #9ca3af;
+                border-bottom: 1px solid #9ca3af;
+              }
+              td {
+                font-size: ${template.pageSetup.fontStyle?.fontSize || 10}pt;
+              }
+              h3 {
+                color: #2563eb;
+                margin-top: 20px;
+                margin-bottom: 16px;
+                font-size: 14pt;
+              }
               @media print {
-                body { margin: 0; padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in; }
+                body {
+                  margin: 0;
+                  padding: ${pageSetup.marginTop}in ${pageSetup.marginRight}in ${pageSetup.marginBottom}in ${pageSetup.marginLeft}in;
+                }
               }
             </style>
           </head>
           <body>
-            ${tempContainer.innerHTML}
+            <h1>${template.name}</h1>
+            <p>${projectName} - ${new Date().toLocaleDateString()}</p>
+            ${tableHTML}
           </body>
         </html>
       `;
 
       const filename = `${projectName}_${template.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
 
+      console.log('Calling PDF export API with filename:', filename);
       const result = await window.api.paperwork.exportPDF(htmlContent, filename, pageSetup);
-
-      // Cleanup
-      document.body.removeChild(tempContainer);
 
       if (result.success) {
         console.log('PDF exported successfully');
