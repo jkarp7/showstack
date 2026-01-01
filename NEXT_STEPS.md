@@ -95,12 +95,14 @@ npm run dev
   - Render ReportTableRenderer component to HTML
   - Apply template font settings and styling
   - Include report title, project name, and date
-- [x] **Batch Export**: Updated to use template system
-  - Load all templates at start of batch export
-  - Find system template for each selected report type
-  - Use same rendering approach as single export
-  - Progress dialog shows current report being exported
-  - Handle errors gracefully and continue with next report
+- [x] **Batch Export**: Creates single combined PDF document
+  - Combines all selected reports into one PDF file
+  - Each report starts on a new page with page breaks
+  - Page numbering resets for each report section
+  - Consistent font styling across all reports
+  - Progress dialog shows each report being prepared
+  - Final PDF: `ProjectName_Batch_Export_YYYY-MM-DD.pdf`
+  - Example: Channel Hookup (15 pages) + Dimmer Schedule (7 pages) = 22-page PDF
   - Batch export button added to editor toolbar for better discoverability
 - [x] **Header Designer Integration**: Completed integration with Layout Designer
   - Fixed prop interface mismatch between components
