@@ -1,6 +1,7 @@
 import { ipcMain, BrowserWindow, dialog } from 'electron';
 import * as fs from 'fs';
 import * as paperworkTemplateQueries from '../database/queries/paperworkTemplates';
+import puppeteer from 'puppeteer';
 
 export function registerPaperworkHandlers(): void {
   // ============================================
@@ -71,8 +72,9 @@ export function registerPaperworkHandlers(): void {
   // PDF EXPORT HANDLER
   // ============================================
 
-  // Export Paperwork Report to PDF
+  // Export Paperwork Report to PDF using Puppeteer
   ipcMain.handle('paperwork:exportPDF', async (_event, htmlContent: string, filename: string, pageSettings: any) => {
+    let browser;
     try {
       // Show save dialog
       const mainWindow = BrowserWindow.getFocusedWindow();
@@ -90,24 +92,24 @@ export function registerPaperworkHandlers(): void {
         return { success: false, canceled: true };
       }
 
-      // Create a hidden window for PDF generation
-      const pdfWindow = new BrowserWindow({
-        width: pageSettings.orientation === 'landscape' ? 1056 : 816,
-        height: pageSettings.orientation === 'landscape' ? 816 : 1056,
-        show: false,
-        webPreferences: {
-          nodeIntegration: false,
-          contextIsolation: true,
-        },
+      console.log('📄 Launching Puppeteer for PDF generation...');
+
+      // Launch Puppeteer browser
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
       });
 
-      // Load the HTML content
-      await pdfWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
+      const page = await browser.newPage();
 
-      // Wait for page to load and render
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Set the HTML content
+      await page.setContent(htmlContent, {
+        waitUntil: 'networkidle0',
+      });
 
-      // Map page size names to Electron's format
+      console.log('📄 Generating PDF with Puppeteer...');
+
+      // Map page size names to Puppeteer format
       const pageSizeMap: Record<string, any> = {
         'letter': 'Letter',
         'legal': 'Legal',
@@ -115,32 +117,33 @@ export function registerPaperworkHandlers(): void {
         'tabloid': 'Tabloid',
       };
 
-      // Generate PDF with proper page settings
-      const pdfData = await pdfWindow.webContents.printToPDF({
-        pageSize: pageSizeMap[pageSettings.size] || 'Letter',
+      // Generate PDF with Puppeteer
+      await page.pdf({
+        path: result.filePath,
+        format: pageSizeMap[pageSettings.size] || 'Letter',
         landscape: pageSettings.orientation === 'landscape',
         printBackground: true,
-        marginsType: 1, // No margins (we handle them in CSS)
-        margins: {
-          top: pageSettings.marginTop || 0,
-          bottom: pageSettings.marginBottom || 0,
-          left: pageSettings.marginLeft || 0,
-          right: pageSettings.marginRight || 0,
+        margin: {
+          top: `${pageSettings.marginTop || 0}in`,
+          bottom: `${pageSettings.marginBottom || 0}in`,
+          left: `${pageSettings.marginLeft || 0}in`,
+          right: `${pageSettings.marginRight || 0}in`,
         },
       });
 
-      // Save PDF to file
-      fs.writeFileSync(result.filePath, pdfData);
+      console.log('✅ PDF generated successfully with Puppeteer');
 
-      // Close the hidden window
-      pdfWindow.close();
+      await browser.close();
 
       return {
         success: true,
         filePath: result.filePath,
       };
     } catch (error) {
-      console.error('Error exporting PDF:', error);
+      console.error('❌ Error exporting PDF with Puppeteer:', error);
+      if (browser) {
+        await browser.close();
+      }
       throw error;
     }
   });
