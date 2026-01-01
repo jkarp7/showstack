@@ -383,7 +383,10 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setShowBatchExport(true)}
+                onClick={() => {
+                  console.log('Batch Export button clicked');
+                  setShowBatchExport(true);
+                }}
                 className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm transition"
               >
                 📦 Batch Export
@@ -399,6 +402,10 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
           reportType={selectedReport}
           projectId={currentProjectId}
           onExport={handleExportPDF}
+          onBatchExport={() => {
+            console.log('Batch Export clicked from editor toolbar');
+            setShowBatchExport(true);
+          }}
           onHeaderDesign={(template) => {
             setCurrentTemplate(template);
             setShowHeaderDesigner(true);
@@ -435,7 +442,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
       {/* Batch Export Dialog */}
       {showBatchExport && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-8">
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-8" style={{ zIndex: 9999 }}>
           <div className="bg-gray-800 rounded-lg w-full max-w-2xl">
             <div className="p-6 border-b border-gray-700">
               <h2 className="text-xl font-bold">Batch Export Reports</h2>

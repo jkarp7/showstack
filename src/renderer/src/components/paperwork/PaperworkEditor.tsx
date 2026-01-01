@@ -20,6 +20,7 @@ interface PaperworkEditorProps {
   reportType: ReportType;
   projectId?: string;
   onExport?: (template: PaperworkTemplate) => void;
+  onBatchExport?: () => void;
   onHeaderDesign?: (template: PaperworkTemplate) => void;
   onReportTypeChange?: (reportType: ReportType) => void;
 }
@@ -28,6 +29,7 @@ export function PaperworkEditor({
   reportType,
   projectId = 'default-project',
   onExport,
+  onBatchExport,
   onHeaderDesign,
   onReportTypeChange
 }: PaperworkEditorProps) {
@@ -411,6 +413,15 @@ export function PaperworkEditor({
             >
               Export PDF
             </button>
+
+            {onBatchExport && (
+              <button
+                onClick={onBatchExport}
+                className="px-4 py-2 bg-purple-700 hover:bg-purple-800 rounded-lg transition-colors"
+              >
+                📦 Batch Export
+              </button>
+            )}
           </div>
         </div>
 
