@@ -43,6 +43,18 @@ export function ReportTableRenderer({
 
   const visibleColumns = columns.filter(c => c.visible);
 
+  // Debug: Log column display modes
+  React.useEffect(() => {
+    if (visibleColumns.length > 0) {
+      console.log('📊 Table columns displayMode:', visibleColumns.slice(0, 3).map(c => ({
+        id: c.id,
+        label: c.label,
+        shortLabel: c.shortLabel,
+        displayMode: c.displayMode
+      })));
+    }
+  }, [columns]);
+
   // Build style object from font settings
   const tableStyle = {
     fontFamily: fontStyle?.fontFamily || 'Arial, sans-serif',
@@ -70,25 +82,43 @@ export function ReportTableRenderer({
   const handleReorder = useCallback((fromIndex: number, toIndex: number) => {
     if (!onColumnsChange || fromIndex === toIndex) return;
 
+    // Get the actual columns being moved (from visibleColumns indices)
+    const movedColumn = visibleColumns[fromIndex];
+    const targetColumn = visibleColumns[toIndex];
+
+    // Find their positions in the full columns array
+    const movedColumnFullIndex = columns.findIndex(c => c.id === movedColumn.id);
+    const targetColumnFullIndex = columns.findIndex(c => c.id === targetColumn.id);
+
+    // Reorder in the full columns array
     const reorderedColumns = [...columns];
-    const [movedColumn] = reorderedColumns.splice(fromIndex, 1);
-    reorderedColumns.splice(toIndex, 0, movedColumn);
+    const [removed] = reorderedColumns.splice(movedColumnFullIndex, 1);
+
+    // Adjust target index if we removed an item before it
+    const adjustedTargetIndex = movedColumnFullIndex < targetColumnFullIndex
+      ? targetColumnFullIndex - 1
+      : targetColumnFullIndex;
+
+    reorderedColumns.splice(adjustedTargetIndex, 0, removed);
 
     onColumnsChange(reorderedColumns);
     setDraggedColumnIndex(null);
     setDropTargetIndex(null);
-  }, [columns, onColumnsChange]);
+  }, [columns, visibleColumns, onColumnsChange]);
 
   // Handle column context menu
   const handleContextMenu = useCallback((columnId: string, event: React.MouseEvent) => {
     event.preventDefault();
     const column = columns.find(c => c.id === columnId);
+    console.log('📋 handleContextMenu called for columnId:', columnId, 'found column:', column?.label);
     if (column) {
-      setContextMenu({
+      const menuState = {
         position: { x: event.clientX, y: event.clientY },
         column,
-        type: 'column'
-      });
+        type: 'column' as const
+      };
+      console.log('📋 Setting contextMenu state:', menuState);
+      setContextMenu(menuState);
     }
   }, [columns]);
 
@@ -214,6 +244,7 @@ export function ReportTableRenderer({
                       column={col}
                       columnIndex={index}
                       totalColumns={visibleColumns.length}
+                      allColumns={columns}
                       headerStyle={headerStyle}
                       onResize={handleResize}
                       onReorder={handleReorder}
@@ -229,7 +260,7 @@ export function ReportTableRenderer({
                       style={{ width: `${col.width}%`, ...headerStyle }}
                       className="border-t border-b border-gray-300 px-2 py-1 text-left font-semibold bg-transparent"
                     >
-                      {getColumnDisplayLabel(col)}
+                      {getColumnDisplayLabel(col, columns)}
                     </th>
                   ))
                 )}
@@ -254,34 +285,49 @@ export function ReportTableRenderer({
       ))}
 
       {/* Context Menu */}
-      {contextMenu && (
-        <ColumnContextMenu
-          position={contextMenu.position}
-          onClose={() => setContextMenu(null)}
-          column={contextMenu.column}
-          allColumns={columns}
-          onGroupByColumn={handleGroupByColumn}
-          onSortByColumn={handleSortByColumn}
-          onHideColumn={handleHideColumn}
-          onResizeToContent={handleResizeToContent}
-          onMergeColumn={handleMergeColumn}
-          onUnmergeColumn={handleUnmergeColumn}
-          organization={organization}
-          visibleColumns={visibleColumns}
-          onOrganizationChange={onOrganizationChange}
-        />
-      )}
+      {contextMenu && (() => {
+        console.log('🎨 Rendering ColumnContextMenu component with contextMenu:', contextMenu);
+        return (
+          <ColumnContextMenu
+            position={contextMenu.position}
+            onClose={() => setContextMenu(null)}
+            column={contextMenu.column}
+            allColumns={columns}
+            onGroupByColumn={handleGroupByColumn}
+            onSortByColumn={handleSortByColumn}
+            onHideColumn={handleHideColumn}
+            onResizeToContent={handleResizeToContent}
+            onMergeColumn={handleMergeColumn}
+            onUnmergeColumn={handleUnmergeColumn}
+            organization={organization}
+            visibleColumns={visibleColumns}
+            onOrganizationChange={onOrganizationChange}
+          />
+        );
+      })()}
 
       {/* Merge Dialog */}
-      {mergeDialogColumn && (
-        <ColumnMergeDialog
-          primaryColumn={mergeDialogColumn}
-          availableColumns={visibleColumns.filter(c => c.id !== mergeDialogColumn.id)}
-          previewData={data.groups[0]?.items || []}
-          onConfirm={handleConfirmMerge}
-          onCancel={() => setMergeDialogColumn(null)}
-        />
-      )}
+      {mergeDialogColumn && (() => {
+        // When editing an existing merge, include the previously merged columns
+        // (even though they're hidden) so they can be removed or re-arranged
+        const mergedColumnIds = mergeDialogColumn.combinedWith || [];
+        const availableForMerge = columns.filter(c => {
+          // Exclude the primary column itself
+          if (c.id === mergeDialogColumn.id) return false;
+          // Include if visible OR if it's currently part of this merge
+          return c.visible || mergedColumnIds.includes(c.id);
+        });
+
+        return (
+          <ColumnMergeDialog
+            primaryColumn={mergeDialogColumn}
+            availableColumns={availableForMerge}
+            previewData={data.groups[0]?.items || []}
+            onConfirm={handleConfirmMerge}
+            onCancel={() => setMergeDialogColumn(null)}
+          />
+        );
+      })()}
     </div>
   );
 }

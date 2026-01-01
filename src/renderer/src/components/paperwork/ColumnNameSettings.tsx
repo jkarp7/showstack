@@ -3,34 +3,72 @@
  * Controls for managing column name display options (full/short/custom)
  */
 
-import React, { useState } from 'react';
-import { PaperworkColumnConfig, ColumnDisplayMode } from '../../types/paperworkTemplate';
+import React, { useState, useEffect } from 'react';
+import { PaperworkColumnConfig, ColumnDisplayMode, ReportType } from '../../types/paperworkTemplate';
+import { getAllAvailableColumns } from '../../utils/paperwork/columnDefaults';
 
 interface ColumnNameSettingsProps {
   columns: PaperworkColumnConfig[];
   onChange: (columns: PaperworkColumnConfig[]) => void;
+  reportType: ReportType;
 }
 
-export function ColumnNameSettings({ columns, onChange }: ColumnNameSettingsProps) {
+export function ColumnNameSettings({ columns, onChange, reportType }: ColumnNameSettingsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [globalMode, setGlobalMode] = useState<ColumnDisplayMode>('full');
+
+  // Get current display mode from columns
+  const currentDisplayMode = columns.length > 0 && columns[0].displayMode
+    ? columns[0].displayMode
+    : 'full';
+  const [globalMode, setGlobalMode] = useState<ColumnDisplayMode>(currentDisplayMode);
+
+  // Sync globalMode with actual column displayMode when columns change
+  useEffect(() => {
+    if (columns.length > 0 && columns[0].displayMode && columns[0].displayMode !== globalMode) {
+      setGlobalMode(columns[0].displayMode);
+    }
+  }, [columns]);
+
+  // Get all available columns for this report type
+  const allAvailableColumns = getAllAvailableColumns(reportType);
+
+  // Merge with current columns to preserve custom labels
+  const columnsWithCustomLabels = allAvailableColumns.map(availableCol => {
+    const currentCol = columns.find(c => c.id === availableCol.id);
+    return {
+      ...availableCol,
+      customLabel: currentCol?.customLabel || '',
+      displayMode: currentCol?.displayMode || currentDisplayMode
+    };
+  });
 
   // Handle global display mode change
   const handleGlobalModeChange = (mode: ColumnDisplayMode) => {
+    console.log('🎨 Changing display mode to:', mode);
     setGlobalMode(mode);
-    const updatedColumns = columns.map(col => ({ ...col, displayMode: mode }));
+
+    // Update displayMode and merge in shortLabel from defaults if missing
+    const updatedColumns = columns.map(col => {
+      const defaultCol = allAvailableColumns.find(c => c.id === col.id);
+      return {
+        ...col,
+        displayMode: mode,
+        // Merge in shortLabel from defaults if not present
+        shortLabel: col.shortLabel || defaultCol?.shortLabel
+      };
+    });
+
+    console.log('🎨 Updated columns:', updatedColumns.slice(0, 3).map(c => ({ id: c.id, label: c.label, shortLabel: c.shortLabel, displayMode: c.displayMode })));
     onChange(updatedColumns);
   };
 
-  // Handle custom label change for individual column
+  // Handle custom label change only
   const handleCustomLabelChange = (columnId: string, customLabel: string) => {
     const updatedColumns = columns.map(col =>
       col.id === columnId ? { ...col, customLabel } : col
     );
     onChange(updatedColumns);
   };
-
-  const visibleColumns = columns.filter(c => c.visible);
 
   return (
     <div className="border-b border-gray-700">
@@ -86,34 +124,56 @@ export function ColumnNameSettings({ columns, onChange }: ColumnNameSettingsProp
             </div>
           </div>
 
-          {/* Custom Label Editor (only shown in custom mode) */}
-          {globalMode === 'custom' && (
-            <div className="max-h-64 overflow-y-auto">
-              <label className="text-xs text-gray-400 mb-2 block">Custom Labels</label>
-              <div className="space-y-1.5">
-                {visibleColumns.map(col => (
-                  <div key={col.id} className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400 w-24 truncate" title={col.label}>
-                      {col.label}:
-                    </span>
+          {/* Custom Label Editor - Shows all available columns */}
+          <div className="max-h-80 overflow-y-auto">
+            <label className="text-xs text-gray-400 mb-2 block">
+              Custom Column Labels (showing all {columnsWithCustomLabels.length} available columns)
+            </label>
+            <div className="space-y-2">
+              {columnsWithCustomLabels.map(col => (
+                <div key={col.id} className="bg-gray-800 p-2 rounded">
+                  {/* Column Info - Read Only */}
+                  <div className="grid grid-cols-3 gap-2 mb-2 text-xs">
+                    <div>
+                      <span className="text-gray-500">Full:</span>
+                      <span className="ml-1 text-gray-300">{col.label}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Short:</span>
+                      <span className="ml-1 text-gray-300">{col.shortLabel || '—'}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className={`text-xs px-1.5 py-0.5 rounded ${
+                        columns.find(c => c.id === col.id)?.visible
+                          ? 'bg-green-600 text-white'
+                          : 'bg-gray-700 text-gray-400'
+                      }`}>
+                        {columns.find(c => c.id === col.id)?.visible ? 'Visible' : 'Hidden'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Custom Label Input - Editable */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400 w-16 flex-shrink-0">Custom:</span>
                     <input
                       type="text"
-                      value={col.customLabel || col.label}
+                      value={col.customLabel || ''}
                       onChange={(e) => handleCustomLabelChange(col.id, e.target.value)}
-                      placeholder={col.label}
+                      placeholder={col.shortLabel || col.label}
                       className="flex-1 px-2 py-1 text-xs bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
                     />
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
 
           {/* Info Text */}
           <div className="text-xs text-gray-500 pt-2 border-t border-gray-700">
-            {globalMode === 'full' && 'Showing full column names'}
-            {globalMode === 'short' && 'Showing abbreviated column names'}
-            {globalMode === 'custom' && 'Using custom column names (edit above)'}
+            Currently displaying: <span className="text-blue-400 font-semibold">
+              {globalMode === 'full' ? 'Full' : globalMode === 'short' ? 'Short' : 'Custom'}
+            </span> labels (highlighted above)
           </div>
         </div>
       )}

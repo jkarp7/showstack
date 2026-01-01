@@ -107,6 +107,7 @@ export function ColumnContextMenu({
   if (column) {
     const isMerged = column.combinedWith && column.combinedWith.length > 0;
     const mergeableColumns = allColumns.filter(c => c.id !== column.id && c.visible);
+    console.log('🎯 Rendering column context menu for:', column.label, 'isMerged:', isMerged, 'mergeableColumns:', mergeableColumns.length);
 
     return createPortal(
       <div

@@ -11,6 +11,7 @@ interface InteractiveTableHeaderProps {
   column: PaperworkColumnConfig;
   columnIndex: number;
   totalColumns: number;
+  allColumns?: PaperworkColumnConfig[];
   headerStyle?: React.CSSProperties;
   onResize?: (columnId: string, newWidth: number) => void;
   onReorder?: (fromIndex: number, toIndex: number) => void;
@@ -23,6 +24,7 @@ export function InteractiveTableHeader({
   column,
   columnIndex,
   totalColumns,
+  allColumns,
   headerStyle = {},
   onResize,
   onReorder,
@@ -108,6 +110,8 @@ export function InteractiveTableHeader({
   // Handle context menu
   const handleContextMenuClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation(); // Prevent event from bubbling to table body
+    console.log('🔍 Context menu triggered for column:', column.label, 'at position:', e.clientX, e.clientY);
     if (onContextMenu) {
       onContextMenu(column.id, e);
     }
@@ -134,7 +138,7 @@ export function InteractiveTableHeader({
       `}
     >
       <div className="flex items-center justify-between">
-        <span>{getColumnDisplayLabel(column)}</span>
+        <span>{getColumnDisplayLabel(column, allColumns)}</span>
 
         {/* Resize Handle */}
         {columnIndex < totalColumns - 1 && (

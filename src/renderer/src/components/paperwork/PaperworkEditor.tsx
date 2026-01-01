@@ -181,7 +181,7 @@ export function PaperworkEditor({
       {/* Template Library Sidebar */}
       {showLibrary && (
         <div className="w-80 border-r border-gray-700 flex flex-col">
-          {/* Report Type Selector */}
+          {/* Report Type Selector - Fixed at top */}
           <div className="p-4 border-b border-gray-700 flex-shrink-0">
             <ReportTypeSelector
               value={reportType}
@@ -193,47 +193,51 @@ export function PaperworkEditor({
             />
           </div>
 
-          {/* Column Visibility Controls */}
-          {activeTemplate && (
+          {/* Scrollable Controls Area */}
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            {/* Column Visibility Controls */}
+            {activeTemplate && (
+              <div className="flex-shrink-0">
+                <ColumnVisibilityControls
+                  reportType={reportType}
+                  columns={activeTemplate.columns}
+                  onChange={handleColumnsChange}
+                />
+              </div>
+            )}
+
+            {/* Column Name Settings */}
+            {activeTemplate && (
+              <div className="flex-shrink-0">
+                <ColumnNameSettings
+                  columns={activeTemplate.columns}
+                  onChange={handleColumnsChange}
+                  reportType={reportType}
+                />
+              </div>
+            )}
+
+            {/* Font Customization Controls */}
+            {activeTemplate && (
+              <div className="flex-shrink-0">
+                <FontCustomizationControls
+                  fontStyle={activeTemplate.pageSetup.fontStyle}
+                  onChange={handleFontStyleChange}
+                />
+              </div>
+            )}
+
+            {/* Template Library */}
             <div className="flex-shrink-0">
-              <ColumnVisibilityControls
+              <PaperworkTemplateLibrary
                 reportType={reportType}
-                columns={activeTemplate.columns}
-                onChange={handleColumnsChange}
+                templates={templates}
+                activeTemplateId={activeTemplate?.id}
+                onLoadTemplate={handleLoadTemplate}
+                onDeleteTemplate={deleteTemplate}
+                onDuplicateTemplate={duplicateTemplate}
               />
             </div>
-          )}
-
-          {/* Column Name Settings */}
-          {activeTemplate && (
-            <div className="flex-shrink-0">
-              <ColumnNameSettings
-                columns={activeTemplate.columns}
-                onChange={handleColumnsChange}
-              />
-            </div>
-          )}
-
-          {/* Font Customization Controls */}
-          {activeTemplate && (
-            <div className="flex-shrink-0">
-              <FontCustomizationControls
-                fontStyle={activeTemplate.pageSetup.fontStyle}
-                onChange={handleFontStyleChange}
-              />
-            </div>
-          )}
-
-          {/* Template Library */}
-          <div className="flex-1 overflow-hidden">
-            <PaperworkTemplateLibrary
-              reportType={reportType}
-              templates={templates}
-              activeTemplateId={activeTemplate?.id}
-              onLoadTemplate={handleLoadTemplate}
-              onDeleteTemplate={deleteTemplate}
-              onDuplicateTemplate={duplicateTemplate}
-            />
           </div>
         </div>
       )}

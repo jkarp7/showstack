@@ -40,8 +40,11 @@ export function ColumnVisibilityControls({
       );
       onChange(updatedColumns);
     } else {
-      // Add new column from defaults
-      onChange([...columns, { ...defaultColumn, visible: true }]);
+      // Add new column from defaults, preserving displayMode from existing columns
+      const currentDisplayMode = columns.length > 0 && columns[0].displayMode
+        ? columns[0].displayMode
+        : 'full';
+      onChange([...columns, { ...defaultColumn, visible: true, displayMode: currentDisplayMode }]);
     }
   };
 

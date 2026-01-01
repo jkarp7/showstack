@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { PaperworkColumnConfig } from '../../types/paperworkTemplate';
 import { ReportDataItem } from '../../utils/paperwork/reportOrganizer';
 
@@ -32,10 +33,15 @@ export function ColumnMergeDialog({
   onConfirm,
   onCancel
 }: ColumnMergeDialogProps) {
-  const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>([]);
-  const [separator, setSeparator] = useState(' • ');
+  // Initialize with existing merge data if editing an existing merge
+  const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>(
+    primaryColumn.combinedWith || []
+  );
+  const [separator, setSeparator] = useState(primaryColumn.separator || ' • ');
   const [customSeparator, setCustomSeparator] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
+
+  const isEditingMerge = (primaryColumn.combinedWith?.length || 0) > 0;
 
   // Handle column selection toggle
   const toggleColumnSelection = (columnId: string) => {
@@ -81,14 +87,18 @@ export function ColumnMergeDialog({
     onConfirm(selectedColumnIds, finalSeparator);
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-8">
+  return createPortal(
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-8" style={{ zIndex: 10000 }}>
       <div className="bg-gray-800 rounded-lg w-full max-w-2xl shadow-xl text-white">
         {/* Header */}
         <div className="p-6 border-b border-gray-700">
-          <h2 className="text-xl font-bold">Merge Columns</h2>
+          <h2 className="text-xl font-bold">
+            {isEditingMerge ? 'Edit Column Merge' : 'Merge Columns'}
+          </h2>
           <p className="text-sm text-gray-400 mt-1">
-            Combine {primaryColumn.label} with other columns
+            {isEditingMerge
+              ? `Editing merged column: ${primaryColumn.label}`
+              : `Select multiple columns to merge with ${primaryColumn.label}`}
           </p>
         </div>
 
@@ -96,9 +106,16 @@ export function ColumnMergeDialog({
         <div className="p-6 max-h-96 overflow-y-auto">
           {/* Column Selection */}
           <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-300 mb-3">
-              Select columns to merge with {primaryColumn.label}:
-            </label>
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-sm font-semibold text-gray-300">
+                Select columns to merge (check multiple):
+              </label>
+              {selectedColumnIds.length > 0 && (
+                <span className="text-xs bg-blue-600 px-2 py-1 rounded">
+                  {selectedColumnIds.length} selected
+                </span>
+              )}
+            </div>
             <div className="space-y-2">
               {availableColumns.map(col => (
                 <label
@@ -193,10 +210,15 @@ export function ColumnMergeDialog({
             disabled={selectedColumnIds.length === 0}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded transition"
           >
-            Merge {selectedColumnIds.length > 0 && `(${selectedColumnIds.length + 1} columns)`}
+            {selectedColumnIds.length === 0
+              ? 'Select columns to merge'
+              : selectedColumnIds.length === 1
+              ? 'Merge 2 columns'
+              : `Merge ${selectedColumnIds.length + 1} columns`}
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
