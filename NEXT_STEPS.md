@@ -1,8 +1,8 @@
 # Next Steps - Resume Here
 
 **Branch:** `feature/unified-visual-editor`
-**Last Updated:** December 30, 2024 - 8:00 PM
-**Status:** Ready for Day 8 Testing & Polish
+**Last Updated:** December 31, 2024 - Evening
+**Status:** Day 8 Testing & Polish - In Progress
 
 ---
 
@@ -61,6 +61,29 @@ npm run dev
 - [x] Corrected useActiveTemplate hook API usage
 - [x] App loads without errors
 
+### Day 8 UX Improvements (Dec 31, 2024)
+- [x] **Sidebar Scrolling**: Fixed overflow issue - controls area now scrollable with fixed report type selector
+- [x] **Multi-Column Merging**: Enhanced to support 3+ columns with clear UI feedback
+  - Added selection counter badge
+  - Dynamic button text showing total columns
+  - Pre-populates existing merges when editing
+  - Includes previously merged columns in available list
+- [x] **Column Label Management**: Streamlined interface
+  - Shows ALL available columns (40+ fixtures, 20+ infrastructure)
+  - Full and Short labels read-only with defaults
+  - Only Custom labels user-editable
+  - Visual Visible/Hidden status badges
+- [x] **Display Mode Switching**: Fixed Full/Short/Custom mode updates
+  - Auto-merge shortLabel from defaults when switching modes
+  - Sync globalMode state with column displayMode
+  - New columns inherit current displayMode
+- [x] **Column Reordering**: Fixed for non-default columns
+  - Properly maps visible column indices to full array
+- [x] **Merged Column Headers**: Show combined names (e.g., "Type + Access")
+- [x] **Event Handling**: Fixed context menu and dialog rendering
+  - Added stopPropagation to prevent event bubbling
+  - React Portal for merge dialog with proper z-index
+
 ---
 
 ## 📋 Day 8: Testing & Polish (Current Task)
@@ -97,7 +120,9 @@ Refer to **`PHASE_3_TESTING_GUIDE.md`** for the complete testing procedure. Key 
 - [ ] Infrastructure Location
 
 #### 3. Core Functionality
-- [ ] Column configuration (drag-reorder, width adjustment, visibility toggles)
+- [x] Column configuration (drag-reorder, width adjustment, visibility toggles)
+- [x] Column merging (3+ columns with dialog)
+- [x] Column label display modes (Full/Short/Custom)
 - [ ] Grouping and sorting controls
 - [ ] Live preview updates
 - [ ] Template save/load operations
