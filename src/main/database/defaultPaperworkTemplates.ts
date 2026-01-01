@@ -30,6 +30,7 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
     name: 'Channel Hookup',
     description: 'Comprehensive channel-to-dimmer reference. Primary report for electricians during load-in and focus.',
     reportType: 'channel-hookup',
+    headerTemplateId: 'default-paperwork-header',
     columns: COLUMN_DEFAULTS['channel-hookup'],
     organization: {
       sortBy: 'channel',
@@ -45,6 +46,7 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
     name: 'Dimmer Schedule',
     description: 'Organized by dimmer for rack patching and troubleshooting.',
     reportType: 'dimmer-schedule',
+    headerTemplateId: 'default-paperwork-header',
     columns: COLUMN_DEFAULTS['dimmer-schedule'],
     organization: {
       groupBy: 'dimmer',
@@ -61,6 +63,7 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
     name: 'Circuit List',
     description: 'Venue circuit assignments for load-in planning.',
     reportType: 'circuit-list',
+    headerTemplateId: 'default-paperwork-header',
     columns: COLUMN_DEFAULTS['circuit-list'],
     organization: {
       groupBy: 'circuit',
@@ -77,6 +80,7 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
     name: 'DMX Addresses',
     description: 'DMX/RDM configuration reference for moving lights and accessories.',
     reportType: 'dmx-addresses',
+    headerTemplateId: 'default-paperwork-header',
     columns: COLUMN_DEFAULTS['dmx-addresses'],
     organization: {
       groupBy: 'universe',
@@ -93,6 +97,7 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
     name: 'Power Summary',
     description: 'Load calculations and power distribution planning.',
     reportType: 'power-summary',
+    headerTemplateId: 'default-paperwork-header',
     columns: COLUMN_DEFAULTS['power-summary'],
     organization: {
       groupBy: 'type',
@@ -109,6 +114,7 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
     name: 'Color Schedule',
     description: 'Color accessory tracking for gel cuts and inventory.',
     reportType: 'color-schedule',
+    headerTemplateId: 'default-paperwork-header',
     columns: COLUMN_DEFAULTS['color-schedule'],
     organization: {
       groupBy: 'color',
@@ -125,6 +131,7 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
     name: 'Gobo Schedule',
     description: 'Gobo and template assignments for moving lights.',
     reportType: 'gobo-schedule',
+    headerTemplateId: 'default-paperwork-header',
     columns: COLUMN_DEFAULTS['gobo-schedule'],
     organization: {
       groupBy: 'gobo',
@@ -145,6 +152,7 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
     name: 'Infrastructure List',
     description: 'Complete infrastructure equipment inventory.',
     reportType: 'infrastructure-list',
+    headerTemplateId: 'default-paperwork-header',
     columns: COLUMN_DEFAULTS['infrastructure-list'],
     organization: {
       groupBy: 'type',
@@ -161,6 +169,7 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
     name: 'Network Summary',
     description: 'Network equipment configuration and IP assignments.',
     reportType: 'network-summary',
+    headerTemplateId: 'default-paperwork-header',
     columns: COLUMN_DEFAULTS['network-summary'],
     organization: {
       groupBy: 'vlan',
@@ -177,6 +186,7 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
     name: 'Port Assignments',
     description: 'Network port mapping for patch panels and switches.',
     reportType: 'port-assignments',
+    headerTemplateId: 'default-paperwork-header',
     columns: COLUMN_DEFAULTS['port-assignments'],
     organization: {
       sortBy: 'port',
@@ -192,6 +202,7 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
     name: 'Infrastructure Power',
     description: 'Power requirements and distribution for infrastructure.',
     reportType: 'infrastructure-power',
+    headerTemplateId: 'default-paperwork-header',
     columns: COLUMN_DEFAULTS['infrastructure-power'],
     organization: {
       groupBy: 'power_source',
@@ -208,6 +219,7 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
     name: 'Infrastructure Location',
     description: 'Physical placement reference for infrastructure equipment.',
     reportType: 'infrastructure-location',
+    headerTemplateId: 'default-paperwork-header',
     columns: COLUMN_DEFAULTS['infrastructure-location'],
     organization: {
       groupBy: 'location',
