@@ -6,50 +6,123 @@
  * paperwork-specific data fields including fixture and infrastructure summaries.
  */
 
+import { useState, useEffect } from 'react';
 import { LayoutDesigner } from '../prep/layout/LayoutDesigner';
+import { useFixtureStore } from '../../store/fixtureStore';
+import { useInfrastructureStore } from '../../store/infrastructureStore';
 import type { PageLayoutTemplate } from '../../types/prep';
-import type { PaperworkProjectData, PrepTemplateData } from '../../utils/paperwork/dataFieldMapper';
+import type { ReportType } from '../../types/paperwork';
+import { mapPaperworkToTemplateData, type PaperworkProjectData } from '../../utils/paperwork/dataFieldMapper';
 
 interface PaperworkHeaderDesignerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  currentTemplateId?: string;
-  onSave: (templateId: string) => void;
-  // Optional: provide project data for live preview
-  projectData?: PaperworkProjectData;
-  templateData?: PrepTemplateData;
+  projectId: string;
+  reportType: ReportType;
+  headerTemplateId?: string; // Existing header template ID if any
+  onSave: (headerTemplateId: string) => void;
+  onCancel: () => void;
 }
 
 /**
  * PaperworkHeaderDesigner Component
  *
- * Opens a modal with the LayoutDesigner configured for paperwork headers:
+ * Opens the LayoutDesigner configured for paperwork headers:
  * - 12-column grid with 8 rows (headers are shorter than full pages)
  * - 816x264px canvas size
  * - Access to all paperwork data fields including summaries
  * - Templates stored in app database (not project-specific)
  */
 export function PaperworkHeaderDesigner({
-  isOpen,
-  onClose,
-  currentTemplateId,
+  projectId,
+  reportType,
+  headerTemplateId,
   onSave,
-  projectData,
-  templateData
+  onCancel
 }: PaperworkHeaderDesignerProps) {
-  if (!isOpen) {
-    return null;
-  }
+  const { fixtures } = useFixtureStore();
+  const { equipment: infrastructure } = useInfrastructureStore();
+
+  const [projectData, setProjectData] = useState<any>(null);
+  const [initialTemplate, setInitialTemplate] = useState<PageLayoutTemplate | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load project data and existing header template
+  useEffect(() => {
+    async function loadData() {
+      try {
+        // Load project information
+        if (window.api?.projects) {
+          const project = await window.api.projects.getById(projectId);
+          if (project) {
+            setProjectData(project);
+          }
+        }
+
+        // Load existing header template if provided
+        if (headerTemplateId && window.api?.prep?.layoutTemplates) {
+          const template = await window.api.prep.layoutTemplates.getById(headerTemplateId);
+          if (template) {
+            // Load template elements
+            const elements = await window.api.prep.layoutTemplates.getElements(headerTemplateId);
+            const parsedElements = elements.map((el: any) => ({
+              ...el,
+              config: typeof el.config === 'string' ? JSON.parse(el.config) : el.config,
+              style: typeof el.style === 'string' ? JSON.parse(el.style) : el.style
+            }));
+
+            setInitialTemplate({
+              ...template,
+              elements: parsedElements
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load header designer data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadData();
+  }, [projectId, headerTemplateId]);
 
   const handleSave = async (template: PageLayoutTemplate) => {
+    console.log('Header template saved:', template.id);
     // Template is already saved to database by LayoutDesigner
-    // Just pass the ID back to parent
+    // Pass the ID back to parent to update the paperwork template
     onSave(template.id);
   };
 
   // Convert paperwork project data to Prep project format for preview
-  const mockPrepProject = templateData ? {
-    id: 'preview',
+  const paperworkProjectData: PaperworkProjectData = {
+    name: projectData?.name || 'Untitled Project',
+    venue: projectData?.venue,
+    venue_city: projectData?.venue_city,
+    venue_state: projectData?.venue_state,
+    lighting_designer: projectData?.lighting_designer,
+    lighting_designer_email: projectData?.lighting_designer_email,
+    lighting_designer_phone: projectData?.lighting_designer_phone,
+    production_electrician: projectData?.production_electrician,
+    production_manager: projectData?.production_manager,
+    general_manager: projectData?.general_manager,
+    load_in_date: projectData?.load_in_date,
+    tech_date: projectData?.tech_date,
+    opening_date: projectData?.opening_date,
+    closing_date: projectData?.closing_date,
+    revision_number: projectData?.revision_number,
+    revision_date: projectData?.revision_date,
+    logo_path: projectData?.logo_path
+  };
+
+  const templateData = mapPaperworkToTemplateData(
+    paperworkProjectData,
+    fixtures,
+    infrastructure,
+    reportType
+  );
+
+  // Convert to PrepProject format for LayoutDesigner
+  const mockPrepProject = {
+    id: projectId,
     production_name: templateData.production_name || 'Sample Production',
     venue: templateData.venue || 'Sample Venue',
     venue_city: templateData.venue_city || 'New York',
@@ -84,24 +157,24 @@ export function PaperworkHeaderDesigner({
     total_ports: templateData.total_ports,
     active_infrastructure: templateData.active_infrastructure,
     inactive_infrastructure: templateData.inactive_infrastructure
-  } : undefined;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-white">Loading header designer...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="fixed inset-0 bg-black bg-opacity-75" onClick={onClose} />
-
-        <div className="relative w-full max-w-7xl">
-          <LayoutDesigner
-            projectId="" // Empty string since templates are app-level
-            currentProject={mockPrepProject}
-            pageType="paperwork-header"
-            onSave={handleSave}
-            onClose={onClose}
-            initialTemplate={currentTemplateId ? undefined : undefined} // TODO: Load template by ID if provided
-          />
-        </div>
-      </div>
-    </div>
+    <LayoutDesigner
+      projectId={projectId}
+      currentProject={mockPrepProject}
+      pageType="paperwork-header"
+      onSave={handleSave}
+      onClose={onCancel}
+      initialTemplate={initialTemplate}
+    />
   );
 }

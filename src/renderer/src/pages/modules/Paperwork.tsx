@@ -416,27 +416,27 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
       {/* Header Designer Modal */}
       {showHeaderDesigner && currentTemplate && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-8">
-          <div className="bg-gray-900 rounded-lg w-full max-w-7xl h-full max-h-[90vh] flex flex-col">
-            <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-              <h2 className="text-xl font-bold">Design Header - {currentTemplate.name}</h2>
-              <button
-                onClick={() => setShowHeaderDesigner(false)}
-                className="p-2 hover:bg-gray-800 rounded transition"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-hidden">
-              <PaperworkHeaderDesigner
-                projectId={currentProjectId}
-                reportType={currentTemplate.reportType}
-                onSave={() => setShowHeaderDesigner(false)}
-                onCancel={() => setShowHeaderDesigner(false)}
-              />
-            </div>
-          </div>
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50">
+          <PaperworkHeaderDesigner
+            projectId={currentProjectId}
+            reportType={currentTemplate.reportType}
+            headerTemplateId={currentTemplate.headerTemplateId}
+            onSave={async (headerTemplateId: string) => {
+              // Save the header template ID to the paperwork template
+              try {
+                console.log('Saving header template ID:', headerTemplateId, 'to paperwork template:', currentTemplate.id);
+                await window.api.paperworkTemplates.update(currentTemplate.id, {
+                  headerTemplateId
+                });
+                console.log('Header template ID saved successfully');
+                setShowHeaderDesigner(false);
+              } catch (error) {
+                console.error('Failed to save header template ID:', error);
+                alert('Failed to save header template');
+              }
+            }}
+            onCancel={() => setShowHeaderDesigner(false)}
+          />
         </div>
       )}
 
