@@ -374,60 +374,12 @@ export function renderFooterTemplate(
 
 /**
  * Calculate data range for report
+ * Note: Range indicators have been removed as per requirements
  */
 export function calculateDataRange(
   reportType: string,
   data: any[]
 ): string {
-  if (!data || data.length === 0) {
-    return 'No data';
-  }
-
-  // Determine the primary field based on report type
-  let field: string;
-  let label: string;
-
-  switch (reportType) {
-    case 'channel-hookup':
-      field = 'channel';
-      label = 'Channels';
-      break;
-    case 'dimmer-schedule':
-      field = 'dimmer';
-      label = 'Dimmers';
-      break;
-    case 'circuit-list':
-      field = 'circuit';
-      label = 'Circuits';
-      break;
-    case 'dmx-addresses':
-      field = 'dmx_address';
-      label = 'DMX';
-      break;
-    default:
-      return `${data.length} items`;
-  }
-
-  // Find min and max values
-  const values = data
-    .map(item => {
-      const val = item[field];
-      // Handle numeric strings like "1", "2", etc.
-      const num = typeof val === 'string' ? parseInt(val) : val;
-      return isNaN(num) ? null : num;
-    })
-    .filter(v => v !== null) as number[];
-
-  if (values.length === 0) {
-    return `${data.length} items`;
-  }
-
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-
-  if (min === max) {
-    return `${label} ${min}`;
-  }
-
-  return `${label} ${min}–${max}`;
+  // Return empty string - range indicators are no longer displayed
+  return '';
 }

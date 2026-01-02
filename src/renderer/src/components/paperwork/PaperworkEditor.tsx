@@ -64,9 +64,24 @@ export function PaperworkEditor({
     }
   }, [reportType, templates, templatesLoading]);
 
-  // Get report data for preview
-  const reportData = useMemo(() => {
-    return getReportData(reportType, projectId);
+  // Get report data for preview (async)
+  const [reportData, setReportData] = useState<any[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadData = async () => {
+      const data = await getReportData(reportType, projectId);
+      if (!cancelled) {
+        setReportData(data);
+      }
+    };
+
+    loadData();
+
+    return () => {
+      cancelled = true;
+    };
   }, [reportType, projectId]);
 
   // Organize data based on current organization settings

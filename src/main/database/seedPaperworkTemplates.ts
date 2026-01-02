@@ -1,7 +1,8 @@
 import { DEFAULT_PAPERWORK_TEMPLATES } from './defaultPaperworkTemplates';
 import {
   getSystemPaperworkTemplates,
-  createPaperworkTemplate
+  createPaperworkTemplate,
+  updatePaperworkTemplate
 } from './queries/paperworkTemplates';
 
 /**
@@ -100,5 +101,44 @@ export async function reseedMissingTemplates(): Promise<void> {
     }
   } catch (error) {
     console.error('❌ Error re-seeding templates:', error);
+  }
+}
+
+/**
+ * Update system templates with latest column configurations
+ * Useful for applying updates to column formats or defaults
+ */
+export async function updateSystemTemplates(): Promise<void> {
+  try {
+    console.log('🔄 Updating system templates with latest configurations...');
+
+    const existingSystemTemplates = getSystemPaperworkTemplates();
+    let updatedCount = 0;
+
+    for (const existingTemplate of existingSystemTemplates) {
+      // Find matching default template
+      const defaultTemplate = DEFAULT_PAPERWORK_TEMPLATES.find(
+        t => t.reportType === existingTemplate.reportType
+      );
+
+      if (defaultTemplate) {
+        try {
+          // Update with latest columns from defaults
+          // Pass true to allow updating system templates during migration
+          updatePaperworkTemplate(
+            existingTemplate.id,
+            { columns: defaultTemplate.columns },
+            true // allowSystemUpdate
+          );
+          updatedCount++;
+        } catch (error) {
+          console.error(`  ❌ Failed to update: ${existingTemplate.name}`, error);
+        }
+      }
+    }
+
+    console.log(`✅ Updated ${updatedCount} system templates`);
+  } catch (error) {
+    console.error('❌ Error updating system templates:', error);
   }
 }

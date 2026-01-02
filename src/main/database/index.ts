@@ -6,7 +6,7 @@ import { APP_SCHEMA } from './appSchema';
 import { PROJECT_SCHEMA } from './projectSchema';
 import { seedDefaultPageLayouts } from './seedDefaultLayouts';
 import { seedDefaultPageLayoutsFromJSON } from './seedDefaultLayoutsFromJSON';
-import { seedPaperworkTemplates } from './seedPaperworkTemplates';
+import { seedPaperworkTemplates, updateSystemTemplates } from './seedPaperworkTemplates';
 import { seedPaperworkHeaderTemplate } from './seedPaperworkHeader';
 import { resetPaperworkHeaderTemplate } from './resetPaperworkHeader';
 import { updatePaperworkTemplateHeaders } from './updatePaperworkTemplateHeaders';
@@ -188,6 +188,9 @@ async function runAppMigrations(db: Database): Promise<void> {
     // Seed paperwork templates if needed
     console.log('🌱 Checking paperwork template seeding...');
     await seedPaperworkTemplates();
+
+    // Update system templates with latest column configurations
+    await updateSystemTemplates();
 
     // Reset paperwork header template if it has old layout (with page numbers)
     resetPaperworkHeaderTemplate();

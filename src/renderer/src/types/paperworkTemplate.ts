@@ -8,7 +8,7 @@ import { ReportType } from './paperwork';
 /**
  * Column format types for display formatting
  */
-export type ColumnFormatType = 'text' | 'number' | 'power' | 'boolean' | 'date' | 'color';
+export type ColumnFormatType = 'text' | 'number' | 'power' | 'amperage' | 'boolean' | 'date' | 'color';
 
 /**
  * Column display mode for header labels

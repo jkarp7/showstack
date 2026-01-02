@@ -201,7 +201,11 @@ export function createPaperworkTemplate(data: PaperworkTemplateInput): any {
 /**
  * Update a paperwork template
  */
-export function updatePaperworkTemplate(id: string, updates: Partial<PaperworkTemplateInput>): any {
+export function updatePaperworkTemplate(
+  id: string,
+  updates: Partial<PaperworkTemplateInput>,
+  allowSystemUpdate: boolean = false
+): any {
   const db = getAppDatabase();
   const now = Date.now();
 
@@ -211,7 +215,8 @@ export function updatePaperworkTemplate(id: string, updates: Partial<PaperworkTe
   }
 
   // System templates cannot be modified (but we can duplicate them)
-  if (template.isSystem) {
+  // Exception: During migrations, we allow system updates
+  if (template.isSystem && !allowSystemUpdate) {
     throw new Error('Cannot modify system templates. Please duplicate first.');
   }
 

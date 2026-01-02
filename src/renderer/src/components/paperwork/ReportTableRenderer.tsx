@@ -212,8 +212,12 @@ export function ReportTableRenderer({
   return (
     <div className="bg-white text-black report-content p-8" onContextMenu={handleTableContextMenu} style={tableStyle}>
       {data.groups.map((group, groupIndex) => (
-        <div key={groupIndex} className="mb-8">
-          {data.hasGroups && (
+        <div
+          key={groupIndex}
+          className="mb-8"
+          style={groupIndex > 0 && organization?.groupPageBreaks ? { pageBreakBefore: 'always' } : undefined}
+        >
+          {data.hasGroups && organization?.showGroupHeaders !== false && (
             <h3 className="text-lg font-bold mb-4 text-blue-600 group-header">
               {group.groupValue} ({group.items.length} items)
             </h3>
@@ -373,6 +377,9 @@ function formatValue(value: any, format?: ColumnFormatType): string {
 
     case 'power':
       return `${Number(value).toLocaleString()}W`;
+
+    case 'amperage':
+      return `${Number(value).toLocaleString()}A`;
 
     case 'boolean':
       return value ? 'Yes' : 'No';

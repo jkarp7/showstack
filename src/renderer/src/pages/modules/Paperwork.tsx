@@ -94,7 +94,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       console.log('Starting PDF export for template:', template.name);
 
       // Get report data
-      const reportData = getReportData(template.reportType, currentProjectId);
+      const reportData = await getReportData(template.reportType, currentProjectId);
       const organizedData = organizeReportData(reportData, template.organization, template.columns);
 
       console.log('Report data loaded:', reportData.length, 'items');
@@ -183,15 +183,21 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
               table.data-table td {
                 padding: 8px;
                 text-align: left;
-                border: 1px solid #d1d5db;
+                border-left: none;
+                border-right: none;
               }
 
               table.data-table th {
                 background-color: transparent;
                 font-weight: ${template.pageSetup.fontStyle?.fontWeight || 'bold'};
                 font-size: ${template.pageSetup.fontStyle?.headerFontSize || 11}pt;
-                border-top: 1px solid #9ca3af;
-                border-bottom: 1px solid #9ca3af;
+                border-top: 2px solid #9ca3af;
+                border-bottom: 2px solid #9ca3af;
+              }
+
+              table.data-table td {
+                border-top: 1px solid #d1d5db;
+                border-bottom: 1px solid #d1d5db;
               }
 
               table.data-table td {
@@ -305,7 +311,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
           console.log(`Batch export: Rendering ${reportName} using template:`, template.name);
 
           // Get report data
-          const reportData = getReportData(reportType, currentProjectId);
+          const reportData = await getReportData(reportType, currentProjectId);
           const organizedData = organizeReportData(reportData, template.organization, template.columns);
 
           console.log(`Batch export: ${reportName} has ${reportData.length} items`);
@@ -328,6 +334,8 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             headerHTML = await renderHeaderHTML(template.headerTemplateId, {
               reportTitle: template.name,
               productionName: projectName,
+              ldName: projectData?.lighting_designer || '',
+              venue: projectData?.venue || '',
               date: new Date().toLocaleDateString(),
             }) || '';
           }
@@ -339,12 +347,25 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
           // Render footer
           const footerHTML = renderFooterHTML(userName, dataRange);
 
-          // Create report section with page break
+          // Create report section with wrapper table for repeating headers
           const reportSection = `
             <section class="report-section">
-              ${headerHTML}
-              ${tableHTML}
-              ${footerHTML}
+              <table class="report-wrapper">
+                <thead>
+                  <tr>
+                    <td>
+                      ${headerHTML}
+                    </td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      ${tableHTML}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </section>
           `;
 
@@ -390,6 +411,26 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 page-break-before: avoid; /* Don't break before first report */
               }
 
+              /* Wrapper table for repeating headers */
+              .report-wrapper {
+                width: 100%;
+                border-collapse: collapse;
+              }
+
+              .report-wrapper thead {
+                display: table-header-group; /* Ensures thead repeats on each page */
+              }
+
+              .report-wrapper tbody {
+                display: table-row-group;
+              }
+
+              .report-wrapper td {
+                border: none;
+                padding: 0;
+                vertical-align: top;
+              }
+
               h1 {
                 font-size: 20pt;
                 margin-bottom: 8pt;
@@ -402,28 +443,33 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 font-size: ${defaultFontSize}pt;
               }
 
-              table {
+              /* Data table styling */
+              table.data-table {
                 width: 100%;
                 border-collapse: collapse;
                 margin-bottom: 1rem;
               }
 
-              th, td {
+              table.data-table th,
+              table.data-table td {
                 padding: 8px;
                 text-align: left;
-                border: 1px solid #d1d5db;
+                border-left: none;
+                border-right: none;
               }
 
-              th {
+              table.data-table th {
                 background-color: transparent;
                 font-weight: bold;
                 font-size: ${defaultFontSize + 1}pt;
-                border-top: 1px solid #9ca3af;
-                border-bottom: 1px solid #9ca3af;
+                border-top: 2px solid #9ca3af;
+                border-bottom: 2px solid #9ca3af;
               }
 
-              td {
+              table.data-table td {
                 font-size: ${defaultFontSize}pt;
+                border-top: 1px solid #d1d5db;
+                border-bottom: 1px solid #d1d5db;
               }
 
               h3 {
@@ -445,6 +491,10 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
                 .report-section:first-child {
                   page-break-before: avoid;
+                }
+
+                .report-wrapper thead {
+                  display: table-header-group;
                 }
               }
 

@@ -332,8 +332,28 @@ export function ColumnContextMenu({
               />
               <span className="text-sm">Page Break Between Groups</span>
             </label>
+
+            <div className="border-t border-gray-700 my-2" />
           </>
         )}
+
+        {/* Reset to Default */}
+        <button
+          onClick={() => {
+            onOrganizationChange({
+              groupBy: undefined,
+              sortBy: visibleColumns[0]?.field,
+              sortDirection: 'asc',
+              showGroupHeaders: true,
+              groupPageBreaks: false
+            });
+            onClose();
+          }}
+          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700 transition flex items-center gap-2"
+        >
+          <span>↺</span>
+          <span>Reset to Default View</span>
+        </button>
       </div>,
       document.body
     );

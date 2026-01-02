@@ -166,29 +166,30 @@ export const COLUMN_DEFAULTS: Record<string, PaperworkColumnConfig[]> = {
     createColumn('type', { width: 25, shortLabel: 'Type' }),
     createColumn('quantity', { width: 10, format: 'number', shortLabel: 'Qty' }),
     createColumn('wattage', { width: 12, format: 'power', shortLabel: 'Watts' }),
-    createColumn('amperage', { width: 12, format: 'number', shortLabel: 'Amps' }),
+    createColumn('amperage', { width: 12, format: 'amperage', shortLabel: 'Amps' }),
     createColumn('total_watts', { width: 15, format: 'power', label: 'Total Watts', shortLabel: 'Tot W' }),
-    createColumn('total_amps', { width: 13, format: 'number', label: 'Total Amps', shortLabel: 'Tot A' }),
+    createColumn('total_amps', { width: 13, format: 'amperage', label: 'Total Amps', shortLabel: 'Tot A' }),
     createColumn('notes', { width: 13, shortLabel: 'Notes' })
   ],
 
   'color-schedule': [
     createColumn('color', { width: 15, shortLabel: 'Clr' }),
-    createColumn('quantity', { width: 10, format: 'number', shortLabel: 'Qty' }),
     createColumn('type', { width: 20, shortLabel: 'Type' }),
     createColumn('position', { width: 15, shortLabel: 'Pos' }),
     createColumn('unit', { width: 8, shortLabel: 'U#' }),
     createColumn('channel', { width: 8, shortLabel: 'Ch' }),
-    createColumn('notes', { width: 24, shortLabel: 'Notes' })
+    createColumn('purpose', { width: 15, shortLabel: 'Purp' }),
+    createColumn('notes', { width: 19, shortLabel: 'Notes' })
   ],
 
   'gobo-schedule': [
     createColumn('gobo', { width: 20, shortLabel: 'Gobo' }),
-    createColumn('quantity', { width: 10, format: 'number', shortLabel: 'Qty' }),
     createColumn('type', { width: 20, shortLabel: 'Type' }),
     createColumn('position', { width: 15, shortLabel: 'Pos' }),
+    createColumn('unit', { width: 8, shortLabel: 'U#' }),
     createColumn('channel', { width: 8, shortLabel: 'Ch' }),
-    createColumn('notes', { width: 27, shortLabel: 'Notes' })
+    createColumn('purpose', { width: 12, shortLabel: 'Purp' }),
+    createColumn('notes', { width: 17, shortLabel: 'Notes' })
   ],
 
   'infrastructure-list': [
