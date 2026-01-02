@@ -1,8 +1,8 @@
 # Phase 3: Paperwork Template System - Testing Guide
 
-**Branch:** `feature/phase-3-paperwork-template-system`
+**Branch:** `feature/unified-visual-editor`
 **Status:** Days 1-7 Complete, Day 8 Ready for Manual Testing
-**Last Updated:** December 30, 2024 - 7:45 PM
+**Last Updated:** January 2, 2026
 
 ## ✅ Day 8 Setup Complete
 
@@ -228,14 +228,39 @@ For any report:
 
 #### 8. Header/Footer Designer Integration
 
-- [ ] Click "Design Header" button
-- [ ] Header designer modal opens
-- [ ] Grid-based layout designer loads
-- [ ] Can place data fields
-- [ ] Can add text elements
-- [ ] Can add images
-- [ ] Changes save to template
-- [ ] Header appears in report preview
+- [x] Click "Design Header" button
+- [x] Header designer modal opens
+- [x] Grid-based layout designer loads
+- [x] Can place data fields
+- [x] Can add text elements
+- [x] Can add images
+- [x] Changes save to template
+- [x] Header appears in report preview
+
+#### 8.5. Header/Footer System (Completed)
+
+**Header Rendering:**
+- [x] Compact 3-row grid layout displays correctly
+- [x] Row 0: Show Name (left), Report Title (center), Date (right)
+- [x] Row 1: Empty spacing row
+- [x] Row 2: LD Name (left), Venue (right)
+- [x] Dynamic data from project displays correctly
+- [x] Empty fields show blank (not "undefined" or placeholder text)
+- [x] Font matching with report content
+- [x] Proper spacing between header rows
+
+**Footer Rendering:**
+- [x] Footer appears at bottom of each page
+- [x] Page numbers display correctly (Puppeteer displayHeaderFooter)
+- [x] Footer shows: Username • ShowStack on left
+- [x] Footer shows: Data range on right (e.g., "Channels 1-48")
+- [x] Footer font matches header style
+
+**Template Migration:**
+- [x] Automatic detection of old header layouts
+- [x] Re-seeding on app startup when old layout detected
+- [x] No duplicate elements after migration
+- [x] Foreign key constraints handled properly
 
 #### 9. PDF Export Testing
 

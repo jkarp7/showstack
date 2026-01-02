@@ -86,11 +86,11 @@ function resolveDataField(fieldType: string, data: HeaderData): string {
     case 'production_name':
       return data.productionName || '';
     case 'ld_name':
-      return data.ldName || 'Lighting Designer';
+      return data.ldName || ''; // Empty if no LD name
     case 'pe_name':
       return data.peName || '';
     case 'venue':
-      return data.venue || '';
+      return data.venue || ''; // Empty if no venue
     case 'generated_date':
       return data.date || new Date().toLocaleDateString();
     case 'page_number':
@@ -200,62 +200,58 @@ export async function renderHeaderHTML(
 
   const { template, elements } = headerLayout;
 
-  // Group elements by row for simpler rendering
-  const elementsByRow: { [key: number]: any[] } = {};
-  elements.forEach(element => {
-    if (!elementsByRow[element.grid_row]) {
-      elementsByRow[element.grid_row] = [];
+  // Calculate row height
+  const rowHeight = Math.floor(template.page_height / template.grid_rows);
+
+  // Render all elements with explicit grid positioning
+  const elementsHTML = elements.map(element => {
+    const config = JSON.parse(element.config);
+    const style = JSON.parse(element.style);
+    let content = '';
+
+    if (element.element_type === 'dataField') {
+      const fieldValue = resolveDataField(config.fieldType, data);
+      const prefix = config.prefix || '';
+      const suffix = config.suffix || '';
+      content = `${prefix}${fieldValue}${suffix}`;
+    } else if (element.element_type === 'text') {
+      content = renderTextContent(config.content || '', data);
     }
-    elementsByRow[element.grid_row].push(element);
-  });
 
-  // Sort rows
-  const sortedRows = Object.keys(elementsByRow).map(Number).sort((a, b) => a - b);
+    // Calculate grid position (1-based for CSS grid)
+    const gridColumnStart = element.grid_column + 1;
+    const gridColumnEnd = gridColumnStart + element.column_span;
+    const gridRowStart = element.grid_row + 1;
+    const gridRowEnd = gridRowStart + element.row_span;
 
-  // Render rows
-  const rowsHTML = sortedRows.map(rowIndex => {
-    const rowElements = elementsByRow[rowIndex].sort((a, b) => a.grid_column - b.grid_column);
-
-    const cellsHTML = rowElements.map(element => {
-      const config = JSON.parse(element.config);
-      const style = JSON.parse(element.style);
-      let content = '';
-
-      if (element.element_type === 'dataField') {
-        const fieldValue = resolveDataField(config.fieldType, data);
-        const prefix = config.prefix || '';
-        const suffix = config.suffix || '';
-        content = `${prefix}${fieldValue}${suffix}`;
-      } else if (element.element_type === 'text') {
-        content = renderTextContent(config.content || '', data);
-      }
-
-      return `
-        <div style="
-          grid-column: span ${element.column_span};
-          font-family: ${style.fontFamily || 'Arial'};
-          font-size: ${style.fontSize || 12}pt;
-          font-weight: ${style.fontWeight || 'normal'};
-          text-align: ${style.textAlign || 'left'};
-          color: ${style.color || '#000000'};
-        ">
-          ${content}
-        </div>
-      `;
-    }).join('');
-
-    return cellsHTML;
+    return `
+      <div style="
+        grid-column: ${gridColumnStart} / ${gridColumnEnd};
+        grid-row: ${gridRowStart} / ${gridRowEnd};
+        font-family: ${style.fontFamily || 'Arial'};
+        font-size: ${style.fontSize || 12}pt;
+        font-weight: ${style.fontWeight || 'normal'};
+        text-align: ${style.textAlign || 'left'};
+        color: ${style.color || '#000000'};
+        display: flex;
+        align-items: center;
+        justify-content: ${style.textAlign === 'center' ? 'center' : style.textAlign === 'right' ? 'flex-end' : 'flex-start'};
+      ">
+        ${content}
+      </div>
+    `;
   }).join('');
 
   return `
     <div style="
       display: grid;
       grid-template-columns: repeat(${template.grid_columns}, 1fr);
+      grid-template-rows: repeat(${template.grid_rows}, ${rowHeight}px);
       gap: ${template.grid_gap}px;
       width: 100%;
       padding: 10px;
     ">
-      ${rowsHTML}
+      ${elementsHTML}
     </div>
   `;
 }

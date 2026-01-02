@@ -8,6 +8,7 @@ import { seedDefaultPageLayouts } from './seedDefaultLayouts';
 import { seedDefaultPageLayoutsFromJSON } from './seedDefaultLayoutsFromJSON';
 import { seedPaperworkTemplates } from './seedPaperworkTemplates';
 import { seedPaperworkHeaderTemplate } from './seedPaperworkHeader';
+import { resetPaperworkHeaderTemplate } from './resetPaperworkHeader';
 import { updatePaperworkTemplateHeaders } from './updatePaperworkTemplateHeaders';
 import { createLayoutTemplate } from './queries/layoutTemplates';
 import * as fs from 'fs';
@@ -187,6 +188,9 @@ async function runAppMigrations(db: Database): Promise<void> {
     // Seed paperwork templates if needed
     console.log('🌱 Checking paperwork template seeding...');
     await seedPaperworkTemplates();
+
+    // Reset paperwork header template if it has old layout (with page numbers)
+    resetPaperworkHeaderTemplate();
 
     // Seed default paperwork header template
     seedPaperworkHeaderTemplate();

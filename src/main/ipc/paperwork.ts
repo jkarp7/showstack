@@ -73,7 +73,7 @@ export function registerPaperworkHandlers(): void {
   // ============================================
 
   // Export Paperwork Report to PDF using Puppeteer
-  ipcMain.handle('paperwork:exportPDF', async (_event, htmlContent: string, filename: string, pageSettings: any) => {
+  ipcMain.handle('paperwork:exportPDF', async (_event, htmlContent: string, filename: string, pageSettings: any, fontFamily?: string) => {
     let browser;
     try {
       // Show save dialog
@@ -118,16 +118,39 @@ export function registerPaperworkHandlers(): void {
       };
 
       // Generate PDF with Puppeteer
+      const userName = 'User'; // TODO: Get from user preferences
+      // Escape font family for use in CSS - remove any existing quotes and re-wrap
+      const footerFontFamily = (fontFamily || '-apple-system, BlinkMacSystemFont, Segoe UI, Arial, sans-serif')
+        .replace(/["']/g, ''); // Remove quotes
+
       await page.pdf({
         path: result.filePath,
         format: pageSizeMap[pageSettings.size] || 'Letter',
         landscape: pageSettings.orientation === 'landscape',
         printBackground: true,
+        displayHeaderFooter: true,
+        headerTemplate: '<div></div>', // Empty header - we use the custom header in the HTML
+        footerTemplate: `
+          <div style="
+            width: 100%;
+            font-family: ${footerFontFamily};
+            font-size: 10pt;
+            padding: 0 20px;
+            margin: 0;
+            color: #6b7280;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          ">
+            <span>${userName} • ShowStack</span>
+            <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
+          </div>
+        `,
         margin: {
-          top: `${pageSettings.marginTop || 0}in`,
-          bottom: `${pageSettings.marginBottom || 0}in`,
-          left: `${pageSettings.marginLeft || 0}in`,
-          right: `${pageSettings.marginRight || 0}in`,
+          top: `${pageSettings.marginTop || 0.5}in`,
+          bottom: `${pageSettings.marginBottom || 0.75}in`, // Slightly larger to fit footer
+          left: `${pageSettings.marginLeft || 0.5}in`,
+          right: `${pageSettings.marginRight || 0.5}in`,
         },
       });
 

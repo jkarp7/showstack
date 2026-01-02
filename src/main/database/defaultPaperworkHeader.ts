@@ -48,10 +48,10 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
       description: 'System default header for all paperwork reports',
       page_type: 'paperwork-header',
       grid_columns: 12,
-      grid_rows: 8,
+      grid_rows: 3,
       grid_gap: 8,
       page_width: 816, // 8.5" at 96 DPI
-      page_height: 264, // ~2.75" header area at 96 DPI
+      page_height: 120, // Compact header height
       is_default: 1,
       created_at: now,
       updated_at: now
@@ -109,13 +109,15 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
         updated_at: now
       },
 
-      // Page # of # - Top Right, 12pt
+      // Date - Top Right, 12pt
       {
         id: uuidv4(),
         template_id: templateId,
-        element_type: 'text',
+        element_type: 'dataField',
         config: JSON.stringify({
-          content: 'Page {page} of {total}'
+          fieldType: 'generated_date',
+          label: 'Date',
+          fallbackText: new Date().toLocaleDateString()
         }),
         grid_column: 9,
         grid_row: 0,
@@ -127,39 +129,13 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
           fontSize: 12,
           fontWeight: 'normal',
           textAlign: 'right',
-          color: '#374151'
-        }),
-        created_at: now,
-        updated_at: now
-      },
-
-      // Date - Top Right, Below Page #, 12pt
-      {
-        id: uuidv4(),
-        template_id: templateId,
-        element_type: 'dataField',
-        config: JSON.stringify({
-          fieldType: 'generated_date',
-          label: 'Date',
-          fallbackText: new Date().toLocaleDateString()
-        }),
-        grid_column: 9,
-        grid_row: 1,
-        column_span: 3,
-        row_span: 1,
-        layer: 1,
-        style: JSON.stringify({
-          fontFamily: 'Arial',
-          fontSize: 12,
-          fontWeight: 'normal',
-          textAlign: 'right',
           color: '#6b7280'
         }),
         created_at: now,
         updated_at: now
       },
 
-      // LD Name - Bottom Left, 10pt
+      // LD Name - Row 3, Left aligned, 10pt
       {
         id: uuidv4(),
         template_id: templateId,
@@ -167,11 +143,12 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
         config: JSON.stringify({
           fieldType: 'ld_name',
           label: 'Lighting Designer',
-          fallbackText: 'Lighting Designer'
+          fallbackText: '',
+          prefix: 'LD: '
         }),
         grid_column: 0,
-        grid_row: 6,
-        column_span: 4,
+        grid_row: 2,
+        column_span: 6,
         row_span: 1,
         layer: 1,
         style: JSON.stringify({
@@ -185,33 +162,7 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
         updated_at: now
       },
 
-      // Associate LD Name - Bottom Left, Below LD, 10pt
-      {
-        id: uuidv4(),
-        template_id: templateId,
-        element_type: 'dataField',
-        config: JSON.stringify({
-          fieldType: 'pe_name',
-          label: 'Associate LD',
-          fallbackText: ''
-        }),
-        grid_column: 0,
-        grid_row: 7,
-        column_span: 4,
-        row_span: 1,
-        layer: 1,
-        style: JSON.stringify({
-          fontFamily: 'Arial',
-          fontSize: 10,
-          fontWeight: 'normal',
-          textAlign: 'left',
-          color: '#6b7280'
-        }),
-        created_at: now,
-        updated_at: now
-      },
-
-      // Venue - Bottom Right, 10pt
+      // Venue - Row 3, Right aligned, 10pt
       {
         id: uuidv4(),
         template_id: templateId,
@@ -219,12 +170,11 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
         config: JSON.stringify({
           fieldType: 'venue',
           label: 'Venue',
-          fallbackText: '',
-          prefix: 'Venue: '
+          fallbackText: ''
         }),
-        grid_column: 8,
-        grid_row: 7,
-        column_span: 4,
+        grid_column: 6,
+        grid_row: 2,
+        column_span: 6,
         row_span: 1,
         layer: 1,
         style: JSON.stringify({

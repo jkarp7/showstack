@@ -118,6 +118,8 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       const headerData = {
         reportTitle: template.name,
         productionName: projectName,
+        ldName: projectData?.lighting_designer || '',
+        venue: projectData?.venue || '',
         date: new Date().toLocaleDateString(),
       };
 
@@ -158,10 +160,6 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
               .report-wrapper thead {
                 display: table-header-group; /* Ensures thead repeats on each page */
-              }
-
-              .report-wrapper tfoot {
-                display: table-footer-group; /* Ensures tfoot repeats on each page */
               }
 
               .report-wrapper tbody {
@@ -211,9 +209,6 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 .report-wrapper thead {
                   display: table-header-group;
                 }
-                .report-wrapper tfoot {
-                  display: table-footer-group;
-                }
               }
             </style>
           </head>
@@ -233,13 +228,6 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                   </td>
                 </tr>
               </tbody>
-              <tfoot>
-                <tr>
-                  <td>
-                    ${footerHTML}
-                  </td>
-                </tr>
-              </tfoot>
             </table>
           </body>
         </html>
@@ -252,7 +240,8 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       const result = await window.api.paperwork.exportPDF(
         htmlContent,
         filename,
-        pageSetup
+        pageSetup,
+        template.pageSetup.fontStyle?.fontFamily || '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif'
       );
 
       if (result.success) {

@@ -214,7 +214,7 @@ export function ReportTableRenderer({
       {data.groups.map((group, groupIndex) => (
         <div key={groupIndex} className="mb-8">
           {data.hasGroups && (
-            <h3 className="text-lg font-bold mb-4 text-blue-600">
+            <h3 className="text-lg font-bold mb-4 text-blue-600 group-header">
               {group.groupValue} ({group.items.length} items)
             </h3>
           )}
@@ -253,7 +253,12 @@ export function ReportTableRenderer({
             </thead>
             <tbody>
               {group.items.map((item, itemIndex) => (
-                <tr key={itemIndex} className="hover:bg-gray-50">
+                <tr
+                  key={itemIndex}
+                  className="hover:bg-gray-50 data-row"
+                  data-report-type={reportType}
+                  data-range-value={getRangeValue(item, reportType)}
+                >
                   {visibleColumns.map(col => (
                     <td
                       key={col.id}
@@ -312,6 +317,29 @@ export function ReportTableRenderer({
       })()}
     </div>
   );
+}
+
+// Helper function to get the range value for a data row (for PDF page footers)
+function getRangeValue(item: ReportDataItem, reportType: string): string {
+  const fieldMap: Record<string, string> = {
+    'channel-hookup': 'channel',
+    'dimmer-schedule': 'dimmer',
+    'circuit-list': 'circuit',
+    'dmx-addresses': 'dmx_address',
+    'power-summary': 'channel',
+    'color-schedule': 'channel',
+    'gobo-schedule': 'channel',
+    // Infrastructure reports fall back to item count
+  };
+
+  const field = fieldMap[reportType];
+  if (!field) return '';
+
+  const value = item[field];
+  if (value == null) return '';
+
+  const num = typeof value === 'string' ? parseInt(value) : value;
+  return isNaN(num) ? String(value) : String(num);
 }
 
 // Render cell value, handling merged columns
