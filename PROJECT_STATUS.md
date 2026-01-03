@@ -67,11 +67,10 @@ This document tracks the development status of all ShowStack feature domains and
    - ✅ Color swatch visualization in reports
    - ✅ Template migration system for future updates
 
-### Next Steps (After Phase 3)
-1. **Phase 3.5: Logo & Image Enhancement** - Image upload UI, project logo integration, PDF rendering (2-3 days)
-2. **Phase 4: Label Integration** - Grid designer for label layouts (5-7 days)
-3. **Phase 5: Polish & UX** - Inline editing, gradients, shadows, multi-display support (1 week)
-4. **Implement shop order creation from system documentation** (auto-populate from fixture/infrastructure data)
+### Next Steps (After Phase 3.5)
+1. **Phase 4: Label Integration** - Grid designer for label layouts (5-7 days)
+2. **Phase 5: Polish & UX** - Inline editing, gradients, shadows, multi-display support (1 week)
+3. **Implement shop order creation from system documentation** (auto-populate from fixture/infrastructure data)
 
 ### Short-term (Next 1-2 Months) - **Focus on Lightwright Parity**
 1. **MVR export support** - Industry standard CAD/visualizer format
@@ -224,11 +223,13 @@ Drag-and-drop label creation for various printer types with HTML5 Canvas.
   - Dual color splitting for accurate counting
   - Manufacturer detection from gel codes
 
+**Completed:**
+- ✅ **Phase 3.5: Logo & Image Support** - Image upload, project logo storage, PDF rendering (COMPLETE)
+
 **Pending Additions:**
-- ⬜ **Phase 3.5: Logo & Image Support** - Image upload, project logo storage, PDF rendering (2-3 days)
 - ⬜ **Color printing support** - Enable color in system docs paperwork (1 day)
 
-**Estimated Total:** 3-4 days
+**Estimated Total:** 1 day
 
 ---
 
@@ -441,15 +442,18 @@ Additional production tools.
    - **Commits:** bcac556, 6126f68, dd76483, 0d05e65, 59b6710
    - **Pending:** Image upload UI and logo integration (see Phase 3.5 below)
 
-3.5. ⬜ **Phase 3.5: Logo & Image Enhancement** (2-3 days)
-   - Add image upload UI to ElementInspector for image elements
-   - Project logo storage in database (projects table)
-   - Quick "Insert Logo" button in ElementPalette
-   - Support for URL-based images and base64 storage
-   - Test image rendering in PDF exports with Puppeteer
-   - Add default show logo to paperwork header templates
-   - Image file browser for selecting local graphics
-   - **Estimated effort:** 2-3 days
+3.5. ✅ **Phase 3.5: Logo & Image Enhancement** - COMPLETED
+   - Image upload UI with file browser and validation (PNG, JPG, SVG, GIF)
+   - Base64 storage for images and project logos (2MB max)
+   - Image preview in ElementInspector (128px) and canvas rendering
+   - Project logo integration in EditProjectDialog with 64px thumbnail
+   - ObjectFit support (contain, cover, fill) for image scaling
+   - Clear/Remove buttons for uploaded images
+   - URL input alternative for web-hosted images
+   - PDF export verified - Puppeteer handles base64 images natively
+   - Comprehensive documentation created
+   - **Commits:** faaf2f5, 1a1c566, bc548f1
+   - **Documentation:** `docs/features/phase-3.5-logo-image-support.md`
 
 4. ⬜ **Phase 4: Label Integration** (5-7 days)
    - Replace Canvas-based rendering with LayoutDesigner component
@@ -471,8 +475,8 @@ Additional production tools.
 
 5. ⬜ **Phase 5: Polish & UX** (1 week)
 
-**Progress:** Phase 1-3 complete (60% done)
-**Estimated Remaining:** 2.5 weeks (Phase 3.5: 2-3 days, Phase 4: 5-7 days, Phase 5: 1 week)
+**Progress:** Phase 1-3.5 complete (70% done)
+**Estimated Remaining:** 1.5 weeks (Phase 4: 5-7 days, Phase 5: 1 week)
 
 **Phase 3.5 Detailed Implementation Plan:**
 
