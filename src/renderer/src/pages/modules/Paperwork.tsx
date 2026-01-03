@@ -608,15 +608,24 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             headerTemplateId={currentTemplate.headerTemplateId}
             onSave={async (headerTemplateId: string) => {
               // Save the header template ID to the paperwork template
+              // Skip for system templates - they already reference default-paperwork-header
               try {
-                console.log('Saving header template ID:', headerTemplateId, 'to paperwork template:', currentTemplate.id);
-                await window.api.paperworkTemplates.update(currentTemplate.id, {
-                  headerTemplateId
-                });
-                console.log('Header template ID saved successfully');
+                console.log('Header template saved:', headerTemplateId);
+
+                // Only update the paperwork template if it's NOT a system template
+                if (!currentTemplate.isSystem) {
+                  console.log('Updating paperwork template:', currentTemplate.id, 'with header:', headerTemplateId);
+                  await window.api.paperworkTemplates.update(currentTemplate.id, {
+                    headerTemplateId
+                  });
+                  console.log('Header template ID saved to paperwork template');
+                } else {
+                  console.log('Skipping paperwork template update (system template) - header changes saved');
+                }
+
                 setShowHeaderDesigner(false);
               } catch (error) {
-                console.error('Failed to save header template ID:', error);
+                console.error('Failed to save header template:', error);
                 alert('Failed to save header template');
               }
             }}

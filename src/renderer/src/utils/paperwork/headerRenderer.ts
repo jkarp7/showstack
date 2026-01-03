@@ -177,6 +177,24 @@ function renderElement(element: LayoutElement, template: LayoutTemplate, data: H
       content = `${prefix}${fieldValue}${suffix}`;
     } else if (element.element_type === 'text') {
       content = renderTextContent(config.content || '', data);
+    } else if (element.element_type === 'image') {
+      // Render image element
+      const imageSrc = config.src || '';
+      const objectFit = config.objectFit || 'contain';
+      if (imageSrc) {
+        return `<div style="${style}; overflow: hidden;"><img src="${imageSrc}" alt="${config.altText || 'Image'}" style="width: 100%; height: 100%; object-fit: ${objectFit};" /></div>`;
+      }
+    } else if (element.element_type === 'shape') {
+      // Render shape element
+      const shapeType = config.shapeType || 'rectangle';
+      const color = config.color || '#000000';
+      const thickness = config.thickness || 1;
+
+      if (shapeType === 'rectangle') {
+        content = `<div style="width: 100%; height: 100%; border: ${thickness}px solid ${color};"></div>`;
+      } else if (shapeType === 'line' || shapeType === 'divider') {
+        content = `<div style="width: 100%; height: ${thickness}px; background-color: ${color};"></div>`;
+      }
     }
   } catch (e) {
     console.warn('Failed to parse element config:', element.id);
@@ -216,6 +234,24 @@ export async function renderHeaderHTML(
       content = `${prefix}${fieldValue}${suffix}`;
     } else if (element.element_type === 'text') {
       content = renderTextContent(config.content || '', data);
+    } else if (element.element_type === 'image') {
+      // Render image element
+      const imageSrc = config.src || '';
+      const objectFit = config.objectFit || 'contain';
+      if (imageSrc) {
+        content = `<img src="${imageSrc}" alt="${config.altText || 'Image'}" style="width: 100%; height: 100%; object-fit: ${objectFit};" />`;
+      }
+    } else if (element.element_type === 'shape') {
+      // Render shape element
+      const shapeType = config.shapeType || 'rectangle';
+      const color = config.color || '#000000';
+      const thickness = config.thickness || 1;
+
+      if (shapeType === 'rectangle') {
+        content = `<div style="width: 100%; height: 100%; border: ${thickness}px solid ${color};"></div>`;
+      } else if (shapeType === 'line' || shapeType === 'divider') {
+        content = `<div style="width: 100%; height: ${thickness}px; background-color: ${color};"></div>`;
+      }
     }
 
     // Calculate grid position (1-based for CSS grid)
@@ -223,6 +259,9 @@ export async function renderHeaderHTML(
     const gridColumnEnd = gridColumnStart + element.column_span;
     const gridRowStart = element.grid_row + 1;
     const gridRowEnd = gridRowStart + element.row_span;
+
+    // For images and shapes, use different flex alignment
+    const isImageOrShape = element.element_type === 'image' || element.element_type === 'shape';
 
     return `
       <div style="
@@ -234,8 +273,9 @@ export async function renderHeaderHTML(
         text-align: ${style.textAlign || 'left'};
         color: ${style.color || '#000000'};
         display: flex;
-        align-items: center;
-        justify-content: ${style.textAlign === 'center' ? 'center' : style.textAlign === 'right' ? 'flex-end' : 'flex-start'};
+        align-items: ${isImageOrShape ? 'stretch' : 'center'};
+        justify-content: ${isImageOrShape ? 'stretch' : (style.textAlign === 'center' ? 'center' : style.textAlign === 'right' ? 'flex-end' : 'flex-start')};
+        overflow: hidden;
       ">
         ${content}
       </div>
@@ -302,6 +342,24 @@ export async function renderHeaderTemplate(
             .replace('{total}', '<span class="totalPages"></span>')
             .replace('{date}', data.date || new Date().toLocaleDateString());
           content = textContent;
+        } else if (element.element_type === 'image') {
+          // Render image element
+          const imageSrc = config.src || '';
+          const objectFit = config.objectFit || 'contain';
+          if (imageSrc) {
+            return `<div style="${style}; overflow: hidden;"><img src="${imageSrc}" alt="${config.altText || 'Image'}" style="width: 100%; height: 100%; object-fit: ${objectFit};" /></div>`;
+          }
+        } else if (element.element_type === 'shape') {
+          // Render shape element
+          const shapeType = config.shapeType || 'rectangle';
+          const color = config.color || '#000000';
+          const thickness = config.thickness || 1;
+
+          if (shapeType === 'rectangle') {
+            content = `<div style="width: 100%; height: 100%; border: ${thickness}px solid ${color};"></div>`;
+          } else if (shapeType === 'line' || shapeType === 'divider') {
+            content = `<div style="width: 100%; height: ${thickness}px; background-color: ${color};"></div>`;
+          }
         }
       } catch (e) {
         console.warn('Failed to parse element config:', element.id);
