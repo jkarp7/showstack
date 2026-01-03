@@ -198,11 +198,13 @@ export const PROJECT_SCHEMA = `
     location TEXT,
     notes TEXT,
     building_service TEXT, -- Building electrical service (Service A, B, C, etc.)
+    phase_template_id TEXT, -- Phase distribution template
 
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
 
-    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+    FOREIGN KEY (phase_template_id) REFERENCES phase_distribution_templates(id) ON DELETE SET NULL
   );
 
   -- Dimmer Rack Modules table (defines module types for circuit ranges)
@@ -236,17 +238,38 @@ export const PROJECT_SCHEMA = `
     location TEXT,
     notes TEXT,
     building_service TEXT, -- Building electrical service (Service A, B, C, etc.)
+    phase_template_id TEXT, -- Phase distribution template
 
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
 
-    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+    FOREIGN KEY (phase_template_id) REFERENCES phase_distribution_templates(id) ON DELETE SET NULL
   );
 
   -- Indexes for power racks
   CREATE INDEX IF NOT EXISTS idx_dimmer_racks_project ON dimmer_racks(project_id);
   CREATE INDEX IF NOT EXISTS idx_pd_racks_project ON pd_racks(project_id);
   -- Note: Indexes on fixtures power columns are created by migrations to handle existing databases
+
+  -- Phase Distribution Templates table (save/load phase configurations for racks)
+  CREATE TABLE IF NOT EXISTS phase_distribution_templates (
+    id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT,
+    phase_config TEXT NOT NULL CHECK(phase_config IN ('single', 'split', 'three')),
+    circuit_count INTEGER NOT NULL CHECK(circuit_count IN (12, 24, 48, 96)),
+    phase_distribution TEXT NOT NULL, -- JSON: {"1": "A", "2": "B", "3": "A", ...}
+    is_system INTEGER DEFAULT 0, -- System templates (built-in) vs user templates
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_phase_templates_project ON phase_distribution_templates(project_id);
+  CREATE INDEX IF NOT EXISTS idx_phase_templates_system ON phase_distribution_templates(is_system);
 
   -- Infrastructure Equipment table (network switches, opto splitters, DMX gateways, etc.)
   CREATE TABLE IF NOT EXISTS infrastructure_equipment (

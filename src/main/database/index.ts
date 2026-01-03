@@ -420,6 +420,50 @@ function runProjectMigrations(db: Database): void {
     }
   }
 
+  // Phase Distribution Templates: Create table if it doesn't exist
+  const phaseTemplatesTableInfo = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='phase_distribution_templates'");
+  if (!phaseTemplatesTableInfo[0] || phaseTemplatesTableInfo[0].values.length === 0) {
+    console.log('Running migration: Creating phase_distribution_templates table');
+    db.run(`
+      CREATE TABLE phase_distribution_templates (
+        id TEXT PRIMARY KEY,
+        project_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        description TEXT,
+        phase_config TEXT NOT NULL CHECK(phase_config IN ('single', 'split', 'three')),
+        circuit_count INTEGER NOT NULL CHECK(circuit_count IN (12, 24, 48, 96)),
+        phase_distribution TEXT NOT NULL,
+        is_system INTEGER DEFAULT 0,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+      )
+    `);
+
+    db.run('CREATE INDEX IF NOT EXISTS idx_phase_templates_project ON phase_distribution_templates(project_id)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_phase_templates_system ON phase_distribution_templates(is_system)');
+  }
+
+  // Phase Distribution Templates: Add phase_template_id to dimmer_racks
+  const dimmerRacksTableInfo3 = db.exec("PRAGMA table_info(dimmer_racks)");
+  if (dimmerRacksTableInfo3[0]) {
+    const dimmerRacksColumns3 = dimmerRacksTableInfo3[0].values.map(row => row[1]) || [];
+    if (!dimmerRacksColumns3.includes('phase_template_id')) {
+      console.log('Running migration: Adding phase_template_id to dimmer_racks');
+      db.run('ALTER TABLE dimmer_racks ADD COLUMN phase_template_id TEXT');
+    }
+  }
+
+  // Phase Distribution Templates: Add phase_template_id to pd_racks
+  const pdRacksTableInfo2 = db.exec("PRAGMA table_info(pd_racks)");
+  if (pdRacksTableInfo2[0]) {
+    const pdRacksColumns2 = pdRacksTableInfo2[0].values.map(row => row[1]) || [];
+    if (!pdRacksColumns2.includes('phase_template_id')) {
+      console.log('Running migration: Adding phase_template_id to pd_racks');
+      db.run('ALTER TABLE pd_racks ADD COLUMN phase_template_id TEXT');
+    }
+  }
+
   // Create dimmer_rack_modules table if it doesn't exist
   const dimmerRackModulesTableInfo = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='dimmer_rack_modules'");
   if (!dimmerRackModulesTableInfo[0] || dimmerRackModulesTableInfo[0].values.length === 0) {
