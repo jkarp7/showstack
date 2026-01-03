@@ -570,9 +570,44 @@ export function LayoutDesigner({
         <div className="text-sm text-gray-400">
           💡 <span className="font-medium">Tip:</span> Drag elements from the palette onto the canvas, then use the inspector to customize
         </div>
-        <div className="text-xs text-gray-500">
-          Grid: {template.grid_columns}×{template.grid_rows} •
-          Page: {template.page_width}×{template.page_height}px
+        <div className="flex items-center gap-4">
+          <div className="text-xs text-gray-500">
+            Grid: {template.grid_columns}×{template.grid_rows} •
+            Page: {template.page_width}×{template.page_height}px
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-400">Rows:</span>
+            <button
+              onClick={() => {
+                if (template.grid_rows > 4) {
+                  const rowHeight = template.page_height / template.grid_rows;
+                  setTemplate({
+                    ...template,
+                    grid_rows: template.grid_rows - 1,
+                    page_height: Math.round(rowHeight * (template.grid_rows - 1))
+                  });
+                }
+              }}
+              className="w-6 h-6 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm flex items-center justify-center transition"
+              title="Decrease rows"
+            >
+              −
+            </button>
+            <button
+              onClick={() => {
+                const rowHeight = template.page_height / template.grid_rows;
+                setTemplate({
+                  ...template,
+                  grid_rows: template.grid_rows + 1,
+                  page_height: Math.round(rowHeight * (template.grid_rows + 1))
+                });
+              }}
+              className="w-6 h-6 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm flex items-center justify-center transition"
+              title="Increase rows"
+            >
+              +
+            </button>
+          </div>
         </div>
       </div>
 
