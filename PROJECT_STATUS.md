@@ -68,9 +68,10 @@ This document tracks the development status of all ShowStack feature domains and
    - ✅ Template migration system for future updates
 
 ### Next Steps (After Phase 3)
-1. **Phase 4: Label Integration** - Grid designer for label layouts
-2. **Phase 5: Polish & UX** - Inline editing, gradients, shadows, multi-display support
-3. **Implement shop order creation from system documentation** (auto-populate from fixture/infrastructure data)
+1. **Phase 3.5: Logo & Image Enhancement** - Image upload UI, project logo integration, PDF rendering (2-3 days)
+2. **Phase 4: Label Integration** - Grid designer for label layouts (5-7 days)
+3. **Phase 5: Polish & UX** - Inline editing, gradients, shadows, multi-display support (1 week)
+4. **Implement shop order creation from system documentation** (auto-populate from fixture/infrastructure data)
 
 ### Short-term (Next 1-2 Months) - **Focus on Lightwright Parity**
 1. **MVR export support** - Industry standard CAD/visualizer format
@@ -187,12 +188,9 @@ Drag-and-drop label creation for various printer types with HTML5 Canvas.
   - Element inspector with property editing
 
 **Remaining Work:**
-- ⬜ **PDF export** - handleExportLabels() needs implementation
-- ⬜ **Actual printing** - handlePrintLabels() needs IPC integration
-- ⬜ **Barcode/QR code generation** - Mentioned but not implemented
-- ⬜ **Printer driver integration** - No direct printer communication
-- ⬜ **Custom background colors** - User-selectable label background (1 day)
-- ⬜ **Background images** - Support logo/image backgrounds on labels (1-2 days)
+- ⬜ **Phase 4: Label Integration** - Complete replacement with unified visual editor (see Unified Visual Editor System section)
+  - Will include: PDF export, barcode/QR codes, custom background colors, image support, printer integration
+  - Current Canvas-based implementation will be replaced with grid-based LayoutDesigner
 
 **Estimated Time to Complete:** 1-2 weeks
 
@@ -227,9 +225,10 @@ Drag-and-drop label creation for various printer types with HTML5 Canvas.
   - Manufacturer detection from gel codes
 
 **Pending Additions:**
+- ⬜ **Phase 3.5: Logo & Image Support** - Image upload, project logo storage, PDF rendering (2-3 days)
 - ⬜ **Color printing support** - Enable color in system docs paperwork (1 day)
 
-**Estimated Total:** 1 day
+**Estimated Total:** 3-4 days
 
 ---
 
@@ -418,13 +417,144 @@ Additional production tools.
    - **Branch:** `feature/unified-visual-editor`
    - **Commits:** 4 commits (429d517, 0509313, 652ea0e, b7ab7d2)
 
-2. ⬜ **Phase 2: Text & Shape Formatting** (1 week)
-3. ⬜ **Phase 3: Paperwork Integration** (1 week)
-4. ⬜ **Phase 4: Label Integration** (1 week)
+2. ✅ **Phase 2: Text & Shape Formatting** - COMPLETED
+   - ColorPicker component with preset swatches, hex input, opacity slider
+   - User custom color saving to localStorage (max 12 colors)
+   - Font size preset buttons (8-72pt) with custom input
+   - Text style toggles: Bold, Italic, Underline, Strikethrough
+   - Icon-based text alignment buttons (left, center, right, justify)
+   - Line height slider (0.8-3.0) and letter spacing controls (-2px to 10px)
+   - Fill & Borders section with color pickers and opacity controls
+   - Individual padding controls with link/unlink checkbox
+   - Streamlined typography controls for compact UX
+   - **Commits:** 99222de, f05121c
+
+3. ✅ **Phase 3: Paperwork Integration** - COMPLETED
+   - PaperworkHeaderDesigner component with 12-column × 8-row grid
+   - Default paperwork header template for all 13 report types
+   - Header and footer rendering for PDF exports with Puppeteer
+   - CSS Grid-based header layout (replaced absolute positioning)
+   - Repeating headers/footers on multi-page PDFs
+   - Integration with existing paperwork template system
+   - Batch export with proper header rendering
+   - Image element type available in ElementPalette (partial - needs enhancement)
+   - **Commits:** bcac556, 6126f68, dd76483, 0d05e65, 59b6710
+   - **Pending:** Image upload UI and logo integration (see Phase 3.5 below)
+
+3.5. ⬜ **Phase 3.5: Logo & Image Enhancement** (2-3 days)
+   - Add image upload UI to ElementInspector for image elements
+   - Project logo storage in database (projects table)
+   - Quick "Insert Logo" button in ElementPalette
+   - Support for URL-based images and base64 storage
+   - Test image rendering in PDF exports with Puppeteer
+   - Add default show logo to paperwork header templates
+   - Image file browser for selecting local graphics
+   - **Estimated effort:** 2-3 days
+
+4. ⬜ **Phase 4: Label Integration** (5-7 days)
+   - Replace Canvas-based rendering with LayoutDesigner component
+   - Convert LabelGraphic data structure to LayoutElement format
+   - Migrate from pixel coordinates to grid-based positioning
+   - Create label-specific grid configurations for printer types:
+     - Avery templates (5160, 5163, 5164, 8160, 5167) with proper dimensions
+     - Roll printers (Dymo 450, Brother P-Touch, Zebra ZD420)
+   - Add barcode/QR code element type to ElementPalette
+   - Add image element support (logos, icons, graphics with PNG/JPG/SVG)
+   - Add label background color customization with ColorPicker
+   - Leverage Phase 2 formatting controls (ColorPicker, typography, spacing)
+   - Preserve batch printing functionality with data field mapping
+   - Migrate save/load system from localStorage to app database
+   - Convert predefined templates (cable, circuit, fixture, dimmer) to grid layouts
+   - Add label-specific right panel with printer settings
+   - Implement PDF export with proper label sheet layout
+   - **Estimated effort:** 5-7 days
+
 5. ⬜ **Phase 5: Polish & UX** (1 week)
 
-**Progress:** Phase 1 complete (20% done)
-**Estimated Remaining:** 4 weeks
+**Progress:** Phase 1-3 complete (60% done)
+**Estimated Remaining:** 2.5 weeks (Phase 3.5: 2-3 days, Phase 4: 5-7 days, Phase 5: 1 week)
+
+**Phase 3.5 Detailed Implementation Plan:**
+
+**Day 1: Image Upload & Storage**
+- Add file browser button to ElementInspector for image elements
+- Implement image upload with file type validation (PNG, JPG, SVG, GIF)
+- Store images as base64 in `page_layout_elements.config` (ImageConfig.src)
+- Add image preview in ElementInspector
+- Support both local file upload and URL input
+- Maximum file size validation (2MB recommended for performance)
+
+**Day 2: Project Logo Integration**
+- Add `logo_path` column to projects table (stores base64 or file path)
+- Create logo upload UI in project settings
+- Add "Insert Project Logo" quick action to ElementPalette
+- Auto-populate logo when creating new paperwork headers
+- Logo management: upload, replace, remove
+
+**Day 3: PDF Export & Testing**
+- Test image rendering in Puppeteer PDF exports
+- Ensure base64 images render correctly in PDFs
+- Test different image formats and sizes
+- Verify image scaling with objectFit settings
+- Update default paperwork header templates with logo placeholder
+- Documentation for logo/image usage
+
+**Phase 4 Detailed Implementation Plan:**
+
+**Day 1-2: Core Architecture Migration**
+- Create `LabelLayoutDesigner.tsx` component wrapping LayoutDesigner
+- Define label-specific grid configurations:
+  - Grid calculator function: `calculateLabelGrid(printerType, averyTemplate)`
+  - Avery 5160: 12×8 grid (2.625" × 1" label)
+  - Avery 5163: 16×10 grid (4" × 2" label)
+  - Dymo/Brother: 18×4 grid (roll labels)
+- Create data migration utility: `convertLabelGraphicToLayoutElement()`
+- Update database schema: `label_templates` table in app database
+
+**Day 3-4: Element Types & Templates**
+- Add barcode/QR code element type to `ElementPalette.tsx`
+  - Barcode rendering component with Code128/QR generation
+  - Data field binding for dynamic barcode values
+- Add image element support for labels (logos, icons, graphics)
+  - Image upload and storage in database
+  - Image positioning and sizing within grid
+  - Support for PNG, JPG, SVG formats
+- Add label background color customization
+  - ColorPicker integration for label background
+  - Support for transparent, solid colors, and opacity
+  - Per-template background color settings
+- Convert predefined templates to grid-based layouts:
+  - Cable label: Header text + body text + footer (3 rows)
+  - Circuit label: Border rectangle + 3 text elements (centered)
+  - Fixture label: 3 text rows with position/channel/color
+  - Dimmer label: Border + bold header + 2 detail rows
+- Add template seeding to database migrations
+
+**Day 5: Batch Printing & Data Field Mapping**
+- Implement batch mode with fixture/infrastructure data binding
+- Create data field selector for label elements:
+  - Text elements can bind to fixture fields (Channel, Dimmer, Type, etc.)
+  - Barcode elements bind to ID/serial fields
+- Batch preview with paginated label sheets
+
+**Day 6: PDF Export & Printer Integration**
+- Implement PDF export with Puppeteer:
+  - Avery sheet layout renderer (multiple labels per page)
+  - Roll label continuous output
+- Add print dialog with printer selection
+- Label sheet visualization with proper margins/gaps
+
+**Day 7: Polish & Testing**
+- Add label-specific properties panel with:
+  - Printer type and template selector
+  - Label dimensions display
+  - Background color picker (including transparent option)
+  - Image upload controls
+- Migrate existing user designs from localStorage
+- Manual testing of all printer templates
+- Test image rendering in PDF exports
+- Test background colors on different printer types
+- Documentation updates
 
 **Benefits:**
 - Consistent UX across all paperwork/label tasks
