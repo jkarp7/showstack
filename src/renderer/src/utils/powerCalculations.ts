@@ -9,6 +9,7 @@ import {
   RackPowerSummary,
   PhaseBalance,
   ProjectPowerSummary,
+  ServicePowerSummary,
   PowerWarning,
   Phase,
   CapacityCheckResult,
@@ -264,6 +265,83 @@ export function calculatePhaseBalance(
 // ============================================
 
 /**
+ * Calculate power summaries grouped by building service
+ */
+export function calculateServicePowerSummaries(
+  dimmerRackSummaries: RackPowerSummary[],
+  pdRackSummaries: RackPowerSummary[],
+  dimmerRacks: DimmerRack[],
+  pdRacks: PDRack[]
+): ServicePowerSummary[] {
+  // Create a map of rack_id to building_service
+  const rackServiceMap = new Map<string, string>();
+
+  dimmerRacks.forEach(rack => {
+    rackServiceMap.set(rack.id, rack.building_service || 'Unassigned');
+  });
+
+  pdRacks.forEach(rack => {
+    rackServiceMap.set(rack.id, rack.building_service || 'Unassigned');
+  });
+
+  // Group summaries by service
+  const serviceGroups = new Map<string, RackPowerSummary[]>();
+
+  [...dimmerRackSummaries, ...pdRackSummaries].forEach(summary => {
+    const service = rackServiceMap.get(summary.rack_id) || 'Unassigned';
+
+    if (!serviceGroups.has(service)) {
+      serviceGroups.set(service, []);
+    }
+
+    serviceGroups.get(service)!.push(summary);
+  });
+
+  // Calculate service summaries
+  const serviceSummaries: ServicePowerSummary[] = [];
+
+  serviceGroups.forEach((racks, serviceName) => {
+    const totalCapacity = racks.reduce((sum, r) => sum + r.total_capacity_kw, 0);
+    const totalLoad = racks.reduce((sum, r) => sum + r.total_load_kw, 0);
+    const utilization = totalCapacity > 0 ? (totalLoad / totalCapacity) * 100 : 0;
+
+    const warnings: string[] = [];
+
+    // Check for service-level warnings
+    if (utilization >= CAPACITY_CRITICAL_THRESHOLD) {
+      warnings.push(`${serviceName} at ${utilization.toFixed(1)}% capacity (CRITICAL)`);
+    } else if (utilization >= CAPACITY_WARNING_THRESHOLD) {
+      warnings.push(`${serviceName} at ${utilization.toFixed(1)}% capacity (WARNING)`);
+    }
+
+    // Include rack-level warnings
+    racks.forEach(rack => {
+      if (rack.warnings.length > 0) {
+        warnings.push(...rack.warnings.map(w => `${rack.rack_name}: ${w}`));
+      }
+    });
+
+    serviceSummaries.push({
+      service_name: serviceName,
+      total_capacity_kw: totalCapacity,
+      total_load_kw: totalLoad,
+      utilization_percentage: utilization,
+      racks,
+      warnings
+    });
+  });
+
+  // Sort by service name, with "Unassigned" last
+  serviceSummaries.sort((a, b) => {
+    if (a.service_name === 'Unassigned') return 1;
+    if (b.service_name === 'Unassigned') return -1;
+    return a.service_name.localeCompare(b.service_name);
+  });
+
+  return serviceSummaries;
+}
+
+/**
  * Calculate overall project power summary
  */
 export function calculateProjectPowerSummary(
@@ -300,6 +378,14 @@ export function calculateProjectPowerSummary(
 
   // Calculate phase balance
   const phaseBalance = calculatePhaseBalance(fixtures);
+
+  // Calculate service summaries
+  const services = calculateServicePowerSummaries(
+    dimmerSummaries,
+    pdSummaries,
+    dimmerRacks,
+    pdRacks
+  );
 
   // Collect all warnings
   const warnings: PowerWarning[] = [];
@@ -345,6 +431,7 @@ export function calculateProjectPowerSummary(
     overall_utilization: overallUtilization,
     dimmer_racks: dimmerSummaries,
     pd_racks: pdSummaries,
+    services,
     phase_balance: phaseBalance,
     warnings,
     critical_warnings: criticalWarnings

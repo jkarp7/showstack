@@ -8,12 +8,16 @@ export interface PDRack {
   id: string;
   project_id: string;
   name: string;
+  rack_identifier?: string; // Identifier for circuit naming (e.g., "Z", "FOH", "DECK")
   voltage: number; // 120, 208, 230, or 240
+  is_dual_voltage?: boolean; // Rack has both 120V and 208V outputs (separate circuits)
+  secondary_voltage?: number; // Secondary voltage if dual voltage
   circuit_count: number; // 12, 24, 48, or 96
   phase_config?: 'single' | 'split' | 'three';
   amps_per_breaker?: number;
   location?: string;
   notes?: string;
+  building_service?: string; // Building electrical service (Service A, B, C, etc.)
   created_at: number;
   updated_at: number;
 }
@@ -87,8 +91,8 @@ export function createPDRack(
     INSERT INTO pd_racks (
       id, project_id, name, rack_identifier, voltage, is_dual_voltage, secondary_voltage,
       circuit_count, phase_config, amps_per_breaker, location, notes,
-      created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      building_service, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
     id,
     projectId,
@@ -102,6 +106,7 @@ export function createPDRack(
     rack.amps_per_breaker || 20,
     rack.location || null,
     rack.notes || null,
+    (rack as any).building_service || null,
     now,
     now
   ]);
@@ -160,6 +165,10 @@ export function updatePDRack(id: string, updates: Partial<PDRack>): PDRack {
   if (updates.notes !== undefined) {
     setClauses.push('notes = ?');
     values.push(updates.notes);
+  }
+  if ((updates as any).building_service !== undefined) {
+    setClauses.push('building_service = ?');
+    values.push((updates as any).building_service);
   }
 
   if (setClauses.length === 0) {

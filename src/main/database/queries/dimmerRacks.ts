@@ -8,6 +8,7 @@ export interface DimmerRack {
   id: string;
   project_id: string;
   name: string;
+  rack_identifier?: string;
   manufacturer?: string;
   model?: string;
   circuit_count: number; // 12, 24, 48, or 96
@@ -16,6 +17,7 @@ export interface DimmerRack {
   watts_per_module?: number;
   location?: string;
   notes?: string;
+  building_service?: string; // Building electrical service (Service A, B, C, etc.)
   created_at: number;
   updated_at: number;
 }
@@ -89,8 +91,8 @@ export function createDimmerRack(
     INSERT INTO dimmer_racks (
       id, project_id, name, rack_identifier, manufacturer, model, circuit_count,
       module_type, channels_per_module, watts_per_module, location, notes,
-      created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      building_service, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
     id,
     projectId,
@@ -104,6 +106,7 @@ export function createDimmerRack(
     rack.watts_per_module || 2400,
     rack.location || null,
     rack.notes || null,
+    (rack as any).building_service || null,
     now,
     now
   ]);
@@ -162,6 +165,10 @@ export function updateDimmerRack(id: string, updates: Partial<DimmerRack>): Dimm
   if (updates.notes !== undefined) {
     setClauses.push('notes = ?');
     values.push(updates.notes);
+  }
+  if ((updates as any).building_service !== undefined) {
+    setClauses.push('building_service = ?');
+    values.push((updates as any).building_service);
   }
 
   if (setClauses.length === 0) {
