@@ -7,6 +7,7 @@ import { ModuleLanding } from './pages/ModuleLanding';
 import { Prep } from './pages/modules/Prep';
 import { SystemDocs } from './pages/modules/SystemDocs';
 import { Manager } from './pages/modules/Manager';
+import { LabelVisualDesigner } from './pages/LabelVisualDesigner';
 import { AdminPanel } from './pages/admin/AdminPanel';
 import { Account } from './pages/Account';
 import { Settings } from './pages/Settings';
@@ -59,6 +60,7 @@ function AppContent() {
         <Route path="/project/:projectId/module/:moduleType" element={<ModuleLanding />} />
         <Route path="/project/:projectId/module/production/system-docs" element={<SystemDocs />} />
         <Route path="/project/:projectId/module/production/shop-order" element={<Prep />} />
+        <Route path="/project/:projectId/prep/label-designer/:averyCode" element={<LabelVisualDesigner />} />
         <Route path="/project/:projectId/module/design" element={<Navigate to="prep" replace />} />
         <Route path="/project/:projectId/module/prep" element={<Navigate to="/project/:projectId/module/production/shop-order" replace />} />
         <Route path="/project/:projectId/module/manager" element={<Manager />} />

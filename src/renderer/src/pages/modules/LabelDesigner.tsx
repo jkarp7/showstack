@@ -1038,9 +1038,22 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Label Preview</h2>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                {Math.round(labelWidth / 96 * 10) / 10}" × {Math.round(labelHeight / 96 * 10) / 10}"
-                ({labelWidth}px × {labelHeight}px)
+              <div className="flex items-center gap-4">
+                {printerType === 'avery-sheet' && (
+                  <button
+                    onClick={() => {
+                      // Open visual designer for the selected Avery template
+                      window.location.hash = `/project/${currentProjectId}/prep/label-designer/${averyTemplate}`;
+                    }}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                  >
+                    Edit with Visual Designer
+                  </button>
+                )}
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {Math.round(labelWidth / 96 * 10) / 10}" × {Math.round(labelHeight / 96 * 10) / 10}"
+                  ({labelWidth}px × {labelHeight}px)
+                </div>
               </div>
             </div>
 
