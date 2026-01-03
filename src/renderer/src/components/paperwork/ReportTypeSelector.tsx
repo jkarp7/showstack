@@ -9,23 +9,22 @@ import { ReportType } from '../../types/paperworkTemplate';
 interface ReportTypeOption {
   id: ReportType;
   name: string;
-  icon: string;
 }
 
 const REPORT_TYPE_OPTIONS: ReportTypeOption[] = [
-  { id: 'channel-hookup', name: 'Channel Hookup', icon: '📊' },
-  { id: 'dimmer-schedule', name: 'Dimmer Schedule', icon: '⚡' },
-  { id: 'circuit-list', name: 'Circuit List', icon: '🔌' },
-  { id: 'dmx-addresses', name: 'DMX Address List', icon: '🎛️' },
-  { id: 'color-schedule', name: 'Color Schedule', icon: '🎨' },
-  { id: 'gobo-schedule', name: 'Gobo Schedule', icon: '🎭' },
-  { id: 'power-summary', name: 'Power Summary', icon: '⚙️' },
-  { id: 'color-cut-report', name: 'Color Cut Report', icon: '✂️' },
-  { id: 'infrastructure-list', name: 'Infrastructure Equipment List', icon: '🔧' },
-  { id: 'network-summary', name: 'Network Summary', icon: '🌐' },
-  { id: 'port-assignments', name: 'Port Assignments', icon: '🔌' },
-  { id: 'infrastructure-power', name: 'Infrastructure Power', icon: '⚡' },
-  { id: 'infrastructure-location', name: 'Infrastructure by Location', icon: '📍' }
+  { id: 'channel-hookup', name: 'Channel Hookup' },
+  { id: 'dimmer-schedule', name: 'Dimmer Schedule' },
+  { id: 'circuit-list', name: 'Circuit List' },
+  { id: 'dmx-addresses', name: 'DMX Address List' },
+  { id: 'color-schedule', name: 'Color Schedule' },
+  { id: 'gobo-schedule', name: 'Gobo Schedule' },
+  { id: 'power-summary', name: 'Power Summary' },
+  { id: 'color-cut-report', name: 'Color Cut Report' },
+  { id: 'infrastructure-list', name: 'Infrastructure Equipment List' },
+  { id: 'network-summary', name: 'Network Summary' },
+  { id: 'port-assignments', name: 'Port Assignments' },
+  { id: 'infrastructure-power', name: 'Infrastructure Power' },
+  { id: 'infrastructure-location', name: 'Infrastructure by Location' }
 ];
 
 interface ReportTypeSelectorProps {
@@ -65,12 +64,9 @@ export function ReportTypeSelector({ value, onChange }: ReportTypeSelectorProps)
         onClick={() => setIsOpen(!isOpen)}
         className="w-full px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-left transition flex items-center justify-between border border-gray-700"
       >
-        <div className="flex items-center gap-3">
-          <span className="text-xl">{selectedOption?.icon}</span>
-          <div>
-            <div className="text-xs text-gray-400 mb-0.5">Report Type</div>
-            <div className="text-sm font-medium">{selectedOption?.name}</div>
-          </div>
+        <div>
+          <div className="text-xs text-gray-400 mb-0.5">Report Type</div>
+          <div className="text-sm font-medium">{selectedOption?.name}</div>
         </div>
         <span className="text-gray-400">{isOpen ? '▲' : '▼'}</span>
       </button>
@@ -82,11 +78,10 @@ export function ReportTypeSelector({ value, onChange }: ReportTypeSelectorProps)
             <button
               key={option.id}
               onClick={() => handleSelect(option.id)}
-              className={`w-full px-4 py-3 text-left hover:bg-gray-700 transition flex items-center gap-3 border-b border-gray-700 last:border-b-0 ${
+              className={`w-full px-4 py-3 text-left hover:bg-gray-700 transition border-b border-gray-700 last:border-b-0 ${
                 value === option.id ? 'bg-blue-600 hover:bg-blue-700' : ''
               }`}
             >
-              <span className="text-xl">{option.icon}</span>
               <span className="text-sm">{option.name}</span>
             </button>
           ))}

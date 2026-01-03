@@ -9,7 +9,6 @@ type ModuleType = 'production' | 'manager' | 'design';
 interface ToolCard {
   name: string;
   description: string;
-  icon: string;
   route: string;
   isLocked: boolean;
 }
@@ -19,21 +18,18 @@ const MODULE_TOOLS: Record<ModuleType, ToolCard[]> = {
     {
       name: 'Shop Order',
       description: 'Equipment orders and specifications for rental houses',
-      icon: '📋',
       route: 'shop-order',
       isLocked: false
     },
     {
       name: 'System Docs',
       description: 'Equipment Manager, Paperwork Generator, and Label Designer - Lightwright parity tool',
-      icon: '📊',
       route: 'system-docs',
       isLocked: false
     },
     {
       name: 'Blueprint',
       description: 'System drawings and rack elevations - Omnigraffle parity tool (Coming Soon)',
-      icon: '📐',
       route: 'blueprint',
       isLocked: true
     }
@@ -42,7 +38,6 @@ const MODULE_TOOLS: Record<ModuleType, ToolCard[]> = {
     {
       name: 'Tour Manager',
       description: 'Manage tour schedules, logistics, and travel',
-      icon: '🗺️',
       route: 'tour',
       isLocked: true
     }
@@ -51,7 +46,6 @@ const MODULE_TOOLS: Record<ModuleType, ToolCard[]> = {
     {
       name: 'Design Studio',
       description: 'Create lighting designs and visualizations',
-      icon: '🎨',
       route: 'studio',
       isLocked: true
     }
@@ -187,12 +181,11 @@ export function ModuleLanding() {
                       : 'hover:border-blue-500 dark:hover:border-blue-400 cursor-pointer'
                   }`}
                 >
-                  <div className="text-4xl mb-4">{tool.icon}</div>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{tool.name}</h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm">{tool.description}</p>
                   {tool.isLocked && (
-                    <div className="mt-4 text-yellow-600 dark:text-yellow-500 text-sm flex items-center gap-2">
-                      🔒 Coming Soon
+                    <div className="mt-4 text-yellow-600 dark:text-yellow-500 text-sm">
+                      Coming Soon
                     </div>
                   )}
                 </div>
@@ -221,7 +214,7 @@ export function ModuleLanding() {
                     onClick={() => handleOpenRecentFile(file.filePath)}
                   >
                     <div className="flex items-start justify-between mb-3">
-                      <div className="text-4xl">📄</div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 truncate">{file.projectName}</h3>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -233,7 +226,6 @@ export function ModuleLanding() {
                         ×
                       </button>
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 truncate">{file.projectName}</h3>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Created: {new Date(file.created).toLocaleDateString()}
                     </p>
@@ -245,7 +237,6 @@ export function ModuleLanding() {
               </div>
             ) : (
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-12 text-center">
-                <div className="text-6xl mb-4">📂</div>
                 <p className="text-gray-600 dark:text-gray-400 text-lg mb-4">No recent files</p>
                 <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
                   Open an existing file or create a new one to get started

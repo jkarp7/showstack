@@ -19,19 +19,19 @@ import { organizeReportData } from '../../utils/paperwork/reportOrganizer';
 import { renderHeaderHTML, renderFooterHTML, renderHeaderTemplate, renderFooterTemplate, calculateDataRange } from '../../utils/paperwork/headerRenderer';
 
 const REPORT_TEMPLATES = [
-  { id: 'channel-hookup', name: 'Channel Hookup', icon: '📊' },
-  { id: 'dimmer-schedule', name: 'Dimmer Schedule', icon: '⚡' },
-  { id: 'circuit-list', name: 'Circuit List', icon: '🔌' },
-  { id: 'dmx-addresses', name: 'DMX Address List', icon: '🎛️' },
-  { id: 'color-schedule', name: 'Color Schedule', icon: '🎨' },
-  { id: 'gobo-schedule', name: 'Gobo Schedule', icon: '🎭' },
-  { id: 'power-summary', name: 'Power Summary', icon: '⚙️' },
-  { id: 'color-cut-report', name: 'Color Cut Report', icon: '✂️' },
-  { id: 'infrastructure-list', name: 'Infrastructure Equipment List', icon: '🔧' },
-  { id: 'network-summary', name: 'Network Summary', icon: '🌐' },
-  { id: 'port-assignments', name: 'Port Assignments', icon: '🔌' },
-  { id: 'infrastructure-power', name: 'Infrastructure Power', icon: '⚡' },
-  { id: 'infrastructure-location', name: 'Infrastructure by Location', icon: '📍' }
+  { id: 'channel-hookup', name: 'Channel Hookup' },
+  { id: 'dimmer-schedule', name: 'Dimmer Schedule' },
+  { id: 'circuit-list', name: 'Circuit List' },
+  { id: 'dmx-addresses', name: 'DMX Address List' },
+  { id: 'color-schedule', name: 'Color Schedule' },
+  { id: 'gobo-schedule', name: 'Gobo Schedule' },
+  { id: 'power-summary', name: 'Power Summary' },
+  { id: 'color-cut-report', name: 'Color Cut Report' },
+  { id: 'infrastructure-list', name: 'Infrastructure Equipment List' },
+  { id: 'network-summary', name: 'Network Summary' },
+  { id: 'port-assignments', name: 'Port Assignments' },
+  { id: 'infrastructure-power', name: 'Infrastructure Power' },
+  { id: 'infrastructure-location', name: 'Infrastructure by Location' }
 ] as const;
 
 interface PaperworkProps {
@@ -574,7 +574,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                 }}
                 className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm transition"
               >
-                📦 Batch Export
+                Batch Export
               </button>
             </div>
           </div>
@@ -649,7 +649,6 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                       onChange={() => toggleBatchSelection(template.id as ReportType)}
                       className="w-4 h-4"
                     />
-                    <span>{template.icon}</span>
                     <span className="flex-1">{template.name}</span>
                   </label>
                 ))}
@@ -684,7 +683,6 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       {isBatchProcessing && (
         <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
           <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full text-center">
-            <div className="text-4xl mb-4">📄</div>
             <h3 className="text-xl font-bold mb-2">Exporting Reports...</h3>
             <p className="text-gray-400 mb-4">
               {batchProgress.reportName}

@@ -6,7 +6,6 @@ interface PaletteElement {
   subType?: DataFieldType | ShapeType;
   label: string;
   description: string;
-  icon: string;
   category: 'data' | 'content' | 'visual';
 }
 
@@ -17,7 +16,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'production_name',
     label: 'Production Name',
     description: 'Show name',
-    icon: '🎭',
     category: 'data'
   },
   {
@@ -25,7 +23,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'venue',
     label: 'Venue',
     description: 'Theater or venue name',
-    icon: '🏛️',
     category: 'data'
   },
   {
@@ -33,7 +30,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'venue_city',
     label: 'Venue City',
     description: 'City location',
-    icon: '🌆',
     category: 'data'
   },
   {
@@ -41,7 +37,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'venue_state',
     label: 'Venue State',
     description: 'State/Province',
-    icon: '📍',
     category: 'data'
   },
   {
@@ -49,7 +44,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'order_date',
     label: 'Order Date',
     description: 'Shop order date',
-    icon: '📅',
     category: 'data'
   },
   {
@@ -57,7 +51,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'load_in_date',
     label: 'Load In Date',
     description: 'Load in schedule',
-    icon: '📦',
     category: 'data'
   },
   {
@@ -65,7 +58,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'opening_night_date',
     label: 'Opening Night',
     description: 'Opening date',
-    icon: '🎉',
     category: 'data'
   },
   {
@@ -73,7 +65,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'closing_date',
     label: 'Closing Date',
     description: 'Closing date',
-    icon: '🎬',
     category: 'data'
   },
   {
@@ -81,7 +72,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'prep_start_date',
     label: 'Prep Start Date',
     description: 'Shop prep start',
-    icon: '🔧',
     category: 'data'
   },
   {
@@ -89,7 +79,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'prep_end_date',
     label: 'Prep End Date',
     description: 'Shop prep end',
-    icon: '🔧',
     category: 'data'
   },
   {
@@ -97,7 +86,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'first_preview_date',
     label: 'First Preview',
     description: 'First preview date',
-    icon: '🎭',
     category: 'data'
   },
   {
@@ -105,7 +93,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'gm_name',
     label: 'General Manager',
     description: 'GM name',
-    icon: '👤',
     category: 'data'
   },
   {
@@ -113,7 +100,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'gm_company',
     label: 'GM Company',
     description: 'GM company name',
-    icon: '🏢',
     category: 'data'
   },
   {
@@ -121,7 +107,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'gm_email',
     label: 'GM Email',
     description: 'GM email address',
-    icon: '📧',
     category: 'data'
   },
   {
@@ -129,7 +114,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'gm_phone',
     label: 'GM Phone',
     description: 'GM phone number',
-    icon: '📞',
     category: 'data'
   },
   {
@@ -137,7 +121,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'pm_name',
     label: 'Production Manager',
     description: 'PM name',
-    icon: '👤',
     category: 'data'
   },
   {
@@ -145,7 +128,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'pm_company',
     label: 'PM Company',
     description: 'PM company name',
-    icon: '🏢',
     category: 'data'
   },
   {
@@ -153,7 +135,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'pm_email',
     label: 'PM Email',
     description: 'PM email address',
-    icon: '📧',
     category: 'data'
   },
   {
@@ -161,7 +142,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'pm_phone',
     label: 'PM Phone',
     description: 'PM phone number',
-    icon: '📞',
     category: 'data'
   },
   {
@@ -169,7 +149,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'ld_name',
     label: 'Lighting Designer',
     description: 'LD name',
-    icon: '💡',
     category: 'data'
   },
   {
@@ -177,7 +156,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'ld_email',
     label: 'LD Email',
     description: 'LD email address',
-    icon: '📧',
     category: 'data'
   },
   {
@@ -185,7 +163,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'ld_phone',
     label: 'LD Phone',
     description: 'LD phone number',
-    icon: '📞',
     category: 'data'
   },
   {
@@ -193,7 +170,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'ald_name',
     label: 'Associate LD',
     description: 'ALD name',
-    icon: '👤',
     category: 'data'
   },
   {
@@ -201,7 +177,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'ald_email',
     label: 'ALD Email',
     description: 'ALD email address',
-    icon: '📧',
     category: 'data'
   },
   {
@@ -209,7 +184,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'ald_phone',
     label: 'ALD Phone',
     description: 'ALD phone number',
-    icon: '📞',
     category: 'data'
   },
   {
@@ -217,7 +191,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'pe_name',
     label: 'Production Electrician',
     description: 'PE name',
-    icon: '👤',
     category: 'data'
   },
   {
@@ -225,7 +198,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'pe_email',
     label: 'PE Email',
     description: 'PE email address',
-    icon: '📧',
     category: 'data'
   },
   {
@@ -233,7 +205,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'pe_phone',
     label: 'PE Phone',
     description: 'PE phone number',
-    icon: '📞',
     category: 'data'
   },
   {
@@ -241,7 +212,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'current_revision',
     label: 'Current Revision',
     description: 'Revision number',
-    icon: '🔄',
     category: 'data'
   },
   {
@@ -249,7 +219,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'logo',
     label: 'Production Logo',
     description: 'Show logo image',
-    icon: '🖼️',
     category: 'data'
   },
 
@@ -259,7 +228,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'report_title',
     label: 'Report Title',
     description: 'Dynamic report title',
-    icon: '📋',
     category: 'data'
   },
   {
@@ -267,7 +235,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'revision_date',
     label: 'Revision Date',
     description: 'Last revision date',
-    icon: '📅',
     category: 'data'
   },
   {
@@ -275,7 +242,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'generated_date',
     label: 'Generated Date',
     description: 'Report generation date',
-    icon: '🕒',
     category: 'data'
   },
 
@@ -285,7 +251,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'total_fixtures',
     label: 'Total Fixtures',
     description: 'Count of all fixtures',
-    icon: '💡',
     category: 'data'
   },
   {
@@ -293,7 +258,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'total_wattage',
     label: 'Total Wattage',
     description: 'Sum of fixture wattage',
-    icon: '⚡',
     category: 'data'
   },
   {
@@ -301,7 +265,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'total_amperage',
     label: 'Total Amperage',
     description: 'Sum of fixture amperage',
-    icon: '🔌',
     category: 'data'
   },
   {
@@ -309,7 +272,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'universe_count',
     label: 'Universe Count',
     description: 'DMX universes in use',
-    icon: '🌐',
     category: 'data'
   },
   {
@@ -317,7 +279,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'fixture_type_count',
     label: 'Fixture Types',
     description: 'Unique fixture types',
-    icon: '🏷️',
     category: 'data'
   },
 
@@ -327,7 +288,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'total_infrastructure',
     label: 'Total Infrastructure',
     description: 'All infrastructure equipment',
-    icon: '🔧',
     category: 'data'
   },
   {
@@ -335,7 +295,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'network_equipment_count',
     label: 'Network Equipment',
     description: 'Network devices count',
-    icon: '🌐',
     category: 'data'
   },
   {
@@ -343,7 +302,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'audio_equipment_count',
     label: 'Audio Equipment',
     description: 'Audio devices count',
-    icon: '🔊',
     category: 'data'
   },
   {
@@ -351,7 +309,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'video_equipment_count',
     label: 'Video Equipment',
     description: 'Video devices count',
-    icon: '📹',
     category: 'data'
   },
   {
@@ -359,7 +316,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'data_distribution_count',
     label: 'Data Distribution',
     description: 'Data distribution count',
-    icon: '📡',
     category: 'data'
   },
   {
@@ -367,7 +323,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'total_ports',
     label: 'Total Ports',
     description: 'All configured ports',
-    icon: '🔌',
     category: 'data'
   },
   {
@@ -375,7 +330,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'active_infrastructure',
     label: 'Active Equipment',
     description: 'Active infrastructure',
-    icon: '✅',
     category: 'data'
   },
   {
@@ -383,7 +337,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'inactive_infrastructure',
     label: 'Inactive Equipment',
     description: 'Inactive infrastructure',
-    icon: '❌',
     category: 'data'
   },
 
@@ -392,42 +345,36 @@ const paletteElements: PaletteElement[] = [
     type: 'text',
     label: 'Text Box',
     description: 'Custom text content',
-    icon: '📝',
     category: 'content'
   },
   {
     type: 'equipment_list',
     label: 'Equipment List',
     description: 'Dynamic equipment by section',
-    icon: '📦',
     category: 'content'
   },
   {
     type: 'notes_content',
     label: 'Notes Content',
     description: 'Dynamic notes and conditions',
-    icon: '📋',
     category: 'content'
   },
   {
     type: 'revision_log',
     label: 'Revision Log',
     description: 'Dynamic revision changes',
-    icon: '📜',
     category: 'content'
   },
   {
     type: 'image',
     label: 'Image',
     description: 'Custom image or graphic',
-    icon: '🖼️',
     category: 'content'
   },
   {
     type: 'table',
     label: 'Contact Table',
     description: 'Formatted contact info grid',
-    icon: '📋',
     category: 'content'
   },
 
@@ -437,7 +384,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'rectangle',
     label: 'Rectangle',
     description: 'Box or background',
-    icon: '⬜',
     category: 'visual'
   },
   {
@@ -445,7 +391,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'line',
     label: 'Line',
     description: 'Horizontal or vertical line',
-    icon: '➖',
     category: 'visual'
   },
   {
@@ -453,7 +398,6 @@ const paletteElements: PaletteElement[] = [
     subType: 'divider',
     label: 'Divider',
     description: 'Section divider',
-    icon: '━━━',
     category: 'visual'
   }
 ];
@@ -499,9 +443,9 @@ export function ElementPalette({ onDragStart, onDragEnd }: ElementPaletteProps) 
   };
 
   const categoryConfig = {
-    data: { title: 'Data Fields', icon: '📊', color: 'blue' },
-    content: { title: 'Content Elements', icon: '📝', color: 'green' },
-    visual: { title: 'Visual Elements', icon: '🎨', color: 'purple' }
+    data: { title: 'Data Fields', color: 'blue' },
+    content: { title: 'Content Elements', color: 'green' },
+    visual: { title: 'Visual Elements', color: 'purple' }
   };
 
   return (
@@ -599,7 +543,6 @@ export function ElementPalette({ onDragStart, onDragEnd }: ElementPaletteProps) 
       <div className="flex-1 overflow-y-auto p-4">
         {filteredElements.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
-            <div className="text-4xl mb-3">🔍</div>
             <div className="text-sm font-medium">No elements found</div>
             <div className="text-xs text-gray-600 mt-1">Try adjusting your search or filters</div>
           </div>
@@ -621,7 +564,6 @@ export function ElementPalette({ onDragStart, onDragEnd }: ElementPaletteProps) 
                     className="w-full flex items-center justify-between p-2 bg-gray-700 hover:bg-gray-650 rounded-lg transition-colors group"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">{config.icon}</span>
                       <span className="text-sm font-semibold text-gray-200">
                         {config.title}
                       </span>
@@ -665,9 +607,6 @@ export function ElementPalette({ onDragStart, onDragEnd }: ElementPaletteProps) 
                           }`}
                         >
                           <div className="flex items-start gap-3">
-                            <div className="text-2xl flex-shrink-0 group-hover:scale-110 transition-transform">
-                              {element.icon}
-                            </div>
                             <div className="flex-1 min-w-0">
                               <div className="font-medium text-sm text-gray-200 truncate">
                                 {element.label}
@@ -726,9 +665,6 @@ export function ElementPalette({ onDragStart, onDragEnd }: ElementPaletteProps) 
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div className="text-2xl flex-shrink-0 group-hover:scale-110 transition-transform">
-                    {element.icon}
-                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm text-gray-200 truncate">
                       {element.label}

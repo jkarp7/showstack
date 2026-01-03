@@ -37,9 +37,9 @@ export function SystemDocs() {
   }, [routeProjectId, moduleStartTime, tabSwitchCount]);
 
   const tabs = [
-    { id: 'equipment' as SystemDocsTab, name: 'Equipment Manager', icon: '📊' },
-    { id: 'paperwork' as SystemDocsTab, name: 'Paperwork', icon: '📋' },
-    { id: 'labels' as SystemDocsTab, name: 'Labels', icon: '🏷️' }
+    { id: 'equipment' as SystemDocsTab, name: 'Equipment Manager' },
+    { id: 'paperwork' as SystemDocsTab, name: 'Paperwork' },
+    { id: 'labels' as SystemDocsTab, name: 'Labels' }
   ];
 
   const handleBackClick = () => {
@@ -74,13 +74,12 @@ export function SystemDocs() {
                 setActiveTab(tab.id);
                 setTabSwitchCount(prev => prev + 1);
               }}
-              className={`px-6 py-3 border-r border-gray-200 dark:border-gray-700 transition flex items-center gap-2 ${
+              className={`px-6 py-3 border-r border-gray-200 dark:border-gray-700 transition ${
                 activeTab === tab.id
                   ? 'bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white border-b-2 border-blue-500'
                   : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
-              <span>{tab.icon}</span>
               <span className="font-medium">{tab.name}</span>
             </button>
           ))}

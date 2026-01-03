@@ -284,7 +284,6 @@ export function ElementInspector({
             <CollapsibleSection
               id="typography"
               title="Typography"
-              icon="🔤"
               isCollapsed={collapsedSections.has('typography')}
               onToggle={toggleSection}
             >
@@ -488,7 +487,6 @@ export function ElementInspector({
             <CollapsibleSection
               id="colors"
               title="Colors"
-              icon="🎨"
               isCollapsed={collapsedSections.has('colors')}
               onToggle={toggleSection}
             >
@@ -514,7 +512,6 @@ export function ElementInspector({
             <CollapsibleSection
               id="fill-borders"
               title="Fill & Borders"
-              icon="🔲"
               isCollapsed={collapsedSections.has('fill-borders')}
               onToggle={toggleSection}
             >
@@ -603,7 +600,6 @@ export function ElementInspector({
             <CollapsibleSection
               id="spacing"
               title="Spacing"
-              icon="📏"
               isCollapsed={collapsedSections.has('spacing')}
               onToggle={toggleSection}
             >
@@ -729,7 +725,6 @@ export function ElementInspector({
             <CollapsibleSection
               id="grid-position"
               title="Grid Position"
-              icon="📍"
               isCollapsed={collapsedSections.has('grid-position')}
               onToggle={toggleSection}
             >
@@ -760,7 +755,6 @@ export function ElementInspector({
             <CollapsibleSection
               id="size"
               title="Size"
-              icon="📐"
               isCollapsed={collapsedSections.has('size')}
               onToggle={toggleSection}
             >
@@ -791,7 +785,6 @@ export function ElementInspector({
             <CollapsibleSection
               id="layer"
               title="Layer"
-              icon="📚"
               isCollapsed={collapsedSections.has('layer')}
               onToggle={toggleSection}
             >
@@ -826,7 +819,6 @@ function CollapsibleSection({
 }: {
   id: string;
   title: string;
-  icon?: string;
   children: React.ReactNode;
   isCollapsed: boolean;
   onToggle: (id: string) => void;
@@ -841,7 +833,6 @@ function CollapsibleSection({
         className="w-full flex items-center justify-between p-3 hover:bg-gray-700 transition-colors"
       >
         <div className="flex items-center gap-2">
-          {icon && <span className="text-base">{icon}</span>}
           <h4 className="text-xs font-semibold text-gray-300 uppercase">{title}</h4>
         </div>
         <svg
