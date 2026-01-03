@@ -4,6 +4,7 @@ import { VirtualRow } from './VirtualRow';
 import { COLUMN_CONFIGS, ColumnVisibility, ColumnKey, getOrderedColumns, applyUserColumnLabels } from '../../types/columns';
 import { DimmerRack, PDRack } from '../../types/power';
 import { autoLinkCircuit } from '../../utils/circuitParser';
+import { HighlightRule } from '../../types/highlighting';
 
 interface VirtualDataGridProps {
   fixtures: Fixture[];
@@ -29,6 +30,7 @@ interface VirtualDataGridProps {
     types?: string[];
     locations?: string[];
   };
+  highlightRules?: HighlightRule[];
 }
 
 const ROW_HEIGHT = 40; // pixels
@@ -49,6 +51,7 @@ export function VirtualDataGrid({
   dimmerRacks = [],
   pdRacks = [],
   autoFillSuggestions = {},
+  highlightRules = [],
 }: VirtualDataGridProps) {
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -446,6 +449,7 @@ export function VirtualDataGrid({
                 getColumnWidth={getColumnWidth}
                 focusedCell={focusedCell}
                 autoFillSuggestions={autoFillSuggestions}
+                highlightRules={highlightRules}
               />
             ))}
           </div>

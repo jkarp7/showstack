@@ -161,10 +161,19 @@ Core fixture database and virtual grid for managing lighting plots.
 - ✅ **Point circuit notation** - Support for circuits like "1.2", "1.3" for power thru/daisy chains - COMPLETED
 - ✅ **Auto-complete from project data** - Inline autocomplete suggestions based on existing fixture data - COMPLETED
 - ✅ **Filter out capability** - Hide fixtures with "hidden" flag, toggle with "Show Hidden" checkbox - COMPLETED
-- ✅ **Color flags for designations** - Multi-color row highlighting with highlight_color field - COMPLETED
-- ✅ **Multi-color row highlighting** - Visual row highlighting with customizable colors - COMPLETED
+- ✅ **Color flags for designations** - Categorical flags (Hot, Spare, Special, Dimmer Doubles, Two-Fer) that appear on labels with colored indicators - COMPLETED
+- ✅ **Multi-color row highlighting** - Conditional formatting with user-defined rules (e.g., "if Type = Spare Circuit, highlight yellow") - COMPLETED
 - ✅ **Click-to-edit infrastructure** - Double-click infrastructure rows to edit (was already implemented) - VERIFIED
 - ✅ **Combined fields on reports** - Concatenate fields (e.g., "Type + Accessory") - COMPLETED
+
+**Implementation Details:**
+- Color flags (`color_flag` field) are specific designations shown as vertical colored bars on row edges
+  - Predefined types: hot, spare, special, dimmer_doubles, two_fer
+  - Each has a specific color and meaning for label printing
+- Row highlighting uses conditional formatting rules evaluated against fixture fields
+  - Rules support operators: equals, contains, starts_with, ends_with, is_empty, etc.
+  - Default rules included for Spare Circuits (yellow) and Practicals (blue)
+  - Rules are priority-based and stored per-project in preferences
 
 **Future Enhancements:**
 - 💡 **Auto-complete System** - Manufacturer, type, color, gobo database (deferred - requires extensive fixture database)

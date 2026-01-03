@@ -27,6 +27,7 @@ import { InfrastructureColumnVisibility } from '../../components/infrastructure/
 import { useEquipmentMenuHandlers } from '../../hooks/useEquipmentMenuHandlers';
 import { autoLinkCircuit } from '../../utils/circuitParser';
 import { Project, buildExportHeader, formatHeaderForCSV, formatHeaderForEos, formatHeaderForGrandMA } from '../../utils/exportHeaders';
+import { HighlightRule, DEFAULT_HIGHLIGHT_RULES } from '../../types/highlighting';
 
 interface EquipmentManagerProps {
   embedded?: boolean;
@@ -67,6 +68,9 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
   // User column definitions
   const [userColumnDefinitions, setUserColumnDefinitions] = useState<Record<string, string>>({});
+
+  // Highlight rules for conditional formatting
+  const [highlightRules, setHighlightRules] = useState<HighlightRule[]>(DEFAULT_HIGHLIGHT_RULES);
 
   // Project state
   const [project, setProject] = useState<Project>({ name: 'Untitled Project' });
@@ -231,6 +235,12 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
           const savedInfrastructureVisibility = await window.api.preferences.get(currentProjectId, 'infrastructureColumnVisibility');
           if (savedInfrastructureVisibility) {
             setInfrastructureColumnVisibility(savedInfrastructureVisibility);
+          }
+
+          // Load highlight rules
+          const savedHighlightRules = await window.api.preferences.get(currentProjectId, 'highlightRules');
+          if (savedHighlightRules) {
+            setHighlightRules(savedHighlightRules);
           }
         }
       } catch (error) {
@@ -979,6 +989,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
           dimmerRacks={dimmerRacks}
           pdRacks={pdRacks}
           autoFillSuggestions={autoFillSuggestions}
+          highlightRules={highlightRules}
         />
       </main>
 

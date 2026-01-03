@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Fixture } from '../types';
 import { EditableCell } from './EditableCell';
 import { COLUMN_CONFIGS, ColumnVisibility, ColumnKey, getOrderedColumns } from '../../types/columns';
+import { HighlightRule, getHighlightColorForFixture, COLOR_FLAG_DEFINITIONS } from '../../types/highlighting';
 
 // Gel color database - Complete GAM, LEE, and Rosco theatrical gels (628 colors)
 // Converted from manufacturer RGB values to hex format
@@ -193,6 +194,7 @@ interface VirtualRowProps {
     types?: string[];
     locations?: string[];
   };
+  highlightRules?: HighlightRule[];
 }
 
 export const VirtualRow = memo(function VirtualRow({
@@ -207,23 +209,27 @@ export const VirtualRow = memo(function VirtualRow({
   getColumnWidth,
   focusedCell,
   autoFillSuggestions = {},
+  highlightRules = [],
 }: VirtualRowProps) {
   // Get ordered column configs
   const orderedColumns = getOrderedColumns(columnOrder);
 
-  // Determine row background and style based on highlight_color and selection state
+  // Get conditional formatting highlight color
+  const highlightColor = getHighlightColorForFixture(fixture, highlightRules);
+
+  // Determine row background and style based on conditional formatting and selection state
   const getRowStyle = (): React.CSSProperties => {
-    if (fixture.highlight_color) {
+    if (highlightColor) {
       return {
-        backgroundColor: fixture.highlight_color,
-        opacity: isSelected ? 0.8 : 0.6,
+        backgroundColor: highlightColor,
+        opacity: isSelected ? 0.9 : 1,
       };
     }
     return {};
   };
 
   const rowClass = `flex items-center h-10 border-b border-gray-200 dark:border-gray-800 ${
-    fixture.highlight_color
+    highlightColor
       ? ''  // Custom color via inline style
       : isSelected
         ? 'bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800'
@@ -231,6 +237,22 @@ export const VirtualRow = memo(function VirtualRow({
   }`;
 
   const rowStyle = getRowStyle();
+
+  // Render color flag indicator if present
+  const renderColorFlag = () => {
+    if (!fixture.color_flag) return null;
+
+    const flagDef = COLOR_FLAG_DEFINITIONS[fixture.color_flag];
+    if (!flagDef) return null;
+
+    return (
+      <div
+        className="w-1 h-full absolute left-0 top-0"
+        style={{ backgroundColor: flagDef.color }}
+        title={`${flagDef.label}: ${flagDef.description}`}
+      />
+    );
+  };
 
   const handleCheckboxClick = (e: React.MouseEvent) => {
     // Let the click propagate to the row for selection logic
@@ -330,7 +352,8 @@ export const VirtualRow = memo(function VirtualRow({
   };
 
   return (
-    <div className={rowClass} style={rowStyle}>
+    <div className={`${rowClass} relative`} style={rowStyle}>
+      {renderColorFlag()}
       <div
         className="w-12 flex items-center justify-center flex-shrink-0 cursor-pointer"
         onClick={handleCheckboxClick}

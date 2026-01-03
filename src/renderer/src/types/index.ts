@@ -71,7 +71,9 @@ export interface Fixture {
   notes?: string;
   work_note_status?: string;
   hidden?: boolean; // Hide fixture from normal view
-  highlight_color?: string; // Hex color for row highlighting (e.g., "#FF0000" for red)
+
+  // Color Flag - Designation that appears on labels
+  color_flag?: 'hot' | 'spare' | 'special' | 'dimmer_doubles' | 'two_fer' | null;
 
   // Custom fields (JSON) - LightWright: User Columns (24)
   custom_fields?: Record<string, any>;
