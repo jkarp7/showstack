@@ -2,33 +2,87 @@
  * Label Printer IPC Handlers
  *
  * Handles batch label printing with fixture data population.
- * Full PDF sheet rendering implemented in Day 5.
+ * Uses Puppeteer for PDF generation with multi-label sheet layouts.
  */
 
-import { ipcMain } from 'electron';
+import { ipcMain, app } from 'electron';
 import type { IpcMainInvokeEvent } from 'electron';
+import puppeteer from 'puppeteer';
+import { join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
+import { renderLabelSheet, calculatePageCount } from '../utils/labelSheetRenderer';
+import * as layoutTemplateQueries from '../database/queries/layoutTemplates';
+import { getAppDatabase } from '../database';
 
 /**
- * Print label batch - placeholder for Day 5 implementation
+ * Print label batch - full PDF rendering with labelSheetRenderer
  */
 async function printLabelBatch(
   event: IpcMainInvokeEvent,
   templateId: string,
-  fixtureIds: string[],
-  projectId: string
+  labelDataArray: any[], // LabelData[]
+  averyCode: string
 ): Promise<string> {
   try {
-    console.log(`Batch print requested:`, {
+    console.log(`📄 Batch label print requested:`, {
       templateId,
-      fixtureCount: fixtureIds.length,
-      projectId
+      labelCount: labelDataArray.length,
+      averyCode,
+      pages: calculatePageCount(labelDataArray.length, averyCode)
     });
 
-    // TODO: Day 5 - Implement full PDF rendering with labelSheetRenderer
-    // For now, return placeholder
-    return `label-batch-${Date.now()}.pdf`;
+    // Load template and elements
+    const db = getAppDatabase();
+    const template = await layoutTemplateQueries.getById(db, templateId);
+
+    if (!template) {
+      throw new Error(`Template not found: ${templateId}`);
+    }
+
+    const elements = await layoutTemplateQueries.getElements(db, templateId);
+
+    // Parse JSON fields
+    const parsedElements = elements.map(el => ({
+      ...el,
+      config: JSON.parse(el.config),
+      style: JSON.parse(el.style)
+    }));
+
+    // Render HTML
+    const html = renderLabelSheet(template as any, parsedElements as any, labelDataArray, averyCode);
+
+    // Generate PDF with Puppeteer
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+
+    try {
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: 'networkidle0' });
+
+      // Ensure exports directory exists
+      const exportsDir = join(app.getPath('userData'), 'exports');
+      if (!existsSync(exportsDir)) {
+        mkdirSync(exportsDir, { recursive: true });
+      }
+
+      const pdfPath = join(exportsDir, `labels-${Date.now()}.pdf`);
+
+      await page.pdf({
+        path: pdfPath,
+        format: 'letter',
+        printBackground: true,
+        margin: { top: 0, right: 0, bottom: 0, left: 0 }
+      });
+
+      console.log(`✅ Label batch PDF generated: ${pdfPath}`);
+      return pdfPath;
+    } finally {
+      await browser.close();
+    }
   } catch (error) {
-    console.error('Label batch print failed:', error);
+    console.error('❌ Label batch print failed:', error);
     throw error;
   }
 }
@@ -42,12 +96,12 @@ async function printLabelPreview(
   sampleData: any
 ): Promise<string> {
   try {
-    console.log(`Label preview requested:`, { templateId });
+    console.log(`📄 Label preview requested:`, { templateId });
 
-    // TODO: Day 5 - Implement preview PDF rendering
-    return `label-preview-${Date.now()}.pdf`;
+    // Use batch printer with single label
+    return await printLabelBatch(event, templateId, [sampleData], '5160');
   } catch (error) {
-    console.error('Label preview failed:', error);
+    console.error('❌ Label preview failed:', error);
     throw error;
   }
 }
