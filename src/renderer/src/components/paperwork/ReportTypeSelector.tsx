@@ -20,6 +20,7 @@ const REPORT_TYPE_OPTIONS: ReportTypeOption[] = [
   { id: 'color-schedule', name: 'Color Schedule', icon: '🎨' },
   { id: 'gobo-schedule', name: 'Gobo Schedule', icon: '🎭' },
   { id: 'power-summary', name: 'Power Summary', icon: '⚙️' },
+  { id: 'color-cut-report', name: 'Color Cut Report', icon: '✂️' },
   { id: 'infrastructure-list', name: 'Infrastructure Equipment List', icon: '🔧' },
   { id: 'network-summary', name: 'Network Summary', icon: '🌐' },
   { id: 'port-assignments', name: 'Port Assignments', icon: '🔌' },

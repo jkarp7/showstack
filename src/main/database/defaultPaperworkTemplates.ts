@@ -5,7 +5,7 @@ import { DEFAULT_PAGE_SETUP } from '../../renderer/src/types/paperwork';
 /**
  * Default Paperwork Templates
  *
- * System templates for all 12 report types.
+ * System templates for all 13 report types.
  * These are seeded into the database on first launch.
  */
 
@@ -19,11 +19,11 @@ const PAPERWORK_PAGE_SETUP = {
 };
 
 /**
- * All 12 system templates
+ * All 13 system templates
  */
 export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
   // ============================================
-  // FIXTURE REPORTS (7)
+  // FIXTURE REPORTS (8)
   // ============================================
 
   {
@@ -138,6 +138,22 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
       sortBy: 'channel',
       sortDirection: 'asc',
       showGroupHeaders: true,
+      groupPageBreaks: false
+    },
+    pageSetup: PAPERWORK_PAGE_SETUP,
+    isSystem: true
+  },
+
+  {
+    name: 'Color Cut Report',
+    description: 'Gel color cutting list with sheet calculations.',
+    reportType: 'color-cut-report',
+    headerTemplateId: 'default-paperwork-header',
+    columns: COLUMN_DEFAULTS['color-cut-report'],
+    organization: {
+      sortBy: 'gel_code',
+      sortDirection: 'asc',
+      showGroupHeaders: false,
       groupPageBreaks: false
     },
     pageSetup: PAPERWORK_PAGE_SETUP,

@@ -10,6 +10,7 @@ import { InteractiveTableHeader } from './InteractiveTableHeader';
 import { ColumnContextMenu } from './ColumnContextMenu';
 import { ColumnMergeDialog } from './ColumnMergeDialog';
 import { getColumnDisplayLabel } from '../../utils/paperwork/columnUtils';
+import { getGelColor } from '../../utils/gelColors';
 
 interface ReportTableRendererProps {
   columns: PaperworkColumnConfig[];
@@ -346,12 +347,40 @@ function getRangeValue(item: ReportDataItem, reportType: string): string {
   return isNaN(num) ? String(value) : String(num);
 }
 
-// Render cell value, handling merged columns
+// Render cell value, handling merged columns and special formats
 function renderCellValue(
   item: ReportDataItem,
   col: PaperworkColumnConfig,
   allColumns: PaperworkColumnConfig[]
-): string {
+): React.ReactNode {
+  // Handle gel_code field with color swatch
+  if (col.field === 'gel_code') {
+    const gelCode = String(item[col.field] || '');
+    const colors = getGelColor(gelCode);
+    // Note: colors will always be a single-element array since dual colors are split in aggregateColorCutReport
+    const hexColor = Array.isArray(colors) ? colors[0] : colors;
+
+    return (
+      <div className="flex items-center gap-2">
+        {hexColor ? (
+          // Color swatch
+          <div
+            className="w-4 h-4 rounded border border-gray-400 flex-shrink-0"
+            style={{ backgroundColor: hexColor }}
+            title={`${gelCode} (${hexColor})`}
+          />
+        ) : (
+          // No color found - show empty swatch
+          <div
+            className="w-4 h-4 rounded border border-gray-400 flex-shrink-0 bg-gray-200"
+            title={gelCode || 'No color'}
+          />
+        )}
+        <span>{gelCode}</span>
+      </div>
+    );
+  }
+
   // Handle merged columns
   if (col.combinedWith && col.combinedWith.length > 0) {
     const values = [formatValue(item[col.field], col.format)];

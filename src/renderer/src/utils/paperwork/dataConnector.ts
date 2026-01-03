@@ -6,16 +6,22 @@
 import { useFixtureStore } from '../../store/fixtureStore';
 import { useInfrastructureStore } from '../../store/infrastructureStore';
 import { ReportDataItem } from './reportOrganizer';
+import { parseFrameSize, calculateCutsPerSheet, calculateSheetsNeeded, formatFrameSize } from './colorCutCalculator';
+import { splitDualGelCode, getGelManufacturer } from '../gelColors';
 
 export async function getReportData(reportType: string, projectId: string): Promise<ReportDataItem[]> {
   // Get fixture data for fixture reports
   if (isFixtureReport(reportType)) {
     const fixtureData = getFixtureData(reportType);
 
-    // Aggregate data for Power Summary only
+    // Aggregate data for Power Summary and Color Cut Report
     // Color/Gobo schedules use regular grouping (not aggregation)
     if (reportType === 'power-summary') {
       return await aggregatePowerSummary(fixtureData, projectId);
+    }
+
+    if (reportType === 'color-cut-report') {
+      return aggregateColorCutReport(fixtureData);
     }
 
     return fixtureData;
@@ -37,7 +43,8 @@ function isFixtureReport(reportType: string): boolean {
     'dmx-addresses',
     'power-summary',
     'color-schedule',
-    'gobo-schedule'
+    'gobo-schedule',
+    'color-cut-report'
   ].includes(reportType);
 }
 
@@ -253,4 +260,65 @@ function aggregateGoboSchedule(fixtures: ReportDataItem[]): ReportDataItem[] {
   });
 
   return aggregated.sort((a, b) => (a.gobo || '').localeCompare(b.gobo || ''));
+}
+
+/**
+ * Aggregate color cut data
+ * Groups by gel code + frame size and calculates sheets needed
+ */
+function aggregateColorCutReport(fixtures: ReportDataItem[]): ReportDataItem[] {
+  interface ColorCutKey {
+    gelCode: string;
+    frameSize: string;
+  }
+
+  const grouped = new Map<string, { count: number; key: ColorCutKey; rawFrameSize: string }>();
+
+  // Group fixtures by color + frame size
+  fixtures.forEach(fixture => {
+    const color = fixture.color || fixture._raw?.color;
+    const colorFrame = fixture._raw?.color_frame;
+
+    if (!color) return; // Skip fixtures without color
+
+    // Split dual colors (e.g., "L202+R119")
+    const gelCodes = splitDualGelCode(color);
+
+    gelCodes.forEach(gelCode => {
+      const trimmedGelCode = gelCode.trim().toUpperCase();
+      const frameSize = colorFrame || 'Unknown';
+      const key = `${trimmedGelCode}|${frameSize}`;
+
+      if (grouped.has(key)) {
+        grouped.get(key)!.count++;
+      } else {
+        grouped.set(key, {
+          count: 1,
+          key: { gelCode: trimmedGelCode, frameSize },
+          rawFrameSize: colorFrame || ''
+        });
+      }
+    });
+  });
+
+  // Convert to report rows
+  const aggregated: ReportDataItem[] = [];
+  grouped.forEach(({ count, key, rawFrameSize }) => {
+    const parsedFrameSize = parseFrameSize(rawFrameSize);
+    const cutsPerSheet = parsedFrameSize ? calculateCutsPerSheet(parsedFrameSize) : 0;
+    const sheetsNeeded = cutsPerSheet > 0 ? calculateSheetsNeeded(count, cutsPerSheet) : count;
+    const formattedFrameSize = parsedFrameSize ? formatFrameSize(parsedFrameSize) : key.frameSize;
+
+    aggregated.push({
+      gel_code: key.gelCode,
+      manufacturer: getGelManufacturer(key.gelCode),
+      frame_size: formattedFrameSize,
+      cuts_needed: count,
+      cuts_per_sheet: cutsPerSheet,
+      sheets_needed: sheetsNeeded
+    });
+  });
+
+  // Sort by gel code
+  return aggregated.sort((a, b) => (a.gel_code || '').localeCompare(b.gel_code || ''));
 }

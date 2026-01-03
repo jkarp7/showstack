@@ -192,6 +192,15 @@ export const COLUMN_DEFAULTS: Record<string, PaperworkColumnConfig[]> = {
     createColumn('notes', { width: 17, shortLabel: 'Notes' })
   ],
 
+  'color-cut-report': [
+    createColumn('gel_code', { width: 12, label: 'Gel Code', shortLabel: 'Gel' }),
+    createColumn('manufacturer', { width: 15, shortLabel: 'Mfr' }),
+    createColumn('frame_size', { width: 15, label: 'Frame Size', shortLabel: 'Size' }),
+    createColumn('cuts_needed', { width: 12, format: 'number', label: 'Cuts Needed', shortLabel: 'Cuts' }),
+    createColumn('cuts_per_sheet', { width: 15, format: 'number', label: 'Cuts/Sheet', shortLabel: 'Per Sheet' }),
+    createColumn('sheets_needed', { width: 15, format: 'number', label: 'Sheets Needed', shortLabel: 'Sheets' })
+  ],
+
   'infrastructure-list': [
     createColumn('name', { width: 20, shortLabel: 'Name' }),
     createColumn('type', { width: 15, shortLabel: 'Type' }),

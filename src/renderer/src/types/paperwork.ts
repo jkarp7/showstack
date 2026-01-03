@@ -8,7 +8,8 @@ export type FixtureReportType =
   | 'dmx-addresses'
   | 'power-summary'
   | 'color-schedule'
-  | 'gobo-schedule';
+  | 'gobo-schedule'
+  | 'color-cut-report';
 
 export type InfrastructureReportType =
   | 'infrastructure-list'
