@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFixtureStore } from '../../store/fixtureStore';
+import { promptAndMigrate, needsMigration } from '../../utils/prep/labelMigration';
 
 type LabelType = 'cable' | 'circuit' | 'fixture' | 'dimmer' | 'custom';
 type PrinterType = 'dymo-450' | 'brother-pt' | 'zebra' | 'avery-sheet';
@@ -241,6 +242,20 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
     loadProjectInfo();
     loadCustomDesigns();
   }, [loadFixtures, currentProjectId]);
+
+  // Check for label migration needs
+  useEffect(() => {
+    const checkMigration = async () => {
+      if (currentProjectId && needsMigration(currentProjectId)) {
+        // Prompt user and migrate if they confirm
+        await promptAndMigrate(currentProjectId);
+        // Reload page to show migrated designs
+        window.location.reload();
+      }
+    };
+
+    checkMigration();
+  }, [currentProjectId]);
 
   // Initialize canvas with default labels
   useEffect(() => {
