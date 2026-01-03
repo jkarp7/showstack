@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import LayoutDesigner from '../layout/LayoutDesigner';
+import { LayoutDesigner } from '../layout/LayoutDesigner';
 import {
   calculateLabelGrid,
   getAveryTemplate,
