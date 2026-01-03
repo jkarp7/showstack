@@ -521,6 +521,46 @@ export function LayoutDesigner({
                 </svg>
               </button>
 
+              {/* Background Color Picker */}
+              <div className="flex items-center gap-2 pl-3 border-l border-gray-700">
+                <label htmlFor="bg-color" className="text-xs text-gray-400">BG:</label>
+                <input
+                  id="bg-color"
+                  type="color"
+                  value={template.config?.backgroundColor || '#ffffff'}
+                  onChange={(e) => {
+                    setTemplate({
+                      ...template,
+                      config: {
+                        ...template.config,
+                        backgroundColor: e.target.value
+                      }
+                    });
+                    setHasChanges(true);
+                  }}
+                  className="w-8 h-8 rounded cursor-pointer border border-gray-600"
+                  title="Background Color"
+                />
+                {template.config?.backgroundColor && template.config.backgroundColor !== '#ffffff' && (
+                  <button
+                    onClick={() => {
+                      setTemplate({
+                        ...template,
+                        config: {
+                          ...template.config,
+                          backgroundColor: '#ffffff'
+                        }
+                      });
+                      setHasChanges(true);
+                    }}
+                    className="text-xs text-gray-400 hover:text-white transition-colors"
+                    title="Reset to White"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+
             {/* Element Count */}
             <div className="pl-3 border-l border-gray-700 text-xs text-gray-400">
               {template.elements.length} {template.elements.length === 1 ? 'element' : 'elements'}

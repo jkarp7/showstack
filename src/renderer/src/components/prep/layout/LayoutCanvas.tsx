@@ -228,10 +228,11 @@ export function LayoutCanvas({
                 handleDrop(e, gridCol, gridRow);
               }
             }}
-            className="relative bg-white shadow-2xl outline-none"
+            className="relative shadow-2xl outline-none"
             style={{
               width: `${template.page_width * (zoom / 100)}px`,
               height: `${template.page_height * (zoom / 100)}px`,
+              backgroundColor: template.config?.backgroundColor || '#ffffff',
               transform: `scale(1)`,
               transformOrigin: 'center'
             }}
