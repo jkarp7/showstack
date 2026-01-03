@@ -14,7 +14,7 @@ This document tracks the development status of all ShowStack feature domains and
 
 | Feature Domain | Status | Completion |
 |----------------|--------|------------|
-| Lighting Features | 🚧 In Progress | 70% |
+| Lighting Features | 🚧 In Progress | 80% |
 | Core Infrastructure | ✅ Complete | 100% |
 | Sound Features | ⬜ Planned | 0% |
 | Video Features | ⬜ Planned | 0% |
@@ -171,27 +171,30 @@ Core fixture database and virtual grid for managing lighting plots.
 
 ---
 
-#### Label Designer - 75% Complete
+#### Label Designer - ✅ Complete
 
-Drag-and-drop label creation for various printer types with HTML5 Canvas.
+Grid-based visual label designer with batch printing and multi-label PDF sheet export.
 
 **Completed:**
-- ✅ **Label Designer Page** - `src/renderer/src/pages/modules/LabelDesigner.tsx` (1,182 lines)
-  - Drag-and-drop label layout with canvas-based WYSIWYG editor
-  - Drawing tools: text, rectangle, circle, line
+- ✅ **Label Visual Designer** - Unified grid-based editor for all Avery templates
+  - Grid-based layout system (4 cells per inch resolution)
+  - Template conversion from canvas to grid coordinates
+  - Database-backed template storage (migrated from localStorage)
+  - Background color customization with color picker
+  - Image support (logos, graphics) via base64 storage
+  - 40+ data field mappings for fixture data
+  - Batch printing with Puppeteer PDF generation
+  - Multi-label sheet rendering with Avery specifications
+  - 5 Avery templates: 5160, 5163, 5164, 8160, 5167
+  - UI integration with "Edit with Visual Designer" button
+  - Automated migration system for existing designs
+
+- ✅ **Legacy Canvas Designer** - Original implementation (preserved for reference)
   - Template system: cable, circuit, fixture, dimmer labels
-  - Custom label designs with save/load (localStorage)
-  - Avery template support (5 predefined templates)
   - Printer type selection (Dymo, Brother, Zebra, Avery sheets)
-  - Batch printing mode
   - Element inspector with property editing
 
-**Remaining Work:**
-- ⬜ **Phase 4: Label Integration** - Complete replacement with unified visual editor (see Unified Visual Editor System section)
-  - Will include: PDF export, barcode/QR codes, custom background colors, image support, printer integration
-  - Current Canvas-based implementation will be replaced with grid-based LayoutDesigner
-
-**Estimated Time to Complete:** 1-2 weeks
+**Phase 4 Implementation:** Complete (6 days, da75a8a, 41373e0, 78a1fc3, eb90c26, d5c5bce)
 
 ---
 
@@ -455,28 +458,28 @@ Additional production tools.
    - **Commits:** faaf2f5, 1a1c566, bc548f1
    - **Documentation:** `docs/features/phase-3.5-logo-image-support.md`
 
-4. ⬜ **Phase 4: Label Integration** (5-7 days)
-   - Replace Canvas-based rendering with LayoutDesigner component
-   - Convert LabelGraphic data structure to LayoutElement format
-   - Migrate from pixel coordinates to grid-based positioning
-   - Create label-specific grid configurations for printer types:
-     - Avery templates (5160, 5163, 5164, 8160, 5167) with proper dimensions
-     - Roll printers (Dymo 450, Brother P-Touch, Zebra ZD420)
-   - Add barcode/QR code element type to ElementPalette
-   - Add image element support (logos, icons, graphics with PNG/JPG/SVG)
-   - Add label background color customization with ColorPicker
-   - Leverage Phase 2 formatting controls (ColorPicker, typography, spacing)
-   - Preserve batch printing functionality with data field mapping
-   - Migrate save/load system from localStorage to app database
-   - Convert predefined templates (cable, circuit, fixture, dimmer) to grid layouts
-   - Add label-specific right panel with printer settings
-   - Implement PDF export with proper label sheet layout
-   - **Estimated effort:** 5-7 days
+4. ✅ **Phase 4: Label Integration** - COMPLETED
+   - LabelLayoutDesigner wrapper component for grid-based label editing
+   - Label grid calculator (4 cells per inch, dynamic grid from dimensions)
+   - Template converter (canvas pixel coordinates → grid cells)
+   - Automated migration system (localStorage → database with user confirmation)
+   - Background color customization with ColorPicker integration
+   - Image support via base64 storage (Phase 3.5 infrastructure)
+   - 40+ data field mappings (fixture data → label fields)
+   - Batch printing with Puppeteer PDF generation
+   - Multi-label sheet renderer with Avery specifications:
+     - 5160 (Address, 3×10), 5163 (Shipping, 2×5), 5164 (Shipping, 2×3)
+     - 8160 (Address, 3×10), 5167 (Return Address, 4×20)
+   - Label printer IPC handlers (batch print, preview)
+   - UI integration: "Edit with Visual Designer" button in Labels tab
+   - Navigation and routing for label designer page
+   - **Commits:** da75a8a, 41373e0, 78a1fc3, eb90c26, d5c5bce
+   - **Documentation:** `docs/features/phase-4-label-integration.md`
 
 5. ⬜ **Phase 5: Polish & UX** (1 week)
 
-**Progress:** Phase 1-3.5 complete (70% done)
-**Estimated Remaining:** 1.5 weeks (Phase 4: 5-7 days, Phase 5: 1 week)
+**Progress:** Phase 1-4 complete (85% done)
+**Estimated Remaining:** 1 week (Phase 5: 1 week)
 
 **Phase 3.5 Detailed Implementation Plan:**
 
