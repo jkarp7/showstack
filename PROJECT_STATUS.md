@@ -1,7 +1,7 @@
 # ShowStack Project Status
 
 **Created:** December 18, 2024
-**Last Updated:** January 2, 2026
+**Last Updated:** January 3, 2026
 **Current Version:** 0.1.0-alpha
 **Development Phase:** Alpha
 **Active Branch:** `feature/unified-visual-editor`
@@ -165,15 +165,27 @@ Core fixture database and virtual grid for managing lighting plots.
 - ✅ **Multi-color row highlighting** - Conditional formatting with user-defined rules (e.g., "if Type = Spare Circuit, highlight yellow") - COMPLETED
 - ✅ **Click-to-edit infrastructure** - Double-click infrastructure rows to edit (was already implemented) - VERIFIED
 - ✅ **Combined fields on reports** - Concatenate fields (e.g., "Type + Accessory") - COMPLETED
+- ✅ **Right-click context menu** - Right-click fixtures to set flags and hide/unhide with React Portal positioning - COMPLETED (Jan 3, 2026)
+- ✅ **Always-visible flag column** - 2px vertical flag bar visible on all rows, subtle gray when no flag set - COMPLETED (Jan 3, 2026)
+- ✅ **Conditional formatting UI** - Dialog for creating/managing row highlighting rules with priority ordering - COMPLETED (Jan 3, 2026)
+- ✅ **Automatic text contrast** - Text color automatically adjusts based on highlight background luminance for readability - COMPLETED (Jan 3, 2026)
+- ✅ **Column visibility persistence** - Column visibility settings now persist per project - COMPLETED (Jan 3, 2026)
+- ✅ **Remove legacy recent files** - Removed recent files from Landing Page and Module Landing pages - COMPLETED (Jan 3, 2026)
 
 **Implementation Details:**
 - Color flags (`color_flag` field) are specific designations shown as vertical colored bars on row edges
   - Predefined types: hot, spare, special, dimmer_doubles, two_fer
   - Each has a specific color and meaning for label printing
+  - Accessible via right-click context menu or bulk edit dialog
+  - Always-visible 2px bar with subtle gray indicator when no flag is set
 - Row highlighting uses conditional formatting rules evaluated against fixture fields
   - Rules support operators: equals, contains, starts_with, ends_with, is_empty, etc.
   - Default rules included for Spare Circuits (yellow) and Practicals (blue)
   - Rules are priority-based and stored per-project in preferences
+  - Dedicated Conditional Formatting dialog accessible from Equipment Manager toolbar
+  - Automatic text color calculation (WCAG luminance formula) ensures readability on all backgrounds
+- Context menu uses React Portal for correct positioning outside virtual scroll transforms
+- Column visibility preferences stored per-project using preferences API
 
 **Future Enhancements:**
 - 💡 **Auto-complete System** - Manufacturer, type, color, gobo database (deferred - requires extensive fixture database)
