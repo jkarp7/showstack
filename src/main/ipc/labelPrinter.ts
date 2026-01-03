@@ -11,7 +11,7 @@ import puppeteer from 'puppeteer';
 import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { renderLabelSheet, calculatePageCount } from '../utils/labelSheetRenderer';
-import * as layoutTemplateQueries from '../database/queries/layoutTemplates';
+import { getLayoutTemplateById, getLayoutElementsByTemplateId } from '../database/queries/layoutTemplates';
 import { getAppDatabase } from '../database';
 
 /**
@@ -32,14 +32,13 @@ async function printLabelBatch(
     });
 
     // Load template and elements
-    const db = getAppDatabase();
-    const template = await layoutTemplateQueries.getById(db, templateId);
+    const template = getLayoutTemplateById(templateId);
 
     if (!template) {
       throw new Error(`Template not found: ${templateId}`);
     }
 
-    const elements = await layoutTemplateQueries.getElements(db, templateId);
+    const elements = getLayoutElementsByTemplateId(templateId);
 
     // Parse JSON fields
     const parsedElements = elements.map(el => ({
