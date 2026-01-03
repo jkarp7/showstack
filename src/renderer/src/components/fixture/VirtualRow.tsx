@@ -1,8 +1,9 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { Fixture } from '../types';
 import { EditableCell } from './EditableCell';
 import { COLUMN_CONFIGS, ColumnVisibility, ColumnKey, getOrderedColumns } from '../../types/columns';
-import { HighlightRule, getHighlightColorForFixture, COLOR_FLAG_DEFINITIONS } from '../../types/highlighting';
+import { HighlightRule, getHighlightColorForFixture, COLOR_FLAG_DEFINITIONS, ColorFlagType } from '../../types/highlighting';
+import { RowContextMenu } from './RowContextMenu';
 
 // Gel color database - Complete GAM, LEE, and Rosco theatrical gels (628 colors)
 // Converted from manufacturer RGB values to hex format
@@ -195,6 +196,8 @@ interface VirtualRowProps {
     locations?: string[];
   };
   highlightRules?: HighlightRule[];
+  onSetFlag?: (fixtureId: string, flag: ColorFlagType | null) => void;
+  onHide?: (fixtureId: string) => void;
 }
 
 export const VirtualRow = memo(function VirtualRow({
@@ -210,19 +213,41 @@ export const VirtualRow = memo(function VirtualRow({
   focusedCell,
   autoFillSuggestions = {},
   highlightRules = [],
+  onSetFlag,
+  onHide,
 }: VirtualRowProps) {
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+
   // Get ordered column configs
   const orderedColumns = getOrderedColumns(columnOrder);
 
   // Get conditional formatting highlight color
   const highlightColor = getHighlightColorForFixture(fixture, highlightRules);
 
+  // Calculate luminance to determine if text should be dark or light
+  const getTextColor = (bgColor: string): string => {
+    // Convert hex to RGB
+    const hex = bgColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+
+    // Calculate relative luminance (WCAG formula)
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    // Return dark text for light backgrounds, light text for dark backgrounds
+    return luminance > 0.5 ? '#1F2937' : '#F9FAFB';
+  };
+
   // Determine row background and style based on conditional formatting and selection state
   const getRowStyle = (): React.CSSProperties => {
     if (highlightColor) {
       return {
         backgroundColor: highlightColor,
-        opacity: isSelected ? 0.9 : 1,
+        color: getTextColor(highlightColor),
+        outline: isSelected ? '2px solid #3B82F6' : undefined,
+        outlineOffset: isSelected ? '-2px' : undefined,
       };
     }
     return {};
@@ -238,20 +263,28 @@ export const VirtualRow = memo(function VirtualRow({
 
   const rowStyle = getRowStyle();
 
-  // Render color flag indicator if present
+  // Always render color flag column (with or without flag)
   const renderColorFlag = () => {
-    if (!fixture.color_flag) return null;
-
-    const flagDef = COLOR_FLAG_DEFINITIONS[fixture.color_flag];
-    if (!flagDef) return null;
+    const flagDef = fixture.color_flag ? COLOR_FLAG_DEFINITIONS[fixture.color_flag] : null;
 
     return (
       <div
-        className="w-1 h-full absolute left-0 top-0"
-        style={{ backgroundColor: flagDef.color }}
-        title={`${flagDef.label}: ${flagDef.description}`}
+        className="w-2 h-full absolute left-0 top-0 z-20"
+        style={{
+          backgroundColor: flagDef ? flagDef.color : 'rgba(0, 0, 0, 0.1)',
+          borderRight: flagDef ? 'none' : '1px solid rgba(0, 0, 0, 0.05)'
+        }}
+        title={flagDef ? `${flagDef.label}: ${flagDef.description}` : 'No flag'}
       />
     );
+  };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Use clientX/clientY for fixed positioning (menu is rendered in portal to body)
+    setContextMenu({ x: e.clientX, y: e.clientY });
   };
 
   const handleCheckboxClick = (e: React.MouseEvent) => {
@@ -352,8 +385,27 @@ export const VirtualRow = memo(function VirtualRow({
   };
 
   return (
-    <div className={`${rowClass} relative`} style={rowStyle}>
+    <div className={`flex items-center h-10 border-b border-gray-200 dark:border-gray-800 relative ${
+      !highlightColor && isSelected
+        ? 'bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800'
+        : !highlightColor
+          ? 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'
+          : ''
+    }`} onContextMenu={handleContextMenu}>
       {renderColorFlag()}
+      {contextMenu && onSetFlag && onHide && (
+        <RowContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+          onSetFlag={(flag) => onSetFlag(fixture.id, flag)}
+          onHide={() => onHide(fixture.id)}
+          currentFlag={fixture.color_flag as ColorFlagType | null | undefined}
+          isHidden={fixture.hidden}
+        />
+      )}
+      {/* Inner wrapper with highlight - starts after flag bar with 2px offset */}
+      <div className="flex items-center flex-1 h-full pl-[2px]" style={rowStyle}>
       <div
         className="w-12 flex items-center justify-center flex-shrink-0 cursor-pointer"
         onClick={handleCheckboxClick}
@@ -455,6 +507,7 @@ export const VirtualRow = memo(function VirtualRow({
           />
         );
       })}
+    </div>
     </div>
   );
 });

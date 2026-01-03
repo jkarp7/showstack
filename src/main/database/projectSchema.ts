@@ -152,6 +152,8 @@ export const PROJECT_SCHEMA = `
     status TEXT DEFAULT 'active',
     notes TEXT,
     work_note_status TEXT,
+    hidden INTEGER DEFAULT 0, -- Hide fixture from table view
+    color_flag TEXT CHECK(color_flag IN ('hot', 'spare', 'special', 'dimmer_doubles', 'two_fer')), -- Label designation
 
     -- Custom fields (JSON) - LightWright: User Columns (24)
     custom_fields TEXT,

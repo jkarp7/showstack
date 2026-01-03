@@ -339,6 +339,17 @@ function runProjectMigrations(db: Database): void {
     }
   }
 
+  // Quick wins: Filter out and color flags
+  if (!fixturesColumns.includes('hidden')) {
+    console.log('Running migration: Adding hidden to fixtures');
+    db.run('ALTER TABLE fixtures ADD COLUMN hidden INTEGER DEFAULT 0');
+  }
+
+  if (!fixturesColumns.includes('color_flag')) {
+    console.log('Running migration: Adding color_flag to fixtures');
+    db.run('ALTER TABLE fixtures ADD COLUMN color_flag TEXT');
+  }
+
   // Add rack identifier columns for dimmer racks
   const dimmerRacksTableInfo = db.exec("PRAGMA table_info(dimmer_racks)");
   if (dimmerRacksTableInfo[0]) {

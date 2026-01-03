@@ -7,6 +7,7 @@ import { SortBar } from '../../components/fixture/SortBar';
 import { AddFixtureDialog } from '../../components/fixture/AddFixtureDialog';
 import { BulkEditDialog } from '../../components/fixture/BulkEditDialog';
 import { UserColumnSettingsDialog } from '../../components/fixture/UserColumnSettingsDialog';
+import { ConditionalFormattingDialog } from '../../components/fixture/ConditionalFormattingDialog';
 import { InfrastructureToolbar } from '../../components/infrastructure/InfrastructureToolbar';
 import { AddInfrastructureDialog } from '../../components/infrastructure/AddInfrastructureDialog';
 import { EditInfrastructureDialog } from '../../components/infrastructure/EditInfrastructureDialog';
@@ -51,6 +52,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   const [editingInfrastructureEquipment, setEditingInfrastructureEquipment] = useState<any | null>(null);
   const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = useState(false);
   const [isUserColumnSettingsOpen, setIsUserColumnSettingsOpen] = useState(false);
+  const [isConditionalFormattingOpen, setIsConditionalFormattingOpen] = useState(false);
 
   // Power features state
   const [isRackManagerOpen, setIsRackManagerOpen] = useState(false);
@@ -449,6 +451,30 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
     // Clear selection after bulk edit
     setSelectedRows(new Set());
+  };
+
+  // Handle hide selected fixtures
+  const handleHideSelected = async () => {
+    await bulkUpdate(Array.from(selectedRows), { hidden: true });
+    setSelectedRows(new Set());
+  };
+
+  // Handle unhide selected fixtures
+  const handleUnhideSelected = async () => {
+    await bulkUpdate(Array.from(selectedRows), { hidden: false });
+    setSelectedRows(new Set());
+  };
+
+  // Handle saving highlight rules
+  const handleSaveHighlightRules = async (rules: HighlightRule[]) => {
+    setHighlightRules(rules);
+    await window.api.preferences.set(currentProjectId, 'highlightRules', rules);
+  };
+
+  // Handle column visibility change with persistence
+  const handleColumnVisibilityChange = async (visibility: ColumnVisibility) => {
+    setColumnVisibility(visibility);
+    await window.api.preferences.set(currentProjectId, 'columnVisibility', visibility);
   };
 
   // Handle auto-numbering
@@ -937,9 +963,12 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
             setSelectedRows(new Set());
           }}
           onDeselectAll={() => setSelectedRows(new Set())}
+          onHideSelected={handleHideSelected}
+          onUnhideSelected={handleUnhideSelected}
           onUserColumnSettings={() => setIsUserColumnSettingsOpen(true)}
+          onConditionalFormatting={() => setIsConditionalFormattingOpen(true)}
           columnVisibility={columnVisibility}
-          onColumnVisibilityChange={setColumnVisibility}
+          onColumnVisibilityChange={handleColumnVisibilityChange}
           userColumnDefinitions={userColumnDefinitions}
         />
       </div>
@@ -1185,6 +1214,14 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
         onClose={() => setIsUserColumnSettingsOpen(false)}
         onSave={handleSaveUserColumnDefinitions}
         initialDefinitions={userColumnDefinitions}
+      />
+
+      {/* Conditional Formatting Dialog */}
+      <ConditionalFormattingDialog
+        isOpen={isConditionalFormattingOpen}
+        onClose={() => setIsConditionalFormattingOpen(false)}
+        rules={highlightRules}
+        onSave={handleSaveHighlightRules}
       />
 
       {/* Export Header Dialog */}

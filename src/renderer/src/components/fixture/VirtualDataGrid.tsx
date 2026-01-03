@@ -450,6 +450,8 @@ export function VirtualDataGrid({
                 focusedCell={focusedCell}
                 autoFillSuggestions={autoFillSuggestions}
                 highlightRules={highlightRules}
+                onSetFlag={(fixtureId, flag) => onUpdateFixture(fixtureId, { color_flag: flag })}
+                onHide={(fixtureId) => onUpdateFixture(fixtureId, { hidden: !fixture.hidden })}
               />
             ))}
           </div>
