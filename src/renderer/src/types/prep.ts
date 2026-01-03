@@ -278,7 +278,12 @@ export type PrintSectionType =
   | 'revision-summary'
   | 'custom-text'
   | 'paperwork-header'
-  | 'page-break';
+  | 'page-break'
+  | 'label_5160'
+  | 'label_5163'
+  | 'label_5164'
+  | 'label_8160'
+  | 'label_5167';
 
 export interface PrintSection {
   id: string;
