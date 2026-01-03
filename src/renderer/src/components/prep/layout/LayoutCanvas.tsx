@@ -459,10 +459,24 @@ export function LayoutCanvas({
                       </div>
                     )}
                     {element.element_type === 'image' && (
-                      <div className="text-xs text-gray-500 italic flex flex-col items-center justify-center">
-                        <div className="text-2xl mb-1">🖼️</div>
-                        <div>Image</div>
-                      </div>
+                      <>
+                        {(element.config as any).src ? (
+                          <img
+                            src={(element.config as any).src}
+                            alt={(element.config as any).altText || 'Image'}
+                            className="w-full h-full"
+                            style={{
+                              objectFit: (element.config as any).objectFit || 'contain'
+                            }}
+                          />
+                        ) : (
+                          <div className="text-xs text-gray-500 italic flex flex-col items-center justify-center h-full">
+                            <div className="text-2xl mb-1">🖼️</div>
+                            <div>No image</div>
+                            <div className="text-xs mt-1">Upload in inspector</div>
+                          </div>
+                        )}
+                      </>
                     )}
                     {element.element_type === 'table' && (
                       <div className="text-xs text-gray-500 italic flex flex-col items-center justify-center">

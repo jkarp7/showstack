@@ -195,12 +195,71 @@ export function ElementInspector({
             {/* Image Configuration */}
             {element.element_type === 'image' && (
               <ConfigSection title="Image">
-                <FormField label="Source URL">
+                {/* Image Preview */}
+                {(element.config as ImageConfig).src && (
+                  <div className="mb-3">
+                    <div className="text-xs text-gray-400 mb-1">Preview</div>
+                    <div className="w-full h-32 bg-gray-900 border border-gray-600 rounded flex items-center justify-center overflow-hidden">
+                      <img
+                        src={(element.config as ImageConfig).src}
+                        alt="Preview"
+                        className="max-w-full max-h-full object-contain"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Upload Button */}
+                <FormField label="Upload Image">
+                  <div className="flex gap-2">
+                    <label className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded cursor-pointer text-center transition">
+                      Choose File
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/gif"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            // Validate file size (2MB max)
+                            if (file.size > 2 * 1024 * 1024) {
+                              alert('Image must be smaller than 2MB');
+                              return;
+                            }
+
+                            // Convert to base64
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              const base64 = event.target?.result as string;
+                              updateConfig({ src: base64 });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                    {(element.config as ImageConfig).src && (
+                      <button
+                        onClick={() => updateConfig({ src: '' })}
+                        className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition"
+                        title="Clear image"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    PNG, JPG, SVG, GIF • Max 2MB
+                  </div>
+                </FormField>
+
+                {/* URL Input (Alternative) */}
+                <FormField label="Or Enter URL">
                   <input
                     type="text"
                     value={(element.config as ImageConfig).src || ''}
                     onChange={(e) => updateConfig({ src: e.target.value })}
-                    placeholder="https://... or base64"
+                    placeholder="https://example.com/image.png"
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                   />
                 </FormField>
@@ -211,10 +270,13 @@ export function ElementInspector({
                     onChange={(e) => updateConfig({ objectFit: e.target.value })}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                   >
-                    <option value="contain">Contain</option>
-                    <option value="cover">Cover</option>
-                    <option value="fill">Fill</option>
+                    <option value="contain">Contain (fit inside)</option>
+                    <option value="cover">Cover (fill and crop)</option>
+                    <option value="fill">Fill (stretch)</option>
                   </select>
+                  <div className="text-xs text-gray-500 mt-1">
+                    How the image fits within the element bounds
+                  </div>
                 </FormField>
               </ConfigSection>
             )}
