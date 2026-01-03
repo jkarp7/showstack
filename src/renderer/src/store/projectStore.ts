@@ -56,6 +56,11 @@ export interface Project {
   venue_state?: string;
   show_dates?: ShowDates;
 
+  // Power Phase Labels (project-wide customization)
+  phase_label_a?: string; // Default: 'A'
+  phase_label_b?: string; // Default: 'B'
+  phase_label_c?: string; // Default: 'C'
+
   enabled_modules?: string[]; // ['production', 'manager', 'design']
   created_at: number;
   updated_at: number;

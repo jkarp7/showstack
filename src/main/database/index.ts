@@ -380,6 +380,44 @@ function runProjectMigrations(db: Database): void {
       console.log('Running migration: Adding secondary_voltage to pd_racks');
       db.run('ALTER TABLE pd_racks ADD COLUMN secondary_voltage INTEGER');
     }
+
+    // Power Service Assignment: Add building_service to PD racks
+    if (!pdRacksColumns.includes('building_service')) {
+      console.log('Running migration: Adding building_service to pd_racks');
+      db.run('ALTER TABLE pd_racks ADD COLUMN building_service TEXT');
+    }
+  }
+
+  // Power Service Assignment: Add building_service to dimmer racks
+  const dimmerRacksTableInfo2 = db.exec("PRAGMA table_info(dimmer_racks)");
+  if (dimmerRacksTableInfo2[0]) {
+    const dimmerRacksColumns2 = dimmerRacksTableInfo2[0].values.map(row => row[1]) || [];
+
+    if (!dimmerRacksColumns2.includes('building_service')) {
+      console.log('Running migration: Adding building_service to dimmer_racks');
+      db.run('ALTER TABLE dimmer_racks ADD COLUMN building_service TEXT');
+    }
+  }
+
+  // Custom Phase Labels: Add phase label columns to projects
+  const projectsTableInfo = db.exec("PRAGMA table_info(projects)");
+  if (projectsTableInfo[0]) {
+    const projectsColumns = projectsTableInfo[0].values.map(row => row[1]) || [];
+
+    if (!projectsColumns.includes('phase_label_a')) {
+      console.log('Running migration: Adding phase_label_a to projects');
+      db.run('ALTER TABLE projects ADD COLUMN phase_label_a TEXT DEFAULT \'A\'');
+    }
+
+    if (!projectsColumns.includes('phase_label_b')) {
+      console.log('Running migration: Adding phase_label_b to projects');
+      db.run('ALTER TABLE projects ADD COLUMN phase_label_b TEXT DEFAULT \'B\'');
+    }
+
+    if (!projectsColumns.includes('phase_label_c')) {
+      console.log('Running migration: Adding phase_label_c to projects');
+      db.run('ALTER TABLE projects ADD COLUMN phase_label_c TEXT DEFAULT \'C\'');
+    }
   }
 
   // Create dimmer_rack_modules table if it doesn't exist

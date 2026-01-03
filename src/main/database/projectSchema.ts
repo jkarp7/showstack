@@ -52,6 +52,11 @@ export const PROJECT_SCHEMA = `
     venue_state TEXT,
     show_dates TEXT, -- JSON object: {prep_start, prep_end, load_in, tech, previews, opening, closing, load_out}
 
+    -- Power Phase Labels (project-wide customization)
+    phase_label_a TEXT DEFAULT 'A',
+    phase_label_b TEXT DEFAULT 'B',
+    phase_label_c TEXT DEFAULT 'C',
+
     enabled_modules TEXT, -- JSON array of module names
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL
@@ -192,6 +197,7 @@ export const PROJECT_SCHEMA = `
     watts_per_module REAL DEFAULT 2400,
     location TEXT,
     notes TEXT,
+    building_service TEXT, -- Building electrical service (Service A, B, C, etc.)
 
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
@@ -229,6 +235,7 @@ export const PROJECT_SCHEMA = `
     amps_per_breaker INTEGER DEFAULT 20,
     location TEXT,
     notes TEXT,
+    building_service TEXT, -- Building electrical service (Service A, B, C, etc.)
 
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
