@@ -7,6 +7,8 @@ interface FilterBarProps {
   onTypeChange: (type: string) => void;
   statusFilter: string;
   onStatusChange: (status: string) => void;
+  showHidden?: boolean;
+  onShowHiddenChange?: (show: boolean) => void;
   onClearFilters: () => void;
   availableLocations: string[];
   availableTypes: string[];
@@ -22,12 +24,14 @@ export function FilterBar({
   onTypeChange,
   statusFilter,
   onStatusChange,
+  showHidden = false,
+  onShowHiddenChange,
   onClearFilters,
   availableLocations,
   availableTypes,
   availableStatuses,
 }: FilterBarProps) {
-  const hasActiveFilters = searchQuery || locationFilter !== 'all' || typeFilter !== 'all' || statusFilter !== 'all';
+  const hasActiveFilters = searchQuery || locationFilter !== 'all' || typeFilter !== 'all' || statusFilter !== 'all' || showHidden;
 
   return (
     <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center gap-2">
@@ -77,6 +81,18 @@ export function FilterBar({
           </option>
         ))}
       </select>
+
+      {onShowHiddenChange && (
+        <label className="flex items-center gap-2 px-3 py-1.5 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
+          <input
+            type="checkbox"
+            checked={showHidden}
+            onChange={(e) => onShowHiddenChange(e.target.checked)}
+            className="rounded border-gray-300 dark:border-gray-600"
+          />
+          Show Hidden
+        </label>
+      )}
 
       {hasActiveFilters && (
         <button

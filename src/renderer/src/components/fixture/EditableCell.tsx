@@ -9,6 +9,7 @@ interface EditableCellProps {
   readOnly?: boolean;
   onNavigate?: (direction: 'up' | 'down' | 'left' | 'right' | 'enter') => void;
   shouldFocus?: boolean;
+  suggestions?: string[];
 }
 
 export function EditableCell({
@@ -18,7 +19,8 @@ export function EditableCell({
   style,
   readOnly = false,
   onNavigate,
-  shouldFocus = false
+  shouldFocus = false,
+  suggestions = []
 }: EditableCellProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value || '');
@@ -87,18 +89,32 @@ export function EditableCell({
     }
   };
 
+  // Generate a unique ID for the datalist
+  const datalistId = `datalist-${Math.random().toString(36).substr(2, 9)}`;
+
   return (
     <div className={clsx('px-2 text-sm', className)} style={style} onClick={(e) => e.stopPropagation()}>
       {isEditing ? (
-        <input
-          ref={inputRef}
-          type="text"
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          className="w-full bg-white dark:bg-gray-700 border border-blue-500 rounded px-1 py-0.5 text-gray-900 dark:text-white focus:outline-none"
-        />
+        <>
+          <input
+            ref={inputRef}
+            type="text"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            className="w-full bg-white dark:bg-gray-700 border border-blue-500 rounded px-1 py-0.5 text-gray-900 dark:text-white focus:outline-none"
+            list={suggestions.length > 0 ? datalistId : undefined}
+            autoComplete="off"
+          />
+          {suggestions.length > 0 && (
+            <datalist id={datalistId}>
+              {suggestions.map((suggestion, index) => (
+                <option key={index} value={suggestion} />
+              ))}
+            </datalist>
+          )}
+        </>
       ) : (
         <div
           onClick={() => !readOnly && setIsEditing(true)}

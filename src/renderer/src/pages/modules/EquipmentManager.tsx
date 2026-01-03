@@ -88,6 +88,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   const [locationFilter, setLocationFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [showHidden, setShowHidden] = useState(false);
 
   // Column visibility state (fixtures)
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(DEFAULT_COLUMN_VISIBILITY);
@@ -428,6 +429,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     setLocationFilter('all');
     setTypeFilter('all');
     setStatusFilter('all');
+    setShowHidden(false);
   };
 
   // Handle bulk edit submission
@@ -667,6 +669,11 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   const processedFixtures = useMemo(() => {
     let result = [...fixtures];
 
+    // Filter out hidden fixtures unless "Show Hidden" is enabled
+    if (!showHidden) {
+      result = result.filter((fixture) => !fixture.hidden);
+    }
+
     // Apply filters
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -741,7 +748,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     }
 
     return result;
-  }, [fixtures, searchQuery, locationFilter, typeFilter, statusFilter, sortConfigs]);
+  }, [fixtures, searchQuery, locationFilter, typeFilter, statusFilter, showHidden, sortConfigs]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -947,6 +954,8 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
           onTypeChange={setTypeFilter}
           statusFilter={statusFilter}
           onStatusChange={setStatusFilter}
+          showHidden={showHidden}
+          onShowHiddenChange={setShowHidden}
           onClearFilters={handleClearFilters}
           availableLocations={availableLocations}
           availableTypes={availableTypes}
@@ -969,6 +978,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
           userColumnDefinitions={userColumnDefinitions}
           dimmerRacks={dimmerRacks}
           pdRacks={pdRacks}
+          autoFillSuggestions={autoFillSuggestions}
         />
       </main>
 

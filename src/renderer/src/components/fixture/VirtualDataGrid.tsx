@@ -18,6 +18,17 @@ interface VirtualDataGridProps {
   userColumnDefinitions?: Record<string, string>;
   dimmerRacks?: DimmerRack[];
   pdRacks?: PDRack[];
+  autoFillSuggestions?: {
+    positions?: string[];
+    purposes?: string[];
+    colors?: string[];
+    manufacturers?: string[];
+    models?: string[];
+    systems?: string[];
+    gobos?: string[];
+    types?: string[];
+    locations?: string[];
+  };
 }
 
 const ROW_HEIGHT = 40; // pixels
@@ -37,6 +48,7 @@ export function VirtualDataGrid({
   userColumnDefinitions = {},
   dimmerRacks = [],
   pdRacks = [],
+  autoFillSuggestions = {},
 }: VirtualDataGridProps) {
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -136,15 +148,13 @@ export function VirtualDataGrid({
       if (field === 'circuit') {
         updates.circuit = value;
       } else {
-        const num = parseInt(value, 10);
-        updates.circuit_number = isNaN(num) ? undefined : num;
+        // Keep circuit_number as string to support point notation (e.g., "1.2", "1.3")
+        updates.circuit_number = value;
       }
 
       // Auto-link if we have both circuit and circuit_number
       const circuit = field === 'circuit' ? value : (fixture?.circuit || '');
-      const circuitNumber = field === 'circuit_number'
-        ? (isNaN(parseInt(value, 10)) ? 0 : parseInt(value, 10))
-        : (fixture?.circuit_number || 0);
+      const circuitNumber = field === 'circuit_number' ? value : (fixture?.circuit_number || '');
 
       if (circuit && circuitNumber && (dimmerRacks.length > 0 || pdRacks.length > 0)) {
         const linkResult = autoLinkCircuit(circuit, circuitNumber, dimmerRacks, pdRacks);
@@ -435,6 +445,7 @@ export function VirtualDataGrid({
                 columnWidths={columnWidths}
                 getColumnWidth={getColumnWidth}
                 focusedCell={focusedCell}
+                autoFillSuggestions={autoFillSuggestions}
               />
             ))}
           </div>

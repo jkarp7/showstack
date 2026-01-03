@@ -182,6 +182,17 @@ interface VirtualRowProps {
   columnWidths: Partial<Record<ColumnKey, number>>;
   getColumnWidth: (col: any) => number;
   focusedCell?: { fixtureId: string; columnKey: ColumnKey } | null;
+  autoFillSuggestions?: {
+    positions?: string[];
+    purposes?: string[];
+    colors?: string[];
+    manufacturers?: string[];
+    models?: string[];
+    systems?: string[];
+    gobos?: string[];
+    types?: string[];
+    locations?: string[];
+  };
 }
 
 export const VirtualRow = memo(function VirtualRow({
@@ -195,18 +206,50 @@ export const VirtualRow = memo(function VirtualRow({
   columnWidths,
   getColumnWidth,
   focusedCell,
+  autoFillSuggestions = {},
 }: VirtualRowProps) {
   // Get ordered column configs
   const orderedColumns = getOrderedColumns(columnOrder);
+
+  // Determine row background and style based on highlight_color and selection state
+  const getRowStyle = (): React.CSSProperties => {
+    if (fixture.highlight_color) {
+      return {
+        backgroundColor: fixture.highlight_color,
+        opacity: isSelected ? 0.8 : 0.6,
+      };
+    }
+    return {};
+  };
+
   const rowClass = `flex items-center h-10 border-b border-gray-200 dark:border-gray-800 ${
-    isSelected
-      ? 'bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800'
-      : 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'
+    fixture.highlight_color
+      ? ''  // Custom color via inline style
+      : isSelected
+        ? 'bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800'
+        : 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'
   }`;
+
+  const rowStyle = getRowStyle();
 
   const handleCheckboxClick = (e: React.MouseEvent) => {
     // Let the click propagate to the row for selection logic
     onClick(e);
+  };
+
+  // Get autocomplete suggestions for a column
+  const getSuggestionsForColumn = (columnKey: ColumnKey): string[] => {
+    const key = columnKey as string;
+    if (key === 'position') return autoFillSuggestions.positions || [];
+    if (key === 'purpose') return autoFillSuggestions.purposes || [];
+    if (key === 'color') return autoFillSuggestions.colors || [];
+    if (key === 'manufacturer') return autoFillSuggestions.manufacturers || [];
+    if (key === 'model') return autoFillSuggestions.models || [];
+    if (key === 'system') return autoFillSuggestions.systems || [];
+    if (key === 'gobo') return autoFillSuggestions.gobos || [];
+    if (key === 'type') return autoFillSuggestions.types || [];
+    if (key === 'location') return autoFillSuggestions.locations || [];
+    return [];
   };
 
   const getCellValue = (key: ColumnKey): string => {
@@ -287,7 +330,7 @@ export const VirtualRow = memo(function VirtualRow({
   };
 
   return (
-    <div className={rowClass}>
+    <div className={rowClass} style={rowStyle}>
       <div
         className="w-12 flex items-center justify-center flex-shrink-0 cursor-pointer"
         onClick={handleCheckboxClick}
@@ -368,6 +411,7 @@ export const VirtualRow = memo(function VirtualRow({
                 className="flex-1"
                 readOnly={isFieldReadOnly(col.key)}
                 shouldFocus={isFocused}
+                suggestions={getSuggestionsForColumn(col.key)}
               />
             </div>
           );
@@ -384,6 +428,7 @@ export const VirtualRow = memo(function VirtualRow({
             style={{ width: `${colWidth}px` }}
             readOnly={isFieldReadOnly(col.key)}
             shouldFocus={isFocused}
+            suggestions={getSuggestionsForColumn(col.key)}
           />
         );
       })}

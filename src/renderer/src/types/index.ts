@@ -46,18 +46,6 @@ export interface Fixture {
   position_y?: number;
   position_z?: number;
 
-  // Focus (LightWright: Focus L/R, U/D, Note, Cut submenu, Status)
-  focus_lr?: string;
-  focus_ud?: string;
-  focus_note?: string;
-  focus_cut_us?: string;
-  focus_cut_ds?: string;
-  focus_cut_sr?: string;
-  focus_cut_sl?: string;
-  focus_cut_top?: string;
-  focus_cut_bottom?: string;
-  focus_status?: string;
-
   // System & Scenery (LightWright: System, Scenery)
   system?: string;
   scenery?: string;
@@ -82,6 +70,8 @@ export interface Fixture {
   status?: string;
   notes?: string;
   work_note_status?: string;
+  hidden?: boolean; // Hide fixture from normal view
+  highlight_color?: string; // Hex color for row highlighting (e.g., "#FF0000" for red)
 
   // Custom fields (JSON) - LightWright: User Columns (24)
   custom_fields?: Record<string, any>;

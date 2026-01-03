@@ -154,14 +154,17 @@ Core fixture database and virtual grid for managing lighting plots.
   - 100-item history limit
 
 **Remaining Work:**
-- ⬜ **Filter out capability** - Hide fixtures matching criteria (1-2 days)
-- ⬜ **Color flags for designations** - Visual indicators for hot circuits, special fixtures (2-3 days)
-- ⬜ **Point circuit notation** - Support circuits like "1.2", "1.3" for power thru/daisy chains (3-4 days)
-- ⬜ **Auto-complete from project data** - Suggest values based on existing fixtures (3-4 days)
-- ⬜ **Click-to-edit infrastructure** - Double-click infrastructure rows to edit (1 day)
-- ⬜ **Multi-color row highlighting** - Color-code fixtures by user criteria (2 days)
-- ⬜ **Combined fields on reports** - Concatenate fields (e.g., "Type + Accessory") (2-3 days)
-- ⬜ **Remove focus columns** - Clean up planned features that won't be implemented (1 hour)
+- (All quick wins completed!)
+
+**Recently Completed Quick Wins (January 2026):**
+- ✅ **Remove focus columns** - Removed focus-related columns from codebase - COMPLETED
+- ✅ **Point circuit notation** - Support for circuits like "1.2", "1.3" for power thru/daisy chains - COMPLETED
+- ✅ **Auto-complete from project data** - Inline autocomplete suggestions based on existing fixture data - COMPLETED
+- ✅ **Filter out capability** - Hide fixtures with "hidden" flag, toggle with "Show Hidden" checkbox - COMPLETED
+- ✅ **Color flags for designations** - Multi-color row highlighting with highlight_color field - COMPLETED
+- ✅ **Multi-color row highlighting** - Visual row highlighting with customizable colors - COMPLETED
+- ✅ **Click-to-edit infrastructure** - Double-click infrastructure rows to edit (was already implemented) - VERIFIED
+- ✅ **Combined fields on reports** - Concatenate fields (e.g., "Type + Accessory") - COMPLETED
 
 **Future Enhancements:**
 - 💡 **Auto-complete System** - Manufacturer, type, color, gobo database (deferred - requires extensive fixture database)
