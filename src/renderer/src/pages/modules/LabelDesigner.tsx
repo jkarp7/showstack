@@ -1043,7 +1043,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                   <button
                     onClick={() => {
                       // Open visual designer for the selected Avery template
-                      window.location.hash = `/project/${currentProjectId}/prep/label-designer/${averyTemplate}`;
+                      navigate(`/project/${currentProjectId}/prep/label-designer/${averyTemplate}`);
                     }}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
                   >
