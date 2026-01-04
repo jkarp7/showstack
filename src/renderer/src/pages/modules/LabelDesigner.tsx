@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFixtureStore } from '../../store/fixtureStore';
+import { promptAndMigrate, needsMigration } from '../../utils/prep/labelMigration';
 
 type LabelType = 'cable' | 'circuit' | 'fixture' | 'dimmer' | 'custom';
 type PrinterType = 'dymo-450' | 'brother-pt' | 'zebra' | 'avery-sheet';
@@ -53,7 +54,6 @@ interface LabelTemplate {
   type: LabelType;
   name: string;
   description: string;
-  icon: string;
   fields: string[];
 }
 
@@ -62,35 +62,30 @@ const LABEL_TEMPLATES: LabelTemplate[] = [
     type: 'cable',
     name: 'Cable Labels',
     description: 'Labels for multi-cables and power cables',
-    icon: '🔌',
     fields: ['Cable Name', 'Circuit Numbers', 'Destination', 'Notes']
   },
   {
     type: 'circuit',
     name: 'Circuit Labels',
     description: 'Labels for circuit breakers and patch panels',
-    icon: '⚡',
     fields: ['Circuit Number', 'Dimmer', 'Load', 'Location']
   },
   {
     type: 'fixture',
     name: 'Fixture Labels',
     description: 'Labels for individual fixtures',
-    icon: '💡',
     fields: ['Position', 'Channel', 'Color', 'Purpose']
   },
   {
     type: 'dimmer',
     name: 'Dimmer Labels',
     description: 'Labels for dimmer racks',
-    icon: '🎛️',
     fields: ['Dimmer Number', 'Circuit', 'Load', 'Phase']
   },
   {
     type: 'custom',
     name: 'Custom Labels',
     description: 'Create your own label format',
-    icon: '✏️',
     fields: []
   }
 ];
@@ -247,6 +242,20 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
     loadProjectInfo();
     loadCustomDesigns();
   }, [loadFixtures, currentProjectId]);
+
+  // Check for label migration needs
+  useEffect(() => {
+    const checkMigration = async () => {
+      if (currentProjectId && needsMigration(currentProjectId)) {
+        // Prompt user and migrate if they confirm
+        await promptAndMigrate(currentProjectId);
+        // Reload page to show migrated designs
+        window.location.reload();
+      }
+    };
+
+    checkMigration();
+  }, [currentProjectId]);
 
   // Initialize canvas with default labels
   useEffect(() => {
@@ -749,25 +758,25 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
               onClick={() => setShowLoadDialog(true)}
               className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
             >
-              📂 Load Design
+              Load Design
             </button>
             <button
               onClick={() => setShowSaveDialog(true)}
               className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
             >
-              💾 Save Design
+              Save Design
             </button>
             <button
               onClick={handleExportLabels}
               className="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
             >
-              📄 Export PDF
+              Export PDF
             </button>
             <button
               onClick={handlePrintLabels}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm transition"
             >
-              🖨️ Print
+              Print
             </button>
           </div>
         </div>
@@ -788,7 +797,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                     selectedTool === 'text' ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
-                  📝 Text
+                  Text
                 </button>
                 <button
                   onClick={() => setSelectedTool('rectangle')}
@@ -796,7 +805,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                     selectedTool === 'rectangle' ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
-                  ▭ Rectangle
+                  Rectangle
                 </button>
                 <button
                   onClick={() => setSelectedTool('circle')}
@@ -804,7 +813,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                     selectedTool === 'circle' ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
-                  ● Circle
+                  Circle
                 </button>
                 <button
                   onClick={() => setSelectedTool('line')}
@@ -812,7 +821,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                     selectedTool === 'line' ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
-                  ─ Line
+                  Line
                 </button>
               </div>
             </div>
@@ -828,7 +837,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                     onClick={deleteSelectedGraphic}
                     className="text-red-500 hover:text-red-400 text-sm"
                   >
-                    🗑️ Delete
+                    Delete
                   </button>
                 </div>
 
@@ -935,10 +944,9 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                   <button
                     key={template.type}
                     onClick={() => handleUseTemplate(template.type)}
-                    className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition flex items-center gap-2"
+                    className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
                   >
-                    <span>{template.icon}</span>
-                    <span>{template.name}</span>
+                    {template.name}
                   </button>
                 ))}
               </div>
@@ -1030,9 +1038,22 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Label Preview</h2>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                {Math.round(labelWidth / 96 * 10) / 10}" × {Math.round(labelHeight / 96 * 10) / 10}"
-                ({labelWidth}px × {labelHeight}px)
+              <div className="flex items-center gap-4">
+                {printerType === 'avery-sheet' && (
+                  <button
+                    onClick={() => {
+                      // Open visual designer for the selected Avery template
+                      navigate(`/project/${currentProjectId}/prep/label-designer/${averyTemplate}`);
+                    }}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                  >
+                    Edit with Visual Designer
+                  </button>
+                )}
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {Math.round(labelWidth / 96 * 10) / 10}" × {Math.round(labelHeight / 96 * 10) / 10}"
+                  ({labelWidth}px × {labelHeight}px)
+                </div>
               </div>
             </div>
 
@@ -1152,7 +1173,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                           }}
                           className="text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition"
                         >
-                          🗑️
+                          ×
                         </button>
                       </div>
                     </div>

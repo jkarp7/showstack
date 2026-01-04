@@ -8,7 +8,12 @@ import { ReportType } from './paperwork';
 /**
  * Column format types for display formatting
  */
-export type ColumnFormatType = 'text' | 'number' | 'power' | 'boolean' | 'date' | 'color';
+export type ColumnFormatType = 'text' | 'number' | 'power' | 'amperage' | 'boolean' | 'date' | 'color';
+
+/**
+ * Column display mode for header labels
+ */
+export type ColumnDisplayMode = 'full' | 'short' | 'custom';
 
 /**
  * Column configuration for paperwork report tables
@@ -16,11 +21,15 @@ export type ColumnFormatType = 'text' | 'number' | 'power' | 'boolean' | 'date' 
 export interface PaperworkColumnConfig {
   id: string;
   field: string; // 'channel', 'dimmer', 'position', etc.
-  label: string;
+  label: string; // Full label
+  shortLabel?: string; // Short/abbreviated label
+  customLabel?: string; // User-defined custom label
+  displayMode?: ColumnDisplayMode; // Which label to display (default: 'full')
   width: number; // percentage
   visible: boolean;
   format?: ColumnFormatType;
   combinedWith?: string[]; // e.g., ['position', 'unit'] -> "FOH 1"
+  separator?: string; // Separator for merged columns (default: ' • ')
 }
 
 /**
@@ -35,6 +44,18 @@ export interface ReportOrganization {
 }
 
 /**
+ * Font style options
+ */
+export interface FontStyle {
+  fontFamily?: string; // e.g., 'Arial', 'Times New Roman', 'Helvetica'
+  fontSize?: number; // Base font size in points (default: 10)
+  headerFontSize?: number; // Header font size in points (default: 11)
+  fontWeight?: 'normal' | 'bold';
+  fontStyle?: 'normal' | 'italic';
+  lineHeight?: number; // Line height multiplier (default: 1.2)
+}
+
+/**
  * Page setup configuration
  */
 export interface PageSetup {
@@ -45,6 +66,7 @@ export interface PageSetup {
   marginRight: number;
   marginBottom: number;
   marginLeft: number;
+  fontStyle?: FontStyle; // Font customization settings
 }
 
 /**

@@ -6,7 +6,6 @@ import { ImportConflictDialog } from '../components/common/ImportConflictDialog'
 import { AccountDialog } from '../components/License/Account/AccountDialog';
 import { useProjectStore, Project } from '../store/projectStore';
 import { useFileStore } from '../store/fileStore';
-import { migrateLegacyRecentFiles } from '../utils/recentFiles';
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -18,8 +17,6 @@ export function LandingPage() {
   const [logoDataUrls, setLogoDataUrls] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
-    // Migrate legacy recent files on first load
-    migrateLegacyRecentFiles();
     loadProjects();
 
     // Update menu context

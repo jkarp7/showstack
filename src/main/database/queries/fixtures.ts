@@ -84,6 +84,8 @@ export interface Fixture {
   status?: string;
   notes?: string;
   work_note_status?: string;
+  hidden?: boolean;
+  color_flag?: 'hot' | 'spare' | 'special' | 'dimmer_doubles' | 'two_fer' | null;
 
   // Custom fields (JSON) - LightWright: User Columns (24)
   custom_fields?: Record<string, any>;
@@ -204,7 +206,8 @@ export function updateFixture(id: string, updates: Partial<Fixture>): Fixture {
     'channel', 'universe', 'dmx_address', 'dimmer', 'circuit', 'circuit_number',
     'color', 'gobo', 'accessories', 'location', 'system', 'wattage',
     'status', 'notes', 'custom_fields',
-    'dimmer_rack_id', 'dimmer_channel_number', 'pd_rack_id', 'pd_circuit_number'
+    'dimmer_rack_id', 'dimmer_channel_number', 'pd_rack_id', 'pd_circuit_number',
+    'hidden', 'color_flag'
   ];
 
   const fields = Object.keys(updates).filter(k =>

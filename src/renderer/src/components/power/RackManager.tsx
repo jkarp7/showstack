@@ -7,7 +7,8 @@ import {
   CIRCUIT_COUNT_OPTIONS,
   VOLTAGE_OPTIONS,
   MODULE_TYPE_OPTIONS,
-  PHASE_CONFIG_OPTIONS
+  PHASE_CONFIG_OPTIONS,
+  BUILDING_SERVICE_OPTIONS
 } from '../../types/power';
 import { ModuleConfigDialog } from './ModuleConfigDialog';
 
@@ -122,6 +123,7 @@ export function RackManager({ projectId = 'default-project', onRacksChange }: Ra
                       <div>Channels/Module: {rack.channels_per_module || 12}</div>
                       <div>Watts/Module: {rack.watts_per_module || 2400}W</div>
                       {rack.location && <div>Location: {rack.location}</div>}
+                      {rack.building_service && <div>Service: {rack.building_service}</div>}
                     </div>
                   </div>
                   <div className="flex gap-2 ml-4">
@@ -184,6 +186,7 @@ export function RackManager({ projectId = 'default-project', onRacksChange }: Ra
                       {rack.phase_config && <div>Phase: {rack.phase_config}</div>}
                       <div>Amps/Breaker: {rack.amps_per_breaker || 20}A</div>
                       {rack.location && <div>Location: {rack.location}</div>}
+                      {rack.building_service && <div>Service: {rack.building_service}</div>}
                     </div>
                   </div>
                   <div className="flex gap-2 ml-4">
@@ -260,7 +263,8 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
         channels_per_module: dimmerRack?.channels_per_module || 12,
         watts_per_module: dimmerRack?.watts_per_module || 2400,
         location: dimmerRack?.location || '',
-        notes: dimmerRack?.notes || ''
+        notes: dimmerRack?.notes || '',
+        building_service: dimmerRack?.building_service || ''
       } as DimmerRackFormData;
     } else {
       const pdRack = rack as PDRack | undefined;
@@ -274,7 +278,8 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
         phase_config: pdRack?.phase_config || 'three',
         amps_per_breaker: pdRack?.amps_per_breaker || 20,
         location: pdRack?.location || '',
-        notes: pdRack?.notes || ''
+        notes: pdRack?.notes || '',
+        building_service: pdRack?.building_service || ''
       } as PDRackFormData;
     }
   });
@@ -554,17 +559,38 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
           )}
 
           {/* Common fields */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Location
-            </label>
-            <input
-              type="text"
-              value={formData.location || ''}
-              onChange={e => setFormData({ ...formData, location: e.target.value })}
-              className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., Stage Right, FOH, etc."
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Location
+              </label>
+              <input
+                type="text"
+                value={formData.location || ''}
+                onChange={e => setFormData({ ...formData, location: e.target.value })}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g., Stage Right, FOH, etc."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Building Service
+                <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                  (for load planning)
+                </span>
+              </label>
+              <select
+                value={formData.building_service || 'None'}
+                onChange={e => setFormData({ ...formData, building_service: e.target.value === 'None' ? '' : e.target.value })}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {BUILDING_SERVICE_OPTIONS.map(service => (
+                  <option key={service} value={service}>
+                    {service}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div>

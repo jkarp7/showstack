@@ -31,7 +31,6 @@ const MOCK_REPORT_TEMPLATES = [
     id: 'channel-hookup' as const,
     name: 'Channel Hookup',
     description: 'Complete fixture list',
-    icon: '📊'
   }
 ];
 

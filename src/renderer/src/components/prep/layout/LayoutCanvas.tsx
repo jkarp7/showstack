@@ -115,6 +115,8 @@ interface LayoutCanvasProps {
   onElementMove: (elementId: string, gridColumn: number, gridRow: number) => void;
   onElementResize: (elementId: string, columnSpan: number, rowSpan: number) => void;
   onElementDelete: (elementId: string) => void;
+  zoom?: number;
+  showGrid?: boolean;
 }
 
 export function LayoutCanvas({
@@ -125,12 +127,17 @@ export function LayoutCanvas({
   onElementDrop,
   onElementMove,
   onElementResize,
-  onElementDelete
+  onElementDelete,
+  zoom: externalZoom,
+  showGrid: externalShowGrid
 }: LayoutCanvasProps) {
-  const [showGrid, setShowGrid] = useState(true);
-  const [zoom, setZoom] = useState(100);
+  // Use external zoom/grid if provided, otherwise use defaults
+  const zoom = externalZoom ?? 100;
+  const showGrid = externalShowGrid ?? true;
   const [draggedElement, setDraggedElement] = useState<string | null>(null);
   const [dragOverCell, setDragOverCell] = useState<{ col: number; row: number } | null>(null);
+  const [resizeHandle, setResizeHandle] = useState<'se' | 'e' | 's' | null>(null);
+  const [snapGuides, setSnapGuides] = useState<{ x: number[]; y: number[] }>({ x: [], y: [] });
   const canvasRef = useRef<HTMLDivElement>(null);
 
   // Calculate cell dimensions based on page size and grid
@@ -170,18 +177,6 @@ export function LayoutCanvas({
     }
   };
 
-  const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 10, 200));
-  };
-
-  const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 10, 50));
-  };
-
-  const handleZoomReset = () => {
-    setZoom(100);
-  };
-
   const getElementAtPosition = (col: number, row: number): LayoutElement | null => {
     return template.elements.find(el =>
       col >= el.grid_column &&
@@ -193,54 +188,6 @@ export function LayoutCanvas({
 
   return (
     <div className="flex-1 bg-gray-900 rounded-lg border border-gray-700 flex flex-col overflow-hidden">
-      {/* Toolbar */}
-      <div className="bg-gray-800 border-b border-gray-700 p-3 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-400">Grid:</span>
-            <button
-              onClick={() => setShowGrid(!showGrid)}
-              className={`px-3 py-1 text-xs rounded transition ${
-                showGrid
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-            >
-              {showGrid ? 'Visible' : 'Hidden'}
-            </button>
-          </div>
-
-          <div className="text-xs text-gray-500">
-            {template.grid_columns} × {template.grid_rows} grid
-          </div>
-        </div>
-
-        {/* Zoom Controls */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-400">Zoom:</span>
-          <button
-            onClick={handleZoomOut}
-            disabled={zoom <= 50}
-            className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            −
-          </button>
-          <button
-            onClick={handleZoomReset}
-            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-gray-900 dark:text-white text-xs transition min-w-16"
-          >
-            {zoom}%
-          </button>
-          <button
-            onClick={handleZoomIn}
-            disabled={zoom >= 200}
-            className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            +
-          </button>
-        </div>
-      </div>
-
       {/* Canvas */}
       <div className="flex-1 overflow-auto p-8 bg-gray-850">
         <div className="flex items-center justify-center min-h-full">
@@ -281,27 +228,70 @@ export function LayoutCanvas({
                 handleDrop(e, gridCol, gridRow);
               }
             }}
-            className="relative bg-white shadow-2xl outline-none"
+            className="relative shadow-2xl outline-none"
             style={{
               width: `${template.page_width * (zoom / 100)}px`,
               height: `${template.page_height * (zoom / 100)}px`,
+              backgroundColor: template.config?.backgroundColor || '#ffffff',
               transform: `scale(1)`,
               transformOrigin: 'center'
             }}
           >
-            {/* Grid */}
+            {/* Grid - Enhanced with better visibility */}
             {showGrid && (
+              <>
+                {/* Fine grid lines */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    backgroundImage: `
+                      linear-gradient(to right, rgba(203, 213, 225, 0.4) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(203, 213, 225, 0.4) 1px, transparent 1px)
+                    `,
+                    backgroundSize: `${cellWidth * (zoom / 100)}px ${cellHeight * (zoom / 100)}px`
+                  }}
+                />
+                {/* Bold grid lines every 4 cells for better visual hierarchy */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    backgroundImage: `
+                      linear-gradient(to right, rgba(148, 163, 184, 0.6) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(148, 163, 184, 0.6) 1px, transparent 1px)
+                    `,
+                    backgroundSize: `${cellWidth * 4 * (zoom / 100)}px ${cellHeight * 4 * (zoom / 100)}px`
+                  }}
+                />
+              </>
+            )}
+
+            {/* Snap Guides - Show when dragging elements */}
+            {snapGuides.x.map((x, i) => (
               <div
-                className="absolute inset-0 pointer-events-none"
+                key={`snap-x-${i}`}
+                className="absolute pointer-events-none bg-blue-500 opacity-50"
                 style={{
-                  backgroundImage: `
-                    linear-gradient(to right, #e5e7eb 1px, transparent 1px),
-                    linear-gradient(to bottom, #e5e7eb 1px, transparent 1px)
-                  `,
-                  backgroundSize: `${cellWidth * (zoom / 100)}px ${cellHeight * (zoom / 100)}px`
+                  left: `${x * (zoom / 100)}px`,
+                  top: 0,
+                  width: '1px',
+                  height: '100%',
+                  zIndex: 9999
                 }}
               />
-            )}
+            ))}
+            {snapGuides.y.map((y, i) => (
+              <div
+                key={`snap-y-${i}`}
+                className="absolute pointer-events-none bg-blue-500 opacity-50"
+                style={{
+                  top: `${y * (zoom / 100)}px`,
+                  left: 0,
+                  height: '1px',
+                  width: '100%',
+                  zIndex: 9999
+                }}
+              />
+            ))}
 
             {/* Grid Cells (Drop Zones) */}
             <div className="absolute inset-0 grid"
@@ -332,22 +322,81 @@ export function LayoutCanvas({
                           e.preventDefault(); // Still need to prevent default even if occupied
                         }
                       }}
-                      className={`border-gray-200 transition-colors ${
+                      className={`transition-all duration-200 ${
                         isDragOver && !isOccupied
-                          ? 'bg-blue-100 border-2 border-blue-400'
+                          ? 'bg-blue-200/60 border-2 border-blue-500 border-dashed shadow-lg animate-pulse'
+                          : isDragOver && isOccupied
+                          ? 'bg-red-200/40 border-2 border-red-400 border-dashed'
+                          : draggedElement || dragOverCell
+                          ? !isOccupied
+                            ? 'bg-green-100/30 border border-green-300/50'
+                            : 'bg-red-50/20 border border-red-300/30'
                           : 'border border-transparent'
                       }`}
                       style={{
                         gridColumn: isOccupied ? `span ${element.column_span}` : undefined,
                         gridRow: isOccupied ? `span ${element.row_span}` : undefined,
-                        cursor: isOccupied ? 'default' : 'crosshair',
+                        cursor: isOccupied ? 'not-allowed' : 'crosshair',
                         minHeight: isOccupied ? undefined : '20px'
                       }}
-                    />
+                    >
+                      {/* Drop Zone Indicator */}
+                      {isDragOver && !isOccupied && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="bg-blue-500 text-white px-2 py-1 rounded text-xs shadow-lg">
+                            Drop here
+                          </div>
+                        </div>
+                      )}
+                      {isDragOver && isOccupied && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="bg-red-500 text-white px-2 py-1 rounded text-xs shadow-lg">
+                            Occupied
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   );
                 })
               )}
             </div>
+
+            {/* Ghost Element Preview - Shows where element will drop */}
+            {dragOverCell && draggedElement && (() => {
+              const element = template.elements.find(el => el.id === draggedElement);
+              if (!element) return null;
+
+              // Check if drop location is valid (not occupied)
+              const targetElement = getElementAtPosition(dragOverCell.col, dragOverCell.row);
+              const isValidDrop = !targetElement;
+
+              return (
+                <div
+                  className={`absolute pointer-events-none border-2 rounded ${
+                    isValidDrop
+                      ? 'border-blue-500 bg-blue-100/40 border-dashed'
+                      : 'border-red-500 bg-red-100/40 border-dashed'
+                  }`}
+                  style={{
+                    left: `${dragOverCell.col * cellWidth * (zoom / 100)}px`,
+                    top: `${dragOverCell.row * cellHeight * (zoom / 100)}px`,
+                    width: `${element.column_span * cellWidth * (zoom / 100)}px`,
+                    height: `${element.row_span * cellHeight * (zoom / 100)}px`,
+                    zIndex: 9998
+                  }}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className={`text-xs font-medium px-2 py-1 rounded ${
+                      isValidDrop
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-red-500 text-white'
+                    }`}>
+                      {isValidDrop ? '✓ Drop' : '✗ Occupied'}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Elements */}
             {template.elements
@@ -362,9 +411,11 @@ export function LayoutCanvas({
                     onElementSelect(element.id);
                   }}
                   className={`absolute cursor-move transition-all ${
-                    selectedElementId === element.id
-                      ? 'ring-2 ring-blue-500 ring-offset-2'
-                      : 'hover:ring-2 hover:ring-gray-400'
+                    draggedElement === element.id
+                      ? 'opacity-40 scale-95 ring-2 ring-blue-400 ring-dashed'
+                      : selectedElementId === element.id
+                      ? 'ring-2 ring-blue-500 ring-offset-2 shadow-xl'
+                      : 'hover:ring-2 hover:ring-gray-400 hover:shadow-md'
                   }`}
                   style={{
                     left: `${element.grid_column * cellWidth * (zoom / 100)}px`,
@@ -377,8 +428,15 @@ export function LayoutCanvas({
                     fontSize: `${(element.style.fontSize || 12) * (zoom / 100)}px`,
                     fontFamily: element.style.fontFamily || 'Arial',
                     fontWeight: element.style.fontWeight || 'normal',
+                    fontStyle: element.style.fontStyle || 'normal',
                     textAlign: element.style.textAlign || 'left',
-                    padding: `${(element.style.padding || 8) * (zoom / 100)}px`,
+                    textDecoration: element.style.textDecoration || 'none',
+                    lineHeight: element.style.lineHeight || 1.5,
+                    letterSpacing: element.style.letterSpacing ? `${element.style.letterSpacing * (zoom / 100)}px` : 'normal',
+                    // Individual padding support - use individual if set, otherwise use unified
+                    padding: element.style.paddingTop !== undefined
+                      ? `${element.style.paddingTop * (zoom / 100)}px ${element.style.paddingRight * (zoom / 100)}px ${element.style.paddingBottom * (zoom / 100)}px ${element.style.paddingLeft * (zoom / 100)}px`
+                      : `${(element.style.padding || 8) * (zoom / 100)}px`,
                     borderWidth: `${(element.style.borderWidth || 0) * (zoom / 100)}px`,
                     borderStyle: element.style.borderStyle || 'none',
                     borderColor: element.style.borderColor || '#000',
@@ -402,10 +460,24 @@ export function LayoutCanvas({
                       </div>
                     )}
                     {element.element_type === 'image' && (
-                      <div className="text-xs text-gray-500 italic flex flex-col items-center justify-center">
-                        <div className="text-2xl mb-1">🖼️</div>
-                        <div>Image</div>
-                      </div>
+                      <>
+                        {(element.config as any).src ? (
+                          <img
+                            src={(element.config as any).src}
+                            alt={(element.config as any).altText || 'Image'}
+                            className="w-full h-full"
+                            style={{
+                              objectFit: (element.config as any).objectFit || 'contain'
+                            }}
+                          />
+                        ) : (
+                          <div className="text-xs text-gray-500 italic flex flex-col items-center justify-center h-full">
+                            <div className="text-2xl mb-1">🖼️</div>
+                            <div>No image</div>
+                            <div className="text-xs mt-1">Upload in inspector</div>
+                          </div>
+                        )}
+                      </>
                     )}
                     {element.element_type === 'table' && (
                       <div className="text-xs text-gray-500 italic flex flex-col items-center justify-center">
@@ -420,13 +492,44 @@ export function LayoutCanvas({
                     )}
                   </div>
 
-                  {/* Selection Indicator */}
+                  {/* Selection Indicator and Resize Handles */}
                   {selectedElementId === element.id && (
-                    <div className="absolute -top-6 left-0 bg-blue-500 text-gray-900 dark:text-white px-2 py-0.5 rounded text-xs whitespace-nowrap pointer-events-none">
-                      {element.element_type}
-                      {' '}
-                      ({element.column_span}×{element.row_span})
-                    </div>
+                    <>
+                      {/* Element info label */}
+                      <div className="absolute -top-6 left-0 bg-blue-500 text-white px-2 py-0.5 rounded text-xs whitespace-nowrap pointer-events-none shadow-lg">
+                        {element.element_type}
+                        {' '}
+                        ({element.column_span}×{element.row_span})
+                      </div>
+
+                      {/* Resize Handles */}
+                      {/* Bottom-right corner handle */}
+                      <div
+                        className="absolute -bottom-1 -right-1 w-3 h-3 bg-white border-2 border-blue-500 rounded-sm cursor-se-resize hover:scale-125 transition-transform shadow-md"
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          setResizeHandle('se');
+                        }}
+                      />
+
+                      {/* Right edge handle */}
+                      <div
+                        className="absolute top-1/2 -translate-y-1/2 -right-1 w-3 h-6 bg-white border-2 border-blue-500 rounded-sm cursor-e-resize hover:scale-125 transition-transform shadow-md"
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          setResizeHandle('e');
+                        }}
+                      />
+
+                      {/* Bottom edge handle */}
+                      <div
+                        className="absolute left-1/2 -translate-x-1/2 -bottom-1 w-6 h-3 bg-white border-2 border-blue-500 rounded-sm cursor-s-resize hover:scale-125 transition-transform shadow-md"
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          setResizeHandle('s');
+                        }}
+                      />
+                    </>
                   )}
                 </div>
               ))}

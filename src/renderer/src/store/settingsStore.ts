@@ -49,12 +49,14 @@ export interface ProjectManagementSettings {
 // Print Settings
 export type PaperSize = 'letter' | 'legal' | 'tabloid' | 'a4' | 'a3';
 export type Orientation = 'portrait' | 'landscape';
+export type ColorMode = 'color' | 'bw';
 
 export interface PrintSettingsConfig {
   paperSize: PaperSize;
   orientation: Orientation;
   dpi: 150 | 300 | 600;
   includeWatermark: boolean;
+  colorMode: ColorMode;
 }
 
 // Advanced Settings
@@ -86,6 +88,16 @@ export interface UserProfileSettings {
   avatarPath?: string; // Path to uploaded avatar image
 }
 
+// Power Services Settings
+export interface ServiceDefinition {
+  name: string;
+  capacity_amps: number;
+}
+
+export interface PowerServicesSettings {
+  services: ServiceDefinition[];
+}
+
 // Complete Settings State
 export interface SettingsState {
   workspace: WorkspaceSettings;
@@ -96,6 +108,7 @@ export interface SettingsState {
   advanced: AdvancedSettings;
   privacy: PrivacySettings;
   userProfile: UserProfileSettings;
+  powerServices: PowerServicesSettings;
 
   // Actions
   updateWorkspace: (settings: Partial<WorkspaceSettings>) => void;
@@ -106,6 +119,7 @@ export interface SettingsState {
   updateAdvanced: (settings: Partial<AdvancedSettings>) => void;
   updatePrivacy: (settings: Partial<PrivacySettings>) => void;
   updateUserProfile: (settings: Partial<UserProfileSettings>) => void;
+  updatePowerServices: (settings: Partial<PowerServicesSettings>) => void;
   resetToDefaults: () => void;
 }
 
@@ -143,6 +157,7 @@ const defaultSettings = {
     orientation: 'portrait' as const,
     dpi: 300 as const,
     includeWatermark: false,
+    colorMode: 'color' as const,
   },
   advanced: {
     developerMode: false,
@@ -164,6 +179,13 @@ const defaultSettings = {
     phone: '',
     designerCredit: '',
     avatarPath: undefined,
+  },
+  powerServices: {
+    services: [
+      { name: 'Service A', capacity_amps: 400 },
+      { name: 'Service B', capacity_amps: 400 },
+      { name: 'Service C', capacity_amps: 200 }
+    ],
   },
 };
 
@@ -212,6 +234,11 @@ export const useSettingsStore = create<SettingsState>()(
       updateUserProfile: (settings) =>
         set((state) => ({
           userProfile: { ...state.userProfile, ...settings },
+        })),
+
+      updatePowerServices: (settings) =>
+        set((state) => ({
+          powerServices: { ...state.powerServices, ...settings },
         })),
 
       resetToDefaults: () => set(defaultSettings),

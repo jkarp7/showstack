@@ -7,6 +7,7 @@ import { ModuleLanding } from './pages/ModuleLanding';
 import { Prep } from './pages/modules/Prep';
 import { SystemDocs } from './pages/modules/SystemDocs';
 import { Manager } from './pages/modules/Manager';
+import { LabelVisualDesigner } from './pages/LabelVisualDesigner';
 import { AdminPanel } from './pages/admin/AdminPanel';
 import { Account } from './pages/Account';
 import { Settings } from './pages/Settings';
@@ -14,8 +15,10 @@ import { LicenseBanner } from './components/License/LicenseBanner';
 import { SplashScreen } from './components/SplashScreen';
 import { ThemeProvider } from './components/ThemeProvider';
 import { ConsentDialog } from './components/common/ConsentDialog';
+import { SettingsDialog } from './components/common/SettingsDialog';
 import { useUser } from './hooks/useUser';
 import { useSettingsStore } from './store/settingsStore';
+import { useUIStore } from './store/uiStore';
 import { telemetry } from './services/telemetry';
 import { useMenuHandlers } from './hooks/useMenuHandlers';
 import { useProjectMenuHandlers } from './hooks/useProjectMenuHandlers';
@@ -23,6 +26,8 @@ import { useProjectMenuHandlers } from './hooks/useProjectMenuHandlers';
 function AppContent() {
   const { status } = useUser();
   const navigate = useNavigate();
+  const isSettingsDialogOpen = useUIStore((state) => state.isSettingsDialogOpen);
+  const closeSettingsDialog = useUIStore((state) => state.closeSettingsDialog);
 
   // Set up menu event handlers
   useMenuHandlers();
@@ -59,6 +64,7 @@ function AppContent() {
         <Route path="/project/:projectId/module/:moduleType" element={<ModuleLanding />} />
         <Route path="/project/:projectId/module/production/system-docs" element={<SystemDocs />} />
         <Route path="/project/:projectId/module/production/shop-order" element={<Prep />} />
+        <Route path="/project/:projectId/prep/label-designer/:averyCode" element={<LabelVisualDesigner />} />
         <Route path="/project/:projectId/module/design" element={<Navigate to="prep" replace />} />
         <Route path="/project/:projectId/module/prep" element={<Navigate to="/project/:projectId/module/production/shop-order" replace />} />
         <Route path="/project/:projectId/module/manager" element={<Manager />} />
@@ -94,6 +100,9 @@ function AppContent() {
         {/* Catch all - redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+
+      {/* Settings Dialog */}
+      <SettingsDialog isOpen={isSettingsDialogOpen} onClose={closeSettingsDialog} />
     </>
   );
 }

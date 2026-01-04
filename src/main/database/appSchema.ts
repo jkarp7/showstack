@@ -59,6 +59,7 @@ export const APP_SCHEMA = `
     grid_gap INTEGER NOT NULL DEFAULT 8, -- pixels
     page_width INTEGER NOT NULL DEFAULT 816, -- 8.5" at 96 DPI
     page_height INTEGER NOT NULL DEFAULT 1056, -- 11" at 96 DPI
+    config TEXT, -- JSON: backgroundColor, etc.
     is_default INTEGER DEFAULT 0,
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL

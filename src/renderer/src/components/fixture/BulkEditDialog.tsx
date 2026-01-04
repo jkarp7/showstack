@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Fixture } from '../../types';
+import { COLOR_FLAG_DEFINITIONS, ColorFlagType } from '../../types/highlighting';
 
 interface BulkEditDialogProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
     colorAccessories: false,
     location: false,
     focus: false,
+    flagsVisibility: false,
     other: false,
   });
 
@@ -531,6 +533,67 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                       placeholder="Leave blank to skip"
                       rows={3}
                     />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Flags & Visibility Section */}
+            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+              <button
+                type="button"
+                onClick={() => toggleSection('flagsVisibility')}
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-between text-left transition"
+              >
+                <span className="font-medium text-gray-900 dark:text-white">Flags & Visibility</span>
+                <span className="text-gray-500">{expandedSections.flagsVisibility ? '▼' : '▶'}</span>
+              </button>
+              {expandedSections.flagsVisibility && (
+                <div className="p-4 space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Color Flag (appears on labels)
+                    </label>
+                    <select
+                      value={updates.color_flag || ''}
+                      onChange={(e) => handleChange('color_flag', (e.target.value || null) as any)}
+                      className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white"
+                    >
+                      <option value="">No Flag (Clear)</option>
+                      {Object.entries(COLOR_FLAG_DEFINITIONS).map(([key, def]) => (
+                        <option key={key} value={key}>
+                          {def.label} - {def.description}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Color flags appear as vertical bars on row edges and on printed labels
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Visibility
+                    </label>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleChange('hidden', false)}
+                        className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium transition"
+                      >
+                        Show (Unhide)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleChange('hidden', true)}
+                        className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm font-medium transition"
+                      >
+                        Hide from Table
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Hidden fixtures can be shown with the "Show Hidden" filter checkbox
+                    </p>
                   </div>
                 </div>
               )}

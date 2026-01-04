@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { DimmerRack, PDRack, ProjectPowerSummary, RackPowerSummary } from '../../types/power';
+import { DimmerRack, PDRack, ProjectPowerSummary, RackPowerSummary, ServicePowerSummary } from '../../types/power';
 import { calculateProjectPowerSummary, formatPower, formatAmps, formatPercentage } from '../../utils/powerCalculations';
 import { DimmerRackModule } from '../../../../main/database/queries/dimmerRackModules';
 
@@ -21,6 +21,7 @@ interface PowerSummaryPanelProps {
 export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = '' }: PowerSummaryPanelProps) {
   // Load module configurations for dimmer racks
   const [rackModules, setRackModules] = useState<Map<string, DimmerRackModule[]>>(new Map());
+  const [viewMode, setViewMode] = useState<'by-service' | 'by-type'>('by-service');
 
   useEffect(() => {
     const loadModules = async () => {
@@ -110,8 +111,32 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
   return (
     <div className={`bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden ${className}`}>
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 flex justify-between items-center">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Power Summary</h3>
+        {summary.services && summary.services.length > 0 && (
+          <div className="flex gap-2 bg-gray-200 dark:bg-gray-600 rounded p-1">
+            <button
+              onClick={() => setViewMode('by-service')}
+              className={`px-3 py-1 text-sm rounded transition ${
+                viewMode === 'by-service'
+                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              By Service
+            </button>
+            <button
+              onClick={() => setViewMode('by-type')}
+              className={`px-3 py-1 text-sm rounded transition ${
+                viewMode === 'by-type'
+                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              By Type
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Overall Summary */}
@@ -237,24 +262,68 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
         </div>
       )}
 
-      {/* Dimmer Racks */}
-      {summary.dimmer_racks.length > 0 && (
+      {/* Service Grouped View */}
+      {viewMode === 'by-service' && summary.services && summary.services.length > 0 ? (
         <div>
-          <div className="px-6 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Dimmer Racks ({summary.dimmer_racks.length})</h4>
-          </div>
-          <div>{summary.dimmer_racks.map(renderRackRow)}</div>
+          {summary.services.map((service) => (
+            <div key={service.service_name}>
+              <div className="px-6 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {service.service_name} ({service.racks.length} racks)
+                  </h4>
+                  <div className="flex gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Load: </span>
+                      <span className="font-medium text-gray-900 dark:text-white">{formatPower(service.total_load_kw)}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Capacity: </span>
+                      <span className="font-medium text-gray-900 dark:text-white">{formatPower(service.total_capacity_kw)}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Utilization: </span>
+                      <span
+                        className={`font-medium ${
+                          service.utilization_percentage >= 100
+                            ? 'text-red-600 dark:text-red-400'
+                            : service.utilization_percentage >= 80
+                            ? 'text-yellow-600 dark:text-yellow-400'
+                            : 'text-green-600 dark:text-green-400'
+                        }`}
+                      >
+                        {formatPercentage(service.utilization_percentage)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>{service.racks.map(renderRackRow)}</div>
+            </div>
+          ))}
         </div>
-      )}
+      ) : (
+        <>
+          {/* Dimmer Racks */}
+          {summary.dimmer_racks.length > 0 && (
+            <div>
+              <div className="px-6 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Dimmer Racks ({summary.dimmer_racks.length})</h4>
+              </div>
+              <div>{summary.dimmer_racks.map(renderRackRow)}</div>
+            </div>
+          )}
 
-      {/* PD Racks */}
-      {summary.pd_racks.length > 0 && (
-        <div>
-          <div className="px-6 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">PD Racks ({summary.pd_racks.length})</h4>
-          </div>
-          <div>{summary.pd_racks.map(renderRackRow)}</div>
-        </div>
+          {/* PD Racks */}
+          {summary.pd_racks.length > 0 && (
+            <div>
+              <div className="px-6 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">PD Racks ({summary.pd_racks.length})</h4>
+              </div>
+              <div>{summary.pd_racks.map(renderRackRow)}</div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Warnings */}

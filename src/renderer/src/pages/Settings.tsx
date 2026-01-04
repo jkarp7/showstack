@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Settings as SettingsIcon, ArrowLeft, Monitor, Edit3, FolderOpen, Users, Sliders, FileType, Printer, Shield } from 'lucide-react';
 import { WorkspacePreferences } from '../components/settings/WorkspacePreferences';
 import { EditorSettings } from '../components/settings/EditorSettings';
@@ -14,7 +14,15 @@ type Tab = 'workspace' | 'editor' | 'projects' | 'collaboration' | 'advanced' | 
 
 export function Settings() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<Tab>('workspace');
+
+  const handleBackClick = () => {
+    // Navigate to the location we came from (stored in state), or home as fallback
+    const from = (location.state as any)?.from || '/';
+    // Use replace to avoid creating extra history entries
+    navigate(from, { replace: true });
+  };
 
   const tabClass = (isActive: boolean) => `flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
     isActive
@@ -30,11 +38,11 @@ export function Settings() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => navigate('/')}
+                onClick={handleBackClick}
                 className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
-                <span>Back to Home</span>
+                <span>Back</span>
               </button>
               <div className="h-6 w-px bg-gray-300 dark:bg-gray-600" />
               <div className="flex items-center gap-2">

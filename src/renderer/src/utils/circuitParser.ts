@@ -16,6 +16,28 @@ export interface ParsedCircuit {
 }
 
 /**
+ * Parse a circuit number that might include point notation (e.g., "1.2", "1.3")
+ * For power thru/daisy chain circuits
+ * Returns the base circuit number for linking purposes
+ */
+export function parseCircuitNumber(circuitNumber: string | number): number {
+  if (typeof circuitNumber === 'number') {
+    return circuitNumber;
+  }
+
+  // Handle point notation (e.g., "1.2" -> 1)
+  if (typeof circuitNumber === 'string' && circuitNumber.includes('.')) {
+    const parts = circuitNumber.split('.');
+    const baseCircuit = parseInt(parts[0], 10);
+    return isNaN(baseCircuit) ? 0 : baseCircuit;
+  }
+
+  // Regular string number
+  const num = parseInt(circuitNumber, 10);
+  return isNaN(num) ? 0 : num;
+}
+
+/**
  * Result of linking a circuit to a rack
  */
 export interface CircuitLinkResult {
@@ -203,10 +225,11 @@ export function linkToPDRack(
 /**
  * Auto-link a fixture based on its circuit and circuit_number fields
  * Determines if it's a dimmer or PD circuit and links accordingly
+ * Supports point notation for power thru/daisy chains (e.g., "1.2", "1.3")
  */
 export function autoLinkCircuit(
   circuit: string,
-  circuitNumber: number,
+  circuitNumber: number | string,
   dimmerRacks: DimmerRack[],
   pdRacks: PDRack[]
 ): {
@@ -220,8 +243,11 @@ export function autoLinkCircuit(
     return {};
   }
 
+  // Parse circuit number to handle point notation
+  const baseCircuitNumber = parseCircuitNumber(circuitNumber);
+
   // Try dimmer racks first
-  const dimmerResult = linkToDimmerRack(circuit, circuitNumber, dimmerRacks);
+  const dimmerResult = linkToDimmerRack(circuit, baseCircuitNumber, dimmerRacks);
   if (dimmerResult.rackId) {
     return {
       dimmer_rack_id: dimmerResult.rackId,
@@ -230,7 +256,7 @@ export function autoLinkCircuit(
   }
 
   // Try PD racks
-  const pdResult = linkToPDRack(circuit, circuitNumber, pdRacks);
+  const pdResult = linkToPDRack(circuit, baseCircuitNumber, pdRacks);
   if (pdResult.rackId) {
     return {
       pd_rack_id: pdResult.rackId,

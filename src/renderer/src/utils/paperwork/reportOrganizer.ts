@@ -68,16 +68,26 @@ function compareValues(a: any, b: any, direction: 'asc' | 'desc'): number {
   }
 
   // String comparison with natural sort for numbers
-  const aStr = String(a);
-  const bStr = String(b);
+  const aStr = String(a).trim();
+  const bStr = String(b).trim();
 
-  // Natural sort: extract numbers and compare
+  // Check if both strings are purely numeric (with optional leading zeros)
+  const aIsNumeric = /^\d+$/.test(aStr);
+  const bIsNumeric = /^\d+$/.test(bStr);
+
+  if (aIsNumeric && bIsNumeric) {
+    const aNum = parseInt(aStr, 10);
+    const bNum = parseInt(bStr, 10);
+    return direction === 'asc' ? aNum - bNum : bNum - aNum;
+  }
+
+  // Natural sort: extract numbers from strings with text
   const aMatch = aStr.match(/(\d+)/);
   const bMatch = bStr.match(/(\d+)/);
 
   if (aMatch && bMatch) {
-    const aNum = parseInt(aMatch[1]);
-    const bNum = parseInt(bMatch[1]);
+    const aNum = parseInt(aMatch[1], 10);
+    const bNum = parseInt(bMatch[1], 10);
 
     if (aNum !== bNum) {
       return direction === 'asc' ? aNum - bNum : bNum - aNum;
@@ -85,7 +95,7 @@ function compareValues(a: any, b: any, direction: 'asc' | 'desc'): number {
   }
 
   // Fall back to string comparison
-  const comparison = aStr.localeCompare(bStr);
+  const comparison = aStr.localeCompare(bStr, undefined, { numeric: true, sensitivity: 'base' });
   return direction === 'asc' ? comparison : -comparison;
 }
 
@@ -101,10 +111,25 @@ function groupItems(items: ReportDataItem[], groupBy: string): ReportGroup[] {
     grouped.get(groupValue)!.push(item);
   }
 
-  // Convert to array and sort by group value
+  // Convert to array and sort by group value using natural sort
   return Array.from(grouped.entries())
     .map(([groupValue, items]) => ({ groupValue, items }))
-    .sort((a, b) => a.groupValue.localeCompare(b.groupValue));
+    .sort((a, b) => {
+      // Use the same natural sort logic as compareValues
+      const aStr = a.groupValue.trim();
+      const bStr = b.groupValue.trim();
+
+      // Check if both are purely numeric
+      const aIsNumeric = /^\d+$/.test(aStr);
+      const bIsNumeric = /^\d+$/.test(bStr);
+
+      if (aIsNumeric && bIsNumeric) {
+        return parseInt(aStr, 10) - parseInt(bStr, 10);
+      }
+
+      // Natural sort with embedded numbers
+      return aStr.localeCompare(bStr, undefined, { numeric: true, sensitivity: 'base' });
+    });
 }
 
 export function calculateGroupSummary(group: ReportGroup): {

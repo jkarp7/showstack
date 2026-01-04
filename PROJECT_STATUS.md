@@ -1,9 +1,10 @@
 # ShowStack Project Status
 
-**Created:** December 18, 2024
-**Last Updated:** December 28, 2024
-**Current Version:** 0.1.0-alpha
-**Development Phase:** Alpha
+**Created:** December 18, 2025  
+**Last Updated:** January 3, 2026  
+**Current Version:** 0.1.0-alpha  
+**Development Phase:** Alpha  
+**Active Branch:** `feature/unified-visual-editor`
 
 This document tracks the development status of all ShowStack feature domains and editions. It serves as the central source of truth for what's completed, in progress, and planned.
 
@@ -13,7 +14,7 @@ This document tracks the development status of all ShowStack feature domains and
 
 | Feature Domain | Status | Completion |
 |----------------|--------|------------|
-| Lighting Features | 🚧 In Progress | 70% |
+| Lighting Features | 🚧 In Progress | 80% |
 | Core Infrastructure | ✅ Complete | 100% |
 | Sound Features | ⬜ Planned | 0% |
 | Video Features | ⬜ Planned | 0% |
@@ -25,20 +26,71 @@ This document tracks the development status of all ShowStack feature domains and
 
 ## 🎯 Current Development Priorities
 
-### Immediate (Next 2 Weeks)
-1. ✅ ~~Add undo/redo system~~ - COMPLETED
-2. ✅ ~~Add customizable headers to Paperwork Generator~~ - COMPLETED (Phase 1 & 2)
-3. ✅ ~~Complete Paperwork Generator with template system~~ - COMPLETED (12 reports)
-4. **UI upgrade for Visual Layout Editors** - Improve LayoutDesigner, LayoutCanvas, ElementPalette UX
-   - Better visual hierarchy and spacing
-   - Improved drag-and-drop feedback
-   - Enhanced element selection and manipulation
-   - Clearer grid guidelines and snapping
-5. **Remove emojis from UI for professional appearance** - Replace emoji icons with proper icons/text
-   - Buttons, labels, and UI elements across all modules
-   - Replace with Lucide React icons or text labels
-   - Maintain visual clarity without emoji decoration
-6. **Implement shop order creation from system documentation** (auto-populate from fixture/infrastructure data)
+### ✅ Recently Completed (December 2025 - January 2026)
+1. ✅ Undo/redo system - COMPLETED
+2. ✅ Customizable headers to Paperwork Generator - COMPLETED (Phase 1 & 2)
+3. ✅ Paperwork Header/Footer System - COMPLETED
+   - Compact 3-row grid layout with proper spacing
+   - Dynamic data from project (Show Name, LD, Venue, Date)
+   - Static footer with page numbers (Puppeteer displayHeaderFooter)
+   - Font matching across header, footer, and report content
+   - Automatic template migration system for layout updates
+   - Fixed duplicate element seeding issue
+4. ✅ Paperwork Template System (Phase 3) - COMPLETE
+   - Database infrastructure & queries
+   - Column configuration UI with drag-and-drop
+   - Grouping & sorting controls
+   - Report table renderer with color swatch visualization
+   - Template library with system templates (13 report types)
+   - Integrated PaperworkEditor component
+   - Major refactor of Paperwork.tsx (2353 → 409 lines, 82% reduction)
+   - Color Cut Report with gel database (628 colors) and sheet calculations
+   - Template migration system for automatic updates
+4. ✅ Layout Designer UI Improvements - COMPLETED
+   - Enhanced LayoutCanvas with better grid visualization, resize handles, snap guides
+   - Modernized ElementPalette and ElementInspector
+   - Floating toolbar with zoom and undo/redo
+   - Improved drag-and-drop feedback with ghost elements
+   - Phase 2 text & shape formatting controls
+   - Streamlined typography controls
+5. ✅ UI Polish: Emoji Removal - COMPLETED (January 2, 2026)
+   - Removed all emoji icons across the application for professional appearance
+   - Updated 8 files: ReportTypeSelector, Paperwork, ModuleLanding, SystemDocs, LabelDesigner, ElementPalette, ElementInspector, HeaderPreview
+   - Cleaner, more professional UI aesthetic without decorative emojis
+6. ✅ Power Management & Infrastructure Enhancements (Sprints 1-4) - COMPLETED (January 3, 2026)
+   - **Sprint 1**: Building service assignment (Service A/B/C) with capacity tracking
+   - **Sprint 1**: Custom phase labels (A/B/C → 1/2/3 or custom names)
+   - **Sprint 2**: Phase distribution templates (save/load phasing configurations)
+   - **Sprint 3**: Infrastructure port linking (fixtures, equipment, free text)
+   - **Sprint 3**: Port usage tracking with visual indicators
+   - **Sprint 4**: Color mode settings for PDF exports (color vs grayscale)
+   - **UI**: Settings dialog modal with click-outside-to-close
+   - **UI**: Service configuration panel with persistence
+   - **Database**: Migrations for building_service, phase_label_a/b/c, phase_template_id
+   - **Testing**: Comprehensive testing with bug fixes
+7. ✅ Phase 4: Label Integration - COMPLETED (January 3, 2026)
+   - Grid-based visual designer for all Avery label templates
+   - 5 Avery templates supported: 5160, 5163, 5164, 8160, 5167
+   - Label grid calculator (4 cells per inch resolution)
+   - Canvas-to-grid template converter for legacy designs
+   - Automated migration system (localStorage → database)
+   - Background color customization with color picker
+   - Image support via base64 storage (logos, graphics)
+   - 36 fixture data field mappings for label customization
+   - Batch PDF printing with Puppeteer
+   - Multi-label sheet renderer with precise Avery specifications
+   - IPC handlers for batch print and preview
+   - UI integration with "Edit with Visual Designer" button
+   - Complete routing and navigation
+   - Comprehensive documentation (617 lines)
+
+### Next Steps (Unified Visual Editor Completion)
+1. ✅ **Phase 3: Paperwork Template System** - COMPLETED
+2. ✅ **Phase 3.5: Logo & Image Support** - COMPLETED
+3. ✅ **Phase 4: Label Integration** - COMPLETED
+4. ⬜ **Phase 5: Polish & UX** - Keyboard shortcuts, inline editing, shadows, smart guides, template management (1 week)
+   - See: `docs/features/phase-5-polish-ux.md` for detailed 7-day implementation plan
+5. ⬜ **Shop order creation from system documentation** - Auto-populate from fixture/infrastructure data
 
 ### Short-term (Next 1-2 Months) - **Focus on Lightwright Parity**
 1. **MVR export support** - Industry standard CAD/visualizer format
@@ -122,14 +174,38 @@ Core fixture database and virtual grid for managing lighting plots.
   - 100-item history limit
 
 **Remaining Work:**
-- ⬜ **Filter out capability** - Hide fixtures matching criteria (1-2 days)
-- ⬜ **Color flags for designations** - Visual indicators for hot circuits, special fixtures (2-3 days)
-- ⬜ **Point circuit notation** - Support circuits like "1.2", "1.3" for power thru/daisy chains (3-4 days)
-- ⬜ **Auto-complete from project data** - Suggest values based on existing fixtures (3-4 days)
-- ⬜ **Click-to-edit infrastructure** - Double-click infrastructure rows to edit (1 day)
-- ⬜ **Multi-color row highlighting** - Color-code fixtures by user criteria (2 days)
-- ⬜ **Combined fields on reports** - Concatenate fields (e.g., "Type + Accessory") (2-3 days)
-- ⬜ **Remove focus columns** - Clean up planned features that won't be implemented (1 hour)
+- (All quick wins completed!)
+
+**Recently Completed Quick Wins (January 2026):**
+- ✅ **Remove focus columns** - Removed focus-related columns from codebase - COMPLETED
+- ✅ **Point circuit notation** - Support for circuits like "1.2", "1.3" for power thru/daisy chains - COMPLETED
+- ✅ **Auto-complete from project data** - Inline autocomplete suggestions based on existing fixture data - COMPLETED
+- ✅ **Filter out capability** - Hide fixtures with "hidden" flag, toggle with "Show Hidden" checkbox - COMPLETED
+- ✅ **Color flags for designations** - Categorical flags (Hot, Spare, Special, Dimmer Doubles, Two-Fer) that appear on labels with colored indicators - COMPLETED
+- ✅ **Multi-color row highlighting** - Conditional formatting with user-defined rules (e.g., "if Type = Spare Circuit, highlight yellow") - COMPLETED
+- ✅ **Click-to-edit infrastructure** - Double-click infrastructure rows to edit (was already implemented) - VERIFIED
+- ✅ **Combined fields on reports** - Concatenate fields (e.g., "Type + Accessory") - COMPLETED
+- ✅ **Right-click context menu** - Right-click fixtures to set flags and hide/unhide with React Portal positioning - COMPLETED (Jan 3, 2026)
+- ✅ **Always-visible flag column** - 2px vertical flag bar visible on all rows, subtle gray when no flag set - COMPLETED (Jan 3, 2026)
+- ✅ **Conditional formatting UI** - Dialog for creating/managing row highlighting rules with priority ordering - COMPLETED (Jan 3, 2026)
+- ✅ **Automatic text contrast** - Text color automatically adjusts based on highlight background luminance for readability - COMPLETED (Jan 3, 2026)
+- ✅ **Column visibility persistence** - Column visibility settings now persist per project - COMPLETED (Jan 3, 2026)
+- ✅ **Remove legacy recent files** - Removed recent files from Landing Page and Module Landing pages - COMPLETED (Jan 3, 2026)
+
+**Implementation Details:**
+- Color flags (`color_flag` field) are specific designations shown as vertical colored bars on row edges
+  - Predefined types: hot, spare, special, dimmer_doubles, two_fer
+  - Each has a specific color and meaning for label printing
+  - Accessible via right-click context menu or bulk edit dialog
+  - Always-visible 2px bar with subtle gray indicator when no flag is set
+- Row highlighting uses conditional formatting rules evaluated against fixture fields
+  - Rules support operators: equals, contains, starts_with, ends_with, is_empty, etc.
+  - Default rules included for Spare Circuits (yellow) and Practicals (blue)
+  - Rules are priority-based and stored per-project in preferences
+  - Dedicated Conditional Formatting dialog accessible from Equipment Manager toolbar
+  - Automatic text color calculation (WCAG luminance formula) ensures readability on all backgrounds
+- Context menu uses React Portal for correct positioning outside virtual scroll transforms
+- Column visibility preferences stored per-project using preferences API
 
 **Future Enhancements:**
 - 💡 **Auto-complete System** - Manufacturer, type, color, gobo database (deferred - requires extensive fixture database)
@@ -139,55 +215,73 @@ Core fixture database and virtual grid for managing lighting plots.
 
 ---
 
-#### Label Designer - 75% Complete
+#### Label Designer - ✅ Complete
 
-Drag-and-drop label creation for various printer types with HTML5 Canvas.
+Grid-based visual label designer with batch printing and multi-label PDF sheet export.
 
 **Completed:**
-- ✅ **Label Designer Page** - `src/renderer/src/pages/modules/LabelDesigner.tsx` (1,182 lines)
-  - Drag-and-drop label layout with canvas-based WYSIWYG editor
-  - Drawing tools: text, rectangle, circle, line
+- ✅ **Label Visual Designer** - Unified grid-based editor for all Avery templates
+  - Grid-based layout system (4 cells per inch resolution)
+  - Template conversion from canvas to grid coordinates
+  - Database-backed template storage (migrated from localStorage)
+  - Background color customization with color picker
+  - Image support (logos, graphics) via base64 storage
+  - 40+ data field mappings for fixture data
+  - Batch printing with Puppeteer PDF generation
+  - Multi-label sheet rendering with Avery specifications
+  - 5 Avery templates: 5160, 5163, 5164, 8160, 5167
+  - UI integration with "Edit with Visual Designer" button
+  - Automated migration system for existing designs
+
+- ✅ **Legacy Canvas Designer** - Original implementation (preserved for reference)
   - Template system: cable, circuit, fixture, dimmer labels
-  - Custom label designs with save/load (localStorage)
-  - Avery template support (5 predefined templates)
   - Printer type selection (Dymo, Brother, Zebra, Avery sheets)
-  - Batch printing mode
   - Element inspector with property editing
 
-**Remaining Work:**
-- ⬜ **PDF export** - handleExportLabels() needs implementation
-- ⬜ **Actual printing** - handlePrintLabels() needs IPC integration
-- ⬜ **Barcode/QR code generation** - Mentioned but not implemented
-- ⬜ **Printer driver integration** - No direct printer communication
-- ⬜ **Custom background colors** - User-selectable label background (1 day)
-- ⬜ **Background images** - Support logo/image backgrounds on labels (1-2 days)
-
-**Estimated Time to Complete:** 1-2 weeks
+**Phase 4 Implementation:** Complete (6 days, da75a8a, 41373e0, 78a1fc3, eb90c26, d5c5bce)
 
 ---
 
 #### Power Management Enhancements
 
+**Completed (Sprints 1-4):**
+- ✅ **Power service assignment** - Building service designation (Service A/B/C) with capacity tracking
+- ✅ **Phase distribution templates** - Save/load phase configurations (AB vs AC phasing)
+- ✅ **Custom phase labels** - User-defined phase naming (A/B/C → 1/2/3 or custom labels)
+- ✅ **Port linking** - Link infrastructure ports to fixtures, equipment, or free text
+- ✅ **Port usage tracking** - Visual indicators showing port utilization
+- ✅ **Color mode PDF exports** - Toggle between color and grayscale printing
+
 **Pending Additions:**
-- ⬜ **Power service assignment** - Designate services (A, B, C, etc.) (2 days)
-- ⬜ **Phase distribution templates** - Save/load phase configurations (AB vs AC phasing) (3-4 days)
-- ⬜ **Custom phase labels** - User-defined phase naming (1, 2, 3 or A, B, C) (1 day)
 - ⬜ **Cable Run Visualization** - Visual cable path layout
 - ⬜ **Advanced Phase Balancing** - Automatic phase assignment suggestions
 - ⬜ **Power Distribution Reports** - Printable rack schedules and load reports
 
-**Estimated Total:** 1-2 weeks
+**Estimated Total:** 2-3 weeks
 
 ---
 
 #### Paperwork Enhancements
 
-**Pending Additions:**
-- ⬜ **Color printing support** - Enable color in system docs paperwork (1 day)
-- ⬜ **Gel color swatches** - Visual color chips for gel/color fields (2-3 days)
-  - Requires gel color database integration
+**Completed:**
+- ✅ **Gel color swatches** - Visual color chips for gel/color fields in reports
+  - Complete gel color database (628 theatrical gels: GAM, LEE, Roscolux)
+  - Color swatch rendering in Color Cut Report
+  - Automatic hex color lookup from gel codes
+- ✅ **Color Cut Report** - Gel cutting list with automatic calculations
+  - Frame size parsing (square, rectangular, round formats)
+  - Cuts per sheet calculation (20" x 24" standard sheets)
+  - Total sheets needed calculation
+  - Dual color splitting for accurate counting
+  - Manufacturer detection from gel codes
 
-**Estimated Total:** 3-4 days
+**Completed:**
+- ✅ **Phase 3.5: Logo & Image Support** - Image upload, project logo storage, PDF rendering (COMPLETE)
+- ✅ **Color printing support** - Color mode toggle for PDF exports (Sprint 4 - COMPLETE)
+  - Color/grayscale toggle in print settings
+  - Default set to color mode
+  - Grayscale CSS filter for B&W PDFs
+  - Applied across Paperwork, Shop Orders, and Labels
 
 ---
 
@@ -244,7 +338,7 @@ Custom report and paperwork templates with fully customizable headers using visu
 
 **Core Reports:**
 - ✅ **Paperwork Page** - `src/renderer/src/pages/modules/Paperwork.tsx`
-  - **Fixture Reports (7)**: Channel hookup, dimmer schedule, circuit list, DMX addresses, power summary, color schedule, gobo schedule
+  - **Fixture Reports (8)**: Channel hookup, dimmer schedule, circuit list, DMX addresses, power summary, color schedule, gobo schedule, color cut report
   - **Infrastructure Reports (5)**: Equipment list, network summary, port assignments, power consumption, location map
   - Batch export to PDF
   - Batch print functionality
@@ -298,13 +392,15 @@ Comprehensive tracking system for network equipment, data distribution, audio/vi
 - ✅ **Infrastructure Store** - Zustand-based state management
 
 **Integration:**
-- ✅ **Equipment Manager Integration** - Three-tab interface (Fixtures | Infrastructure | Power Racks)
+- ✅ **Equipment Manager Integration** - Three-tab interface (Fixtures | Infrastructure | Power)
+
+**Enhanced Features (Sprint 3):**
+- ✅ **Port Linking** - Link ports to fixtures, equipment, or free text notes
+- ✅ **Port Usage Tracking** - Visual indicators and statistics showing port utilization
+- ✅ **Import/Export** - CSV import/export with field mapping UI
 
 **Pending Enhancements:**
-- ⬜ **Port Linking** - Link ports to fixtures or other infrastructure
-- ⬜ **Port Usage Tracking** - Track which ports are actively in use
 - ⬜ **Port Validation** - IP address, VLAN range validation
-- ⬜ **Import/Export** - CSV import/export for infrastructure equipment
 - ⬜ **Network Topology Visualization** - Visual network layout
 
 ---
@@ -367,13 +463,163 @@ Additional production tools.
 - Speed-first design - Keyboard shortcuts, command palette, inline editing
 
 **Implementation Phases:**
-1. **Phase 1: Core Refactor** (2 weeks)
-2. **Phase 2: Text & Shape Formatting** (1 week)
-3. **Phase 3: Paperwork Integration** (1 week)
-4. **Phase 4: Label Integration** (1 week)
-5. **Phase 5: Polish & UX** (1 week)
+1. ✅ **Phase 1: Core Refactor & UI Improvements** - COMPLETED
+   - Enhanced LayoutCanvas with better grid visualization, resize handles, and snap guides
+   - Modernized ElementPalette with collapsible category sections and preview cards
+   - Enhanced ElementInspector with collapsible sections and modern controls
+   - Added floating toolbar with zoom controls and undo/redo functionality
+   - Improved drag-and-drop feedback with ghost elements and visual indicators
+   - **Branch:** `feature/unified-visual-editor`
+   - **Commits:** 4 commits (429d517, 0509313, 652ea0e, b7ab7d2)
 
-**Estimated Total:** 6 weeks
+2. ✅ **Phase 2: Text & Shape Formatting** - COMPLETED
+   - ColorPicker component with preset swatches, hex input, opacity slider
+   - User custom color saving to localStorage (max 12 colors)
+   - Font size preset buttons (8-72pt) with custom input
+   - Text style toggles: Bold, Italic, Underline, Strikethrough
+   - Icon-based text alignment buttons (left, center, right, justify)
+   - Line height slider (0.8-3.0) and letter spacing controls (-2px to 10px)
+   - Fill & Borders section with color pickers and opacity controls
+   - Individual padding controls with link/unlink checkbox
+   - Streamlined typography controls for compact UX
+   - **Commits:** 99222de, f05121c
+
+3. ✅ **Phase 3: Paperwork Integration** - COMPLETED
+   - PaperworkHeaderDesigner component with 12-column × 8-row grid
+   - Default paperwork header template for all 13 report types
+   - Header and footer rendering for PDF exports with Puppeteer
+   - CSS Grid-based header layout (replaced absolute positioning)
+   - Repeating headers/footers on multi-page PDFs
+   - Integration with existing paperwork template system
+   - Batch export with proper header rendering
+   - Image element type available in ElementPalette (partial - needs enhancement)
+   - **Commits:** bcac556, 6126f68, dd76483, 0d05e65, 59b6710
+   - **Pending:** Image upload UI and logo integration (see Phase 3.5 below)
+
+3.5. ✅ **Phase 3.5: Logo & Image Enhancement** - COMPLETED
+   - Image upload UI with file browser and validation (PNG, JPG, SVG, GIF)
+   - Base64 storage for images and project logos (2MB max)
+   - Image preview in ElementInspector (128px) and canvas rendering
+   - Project logo integration in EditProjectDialog with 64px thumbnail
+   - ObjectFit support (contain, cover, fill) for image scaling
+   - Clear/Remove buttons for uploaded images
+   - URL input alternative for web-hosted images
+   - PDF export verified - Puppeteer handles base64 images natively
+   - Comprehensive documentation created
+   - **Commits:** faaf2f5, 1a1c566, bc548f1
+   - **Documentation:** `docs/features/phase-3.5-logo-image-support.md`
+
+4. ✅ **Phase 4: Label Integration** - COMPLETED
+   - LabelLayoutDesigner wrapper component for grid-based label editing
+   - Label grid calculator (4 cells per inch, dynamic grid from dimensions)
+   - Template converter (canvas pixel coordinates → grid cells)
+   - Automated migration system (localStorage → database with user confirmation)
+   - Background color customization with ColorPicker integration
+   - Image support via base64 storage (Phase 3.5 infrastructure)
+   - 40+ data field mappings (fixture data → label fields)
+   - Batch printing with Puppeteer PDF generation
+   - Multi-label sheet renderer with Avery specifications:
+     - 5160 (Address, 3×10), 5163 (Shipping, 2×5), 5164 (Shipping, 2×3)
+     - 8160 (Address, 3×10), 5167 (Return Address, 4×20)
+   - Label printer IPC handlers (batch print, preview)
+   - UI integration: "Edit with Visual Designer" button in Labels tab
+   - Navigation and routing for label designer page
+   - **Commits:** da75a8a, 41373e0, 78a1fc3, eb90c26, d5c5bce
+   - **Documentation:** `docs/features/phase-4-label-integration.md`
+
+5. ⬜ **Phase 5: Polish & UX** (1 week)
+   - Keyboard shortcuts (Cmd+S, Cmd+Z, arrow keys, etc.)
+   - Inline editing for faster text updates
+   - Visual effects (shadows, gradients, advanced borders)
+   - Smart alignment guides
+   - Template management and sharing
+   - Comprehensive validation and error handling
+   - See: `docs/features/phase-5-polish-ux.md` for detailed 7-day plan
+
+**Progress:** Phase 1-4 complete (90% done)
+**Estimated Remaining:** 1 week (Phase 5 only)
+
+**Phase 3.5 Detailed Implementation Plan:**
+
+**Day 1: Image Upload & Storage**
+- Add file browser button to ElementInspector for image elements
+- Implement image upload with file type validation (PNG, JPG, SVG, GIF)
+- Store images as base64 in `page_layout_elements.config` (ImageConfig.src)
+- Add image preview in ElementInspector
+- Support both local file upload and URL input
+- Maximum file size validation (2MB recommended for performance)
+
+**Day 2: Project Logo Integration**
+- Add `logo_path` column to projects table (stores base64 or file path)
+- Create logo upload UI in project settings
+- Add "Insert Project Logo" quick action to ElementPalette
+- Auto-populate logo when creating new paperwork headers
+- Logo management: upload, replace, remove
+
+**Day 3: PDF Export & Testing**
+- Test image rendering in Puppeteer PDF exports
+- Ensure base64 images render correctly in PDFs
+- Test different image formats and sizes
+- Verify image scaling with objectFit settings
+- Update default paperwork header templates with logo placeholder
+- Documentation for logo/image usage
+
+**Phase 4 Detailed Implementation Plan:**
+
+**Day 1-2: Core Architecture Migration**
+- Create `LabelLayoutDesigner.tsx` component wrapping LayoutDesigner
+- Define label-specific grid configurations:
+  - Grid calculator function: `calculateLabelGrid(printerType, averyTemplate)`
+  - Avery 5160: 12×8 grid (2.625" × 1" label)
+  - Avery 5163: 16×10 grid (4" × 2" label)
+  - Dymo/Brother: 18×4 grid (roll labels)
+- Create data migration utility: `convertLabelGraphicToLayoutElement()`
+- Update database schema: `label_templates` table in app database
+
+**Day 3-4: Element Types & Templates**
+- Add barcode/QR code element type to `ElementPalette.tsx`
+  - Barcode rendering component with Code128/QR generation
+  - Data field binding for dynamic barcode values
+- Add image element support for labels (logos, icons, graphics)
+  - Image upload and storage in database
+  - Image positioning and sizing within grid
+  - Support for PNG, JPG, SVG formats
+- Add label background color customization
+  - ColorPicker integration for label background
+  - Support for transparent, solid colors, and opacity
+  - Per-template background color settings
+- Convert predefined templates to grid-based layouts:
+  - Cable label: Header text + body text + footer (3 rows)
+  - Circuit label: Border rectangle + 3 text elements (centered)
+  - Fixture label: 3 text rows with position/channel/color
+  - Dimmer label: Border + bold header + 2 detail rows
+- Add template seeding to database migrations
+
+**Day 5: Batch Printing & Data Field Mapping**
+- Implement batch mode with fixture/infrastructure data binding
+- Create data field selector for label elements:
+  - Text elements can bind to fixture fields (Channel, Dimmer, Type, etc.)
+  - Barcode elements bind to ID/serial fields
+- Batch preview with paginated label sheets
+
+**Day 6: PDF Export & Printer Integration**
+- Implement PDF export with Puppeteer:
+  - Avery sheet layout renderer (multiple labels per page)
+  - Roll label continuous output
+- Add print dialog with printer selection
+- Label sheet visualization with proper margins/gaps
+
+**Day 7: Polish & Testing**
+- Add label-specific properties panel with:
+  - Printer type and template selector
+  - Label dimensions display
+  - Background color picker (including transparent option)
+  - Image upload controls
+- Migrate existing user designs from localStorage
+- Manual testing of all printer templates
+- Test image rendering in PDF exports
+- Test background colors on different printer types
+- Documentation updates
 
 **Benefits:**
 - Consistent UX across all paperwork/label tasks

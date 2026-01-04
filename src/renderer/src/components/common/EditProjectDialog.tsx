@@ -192,15 +192,32 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
     }
   };
 
-  const handleLogoUpload = async () => {
-    if (typeof window !== 'undefined' && window.api?.dialog) {
-      const filePath = await window.api.dialog.openImage();
-      if (filePath) {
-        setLogoPath(filePath);
+  const handleLogoUpload = () => {
+    // Create a hidden file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/png,image/jpeg,image/jpg,image/svg+xml,image/gif';
+
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        // Validate file size (2MB max)
+        if (file.size > 2 * 1024 * 1024) {
+          alert('Logo image must be smaller than 2MB');
+          return;
+        }
+
+        // Convert to base64
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const base64 = event.target?.result as string;
+          setLogoPath(base64);
+        };
+        reader.readAsDataURL(file);
       }
-    } else {
-      console.warn('Dialog API not available');
-    }
+    };
+
+    input.click();
   };
 
   const toggleModule = (module: string) => {
@@ -307,16 +324,24 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                   {logoPath ? 'Change Logo' : 'Upload Logo'}
                 </button>
                 {logoPath && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <span>✓</span>
-                    <span className="truncate max-w-xs">{logoPath}</span>
-                    <button
-                      type="button"
-                      onClick={() => setLogoPath('')}
-                      className="text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400"
-                    >
-                      Remove
-                    </button>
+                  <div className="flex items-center gap-3">
+                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded flex items-center justify-center overflow-hidden">
+                      <img
+                        src={logoPath}
+                        alt="Project Logo"
+                        className="max-w-full max-h-full object-contain"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                      <span>✓ Logo uploaded</span>
+                      <button
+                        type="button"
+                        onClick={() => setLogoPath('')}
+                        className="text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400"
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

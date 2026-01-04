@@ -42,6 +42,7 @@ export interface DimmerRack {
   watts_per_module?: number;
   location?: string;
   notes?: string;
+  building_service?: string; // Building electrical service (Service A, B, C, etc.)
   created_at: number;
   updated_at: number;
 }
@@ -62,6 +63,7 @@ export interface PDRack {
   amps_per_breaker?: number;
   location?: string;
   notes?: string;
+  building_service?: string; // Building electrical service (Service A, B, C, etc.)
   created_at: number;
   updated_at: number;
 }
@@ -114,6 +116,18 @@ export interface PhaseBalance {
 }
 
 /**
+ * Power summary grouped by building service
+ */
+export interface ServicePowerSummary {
+  service_name: string; // e.g., "Service A", "Service B", "Unassigned"
+  total_capacity_kw: number;
+  total_load_kw: number;
+  utilization_percentage: number;
+  racks: RackPowerSummary[];
+  warnings: string[];
+}
+
+/**
  * Overall power summary for the entire project
  */
 export interface ProjectPowerSummary {
@@ -122,6 +136,7 @@ export interface ProjectPowerSummary {
   overall_utilization: number;
   dimmer_racks: RackPowerSummary[];
   pd_racks: RackPowerSummary[];
+  services?: ServicePowerSummary[]; // Grouped by building service
   phase_balance?: PhaseBalance;
   warnings: PowerWarning[];
   critical_warnings: PowerWarning[];
@@ -180,6 +195,7 @@ export interface DimmerRackFormData {
   watts_per_module?: number;
   location?: string;
   notes?: string;
+  building_service?: string; // Building electrical service (Service A, B, C, etc.)
 }
 
 /**
@@ -196,6 +212,7 @@ export interface PDRackFormData {
   amps_per_breaker?: number;
   location?: string;
   notes?: string;
+  building_service?: string; // Building electrical service (Service A, B, C, etc.)
 }
 
 // ============================================
@@ -237,6 +254,16 @@ export const VOLTAGE_OPTIONS = [120, 208, 230, 240] as const;
 export const MODULE_TYPE_OPTIONS: ModuleType[] = ['dimmer', 'relay', 'constant_current', 'thrupower'];
 export const PHASE_CONFIG_OPTIONS: PhaseConfig[] = ['single', 'split', 'three'];
 export const PHASE_OPTIONS: Phase[] = ['A', 'B', 'C'];
+
+// Building service options
+export const BUILDING_SERVICE_OPTIONS = [
+  'None',
+  'Service A',
+  'Service B',
+  'Service C',
+  'Service D',
+  'Service E'
+] as const;
 
 // Warning thresholds
 export const CAPACITY_WARNING_THRESHOLD = 80; // 80% capacity = warning

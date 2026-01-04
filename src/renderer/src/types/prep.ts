@@ -278,7 +278,12 @@ export type PrintSectionType =
   | 'revision-summary'
   | 'custom-text'
   | 'paperwork-header'
-  | 'page-break';
+  | 'page-break'
+  | 'label_5160'
+  | 'label_5163'
+  | 'label_5164'
+  | 'label_8160'
+  | 'label_5167';
 
 export interface PrintSection {
   id: string;
@@ -546,6 +551,11 @@ export interface LayoutElement {
   updated_at: number;
 }
 
+// Page layout template config (stored as JSON in database)
+export interface PageLayoutTemplateConfig {
+  backgroundColor?: string; // Hex color code (e.g., '#ffffff')
+}
+
 // Page layout template (app-level user preference)
 export interface PageLayoutTemplate {
   id: string;
@@ -562,6 +572,9 @@ export interface PageLayoutTemplate {
   // Page settings
   page_width: number; // pixels
   page_height: number; // pixels
+
+  // Template configuration (JSON)
+  config?: PageLayoutTemplateConfig;
 
   elements: LayoutElement[];
 

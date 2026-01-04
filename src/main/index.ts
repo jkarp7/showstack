@@ -10,6 +10,7 @@ import { registerFileHandlers } from './ipc/files';
 import { registerWindowHandlers } from './ipc/windows';
 import { registerPrepHandlers } from './ipc/prep';
 import { registerPaperworkHandlers } from './ipc/paperwork';
+import { registerLabelPrinterHandlers } from './ipc/labelPrinter';
 import { registerLicenseHandlers } from './ipc/license';
 import { registerAdminHandlers } from './ipc/admin';
 import { registerSettingsHandlers } from './ipc/settings';
@@ -18,6 +19,7 @@ import { registerShellHandlers } from './ipc/shell';
 import { registerDimmerRackHandlers } from './ipc/dimmerRacks';
 import { registerDimmerRackModuleHandlers } from './ipc/dimmerRackModules';
 import { registerPDRackHandlers } from './ipc/pdRacks';
+import { registerPhaseTemplateHandlers } from './ipc/phaseTemplates';
 import { registerInfrastructureHandlers } from './ipc/infrastructure';
 import { backgroundVerifier } from './services/BackgroundVerifier';
 import { licenseService } from './services/LicenseService';
@@ -50,6 +52,7 @@ app.on('ready', async () => {
   registerWindowHandlers();
   registerPrepHandlers();
   registerPaperworkHandlers();
+  registerLabelPrinterHandlers();
   registerLicenseHandlers();
   registerAdminHandlers();
   registerSettingsHandlers();
@@ -58,6 +61,7 @@ app.on('ready', async () => {
   registerDimmerRackHandlers();
   registerDimmerRackModuleHandlers();
   registerPDRackHandlers();
+  registerPhaseTemplateHandlers();
   registerInfrastructureHandlers();
 
   // Start background license verification (non-blocking)

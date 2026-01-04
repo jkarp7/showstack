@@ -24,16 +24,6 @@ export type ColumnKey =
   | 'mode'             // LED/Moving Light mode
   | 'system'
   | 'scenery'
-  | 'focus_lr'
-  | 'focus_ud'
-  | 'focus_note'
-  | 'focus_cut_us'
-  | 'focus_cut_ds'
-  | 'focus_cut_sr'
-  | 'focus_cut_sl'
-  | 'focus_cut_top'
-  | 'focus_cut_bottom'
-  | 'focus_status'
   | 'vw_layer'
   | 'vw_label_legend'
   | 'vw_class'
@@ -97,16 +87,6 @@ export const COLUMN_CONFIGS: ColumnConfig[] = [
   { key: 'mode', label: 'Mode', width: 'w-24' }, // LED/Moving Light mode
   { key: 'system', label: 'System', width: 'w-24' },
   { key: 'scenery', label: 'Scenery', width: 'w-32' },
-  { key: 'focus_lr', label: 'Focus L/R', width: 'w-24' },
-  { key: 'focus_ud', label: 'Focus U/D', width: 'w-24' },
-  { key: 'focus_note', label: 'Focus Note', width: 'w-48' },
-  { key: 'focus_cut_us', label: 'Cut: US', width: 'w-20', group: 'Focus Cut' },
-  { key: 'focus_cut_ds', label: 'Cut: DS', width: 'w-20', group: 'Focus Cut' },
-  { key: 'focus_cut_sr', label: 'Cut: SR', width: 'w-20', group: 'Focus Cut' },
-  { key: 'focus_cut_sl', label: 'Cut: SL', width: 'w-20', group: 'Focus Cut' },
-  { key: 'focus_cut_top', label: 'Cut: Top', width: 'w-20', group: 'Focus Cut' },
-  { key: 'focus_cut_bottom', label: 'Cut: Bottom', width: 'w-24', group: 'Focus Cut' },
-  { key: 'focus_status', label: 'Focus Status', width: 'w-24' },
   { key: 'vw_layer', label: 'VW Layer', width: 'w-24', group: 'Vectorworks' },
   { key: 'vw_label_legend', label: 'VW Label Legend', width: 'w-32', group: 'Vectorworks' },
   { key: 'vw_class', label: 'VW Class', width: 'w-24', group: 'Vectorworks' },
@@ -218,16 +198,6 @@ export const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = {
   mode: false,
   system: false,
   scenery: false,
-  focus_lr: false,
-  focus_ud: false,
-  focus_note: false,
-  focus_cut_us: false,
-  focus_cut_ds: false,
-  focus_cut_sr: false,
-  focus_cut_sl: false,
-  focus_cut_top: false,
-  focus_cut_bottom: false,
-  focus_status: false,
   vw_layer: false,
   vw_label_legend: false,
   vw_class: false,

@@ -1,6 +1,7 @@
 import { ipcMain, BrowserWindow, dialog } from 'electron';
 import * as fs from 'fs';
 import * as paperworkTemplateQueries from '../database/queries/paperworkTemplates';
+import puppeteer from 'puppeteer';
 
 export function registerPaperworkHandlers(): void {
   // ============================================
@@ -71,8 +72,9 @@ export function registerPaperworkHandlers(): void {
   // PDF EXPORT HANDLER
   // ============================================
 
-  // Export Paperwork Report to PDF
-  ipcMain.handle('paperwork:exportPDF', async (_event, htmlContent: string, filename: string, pageSettings: any) => {
+  // Export Paperwork Report to PDF using Puppeteer
+  ipcMain.handle('paperwork:exportPDF', async (_event, htmlContent: string, filename: string, pageSettings: any, fontFamily?: string) => {
+    let browser;
     try {
       // Show save dialog
       const mainWindow = BrowserWindow.getFocusedWindow();
@@ -90,24 +92,39 @@ export function registerPaperworkHandlers(): void {
         return { success: false, canceled: true };
       }
 
-      // Create a hidden window for PDF generation
-      const pdfWindow = new BrowserWindow({
-        width: pageSettings.orientation === 'landscape' ? 1056 : 816,
-        height: pageSettings.orientation === 'landscape' ? 816 : 1056,
-        show: false,
-        webPreferences: {
-          nodeIntegration: false,
-          contextIsolation: true,
-        },
+      console.log('📄 Launching Puppeteer for PDF generation...');
+
+      // Launch Puppeteer browser
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
       });
 
-      // Load the HTML content
-      await pdfWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
+      const page = await browser.newPage();
 
-      // Wait for page to load and render
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Set the HTML content
+      await page.setContent(htmlContent, {
+        waitUntil: 'networkidle0',
+      });
 
-      // Map page size names to Electron's format
+      // Apply grayscale filter if black & white mode
+      if (pageSettings?.colorMode === 'bw') {
+        console.log('📄 Applying grayscale filter for black & white mode...');
+        await page.addStyleTag({
+          content: `
+            body {
+              -webkit-filter: grayscale(100%);
+              filter: grayscale(100%);
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+          `
+        });
+      }
+
+      console.log('📄 Generating PDF with Puppeteer...');
+
+      // Map page size names to Puppeteer format
       const pageSizeMap: Record<string, any> = {
         'letter': 'Letter',
         'legal': 'Legal',
@@ -115,32 +132,56 @@ export function registerPaperworkHandlers(): void {
         'tabloid': 'Tabloid',
       };
 
-      // Generate PDF with proper page settings
-      const pdfData = await pdfWindow.webContents.printToPDF({
-        pageSize: pageSizeMap[pageSettings.size] || 'Letter',
+      // Generate PDF with Puppeteer
+      const userName = 'User'; // TODO: Get from user preferences
+      // Escape font family for use in CSS - remove any existing quotes and re-wrap
+      const footerFontFamily = (fontFamily || '-apple-system, BlinkMacSystemFont, Segoe UI, Arial, sans-serif')
+        .replace(/["']/g, ''); // Remove quotes
+
+      await page.pdf({
+        path: result.filePath,
+        format: pageSizeMap[pageSettings.size] || 'Letter',
         landscape: pageSettings.orientation === 'landscape',
         printBackground: true,
-        marginsType: 1, // No margins (we handle them in CSS)
-        margins: {
-          top: pageSettings.marginTop || 0,
-          bottom: pageSettings.marginBottom || 0,
-          left: pageSettings.marginLeft || 0,
-          right: pageSettings.marginRight || 0,
+        displayHeaderFooter: true,
+        headerTemplate: '<div></div>', // Empty header - we use the custom header in the HTML
+        footerTemplate: `
+          <div style="
+            width: 100%;
+            font-family: ${footerFontFamily};
+            font-size: 10pt;
+            padding: 0 20px;
+            margin: 0;
+            color: #6b7280;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          ">
+            <span>${userName} • ShowStack</span>
+            <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
+          </div>
+        `,
+        margin: {
+          top: `${pageSettings.marginTop || 0.5}in`,
+          bottom: `${pageSettings.marginBottom || 0.75}in`, // Slightly larger to fit footer
+          left: `${pageSettings.marginLeft || 0.5}in`,
+          right: `${pageSettings.marginRight || 0.5}in`,
         },
       });
 
-      // Save PDF to file
-      fs.writeFileSync(result.filePath, pdfData);
+      console.log('✅ PDF generated successfully with Puppeteer');
 
-      // Close the hidden window
-      pdfWindow.close();
+      await browser.close();
 
       return {
         success: true,
         filePath: result.filePath,
       };
     } catch (error) {
-      console.error('Error exporting PDF:', error);
+      console.error('❌ Error exporting PDF with Puppeteer:', error);
+      if (browser) {
+        await browser.close();
+      }
       throw error;
     }
   });

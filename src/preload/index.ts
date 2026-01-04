@@ -184,6 +184,16 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.invoke('paperwork:exportPDF', htmlContent, filename, pageSettings)
   },
 
+  // Paperwork Template operations
+  paperworkTemplates: {
+    getAll: (reportType?: string) => ipcRenderer.invoke('paperwork-templates:getAll', reportType),
+    getById: (id: string) => ipcRenderer.invoke('paperwork-templates:getById', id),
+    create: (data: any) => ipcRenderer.invoke('paperwork-templates:create', data),
+    update: (id: string, updates: any) => ipcRenderer.invoke('paperwork-templates:update', id, updates),
+    delete: (id: string) => ipcRenderer.invoke('paperwork-templates:delete', id),
+    duplicate: (id: string, newName?: string) => ipcRenderer.invoke('paperwork-templates:duplicate', id, newName)
+  },
+
   // Menu operations
   menu: {
     setState: (state: any) => ipcRenderer.invoke('menu:setState', state),
@@ -237,7 +247,27 @@ contextBridge.exposeInMainWorld('api', {
     create: (equipment: any, projectId: string) => ipcRenderer.invoke('infrastructure:create', equipment, projectId),
     update: (id: string, updates: any) => ipcRenderer.invoke('infrastructure:update', id, updates),
     delete: (id: string) => ipcRenderer.invoke('infrastructure:delete', id),
-    deleteMultiple: (ids: string[]) => ipcRenderer.invoke('infrastructure:deleteMultiple', ids)
+    deleteMultiple: (ids: string[]) => ipcRenderer.invoke('infrastructure:deleteMultiple', ids),
+    getPortLinkages: (equipmentId: string, projectId: string) => ipcRenderer.invoke('infrastructure:getPortLinkages', equipmentId, projectId),
+    getFixtureConnections: (fixtureId: string, projectId: string) => ipcRenderer.invoke('infrastructure:getFixtureConnections', fixtureId, projectId),
+    getEquipmentConnections: (equipmentId: string, projectId: string) => ipcRenderer.invoke('infrastructure:getEquipmentConnections', equipmentId, projectId),
+    validatePortAssignment: (equipmentId: string, portAssignment: any, projectId: string) => ipcRenderer.invoke('infrastructure:validatePortAssignment', equipmentId, portAssignment, projectId),
+    getPortUsageStats: (equipmentId: string) => ipcRenderer.invoke('infrastructure:getPortUsageStats', equipmentId),
+    getAllPortUsageStats: (projectId: string) => ipcRenderer.invoke('infrastructure:getAllPortUsageStats', projectId),
+    exportCSV: (projectId: string) => ipcRenderer.invoke('infrastructure:exportCSV', projectId),
+    importCSV: (projectId: string, csvFilePath: string, fieldMapping: any[]) => ipcRenderer.invoke('infrastructure:importCSV', projectId, csvFilePath, fieldMapping),
+    readCSVHeaders: (filePath: string) => ipcRenderer.invoke('infrastructure:readCSVHeaders', filePath),
+    showImportDialog: () => ipcRenderer.invoke('infrastructure:showImportDialog')
+  },
+
+  // Phase Template operations
+  phaseTemplates: {
+    getAll: (projectId: string) => ipcRenderer.invoke('phaseTemplates:getAll', projectId),
+    getById: (id: string) => ipcRenderer.invoke('phaseTemplates:getById', id),
+    create: (template: any, projectId: string) => ipcRenderer.invoke('phaseTemplates:create', template, projectId),
+    update: (id: string, updates: any) => ipcRenderer.invoke('phaseTemplates:update', id, updates),
+    delete: (id: string) => ipcRenderer.invoke('phaseTemplates:delete', id),
+    seed: (projectId: string) => ipcRenderer.invoke('phaseTemplates:seed', projectId)
   }
 });
 
@@ -371,6 +401,14 @@ export interface ElectronAPI {
   paperwork: {
     exportPDF: (htmlContent: string, filename: string, pageSettings: any) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
   };
+  paperworkTemplates: {
+    getAll: (reportType?: string) => Promise<any[]>;
+    getById: (id: string) => Promise<any | null>;
+    create: (data: any) => Promise<any>;
+    update: (id: string, updates: any) => Promise<any>;
+    delete: (id: string) => Promise<void>;
+    duplicate: (id: string, newName?: string) => Promise<any>;
+  };
   menu: {
     setState: (state: any) => Promise<{ success: boolean }>;
     getState: () => Promise<any>;
@@ -410,6 +448,24 @@ export interface ElectronAPI {
     update: (id: string, updates: any) => Promise<any>;
     delete: (id: string) => Promise<void>;
     deleteMultiple: (ids: string[]) => Promise<void>;
+    getPortLinkages: (equipmentId: string, projectId: string) => Promise<any[]>;
+    getFixtureConnections: (fixtureId: string, projectId: string) => Promise<any[]>;
+    getEquipmentConnections: (equipmentId: string, projectId: string) => Promise<any[]>;
+    validatePortAssignment: (equipmentId: string, portAssignment: any, projectId: string) => Promise<{ valid: boolean; error?: string }>;
+    getPortUsageStats: (equipmentId: string) => Promise<any>;
+    getAllPortUsageStats: (projectId: string) => Promise<Record<string, any>>;
+    exportCSV: (projectId: string) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
+    importCSV: (projectId: string, csvFilePath: string, fieldMapping: any[]) => Promise<{ success: boolean; imported: number; errors: string[] }>;
+    readCSVHeaders: (filePath: string) => Promise<{ success: boolean; headers: string[] }>;
+    showImportDialog: () => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
+  };
+  phaseTemplates: {
+    getAll: (projectId: string) => Promise<any[]>;
+    getById: (id: string) => Promise<any>;
+    create: (template: any, projectId: string) => Promise<any>;
+    update: (id: string, updates: any) => Promise<any>;
+    delete: (id: string) => Promise<void>;
+    seed: (projectId: string) => Promise<void>;
   };
 }
 

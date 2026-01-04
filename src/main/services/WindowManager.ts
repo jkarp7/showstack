@@ -58,9 +58,20 @@ class WindowManager {
       if (existingWindow.isMinimized()) {
         existingWindow.restore();
       }
-      existingWindow.show();
-      existingWindow.focus();
-      existingWindow.moveTop(); // Ensure it's on top
+
+      // On macOS, need to be more aggressive with window focusing
+      if (process.platform === 'darwin') {
+        // Temporarily set always on top to ensure it comes to front
+        existingWindow.setAlwaysOnTop(true);
+        existingWindow.show();
+        existingWindow.focus();
+        existingWindow.setAlwaysOnTop(false);
+      } else {
+        existingWindow.show();
+        existingWindow.focus();
+      }
+
+      existingWindow.moveTop(); // Ensure it's on top of other windows
       return existingWindow;
     }
 

@@ -6,7 +6,10 @@ import { APP_SCHEMA } from './appSchema';
 import { PROJECT_SCHEMA } from './projectSchema';
 import { seedDefaultPageLayouts } from './seedDefaultLayouts';
 import { seedDefaultPageLayoutsFromJSON } from './seedDefaultLayoutsFromJSON';
-import { seedPaperworkTemplates } from './seedPaperworkTemplates';
+import { seedPaperworkTemplates, updateSystemTemplates, reseedMissingTemplates } from './seedPaperworkTemplates';
+import { seedPaperworkHeaderTemplate } from './seedPaperworkHeader';
+import { resetPaperworkHeaderTemplate } from './resetPaperworkHeader';
+import { updatePaperworkTemplateHeaders } from './updatePaperworkTemplateHeaders';
 import { createLayoutTemplate } from './queries/layoutTemplates';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -186,6 +189,21 @@ async function runAppMigrations(db: Database): Promise<void> {
     console.log('🌱 Checking paperwork template seeding...');
     await seedPaperworkTemplates();
 
+    // Add any missing system templates (for new templates added in updates)
+    await reseedMissingTemplates();
+
+    // Update system templates with latest column configurations
+    await updateSystemTemplates();
+
+    // Reset paperwork header template if it has old layout (with page numbers)
+    resetPaperworkHeaderTemplate();
+
+    // Seed default paperwork header template
+    seedPaperworkHeaderTemplate();
+
+    // Update existing paperwork templates to reference the default header
+    updatePaperworkTemplateHeaders();
+
     console.log('✅ App database migrations complete');
   } catch (error) {
     console.error('❌ Error running app migrations:', error);
@@ -321,6 +339,17 @@ function runProjectMigrations(db: Database): void {
     }
   }
 
+  // Quick wins: Filter out and color flags
+  if (!fixturesColumns.includes('hidden')) {
+    console.log('Running migration: Adding hidden to fixtures');
+    db.run('ALTER TABLE fixtures ADD COLUMN hidden INTEGER DEFAULT 0');
+  }
+
+  if (!fixturesColumns.includes('color_flag')) {
+    console.log('Running migration: Adding color_flag to fixtures');
+    db.run('ALTER TABLE fixtures ADD COLUMN color_flag TEXT');
+  }
+
   // Add rack identifier columns for dimmer racks
   const dimmerRacksTableInfo = db.exec("PRAGMA table_info(dimmer_racks)");
   if (dimmerRacksTableInfo[0]) {
@@ -350,6 +379,88 @@ function runProjectMigrations(db: Database): void {
     if (!pdRacksColumns.includes('secondary_voltage')) {
       console.log('Running migration: Adding secondary_voltage to pd_racks');
       db.run('ALTER TABLE pd_racks ADD COLUMN secondary_voltage INTEGER');
+    }
+
+    // Power Service Assignment: Add building_service to PD racks
+    if (!pdRacksColumns.includes('building_service')) {
+      console.log('Running migration: Adding building_service to pd_racks');
+      db.run('ALTER TABLE pd_racks ADD COLUMN building_service TEXT');
+    }
+  }
+
+  // Power Service Assignment: Add building_service to dimmer racks
+  const dimmerRacksTableInfo2 = db.exec("PRAGMA table_info(dimmer_racks)");
+  if (dimmerRacksTableInfo2[0]) {
+    const dimmerRacksColumns2 = dimmerRacksTableInfo2[0].values.map(row => row[1]) || [];
+
+    if (!dimmerRacksColumns2.includes('building_service')) {
+      console.log('Running migration: Adding building_service to dimmer_racks');
+      db.run('ALTER TABLE dimmer_racks ADD COLUMN building_service TEXT');
+    }
+  }
+
+  // Custom Phase Labels: Add phase label columns to projects
+  const projectsTableInfo2 = db.exec("PRAGMA table_info(projects)");
+  if (projectsTableInfo2[0]) {
+    const projectsColumns2 = projectsTableInfo2[0].values.map(row => row[1]) || [];
+
+    if (!projectsColumns2.includes('phase_label_a')) {
+      console.log('Running migration: Adding phase_label_a to projects');
+      db.run('ALTER TABLE projects ADD COLUMN phase_label_a TEXT DEFAULT \'A\'');
+    }
+
+    if (!projectsColumns2.includes('phase_label_b')) {
+      console.log('Running migration: Adding phase_label_b to projects');
+      db.run('ALTER TABLE projects ADD COLUMN phase_label_b TEXT DEFAULT \'B\'');
+    }
+
+    if (!projectsColumns2.includes('phase_label_c')) {
+      console.log('Running migration: Adding phase_label_c to projects');
+      db.run('ALTER TABLE projects ADD COLUMN phase_label_c TEXT DEFAULT \'C\'');
+    }
+  }
+
+  // Phase Distribution Templates: Create table if it doesn't exist
+  const phaseTemplatesTableInfo = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='phase_distribution_templates'");
+  if (!phaseTemplatesTableInfo[0] || phaseTemplatesTableInfo[0].values.length === 0) {
+    console.log('Running migration: Creating phase_distribution_templates table');
+    db.run(`
+      CREATE TABLE phase_distribution_templates (
+        id TEXT PRIMARY KEY,
+        project_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        description TEXT,
+        phase_config TEXT NOT NULL CHECK(phase_config IN ('single', 'split', 'three')),
+        circuit_count INTEGER NOT NULL CHECK(circuit_count IN (12, 24, 48, 96)),
+        phase_distribution TEXT NOT NULL,
+        is_system INTEGER DEFAULT 0,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+      )
+    `);
+
+    db.run('CREATE INDEX IF NOT EXISTS idx_phase_templates_project ON phase_distribution_templates(project_id)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_phase_templates_system ON phase_distribution_templates(is_system)');
+  }
+
+  // Phase Distribution Templates: Add phase_template_id to dimmer_racks
+  const dimmerRacksTableInfo3 = db.exec("PRAGMA table_info(dimmer_racks)");
+  if (dimmerRacksTableInfo3[0]) {
+    const dimmerRacksColumns3 = dimmerRacksTableInfo3[0].values.map(row => row[1]) || [];
+    if (!dimmerRacksColumns3.includes('phase_template_id')) {
+      console.log('Running migration: Adding phase_template_id to dimmer_racks');
+      db.run('ALTER TABLE dimmer_racks ADD COLUMN phase_template_id TEXT');
+    }
+  }
+
+  // Phase Distribution Templates: Add phase_template_id to pd_racks
+  const pdRacksTableInfo2 = db.exec("PRAGMA table_info(pd_racks)");
+  if (pdRacksTableInfo2[0]) {
+    const pdRacksColumns2 = pdRacksTableInfo2[0].values.map(row => row[1]) || [];
+    if (!pdRacksColumns2.includes('phase_template_id')) {
+      console.log('Running migration: Adding phase_template_id to pd_racks');
+      db.run('ALTER TABLE pd_racks ADD COLUMN phase_template_id TEXT');
     }
   }
 
