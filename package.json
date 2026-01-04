@@ -3,7 +3,10 @@
   "productName": "ShowStack",
   "version": "0.1.0-alpha",
   "description": "Modern production management software for live entertainment",
-  "author": "Lytrix",
+  "author": {
+    "name": "Lytrix",
+    "email": "info@showstack.app"
+  },
   "license": "UNLICENSED",
   "private": true,
   "type": "module",
