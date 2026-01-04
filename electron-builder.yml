@@ -35,7 +35,7 @@ mac:
   target:
     - dmg
     - zip
-  icon: resources/icon.icns
+  # icon: resources/icon.icns
   hardenedRuntime: false  # Set to true when you have code signing certificate
   gatekeeperAssess: false
   entitlements: null
@@ -44,8 +44,8 @@ mac:
 
 dmg:
   title: "ShowStack:Production ${version}"
-  icon: resources/icon.icns
-  background: resources/dmg-background.png
+  # icon: resources/icon.icns
+  # background: resources/dmg-background.png
   contents:
     - x: 130
       y: 220
