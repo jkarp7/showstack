@@ -68,20 +68,29 @@ This document tracks the development status of all ShowStack feature domains and
    - **UI**: Service configuration panel with persistence
    - **Database**: Migrations for building_service, phase_label_a/b/c, phase_template_id
    - **Testing**: Comprehensive testing with bug fixes
+7. ✅ Phase 4: Label Integration - COMPLETED (January 3, 2026)
+   - Grid-based visual designer for all Avery label templates
+   - 5 Avery templates supported: 5160, 5163, 5164, 8160, 5167
+   - Label grid calculator (4 cells per inch resolution)
+   - Canvas-to-grid template converter for legacy designs
+   - Automated migration system (localStorage → database)
+   - Background color customization with color picker
+   - Image support via base64 storage (logos, graphics)
+   - 36 fixture data field mappings for label customization
+   - Batch PDF printing with Puppeteer
+   - Multi-label sheet renderer with precise Avery specifications
+   - IPC handlers for batch print and preview
+   - UI integration with "Edit with Visual Designer" button
+   - Complete routing and navigation
+   - Comprehensive documentation (617 lines)
 
-### Immediate (Current Session)
-1. **Phase 3: Paperwork Template System** - ✅ COMPLETE
-   - ✅ Manual UI testing of all 13 report types
-   - ✅ Template operation testing (load, save, duplicate, delete)
-   - ✅ Bug fixes based on testing findings
-   - ✅ Color Cut Report with gel database and sheet calculations
-   - ✅ Color swatch visualization in reports
-   - ✅ Template migration system for future updates
-
-### Next Steps (After Phase 3.5)
-1. **Phase 4: Label Integration** - Grid designer for label layouts (5-7 days)
-2. **Phase 5: Polish & UX** - Inline editing, gradients, shadows, multi-display support (1 week)
-3. **Implement shop order creation from system documentation** (auto-populate from fixture/infrastructure data)
+### Next Steps (Unified Visual Editor Completion)
+1. ✅ **Phase 3: Paperwork Template System** - COMPLETED
+2. ✅ **Phase 3.5: Logo & Image Support** - COMPLETED
+3. ✅ **Phase 4: Label Integration** - COMPLETED
+4. ⬜ **Phase 5: Polish & UX** - Keyboard shortcuts, inline editing, shadows, smart guides, template management (1 week)
+   - See: `docs/features/phase-5-polish-ux.md` for detailed 7-day implementation plan
+5. ⬜ **Shop order creation from system documentation** - Auto-populate from fixture/infrastructure data
 
 ### Short-term (Next 1-2 Months) - **Focus on Lightwright Parity**
 1. **MVR export support** - Industry standard CAD/visualizer format
@@ -235,15 +244,20 @@ Grid-based visual label designer with batch printing and multi-label PDF sheet e
 
 #### Power Management Enhancements
 
+**Completed (Sprints 1-4):**
+- ✅ **Power service assignment** - Building service designation (Service A/B/C) with capacity tracking
+- ✅ **Phase distribution templates** - Save/load phase configurations (AB vs AC phasing)
+- ✅ **Custom phase labels** - User-defined phase naming (A/B/C → 1/2/3 or custom labels)
+- ✅ **Port linking** - Link infrastructure ports to fixtures, equipment, or free text
+- ✅ **Port usage tracking** - Visual indicators showing port utilization
+- ✅ **Color mode PDF exports** - Toggle between color and grayscale printing
+
 **Pending Additions:**
-- ⬜ **Power service assignment** - Designate services (A, B, C, etc.) (2 days)
-- ⬜ **Phase distribution templates** - Save/load phase configurations (AB vs AC phasing) (3-4 days)
-- ⬜ **Custom phase labels** - User-defined phase naming (1, 2, 3 or A, B, C) (1 day)
 - ⬜ **Cable Run Visualization** - Visual cable path layout
 - ⬜ **Advanced Phase Balancing** - Automatic phase assignment suggestions
 - ⬜ **Power Distribution Reports** - Printable rack schedules and load reports
 
-**Estimated Total:** 1-2 weeks
+**Estimated Total:** 2-3 weeks
 
 ---
 
@@ -263,11 +277,11 @@ Grid-based visual label designer with batch printing and multi-label PDF sheet e
 
 **Completed:**
 - ✅ **Phase 3.5: Logo & Image Support** - Image upload, project logo storage, PDF rendering (COMPLETE)
-
-**Pending Additions:**
-- ⬜ **Color printing support** - Enable color in system docs paperwork (1 day)
-
-**Estimated Total:** 1 day
+- ✅ **Color printing support** - Color mode toggle for PDF exports (Sprint 4 - COMPLETE)
+  - Color/grayscale toggle in print settings
+  - Default set to color mode
+  - Grayscale CSS filter for B&W PDFs
+  - Applied across Paperwork, Shop Orders, and Labels
 
 ---
 
@@ -378,13 +392,15 @@ Comprehensive tracking system for network equipment, data distribution, audio/vi
 - ✅ **Infrastructure Store** - Zustand-based state management
 
 **Integration:**
-- ✅ **Equipment Manager Integration** - Three-tab interface (Fixtures | Infrastructure | Power Racks)
+- ✅ **Equipment Manager Integration** - Three-tab interface (Fixtures | Infrastructure | Power)
+
+**Enhanced Features (Sprint 3):**
+- ✅ **Port Linking** - Link ports to fixtures, equipment, or free text notes
+- ✅ **Port Usage Tracking** - Visual indicators and statistics showing port utilization
+- ✅ **Import/Export** - CSV import/export with field mapping UI
 
 **Pending Enhancements:**
-- ⬜ **Port Linking** - Link ports to fixtures or other infrastructure
-- ⬜ **Port Usage Tracking** - Track which ports are actively in use
 - ⬜ **Port Validation** - IP address, VLAN range validation
-- ⬜ **Import/Export** - CSV import/export for infrastructure equipment
 - ⬜ **Network Topology Visualization** - Visual network layout
 
 ---
@@ -512,9 +528,16 @@ Additional production tools.
    - **Documentation:** `docs/features/phase-4-label-integration.md`
 
 5. ⬜ **Phase 5: Polish & UX** (1 week)
+   - Keyboard shortcuts (Cmd+S, Cmd+Z, arrow keys, etc.)
+   - Inline editing for faster text updates
+   - Visual effects (shadows, gradients, advanced borders)
+   - Smart alignment guides
+   - Template management and sharing
+   - Comprehensive validation and error handling
+   - See: `docs/features/phase-5-polish-ux.md` for detailed 7-day plan
 
-**Progress:** Phase 1-4 complete (85% done)
-**Estimated Remaining:** 1 week (Phase 5: 1 week)
+**Progress:** Phase 1-4 complete (90% done)
+**Estimated Remaining:** 1 week (Phase 5 only)
 
 **Phase 3.5 Detailed Implementation Plan:**
 
