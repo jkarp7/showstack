@@ -1,7 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { InfrastructureEquipment, PortAssignment } from '../../types/infrastructure';
+import { useProjectStore } from '../../store/projectStore';
+import { useFixtureStore } from '../../store/fixtureStore';
+import { useInfrastructureStore } from '../../store/infrastructureStore';
+import { Link, AlertCircle } from 'lucide-react';
 
 interface PortAssignmentEditorProps {
+  equipmentId?: string; // ID of current equipment being edited
   portCount: number;
   onPortCountChange: (count: number) => void;
   portAssignments: PortAssignment[];
@@ -9,12 +14,17 @@ interface PortAssignmentEditorProps {
 }
 
 export function PortAssignmentEditor({
+  equipmentId,
   portCount,
   onPortCountChange,
   portAssignments,
   onPortAssignmentsChange
 }: PortAssignmentEditorProps) {
+  const currentProject = useProjectStore((state) => state.currentProject);
+  const fixtures = useFixtureStore((state) => state.fixtures);
+  const allEquipment = useInfrastructureStore((state) => state.equipment);
   const [expandedPorts, setExpandedPorts] = useState<Set<number>>(new Set());
+  const [linkValidation, setLinkValidation] = useState<Record<number, { valid: boolean; error?: string }>>({});
 
   // Initialize port assignments when port count changes
   const handlePortCountChange = (newCount: number) => {
@@ -34,11 +44,57 @@ export function PortAssignmentEditor({
     onPortAssignmentsChange(newAssignments);
   };
 
-  const updatePortAssignment = (port: number, updates: Partial<PortAssignment>) => {
+  const updatePortAssignment = async (port: number, updates: Partial<PortAssignment>) => {
     const newAssignments = portAssignments.map(pa =>
       pa.port === port ? { ...pa, ...updates } : pa
     );
     onPortAssignmentsChange(newAssignments);
+
+    // Validate if linking to equipment
+    if (equipmentId && currentProject && (updates.linked_equipment_id || updates.linked_fixture_id)) {
+      const portAssignment = newAssignments.find(pa => pa.port === port);
+      if (portAssignment) {
+        try {
+          const validation = await window.api.infrastructure.validatePortAssignment(
+            equipmentId,
+            portAssignment,
+            currentProject.id
+          );
+          setLinkValidation(prev => ({ ...prev, [port]: validation }));
+        } catch (error) {
+          console.error('Error validating port assignment:', error);
+        }
+      }
+    }
+  };
+
+  const getLinkType = (pa: PortAssignment): 'none' | 'fixture' | 'equipment' | 'text' => {
+    if (pa.linked_fixture_id !== undefined) return 'fixture';
+    if (pa.linked_equipment_id !== undefined) return 'equipment';
+    if (pa.connected_to !== undefined) return 'text';
+    return 'none';
+  };
+
+  const handleLinkTypeChange = (port: number, linkType: 'none' | 'fixture' | 'equipment' | 'text') => {
+    const updates: Partial<PortAssignment> = {
+      linked_fixture_id: linkType === 'fixture' ? '' : undefined,
+      linked_equipment_id: linkType === 'equipment' ? '' : undefined,
+      linked_port: undefined,
+      connected_to: linkType === 'text' ? '' : undefined
+    };
+    updatePortAssignment(port, updates);
+  };
+
+  const getLinkedName = (pa: PortAssignment): string => {
+    if (pa.linked_fixture_id) {
+      const fixture = fixtures.find(f => f.id === pa.linked_fixture_id);
+      return fixture?.position || 'Unknown Fixture';
+    }
+    if (pa.linked_equipment_id) {
+      const equipment = allEquipment.find(e => e.id === pa.linked_equipment_id);
+      return equipment?.name || 'Unknown Equipment';
+    }
+    return pa.connected_to || '';
   };
 
   const togglePortExpansion = (port: number) => {
@@ -89,10 +145,13 @@ export function PortAssignmentEditor({
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
                       Port {pa.port}
                     </span>
-                    {pa.connected_to && (
-                      <span className="text-xs text-gray-600 dark:text-gray-400">
-                        → {pa.connected_to}
-                      </span>
+                    {getLinkType(pa) !== 'none' && (
+                      <>
+                        <Link className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                        <span className="text-xs text-gray-600 dark:text-gray-400">
+                          → {getLinkedName(pa)}
+                        </span>
+                      </>
                     )}
                     <span className={`px-2 py-0.5 rounded-full text-xs ${
                       pa.status === 'active' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' :
@@ -101,6 +160,9 @@ export function PortAssignmentEditor({
                     }`}>
                       {pa.status}
                     </span>
+                    {linkValidation[pa.port] && !linkValidation[pa.port].valid && (
+                      <AlertCircle className="w-4 h-4 text-red-500" title={linkValidation[pa.port].error} />
+                    )}
                   </div>
                   <span className="text-xs text-gray-500">
                     {expandedPorts.has(pa.port) ? '▼' : '▶'}
@@ -109,19 +171,108 @@ export function PortAssignmentEditor({
 
                 {/* Port Details - Expandable */}
                 {expandedPorts.has(pa.port) && (
-                  <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 grid grid-cols-2 gap-3">
-                    <div className="col-span-2">
+                  <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 space-y-3">
+                    {/* Link Type Selector */}
+                    <div>
                       <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Connected To
+                        Link Type
                       </label>
-                      <input
-                        type="text"
-                        value={pa.connected_to || ''}
-                        onChange={(e) => updatePortAssignment(pa.port, { connected_to: e.target.value })}
+                      <select
+                        value={getLinkType(pa)}
+                        onChange={(e) => handleLinkTypeChange(pa.port, e.target.value as any)}
                         className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        placeholder="Device or destination name"
-                      />
+                      >
+                        <option value="none">None</option>
+                        <option value="fixture">Link to Fixture</option>
+                        <option value="equipment">Link to Equipment</option>
+                        <option value="text">Free Text</option>
+                      </select>
                     </div>
+
+                    {/* Link Details based on type */}
+                    {getLinkType(pa) === 'fixture' && (
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Fixture
+                        </label>
+                        <select
+                          value={pa.linked_fixture_id || ''}
+                          onChange={(e) => updatePortAssignment(pa.port, { linked_fixture_id: e.target.value || undefined })}
+                          className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        >
+                          <option value="">Select a fixture...</option>
+                          {fixtures.map(f => (
+                            <option key={f.id} value={f.id}>
+                              {f.position} {f.type ? `- ${f.type}` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {getLinkType(pa) === 'equipment' && (
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="col-span-2">
+                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Equipment
+                          </label>
+                          <select
+                            value={pa.linked_equipment_id || ''}
+                            onChange={(e) => updatePortAssignment(pa.port, { linked_equipment_id: e.target.value || undefined })}
+                            className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          >
+                            <option value="">Select equipment...</option>
+                            {allEquipment
+                              .filter(e => e.id !== equipmentId) // Can't link to self
+                              .map(e => (
+                                <option key={e.id} value={e.id}>
+                                  {e.name} {e.model ? `- ${e.model}` : ''}
+                                </option>
+                              ))}
+                          </select>
+                        </div>
+                        {pa.linked_equipment_id && (
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              Port on linked equipment
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              value={pa.linked_port || ''}
+                              onChange={(e) => updatePortAssignment(pa.port, { linked_port: e.target.value ? parseInt(e.target.value) : undefined })}
+                              className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                              placeholder="Port #"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {getLinkType(pa) === 'text' && (
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Connected To
+                        </label>
+                        <input
+                          type="text"
+                          value={pa.connected_to || ''}
+                          onChange={(e) => updatePortAssignment(pa.port, { connected_to: e.target.value })}
+                          className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          placeholder="Device or destination name"
+                        />
+                      </div>
+                    )}
+
+                    {/* Validation Error */}
+                    {linkValidation[pa.port] && !linkValidation[pa.port].valid && (
+                      <div className="col-span-2 flex items-center gap-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-2 py-1.5 rounded">
+                        <AlertCircle className="w-4 h-4" />
+                        <span>{linkValidation[pa.port].error}</span>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-3">
 
                     <div>
                       <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -183,6 +334,7 @@ export function PortAssignmentEditor({
                         className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                         placeholder="Additional notes"
                       />
+                    </div>
                     </div>
                   </div>
                 )}

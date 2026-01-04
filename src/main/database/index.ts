@@ -400,21 +400,21 @@ function runProjectMigrations(db: Database): void {
   }
 
   // Custom Phase Labels: Add phase label columns to projects
-  const projectsTableInfo = db.exec("PRAGMA table_info(projects)");
-  if (projectsTableInfo[0]) {
-    const projectsColumns = projectsTableInfo[0].values.map(row => row[1]) || [];
+  const projectsTableInfo2 = db.exec("PRAGMA table_info(projects)");
+  if (projectsTableInfo2[0]) {
+    const projectsColumns2 = projectsTableInfo2[0].values.map(row => row[1]) || [];
 
-    if (!projectsColumns.includes('phase_label_a')) {
+    if (!projectsColumns2.includes('phase_label_a')) {
       console.log('Running migration: Adding phase_label_a to projects');
       db.run('ALTER TABLE projects ADD COLUMN phase_label_a TEXT DEFAULT \'A\'');
     }
 
-    if (!projectsColumns.includes('phase_label_b')) {
+    if (!projectsColumns2.includes('phase_label_b')) {
       console.log('Running migration: Adding phase_label_b to projects');
       db.run('ALTER TABLE projects ADD COLUMN phase_label_b TEXT DEFAULT \'B\'');
     }
 
-    if (!projectsColumns.includes('phase_label_c')) {
+    if (!projectsColumns2.includes('phase_label_c')) {
       console.log('Running migration: Adding phase_label_c to projects');
       db.run('ALTER TABLE projects ADD COLUMN phase_label_c TEXT DEFAULT \'C\'');
     }

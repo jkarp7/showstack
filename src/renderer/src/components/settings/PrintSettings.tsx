@@ -48,7 +48,7 @@ export function PrintSettings() {
             </p>
           </div>
 
-          <div className="md:col-span-2">
+          <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Resolution (DPI)</label>
             <select value={print.dpi} onChange={(e) => updatePrint({ dpi: parseInt(e.target.value) as any })} className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="150">150 DPI (Draft)</option>
@@ -57,6 +57,17 @@ export function PrintSettings() {
             </select>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Higher DPI produces sharper prints but larger file sizes. 300 DPI is recommended for professional shop orders.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Color Mode</label>
+            <select value={print.colorMode || 'bw'} onChange={(e) => updatePrint({ colorMode: e.target.value as any })} className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="bw">Black & White (Grayscale)</option>
+              <option value="color">Color</option>
+            </select>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Black & White is recommended for printing shop orders. Color mode is useful for presentations and digital viewing.
             </p>
           </div>
         </div>

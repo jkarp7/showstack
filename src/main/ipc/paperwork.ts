@@ -107,6 +107,21 @@ export function registerPaperworkHandlers(): void {
         waitUntil: 'networkidle0',
       });
 
+      // Apply grayscale filter if black & white mode
+      if (pageSettings?.colorMode === 'bw') {
+        console.log('📄 Applying grayscale filter for black & white mode...');
+        await page.addStyleTag({
+          content: `
+            body {
+              -webkit-filter: grayscale(100%);
+              filter: grayscale(100%);
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+          `
+        });
+      }
+
       console.log('📄 Generating PDF with Puppeteer...');
 
       // Map page size names to Puppeteer format

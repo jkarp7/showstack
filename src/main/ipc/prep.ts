@@ -635,6 +635,14 @@ function generatePDFContent(project: PrepProject, templateData: any): string {
     return renderPageSection(section, project, contentWidth, contentHeight, notesMap);
   }).filter(html => html).join('');
 
+  // Grayscale CSS for black & white mode
+  const grayscaleCSS = templateData.pageSettings?.colorMode === 'bw' ? `
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  ` : '';
+
   return `
     <!DOCTYPE html>
     <html>
@@ -652,6 +660,7 @@ function generatePDFContent(project: PrepProject, templateData: any): string {
             color: #000;
             background: white;
             padding: 0;
+            ${grayscaleCSS}
           }
           .page {
             width: ${pageWidth}px;

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useUIStore } from '../store/uiStore';
 
 /**
  * Project menu event handlers
@@ -8,6 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 export function useProjectMenuHandlers() {
   const navigate = useNavigate();
   const params = useParams();
+  const openSettingsDialog = useUIStore((state) => state.openSettingsDialog);
 
   useEffect(() => {
     if (!window.api?.menu) return;
@@ -27,8 +29,8 @@ export function useProjectMenuHandlers() {
     };
 
     const handleProjectSettings = () => {
-      // Navigate to project settings page (to be implemented)
-      console.log('Open project settings');
+      // Open settings dialog
+      openSettingsDialog();
     };
 
     // Register all handlers
@@ -40,5 +42,5 @@ export function useProjectMenuHandlers() {
       window.api.menu.off('menu:editProject', handleEditProject);
       window.api.menu.off('menu:projectSettings', handleProjectSettings);
     };
-  }, [navigate, params]);
+  }, [navigate, params, openSettingsDialog]);
 }

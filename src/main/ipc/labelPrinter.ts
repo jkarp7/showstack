@@ -21,7 +21,8 @@ async function printLabelBatch(
   event: IpcMainInvokeEvent,
   templateId: string,
   labelDataArray: any[], // LabelData[]
-  averyCode: string
+  averyCode: string,
+  colorMode?: 'color' | 'bw' // Optional color mode
 ): Promise<string> {
   try {
     console.log(`📄 Batch label print requested:`, {
@@ -59,6 +60,20 @@ async function printLabelBatch(
     try {
       const page = await browser.newPage();
       await page.setContent(html, { waitUntil: 'networkidle0' });
+
+      // Apply grayscale filter if black & white mode
+      if (colorMode === 'bw') {
+        await page.addStyleTag({
+          content: `
+            body {
+              -webkit-filter: grayscale(100%);
+              filter: grayscale(100%);
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+          `
+        });
+      }
 
       // Ensure exports directory exists
       const exportsDir = join(app.getPath('userData'), 'exports');

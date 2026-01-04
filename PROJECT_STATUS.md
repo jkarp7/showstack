@@ -57,6 +57,17 @@ This document tracks the development status of all ShowStack feature domains and
    - Removed all emoji icons across the application for professional appearance
    - Updated 8 files: ReportTypeSelector, Paperwork, ModuleLanding, SystemDocs, LabelDesigner, ElementPalette, ElementInspector, HeaderPreview
    - Cleaner, more professional UI aesthetic without decorative emojis
+6. ✅ Power Management & Infrastructure Enhancements (Sprints 1-4) - COMPLETED (January 3, 2026)
+   - **Sprint 1**: Building service assignment (Service A/B/C) with capacity tracking
+   - **Sprint 1**: Custom phase labels (A/B/C → 1/2/3 or custom names)
+   - **Sprint 2**: Phase distribution templates (save/load phasing configurations)
+   - **Sprint 3**: Infrastructure port linking (fixtures, equipment, free text)
+   - **Sprint 3**: Port usage tracking with visual indicators
+   - **Sprint 4**: Color mode settings for PDF exports (color vs grayscale)
+   - **UI**: Settings dialog modal with click-outside-to-close
+   - **UI**: Service configuration panel with persistence
+   - **Database**: Migrations for building_service, phase_label_a/b/c, phase_template_id
+   - **Testing**: Comprehensive testing with bug fixes
 
 ### Immediate (Current Session)
 1. **Phase 3: Paperwork Template System** - ✅ COMPLETE

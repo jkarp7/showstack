@@ -3,11 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { EquipmentManager } from './EquipmentManager';
 import { Paperwork } from './Paperwork';
 import { LabelDesigner } from './LabelDesigner';
+import { PowerManagement } from './PowerManagement';
 import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { DeveloperPanel } from '../../components/common/DeveloperPanel';
 import { telemetry } from '../../services/telemetry';
 
-type SystemDocsTab = 'equipment' | 'paperwork' | 'labels';
+type SystemDocsTab = 'equipment' | 'paperwork' | 'labels' | 'power';
 
 export function SystemDocs() {
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ export function SystemDocs() {
 
   const tabs = [
     { id: 'equipment' as SystemDocsTab, name: 'Equipment Manager' },
+    { id: 'power' as SystemDocsTab, name: 'Power Management' },
     { id: 'paperwork' as SystemDocsTab, name: 'Paperwork' },
     { id: 'labels' as SystemDocsTab, name: 'Labels' }
   ];
@@ -89,6 +91,7 @@ export function SystemDocs() {
       {/* Tab Content */}
       <div className="flex-1 min-h-0 overflow-hidden">
         {activeTab === 'equipment' && <EquipmentManager embedded />}
+        {activeTab === 'power' && <PowerManagement embedded />}
         {activeTab === 'paperwork' && <Paperwork embedded />}
         {activeTab === 'labels' && <LabelDesigner embedded />}
       </div>

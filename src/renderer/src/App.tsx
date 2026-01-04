@@ -15,8 +15,10 @@ import { LicenseBanner } from './components/License/LicenseBanner';
 import { SplashScreen } from './components/SplashScreen';
 import { ThemeProvider } from './components/ThemeProvider';
 import { ConsentDialog } from './components/common/ConsentDialog';
+import { SettingsDialog } from './components/common/SettingsDialog';
 import { useUser } from './hooks/useUser';
 import { useSettingsStore } from './store/settingsStore';
+import { useUIStore } from './store/uiStore';
 import { telemetry } from './services/telemetry';
 import { useMenuHandlers } from './hooks/useMenuHandlers';
 import { useProjectMenuHandlers } from './hooks/useProjectMenuHandlers';
@@ -24,6 +26,8 @@ import { useProjectMenuHandlers } from './hooks/useProjectMenuHandlers';
 function AppContent() {
   const { status } = useUser();
   const navigate = useNavigate();
+  const isSettingsDialogOpen = useUIStore((state) => state.isSettingsDialogOpen);
+  const closeSettingsDialog = useUIStore((state) => state.closeSettingsDialog);
 
   // Set up menu event handlers
   useMenuHandlers();
@@ -96,6 +100,9 @@ function AppContent() {
         {/* Catch all - redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+
+      {/* Settings Dialog */}
+      <SettingsDialog isOpen={isSettingsDialogOpen} onClose={closeSettingsDialog} />
     </>
   );
 }

@@ -266,6 +266,7 @@ export function EditInfrastructureDialog({ isOpen, onClose, onUpdate, equipment 
                 Port Configuration
               </h3>
               <PortAssignmentEditor
+                equipmentId={equipment.id}
                 portCount={portCount}
                 onPortCountChange={setPortCount}
                 portAssignments={portAssignments}
