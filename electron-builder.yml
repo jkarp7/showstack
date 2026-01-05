@@ -1,5 +1,5 @@
-appId: com.lytrix.showstack-production
-productName: ShowStack Production
+appId: com.lytrix.showstack
+productName: ShowStack
 copyright: Copyright © 2025 Lytrix
 
 directories:
@@ -43,7 +43,7 @@ mac:
   darkModeSupport: true
 
 dmg:
-  title: "ShowStack:Production ${version}"
+  title: "ShowStack ${version}"
   icon: resources/icon.icns
   background: resources/dmg-background.png
   contents:
@@ -69,7 +69,7 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: always
   createStartMenuShortcut: true
-  shortcutName: "ShowStack:Production"
+  shortcutName: "ShowStack"
 
 linux:
   target:
@@ -79,10 +79,10 @@ linux:
   icon: resources/icon.png
   synopsis: "Modern production management software for live entertainment"
   description: |
-    ShowStack:Production is a comprehensive lighting design and production
-    management tool for theater, concerts, and live events. Features include
-    fixture management, power distribution, label printing, and integration
-    with ETC Eos consoles and Vectorworks.
+    ShowStack is a comprehensive lighting design and production management
+    tool for theater, concerts, and live events. Features include fixture
+    management, power distribution, label printing, and integration with
+    ETC Eos consoles and Vectorworks.
 
 appImage:
   license: LICENSE
