@@ -138,7 +138,7 @@ export function NewProjectDialog({ isOpen, onClose, onCreate }: NewProjectDialog
                   className="w-4 h-4"
                 />
                 <div className="flex-1">
-                  <div className="font-medium">ShowStack:Production</div>
+                  <div className="font-medium">ShowStack:Lighting</div>
                   <p className="text-xs text-gray-400">Fixture management & technical planning</p>
                 </div>
               </label>

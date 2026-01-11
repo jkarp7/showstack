@@ -896,7 +896,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
                 {!embedded && (
                   <>
                     <span className="text-gray-500">•</span>
-                    <span className="text-lg text-gray-600 dark:text-gray-400">ShowStack:Production</span>
+                    <span className="text-lg text-gray-600 dark:text-gray-400">ShowStack:Lighting</span>
                   </>
                 )}
               </div>
@@ -1025,7 +1025,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
       {/* Status Bar */}
       <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
         <div>Ready</div>
-        <div>ShowStack:Production v0.1.0-alpha</div>
+        <div>ShowStack:Lighting v0.1.0-alpha</div>
       </footer>
       </>
       )}
@@ -1140,7 +1140,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
             <div>
               {infrastructureEquipment.length} equipment | {selectedInfrastructure.size} selected
             </div>
-            <div>ShowStack:Production v0.1.0-alpha</div>
+            <div>ShowStack:Lighting v0.1.0-alpha</div>
           </footer>
         </>
       )}
@@ -1241,7 +1241,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
             <div>
               {dimmerRacks.length} dimmer racks | {pdRacks.length} PD racks | {dimmerRacks.length + pdRacks.length} total
             </div>
-            <div>ShowStack:Production v0.1.0-alpha</div>
+            <div>ShowStack:Lighting v0.1.0-alpha</div>
           </footer>
         </>
       )}

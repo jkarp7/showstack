@@ -456,7 +456,7 @@ export function ProjectPage() {
               {/* Show Production module if either 'production' or 'prep' (legacy) is enabled */}
               {(enabledModules.includes('production') || enabledModules.includes('prep')) && (
                 <ModuleCard
-                  name="ShowStack:Production"
+                  name="ShowStack:Lighting"
                   description="Equipment management, shop orders, paperwork generation, and technical planning"
                   icon="🎬"
                   route={`/project/${projectId}/module/production`}

@@ -42,7 +42,7 @@ export const FILE_EXTENSION = 'ss';
 
 // Legacy file extensions (for backward compatibility)
 export const LEGACY_EXTENSIONS = {
-  PRODUCTION: 'ssp',    // ShowStack:Production (legacy)
+  PRODUCTION: 'ssp',    // ShowStack:Lighting (legacy)
   MANAGER: 'ssm',       // ShowStack:Manager (legacy)
   DESIGN: 'ssd'         // ShowStack:Design (legacy)
 } as const;

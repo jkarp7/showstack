@@ -1195,7 +1195,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
 
       {/* Footer */}
       <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 flex-shrink-0">
-        <div>ShowStack:Production - Label Designer</div>
+        <div>ShowStack:Lighting - Label Designer</div>
         <div>{customDesigns.length} saved design{customDesigns.length !== 1 ? 's' : ''}</div>
       </footer>
     </div>

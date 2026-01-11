@@ -7,7 +7,7 @@
 
 export type ShowStackModule =
   | 'prep'        // ShowStack:Prep (Shop Order Builder - current product)
-  | 'production'  // ShowStack:Production (LightWright competitor)
+  | 'production'  // ShowStack:Lighting (LightWright competitor)
   | 'manager'     // ShowStack:Manager (Production/Tour management)
   | 'student';    // ShowStack:Student (Educational version)
 

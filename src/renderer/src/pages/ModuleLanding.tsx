@@ -51,7 +51,7 @@ const MODULE_TOOLS: Record<ModuleType, ToolCard[]> = {
 };
 
 const MODULE_NAMES: Record<ModuleType, string> = {
-  production: 'ShowStack:Production',
+  production: 'ShowStack:Lighting',
   manager: 'ShowStack:Manager',
   design: 'ShowStack:Design'
 };
