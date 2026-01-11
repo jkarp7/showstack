@@ -9,6 +9,26 @@ export interface PlatformInfo {
 }
 
 /**
+ * Internal helper to detect the current platform.
+ * Uses modern userAgentData API when available, with fallback to deprecated APIs.
+ *
+ * Note: Platform detection is cached per session as the platform won't change during runtime.
+ */
+function detectPlatform() {
+  // @ts-expect-error - userAgentData is experimental and not yet in TS DOM types
+  const userAgentData = navigator.userAgentData;
+  const platformString = userAgentData?.platform || navigator.platform || '';
+  const platform = platformString.toUpperCase();
+  const userAgent = (navigator.userAgent || '').toUpperCase();
+
+  const isMac = platform.includes('MAC') || userAgent.includes('MAC');
+  const isWindows = platform.includes('WIN') || userAgent.includes('WIN');
+  const isLinux = platform.includes('LINUX') || userAgent.includes('LINUX');
+
+  return { isMac, isWindows, isLinux };
+}
+
+/**
  * Hook to detect the current platform and provide platform-specific information.
  * Useful for displaying correct keyboard shortcuts across different operating systems.
  *
@@ -20,16 +40,8 @@ export interface PlatformInfo {
  */
 export function usePlatform(): PlatformInfo {
   return useMemo(() => {
-    // Use modern userAgentData API if available, otherwise fall back to deprecated platform/userAgent
-    // @ts-ignore - userAgentData is not yet in TypeScript DOM types
-    const userAgentData = navigator.userAgentData;
-    const platformString = userAgentData?.platform || navigator.platform;
-    const platform = platformString.toUpperCase();
-    const userAgent = navigator.userAgent.toUpperCase();
-
-    const isMac = platform.includes('MAC') || userAgent.includes('MAC');
-    const isWindows = platform.includes('WIN') || userAgent.includes('WIN');
-    const isLinux = platform.includes('LINUX') || userAgent.includes('LINUX');
+    // Platform won't change during session, so empty dependency array is safe
+    const { isMac, isWindows, isLinux } = detectPlatform();
 
     return {
       isMac,
@@ -53,12 +65,7 @@ export function usePlatform(): PlatformInfo {
  * formatShortcut("Mod+S", true) // Returns "⌘+S" on Mac, "Ctrl+S" on Windows
  */
 export function formatShortcut(shortcut: string, useSymbol = false): string {
-  // Use modern userAgentData API if available, otherwise fall back to deprecated platform
-  // @ts-ignore - userAgentData is not yet in TypeScript DOM types
-  const userAgentData = navigator.userAgentData;
-  const platformString = userAgentData?.platform || navigator.platform;
-  const platform = platformString.toUpperCase();
-  const isMac = platform.includes('MAC');
+  const { isMac } = detectPlatform();
   const modifier = useSymbol && isMac ? '⌘' : (isMac ? 'Cmd' : 'Ctrl');
 
   return shortcut.replace(/Mod/g, modifier);

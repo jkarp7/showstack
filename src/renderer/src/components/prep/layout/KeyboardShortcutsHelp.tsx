@@ -155,7 +155,7 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
         {/* Footer */}
         <div className="p-4 border-t border-gray-700 flex items-center justify-between">
           <div className="text-xs text-gray-500">
-            Press <kbd className="px-2 py-0.5 bg-gray-700 border border-gray-600 rounded text-xs font-mono">Cmd+/</kbd> anytime to view this help
+            Press <kbd className="px-2 py-0.5 bg-gray-700 border border-gray-600 rounded text-xs font-mono">{formatShortcut('Mod+/')}</kbd> anytime to view this help
           </div>
           <button
             onClick={onClose}
