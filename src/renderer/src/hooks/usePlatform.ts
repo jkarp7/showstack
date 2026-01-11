@@ -8,13 +8,22 @@ export interface PlatformInfo {
   modifierSymbol: '⌘' | 'Ctrl';
 }
 
+type PlatformFlags = Pick<PlatformInfo, 'isMac' | 'isWindows' | 'isLinux'>;
+
+// Module-level cache for platform detection
+// Platform won't change during runtime, so we can safely cache this
+let cachedPlatform: PlatformFlags | null = null;
+
 /**
  * Internal helper to detect the current platform.
  * Uses modern userAgentData API when available, with fallback to deprecated APIs.
  *
- * Note: Platform detection is cached per session as the platform won't change during runtime.
+ * Note: Platform detection is cached at module level as the platform won't change during runtime.
+ * This improves performance when formatShortcut() is called frequently.
  */
-function detectPlatform() {
+function detectPlatform(): PlatformFlags {
+  if (cachedPlatform) return cachedPlatform;
+
   // @ts-expect-error - userAgentData is experimental and not yet in TS DOM types
   const userAgentData = navigator.userAgentData;
   const platformString = userAgentData?.platform || navigator.platform || '';
@@ -25,7 +34,8 @@ function detectPlatform() {
   const isWindows = platform.includes('WIN') || userAgent.includes('WIN');
   const isLinux = platform.includes('LINUX') || userAgent.includes('LINUX');
 
-  return { isMac, isWindows, isLinux };
+  cachedPlatform = { isMac, isWindows, isLinux };
+  return cachedPlatform;
 }
 
 /**
@@ -33,6 +43,7 @@ function detectPlatform() {
  * Useful for displaying correct keyboard shortcuts across different operating systems.
  *
  * @returns PlatformInfo object with platform detection flags and modifier key information
+ * @note For unrecognized platforms (FreeBSD, ChromeOS, etc.), defaults to 'Ctrl' as the modifier key
  *
  * @example
  * const { isMac, modifierKey } = usePlatform();
