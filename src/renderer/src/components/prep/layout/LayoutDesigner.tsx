@@ -67,7 +67,7 @@ export function LayoutDesigner({
   });
 
   // Platform detection for keyboard shortcuts
-  const { modifierKey } = usePlatform();
+  const { modifierKey, isMac } = usePlatform();
 
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [draggedPaletteElement, setDraggedPaletteElement] = useState<any>(null);
@@ -384,7 +384,6 @@ export function LayoutDesigner({
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
       const modifier = isMac ? e.metaKey : e.ctrlKey;
 
       // Command Palette: Cmd+K
@@ -566,6 +565,7 @@ export function LayoutDesigner({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [
+    isMac,
     hasChanges,
     handleSave,
     previewMode,

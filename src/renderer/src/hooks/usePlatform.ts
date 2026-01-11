@@ -20,7 +20,11 @@ export interface PlatformInfo {
  */
 export function usePlatform(): PlatformInfo {
   return useMemo(() => {
-    const platform = navigator.platform.toUpperCase();
+    // Use modern userAgentData API if available, otherwise fall back to deprecated platform/userAgent
+    // @ts-ignore - userAgentData is not yet in TypeScript DOM types
+    const userAgentData = navigator.userAgentData;
+    const platformString = userAgentData?.platform || navigator.platform;
+    const platform = platformString.toUpperCase();
     const userAgent = navigator.userAgent.toUpperCase();
 
     const isMac = platform.includes('MAC') || userAgent.includes('MAC');
@@ -49,7 +53,11 @@ export function usePlatform(): PlatformInfo {
  * formatShortcut("Mod+S", true) // Returns "⌘+S" on Mac, "Ctrl+S" on Windows
  */
 export function formatShortcut(shortcut: string, useSymbol = false): string {
-  const platform = navigator.platform.toUpperCase();
+  // Use modern userAgentData API if available, otherwise fall back to deprecated platform
+  // @ts-ignore - userAgentData is not yet in TypeScript DOM types
+  const userAgentData = navigator.userAgentData;
+  const platformString = userAgentData?.platform || navigator.platform;
+  const platform = platformString.toUpperCase();
   const isMac = platform.includes('MAC');
   const modifier = useSymbol && isMac ? '⌘' : (isMac ? 'Cmd' : 'Ctrl');
 
