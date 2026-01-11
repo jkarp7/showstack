@@ -1,7 +1,9 @@
+import { formatShortcut } from '../../../hooks/usePlatform';
+
 interface ShortcutGroup {
   category: string;
   shortcuts: {
-    keys: string;
+    keys: string; // Use "Mod" for modifier key (e.g., "Mod+S")
     description: string;
   }[];
 }
@@ -10,19 +12,19 @@ const shortcutGroups: ShortcutGroup[] = [
   {
     category: 'General',
     shortcuts: [
-      { keys: 'Cmd+K', description: 'Open command palette' },
-      { keys: 'Cmd+/', description: 'Show keyboard shortcuts' },
-      { keys: 'Cmd+S', description: 'Save template' },
-      { keys: 'Cmd+P', description: 'Toggle preview mode' },
+      { keys: 'Mod+K', description: 'Open command palette' },
+      { keys: 'Mod+/', description: 'Show keyboard shortcuts' },
+      { keys: 'Mod+S', description: 'Save template' },
+      { keys: 'Mod+P', description: 'Toggle preview mode' },
       { keys: 'ESC', description: 'Deselect / Close' }
     ]
   },
   {
     category: 'Editing',
     shortcuts: [
-      { keys: 'Cmd+Z', description: 'Undo' },
-      { keys: 'Cmd+Shift+Z', description: 'Redo' },
-      { keys: 'Cmd+D', description: 'Duplicate element' },
+      { keys: 'Mod+Z', description: 'Undo' },
+      { keys: 'Mod+Shift+Z', description: 'Redo' },
+      { keys: 'Mod+D', description: 'Duplicate element' },
       { keys: 'Delete', description: 'Delete selected element' },
       { keys: 'Backspace', description: 'Delete selected element' }
     ]
@@ -30,22 +32,22 @@ const shortcutGroups: ShortcutGroup[] = [
   {
     category: 'Text Formatting',
     shortcuts: [
-      { keys: 'Cmd+B', description: 'Bold' },
-      { keys: 'Cmd+I', description: 'Italic' },
-      { keys: 'Cmd+U', description: 'Underline' },
-      { keys: 'Cmd+Shift+L', description: 'Align left' },
-      { keys: 'Cmd+Shift+E', description: 'Align center' },
-      { keys: 'Cmd+Shift+R', description: 'Align right' }
+      { keys: 'Mod+B', description: 'Bold' },
+      { keys: 'Mod+I', description: 'Italic' },
+      { keys: 'Mod+U', description: 'Underline' },
+      { keys: 'Mod+Shift+L', description: 'Align left' },
+      { keys: 'Mod+Shift+E', description: 'Align center' },
+      { keys: 'Mod+Shift+R', description: 'Align right' }
     ]
   },
   {
     category: 'Canvas',
     shortcuts: [
-      { keys: 'Cmd++', description: 'Zoom in' },
-      { keys: 'Cmd+-', description: 'Zoom out' },
-      { keys: 'Cmd+0', description: 'Reset zoom to 100%' },
-      { keys: 'Cmd+G', description: 'Toggle grid' },
-      { keys: 'Cmd+Shift+G', description: 'Toggle snap guides' }
+      { keys: 'Mod++', description: 'Zoom in' },
+      { keys: 'Mod+-', description: 'Zoom out' },
+      { keys: 'Mod+0', description: 'Reset zoom to 100%' },
+      { keys: 'Mod+G', description: 'Toggle grid' },
+      { keys: 'Mod+Shift+G', description: 'Toggle snap guides' }
     ]
   },
   {
@@ -131,7 +133,7 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
                         {shortcut.description}
                       </span>
                       <div className="flex items-center gap-1">
-                        {shortcut.keys.split('+').map((key, keyIndex) => (
+                        {formatShortcut(shortcut.keys).split('+').map((key, keyIndex) => (
                           <span key={keyIndex} className="flex items-center gap-1">
                             {keyIndex > 0 && (
                               <span className="text-gray-500 text-xs">+</span>

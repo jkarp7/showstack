@@ -5,6 +5,7 @@ import { LayoutCanvas } from './LayoutCanvas';
 import { ElementInspector } from './ElementInspector';
 import { CommandPalette, type Command } from './CommandPalette';
 import { KeyboardShortcutsHelp } from './KeyboardShortcutsHelp';
+import { usePlatform } from '../../../hooks/usePlatform';
 import type {
   PageLayoutTemplate,
   LayoutElement,
@@ -64,6 +65,9 @@ export function LayoutDesigner({
       updated_at: now
     };
   });
+
+  // Platform detection for keyboard shortcuts
+  const { modifierKey } = usePlatform();
 
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [draggedPaletteElement, setDraggedPaletteElement] = useState<any>(null);
@@ -583,7 +587,7 @@ export function LayoutDesigner({
       label: 'Save Template',
       description: 'Save the current layout template',
       category: 'General',
-      shortcut: 'Cmd+S',
+      shortcut: 'Mod+S',
       icon: '💾',
       action: () => hasChanges && handleSave()
     },
@@ -592,7 +596,7 @@ export function LayoutDesigner({
       label: previewMode ? 'Exit Preview Mode' : 'Enter Preview Mode',
       description: 'Toggle between edit and preview modes',
       category: 'General',
-      shortcut: 'Cmd+P',
+      shortcut: 'Mod+P',
       icon: '👁️',
       action: () => setPreviewMode(!previewMode)
     },
@@ -601,7 +605,7 @@ export function LayoutDesigner({
       label: 'Show Keyboard Shortcuts',
       description: 'View all available keyboard shortcuts',
       category: 'General',
-      shortcut: 'Cmd+/',
+      shortcut: 'Mod+/',
       icon: '⌨️',
       action: () => setShowShortcutsHelp(true)
     },
@@ -620,7 +624,7 @@ export function LayoutDesigner({
       label: 'Undo',
       description: 'Undo the last change',
       category: 'Editing',
-      shortcut: 'Cmd+Z',
+      shortcut: 'Mod+Z',
       icon: '↶',
       action: handleUndo
     },
@@ -629,7 +633,7 @@ export function LayoutDesigner({
       label: 'Redo',
       description: 'Redo the last undone change',
       category: 'Editing',
-      shortcut: 'Cmd+Shift+Z',
+      shortcut: 'Mod+Shift+Z',
       icon: '↷',
       action: handleRedo
     },
@@ -638,7 +642,7 @@ export function LayoutDesigner({
       label: 'Duplicate Element',
       description: 'Duplicate the selected element',
       category: 'Editing',
-      shortcut: 'Cmd+D',
+      shortcut: 'Mod+D',
       icon: '📋',
       action: () => {
         if (selectedElementId) {
@@ -680,7 +684,7 @@ export function LayoutDesigner({
       label: 'Zoom In',
       description: 'Increase canvas zoom',
       category: 'Canvas',
-      shortcut: 'Cmd++',
+      shortcut: 'Mod++',
       icon: '🔍',
       action: () => setZoom(Math.min(200, zoom + 10))
     },
@@ -689,7 +693,7 @@ export function LayoutDesigner({
       label: 'Zoom Out',
       description: 'Decrease canvas zoom',
       category: 'Canvas',
-      shortcut: 'Cmd+-',
+      shortcut: 'Mod+-',
       icon: '🔍',
       action: () => setZoom(Math.max(50, zoom - 10))
     },
@@ -698,7 +702,7 @@ export function LayoutDesigner({
       label: 'Reset Zoom',
       description: 'Reset zoom to 100%',
       category: 'Canvas',
-      shortcut: 'Cmd+0',
+      shortcut: 'Mod+0',
       icon: '🔍',
       action: () => setZoom(100)
     },
@@ -707,7 +711,7 @@ export function LayoutDesigner({
       label: showGrid ? 'Hide Grid' : 'Show Grid',
       description: 'Toggle grid visibility',
       category: 'Canvas',
-      shortcut: 'Cmd+G',
+      shortcut: 'Mod+G',
       icon: '⊞',
       action: () => setShowGrid(!showGrid)
     },
@@ -716,7 +720,7 @@ export function LayoutDesigner({
       label: snapEnabled ? 'Disable Snap Guides' : 'Enable Snap Guides',
       description: 'Toggle snap-to-element guides',
       category: 'Canvas',
-      shortcut: 'Cmd+Shift+G',
+      shortcut: 'Mod+Shift+G',
       icon: '📍',
       action: () => setSnapEnabled(!snapEnabled)
     },
@@ -1130,11 +1134,11 @@ export function LayoutDesigner({
         <div className="text-sm text-gray-400">
           {previewMode ? (
             <>
-              <span className="font-medium text-green-400">Preview Mode</span> • Press <kbd className="px-2 py-0.5 bg-gray-700 border border-gray-600 rounded text-xs font-mono">Cmd+P</kbd> to exit
+              <span className="font-medium text-green-400">Preview Mode</span> • Press <kbd className="px-2 py-0.5 bg-gray-700 border border-gray-600 rounded text-xs font-mono">{modifierKey}+P</kbd> to exit
             </>
           ) : (
             <>
-              <span className="font-medium">Tip:</span> Press <kbd className="px-2 py-0.5 bg-gray-700 border border-gray-600 rounded text-xs font-mono">Cmd+K</kbd> for commands or <kbd className="px-2 py-0.5 bg-gray-700 border border-gray-600 rounded text-xs font-mono">Cmd+/</kbd> for shortcuts
+              <span className="font-medium">Tip:</span> Press <kbd className="px-2 py-0.5 bg-gray-700 border border-gray-600 rounded text-xs font-mono">{modifierKey}+K</kbd> for commands or <kbd className="px-2 py-0.5 bg-gray-700 border border-gray-600 rounded text-xs font-mono">{modifierKey}+/</kbd> for shortcuts
             </>
           )}
         </div>
