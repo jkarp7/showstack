@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { SnapGuides } from './SnapGuides';
 import type { LayoutElement, PageLayoutTemplate, PrepProject, DataFieldType } from '../../../types/prep';
 
 /**
@@ -117,6 +118,7 @@ interface LayoutCanvasProps {
   onElementDelete: (elementId: string) => void;
   zoom?: number;
   showGrid?: boolean;
+  snapEnabled?: boolean;
 }
 
 export function LayoutCanvas({
@@ -129,15 +131,16 @@ export function LayoutCanvas({
   onElementResize,
   onElementDelete,
   zoom: externalZoom,
-  showGrid: externalShowGrid
+  showGrid: externalShowGrid,
+  snapEnabled: externalSnapEnabled
 }: LayoutCanvasProps) {
-  // Use external zoom/grid if provided, otherwise use defaults
+  // Use external zoom/grid/snap if provided, otherwise use defaults
   const zoom = externalZoom ?? 100;
   const showGrid = externalShowGrid ?? true;
+  const snapEnabled = externalSnapEnabled ?? true;
   const [draggedElement, setDraggedElement] = useState<string | null>(null);
   const [dragOverCell, setDragOverCell] = useState<{ col: number; row: number } | null>(null);
   const [resizeHandle, setResizeHandle] = useState<'se' | 'e' | 's' | null>(null);
-  const [snapGuides, setSnapGuides] = useState<{ x: number[]; y: number[] }>({ x: [], y: [] });
   const canvasRef = useRef<HTMLDivElement>(null);
 
   // Calculate cell dimensions based on page size and grid
@@ -187,9 +190,9 @@ export function LayoutCanvas({
   };
 
   return (
-    <div className="flex-1 bg-gray-900 rounded-lg border border-gray-700 flex flex-col overflow-hidden">
+    <div className="flex-1 bg-[#0D0D0D] rounded-lg border border-gray-700 flex flex-col overflow-hidden">
       {/* Canvas */}
-      <div className="flex-1 overflow-auto p-8 bg-gray-850">
+      <div className="flex-1 overflow-auto p-8 bg-[#1A1A1A]">
         <div className="flex items-center justify-center min-h-full">
           <div
             ref={canvasRef}
@@ -240,24 +243,24 @@ export function LayoutCanvas({
             {/* Grid - Enhanced with better visibility */}
             {showGrid && (
               <>
-                {/* Fine grid lines */}
+                {/* Fine grid lines - Optimized for theater environments */}
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
                     backgroundImage: `
-                      linear-gradient(to right, rgba(203, 213, 225, 0.4) 1px, transparent 1px),
-                      linear-gradient(to bottom, rgba(203, 213, 225, 0.4) 1px, transparent 1px)
+                      linear-gradient(to right, rgba(45, 45, 45, 0.5) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(45, 45, 45, 0.5) 1px, transparent 1px)
                     `,
                     backgroundSize: `${cellWidth * (zoom / 100)}px ${cellHeight * (zoom / 100)}px`
                   }}
                 />
-                {/* Bold grid lines every 4 cells for better visual hierarchy */}
+                {/* Bold grid lines every 4 cells - Theater-optimized */}
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
                     backgroundImage: `
-                      linear-gradient(to right, rgba(148, 163, 184, 0.6) 1px, transparent 1px),
-                      linear-gradient(to bottom, rgba(148, 163, 184, 0.6) 1px, transparent 1px)
+                      linear-gradient(to right, rgba(60, 60, 60, 0.7) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(60, 60, 60, 0.7) 1px, transparent 1px)
                     `,
                     backgroundSize: `${cellWidth * 4 * (zoom / 100)}px ${cellHeight * 4 * (zoom / 100)}px`
                   }}
@@ -266,32 +269,16 @@ export function LayoutCanvas({
             )}
 
             {/* Snap Guides - Show when dragging elements */}
-            {snapGuides.x.map((x, i) => (
-              <div
-                key={`snap-x-${i}`}
-                className="absolute pointer-events-none bg-blue-500 opacity-50"
-                style={{
-                  left: `${x * (zoom / 100)}px`,
-                  top: 0,
-                  width: '1px',
-                  height: '100%',
-                  zIndex: 9999
-                }}
-              />
-            ))}
-            {snapGuides.y.map((y, i) => (
-              <div
-                key={`snap-y-${i}`}
-                className="absolute pointer-events-none bg-blue-500 opacity-50"
-                style={{
-                  top: `${y * (zoom / 100)}px`,
-                  left: 0,
-                  height: '1px',
-                  width: '100%',
-                  zIndex: 9999
-                }}
-              />
-            ))}
+            <SnapGuides
+              elements={template.elements}
+              draggedElementId={draggedElement}
+              draggedElement={draggedElement ? template.elements.find(el => el.id === draggedElement) || null : null}
+              dragPosition={dragOverCell}
+              cellWidth={cellWidth}
+              cellHeight={cellHeight}
+              zoom={zoom}
+              snapEnabled={snapEnabled}
+            />
 
             {/* Grid Cells (Drop Zones) */}
             <div className="absolute inset-0 grid"
