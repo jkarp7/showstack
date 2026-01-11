@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { formatShortcut } from '../../../hooks/usePlatform';
 
 export interface Command {
   id: string;
   label: string;
   description?: string;
   category: string;
-  shortcut?: string;
+  shortcut?: string; // Use "Mod" for modifier key (e.g., "Mod+S")
   action: () => void;
   icon?: string;
 }
@@ -246,7 +247,7 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
                                 ? 'bg-blue-700 text-blue-100'
                                 : 'bg-gray-700 text-gray-400'
                             }`}>
-                              {command.shortcut}
+                              {formatShortcut(command.shortcut)}
                             </div>
                           )}
                         </button>
