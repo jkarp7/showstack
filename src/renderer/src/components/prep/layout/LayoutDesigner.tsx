@@ -382,6 +382,7 @@ export function LayoutDesigner({
   }, [template.elements, template.updated_at]);
 
   // Keyboard shortcuts
+  // Note: isMac is not in dependency array as it never changes during runtime (cached in usePlatform hook)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const modifier = isMac ? e.metaKey : e.ctrlKey;
@@ -565,7 +566,6 @@ export function LayoutDesigner({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [
-    isMac,
     hasChanges,
     handleSave,
     previewMode,

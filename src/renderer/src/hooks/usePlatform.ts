@@ -69,15 +69,19 @@ export function usePlatform(): PlatformInfo {
  *
  * @param shortcut - Shortcut string with generic "Mod" prefix (e.g., "Mod+S", "Mod+Shift+Z")
  * @param useSymbol - Whether to use symbol (⌘) or text (Cmd) for Mac modifier
- * @returns Formatted shortcut string (e.g., "Cmd+S" on Mac, "Ctrl+S" on Windows)
+ * @returns Formatted shortcut string (e.g., "Cmd+S" on Mac, "Ctrl+S" on Windows), or empty string if input is invalid
  *
  * @example
  * formatShortcut("Mod+S") // Returns "Cmd+S" on Mac, "Ctrl+S" on Windows
  * formatShortcut("Mod+S", true) // Returns "⌘+S" on Mac, "Ctrl+S" on Windows
  */
-export function formatShortcut(shortcut: string, useSymbol = false): string {
+export function formatShortcut(shortcut: string | undefined, useSymbol = false): string {
+  if (!shortcut) return '';
+
   const { isMac } = detectPlatform();
-  const modifier = useSymbol && isMac ? '⌘' : (isMac ? 'Cmd' : 'Ctrl');
+  const modifier = isMac
+    ? (useSymbol ? '⌘' : 'Cmd')
+    : 'Ctrl';
 
   return shortcut.replace(/Mod/g, modifier);
 }
