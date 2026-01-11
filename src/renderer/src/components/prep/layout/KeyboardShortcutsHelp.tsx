@@ -81,6 +81,9 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
     <div
       className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-8"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="shortcuts-title"
     >
       <div
         className="bg-gray-800 rounded-lg border border-gray-700 shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col"
@@ -90,7 +93,7 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
         <div className="p-6 border-b border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-white">Keyboard Shortcuts</h2>
+              <h2 id="shortcuts-title" className="text-2xl font-bold text-white">Keyboard Shortcuts</h2>
               <p className="text-sm text-gray-400 mt-1">
                 Master these shortcuts to work faster
               </p>

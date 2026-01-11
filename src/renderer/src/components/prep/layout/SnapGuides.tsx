@@ -18,6 +18,19 @@ interface Guide {
   alignmentType: 'left' | 'right' | 'center' | 'top' | 'bottom' | 'middle';
 }
 
+/**
+ * SnapGuides Component
+ *
+ * Displays visual alignment guides when dragging elements to help with precise positioning.
+ *
+ * Performance Characteristics:
+ * - Calculation complexity: O(n) where n = number of elements
+ * - Runs on every drag move when snapEnabled is true
+ * - Optimized with useMemo to prevent unnecessary recalculations
+ * - Performs well for typical use cases (< 50 elements)
+ * - For very large layouts (100+ elements), consider adding a proximity check
+ *   to only calculate guides for nearby elements
+ */
 export function SnapGuides({
   elements,
   draggedElementId,
@@ -125,6 +138,7 @@ export function SnapGuides({
       {guides.vertical.map((guide, index) => (
         <div
           key={`v-${index}`}
+          aria-hidden="true"
           className="absolute pointer-events-none bg-pink-500 opacity-70 shadow-lg"
           style={{
             left: `${guide.position * (zoom / 100)}px`,
@@ -148,6 +162,7 @@ export function SnapGuides({
       {guides.horizontal.map((guide, index) => (
         <div
           key={`h-${index}`}
+          aria-hidden="true"
           className="absolute pointer-events-none bg-pink-500 opacity-70 shadow-lg"
           style={{
             top: `${guide.position * (zoom / 100)}px`,
