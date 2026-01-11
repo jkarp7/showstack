@@ -5,10 +5,15 @@ export interface PlatformInfo {
   isWindows: boolean;
   isLinux: boolean;
   modifierKey: 'Cmd' | 'Ctrl';
-  modifierSymbol: '⌘' | 'Ctrl';
+  modifierSymbol: '⌘' | 'Ctrl'; // Note: Symbol version available for UI that prefers visual clarity
 }
 
 type PlatformFlags = Pick<PlatformInfo, 'isMac' | 'isWindows' | 'isLinux'>;
+
+// Platform identifier constants for consistent detection
+const MAC_IDENTIFIERS = ['MAC'];
+const WINDOWS_IDENTIFIERS = ['WIN'];
+const LINUX_IDENTIFIERS = ['LINUX'];
 
 // Module-level cache for platform detection
 // Platform won't change during runtime, so we can safely cache this
@@ -24,15 +29,15 @@ let cachedPlatform: PlatformFlags | null = null;
 function detectPlatform(): PlatformFlags {
   if (cachedPlatform) return cachedPlatform;
 
-  // @ts-expect-error - userAgentData is experimental and not yet in TS DOM types
+  // @ts-expect-error - userAgentData is experimental; remove when added to TS DOM lib types
   const userAgentData = navigator.userAgentData;
   const platformString = userAgentData?.platform || navigator.platform || '';
   const platform = platformString.toUpperCase();
   const userAgent = (navigator.userAgent || '').toUpperCase();
 
-  const isMac = platform.includes('MAC') || userAgent.includes('MAC');
-  const isWindows = platform.includes('WIN') || userAgent.includes('WIN');
-  const isLinux = platform.includes('LINUX') || userAgent.includes('LINUX');
+  const isMac = MAC_IDENTIFIERS.some(id => platform.includes(id) || userAgent.includes(id));
+  const isWindows = WINDOWS_IDENTIFIERS.some(id => platform.includes(id) || userAgent.includes(id));
+  const isLinux = LINUX_IDENTIFIERS.some(id => platform.includes(id) || userAgent.includes(id));
 
   cachedPlatform = { isMac, isWindows, isLinux };
   return cachedPlatform;
@@ -74,6 +79,7 @@ export function usePlatform(): PlatformInfo {
  * @example
  * formatShortcut("Mod+S") // Returns "Cmd+S" on Mac, "Ctrl+S" on Windows
  * formatShortcut("Mod+S", true) // Returns "⌘+S" on Mac, "Ctrl+S" on Windows
+ * formatShortcut("mod+s") // Also works (case-insensitive)
  */
 export function formatShortcut(shortcut: string | undefined, useSymbol = false): string {
   if (!shortcut) return '';
@@ -83,5 +89,6 @@ export function formatShortcut(shortcut: string | undefined, useSymbol = false):
     ? (useSymbol ? '⌘' : 'Cmd')
     : 'Ctrl';
 
-  return shortcut.replace(/Mod/g, modifier);
+  // Use case-insensitive regex for robustness
+  return shortcut.replace(/Mod/gi, modifier);
 }
