@@ -412,7 +412,7 @@ export function LayoutDesigner({
       // Preview Mode: Cmd+P
       if (modifier && e.key === 'p') {
         e.preventDefault();
-        setPreviewMode(!previewMode);
+        setPreviewMode(prev => !prev);
         return;
       }
 
@@ -460,14 +460,14 @@ export function LayoutDesigner({
       // Zoom In: Cmd++
       if (modifier && (e.key === '+' || e.key === '=')) {
         e.preventDefault();
-        setZoom(Math.min(200, zoom + 10));
+        setZoom(prev => Math.min(200, prev + 10));
         return;
       }
 
       // Zoom Out: Cmd+-
       if (modifier && e.key === '-') {
         e.preventDefault();
-        setZoom(Math.max(50, zoom - 10));
+        setZoom(prev => Math.max(50, prev - 10));
         return;
       }
 
@@ -481,14 +481,14 @@ export function LayoutDesigner({
       // Toggle Grid: Cmd+G
       if (modifier && e.key === 'g' && !e.shiftKey) {
         e.preventDefault();
-        setShowGrid(!showGrid);
+        setShowGrid(prev => !prev);
         return;
       }
 
       // Toggle Snap Guides: Cmd+Shift+G
       if (modifier && e.shiftKey && e.key === 'g') {
         e.preventDefault();
-        setSnapEnabled(!snapEnabled);
+        setSnapEnabled(prev => !prev);
         return;
       }
 
@@ -568,14 +568,10 @@ export function LayoutDesigner({
     isMac,
     hasChanges,
     handleSave,
-    previewMode,
     handleUndo,
     handleRedo,
     selectedElementId,
     template,
-    zoom,
-    showGrid,
-    snapEnabled,
     handleElementUpdate
   ]);
 
