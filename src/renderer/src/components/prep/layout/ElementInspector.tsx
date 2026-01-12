@@ -221,9 +221,18 @@ export function ElementInspector({
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
+                            // SECURITY: Validate MIME type (matches backend whitelist)
+                            const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+                            if (!ALLOWED_TYPES.includes(file.type)) {
+                              alert('Invalid file type. Allowed: PNG, JPG, GIF, WebP');
+                              e.target.value = ''; // Reset input
+                              return;
+                            }
+
                             // Validate file size (2MB max)
                             if (file.size > 2 * 1024 * 1024) {
                               alert('Image must be smaller than 2MB');
+                              e.target.value = ''; // Reset input
                               return;
                             }
 
@@ -232,6 +241,10 @@ export function ElementInspector({
                             reader.onload = (event) => {
                               const base64 = event.target?.result as string;
                               updateConfig({ src: base64 });
+                            };
+                            reader.onerror = () => {
+                              alert('Failed to read image file');
+                              e.target.value = ''; // Reset input
                             };
                             reader.readAsDataURL(file);
                           }

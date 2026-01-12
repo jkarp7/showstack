@@ -100,21 +100,26 @@ vi.mock('sql.js', () => ({
 }));
 
 // Mock lucide-react icons (to avoid SVG rendering issues)
+// Factory function to create consistent icon mocks
+const mockIcon = (name: string) => {
+  return () => <div data-testid={`icon-${name.toLowerCase()}`}>{name}</div>;
+};
+
 vi.mock('lucide-react', () => ({
-  // Return simple div components for all icons
-  AlertCircle: () => '<div>AlertCircle</div>',
-  ChevronDown: () => '<div>ChevronDown</div>',
-  ChevronRight: () => '<div>ChevronRight</div>',
-  Plus: () => '<div>Plus</div>',
-  X: () => '<div>X</div>',
-  Check: () => '<div>Check</div>',
-  Save: () => '<div>Save</div>',
-  Upload: () => '<div>Upload</div>',
-  Download: () => '<div>Download</div>',
-  Edit: () => '<div>Edit</div>',
-  Trash: () => '<div>Trash</div>',
-  Search: () => '<div>Search</div>',
-  Settings: () => '<div>Settings</div>',
+  // Return React component functions for all icons
+  AlertCircle: mockIcon('AlertCircle'),
+  ChevronDown: mockIcon('ChevronDown'),
+  ChevronRight: mockIcon('ChevronRight'),
+  Plus: mockIcon('Plus'),
+  X: mockIcon('X'),
+  Check: mockIcon('Check'),
+  Save: mockIcon('Save'),
+  Upload: mockIcon('Upload'),
+  Download: mockIcon('Download'),
+  Edit: mockIcon('Edit'),
+  Trash: mockIcon('Trash'),
+  Search: mockIcon('Search'),
+  Settings: mockIcon('Settings'),
   // Add other icons as needed
 }));
 
