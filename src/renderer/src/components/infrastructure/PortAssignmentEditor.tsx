@@ -69,9 +69,9 @@ export function PortAssignmentEditor({
   };
 
   const getLinkType = (pa: PortAssignment): 'none' | 'fixture' | 'equipment' | 'text' => {
-    if (pa.linked_fixture_id !== undefined) return 'fixture';
-    if (pa.linked_equipment_id !== undefined) return 'equipment';
-    if (pa.connected_to !== undefined) return 'text';
+    if (pa.linked_fixture_id) return 'fixture';
+    if (pa.linked_equipment_id) return 'equipment';
+    if (pa.connected_to) return 'text';
     return 'none';
   };
 

@@ -63,6 +63,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",
+    "file-type": "^19.6.0",
     "lucide-react": "^0.460.0",
     "puppeteer": "^24.34.0",
     "react": "^19.2.0",

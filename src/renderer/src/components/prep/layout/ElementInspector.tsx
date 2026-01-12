@@ -51,9 +51,9 @@ export function ElementInspector({
     );
   }
 
-  const updateConfig = (configUpdates: Partial<any>) => {
+  const updateConfig = (configUpdates: Partial<ElementConfig>) => {
     onUpdate({
-      config: { ...element.config, ...configUpdates }
+      config: { ...element.config, ...configUpdates } as ElementConfig
     });
   };
 
