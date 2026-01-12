@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type {
   LayoutElement,
   ElementStyle,
+  ElementConfig,
   DataFieldConfig,
   TextConfig,
   ImageConfig,
@@ -216,7 +217,7 @@ export function ElementInspector({
                       Choose File
                       <input
                         type="file"
-                        accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/gif"
+                        accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
@@ -249,7 +250,7 @@ export function ElementInspector({
                     )}
                   </div>
                   <div className="text-xs text-gray-500 mt-1">
-                    PNG, JPG, SVG, GIF • Max 2MB
+                    PNG, JPG, GIF, WebP • Max 2MB
                   </div>
                 </FormField>
 
