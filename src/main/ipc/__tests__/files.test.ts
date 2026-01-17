@@ -16,16 +16,20 @@ vi.mock('electron', () => ({
 }));
 
 /**
- * Comprehensive tests for files.ts IPC handlers
- * Covers security validation, error handling, and integration scenarios
+ * Integration tests for files.ts IPC handlers
+ *
+ * NOTE: Comprehensive security and validation tests have been extracted to:
+ * - src/main/utils/__tests__/imageValidation.test.ts (70+ tests for image validation logic)
+ * - src/main/utils/__tests__/pathValidation.test.ts (50+ tests for path security)
+ *
+ * These tests focus on IPC handler integration and mock setup verification.
  */
 
 /**
- * Tests for Bug Fix #3: Security Vulnerability in files.ts
- * Issue: Image upload handler lacked proper validation
- * Fix: Added magic number validation, file size checks, and MIME type whitelist
+ * IPC Handler Integration Tests
+ * Tests verify the handlers are properly wired and use the validation modules
  */
-describe('file:readImageAsDataUrl - Security Validation', () => {
+describe('file:readImageAsDataUrl - IPC Integration', () => {
   const mockBuffer = Buffer.from('mock image data');
 
   beforeEach(() => {

@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main, develop]
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write  # For Codecov comments
+
 jobs:
   test:
     name: Test on ${{ matrix.os }} - Node ${{ matrix.node-version }}
@@ -31,7 +36,7 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        run: npm run test:run
+        run: npm run test:run -- --reporter=verbose
 
       - name: Generate coverage report
         run: npm run test:coverage
@@ -75,11 +80,11 @@ jobs:
         run: npm ci
 
       - name: Run TypeScript type check
-        run: npx tsc --noEmit
+        run: npx tsc --noEmit --strict
 
       - name: Run ESLint (if configured)
         run: npm run lint --if-present
-        continue-on-error: true # Don't fail if lint script doesn't exist
+        continue-on-error: true # Don't fail if lint script doesn't exist (lint script not yet configured)
 
   # Summary job that all other jobs depend on
   test-summary:
