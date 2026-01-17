@@ -69,6 +69,8 @@ export function PortAssignmentEditor({
   };
 
   const getLinkType = (pa: PortAssignment): 'none' | 'fixture' | 'equipment' | 'text' => {
+    // Check for property existence (not truthiness) to detect link mode
+    // Empty string "" means "mode selected but no item chosen yet"
     if (pa.linked_fixture_id !== undefined) return 'fixture';
     if (pa.linked_equipment_id !== undefined) return 'equipment';
     if (pa.connected_to !== undefined) return 'text';

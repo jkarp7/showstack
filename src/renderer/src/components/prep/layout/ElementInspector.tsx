@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type {
   LayoutElement,
   ElementStyle,
+  ElementConfig,
   DataFieldConfig,
   TextConfig,
   ImageConfig,
@@ -51,9 +52,9 @@ export function ElementInspector({
     );
   }
 
-  const updateConfig = (configUpdates: Partial<any>) => {
+  const updateConfig = (configUpdates: Partial<ElementConfig>) => {
     onUpdate({
-      config: { ...element.config, ...configUpdates }
+      config: { ...element.config, ...configUpdates } as ElementConfig
     });
   };
 
@@ -216,13 +217,22 @@ export function ElementInspector({
                       Choose File
                       <input
                         type="file"
-                        accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/gif"
+                        accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
+                            // SECURITY: Validate MIME type (matches backend whitelist)
+                            const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+                            if (!ALLOWED_TYPES.includes(file.type)) {
+                              alert('Invalid file type. Allowed: PNG, JPG, GIF, WebP');
+                              e.target.value = ''; // Reset input
+                              return;
+                            }
+
                             // Validate file size (2MB max)
                             if (file.size > 2 * 1024 * 1024) {
                               alert('Image must be smaller than 2MB');
+                              e.target.value = ''; // Reset input
                               return;
                             }
 
@@ -231,6 +241,10 @@ export function ElementInspector({
                             reader.onload = (event) => {
                               const base64 = event.target?.result as string;
                               updateConfig({ src: base64 });
+                            };
+                            reader.onerror = () => {
+                              alert('Failed to read image file');
+                              e.target.value = ''; // Reset input
                             };
                             reader.readAsDataURL(file);
                           }
@@ -249,7 +263,7 @@ export function ElementInspector({
                     )}
                   </div>
                   <div className="text-xs text-gray-500 mt-1">
-                    PNG, JPG, SVG, GIF • Max 2MB
+                    PNG, JPG, GIF, WebP • Max 2MB
                   </div>
                 </FormField>
 
@@ -258,10 +272,43 @@ export function ElementInspector({
                   <input
                     type="text"
                     value={(element.config as ImageConfig).src || ''}
-                    onChange={(e) => updateConfig({ src: e.target.value })}
+                    onChange={(e) => {
+                      const url = e.target.value.trim();
+
+                      // Allow empty string (clearing the field)
+                      if (!url) {
+                        updateConfig({ src: '' });
+                        return;
+                      }
+
+                      // SECURITY: Validate data URLs match allowed MIME types
+                      if (url.startsWith('data:')) {
+                        const ALLOWED_DATA_TYPES = [
+                          'data:image/png',
+                          'data:image/jpeg',
+                          'data:image/gif',
+                          'data:image/webp'
+                        ];
+                        const hasAllowedType = ALLOWED_DATA_TYPES.some(type => url.startsWith(type));
+                        if (!hasAllowedType) {
+                          alert('Invalid data URL. Only PNG, JPG, GIF, and WebP data URLs are allowed.');
+                          return;
+                        }
+                      }
+                      // Allow HTTP/HTTPS URLs (external images)
+                      else if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                        alert('Invalid URL. Must be HTTP, HTTPS, or a valid data URL.');
+                        return;
+                      }
+
+                      updateConfig({ src: url });
+                    }}
                     placeholder="https://example.com/image.png"
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                   />
+                  <div className="text-xs text-gray-500 mt-1">
+                    HTTP/HTTPS URLs or data URLs (PNG, JPG, GIF, WebP only)
+                  </div>
                 </FormField>
 
                 <FormField label="Object Fit">

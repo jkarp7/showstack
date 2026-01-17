@@ -2,6 +2,7 @@ import { ipcMain, BrowserWindow } from 'electron';
 import { fileService, ProjectImportResult, ProjectConflictResolution } from '../services/fileService';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileTypeFromBuffer } from 'file-type';
 
 /**
  * Register file operation IPC handlers
@@ -165,6 +166,7 @@ export function registerFileHandlers(): void {
 
   /**
    * Read an image file and convert to base64 data URL
+   * SECURITY: Validates file type via magic numbers and enforces size limits
    */
   ipcMain.handle('file:readImageAsDataUrl', async (_, imagePath: string): Promise<string | null> => {
     try {
@@ -176,25 +178,30 @@ export function registerFileHandlers(): void {
       // Read file as buffer
       const buffer = fs.readFileSync(imagePath);
 
-      // Get file extension to determine MIME type
-      const ext = path.extname(imagePath).toLowerCase();
-      const mimeTypes: Record<string, string> = {
-        '.jpg': 'image/jpeg',
-        '.jpeg': 'image/jpeg',
-        '.png': 'image/png',
-        '.gif': 'image/gif',
-        '.svg': 'image/svg+xml',
-        '.webp': 'image/webp'
-      };
+      // SECURITY: Backend file size validation (2MB max)
+      const MAX_FILE_SIZE = 2 * 1024 * 1024;
+      if (buffer.length > MAX_FILE_SIZE) {
+        console.error('Image file too large:', buffer.length, 'bytes');
+        throw new Error('Image must be smaller than 2MB');
+      }
 
-      const mimeType = mimeTypes[ext] || 'image/png';
+      // SECURITY: Validate MIME type using magic numbers (file content)
+      const fileType = await fileTypeFromBuffer(buffer);
 
-      // Convert to base64 data URL
+      // Whitelist of allowed image MIME types (NO SVG for XSS prevention)
+      const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+      if (!fileType || !ALLOWED_TYPES.includes(fileType.mime)) {
+        console.error('Invalid image type:', fileType?.mime || 'unknown');
+        throw new Error('Invalid image file type. Allowed: PNG, JPG, GIF, WebP');
+      }
+
+      // Convert to base64 data URL using validated MIME type
       const base64 = buffer.toString('base64');
-      return `data:${mimeType};base64,${base64}`;
+      return `data:${fileType.mime};base64,${base64}`;
     } catch (error) {
       console.error('Error reading image file:', error);
-      return null;
+      throw error; // Propagate to renderer for user feedback
     }
   });
 
