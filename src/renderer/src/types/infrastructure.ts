@@ -1,6 +1,12 @@
 export interface PortAssignment {
   port: number;
-  connected_to?: string;
+  connected_to?: string; // Legacy free text
+
+  // Port linking - structured connections
+  linked_fixture_id?: string; // Link to fixture
+  linked_equipment_id?: string; // Link to other infrastructure equipment
+  linked_port?: number; // Port number on linked equipment
+
   type?: 'ethernet' | 'dmx' | 'fiber' | 'power' | 'other';
   vlan?: number;
   status?: 'active' | 'inactive' | 'error';

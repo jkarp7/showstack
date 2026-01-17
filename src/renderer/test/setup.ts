@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom';
 import { vi, beforeEach, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
+import React from 'react';
 
 // Cleanup after each test
 afterEach(() => {
@@ -100,9 +101,12 @@ vi.mock('sql.js', () => ({
 }));
 
 // Mock lucide-react icons (to avoid SVG rendering issues)
-// Factory function to create consistent icon mocks
+// Use React.createElement to avoid JSX parsing issues in test setup
 const mockIcon = (name: string) => {
-  return () => <div data-testid={`icon-${name.toLowerCase()}`}>{name}</div>;
+  return (props: any) => React.createElement('div', {
+    'data-testid': `icon-${name.toLowerCase()}`,
+    ...props
+  }, name);
 };
 
 vi.mock('lucide-react', () => ({

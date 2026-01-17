@@ -272,10 +272,43 @@ export function ElementInspector({
                   <input
                     type="text"
                     value={(element.config as ImageConfig).src || ''}
-                    onChange={(e) => updateConfig({ src: e.target.value })}
+                    onChange={(e) => {
+                      const url = e.target.value.trim();
+
+                      // Allow empty string (clearing the field)
+                      if (!url) {
+                        updateConfig({ src: '' });
+                        return;
+                      }
+
+                      // SECURITY: Validate data URLs match allowed MIME types
+                      if (url.startsWith('data:')) {
+                        const ALLOWED_DATA_TYPES = [
+                          'data:image/png',
+                          'data:image/jpeg',
+                          'data:image/gif',
+                          'data:image/webp'
+                        ];
+                        const hasAllowedType = ALLOWED_DATA_TYPES.some(type => url.startsWith(type));
+                        if (!hasAllowedType) {
+                          alert('Invalid data URL. Only PNG, JPG, GIF, and WebP data URLs are allowed.');
+                          return;
+                        }
+                      }
+                      // Allow HTTP/HTTPS URLs (external images)
+                      else if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                        alert('Invalid URL. Must be HTTP, HTTPS, or a valid data URL.');
+                        return;
+                      }
+
+                      updateConfig({ src: url });
+                    }}
                     placeholder="https://example.com/image.png"
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                   />
+                  <div className="text-xs text-gray-500 mt-1">
+                    HTTP/HTTPS URLs or data URLs (PNG, JPG, GIF, WebP only)
+                  </div>
                 </FormField>
 
                 <FormField label="Object Fit">
