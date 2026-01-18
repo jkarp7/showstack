@@ -2,6 +2,7 @@ import { ipcMain, BrowserWindow } from 'electron';
 import { fileService, ProjectImportResult, ProjectConflictResolution } from '../services/fileService';
 import * as path from 'path';
 import { readImageAsDataUrl } from '../utils/imageValidation';
+import { sanitizeError, sanitizeErrorForLogging } from '../utils/errorSanitizer';
 
 /**
  * Register file operation IPC handlers
@@ -166,13 +167,18 @@ export function registerFileHandlers(): void {
   /**
    * Read an image file and convert to base64 data URL
    * SECURITY: Validates file type via magic numbers and enforces size limits
+   * SECURITY: Sanitizes error messages to prevent information disclosure
    */
   ipcMain.handle('file:readImageAsDataUrl', async (_, imagePath: string): Promise<string | null> => {
     try {
       return await readImageAsDataUrl(imagePath);
     } catch (error) {
-      console.error('Error reading image file:', error);
-      throw error; // Propagate to renderer for user feedback
+      // Log full error details securely (console only, not sent to renderer)
+      console.error('Error reading image file:', sanitizeErrorForLogging(error));
+
+      // Sanitize error message before sending to renderer (prevents path disclosure)
+      const sanitizedMessage = sanitizeError(error);
+      throw new Error(sanitizedMessage);
     }
   });
 

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fileTypeFromBuffer } from 'file-type';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
+import * as fsSync from 'fs';
 import { readImageAsDataUrl } from '../../utils/imageValidation';
 import { validateFilePath } from '../../utils/pathValidation';
 import {
@@ -12,6 +13,7 @@ import {
 } from '../../utils/errors';
 
 // Mock dependencies
+vi.mock('fs/promises');
 vi.mock('fs');
 vi.mock('file-type');
 vi.mock('electron', () => ({
@@ -59,8 +61,8 @@ describe('file:readImageAsDataUrl - IPC Integration', () => {
 
   describe('MIME type validation', () => {
     it('should accept PNG images', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue(mockBuffer);
+      vi.mocked(fsSync.existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFile).mockResolvedValue(mockBuffer);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'png',
         mime: 'image/png',
@@ -68,7 +70,7 @@ describe('file:readImageAsDataUrl - IPC Integration', () => {
 
       // Handler would be called here in actual implementation
       // For now, verify the mocks are set up correctly
-      expect(fs.existsSync).toBeDefined();
+      expect(fsSync.existsSync).toBeDefined();
       expect(fileTypeFromBuffer).toBeDefined();
     });
 
@@ -204,41 +206,37 @@ describe('file:readImageAsDataUrl - IPC Integration', () => {
 
   describe('Integration scenarios', () => {
     it('should handle missing file path', async () => {
-      vi.mocked(fs.existsSync).mockReturnValue(false);
+      vi.mocked(fsSync.existsSync).mockReturnValue(false);
 
       // Handler would return null for missing files
-      expect(fs.existsSync('/nonexistent/file.png')).toBe(false);
+      expect(fsSync.existsSync('/nonexistent/file.png')).toBe(false);
     });
 
     it('should validate file exists before reading', () => {
       const imagePath = '/path/to/image.png';
-      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fsSync.existsSync).mockReturnValue(true);
 
-      expect(fs.existsSync(imagePath)).toBe(true);
+      expect(fsSync.existsSync(imagePath)).toBe(true);
     });
 
-    it('should handle filesystem read errors gracefully', () => {
-      vi.mocked(fs.readFileSync).mockImplementation(() => {
-        throw new Error('Permission denied');
-      });
+    it('should handle filesystem read errors gracefully', async () => {
+      vi.mocked(fs.readFile).mockRejectedValue(new Error('Permission denied'));
 
-      expect(() => fs.readFileSync('/restricted/file.png')).toThrow('Permission denied');
+      await expect(fs.readFile('/restricted/file.png')).rejects.toThrow('Permission denied');
     });
 
     it('should process valid image end-to-end', async () => {
       const imagePath = '/valid/image.png';
       const imageBuffer = Buffer.from('PNG_DATA');
 
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue(imageBuffer);
+      vi.mocked(fs.readFile).mockResolvedValue(imageBuffer);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'png',
         mime: 'image/png',
       });
 
-      // Simulate complete flow
-      expect(fs.existsSync(imagePath)).toBe(true);
-      const buffer = fs.readFileSync(imagePath);
+      // Simulate complete flow (TOCTOU FIX: no existence check)
+      const buffer = await fs.readFile(imagePath);
       const fileType = await fileTypeFromBuffer(buffer);
 
       expect(fileType?.mime).toBe('image/png');
@@ -457,8 +455,8 @@ describe('file:readImageAsDataUrl - Full Integration with Validation Module', ()
     const imagePath = '/Users/test/Documents/image.png';
     const imageBuffer = Buffer.from('PNG_IMAGE_DATA');
 
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.readFileSync).mockReturnValue(imageBuffer);
+    // TOCTOU FIX: No longer checks existence before reading
+    vi.mocked(fs.readFile).mockResolvedValue(imageBuffer);
     vi.mocked(fileTypeFromBuffer).mockResolvedValue({
       ext: 'png',
       mime: 'image/png'
@@ -467,17 +465,16 @@ describe('file:readImageAsDataUrl - Full Integration with Validation Module', ()
     // Actually invoke the handler logic
     const result = await readImageAsDataUrl(imagePath);
 
-    // Verify complete flow
+    // Verify complete flow (TOCTOU FIX: no existsSync call)
     expect(validateFilePath).toHaveBeenCalledWith(imagePath);
-    expect(fs.existsSync).toHaveBeenCalledWith(imagePath);
-    expect(fs.readFileSync).toHaveBeenCalledWith(imagePath);
+    expect(fs.readFile).toHaveBeenCalledWith(imagePath);
     expect(fileTypeFromBuffer).toHaveBeenCalledWith(imageBuffer);
     expect(result).toMatch(/^data:image\/png;base64,/);
   });
 
   it('should reject SVG files through validation module', async () => {
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.readFileSync).mockReturnValue(Buffer.from('SVG_DATA'));
+    vi.mocked(fsSync.existsSync).mockReturnValue(true);
+    vi.mocked(fs.readFile).mockResolvedValue(Buffer.from('SVG_DATA'));
     vi.mocked(fileTypeFromBuffer).mockResolvedValue({
       ext: 'svg',
       mime: 'image/svg+xml'
@@ -490,8 +487,8 @@ describe('file:readImageAsDataUrl - Full Integration with Validation Module', ()
   it('should reject files over 2MB through validation module', async () => {
     const largeBuffer = Buffer.alloc(3 * 1024 * 1024); // 3MB
 
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.readFileSync).mockReturnValue(largeBuffer);
+    vi.mocked(fsSync.existsSync).mockReturnValue(true);
+    vi.mocked(fs.readFile).mockResolvedValue(largeBuffer);
 
     await expect(readImageAsDataUrl('/Users/test/large.png'))
       .rejects.toThrow(FileSizeExceededError);
@@ -510,7 +507,10 @@ describe('file:readImageAsDataUrl - Full Integration with Validation Module', ()
   });
 
   it('should throw FileNotFoundError for non-existent files', async () => {
-    vi.mocked(fs.existsSync).mockReturnValue(false);
+    // TOCTOU FIX: No longer checks existence, readFile throws ENOENT
+    const error: any = new Error('File not found');
+    error.code = 'ENOENT';
+    vi.mocked(fs.readFile).mockRejectedValue(error);
 
     await expect(readImageAsDataUrl('/nonexistent/file.png'))
       .rejects.toThrow(FileNotFoundError);
@@ -519,8 +519,8 @@ describe('file:readImageAsDataUrl - Full Integration with Validation Module', ()
   it('should handle JPEG images with correct MIME type', async () => {
     const jpegBuffer = Buffer.from([0xFF, 0xD8, 0xFF, 0xE0]); // JPEG header
 
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.readFileSync).mockReturnValue(jpegBuffer);
+    vi.mocked(fsSync.existsSync).mockReturnValue(true);
+    vi.mocked(fs.readFile).mockResolvedValue(jpegBuffer);
     vi.mocked(fileTypeFromBuffer).mockResolvedValue({
       ext: 'jpg',
       mime: 'image/jpeg'
@@ -534,8 +534,8 @@ describe('file:readImageAsDataUrl - Full Integration with Validation Module', ()
   });
 
   it('should verify structured error types are used', async () => {
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.readFileSync).mockReturnValue(Buffer.from('data'));
+    vi.mocked(fsSync.existsSync).mockReturnValue(true);
+    vi.mocked(fs.readFile).mockResolvedValue(Buffer.from('data'));
     vi.mocked(fileTypeFromBuffer).mockResolvedValue({
       ext: 'exe',
       mime: 'application/x-msdownload'
