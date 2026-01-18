@@ -29,6 +29,64 @@ interface StoredEvent {
 }
 
 /**
+ * Sanitize file path to remove sensitive information
+ *
+ * Removes everything before /src/ or /node_modules/ to prevent
+ * exposing usernames, home directories, or internal project structure.
+ *
+ * @param path Potentially sensitive file path
+ * @returns Sanitized relative path
+ *
+ * @example
+ * sanitizePath('/Users/john.doe/projects/showstack/src/App.tsx')
+ * // Returns: 'src/App.tsx'
+ */
+function sanitizePath(path: string | undefined): string {
+  if (!path) return '';
+
+  // Remove everything before /src/ or /node_modules/
+  const srcMatch = path.match(/\/src\/.*/);
+  if (srcMatch) return srcMatch[0].slice(1); // Remove leading slash
+
+  const nodeModulesMatch = path.match(/\/node_modules\/.*/);
+  if (nodeModulesMatch) return nodeModulesMatch[0].slice(1);
+
+  // If no match, return just the filename to be safe
+  const parts = path.split('/');
+  return parts[parts.length - 1] || '';
+}
+
+/**
+ * Sanitize stack trace to remove sensitive information
+ *
+ * - Removes absolute paths (keeps only relative paths like src/...)
+ * - Truncates to first 20 lines to reduce payload size
+ * - Prevents exposure of usernames and internal project structure
+ *
+ * @param stack Raw stack trace string
+ * @returns Sanitized stack trace
+ *
+ * @example
+ * sanitizeStackTrace(error.stack)
+ * // Removes '/Users/john.doe/projects/' from all lines
+ * // Keeps only 'src/components/App.tsx:45:12'
+ */
+function sanitizeStackTrace(stack: string | undefined): string {
+  if (!stack) return '';
+
+  const lines = stack.split('\n');
+  const sanitized = lines
+    .slice(0, 20) // Truncate to first 20 lines
+    .map(line => {
+      // Replace absolute paths with relative paths
+      return line.replace(/\/[^:]+\/(src\/[^:]+)/g, '$1')
+                 .replace(/\/[^:]+\/(node_modules\/[^:]+)/g, '$1');
+    });
+
+  return sanitized.join('\n');
+}
+
+/**
  * Telemetry Service
  *
  * Privacy-first analytics service with local storage and optional cloud sync.
@@ -78,6 +136,7 @@ class TelemetryService {
   private posthogInitialized = false;
   private posthogInitPromise: Promise<void> | null = null;
   private eventQueue: Array<() => void> = [];
+  private isFlushInProgress = false;
 
   constructor() {
     this.sessionId = crypto.randomUUID();
@@ -218,17 +277,27 @@ class TelemetryService {
       return;
     }
 
+    // Sanitize context to remove sensitive file paths
+    const sanitizedContext: EventProperties = {};
+    for (const [key, value] of Object.entries(context)) {
+      if (key === 'filename' && typeof value === 'string') {
+        sanitizedContext[key] = sanitizePath(value);
+      } else {
+        sanitizedContext[key] = value;
+      }
+    }
+
     const errorData = typeof error === 'string'
       ? { message: error }
       : {
           message: error.message,
-          stack: error.stack,
+          stack: sanitizeStackTrace(error.stack),
           name: error.name,
         };
 
     await this.track('error_occurred', {
       ...errorData,
-      ...context,
+      ...sanitizedContext,
     });
 
     // Also use PostHog's exception capture if available
@@ -236,8 +305,8 @@ class TelemetryService {
       posthog.capture('$exception', {
         $exception_message: error.message,
         $exception_type: error.name,
-        $exception_stack_trace_raw: error.stack,
-        ...context,
+        $exception_stack_trace_raw: sanitizeStackTrace(error.stack),
+        ...sanitizedContext,
       });
     }
   }
@@ -262,6 +331,7 @@ class TelemetryService {
 
   /**
    * Flush all pending events to cloud (if enabled)
+   * Uses a lock to prevent race conditions from concurrent flush calls
    */
   async flush(): Promise<void> {
     const settings = useSettingsStore.getState().privacy;
@@ -270,11 +340,21 @@ class TelemetryService {
       return;
     }
 
+    // Prevent concurrent flushes (race condition protection)
+    if (this.isFlushInProgress) {
+      if (import.meta.env.DEV) {
+        console.log('[Telemetry] Flush already in progress, skipping');
+      }
+      return;
+    }
+
     const unsyncedEvents = this.localEvents.filter(e => !e.synced);
 
     if (unsyncedEvents.length === 0) {
       return;
     }
+
+    this.isFlushInProgress = true;
 
     try {
       await this.syncToCloud(unsyncedEvents);
@@ -291,6 +371,8 @@ class TelemetryService {
     } catch (error) {
       console.error('Failed to flush telemetry events:', error);
       // Events remain unsynced and will retry on next flush
+    } finally {
+      this.isFlushInProgress = false;
     }
   }
 

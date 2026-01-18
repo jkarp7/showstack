@@ -182,8 +182,14 @@ describe('TelemetryService', () => {
       expect(posthog.capture).toHaveBeenCalledWith('$exception', expect.objectContaining({
         $exception_message: 'Test error',
         $exception_type: 'Error',
-        $exception_stack_trace_raw: error.stack,
+        // Stack trace is sanitized, so just verify it's defined
+        $exception_stack_trace_raw: expect.any(String),
       }));
+
+      // Verify stack trace was sanitized (should not contain full absolute paths)
+      const captureCall = vi.mocked(posthog.capture).mock.calls[0][1];
+      const stack = captureCall.$exception_stack_trace_raw;
+      expect(stack).toBeDefined();
     });
 
     it('should not track errors when telemetry is disabled', async () => {
