@@ -48,14 +48,14 @@ export function initializeGlobalErrorHandlers(): void {
   const originalConsoleError = console.error;
   console.error = (...args: any[]) => {
     // Only track if first argument looks like an error
+    // SECURITY: Do not track additional args to prevent leaking passwords/API keys
     if (args[0] instanceof Error) {
       telemetry.trackError(args[0], {
         type: 'console_error',
-        args: args.slice(1),
       });
     } else if (typeof args[0] === 'string' && args[0].toLowerCase().includes('error')) {
       // Track error-like console messages
-      telemetry.trackError(args.join(' '), {
+      telemetry.trackError(args[0], {
         type: 'console_error_string',
       });
     }

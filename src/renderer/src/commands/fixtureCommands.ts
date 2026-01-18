@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Command, CommandType } from '../types/commands';
 import { Fixture } from '../types';
 import { useFileStore } from '../store/fileStore';
+import { trackFixtureOperation } from '../services/telemetryTracking';
 
 /**
  * Command to add a new fixture
@@ -36,6 +37,12 @@ export class AddFixtureCommand implements Command {
       useFixtureStore.setState((state) => ({
         fixtures: [...state.fixtures, addedFixture],
       }));
+
+      // Track fixture addition
+      trackFixtureOperation.add(1, {
+        position: addedFixture.position,
+        type: addedFixture.type,
+      });
     } else {
       // Redo - restore the previously deleted fixture
       if (!this.addedFixture) {
@@ -107,6 +114,12 @@ export class UpdateFixtureCommand implements Command {
       fixtures: state.fixtures.map((f) => (f.id === this.fixtureId ? updatedFixture : f)),
     }));
 
+    // Track fixture edit
+    const changedFields = Object.keys(this.newData);
+    trackFixtureOperation.edit(this.fixtureId, changedFields, {
+      position: updatedFixture.position,
+    });
+
     // Mark file as dirty
     useFileStore.getState().setDirty(true);
   }
@@ -155,6 +168,12 @@ export class DeleteFixtureCommand implements Command {
       useFixtureStore.setState((state) => ({
         fixtures: state.fixtures.filter((f) => f.id !== fixtureId),
       }));
+
+      // Track fixture deletion
+      trackFixtureOperation.delete(1, {
+        position: this.deletedFixture.position,
+        type: this.deletedFixture.type,
+      });
 
       this.isDeleted = true;
       useFileStore.getState().setDirty(true);
@@ -217,6 +236,10 @@ export class BulkUpdateFixturesCommand implements Command {
       };
     });
 
+    // Track bulk update
+    const allChangedFields = [...new Set(this.fixtureUpdates.flatMap(u => Object.keys(u.newData)))];
+    trackFixtureOperation.bulkEdit(this.fixtureUpdates.length, allChangedFields);
+
     // Mark file as dirty
     useFileStore.getState().setDirty(true);
   }
@@ -272,6 +295,9 @@ export class BulkDeleteFixturesCommand implements Command {
       useFixtureStore.setState((state) => ({
         fixtures: state.fixtures.filter((f) => !deletedIds.has(f.id)),
       }));
+
+      // Track bulk deletion
+      trackFixtureOperation.delete(this.deletedFixtures.length);
 
       this.isDeleted = true;
       useFileStore.getState().setDirty(true);

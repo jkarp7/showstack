@@ -36,22 +36,26 @@ class TelemetryService {
   private readonly STORAGE_KEY = 'showstack-telemetry-events';
   private readonly BATCH_SIZE = 50;
   private readonly FLUSH_INTERVAL = 60000; // 1 minute
+  private readonly MAX_LOCAL_EVENTS = 1000; // Prevent memory issues
   private flushTimer: number | null = null;
   private sessionId: string;
   private localEvents: StoredEvent[] = [];
   private posthogInitialized = false;
+  private posthogInitPromise: Promise<void> | null = null;
+  private eventQueue: Array<() => void> = [];
 
   constructor() {
     this.sessionId = crypto.randomUUID();
     this.loadLocalEvents();
-    this.initializePostHog();
+    this.posthogInitPromise = this.initializePostHog();
     this.startAutoFlush();
   }
 
   /**
    * Initialize PostHog SDK
+   * Returns a promise that resolves when initialization is complete
    */
-  private initializePostHog(): void {
+  private async initializePostHog(): Promise<void> {
     const posthogKey = import.meta.env.VITE_POSTHOG_KEY;
     const settings = useSettingsStore.getState().privacy;
 
@@ -64,26 +68,44 @@ class TelemetryService {
       return;
     }
 
-    try {
-      posthog.init(posthogKey, {
-        api_host: 'https://us.i.posthog.com',
-        autocapture: false, // We manually track events
-        capture_pageview: false, // No pageviews in desktop app
-        capture_pageleave: false,
-        persistence: 'localStorage',
-        loaded: (posthog) => {
-          // Set anonymous ID from settings
-          posthog.identify(settings.anonymousId);
-          this.posthogInitialized = true;
+    return new Promise<void>((resolve) => {
+      try {
+        posthog.init(posthogKey, {
+          api_host: 'https://us.i.posthog.com',
+          autocapture: false, // We manually track events
+          capture_pageview: false, // No pageviews in desktop app
+          capture_pageleave: false,
+          persistence: 'localStorage',
+          loaded: (posthog) => {
+            // Set anonymous ID from settings
+            posthog.identify(settings.anonymousId);
+            this.posthogInitialized = true;
 
-          if (import.meta.env.DEV) {
-            console.log('[Telemetry] PostHog initialized successfully');
-          }
-        },
-      });
-    } catch (error) {
-      console.error('[Telemetry] Failed to initialize PostHog:', error);
-      this.posthogInitialized = false;
+            if (import.meta.env.DEV) {
+              console.log('[Telemetry] PostHog initialized successfully');
+            }
+
+            // Process queued events
+            this.processEventQueue();
+
+            resolve();
+          },
+        });
+      } catch (error) {
+        console.error('[Telemetry] Failed to initialize PostHog:', error);
+        this.posthogInitialized = false;
+        resolve(); // Still resolve to unblock waiting calls
+      }
+    });
+  }
+
+  /**
+   * Process queued events after PostHog initializes
+   */
+  private processEventQueue(): void {
+    while (this.eventQueue.length > 0) {
+      const fn = this.eventQueue.shift();
+      if (fn) fn();
     }
   }
 
@@ -97,6 +119,9 @@ class TelemetryService {
 
     // Respect user opt-out
     if (!settings.telemetryEnabled) {
+      if (import.meta.env.DEV) {
+        console.log(`[Telemetry] Event "${event}" not tracked - telemetry disabled`);
+      }
       return;
     }
 
@@ -109,6 +134,10 @@ class TelemetryService {
       platform: this.getPlatform(),
       sessionId: this.sessionId,
     };
+
+    if (import.meta.env.DEV) {
+      console.log(`[Telemetry] Tracking event: ${event}`, properties);
+    }
 
     await this.storeLocal(telemetryEvent);
 
@@ -247,8 +276,13 @@ class TelemetryService {
   getStats() {
     const synced = this.localEvents.filter(e => e.synced).length;
     const unsynced = this.localEvents.filter(e => !e.synced).length;
+
+    // Use reduce instead of spread to avoid call stack issues with large arrays
     const oldest = this.localEvents.length > 0
-      ? new Date(Math.min(...this.localEvents.map(e => e.event.timestamp)))
+      ? new Date(this.localEvents.reduce((min, e) =>
+          e.event.timestamp < min ? e.event.timestamp : min,
+          this.localEvents[0].event.timestamp
+        ))
       : null;
 
     return {
@@ -270,6 +304,23 @@ class TelemetryService {
     };
 
     this.localEvents.push(storedEvent);
+
+    // Enforce maximum local events limit
+    if (this.localEvents.length > this.MAX_LOCAL_EVENTS) {
+      // Remove oldest synced events first
+      const syncedEvents = this.localEvents.filter(e => e.synced);
+      if (syncedEvents.length > 0) {
+        const oldestSynced = syncedEvents[0];
+        const index = this.localEvents.indexOf(oldestSynced);
+        if (index > -1) {
+          this.localEvents.splice(index, 1);
+        }
+      } else {
+        // If no synced events, remove oldest event
+        this.localEvents.shift();
+      }
+    }
+
     this.saveLocalEvents();
   }
 
@@ -299,16 +350,8 @@ class TelemetryService {
         });
       }
 
-      // Force flush to PostHog immediately
-      await new Promise<void>((resolve, reject) => {
-        try {
-          // PostHog's flush is synchronous but we wrap in promise
-          posthog.flush();
-          resolve();
-        } catch (error) {
-          reject(error);
-        }
-      });
+      // Force flush to PostHog immediately (synchronous)
+      posthog.flush();
 
       if (import.meta.env.DEV) {
         console.log(`[Telemetry] Successfully synced ${events.length} events to PostHog`);

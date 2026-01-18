@@ -186,17 +186,18 @@ export function trackFileOperation(
 }
 
 /**
- * Monitor React component render performance
+ * Track React component render performance
  *
- * Use this hook in components to track render performance.
+ * Call this at the start of your component to track render time.
+ * Note: This is NOT a React hook despite the name pattern.
  *
  * @example
  * const RenderMonitor = () => {
- *   useRenderMonitor('EquipmentManager', { fixtureCount: fixtures.length });
+ *   trackComponentRender('EquipmentManager', { fixtureCount: fixtures.length });
  *   return <div>...</div>;
  * };
  */
-export function useRenderMonitor(
+export function trackComponentRender(
   componentName: string,
   context: Record<string, any> = {}
 ): void {
