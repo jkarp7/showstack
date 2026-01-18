@@ -1,4 +1,10 @@
+import posthog from 'posthog-js';
 import { useSettingsStore } from '../store/settingsStore';
+
+/**
+ * Event properties type - restricts values to primitive types for safety
+ */
+export type EventProperties = Record<string, string | number | boolean | null | undefined>;
 
 /**
  * Telemetry Event Structure
@@ -6,7 +12,7 @@ import { useSettingsStore } from '../store/settingsStore';
 export interface TelemetryEvent {
   event: string;
   timestamp: number;
-  properties: Record<string, any>;
+  properties: EventProperties;
   anonymousId: string;
   appVersion: string;
   platform: string;
@@ -23,26 +29,178 @@ interface StoredEvent {
 }
 
 /**
+ * Sanitize file path to remove sensitive information
+ *
+ * Removes everything before /src/ or /node_modules/ to prevent
+ * exposing usernames, home directories, or internal project structure.
+ *
+ * @param path Potentially sensitive file path
+ * @returns Sanitized relative path
+ *
+ * @example
+ * sanitizePath('/Users/john.doe/projects/showstack/src/App.tsx')
+ * // Returns: 'src/App.tsx'
+ */
+function sanitizePath(path: string | undefined): string {
+  if (!path) return '';
+
+  // Remove everything before /src/ or /node_modules/
+  const srcMatch = path.match(/\/src\/.*/);
+  if (srcMatch) return srcMatch[0].slice(1); // Remove leading slash
+
+  const nodeModulesMatch = path.match(/\/node_modules\/.*/);
+  if (nodeModulesMatch) return nodeModulesMatch[0].slice(1);
+
+  // If no match, return just the filename to be safe
+  const parts = path.split('/');
+  return parts[parts.length - 1] || '';
+}
+
+/**
+ * Sanitize stack trace to remove sensitive information
+ *
+ * - Removes absolute paths (keeps only relative paths like src/...)
+ * - Truncates to first 20 lines to reduce payload size
+ * - Prevents exposure of usernames and internal project structure
+ *
+ * @param stack Raw stack trace string
+ * @returns Sanitized stack trace
+ *
+ * @example
+ * sanitizeStackTrace(error.stack)
+ * // Removes '/Users/john.doe/projects/' from all lines
+ * // Keeps only 'src/components/App.tsx:45:12'
+ */
+function sanitizeStackTrace(stack: string | undefined): string {
+  if (!stack) return '';
+
+  const lines = stack.split('\n');
+  const sanitized = lines
+    .slice(0, 20) // Truncate to first 20 lines
+    .map(line => {
+      // Replace absolute paths with relative paths
+      return line.replace(/\/[^:]+\/(src\/[^:]+)/g, '$1')
+                 .replace(/\/[^:]+\/(node_modules\/[^:]+)/g, '$1');
+    });
+
+  return sanitized.join('\n');
+}
+
+/**
  * Telemetry Service
  *
  * Privacy-first analytics service with local storage and optional cloud sync.
+ *
+ * ## Architecture
  * - Respects user opt-in/opt-out preferences
- * - Stores events locally using IndexedDB
- * - Batches events for efficient sync
- * - Auto-flushes on interval and before app close
+ * - Stores events locally in localStorage (limited to 1,000 events)
+ * - Dual-layer batching: local storage + PostHog SDK batching
+ * - Auto-syncs on interval (60 seconds) and before app close
+ *
+ * ## PostHog SDK Integration
+ * PostHog SDK handles event transmission automatically with its own batching:
+ * - Events are queued in memory and sent in batches
+ * - Default batch size: 10 events or 10 seconds (whichever comes first)
+ * - Network failures are handled gracefully with automatic retries
+ * - Events persist across page reloads via localStorage
+ *
+ * ## Event Flow
+ * 1. Event tracked → stored locally (localStorage)
+ * 2. If batch size reached (50 events) → trigger sync
+ * 3. Sync: Send events to PostHog SDK via posthog.capture()
+ * 4. PostHog SDK batches and transmits to server
+ * 5. Mark local events as synced, clean up old events
+ *
+ * ## Sync Semantics
+ * - Local events marked "synced" after PostHog SDK capture (not server confirmation)
+ * - PostHog SDK handles server transmission and retries
+ * - Old synced events auto-deleted after retention period (90 days default)
+ * - Unsynced events never deleted (prevent data loss)
+ * - Max 1,000 events stored locally to prevent memory issues
+ *
+ * ## Privacy Considerations
+ * - All tracking respects telemetryEnabled setting
+ * - Anonymous ID used (crypto.randomUUID)
+ * - No PII tracked in event properties
+ * - User can export/delete all local data
+ * - PostHog API key is public (bundled in JS) - this is expected and safe
  */
 class TelemetryService {
   private readonly STORAGE_KEY = 'showstack-telemetry-events';
   private readonly BATCH_SIZE = 50;
   private readonly FLUSH_INTERVAL = 60000; // 1 minute
+  private readonly MAX_LOCAL_EVENTS = 1000; // Prevent memory issues
   private flushTimer: number | null = null;
   private sessionId: string;
   private localEvents: StoredEvent[] = [];
+  private posthogInitialized = false;
+  private posthogInitPromise: Promise<void> | null = null;
+  private eventQueue: Array<() => void> = [];
+  private isFlushInProgress = false;
 
   constructor() {
     this.sessionId = crypto.randomUUID();
     this.loadLocalEvents();
+    this.posthogInitPromise = this.initializePostHog();
     this.startAutoFlush();
+  }
+
+  /**
+   * Initialize PostHog SDK
+   * Returns a promise that resolves when initialization is complete
+   */
+  private async initializePostHog(): Promise<void> {
+    const posthogKey = import.meta.env.VITE_POSTHOG_KEY;
+    const settings = useSettingsStore.getState().privacy;
+
+    // Only initialize if API key is configured and telemetry is enabled
+    // Check for undefined, null, or empty string
+    if (!posthogKey || posthogKey === 'undefined' || posthogKey.trim() === '' || !settings.telemetryEnabled) {
+      if (import.meta.env.DEV && (!posthogKey || posthogKey === 'undefined' || posthogKey.trim() === '')) {
+        console.log('[Telemetry] PostHog key not configured. Events will be stored locally only.');
+      }
+      return;
+    }
+
+    return new Promise<void>((resolve) => {
+      try {
+        posthog.init(posthogKey, {
+          api_host: 'https://us.i.posthog.com',
+          autocapture: false, // We manually track events
+          capture_pageview: false, // No pageviews in desktop app
+          capture_pageleave: false,
+          persistence: 'localStorage',
+          loaded: (posthog) => {
+            // Set anonymous ID from settings
+            posthog.identify(settings.anonymousId);
+            this.posthogInitialized = true;
+
+            if (import.meta.env.DEV) {
+              console.log('[Telemetry] PostHog initialized successfully');
+            }
+
+            // Process queued events
+            this.processEventQueue();
+
+            resolve();
+          },
+        });
+      } catch (error) {
+        console.error('[Telemetry] Failed to initialize PostHog:', error);
+        this.posthogInitialized = false;
+        resolve(); // Still resolve to unblock waiting calls
+      }
+    });
+  }
+
+  /**
+   * Process queued events after PostHog initializes
+   */
+  private processEventQueue(): void {
+    while (this.eventQueue.length > 0) {
+      const fn = this.eventQueue.shift();
+      if (fn) fn();
+    }
   }
 
   /**
@@ -50,11 +208,14 @@ class TelemetryService {
    * @param event Event name
    * @param properties Event properties (optional)
    */
-  async track(event: string, properties: Record<string, any> = {}): Promise<void> {
+  async track(event: string, properties: EventProperties = {}): Promise<void> {
     const settings = useSettingsStore.getState().privacy;
 
     // Respect user opt-out
     if (!settings.telemetryEnabled) {
+      if (import.meta.env.DEV) {
+        console.log(`[Telemetry] Event "${event}" not tracked - telemetry disabled`);
+      }
       return;
     }
 
@@ -68,10 +229,18 @@ class TelemetryService {
       sessionId: this.sessionId,
     };
 
+    if (import.meta.env.DEV) {
+      console.log(`[Telemetry] Tracking event: ${event}`, properties);
+    }
+
     await this.storeLocal(telemetryEvent);
 
     // Auto-flush if batch size reached
     if (this.localEvents.filter(e => !e.synced).length >= this.BATCH_SIZE) {
+      // Wait for PostHog initialization to complete before flushing
+      if (this.posthogInitPromise) {
+        await this.posthogInitPromise;
+      }
       await this.flush();
     }
   }
@@ -80,12 +249,89 @@ class TelemetryService {
    * Identify user traits (anonymous)
    * @param traits User traits (no PII)
    */
-  async identify(traits: Record<string, any>): Promise<void> {
+  async identify(traits: EventProperties): Promise<void> {
+    const settings = useSettingsStore.getState().privacy;
+
+    if (!settings.telemetryEnabled) {
+      return;
+    }
+
+    // Use PostHog's identify method if initialized
+    if (this.posthogInitialized) {
+      posthog.identify(settings.anonymousId, traits);
+    }
+
+    // Also track as an event for local storage
     await this.track('user_identified', traits);
   }
 
   /**
+   * Track an error event with stack trace
+   * @param error Error object or message
+   * @param context Additional context about the error
+   */
+  async trackError(error: Error | string, context: EventProperties = {}): Promise<void> {
+    const settings = useSettingsStore.getState().privacy;
+
+    if (!settings.telemetryEnabled) {
+      return;
+    }
+
+    // Sanitize context to remove sensitive file paths
+    const sanitizedContext: EventProperties = {};
+    for (const [key, value] of Object.entries(context)) {
+      if (key === 'filename' && typeof value === 'string') {
+        sanitizedContext[key] = sanitizePath(value);
+      } else {
+        sanitizedContext[key] = value;
+      }
+    }
+
+    const errorData = typeof error === 'string'
+      ? { message: error }
+      : {
+          message: error.message,
+          stack: sanitizeStackTrace(error.stack),
+          name: error.name,
+        };
+
+    await this.track('error_occurred', {
+      ...errorData,
+      ...sanitizedContext,
+    });
+
+    // Also use PostHog's exception capture if available
+    if (this.posthogInitialized && typeof error !== 'string') {
+      posthog.capture('$exception', {
+        $exception_message: error.message,
+        $exception_type: error.name,
+        $exception_stack_trace_raw: sanitizeStackTrace(error.stack),
+        ...sanitizedContext,
+      });
+    }
+  }
+
+  /**
+   * Track a performance metric
+   * @param metric Name of the performance metric
+   * @param value Numeric value (e.g., duration in milliseconds)
+   * @param context Additional context
+   */
+  async trackPerformance(
+    metric: string,
+    value: number,
+    context: EventProperties = {}
+  ): Promise<void> {
+    await this.track('performance_metric', {
+      metric,
+      value,
+      ...context,
+    });
+  }
+
+  /**
    * Flush all pending events to cloud (if enabled)
+   * Uses a lock to prevent race conditions from concurrent flush calls
    */
   async flush(): Promise<void> {
     const settings = useSettingsStore.getState().privacy;
@@ -94,11 +340,21 @@ class TelemetryService {
       return;
     }
 
+    // Prevent concurrent flushes (race condition protection)
+    if (this.isFlushInProgress) {
+      if (import.meta.env.DEV) {
+        console.log('[Telemetry] Flush already in progress, skipping');
+      }
+      return;
+    }
+
     const unsyncedEvents = this.localEvents.filter(e => !e.synced);
 
     if (unsyncedEvents.length === 0) {
       return;
     }
+
+    this.isFlushInProgress = true;
 
     try {
       await this.syncToCloud(unsyncedEvents);
@@ -115,6 +371,8 @@ class TelemetryService {
     } catch (error) {
       console.error('Failed to flush telemetry events:', error);
       // Events remain unsynced and will retry on next flush
+    } finally {
+      this.isFlushInProgress = false;
     }
   }
 
@@ -139,8 +397,13 @@ class TelemetryService {
   getStats() {
     const synced = this.localEvents.filter(e => e.synced).length;
     const unsynced = this.localEvents.filter(e => !e.synced).length;
+
+    // Use reduce instead of spread to avoid call stack issues with large arrays
     const oldest = this.localEvents.length > 0
-      ? new Date(Math.min(...this.localEvents.map(e => e.event.timestamp)))
+      ? new Date(this.localEvents.reduce((min, e) =>
+          e.event.timestamp < min ? e.event.timestamp : min,
+          this.localEvents[0].event.timestamp
+        ))
       : null;
 
     return {
@@ -162,49 +425,69 @@ class TelemetryService {
     };
 
     this.localEvents.push(storedEvent);
+
+    // Enforce maximum local events limit
+    if (this.localEvents.length > this.MAX_LOCAL_EVENTS) {
+      // Remove oldest synced event first (more efficient)
+      const syncedIndex = this.localEvents.findIndex(e => e.synced);
+      if (syncedIndex > -1) {
+        this.localEvents.splice(syncedIndex, 1);
+      } else {
+        // If no synced events, remove oldest event
+        this.localEvents.shift();
+      }
+    }
+
     this.saveLocalEvents();
   }
 
   /**
    * Sync events to cloud backend (PostHog)
+   *
+   * This passes our locally-stored events to the PostHog SDK, which handles
+   * the actual transmission to PostHog servers.
+   *
+   * ## PostHog SDK Batching
+   * - SDK queues events in memory (default: 10 events or 10 seconds)
+   * - Automatically sends batches to server in background
+   * - Handles network failures with retries
+   * - Persists queue to localStorage for reliability
+   *
+   * ## Why we store locally first
+   * 1. Provides immediate feedback in Analytics Dashboard
+   * 2. Ensures no data loss if PostHog SDK fails to initialize
+   * 3. Allows export of all telemetry data (not just server-synced)
+   * 4. Respects data retention policy (auto-cleanup after 90 days)
+   *
+   * @param events Array of events to sync to PostHog
    */
   private async syncToCloud(events: StoredEvent[]): Promise<void> {
-    const posthogKey = import.meta.env.VITE_POSTHOG_KEY;
-
-    // If no PostHog key configured, skip cloud sync (events remain local)
-    if (!posthogKey) {
+    // If PostHog is not initialized, skip cloud sync (events remain local)
+    if (!this.posthogInitialized) {
       if (import.meta.env.DEV) {
-        console.log(`[Telemetry] No PostHog key configured. ${events.length} events stored locally only.`);
+        console.log(`[Telemetry] PostHog not initialized. ${events.length} events stored locally only.`);
       }
       return Promise.resolve();
     }
 
     try {
-      // PostHog batch API endpoint
-      const response = await fetch('https://us.i.posthog.com/batch/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          api_key: posthogKey,
-          batch: events.map(e => ({
-            event: e.event.event,
-            properties: {
-              ...e.event.properties,
-              $app_version: e.event.appVersion,
-              $os: e.event.platform,
-              $session_id: e.event.sessionId,
-            },
-            timestamp: new Date(e.event.timestamp).toISOString(),
-            distinct_id: e.event.anonymousId,
-          })),
-        }),
-      });
+      // Pass events to PostHog SDK
+      // SDK will batch and transmit to server automatically
+      for (const storedEvent of events) {
+        const e = storedEvent.event;
 
-      if (!response.ok) {
-        throw new Error(`PostHog sync failed: ${response.status} ${response.statusText}`);
+        posthog.capture(e.event, {
+          ...e.properties,
+          $app_version: e.appVersion,
+          $os: e.platform,
+          $session_id: e.sessionId,
+          timestamp: new Date(e.timestamp).toISOString(),
+        });
       }
+
+      // Note: PostHog browser SDK sends events automatically in background
+      // We mark events as "synced" after capture (not server confirmation)
+      // The SDK handles retries and persistence internally
 
       if (import.meta.env.DEV) {
         console.log(`[Telemetry] Successfully synced ${events.length} events to PostHog`);
@@ -266,9 +549,8 @@ class TelemetryService {
    * Start auto-flush timer
    */
   private startAutoFlush(): void {
-    if (this.flushTimer !== null) {
-      return;
-    }
+    // Clear any existing timer to prevent memory leaks
+    this.stopAutoFlush();
 
     this.flushTimer = window.setInterval(() => {
       this.flush().catch(err => {
@@ -309,7 +591,28 @@ class TelemetryService {
    */
   async shutdown(): Promise<void> {
     this.stopAutoFlush();
-    await this.flush();
+
+    // Try to sync any remaining events
+    try {
+      await this.flush();
+    } catch (error) {
+      // Ignore flush errors on shutdown
+      if (import.meta.env.DEV) {
+        console.log('[Telemetry] Flush on shutdown failed (expected):', error);
+      }
+    }
+
+    // Reset PostHog if initialized
+    if (this.posthogInitialized) {
+      try {
+        posthog.reset();
+        if (import.meta.env.DEV) {
+          console.log('[Telemetry] PostHog reset successfully');
+        }
+      } catch (error) {
+        console.error('[Telemetry] Failed to reset PostHog:', error);
+      }
+    }
   }
 }
 

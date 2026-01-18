@@ -19,7 +19,7 @@ PostHog is configured via environment variables in `.env.local`:
 
 ```bash
 # PostHog Analytics (US Cloud)
-VITE_POSTHOG_KEY=phc_BSjx7IS5CQ4bOIDosKeU22xDjXaRxyB7QFpyVXawJSw
+VITE_POSTHOG_KEY=phc_YOUR_PROJECT_API_KEY_HERE
 
 # App Version
 VITE_APP_VERSION=0.1.0-alpha
@@ -34,7 +34,7 @@ VITE_APP_VERSION=0.1.0-alpha
 - **Account**: ShowStack Analytics
 - **Project**: ShowStack Production
 - **Region**: US Cloud (https://us.i.posthog.com)
-- **API Key**: phc_BSjx7IS5CQ4bOIDosKeU22xDjXaRxyB7QFpyVXawJSw
+- **API Key**: `phc_YOUR_PROJECT_API_KEY_HERE` (stored in `.env.local`, not in git)
 - **Dashboard**: https://us.posthog.com/project/[project_id]
 
 ---
@@ -69,7 +69,7 @@ VITE_APP_VERSION=0.1.0-alpha
 **Request Format**:
 ```json
 {
-  "api_key": "phc_BSjx7IS5CQ4bOIDosKeU22xDjXaRxyB7QFpyVXawJSw",
+  "api_key": "phc_YOUR_PROJECT_API_KEY_HERE",
   "batch": [
     {
       "event": "app_opened",

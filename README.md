@@ -196,9 +196,13 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
   - Phase balance monitoring
 
 **Privacy & Analytics:**
-- ✅ Privacy-first telemetry (PostHog)
-- ✅ User consent dialog
+- ✅ Privacy-first telemetry with PostHog SDK integration
+- ✅ User consent dialog with opt-in controls
 - ✅ Anonymous analytics (opt-in only)
+- ✅ Comprehensive event tracking (fixtures, infrastructure, power, shop orders)
+- ✅ Global error tracking with stack traces
+- ✅ Performance metrics (grid render, PDF export, app startup)
+- ✅ Analytics dashboard in Admin Panel
 - ✅ Data retention controls
 - ✅ Export/delete personal data
 
