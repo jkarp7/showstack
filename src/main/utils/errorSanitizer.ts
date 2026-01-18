@@ -72,9 +72,9 @@ export function sanitizeError(error: unknown): string {
 
     // Remove absolute Unix paths (aggressive - replaces with filename only)
     // Support Unicode characters in paths
-    message = message.replace(/\/[^/\s]+\/([^/\s]+)/gu, (_, filename) => filename);
+    message = message.replace(/\/[^/\s]+\/([^/\s]+)/g, (_, filename) => filename);
     // Remove remaining Unix path patterns
-    message = message.replace(/\/[^/\s]+/gu, (match) => {
+    message = message.replace(/\/[^/\s]+/g, (match) => {
       // If it looks like a path (contains /), sanitize it
       if (match.includes('/') && match.length > 10) {
         return sanitizeFilePath(match);
