@@ -350,8 +350,8 @@ class TelemetryService {
         });
       }
 
-      // Force flush to PostHog immediately (synchronous)
-      posthog.flush();
+      // Note: PostHog browser SDK sends events automatically
+      // No manual flush needed - events are batched and sent in background
 
       if (import.meta.env.DEV) {
         console.log(`[Telemetry] Successfully synced ${events.length} events to PostHog`);
@@ -456,17 +456,26 @@ class TelemetryService {
    */
   async shutdown(): Promise<void> {
     this.stopAutoFlush();
-    await this.flush();
 
-    // Shutdown PostHog if initialized
+    // Try to sync any remaining events
+    try {
+      await this.flush();
+    } catch (error) {
+      // Ignore flush errors on shutdown
+      if (import.meta.env.DEV) {
+        console.log('[Telemetry] Flush on shutdown failed (expected):', error);
+      }
+    }
+
+    // Reset PostHog if initialized
     if (this.posthogInitialized) {
       try {
-        posthog.shutdown();
+        posthog.reset();
         if (import.meta.env.DEV) {
-          console.log('[Telemetry] PostHog shut down successfully');
+          console.log('[Telemetry] PostHog reset successfully');
         }
       } catch (error) {
-        console.error('[Telemetry] Failed to shutdown PostHog:', error);
+        console.error('[Telemetry] Failed to reset PostHog:', error);
       }
     }
   }
