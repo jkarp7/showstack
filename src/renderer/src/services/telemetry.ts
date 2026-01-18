@@ -1,3 +1,4 @@
+import posthog from 'posthog-js';
 import { useSettingsStore } from '../store/settingsStore';
 
 /**
@@ -38,11 +39,52 @@ class TelemetryService {
   private flushTimer: number | null = null;
   private sessionId: string;
   private localEvents: StoredEvent[] = [];
+  private posthogInitialized = false;
 
   constructor() {
     this.sessionId = crypto.randomUUID();
     this.loadLocalEvents();
+    this.initializePostHog();
     this.startAutoFlush();
+  }
+
+  /**
+   * Initialize PostHog SDK
+   */
+  private initializePostHog(): void {
+    const posthogKey = import.meta.env.VITE_POSTHOG_KEY;
+    const settings = useSettingsStore.getState().privacy;
+
+    // Only initialize if API key is configured and telemetry is enabled
+    // Check for undefined, null, or empty string
+    if (!posthogKey || posthogKey === 'undefined' || posthogKey.trim() === '' || !settings.telemetryEnabled) {
+      if (import.meta.env.DEV && (!posthogKey || posthogKey === 'undefined' || posthogKey.trim() === '')) {
+        console.log('[Telemetry] PostHog key not configured. Events will be stored locally only.');
+      }
+      return;
+    }
+
+    try {
+      posthog.init(posthogKey, {
+        api_host: 'https://us.i.posthog.com',
+        autocapture: false, // We manually track events
+        capture_pageview: false, // No pageviews in desktop app
+        capture_pageleave: false,
+        persistence: 'localStorage',
+        loaded: (posthog) => {
+          // Set anonymous ID from settings
+          posthog.identify(settings.anonymousId);
+          this.posthogInitialized = true;
+
+          if (import.meta.env.DEV) {
+            console.log('[Telemetry] PostHog initialized successfully');
+          }
+        },
+      });
+    } catch (error) {
+      console.error('[Telemetry] Failed to initialize PostHog:', error);
+      this.posthogInitialized = false;
+    }
   }
 
   /**
@@ -81,7 +123,73 @@ class TelemetryService {
    * @param traits User traits (no PII)
    */
   async identify(traits: Record<string, any>): Promise<void> {
+    const settings = useSettingsStore.getState().privacy;
+
+    if (!settings.telemetryEnabled) {
+      return;
+    }
+
+    // Use PostHog's identify method if initialized
+    if (this.posthogInitialized) {
+      posthog.identify(settings.anonymousId, traits);
+    }
+
+    // Also track as an event for local storage
     await this.track('user_identified', traits);
+  }
+
+  /**
+   * Track an error event with stack trace
+   * @param error Error object or message
+   * @param context Additional context about the error
+   */
+  async trackError(error: Error | string, context: Record<string, any> = {}): Promise<void> {
+    const settings = useSettingsStore.getState().privacy;
+
+    if (!settings.telemetryEnabled) {
+      return;
+    }
+
+    const errorData = typeof error === 'string'
+      ? { message: error }
+      : {
+          message: error.message,
+          stack: error.stack,
+          name: error.name,
+        };
+
+    await this.track('error_occurred', {
+      ...errorData,
+      ...context,
+    });
+
+    // Also use PostHog's exception capture if available
+    if (this.posthogInitialized && typeof error !== 'string') {
+      posthog.capture('$exception', {
+        $exception_message: error.message,
+        $exception_type: error.name,
+        $exception_stack_trace_raw: error.stack,
+        ...context,
+      });
+    }
+  }
+
+  /**
+   * Track a performance metric
+   * @param metric Name of the performance metric
+   * @param value Numeric value (e.g., duration in milliseconds)
+   * @param context Additional context
+   */
+  async trackPerformance(
+    metric: string,
+    value: number,
+    context: Record<string, any> = {}
+  ): Promise<void> {
+    await this.track('performance_metric', {
+      metric,
+      value,
+      ...context,
+    });
   }
 
   /**
@@ -169,42 +277,38 @@ class TelemetryService {
    * Sync events to cloud backend (PostHog)
    */
   private async syncToCloud(events: StoredEvent[]): Promise<void> {
-    const posthogKey = import.meta.env.VITE_POSTHOG_KEY;
-
-    // If no PostHog key configured, skip cloud sync (events remain local)
-    if (!posthogKey) {
+    // If PostHog is not initialized, skip cloud sync (events remain local)
+    if (!this.posthogInitialized) {
       if (import.meta.env.DEV) {
-        console.log(`[Telemetry] No PostHog key configured. ${events.length} events stored locally only.`);
+        console.log(`[Telemetry] PostHog not initialized. ${events.length} events stored locally only.`);
       }
       return Promise.resolve();
     }
 
     try {
-      // PostHog batch API endpoint
-      const response = await fetch('https://us.i.posthog.com/batch/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          api_key: posthogKey,
-          batch: events.map(e => ({
-            event: e.event.event,
-            properties: {
-              ...e.event.properties,
-              $app_version: e.event.appVersion,
-              $os: e.event.platform,
-              $session_id: e.event.sessionId,
-            },
-            timestamp: new Date(e.event.timestamp).toISOString(),
-            distinct_id: e.event.anonymousId,
-          })),
-        }),
-      });
+      // Use PostHog SDK to capture events
+      for (const storedEvent of events) {
+        const e = storedEvent.event;
 
-      if (!response.ok) {
-        throw new Error(`PostHog sync failed: ${response.status} ${response.statusText}`);
+        posthog.capture(e.event, {
+          ...e.properties,
+          $app_version: e.appVersion,
+          $os: e.platform,
+          $session_id: e.sessionId,
+          timestamp: new Date(e.timestamp).toISOString(),
+        });
       }
+
+      // Force flush to PostHog immediately
+      await new Promise<void>((resolve, reject) => {
+        try {
+          // PostHog's flush is synchronous but we wrap in promise
+          posthog.flush();
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      });
 
       if (import.meta.env.DEV) {
         console.log(`[Telemetry] Successfully synced ${events.length} events to PostHog`);
@@ -310,6 +414,18 @@ class TelemetryService {
   async shutdown(): Promise<void> {
     this.stopAutoFlush();
     await this.flush();
+
+    // Shutdown PostHog if initialized
+    if (this.posthogInitialized) {
+      try {
+        posthog.shutdown();
+        if (import.meta.env.DEV) {
+          console.log('[Telemetry] PostHog shut down successfully');
+        }
+      } catch (error) {
+        console.error('[Telemetry] Failed to shutdown PostHog:', error);
+      }
+    }
   }
 }
 

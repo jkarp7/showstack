@@ -16,10 +16,12 @@ import { SplashScreen } from './components/SplashScreen';
 import { ThemeProvider } from './components/ThemeProvider';
 import { ConsentDialog } from './components/common/ConsentDialog';
 import { SettingsDialog } from './components/common/SettingsDialog';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { useUser } from './hooks/useUser';
 import { useSettingsStore } from './store/settingsStore';
 import { useUIStore } from './store/uiStore';
 import { telemetry } from './services/telemetry';
+import { initializeGlobalErrorHandlers } from './services/globalErrorHandler';
 import { useMenuHandlers } from './hooks/useMenuHandlers';
 import { useProjectMenuHandlers } from './hooks/useProjectMenuHandlers';
 
@@ -141,6 +143,11 @@ export default function App() {
     localStorage.setItem('showstack-consent-shown', 'true');
   };
 
+  // Initialize global error handlers
+  useEffect(() => {
+    initializeGlobalErrorHandlers();
+  }, []);
+
   // Track app lifecycle with telemetry
   useEffect(() => {
     const appStartTime = Date.now();
@@ -153,6 +160,11 @@ export default function App() {
         width: window.innerWidth,
         height: window.innerHeight,
       },
+    });
+
+    // Track app startup performance
+    telemetry.trackPerformance('app_startup', Date.now() - appStartTime, {
+      metric_type: 'startup_time',
     });
 
     // Track app closed (cleanup on unmount or page unload)
@@ -173,18 +185,20 @@ export default function App() {
   }, []);
 
   return (
-    <ThemeProvider>
-      <Router>
-        {showSplash ? (
-          <SplashScreen onComplete={handleSplashComplete} />
-        ) : (
-          <>
-            <AppContent />
-            {/* Show consent dialog on first launch after splash */}
-            {showConsent && <ConsentDialog onClose={handleConsentClose} />}
-          </>
-        )}
-      </Router>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <Router>
+          {showSplash ? (
+            <SplashScreen onComplete={handleSplashComplete} />
+          ) : (
+            <>
+              <AppContent />
+              {/* Show consent dialog on first launch after splash */}
+              {showConsent && <ConsentDialog onClose={handleConsentClose} />}
+            </>
+          )}
+        </Router>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
