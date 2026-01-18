@@ -18,6 +18,39 @@ npm test powerCalculations  # Run tests matching name
 npm test -- --grep="bug"    # Run tests matching pattern
 ```
 
+## Test Performance
+
+### Running Tests Concurrently
+
+For CPU-bound tests with no dependencies, use `.concurrent` to speed up execution:
+
+```typescript
+describe('Power Conversion Utilities', () => {
+  it.concurrent('should convert watts to kilowatts', () => {
+    expect(wattsToKW(1000)).toBe(1);
+  });
+
+  it.concurrent('should convert amps to watts', () => {
+    expect(ampsToWatts(10)).toBe(1200);
+  });
+
+  it.concurrent('should convert watts to amps', () => {
+    expect(wattsToAmps(1200)).toBe(10);
+  });
+});
+```
+
+**When to Use:**
+- ✅ Pure functions (no side effects)
+- ✅ Independent test cases
+- ✅ CPU-bound calculations
+
+**When NOT to Use:**
+- ❌ Tests with shared state
+- ❌ Database operations
+- ❌ File system operations
+- ❌ Tests that modify global variables
+
 ---
 
 ## Common Test Patterns

@@ -1,5 +1,6 @@
 import * as path from 'path';
 import { app } from 'electron';
+import { PathTraversalError, NullByteError, InvalidPathError } from './errors';
 
 /**
  * Path validation utilities for security
@@ -24,6 +25,10 @@ export function hasPathTraversal(filePath: string): boolean {
 /**
  * Check if a path is within allowed directories
  * Allowed: app data directory, user's home directory, temp directory
+ *
+ * Uses path.relative() to prevent edge cases like:
+ * - /Users/test matching /Users/test-malicious
+ * - Case sensitivity issues on Windows
  */
 export function isPathAllowed(filePath: string): boolean {
   try {
@@ -39,10 +44,17 @@ export function isPathAllowed(filePath: string): boolean {
 
     const allowedPaths = [appData, home, temp, documents, downloads, desktop];
 
-    // Check if path starts with any allowed base path
+    // Check if path is within any allowed base path using path.relative()
+    // This prevents edge cases like /Users/test matching /Users/test-other
     return allowedPaths.some(allowed => {
       const resolvedAllowed = path.resolve(allowed);
-      return normalized.startsWith(resolvedAllowed);
+      const relative = path.relative(resolvedAllowed, normalized);
+
+      // Path is allowed if:
+      // 1. relative is not empty (not the exact same path)
+      // 2. relative doesn't start with '..' (not outside the directory)
+      // 3. relative is not an absolute path (stays within the tree)
+      return relative && !relative.startsWith('..') && !path.isAbsolute(relative);
     });
   } catch (error) {
     console.error('Error validating path:', error);
@@ -52,19 +64,21 @@ export function isPathAllowed(filePath: string): boolean {
 
 /**
  * Validate a file path for security vulnerabilities
- * @throws Error if path is invalid or unsafe
+ * @throws InvalidPathError if path is not a valid string
+ * @throws NullByteError if path contains null bytes
+ * @throws PathTraversalError if path contains traversal attempts
  */
 export function validateFilePath(filePath: string): void {
   if (!filePath || typeof filePath !== 'string') {
-    throw new Error('File path must be a non-empty string');
+    throw new InvalidPathError('File path must be a non-empty string');
   }
 
   if (containsNullByte(filePath)) {
-    throw new Error('File path contains null byte (security violation)');
+    throw new NullByteError(filePath);
   }
 
   if (hasPathTraversal(filePath)) {
-    throw new Error('File path contains traversal attempt (security violation)');
+    throw new PathTraversalError(filePath);
   }
 
   // Note: We allow paths outside allowed directories if they come from

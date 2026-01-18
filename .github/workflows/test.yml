@@ -15,6 +15,7 @@ jobs:
   test:
     name: Test on ${{ matrix.os }} - Node ${{ matrix.node-version }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15  # Prevent runaway tests
 
     strategy:
       fail-fast: false # Don't cancel other jobs if one fails
@@ -65,6 +66,7 @@ jobs:
   lint:
     name: Lint and Type Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10  # Prevent runaway linting
 
     steps:
       - name: Checkout code

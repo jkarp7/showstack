@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import { fileTypeFromBuffer } from 'file-type';
 import { validateFilePath } from './pathValidation';
+import { InvalidFileTypeError, FileSizeExceededError, FileNotFoundError } from './errors';
 
 /**
  * Image validation utilities for file upload security
@@ -22,7 +23,10 @@ export const ALLOWED_IMAGE_TYPES = [
  * Validate image file and convert to base64 data URL
  * @param imagePath Path to image file
  * @returns Base64 data URL string
- * @throws Error if validation fails
+ * @throws FileNotFoundError if file doesn't exist
+ * @throws FileSizeExceededError if file exceeds 2MB
+ * @throws InvalidFileTypeError if file type is not allowed
+ * @throws PathTraversalError, NullByteError if path is malicious
  */
 export async function readImageAsDataUrl(imagePath: string): Promise<string> {
   // SECURITY: Validate path for traversal attacks
@@ -30,7 +34,7 @@ export async function readImageAsDataUrl(imagePath: string): Promise<string> {
 
   // Check if file exists
   if (!imagePath || !fs.existsSync(imagePath)) {
-    throw new Error('Image file not found');
+    throw new FileNotFoundError(imagePath);
   }
 
   // Read file as buffer
@@ -38,14 +42,14 @@ export async function readImageAsDataUrl(imagePath: string): Promise<string> {
 
   // SECURITY: Backend file size validation (2MB max)
   if (buffer.length > MAX_FILE_SIZE) {
-    throw new Error(`Image must be smaller than ${MAX_FILE_SIZE / 1024 / 1024}MB`);
+    throw new FileSizeExceededError(buffer.length, MAX_FILE_SIZE);
   }
 
   // SECURITY: Validate MIME type using magic numbers (file content)
   const fileType = await fileTypeFromBuffer(buffer);
 
   if (!fileType || !ALLOWED_IMAGE_TYPES.includes(fileType.mime)) {
-    throw new Error('Invalid image file type. Allowed: PNG, JPG, GIF, WebP');
+    throw new InvalidFileTypeError(fileType?.mime, ALLOWED_IMAGE_TYPES);
   }
 
   // Convert to base64 data URL using validated MIME type
@@ -81,11 +85,11 @@ export function getFileSize(imagePath: string): number {
 /**
  * Validate file size without reading entire file
  * @param imagePath Path to file
- * @throws Error if file is too large
+ * @throws FileSizeExceededError if file is too large
  */
 export function validateFileSize(imagePath: string): void {
   const size = getFileSize(imagePath);
   if (size > MAX_FILE_SIZE) {
-    throw new Error(`Image must be smaller than ${MAX_FILE_SIZE / 1024 / 1024}MB`);
+    throw new FileSizeExceededError(size, MAX_FILE_SIZE);
   }
 }

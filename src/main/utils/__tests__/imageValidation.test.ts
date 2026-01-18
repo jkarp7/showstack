@@ -7,6 +7,7 @@ import {
   MAX_FILE_SIZE,
   ALLOWED_IMAGE_TYPES
 } from '../imageValidation';
+import { InvalidFileTypeError, FileSizeExceededError, FileNotFoundError } from '../errors';
 import * as fs from 'fs';
 import { fileTypeFromBuffer } from 'file-type';
 
@@ -110,7 +111,7 @@ describe('Image Validation Module', () => {
       });
 
       await expect(readImageAsDataUrl('/Users/test/image.svg'))
-        .rejects.toThrow('Invalid image file type');
+        .rejects.toThrow(InvalidFileTypeError);
     });
 
     it('should reject executable files disguised as images', async () => {
@@ -122,7 +123,7 @@ describe('Image Validation Module', () => {
       });
 
       await expect(readImageAsDataUrl('/Users/test/virus.png'))
-        .rejects.toThrow('Invalid image file type');
+        .rejects.toThrow(InvalidFileTypeError);
     });
 
     it('should reject files over 2MB', async () => {
@@ -132,7 +133,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFileSync).mockReturnValue(largeBuffer);
 
       await expect(readImageAsDataUrl('/Users/test/large.png'))
-        .rejects.toThrow('must be smaller');
+        .rejects.toThrow(FileSizeExceededError);
     });
 
     it('should accept files exactly at 2MB limit', async () => {
@@ -153,7 +154,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.existsSync).mockReturnValue(false);
 
       await expect(readImageAsDataUrl('/nonexistent/file.png'))
-        .rejects.toThrow('not found');
+        .rejects.toThrow(FileNotFoundError);
     });
 
     it('should throw for empty path', async () => {
@@ -182,7 +183,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fileTypeFromBuffer).mockResolvedValue(undefined);
 
       await expect(readImageAsDataUrl('/Users/test/corrupted.png'))
-        .rejects.toThrow('Invalid image file type');
+        .rejects.toThrow(InvalidFileTypeError);
     });
 
     it('should handle file read errors', async () => {
@@ -284,7 +285,7 @@ describe('Image Validation Module', () => {
       } as any);
 
       expect(() => validateFileSize('/Users/test/large.png'))
-        .toThrow('must be smaller');
+        .toThrow(FileSizeExceededError);
     });
 
     it('should pass for files at exact limit', () => {
@@ -389,7 +390,7 @@ describe('Image Validation Module', () => {
       });
 
       await expect(readImageAsDataUrl(maliciousPath))
-        .rejects.toThrow('Invalid image file type');
+        .rejects.toThrow(InvalidFileTypeError);
     });
   });
 });

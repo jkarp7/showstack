@@ -6,6 +6,7 @@ import {
   validateFilePath,
   sanitizeFilePath
 } from '../pathValidation';
+import { PathTraversalError, NullByteError, InvalidPathError } from '../errors';
 import { app } from 'electron';
 
 // Mock electron app
@@ -125,7 +126,7 @@ describe('Path Validation Security', () => {
 
     it('should throw for null byte injection', () => {
       expect(() => validateFilePath('file.png\x00.exe'))
-        .toThrow('null byte');
+        .toThrow(NullByteError);
     });
 
     it('should throw for path traversal attempts', () => {
@@ -176,7 +177,7 @@ describe('Path Validation Security', () => {
 
     it('should throw for null byte injection', () => {
       expect(() => sanitizeFilePath('file.png\x00.exe'))
-        .toThrow('null byte');
+        .toThrow(NullByteError);
     });
   });
 

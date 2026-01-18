@@ -551,6 +551,49 @@ describe('Modal Component', () => {
 - Mock file system operations
 - Set env vars in CI config
 
+### Issue: Windows-Specific Test Failures
+
+**Path Separators:**
+- Windows uses `\` while Unix uses `/`
+- Use `path.join()` instead of string concatenation
+- Use `path.normalize()` for cross-platform paths
+
+```typescript
+// ❌ Don't do this:
+const filePath = '/Users/test/file.png';  // Fails on Windows
+
+// ✅ Do this:
+const filePath = path.join('Users', 'test', 'file.png');
+```
+
+**Line Endings:**
+- Windows uses CRLF (`\r\n`)
+- Unix/Mac use LF (`\n`)
+- Configure git: `git config core.autocrlf true` (Windows) or `false` (Unix/Mac)
+- Use `.gitattributes` for consistency
+
+**Case Sensitivity:**
+- Windows file system is case-insensitive
+- Unix/Mac file systems are case-sensitive
+- Always use consistent casing in import paths
+- Test on Windows if you develop on Mac/Linux
+
+**Path Length Limits:**
+- Windows has 260-character path limit (older versions)
+- Use shorter test file names
+- Enable long paths: `git config core.longpaths true`
+
+**Example Test Setup:**
+```typescript
+import * as path from 'path';
+import * as os from 'os';
+
+const isWindows = os.platform() === 'win32';
+const testPath = isWindows
+  ? 'C:\\Users\\test\\file.png'
+  : '/Users/test/file.png';
+```
+
 ### Issue: "Cannot find module" in Tests
 
 **Causes:**
@@ -626,6 +669,36 @@ Before committing new tests, ensure:
 
 ---
 
+## Future Enhancements
+
+### Performance Benchmarks
+Consider adding Vitest's `bench` API for performance-critical functions:
+
+```typescript
+import { bench, describe } from 'vitest';
+
+describe('Power Calculation Performance', () => {
+  bench('calculateProjectPowerSummary with 1000 fixtures', () => {
+    calculateProjectPowerSummary(dimmerRacks, pdRacks, largeFixtureSet);
+  });
+});
+```
+
+Run benchmarks: `npm run test -- --bench`
+
+### Visual Regression Testing
+For UI components, consider adding visual regression testing:
+- **Playwright** - E2E testing with screenshot comparison
+- **Chromatic** - Visual testing for Storybook components
+- **Percy** - Visual testing for React components
+
+### Enhanced Coverage Metrics
+- **Mutation Testing** - Test the quality of tests (Stryker)
+- **Branch Coverage Analysis** - Identify untested code paths
+- **Integration Coverage** - Cross-module testing metrics
+
+---
+
 ## Updating This Guide
 
 This guide should be updated when:
@@ -635,4 +708,4 @@ This guide should be updated when:
 - New test types are added
 
 **Last Updated:** 2026-01-17
-**Version:** 1.0.0
+**Version:** 1.1.0
