@@ -16,8 +16,7 @@ vi.mock('posthog-js', () => ({
     init: vi.fn(),
     identify: vi.fn(),
     capture: vi.fn(),
-    flush: vi.fn(),
-    shutdown: vi.fn(),
+    reset: vi.fn(),
   },
 }));
 
@@ -309,7 +308,6 @@ describe('TelemetryService', () => {
       await telemetry.flush();
 
       expect(posthog.capture).toHaveBeenCalledTimes(2);
-      expect(posthog.flush).toHaveBeenCalled();
     });
 
     it('should mark events as synced after successful flush', async () => {
@@ -463,14 +461,13 @@ describe('TelemetryService', () => {
   });
 
   describe('Shutdown', () => {
-    it('should flush events and shutdown PostHog', async () => {
+    it('should flush events and reset PostHog', async () => {
       (telemetry as any).posthogInitialized = true;
 
       await telemetry.track('test_event');
       await telemetry.shutdown();
 
-      expect(posthog.flush).toHaveBeenCalled();
-      expect(posthog.shutdown).toHaveBeenCalled();
+      expect(posthog.reset).toHaveBeenCalled();
     });
 
     it('should handle shutdown when PostHog is not initialized', async () => {
@@ -478,7 +475,7 @@ describe('TelemetryService', () => {
 
       await telemetry.shutdown();
 
-      expect(posthog.shutdown).not.toHaveBeenCalled();
+      expect(posthog.reset).not.toHaveBeenCalled();
     });
   });
 

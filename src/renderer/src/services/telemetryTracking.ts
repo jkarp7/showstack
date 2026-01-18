@@ -247,7 +247,7 @@ export const trackSettingsChange = (
   telemetry.track('settings_changed', {
     category,
     setting,
-    value: typeof value === 'object' ? JSON.stringify(value) : value,
+    value: (value !== null && value !== undefined && typeof value === 'object') ? JSON.stringify(value) : value,
     ...properties,
   });
 };

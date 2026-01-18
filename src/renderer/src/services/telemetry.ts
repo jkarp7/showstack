@@ -27,10 +27,40 @@ interface StoredEvent {
  * Telemetry Service
  *
  * Privacy-first analytics service with local storage and optional cloud sync.
+ *
+ * ## Architecture
  * - Respects user opt-in/opt-out preferences
- * - Stores events locally using IndexedDB
- * - Batches events for efficient sync
- * - Auto-flushes on interval and before app close
+ * - Stores events locally in localStorage (limited to 1,000 events)
+ * - Dual-layer batching: local storage + PostHog SDK batching
+ * - Auto-syncs on interval (60 seconds) and before app close
+ *
+ * ## PostHog SDK Integration
+ * PostHog SDK handles event transmission automatically with its own batching:
+ * - Events are queued in memory and sent in batches
+ * - Default batch size: 10 events or 10 seconds (whichever comes first)
+ * - Network failures are handled gracefully with automatic retries
+ * - Events persist across page reloads via localStorage
+ *
+ * ## Event Flow
+ * 1. Event tracked → stored locally (localStorage)
+ * 2. If batch size reached (50 events) → trigger sync
+ * 3. Sync: Send events to PostHog SDK via posthog.capture()
+ * 4. PostHog SDK batches and transmits to server
+ * 5. Mark local events as synced, clean up old events
+ *
+ * ## Sync Semantics
+ * - Local events marked "synced" after PostHog SDK capture (not server confirmation)
+ * - PostHog SDK handles server transmission and retries
+ * - Old synced events auto-deleted after retention period (90 days default)
+ * - Unsynced events never deleted (prevent data loss)
+ * - Max 1,000 events stored locally to prevent memory issues
+ *
+ * ## Privacy Considerations
+ * - All tracking respects telemetryEnabled setting
+ * - Anonymous ID used (crypto.randomUUID)
+ * - No PII tracked in event properties
+ * - User can export/delete all local data
+ * - PostHog API key is public (bundled in JS) - this is expected and safe
  */
 class TelemetryService {
   private readonly STORAGE_KEY = 'showstack-telemetry-events';
@@ -326,6 +356,23 @@ class TelemetryService {
 
   /**
    * Sync events to cloud backend (PostHog)
+   *
+   * This passes our locally-stored events to the PostHog SDK, which handles
+   * the actual transmission to PostHog servers.
+   *
+   * ## PostHog SDK Batching
+   * - SDK queues events in memory (default: 10 events or 10 seconds)
+   * - Automatically sends batches to server in background
+   * - Handles network failures with retries
+   * - Persists queue to localStorage for reliability
+   *
+   * ## Why we store locally first
+   * 1. Provides immediate feedback in Analytics Dashboard
+   * 2. Ensures no data loss if PostHog SDK fails to initialize
+   * 3. Allows export of all telemetry data (not just server-synced)
+   * 4. Respects data retention policy (auto-cleanup after 90 days)
+   *
+   * @param events Array of events to sync to PostHog
    */
   private async syncToCloud(events: StoredEvent[]): Promise<void> {
     // If PostHog is not initialized, skip cloud sync (events remain local)
@@ -337,7 +384,8 @@ class TelemetryService {
     }
 
     try {
-      // Use PostHog SDK to capture events
+      // Pass events to PostHog SDK
+      // SDK will batch and transmit to server automatically
       for (const storedEvent of events) {
         const e = storedEvent.event;
 
@@ -350,8 +398,9 @@ class TelemetryService {
         });
       }
 
-      // Note: PostHog browser SDK sends events automatically
-      // No manual flush needed - events are batched and sent in background
+      // Note: PostHog browser SDK sends events automatically in background
+      // We mark events as "synced" after capture (not server confirmation)
+      // The SDK handles retries and persistence internally
 
       if (import.meta.env.DEV) {
         console.log(`[Telemetry] Successfully synced ${events.length} events to PostHog`);
