@@ -8,7 +8,6 @@ import {
   trackPDFExport,
   trackDatabaseQuery,
   trackFileOperation,
-  trackComponentRender,
 } from '../performanceMonitor';
 
 /**
@@ -226,50 +225,6 @@ describe('Performance Monitor', () => {
     });
   });
 
-  describe('trackComponentRender', () => {
-    it('should track component render if > 16ms', async () => {
-      // Mock performance.now to simulate slow render
-      const mockNow = vi.spyOn(performance, 'now');
-      let callCount = 0;
-      mockNow.mockImplementation(() => {
-        callCount++;
-        return callCount === 1 ? 100 : 120; // 20ms elapsed
-      });
-
-      trackComponentRender('TestComponent', { props: 'test' });
-
-      // Wait for setTimeout to execute
-      await new Promise(resolve => setTimeout(resolve, 10));
-
-      // Should track since 20ms > 16ms
-      expect(telemetry.trackPerformance).toHaveBeenCalledWith(
-        'component_render',
-        20,
-        expect.objectContaining({
-          component: 'TestComponent',
-          props: 'test',
-        })
-      );
-
-      mockNow.mockRestore();
-    });
-
-    it('should not track if render is fast (<16ms)', async () => {
-      // Mock performance.now to return same value (0ms elapsed)
-      const mockNow = vi.spyOn(performance, 'now');
-      mockNow.mockReturnValue(100);
-
-      trackComponentRender('FastComponent');
-
-      // Wait for setTimeout to execute
-      await new Promise(resolve => setTimeout(resolve, 10));
-
-      // Should not track because 0ms < 16ms
-      expect(telemetry.trackPerformance).not.toHaveBeenCalled();
-
-      mockNow.mockRestore();
-    });
-  });
 
   describe('Edge Cases', () => {
     it('should handle zero duration', () => {

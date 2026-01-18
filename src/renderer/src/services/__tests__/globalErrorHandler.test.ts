@@ -110,9 +110,10 @@ describe('GlobalErrorHandler', () => {
     it('should track promise rejections with Error objects', () => {
       const error = new Error('Promise rejection');
       // Create a custom event since PromiseRejectionEvent may not be available in test environment
+      const promise = Promise.reject(error).catch(() => {}); // Catch to prevent unhandled rejection
       const event = new Event('unhandledrejection') as any;
       event.reason = error;
-      event.promise = Promise.reject(error);
+      event.promise = promise;
 
       window.dispatchEvent(event);
 
@@ -126,9 +127,10 @@ describe('GlobalErrorHandler', () => {
 
     it('should track promise rejections with string reasons', () => {
       const reason = 'Promise failed';
+      const promise = Promise.reject(reason).catch(() => {}); // Catch to prevent unhandled rejection
       const event = new Event('unhandledrejection') as any;
       event.reason = reason;
-      event.promise = Promise.reject(reason);
+      event.promise = promise;
 
       window.dispatchEvent(event);
 
@@ -149,9 +151,10 @@ describe('GlobalErrorHandler', () => {
 
     it('should track promise rejections with non-Error objects', () => {
       const reason = { code: 500, message: 'Server error' };
+      const promise = Promise.reject(reason).catch(() => {}); // Catch to prevent unhandled rejection
       const event = new Event('unhandledrejection') as any;
       event.reason = reason;
-      event.promise = Promise.reject(reason);
+      event.promise = promise;
 
       window.dispatchEvent(event);
 

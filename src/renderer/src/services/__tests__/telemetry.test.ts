@@ -138,6 +138,7 @@ describe('TelemetryService', () => {
       // Set batch size to 2 for testing
       (telemetry as any).BATCH_SIZE = 2;
       (telemetry as any).posthogInitialized = true;
+      (telemetry as any).posthogInitPromise = Promise.resolve();
 
       await telemetry.track('event_1');
       expect(posthog.capture).not.toHaveBeenCalled();
@@ -299,6 +300,7 @@ describe('TelemetryService', () => {
   describe('Event Syncing', () => {
     beforeEach(() => {
       (telemetry as any).posthogInitialized = true;
+      (telemetry as any).posthogInitPromise = Promise.resolve();
     });
 
     it('should sync events to PostHog', async () => {

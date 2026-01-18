@@ -34,25 +34,36 @@ export function AnalyticsDashboard() {
   };
 
   const handleExport = () => {
-    const events = telemetry.exportData();
-    const dataStr = JSON.stringify(events, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
+    try {
+      const events = telemetry.exportData();
+      const dataStr = JSON.stringify(events, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `telemetry-export-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `telemetry-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export telemetry data:', error);
+      alert('Failed to export data. Please try again.');
+    }
   };
 
   const handleClear = async () => {
     if (confirm('Are you sure you want to clear all local telemetry data? This cannot be undone.')) {
-      await telemetry.clearLocalData();
-      loadStats();
-      loadEventData();
+      try {
+        await telemetry.clearLocalData();
+        loadStats();
+        loadEventData();
+        alert('Telemetry data cleared successfully.');
+      } catch (error) {
+        console.error('Failed to clear telemetry data:', error);
+        alert('Failed to clear data. Please try again.');
+      }
     }
   };
 
@@ -99,6 +110,7 @@ export function AnalyticsDashboard() {
         <div className="flex gap-2">
           <button
             onClick={handleExport}
+            aria-label="Export telemetry data as JSON file"
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
             <Download className="w-4 h-4" />
@@ -106,6 +118,7 @@ export function AnalyticsDashboard() {
           </button>
           <button
             onClick={handleClear}
+            aria-label="Clear all local telemetry data"
             className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
           >
             <Trash2 className="w-4 h-4" />

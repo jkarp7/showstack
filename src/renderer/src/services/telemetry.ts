@@ -2,12 +2,17 @@ import posthog from 'posthog-js';
 import { useSettingsStore } from '../store/settingsStore';
 
 /**
+ * Event properties type - restricts values to primitive types for safety
+ */
+export type EventProperties = Record<string, string | number | boolean | null | undefined>;
+
+/**
  * Telemetry Event Structure
  */
 export interface TelemetryEvent {
   event: string;
   timestamp: number;
-  properties: Record<string, any>;
+  properties: EventProperties;
   anonymousId: string;
   appVersion: string;
   platform: string;
@@ -144,7 +149,7 @@ class TelemetryService {
    * @param event Event name
    * @param properties Event properties (optional)
    */
-  async track(event: string, properties: Record<string, any> = {}): Promise<void> {
+  async track(event: string, properties: EventProperties = {}): Promise<void> {
     const settings = useSettingsStore.getState().privacy;
 
     // Respect user opt-out
@@ -173,6 +178,10 @@ class TelemetryService {
 
     // Auto-flush if batch size reached
     if (this.localEvents.filter(e => !e.synced).length >= this.BATCH_SIZE) {
+      // Wait for PostHog initialization to complete before flushing
+      if (this.posthogInitPromise) {
+        await this.posthogInitPromise;
+      }
       await this.flush();
     }
   }
@@ -181,7 +190,7 @@ class TelemetryService {
    * Identify user traits (anonymous)
    * @param traits User traits (no PII)
    */
-  async identify(traits: Record<string, any>): Promise<void> {
+  async identify(traits: EventProperties): Promise<void> {
     const settings = useSettingsStore.getState().privacy;
 
     if (!settings.telemetryEnabled) {
@@ -202,7 +211,7 @@ class TelemetryService {
    * @param error Error object or message
    * @param context Additional context about the error
    */
-  async trackError(error: Error | string, context: Record<string, any> = {}): Promise<void> {
+  async trackError(error: Error | string, context: EventProperties = {}): Promise<void> {
     const settings = useSettingsStore.getState().privacy;
 
     if (!settings.telemetryEnabled) {
@@ -242,7 +251,7 @@ class TelemetryService {
   async trackPerformance(
     metric: string,
     value: number,
-    context: Record<string, any> = {}
+    context: EventProperties = {}
   ): Promise<void> {
     await this.track('performance_metric', {
       metric,
@@ -337,14 +346,10 @@ class TelemetryService {
 
     // Enforce maximum local events limit
     if (this.localEvents.length > this.MAX_LOCAL_EVENTS) {
-      // Remove oldest synced events first
-      const syncedEvents = this.localEvents.filter(e => e.synced);
-      if (syncedEvents.length > 0) {
-        const oldestSynced = syncedEvents[0];
-        const index = this.localEvents.indexOf(oldestSynced);
-        if (index > -1) {
-          this.localEvents.splice(index, 1);
-        }
+      // Remove oldest synced event first (more efficient)
+      const syncedIndex = this.localEvents.findIndex(e => e.synced);
+      if (syncedIndex > -1) {
+        this.localEvents.splice(syncedIndex, 1);
       } else {
         // If no synced events, remove oldest event
         this.localEvents.shift();
@@ -462,9 +467,8 @@ class TelemetryService {
    * Start auto-flush timer
    */
   private startAutoFlush(): void {
-    if (this.flushTimer !== null) {
-      return;
-    }
+    // Clear any existing timer to prevent memory leaks
+    this.stopAutoFlush();
 
     this.flushTimer = window.setInterval(() => {
       this.flush().catch(err => {

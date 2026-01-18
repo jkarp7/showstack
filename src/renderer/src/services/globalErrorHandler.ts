@@ -9,7 +9,7 @@
  * All errors are reported to telemetry service.
  */
 
-import { telemetry } from './telemetry';
+import { telemetry, EventProperties } from './telemetry';
 
 /**
  * Initialize global error handlers
@@ -45,10 +45,13 @@ export function initializeGlobalErrorHandlers(): void {
   });
 
   // Optionally intercept console.error to track application errors
+  // NOTE: This intercepts ALL console.error calls to track errors.
+  // Tracking respects user opt-out (checked in telemetry.trackError)
   const originalConsoleError = console.error;
   console.error = (...args: any[]) => {
     // Only track if first argument looks like an error
     // SECURITY: Do not track additional args to prevent leaking passwords/API keys
+    // The telemetry.trackError method checks if telemetry is enabled before tracking
     if (args[0] instanceof Error) {
       telemetry.trackError(args[0], {
         type: 'console_error',
@@ -79,7 +82,7 @@ export function initializeGlobalErrorHandlers(): void {
  */
 export function reportError(
   error: Error | string,
-  context: Record<string, any> = {}
+  context: EventProperties = {}
 ): void {
   telemetry.trackError(error, {
     type: 'manual_report',

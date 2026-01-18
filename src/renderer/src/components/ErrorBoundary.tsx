@@ -17,6 +17,8 @@ interface State {
  * Provides a fallback UI when errors occur.
  */
 export class ErrorBoundary extends Component<Props, State> {
+  static displayName = 'ErrorBoundary';
+
   constructor(props: Props) {
     super(props);
     this.state = {

@@ -5,7 +5,7 @@
  * All metrics are automatically reported to telemetry.
  */
 
-import { telemetry } from './telemetry';
+import { telemetry, EventProperties } from './telemetry';
 
 /**
  * Performance timer for measuring operation duration
@@ -13,9 +13,9 @@ import { telemetry } from './telemetry';
 class PerformanceTimer {
   private startTime: number;
   private metric: string;
-  private context: Record<string, any>;
+  private context: EventProperties;
 
-  constructor(metric: string, context: Record<string, any> = {}) {
+  constructor(metric: string, context: EventProperties = {}) {
     this.metric = metric;
     this.context = context;
     this.startTime = performance.now();
@@ -24,7 +24,7 @@ class PerformanceTimer {
   /**
    * End the timer and report the duration
    */
-  end(additionalContext: Record<string, any> = {}): number {
+  end(additionalContext: EventProperties = {}): number {
     const duration = performance.now() - this.startTime;
 
     telemetry.trackPerformance(this.metric, duration, {
@@ -51,7 +51,7 @@ class PerformanceTimer {
  */
 export function startTimer(
   metric: string,
-  context: Record<string, any> = {}
+  context: EventProperties = {}
 ): PerformanceTimer {
   return new PerformanceTimer(metric, context);
 }
@@ -72,7 +72,7 @@ export function startTimer(
 export async function measureAsync<T>(
   metric: string,
   fn: () => Promise<T>,
-  context: Record<string, any> = {}
+  context: EventProperties = {}
 ): Promise<T> {
   const timer = startTimer(metric, context);
 
@@ -102,7 +102,7 @@ export async function measureAsync<T>(
 export function measureSync<T>(
   metric: string,
   fn: () => T,
-  context: Record<string, any> = {}
+  context: EventProperties = {}
 ): T {
   const timer = startTimer(metric, context);
 
@@ -126,7 +126,7 @@ export function measureSync<T>(
  */
 export function trackGridRender(
   duration: number,
-  context: Record<string, any> = {}
+  context: EventProperties = {}
 ): void {
   telemetry.trackPerformance('virtual_grid_render', duration, {
     metric_type: 'render_time',
@@ -142,7 +142,7 @@ export function trackGridRender(
  */
 export function trackPDFExport(
   duration: number,
-  context: Record<string, any> = {}
+  context: EventProperties = {}
 ): void {
   telemetry.trackPerformance('pdf_export', duration, {
     metric_type: 'export_time',
@@ -158,7 +158,7 @@ export function trackPDFExport(
  */
 export function trackDatabaseQuery(
   duration: number,
-  context: Record<string, any> = {}
+  context: EventProperties = {}
 ): void {
   telemetry.trackPerformance('database_query', duration, {
     metric_type: 'query_time',
@@ -176,7 +176,7 @@ export function trackDatabaseQuery(
 export function trackFileOperation(
   operation: string,
   duration: number,
-  context: Record<string, any> = {}
+  context: EventProperties = {}
 ): void {
   telemetry.trackPerformance(`file_${operation}`, duration, {
     metric_type: 'file_operation',
@@ -185,35 +185,3 @@ export function trackFileOperation(
   });
 }
 
-/**
- * Track React component render performance
- *
- * Call this at the start of your component to track render time.
- * Note: This is NOT a React hook despite the name pattern.
- *
- * @example
- * const RenderMonitor = () => {
- *   trackComponentRender('EquipmentManager', { fixtureCount: fixtures.length });
- *   return <div>...</div>;
- * };
- */
-export function trackComponentRender(
-  componentName: string,
-  context: Record<string, any> = {}
-): void {
-  const startTime = performance.now();
-
-  // Track render time after component mounts/updates
-  setTimeout(() => {
-    const renderTime = performance.now() - startTime;
-
-    // Only track if render took longer than 16ms (1 frame at 60 FPS)
-    if (renderTime > 16) {
-      telemetry.trackPerformance('component_render', renderTime, {
-        component: componentName,
-        metric_type: 'render_time',
-        ...context,
-      });
-    }
-  }, 0);
-}

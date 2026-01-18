@@ -5,20 +5,20 @@
  * These helpers provide a consistent interface for tracking events.
  */
 
-import { telemetry } from './telemetry';
+import { telemetry, EventProperties } from './telemetry';
 
 /**
  * Fixture Operations Tracking
  */
 export const trackFixtureOperation = {
-  add: (count: number = 1, properties: Record<string, any> = {}) => {
+  add: (count: number = 1, properties: EventProperties = {}) => {
     telemetry.track('fixture_added', {
       count,
       ...properties,
     });
   },
 
-  edit: (fixtureId: string, changedFields: string[], properties: Record<string, any> = {}) => {
+  edit: (fixtureId: string, changedFields: string[], properties: EventProperties = {}) => {
     telemetry.track('fixture_edited', {
       fixtureId,
       changedFields,
@@ -27,7 +27,7 @@ export const trackFixtureOperation = {
     });
   },
 
-  bulkEdit: (count: number, changedFields: string[], properties: Record<string, any> = {}) => {
+  bulkEdit: (count: number, changedFields: string[], properties: EventProperties = {}) => {
     telemetry.track('fixture_bulk_edit', {
       count,
       changedFields,
@@ -36,14 +36,14 @@ export const trackFixtureOperation = {
     });
   },
 
-  delete: (count: number = 1, properties: Record<string, any> = {}) => {
+  delete: (count: number = 1, properties: EventProperties = {}) => {
     telemetry.track('fixture_deleted', {
       count,
       ...properties,
     });
   },
 
-  import: (count: number, format: string, properties: Record<string, any> = {}) => {
+  import: (count: number, format: string, properties: EventProperties = {}) => {
     telemetry.track('fixtures_imported', {
       count,
       format,
@@ -51,7 +51,7 @@ export const trackFixtureOperation = {
     });
   },
 
-  export: (count: number, format: string, properties: Record<string, any> = {}) => {
+  export: (count: number, format: string, properties: EventProperties = {}) => {
     telemetry.track('fixtures_exported', {
       count,
       format,
@@ -64,7 +64,7 @@ export const trackFixtureOperation = {
  * Infrastructure Operations Tracking
  */
 export const trackInfrastructureOperation = {
-  add: (count: number = 1, equipmentType: string, properties: Record<string, any> = {}) => {
+  add: (count: number = 1, equipmentType: string, properties: EventProperties = {}) => {
     telemetry.track('infrastructure_added', {
       count,
       equipmentType,
@@ -72,7 +72,7 @@ export const trackInfrastructureOperation = {
     });
   },
 
-  edit: (equipmentId: string, changedFields: string[], properties: Record<string, any> = {}) => {
+  edit: (equipmentId: string, changedFields: string[], properties: EventProperties = {}) => {
     telemetry.track('infrastructure_edited', {
       equipmentId,
       changedFields,
@@ -81,14 +81,14 @@ export const trackInfrastructureOperation = {
     });
   },
 
-  delete: (count: number = 1, properties: Record<string, any> = {}) => {
+  delete: (count: number = 1, properties: EventProperties = {}) => {
     telemetry.track('infrastructure_deleted', {
       count,
       ...properties,
     });
   },
 
-  portLink: (portId: string, linkType: string, properties: Record<string, any> = {}) => {
+  portLink: (portId: string, linkType: string, properties: EventProperties = {}) => {
     telemetry.track('infrastructure_port_linked', {
       portId,
       linkType,
@@ -101,14 +101,14 @@ export const trackInfrastructureOperation = {
  * Power Rack Operations Tracking
  */
 export const trackPowerRackOperation = {
-  add: (rackType: 'dimmer' | 'pd', properties: Record<string, any> = {}) => {
+  add: (rackType: 'dimmer' | 'pd', properties: EventProperties = {}) => {
     telemetry.track('power_rack_added', {
       rackType,
       ...properties,
     });
   },
 
-  edit: (rackId: string, rackType: string, properties: Record<string, any> = {}) => {
+  edit: (rackId: string, rackType: string, properties: EventProperties = {}) => {
     telemetry.track('power_rack_edited', {
       rackId,
       rackType,
@@ -116,7 +116,7 @@ export const trackPowerRackOperation = {
     });
   },
 
-  delete: (rackId: string, rackType: string, properties: Record<string, any> = {}) => {
+  delete: (rackId: string, rackType: string, properties: EventProperties = {}) => {
     telemetry.track('power_rack_deleted', {
       rackId,
       rackType,
@@ -124,7 +124,7 @@ export const trackPowerRackOperation = {
     });
   },
 
-  autoLink: (linkedCount: number, properties: Record<string, any> = {}) => {
+  autoLink: (linkedCount: number, properties: EventProperties = {}) => {
     telemetry.track('power_auto_link_executed', {
       linkedCount,
       ...properties,
@@ -136,21 +136,21 @@ export const trackPowerRackOperation = {
  * Shop Order Operations Tracking
  */
 export const trackShopOrderOperation = {
-  create: (projectId: string, properties: Record<string, any> = {}) => {
+  create: (projectId: string, properties: EventProperties = {}) => {
     telemetry.track('shop_order_created', {
       projectId,
       ...properties,
     });
   },
 
-  addItem: (sectionId: string, properties: Record<string, any> = {}) => {
+  addItem: (sectionId: string, properties: EventProperties = {}) => {
     telemetry.track('shop_order_item_added', {
       sectionId,
       ...properties,
     });
   },
 
-  export: (format: 'pdf' | 'csv', itemCount: number, properties: Record<string, any> = {}) => {
+  export: (format: 'pdf' | 'csv', itemCount: number, properties: EventProperties = {}) => {
     telemetry.track('shop_order_exported', {
       format,
       itemCount,
@@ -158,7 +158,7 @@ export const trackShopOrderOperation = {
     });
   },
 
-  print: (itemCount: number, properties: Record<string, any> = {}) => {
+  print: (itemCount: number, properties: EventProperties = {}) => {
     telemetry.track('shop_order_printed', {
       itemCount,
       ...properties,
@@ -170,14 +170,14 @@ export const trackShopOrderOperation = {
  * Paperwork Operations Tracking
  */
 export const trackPaperworkOperation = {
-  generate: (reportType: string, properties: Record<string, any> = {}) => {
+  generate: (reportType: string, properties: EventProperties = {}) => {
     telemetry.track('paperwork_generated', {
       reportType,
       ...properties,
     });
   },
 
-  export: (reportType: string, format: 'pdf' | 'csv', properties: Record<string, any> = {}) => {
+  export: (reportType: string, format: 'pdf' | 'csv', properties: EventProperties = {}) => {
     telemetry.track('paperwork_exported', {
       reportType,
       format,
@@ -185,14 +185,14 @@ export const trackPaperworkOperation = {
     });
   },
 
-  print: (reportType: string, properties: Record<string, any> = {}) => {
+  print: (reportType: string, properties: EventProperties = {}) => {
     telemetry.track('paperwork_printed', {
       reportType,
       ...properties,
     });
   },
 
-  batchExport: (reportCount: number, format: string, properties: Record<string, any> = {}) => {
+  batchExport: (reportCount: number, format: string, properties: EventProperties = {}) => {
     telemetry.track('paperwork_batch_exported', {
       reportCount,
       format,
@@ -205,21 +205,21 @@ export const trackPaperworkOperation = {
  * Label Designer Operations Tracking
  */
 export const trackLabelOperation = {
-  designOpened: (averyCode: string, properties: Record<string, any> = {}) => {
+  designOpened: (averyCode: string, properties: EventProperties = {}) => {
     telemetry.track('label_design_opened', {
       averyCode,
       ...properties,
     });
   },
 
-  elementAdded: (elementType: string, properties: Record<string, any> = {}) => {
+  elementAdded: (elementType: string, properties: EventProperties = {}) => {
     telemetry.track('label_element_added', {
       elementType,
       ...properties,
     });
   },
 
-  print: (averyCode: string, labelCount: number, properties: Record<string, any> = {}) => {
+  print: (averyCode: string, labelCount: number, properties: EventProperties = {}) => {
     telemetry.track('labels_printed', {
       averyCode,
       labelCount,
@@ -227,7 +227,7 @@ export const trackLabelOperation = {
     });
   },
 
-  preview: (averyCode: string, properties: Record<string, any> = {}) => {
+  preview: (averyCode: string, properties: EventProperties = {}) => {
     telemetry.track('labels_previewed', {
       averyCode,
       ...properties,
@@ -242,7 +242,7 @@ export const trackSettingsChange = (
   category: string,
   setting: string,
   value: any,
-  properties: Record<string, any> = {}
+  properties: EventProperties = {}
 ) => {
   telemetry.track('settings_changed', {
     category,
@@ -256,28 +256,28 @@ export const trackSettingsChange = (
  * File Operations Tracking
  */
 export const trackFileOperation = {
-  open: (fileType: string, properties: Record<string, any> = {}) => {
+  open: (fileType: string, properties: EventProperties = {}) => {
     telemetry.track('file_opened', {
       fileType,
       ...properties,
     });
   },
 
-  save: (fileType: string, properties: Record<string, any> = {}) => {
+  save: (fileType: string, properties: EventProperties = {}) => {
     telemetry.track('file_saved', {
       fileType,
       ...properties,
     });
   },
 
-  import: (fileType: string, properties: Record<string, any> = {}) => {
+  import: (fileType: string, properties: EventProperties = {}) => {
     telemetry.track('file_imported', {
       fileType,
       ...properties,
     });
   },
 
-  export: (fileType: string, format: string, properties: Record<string, any> = {}) => {
+  export: (fileType: string, format: string, properties: EventProperties = {}) => {
     telemetry.track('file_exported', {
       fileType,
       format,
@@ -292,7 +292,7 @@ export const trackFileOperation = {
 export const trackNavigation = (
   destination: string,
   source: string,
-  properties: Record<string, any> = {}
+  properties: EventProperties = {}
 ) => {
   telemetry.track('navigation', {
     destination,
@@ -307,7 +307,7 @@ export const trackNavigation = (
 export const trackFeatureUsage = (
   feature: string,
   action: string,
-  properties: Record<string, any> = {}
+  properties: EventProperties = {}
 ) => {
   telemetry.track('feature_used', {
     feature,
