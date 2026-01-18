@@ -37,6 +37,7 @@ global.window = global.window || {};
     update: vi.fn(),
     delete: vi.fn(),
     getAll: vi.fn(),
+    getByProject: vi.fn().mockResolvedValue([]),
     bulkUpdate: vi.fn(),
   },
 

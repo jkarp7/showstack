@@ -2,6 +2,12 @@
 
 **Modern production management software for live entertainment**
 
+[![Test Suite](https://github.com/jkarp7/showstack/actions/workflows/test.yml/badge.svg)](https://github.com/jkarp7/showstack/actions/workflows/test.yml)
+[![Coverage](https://codecov.io/gh/jkarp7/showstack/branch/main/graph/badge.svg)](https://codecov.io/gh/jkarp7/showstack)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
+[![Electron](https://img.shields.io/badge/Electron-28-47848F.svg)](https://www.electronjs.org/)
+
 ShowStack is a comprehensive suite of tools designed for lighting designers, production electricians, and entertainment professionals. This repository contains the ShowStack:Production module - a modern alternative to LightWright 6.
 
 ---
@@ -92,6 +98,64 @@ Coming soon! See [docs/dev-setup.md](docs/dev-setup.md) for environment setup.
 
 ---
 
+## 🧪 Testing
+
+ShowStack has comprehensive test coverage with **235+ tests** across utilities, components, and IPC handlers.
+
+### Running Tests
+
+```bash
+# Watch mode - auto-runs on changes
+npm test
+
+# Run tests once (CI mode)
+npm run test:run
+
+# Generate coverage report
+npm run test:coverage
+
+# Visual UI with coverage
+npm run test:ui
+
+# Run specific test file
+npm test powerCalculations
+```
+
+### Coverage Requirements
+
+| File Type | Target | Current |
+|-----------|--------|---------|
+| **Critical Utilities** | 80%+ | **95-100%** ✅ |
+| **Standard Utilities** | 60-70% | **70%+** ✅ |
+| **Components** | 50-60% | **50%+** ✅ |
+| **IPC Handlers** | 70%+ | **70%+** ✅ |
+| **Global** | 50%+ | **~50%** ✅ |
+
+**Tested Modules:**
+- ✅ Power calculations (98% coverage)
+- ✅ Circuit parsing & rack linking (95% coverage)
+- ✅ Label grid calculations (100% coverage)
+- ✅ Fixture data mapping (100% coverage)
+- ✅ Component logic (bug fixes verified)
+- ✅ File security validation (43 tests)
+
+### Testing Documentation
+
+- **[Testing Guide](docs/testing/TESTING_GUIDE.md)** - Comprehensive guide with examples
+- **[Quick Reference](docs/testing/QUICK_REFERENCE.md)** - Common patterns and commands
+- **[Mocking Strategy](docs/testing/MOCKING_STRATEGY.md)** - Mock patterns and best practices
+
+### CI/CD
+
+All tests run automatically on:
+- ✅ **Ubuntu Latest** - Primary CI environment
+- ✅ **macOS Latest** - macOS compatibility
+- ✅ **Windows Latest** - Windows compatibility
+
+Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstack) on every push.
+
+---
+
 ## 📊 Status
 
 **Current Phase:** Alpha
@@ -144,6 +208,13 @@ Coming soon! See [docs/dev-setup.md](docs/dev-setup.md) for environment setup.
 - ✅ Debug panels in all modules
 - ✅ F12 keyboard shortcut
 - ✅ Comprehensive documentation
+
+**Testing Infrastructure:**
+- ✅ Vitest + React Testing Library setup
+- ✅ 235+ comprehensive tests (95-100% coverage on critical code)
+- ✅ CI/CD with GitHub Actions (Ubuntu, macOS, Windows)
+- ✅ Codecov integration for coverage tracking
+- ✅ Testing guides and reference documentation
 
 ### 🚧 In Progress
 - 🚧 Equipment Manager fixture list UI (~30% remaining)

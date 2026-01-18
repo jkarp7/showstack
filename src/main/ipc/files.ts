@@ -1,8 +1,8 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { fileService, ProjectImportResult, ProjectConflictResolution } from '../services/fileService';
-import * as fs from 'fs';
 import * as path from 'path';
-import { fileTypeFromBuffer } from 'file-type';
+import { readImageAsDataUrl } from '../utils/imageValidation';
+import { sanitizeError, sanitizeErrorForLogging } from '../utils/errorSanitizer';
 
 /**
  * Register file operation IPC handlers
@@ -167,41 +167,18 @@ export function registerFileHandlers(): void {
   /**
    * Read an image file and convert to base64 data URL
    * SECURITY: Validates file type via magic numbers and enforces size limits
+   * SECURITY: Sanitizes error messages to prevent information disclosure
    */
   ipcMain.handle('file:readImageAsDataUrl', async (_, imagePath: string): Promise<string | null> => {
     try {
-      if (!imagePath || !fs.existsSync(imagePath)) {
-        console.error('Image file not found:', imagePath);
-        return null;
-      }
-
-      // Read file as buffer
-      const buffer = fs.readFileSync(imagePath);
-
-      // SECURITY: Backend file size validation (2MB max)
-      const MAX_FILE_SIZE = 2 * 1024 * 1024;
-      if (buffer.length > MAX_FILE_SIZE) {
-        console.error('Image file too large:', buffer.length, 'bytes');
-        throw new Error('Image must be smaller than 2MB');
-      }
-
-      // SECURITY: Validate MIME type using magic numbers (file content)
-      const fileType = await fileTypeFromBuffer(buffer);
-
-      // Whitelist of allowed image MIME types (NO SVG for XSS prevention)
-      const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-
-      if (!fileType || !ALLOWED_TYPES.includes(fileType.mime)) {
-        console.error('Invalid image type:', fileType?.mime || 'unknown');
-        throw new Error('Invalid image file type. Allowed: PNG, JPG, GIF, WebP');
-      }
-
-      // Convert to base64 data URL using validated MIME type
-      const base64 = buffer.toString('base64');
-      return `data:${fileType.mime};base64,${base64}`;
+      return await readImageAsDataUrl(imagePath);
     } catch (error) {
-      console.error('Error reading image file:', error);
-      throw error; // Propagate to renderer for user feedback
+      // Log full error details securely (console only, not sent to renderer)
+      console.error('Error reading image file:', sanitizeErrorForLogging(error));
+
+      // Sanitize error message before sending to renderer (prevents path disclosure)
+      const sanitizedMessage = sanitizeError(error);
+      throw new Error(sanitizedMessage);
     }
   });
 
