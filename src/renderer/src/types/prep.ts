@@ -126,14 +126,23 @@ export interface PrepEquipmentItem {
 
   sort_order: number;
 
-  // Revision tracking
+  // Revision tracking (old columns - kept for rollback safety)
   added_in_revision?: number;
   removed_in_revision?: number;
   modified_in_revision?: number;
 
+  // NEW: Table-based revision tracking
+  revision_quantities?: string; // JSON string: { "0": 10, "1": 12, "2": 8 }
+  deleted_in_revision?: number;
+
   created_at: number;
   updated_at: number;
 }
+
+/**
+ * Revision Quantities type - parsed from JSON
+ */
+export type RevisionQuantities = Record<number, number>;
 
 /**
  * Change types for revision tracking
@@ -163,10 +172,16 @@ export interface PrepRevision {
   revision_date: number;
   notes?: string;
   change_log: ItemChange[]; // Automatically generated change summary
+  spare_snapshot?: string; // JSON: snapshot of spare quantities { "item_id": spare_qty }
 
   created_at: number;
   updated_at: number;
 }
+
+/**
+ * Spare Snapshot type - parsed from JSON
+ */
+export type SpareSnapshot = Record<string, number>;
 
 /**
  * Note - 3-tier notes system

@@ -273,10 +273,14 @@ export const SCHEMA = `
 
     sort_order INTEGER NOT NULL,
 
-    -- Revision tracking
+    -- Revision tracking (old columns - kept for rollback safety)
     added_in_revision INTEGER,
     removed_in_revision INTEGER,
     modified_in_revision INTEGER,
+
+    -- NEW: Table-based revision tracking
+    revision_quantities TEXT, -- JSON: { "0": 10, "1": 12, "2": 8 } - active qty per revision
+    deleted_in_revision INTEGER, -- Soft delete support
 
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
@@ -293,6 +297,7 @@ export const SCHEMA = `
     revision_date INTEGER NOT NULL,
     notes TEXT,
     change_log TEXT, -- JSON: automatically generated change summary
+    spare_snapshot TEXT, -- JSON: snapshot of spare quantities { "item_id": spare_qty }
 
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,

@@ -160,3 +160,195 @@ export function formatChange(change: ItemChange): string {
 
   return `${symbol} ${change.description}${details}`;
 }
+
+/**
+ * ============================================
+ * NEW: Table-based Revision Utilities
+ * ============================================
+ */
+
+import type { RevisionQuantities, SpareSnapshot } from '../types/prep';
+
+/**
+ * Parse revision quantities from JSON string
+ */
+export function parseRevisionQuantities(jsonString?: string): RevisionQuantities {
+  if (!jsonString) return {};
+  try {
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error('Failed to parse revision_quantities:', error);
+    return {};
+  }
+}
+
+/**
+ * Stringify revision quantities to JSON
+ */
+export function stringifyRevisionQuantities(quantities: RevisionQuantities): string {
+  return JSON.stringify(quantities);
+}
+
+/**
+ * Get active quantity for a specific revision
+ */
+export function getRevisionQuantity(
+  item: PrepEquipmentItem,
+  revisionNumber: number
+): number {
+  const quantities = parseRevisionQuantities(item.revision_quantities);
+  return quantities[revisionNumber] || 0;
+}
+
+/**
+ * Set active quantity for a specific revision
+ */
+export function setRevisionQuantity(
+  item: PrepEquipmentItem,
+  revisionNumber: number,
+  quantity: number
+): PrepEquipmentItem {
+  const quantities = parseRevisionQuantities(item.revision_quantities);
+  quantities[revisionNumber] = quantity;
+  return {
+    ...item,
+    revision_quantities: stringifyRevisionQuantities(quantities)
+  };
+}
+
+/**
+ * Get all revision numbers for an item
+ */
+export function getItemRevisions(item: PrepEquipmentItem): number[] {
+  const quantities = parseRevisionQuantities(item.revision_quantities);
+  return Object.keys(quantities).map(Number).sort((a, b) => a - b);
+}
+
+/**
+ * Calculate total quantity (max of all revisions + spare)
+ */
+export function calculateTotalQuantity(item: PrepEquipmentItem): number {
+  const quantities = parseRevisionQuantities(item.revision_quantities);
+  const maxActive = Math.max(...Object.values(quantities), 0);
+  return maxActive + (item.spare_qty || 0);
+}
+
+/**
+ * Calculate rental quantity (total - venue)
+ */
+export function calculateRentalQuantity(item: PrepEquipmentItem): number {
+  const total = calculateTotalQuantity(item);
+  return total - (item.venue_qty || 0);
+}
+
+/**
+ * Detect changes between two revisions using revision_quantities
+ */
+export function detectRevisionChanges(
+  items: PrepEquipmentItem[],
+  fromRevision: number,
+  toRevision: number,
+  previousSpareSnapshot?: SpareSnapshot
+): ItemChange[] {
+  const changes: ItemChange[] = [];
+
+  for (const item of items) {
+    const quantities = parseRevisionQuantities(item.revision_quantities);
+    const prevActive = quantities[fromRevision] || 0;
+    const currActive = quantities[toRevision] || 0;
+
+    // Get spare quantities
+    const prevSpare = previousSpareSnapshot?.[item.id] ?? item.spare_qty;
+    const currSpare = item.spare_qty;
+
+    // Determine change type
+    if (prevActive === 0 && currActive > 0) {
+      // Addition
+      changes.push({
+        item_id: item.id,
+        change_type: 'addition',
+        description: item.description,
+        new_values: {
+          active_qty: currActive,
+          spare_qty: currSpare,
+          venue_qty: item.venue_qty,
+        }
+      });
+    } else if (prevActive > 0 && currActive === 0) {
+      // Deletion
+      changes.push({
+        item_id: item.id,
+        change_type: 'deletion',
+        description: item.description,
+        old_values: {
+          active_qty: prevActive,
+          spare_qty: prevSpare,
+          venue_qty: item.venue_qty,
+        }
+      });
+    } else if (prevActive !== currActive || prevSpare !== currSpare) {
+      // Modification
+      changes.push({
+        item_id: item.id,
+        change_type: 'modification',
+        description: item.description,
+        old_values: {
+          active_qty: prevActive,
+          spare_qty: prevSpare,
+        },
+        new_values: {
+          active_qty: currActive,
+          spare_qty: currSpare,
+        }
+      });
+    }
+  }
+
+  return changes;
+}
+
+/**
+ * Create spare snapshot for a revision
+ */
+export function createSpareSnapshot(items: PrepEquipmentItem[]): SpareSnapshot {
+  const snapshot: SpareSnapshot = {};
+  for (const item of items) {
+    snapshot[item.id] = item.spare_qty || 0;
+  }
+  return snapshot;
+}
+
+/**
+ * Parse spare snapshot from JSON string
+ */
+export function parseSpareSnapshot(jsonString?: string): SpareSnapshot {
+  if (!jsonString) return {};
+  try {
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error('Failed to parse spare_snapshot:', error);
+    return {};
+  }
+}
+
+/**
+ * Get DELTA indicator for print view (+/-/~)
+ */
+export function getDeltaIndicator(
+  item: PrepEquipmentItem,
+  currentRevision: number,
+  previousRevision?: number
+): string {
+  if (previousRevision === undefined || currentRevision === 0) {
+    return ''; // No delta for revision 0 or if no previous revision
+  }
+
+  const quantities = parseRevisionQuantities(item.revision_quantities);
+  const prevQty = quantities[previousRevision] || 0;
+  const currQty = quantities[currentRevision] || 0;
+
+  if (prevQty === 0 && currQty > 0) return '+';
+  if (prevQty > 0 && currQty === 0) return '−';
+  if (prevQty !== currQty) return '~';
+  return '';
+}
