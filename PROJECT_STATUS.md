@@ -141,21 +141,13 @@ This document tracks the development status of all ShowStack feature domains and
 
 **Related:** PR #54 review concerns, Issue #55
 
-### Next Steps (Unified Visual Editor Completion)
-1. ✅ **Phase 3: Paperwork Template System** - COMPLETED
-2. ✅ **Phase 3.5: Logo & Image Support** - COMPLETED
-3. ✅ **Phase 4: Label Integration** - COMPLETED
-4. ⬜ **Phase 5: Polish & UX** - Keyboard shortcuts, inline editing, shadows, smart guides, template management (1 week)
-   - See: `docs/features/phase-5-polish-ux.md` for detailed 7-day implementation plan
-5. ⬜ **Shop order creation from system documentation** - Auto-populate from fixture/infrastructure data
-
 ### Short-term (Next 1-2 Months) - **Focus on Lightwright Parity**
 1. **MVR export support** - Industry standard CAD/visualizer format
 2. **Enhanced error checking** - Overlapping patches, overloaded dimmers, duplicate channels, missing data
 3. **Basic console integration** - OSC protocol for ETC Eos
-4. Complete Label Designer module
-5. Add power distribution printable reports with visualization
-6. Implement CSV import/export with field mapping
+4. Add power distribution printable reports with visualization
+5. Implement CSV import/export with field mapping
+6. **Shop Order table-based redesign** - Migrate from dialog-based to spreadsheet-like table format for faster data entry and import support (See: `docs/features/migration-shop-order-table.md`)
 
 ### Medium-term (Next 3-6 Months) - **Professional Integration**
 1. **Vectorworks XML integration** - Automatic data sync with CAD
@@ -387,6 +379,9 @@ Complete shop order and equipment specification builder with professional PDF ou
   - Default page layouts
   - Query functions
 
+**Planned Enhancements:**
+- ⬜ **Auto-populate from System Documentation** - Create shop order items automatically from fixture and infrastructure data
+
 ---
 
 #### Paperwork Generator (Phase 1 & 2)
@@ -505,7 +500,7 @@ Additional production tools.
 
 ---
 
-#### Unified Visual Editor System (Major Refactor)
+#### Unified Visual Editor System - ✅ Complete
 
 **Overview:** Consolidate all visual editing (Paperwork, Labels, Shop Orders) into a single, modern, production-grade editor with comprehensive formatting controls.
 
@@ -519,227 +514,52 @@ Additional production tools.
 - Modern appearance - Clean, floating toolbars, collapsible panels, dark mode optimized
 - Speed-first design - Keyboard shortcuts, command palette, inline editing
 
-**Implementation Phases:**
-1. ✅ **Phase 1: Core Refactor & UI Improvements** - COMPLETED
-   - Enhanced LayoutCanvas with better grid visualization, resize handles, and snap guides
-   - Modernized ElementPalette with collapsible category sections and preview cards
-   - Enhanced ElementInspector with collapsible sections and modern controls
-   - Added floating toolbar with zoom controls and undo/redo functionality
-   - Improved drag-and-drop feedback with ghost elements and visual indicators
-   - **Branch:** `feature/unified-visual-editor`
-   - **Commits:** 4 commits (429d517, 0509313, 652ea0e, b7ab7d2)
+**Completed Features:**
+- ✅ Enhanced LayoutCanvas with grid visualization, resize handles, and snap guides
+- ✅ Modernized ElementPalette and ElementInspector
+- ✅ ColorPicker component with custom color saving
+- ✅ Comprehensive text and shape formatting controls
+- ✅ PaperworkHeaderDesigner with 12-column × 8-row grid
+- ✅ Image upload UI with base64 storage and project logo integration
+- ✅ LabelLayoutDesigner for grid-based label editing with 5 Avery templates
+- ✅ Batch printing with Puppeteer PDF generation
+- ✅ Keyboard shortcuts and inline editing
+- ✅ Template management and validation
 
-2. ✅ **Phase 2: Text & Shape Formatting** - COMPLETED
-   - ColorPicker component with preset swatches, hex input, opacity slider
-   - User custom color saving to localStorage (max 12 colors)
-   - Font size preset buttons (8-72pt) with custom input
-   - Text style toggles: Bold, Italic, Underline, Strikethrough
-   - Icon-based text alignment buttons (left, center, right, justify)
-   - Line height slider (0.8-3.0) and letter spacing controls (-2px to 10px)
-   - Fill & Borders section with color pickers and opacity controls
-   - Individual padding controls with link/unlink checkbox
-   - Streamlined typography controls for compact UX
-   - **Commits:** 99222de, f05121c
+**Documentation:**
+- `docs/features/phase-3.5-logo-image-support.md`
+- `docs/features/phase-4-label-integration.md`
+- `docs/features/phase-5-polish-ux.md`
+- `docs/mockups/unified-editor-mockup.md`
 
-3. ✅ **Phase 3: Paperwork Integration** - COMPLETED
-   - PaperworkHeaderDesigner component with 12-column × 8-row grid
-   - Default paperwork header template for all 13 report types
-   - Header and footer rendering for PDF exports with Puppeteer
-   - CSS Grid-based header layout (replaced absolute positioning)
-   - Repeating headers/footers on multi-page PDFs
-   - Integration with existing paperwork template system
-   - Batch export with proper header rendering
-   - Image element type available in ElementPalette (partial - needs enhancement)
-   - **Commits:** bcac556, 6126f68, dd76483, 0d05e65, 59b6710
-   - **Pending:** Image upload UI and logo integration (see Phase 3.5 below)
-
-3.5. ✅ **Phase 3.5: Logo & Image Enhancement** - COMPLETED
-   - Image upload UI with file browser and validation (PNG, JPG, SVG, GIF)
-   - Base64 storage for images and project logos (2MB max)
-   - Image preview in ElementInspector (128px) and canvas rendering
-   - Project logo integration in EditProjectDialog with 64px thumbnail
-   - ObjectFit support (contain, cover, fill) for image scaling
-   - Clear/Remove buttons for uploaded images
-   - URL input alternative for web-hosted images
-   - PDF export verified - Puppeteer handles base64 images natively
-   - Comprehensive documentation created
-   - **Commits:** faaf2f5, 1a1c566, bc548f1
-   - **Documentation:** `docs/features/phase-3.5-logo-image-support.md`
-
-4. ✅ **Phase 4: Label Integration** - COMPLETED
-   - LabelLayoutDesigner wrapper component for grid-based label editing
-   - Label grid calculator (4 cells per inch, dynamic grid from dimensions)
-   - Template converter (canvas pixel coordinates → grid cells)
-   - Automated migration system (localStorage → database with user confirmation)
-   - Background color customization with ColorPicker integration
-   - Image support via base64 storage (Phase 3.5 infrastructure)
-   - 40+ data field mappings (fixture data → label fields)
-   - Batch printing with Puppeteer PDF generation
-   - Multi-label sheet renderer with Avery specifications:
-     - 5160 (Address, 3×10), 5163 (Shipping, 2×5), 5164 (Shipping, 2×3)
-     - 8160 (Address, 3×10), 5167 (Return Address, 4×20)
-   - Label printer IPC handlers (batch print, preview)
-   - UI integration: "Edit with Visual Designer" button in Labels tab
-   - Navigation and routing for label designer page
-   - **Commits:** da75a8a, 41373e0, 78a1fc3, eb90c26, d5c5bce
-   - **Documentation:** `docs/features/phase-4-label-integration.md`
-
-5. ⬜ **Phase 5: Polish & UX** (1 week)
-   - Keyboard shortcuts (Cmd+S, Cmd+Z, arrow keys, etc.)
-   - Inline editing for faster text updates
-   - Visual effects (shadows, gradients, advanced borders)
-   - Smart alignment guides
-   - Template management and sharing
-   - Comprehensive validation and error handling
-   - See: `docs/features/phase-5-polish-ux.md` for detailed 7-day plan
-
-**Progress:** Phase 1-4 complete (90% done)
-**Estimated Remaining:** 1 week (Phase 5 only)
-
-**Phase 3.5 Detailed Implementation Plan:**
-
-**Day 1: Image Upload & Storage**
-- Add file browser button to ElementInspector for image elements
-- Implement image upload with file type validation (PNG, JPG, SVG, GIF)
-- Store images as base64 in `page_layout_elements.config` (ImageConfig.src)
-- Add image preview in ElementInspector
-- Support both local file upload and URL input
-- Maximum file size validation (2MB recommended for performance)
-
-**Day 2: Project Logo Integration**
-- Add `logo_path` column to projects table (stores base64 or file path)
-- Create logo upload UI in project settings
-- Add "Insert Project Logo" quick action to ElementPalette
-- Auto-populate logo when creating new paperwork headers
-- Logo management: upload, replace, remove
-
-**Day 3: PDF Export & Testing**
-- Test image rendering in Puppeteer PDF exports
-- Ensure base64 images render correctly in PDFs
-- Test different image formats and sizes
-- Verify image scaling with objectFit settings
-- Update default paperwork header templates with logo placeholder
-- Documentation for logo/image usage
-
-**Phase 4 Detailed Implementation Plan:**
-
-**Day 1-2: Core Architecture Migration**
-- Create `LabelLayoutDesigner.tsx` component wrapping LayoutDesigner
-- Define label-specific grid configurations:
-  - Grid calculator function: `calculateLabelGrid(printerType, averyTemplate)`
-  - Avery 5160: 12×8 grid (2.625" × 1" label)
-  - Avery 5163: 16×10 grid (4" × 2" label)
-  - Dymo/Brother: 18×4 grid (roll labels)
-- Create data migration utility: `convertLabelGraphicToLayoutElement()`
-- Update database schema: `label_templates` table in app database
-
-**Day 3-4: Element Types & Templates**
-- Add barcode/QR code element type to `ElementPalette.tsx`
-  - Barcode rendering component with Code128/QR generation
-  - Data field binding for dynamic barcode values
-- Add image element support for labels (logos, icons, graphics)
-  - Image upload and storage in database
-  - Image positioning and sizing within grid
-  - Support for PNG, JPG, SVG formats
-- Add label background color customization
-  - ColorPicker integration for label background
-  - Support for transparent, solid colors, and opacity
-  - Per-template background color settings
-- Convert predefined templates to grid-based layouts:
-  - Cable label: Header text + body text + footer (3 rows)
-  - Circuit label: Border rectangle + 3 text elements (centered)
-  - Fixture label: 3 text rows with position/channel/color
-  - Dimmer label: Border + bold header + 2 detail rows
-- Add template seeding to database migrations
-
-**Day 5: Batch Printing & Data Field Mapping**
-- Implement batch mode with fixture/infrastructure data binding
-- Create data field selector for label elements:
-  - Text elements can bind to fixture fields (Channel, Dimmer, Type, etc.)
-  - Barcode elements bind to ID/serial fields
-- Batch preview with paginated label sheets
-
-**Day 6: PDF Export & Printer Integration**
-- Implement PDF export with Puppeteer:
-  - Avery sheet layout renderer (multiple labels per page)
-  - Roll label continuous output
-- Add print dialog with printer selection
-- Label sheet visualization with proper margins/gaps
-
-**Day 7: Polish & Testing**
-- Add label-specific properties panel with:
-  - Printer type and template selector
-  - Label dimensions display
-  - Background color picker (including transparent option)
-  - Image upload controls
-- Migrate existing user designs from localStorage
-- Manual testing of all printer templates
-- Test image rendering in PDF exports
-- Test background colors on different printer types
-- Documentation updates
+**Status:** Feature complete and production ready
 
 **Benefits:**
 - Consistent UX across all paperwork/label tasks
 - Professional-grade formatting control
-- Faster workflow with keyboard shortcuts
-- Single codebase (~40% less code)
-
-**Competitive Advantage:**
 - Modern visual editor vs. LightWright's settings-based approach
-- Drag-and-drop WYSIWYG beats form-based configuration
-
-**Related Files:**
-- **Mockup**: `docs/mockups/unified-editor-mockup.md`
-- **Existing Editor**: `src/renderer/src/components/prep/layout/LayoutDesigner.tsx`
-- **Paperwork Page**: `src/renderer/src/pages/modules/Paperwork.tsx`
-- **Label Designer**: `src/renderer/src/pages/modules/LabelDesigner.tsx`
 
 ---
 
-#### Maintenance Menu System (Major Feature)
+#### Maintenance Menu System
 
-**Overview:** Lightwright 6 parity feature - custom categorization system for grouping fixtures.
+Lightwright 6 parity feature - custom categorization system for grouping fixtures.
 
-**Core Functionality:**
-- Menu bar "Maintenance" menu with entry for every column (including user-defined)
-- Each menu item opens dialog with 4 tabs:
-  - **Notes**: General category notes
-  - **Physical**: Physical characteristics, handling
-  - **Vectorworks**: CAD-specific notes, layer assignments
-  - **Position**: Location-specific notes
-- Create custom categories/families:
-  - Examples: "ALL Incandescent", "ALL Moving Lights", "FOH Fixtures"
-  - Rule-based auto-assignment (e.g., Type contains "MAC" → "Moving Lights")
-  - Manual assignment override
-- Category integration:
-  - Show on labels
-  - Group on paperwork
-  - Drive shop order automation (Equipment Manager → Shop Order)
-  - Color-coded visual indicators
-  - Filter/search by category
+**Planned Features:**
+- Custom categories/families with rule-based auto-assignment
+- Integration with labels, paperwork, and shop order automation
+- Color-coded visual indicators and filtering
+- Menu bar integration with 4-tab dialog (Notes, Physical, Vectorworks, Position)
 
-**Implementation Phases:**
-1. **Phase 1: Core System** (5-7 days)
-2. **Phase 2: Maintenance Menu UI** (3-4 days)
-3. **Phase 3: Integration** (4-5 days)
-4. **Phase 4: Advanced** (2-3 days)
+**Strategic Value:** Critical for shop order automation - provides grouping mechanism for Equipment Manager → Shop Order workflow
 
-**Estimated Total:** 3-4 weeks
+**See:** `docs/features/maintenance-menu-system.md` for detailed specifications
 
-**Strategic Value:**
-- **CRITICAL for shop order automation** - Provides grouping mechanism
-- Lightwright 6 parity
-- Enables sophisticated workflow customization
-- Foundation for Equipment Manager → Shop Order automation (#29)
-
-**Related Issues:** #29 (shop order automation), #14 (auto-complete)
+**Estimated Effort:** 3-4 weeks
 
 ---
 
 #### UI/UX Improvements
-
-**Quick Fixes:**
-- ⬜ **Remove recent files from Production Landing** - Current flow broken (1 hour)
 
 **Menu Bar Reorganization:**
 - ⬜ **Evaluate menu bar access** - Move common functions to menu for easier access
