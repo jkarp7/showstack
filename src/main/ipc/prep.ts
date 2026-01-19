@@ -879,19 +879,21 @@ function renderLayoutElement(
       return `<div style="${baseStyle}">No equipment items</div>`;
     }
 
-    // Get current revision changes for delta column
+    // Get revision information for delta calculation
     const revisions = getRevisionsByProjectId(project.id);
-    const currentRevision = revisions.find(r => r.revision_number === project.current_revision);
-    let changeMap = new Map<string, any>();
+    const currentRevisionNum = project.current_revision;
+    const previousRevisionNum = currentRevisionNum > 0 ? currentRevisionNum - 1 : undefined;
 
-    if (currentRevision) {
-      try {
-        const changeLog = JSON.parse(currentRevision.change_log || '[]');
-        changeLog.forEach((change: any) => {
-          changeMap.set(change.item_id, change);
-        });
-      } catch (e) {
-        console.error('Error parsing change log:', e);
+    // Get spare snapshot from previous revision
+    let previousSpareSnapshot: any = {};
+    if (previousRevisionNum !== undefined) {
+      const previousRevision = revisions.find(r => r.revision_number === previousRevisionNum);
+      if (previousRevision?.spare_snapshot) {
+        try {
+          previousSpareSnapshot = JSON.parse(previousRevision.spare_snapshot);
+        } catch (e) {
+          console.error('Error parsing spare snapshot:', e);
+        }
       }
     }
 
@@ -922,80 +924,92 @@ function renderLayoutElement(
         currentY += (noteLines.length * 12) + 20; // Extra space before equipment table
       }
 
-      // Table headers: Delta | Total | Active | Spare | Description
-      // Tightened column widths
-      const deltaWidth = width * 0.05;  // Delta - tighter
-      const totalWidth = width * 0.07;  // Total - tighter
-      const activeWidth = width * 0.07; // Active - tighter
-      const spareWidth = width * 0.07;  // Spare - tighter
-      const descWidth = width * 0.74;   // Description - wider
+      // Table headers: Δ | Total | Rental | Active | Spare | Description
+      const deltaWidth = width * 0.04;   // Delta
+      const totalWidth = width * 0.07;   // Total - prominent
+      const rentalWidth = width * 0.07;  // Rental - prominent
+      const activeWidth = width * 0.06;  // Active
+      const spareWidth = width * 0.06;   // Spare
+      const descWidth = width * 0.70;    // Description
 
       equipmentHTML += `
         <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${deltaWidth}px; background-color: #F3F4F6; padding: 4px 2px; font-size: 8pt; font-weight: bold; text-align: center;">Δ</div>
-        <div style="position: absolute; left: ${left + deltaWidth}px; top: ${currentY}px; width: ${totalWidth}px; background-color: #F3F4F6; padding: 4px 2px; font-size: 8pt; font-weight: bold; text-align: center;">Total</div>
-        <div style="position: absolute; left: ${left + deltaWidth + totalWidth}px; top: ${currentY}px; width: ${activeWidth}px; background-color: #F3F4F6; padding: 4px 2px; font-size: 8pt; font-weight: bold; text-align: center;">Active</div>
-        <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth}px; top: ${currentY}px; width: ${spareWidth}px; background-color: #F3F4F6; padding: 4px 2px; font-size: 8pt; font-weight: bold; text-align: center;">Spare</div>
-        <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth + spareWidth}px; top: ${currentY}px; width: ${descWidth}px; background-color: #F3F4F6; padding: 4px; font-size: 8pt; font-weight: bold;">Description</div>
+        <div style="position: absolute; left: ${left + deltaWidth}px; top: ${currentY}px; width: ${totalWidth}px; background-color: #3B82F6; padding: 4px 2px; font-size: 9pt; font-weight: bold; text-align: center; color: white;">TOTAL</div>
+        <div style="position: absolute; left: ${left + deltaWidth + totalWidth}px; top: ${currentY}px; width: ${rentalWidth}px; background-color: #10B981; padding: 4px 2px; font-size: 9pt; font-weight: bold; text-align: center; color: white;">RENTAL</div>
+        <div style="position: absolute; left: ${left + deltaWidth + totalWidth + rentalWidth}px; top: ${currentY}px; width: ${activeWidth}px; background-color: #F3F4F6; padding: 4px 2px; font-size: 8pt; font-weight: bold; text-align: center;">Active</div>
+        <div style="position: absolute; left: ${left + deltaWidth + totalWidth + rentalWidth + activeWidth}px; top: ${currentY}px; width: ${spareWidth}px; background-color: #F3F4F6; padding: 4px 2px; font-size: 8pt; font-weight: bold; text-align: center;">Spare</div>
+        <div style="position: absolute; left: ${left + deltaWidth + totalWidth + rentalWidth + activeWidth + spareWidth}px; top: ${currentY}px; width: ${descWidth}px; background-color: #F3F4F6; padding: 4px; font-size: 8pt; font-weight: bold;">Description</div>
       `;
       currentY += 20;
 
       // Equipment items
       items.forEach(item => {
-        const change = changeMap.get(item.id);
+        // Parse revision quantities
+        let revisionQuantities: any = {};
+        try {
+          revisionQuantities = item.revision_quantities ? JSON.parse(item.revision_quantities) : {};
+        } catch (e) {
+          console.error('Error parsing revision_quantities:', e);
+        }
+
+        // Get quantities for current and previous revisions
+        const currentActive = revisionQuantities[currentRevisionNum] || 0;
+        const previousActive = previousRevisionNum !== undefined ? (revisionQuantities[previousRevisionNum] || 0) : 0;
+        const currentSpare = item.spare_qty || 0;
+        const previousSpare = previousRevisionNum !== undefined ? (previousSpareSnapshot[item.id] || item.spare_qty) : 0;
+
+        // Calculate delta indicator
         let deltaContent = '';
         let rowBgColor = '#FFFFFF';
 
-        if (change) {
-          if (change.change_type === 'addition') {
-            // New item added
-            deltaContent = '<span style="color: #3B82F6;">NEW</span>';
-            rowBgColor = '#DBEAFE'; // Light blue
-          } else if (change.change_type === 'deletion') {
-            // Item removed (shouldn't show in equipment list, but handle it)
-            deltaContent = '<span style="color: #DC2626;">DEL</span>';
-            rowBgColor = '#FEE2E2'; // Light red
-          } else if (change.change_type === 'modification') {
-            // Check if quantity changed
-            const oldActive = change.old_values?.active_qty || 0;
-            const oldSpare = change.old_values?.spare_qty || 0;
-            const newActive = change.new_values?.active_qty || 0;
-            const newSpare = change.new_values?.spare_qty || 0;
-            const oldTotal = oldActive + oldSpare;
-            const newTotal = newActive + newSpare;
+        if (previousRevisionNum !== undefined && currentRevisionNum > 0) {
+          if (previousActive === 0 && currentActive > 0) {
+            // Addition
+            deltaContent = '<span style="color: #3B82F6; font-weight: bold;">+</span>';
+            rowBgColor = '#DBEAFE';
+          } else if (previousActive > 0 && currentActive === 0) {
+            // Deletion
+            deltaContent = '<span style="color: #DC2626; font-weight: bold;">−</span>';
+            rowBgColor = '#FEE2E2';
+          } else if (previousActive !== currentActive || previousSpare !== currentSpare) {
+            // Modification
+            const prevTotal = previousActive + previousSpare;
+            const currTotal = currentActive + currentSpare;
+            const delta = currTotal - prevTotal;
 
-            if (newTotal > oldTotal) {
-              // Quantity increased
-              const delta = newTotal - oldTotal;
-              deltaContent = `<span style="color: #059669;">▲ +${delta}</span>`;
-              rowBgColor = '#D1FAE5'; // Light green
-            } else if (newTotal < oldTotal) {
-              // Quantity decreased
-              const delta = oldTotal - newTotal;
-              deltaContent = `<span style="color: #DC2626;">▼ -${delta}</span>`;
-              rowBgColor = '#FEE2E2'; // Light red
+            if (delta > 0) {
+              deltaContent = `<span style="color: #059669; font-weight: bold;">▲${delta > 0 ? '+' : ''}${delta}</span>`;
+              rowBgColor = '#D1FAE5';
+            } else if (delta < 0) {
+              deltaContent = `<span style="color: #DC2626; font-weight: bold;">▼${delta}</span>`;
+              rowBgColor = '#FEE2E2';
             } else {
-              // Other modification (description, notes, etc.)
-              deltaContent = '<span style="color: #CA8A04;">MOD</span>';
-              rowBgColor = '#FEF9C3'; // Light yellow
+              deltaContent = '<span style="color: #CA8A04;">~</span>';
+              rowBgColor = '#FEF9C3';
             }
           }
         }
 
-        const total = item.active_qty + item.spare_qty;
+        // Calculate total and rental using max of all revisions
+        const allRevisionValues = Object.values(revisionQuantities);
+        const maxActive = allRevisionValues.length > 0 ? Math.max(...allRevisionValues as number[]) : 0;
+        const total = maxActive + currentSpare;
+        const rental = total - (item.venue_qty || 0);
 
         equipmentHTML += `
           <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${deltaWidth}px; padding: 3px 2px; font-size: 7pt; text-align: center; background-color: ${rowBgColor};">${deltaContent}</div>
-          <div style="position: absolute; left: ${left + deltaWidth}px; top: ${currentY}px; width: ${totalWidth}px; padding: 3px 2px; font-size: 8pt; text-align: center; background-color: ${rowBgColor}; font-weight: bold;">${total}</div>
-          <div style="position: absolute; left: ${left + deltaWidth + totalWidth}px; top: ${currentY}px; width: ${activeWidth}px; padding: 3px 2px; font-size: 8pt; text-align: center; background-color: ${rowBgColor};">${item.active_qty}</div>
-          <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth}px; top: ${currentY}px; width: ${spareWidth}px; padding: 3px 2px; font-size: 8pt; text-align: center; background-color: ${rowBgColor};">${item.spare_qty}</div>
-          <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth + spareWidth}px; top: ${currentY}px; width: ${descWidth}px; padding: 3px 4px; font-size: 8pt; background-color: ${rowBgColor};">${escapeHtml(item.description)}</div>
+          <div style="position: absolute; left: ${left + deltaWidth}px; top: ${currentY}px; width: ${totalWidth}px; padding: 3px 2px; font-size: 9pt; text-align: center; background-color: ${rowBgColor}; font-weight: bold; color: #1E40AF;">${total}</div>
+          <div style="position: absolute; left: ${left + deltaWidth + totalWidth}px; top: ${currentY}px; width: ${rentalWidth}px; padding: 3px 2px; font-size: 9pt; text-align: center; background-color: ${rowBgColor}; font-weight: bold; color: #047857;">${rental}</div>
+          <div style="position: absolute; left: ${left + deltaWidth + totalWidth + rentalWidth}px; top: ${currentY}px; width: ${activeWidth}px; padding: 3px 2px; font-size: 8pt; text-align: center; background-color: ${rowBgColor};">${currentActive}</div>
+          <div style="position: absolute; left: ${left + deltaWidth + totalWidth + rentalWidth + activeWidth}px; top: ${currentY}px; width: ${spareWidth}px; padding: 3px 2px; font-size: 8pt; text-align: center; background-color: ${rowBgColor};">${currentSpare}</div>
+          <div style="position: absolute; left: ${left + deltaWidth + totalWidth + rentalWidth + activeWidth + spareWidth}px; top: ${currentY}px; width: ${descWidth}px; padding: 3px 4px; font-size: 8pt; background-color: ${rowBgColor};">${escapeHtml(item.description)}</div>
         `;
         currentY += 18;
 
         // Item notes (if present)
         if (item.notes && item.notes.trim()) {
           equipmentHTML += `
-            <div style="position: absolute; left: ${left + deltaWidth + totalWidth + activeWidth + spareWidth}px; top: ${currentY}px; width: ${descWidth}px; padding: 2px 4px 2px 8px; font-size: 7pt; font-style: italic; color: #6B7280;">
+            <div style="position: absolute; left: ${left + deltaWidth + totalWidth + rentalWidth + activeWidth + spareWidth}px; top: ${currentY}px; width: ${descWidth}px; padding: 2px 4px 2px 8px; font-size: 7pt; font-style: italic; color: #6B7280;">
               ${escapeHtml(item.notes)}
             </div>
           `;
