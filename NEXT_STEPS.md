@@ -1,305 +1,116 @@
-# Next Steps - Resume Here
+# Next Steps - ShowStack Development
 
-**Branch:** `feature/unified-visual-editor`
-**Last Updated:** January 2, 2026
-**Status:** Phase 3 Complete - Color Cut Report Added
+**Branch:** `develop`
+**Last Updated:** January 18, 2026
+**Status:** Telemetry hardening complete, planning cloud-native architecture
 
 ---
 
 ## 🚀 Quick Start (Resuming Work)
 
 ```bash
-# 1. Ensure you're on the correct branch
-git checkout feature/unified-visual-editor
+# 1. Ensure you're on develop branch
+git checkout develop
 
-# 2. Pull latest changes (if working from different machine)
-git pull origin feature/unified-visual-editor
+# 2. Pull latest changes
+git pull origin develop
 
 # 3. Start dev server
 npm run dev
 
-# 4. Navigate to Paperwork module in the app
-# Default project → Paperwork module
+# 4. Run tests
+npm test
 ```
 
 ---
 
-## ✅ What's Been Completed (Phase 3 Days 1-7)
+## ✅ Just Completed (January 18, 2026)
 
-### Database & Backend
-- [x] `paperwork_templates` table in app database
-- [x] Full CRUD query operations in `src/main/database/queries/paperworkTemplates.ts`
-- [x] IPC handlers for template management
-- [x] System template seeding (12 templates on first launch)
-- [x] Preload API exposure for renderer access
+### Telemetry System Hardening (PR #61)
+- Fixed all 5 critical security & reliability issues
+- Comprehensive test coverage (95 specs, 100% passing)
+- ErrorBoundary component with fallback UI
+- AnalyticsDashboard for admin panel
+- Production-ready telemetry implementation
 
-### Frontend Components
-- [x] Type definitions (`src/renderer/src/types/paperworkTemplate.ts`)
-- [x] Column configuration panel with drag-and-drop (`ColumnConfigurationPanel.tsx`)
-- [x] Grouping & sorting controls (`GroupingSortingControls.tsx`)
-- [x] Report table renderer (`ReportTableRenderer.tsx`)
-- [x] Data connector bridge to Zustand stores (`dataConnector.ts`)
-- [x] Report organizer (grouping/sorting logic) (`reportOrganizer.ts`)
-- [x] Template library UI (`PaperworkTemplateLibrary.tsx`)
-- [x] Integrated PaperworkEditor component (`PaperworkEditor.tsx`)
-- [x] Paperwork.tsx refactor (2353 → 409 lines, 82% reduction)
-
-### Default Configurations
-- [x] Column defaults for all 12 report types (`columnDefaults.ts`)
-- [x] System templates with descriptions in database
-
-### Layout Designer Improvements (Cherry-picked)
-- [x] Enhanced LayoutCanvas (grid visualization, resize handles, snap guides)
-- [x] Modernized ElementPalette and ElementInspector
-- [x] Floating toolbar with zoom and undo/redo
-- [x] Improved drag-and-drop feedback with ghost elements
-- [x] Phase 2 text & shape formatting controls
-- [x] Streamlined typography controls
-
-### Bug Fixes
-- [x] Fixed preload API for paperworkTemplates
-- [x] Corrected useActiveTemplate hook API usage
-- [x] App loads without errors
-
-### Day 8 UX Improvements (Dec 31, 2024)
-- [x] **Sidebar Scrolling**: Fixed overflow issue - controls area now scrollable with fixed report type selector
-- [x] **Multi-Column Merging**: Enhanced to support 3+ columns with clear UI feedback
-  - Added selection counter badge
-  - Dynamic button text showing total columns
-  - Pre-populates existing merges when editing
-  - Includes previously merged columns in available list
-- [x] **Column Label Management**: Streamlined interface
-  - Shows ALL available columns (40+ fixtures, 20+ infrastructure)
-  - Full and Short labels read-only with defaults
-  - Only Custom labels user-editable
-  - Visual Visible/Hidden status badges
-- [x] **Display Mode Switching**: Fixed Full/Short/Custom mode updates
-  - Auto-merge shortLabel from defaults when switching modes
-  - Sync globalMode state with column displayMode
-  - New columns inherit current displayMode
-- [x] **Column Reordering**: Fixed for non-default columns
-  - Properly maps visible column indices to full array
-- [x] **Merged Column Headers**: Show combined names (e.g., "Type + Access")
-- [x] **Event Handling**: Fixed context menu and dialog rendering
-  - Added stopPropagation to prevent event bubbling
-  - React Portal for merge dialog with proper z-index
-- [x] **Template Save/Load/Duplication**: Fixed signature mismatches and improved UX
-  - Fixed prop mismatches between PaperworkEditor and PaperworkTemplateLibrary
-  - Added wrapper functions for duplicate/delete/create operations
-  - Save button auto-creates copy when editing system templates
-  - Replaced window.prompt() with custom modal dialog for Save As
-  - Enhanced error handling with console logging and user alerts
-  - Auto-load next template after deletion
-- [x] **PDF Export**: Fixed blank page issue with proper table rendering
-  - Import renderToStaticMarkup from react-dom/server
-  - Render ReportTableRenderer component to HTML
-  - Apply template font settings and styling
-  - Include report title, project name, and date
-- [x] **Batch Export**: Creates single combined PDF document
-  - Combines all selected reports into one PDF file
-  - Each report starts on a new page with page breaks
-  - Page numbering resets for each report section
-  - Consistent font styling across all reports
-  - Progress dialog shows each report being prepared
-  - Final PDF: `ProjectName_Batch_Export_YYYY-MM-DD.pdf`
-  - Example: Channel Hookup (15 pages) + Dimmer Schedule (7 pages) = 22-page PDF
-  - Batch export button added to editor toolbar for better discoverability
-- [x] **Header Designer Integration**: Completed integration with Layout Designer
-  - Fixed prop interface mismatch between components
-  - Load project data, fixtures, and infrastructure for live preview
-  - Map paperwork data to Prep template format with summaries
-  - Load existing header template if headerTemplateId is set
-  - Save headerTemplateId back to paperwork template on save
-  - Full data preview with fixture/infrastructure statistics
-- [x] **Paperwork Header/Footer System**: Completed compact 3-row header with dynamic data
-  - Compact 3-row grid layout (120px height) with proper spacing
-  - Dynamic data from project (Show Name, LD, Venue, Date)
-  - Static footer with page numbers using Puppeteer displayHeaderFooter
-  - Font matching across header, footer, and report content
-  - Automatic template migration system for layout updates
-  - Fixed duplicate element seeding issue
-  - CSS Grid layout with explicit grid-template-rows to prevent collapsing
+### Cloud-Native Architecture Planning
+- 15-16 week implementation plan for authentication + real-time collaboration
+- Backend server design (Express.js + PostgreSQL + Socket.io)
+- Operational Transform for conflict-free concurrent editing
+- Plan saved to: `docs/CLOUD_NATIVE_ARCHITECTURE_PLAN.md`
+- **Decision**: On hold until core features complete
 
 ---
 
-## ✅ Latest Additions (January 2, 2026)
+## 🎯 Immediate Priorities
 
-### Color Cut Report - COMPLETE
-- **13th Report Type**: Gel cutting list with automatic sheet calculations
-- **Gel Database**: 628 theatrical gels (GAM, LEE Filters, Roscolux)
-- **Color Swatches**: Visual hex color display for each gel code
-- **Smart Calculations**:
-  - Frame size parsing (square, rectangular, round formats)
-  - Cuts per 20" x 24" gel sheet calculation
-  - Total sheets needed calculation
-  - Dual color splitting ("L202+R119" → separate rows)
-- **Manufacturer Detection**: Automatic from gel code prefix (G=GAM, L=LEE, R=Roscolux)
-- **Template Migration**: System automatically adds new templates on updates
+### 1. Test Coverage (Issue #55)
+**Goal:** Minimum 50% overall coverage for alpha.2 release
 
-### New Files Created
-- `src/renderer/src/utils/gelColors.ts` - Complete gel color database
-- `src/renderer/src/utils/paperwork/colorCutCalculator.ts` - Frame size parsing and calculations
+**Critical Path Testing:**
+- [ ] Label rendering tests
+- [ ] Phase template tests
+- [ ] Circuit parser tests
+- [ ] Power calculation tests
 
-## 📋 Day 8: Testing & Polish (COMPLETE)
+**High Priority:**
+- [ ] Port validation tests
+- [ ] Image upload tests
+- [ ] CSV import tests
 
-### Test Data Available
-- **Fixtures:** 84 items (sufficient for all fixture reports)
-- **Infrastructure:** 13 items across 5 categories (Network, DMX, Control, Media, Power)
+**Current Status:** Telemetry modules have 100% test coverage (baseline example)
 
-### Testing Checklist
+### 2. Core Feature Completion
+**Before considering cloud-native architecture:**
+- [ ] Review and close open issues
+- [ ] Complete any incomplete features
+- [ ] Performance optimization
+- [ ] Bug fixes from alpha testing feedback
 
-Refer to **`PHASE_3_TESTING_GUIDE.md`** for the complete testing procedure. Key areas:
-
-#### 1. System Templates Verification
-- [x] Verify all 13 system templates load in library sidebar
-- [x] Check each has name, description, "System" badge
-- [x] Confirm system templates cannot be deleted
-
-#### 2. Report Types Testing (13 Total)
-
-**Fixture Reports (8):**
-- [x] Channel Hookup
-- [x] Dimmer Schedule
-- [x] Circuit List
-- [x] DMX Addresses
-- [x] Power Summary
-- [x] Color Schedule
-- [x] Gobo Schedule
-- [x] Color Cut Report
-
-**Infrastructure Reports (5):**
-- [x] Infrastructure List
-- [x] Network Summary
-- [x] Port Assignments
-- [x] Infrastructure Power
-- [x] Infrastructure Location
-
-#### 3. Core Functionality
-- [x] Column configuration (drag-reorder, width adjustment, visibility toggles)
-- [x] Column merging (3+ columns with dialog)
-- [x] Column label display modes (Full/Short/Custom)
-- [x] Grouping and sorting controls
-- [x] Live preview updates
-- [x] Template save/load operations
-- [x] Template duplication
-- [x] Custom template deletion
-- [x] PDF export (single report)
-- [x] Batch export (multiple reports)
-- [x] Header designer integration
-
-#### 4. Performance
-- [x] Template loads < 500ms
-- [x] Preview updates < 300ms
-- [x] No UI lag with 84 fixtures + 13 infrastructure items
-
-#### 5. Bug Fixes
-- [x] Document any issues found
-- [x] Fix critical/major bugs
-- [x] Polish UI based on findings
+### 3. Alpha.2 Release Preparation
+- [ ] Achieve 50% test coverage
+- [ ] Fix critical bugs from alpha.1 feedback
+- [ ] Update release notes
+- [ ] Build and test on all platforms
 
 ---
 
-## 🐛 Known Issues
+## 📋 Future Work (After Core Features)
 
-### Critical
-- None
+### Cloud-Native Architecture (Issues #34 + #33)
+When ready to implement:
+1. Review `docs/CLOUD_NATIVE_ARCHITECTURE_PLAN.md`
+2. Confirm scope (15-16 weeks)
+3. Confirm budget (~$20-50/month hosting)
+4. Set up backend repository
+5. Begin Phase 1: Backend Foundation
 
-### Major
-- None
-
-### Minor
-- **PDF Formatting**: Export works with headers/footers complete
-  - ✅ Header/footer implemented with Puppeteer displayHeaderFooter
-  - Future enhancements: Better table styling, page breaks for grouped data
-
----
-
-## 🎯 Phase 3 Complete! ✅
-
-All Phase 3 objectives have been achieved:
-
-1. ✅ **Documentation updated** - All status files reflect completion
-2. ✅ **13 system templates** - All fixture and infrastructure reports operational
-3. ✅ **Color Cut Report** - Gel database and sheet calculations working
-4. ✅ **Comprehensive testing** - All features tested and verified
-5. ✅ **Phase 3 marked complete** - PROJECT_STATUS.md updated
-
-**Next Steps:**
-- Ready to create Pull Request to merge `feature/unified-visual-editor` → `main`
-- Phase 4 planning (Label Integration) can begin
-
----
-
-## 📦 Branches Summary
-
-### Active Development
-- **`feature/unified-visual-editor`** (current)
-  - Contains: Phase 3 work + Layout Designer improvements + Color Cut Report
-  - Status: ✅ COMPLETE
-  - Ready for merge to main branch
-
-### Preserved
-- **`feature/unified-visual-editor`**
-  - Original branch with layout designer + early Phase 3 work
-  - Archived for reference
-  - All commits have been integrated into phase-3 branch
-
-### Main Branches
-- **`develop`** - Latest stable development code
-- **`main`** - Production-ready releases
-
----
-
-## 📝 Quick Reference
-
-### Key Files Modified
-- `src/renderer/src/pages/modules/Paperwork.tsx` - Major refactor
-- `src/renderer/src/components/paperwork/PaperworkEditor.tsx` - Integrated editor
-- `src/main/database/appSchema.ts` - Added paperwork_templates table
-- `src/preload/index.ts` - Exposed paperworkTemplates API
-
-### New Files Created (Phase 3)
-```
-src/renderer/src/types/paperworkTemplate.ts
-src/renderer/src/components/paperwork/
-  ├── ColumnConfigurationPanel.tsx
-  ├── GroupingSortingControls.tsx
-  ├── ReportTableRenderer.tsx
-  ├── PaperworkTemplateLibrary.tsx
-  └── PaperworkEditor.tsx
-src/renderer/src/utils/paperwork/
-  ├── columnDefaults.ts
-  ├── dataConnector.ts
-  └── reportOrganizer.ts
-src/main/database/queries/
-  └── paperworkTemplates.ts
-src/main/database/
-  ├── defaultPaperworkTemplates.ts
-  └── seedPaperworkTemplates.ts
-```
-
-### Testing Guide
-- **`PHASE_3_TESTING_GUIDE.md`** - Comprehensive testing checklist
-
----
-
-## 💡 Tips for Resuming
-
-1. **Check dev server logs** - Look for any errors on startup
-2. **Navigate to Paperwork module** - Open default project → Paperwork
-3. **Start with system templates** - Verify they load correctly
-4. **Test one report type thoroughly** - Then test the others
-5. **Document bugs as you find them** - Update "Known Issues" section above
-6. **Take screenshots** - Helpful for documenting UI issues
+**Key Features:**
+- Real-time collaboration
+- User authentication (JWT)
+- WebSocket integration
+- Offline support (14-day grace period)
+- Conflict resolution UI
 
 ---
 
 ## 🔗 Related Documentation
 
-- `PHASE_3_TESTING_GUIDE.md` - Detailed testing procedures
 - `PROJECT_STATUS.md` - Overall project status
-- `~/.claude/plans/recursive-conjuring-lampson.md` - Original Phase 3 implementation plan
+- `docs/CLOUD_NATIVE_ARCHITECTURE_PLAN.md` - Full cloud-native implementation plan
+- `docs/testing/` - Testing documentation and guides
+- GitHub Issues - Open issues and feature requests
 
 ---
 
-**Ready to continue? Start the dev server and begin testing!** 🚀
+## 💡 Tips for Resuming
+
+1. **Check GitHub Issues** - Look for any critical bugs or feedback
+2. **Review PR #61** - Latest telemetry changes merged
+3. **Run test suite** - Ensure all tests passing: `npm test`
+4. **Check PROJECT_STATUS.md** - Review completion status
+5. **Focus on test coverage** - Priority for next alpha release
+
+---
+
+**Current Focus:** Test coverage and core feature completion before cloud-native overhaul 🎯
