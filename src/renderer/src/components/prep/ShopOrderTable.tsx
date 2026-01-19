@@ -30,10 +30,12 @@ interface EditingCell {
  * - Row reordering via drag-and-drop
  */
 export function ShopOrderTable({ projectId }: ShopOrderTableProps) {
-  const { currentProject, sections, items, updateItem, createItem, deleteItem } = usePrepStore();
+  const { currentProject, sections, items, updateItem, createItem, deleteItem, updateProject, createRevision } = usePrepStore();
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null);
   const [editValue, setEditValue] = useState('');
   const editInputRef = useRef<HTMLInputElement>(null);
+  const [draggedItem, setDraggedItem] = useState<PrepEquipmentItem | null>(null);
+  const [notesModalItem, setNotesModalItem] = useState<PrepEquipmentItem | null>(null);
 
   // Focus input when editing starts
   useEffect(() => {
@@ -147,6 +149,89 @@ export function ShopOrderTable({ projectId }: ShopOrderTableProps) {
     }
   };
 
+  const handleAddRevision = async () => {
+    if (!currentProject || currentRevision >= 5) return;
+
+    const newRevisionNumber = currentRevision + 1;
+
+    // Create the revision record
+    await createRevision({
+      prep_project_id: projectId,
+      revision_number: newRevisionNumber,
+      revision_date: Date.now(),
+      notes: '',
+      change_log: JSON.stringify([]),
+    });
+
+    // Update project's current revision
+    await updateProject(projectId, {
+      current_revision: newRevisionNumber,
+    });
+
+    // Initialize revision_quantities for all items with the new revision
+    // Copy quantity from previous revision
+    for (const item of items) {
+      const quantities = parseRevisionQuantities(item.revision_quantities);
+      const previousQty = quantities[currentRevision] || 0;
+      quantities[newRevisionNumber] = previousQty;
+      await updateItem(item.id, {
+        revision_quantities: JSON.stringify(quantities),
+      });
+    }
+  };
+
+  // Drag and drop handlers for row reordering
+  const handleRowDragStart = (e: React.DragEvent, item: PrepEquipmentItem) => {
+    setDraggedItem(item);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleRowDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleRowDrop = async (e: React.DragEvent, targetItem: PrepEquipmentItem) => {
+    e.preventDefault();
+
+    if (!draggedItem || draggedItem.id === targetItem.id) {
+      setDraggedItem(null);
+      return;
+    }
+
+    // Only allow reordering within the same section
+    if (draggedItem.section_id !== targetItem.section_id) {
+      setDraggedItem(null);
+      return;
+    }
+
+    const sectionItems = items
+      .filter((i) => i.section_id === draggedItem.section_id)
+      .sort((a, b) => a.sort_order - b.sort_order);
+
+    const sourceIndex = sectionItems.findIndex((i) => i.id === draggedItem.id);
+    const targetIndex = sectionItems.findIndex((i) => i.id === targetItem.id);
+
+    if (sourceIndex === targetIndex) {
+      setDraggedItem(null);
+      return;
+    }
+
+    // Reorder items
+    const reordered = [...sectionItems];
+    const [removed] = reordered.splice(sourceIndex, 1);
+    reordered.splice(targetIndex, 0, removed);
+
+    // Update sort_order for all affected items
+    for (let i = 0; i < reordered.length; i++) {
+      if (reordered[i].sort_order !== i) {
+        await updateItem(reordered[i].id, { sort_order: i });
+      }
+    }
+
+    setDraggedItem(null);
+  };
+
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900">
       {/* Header */}
@@ -154,14 +239,12 @@ export function ShopOrderTable({ projectId }: ShopOrderTableProps) {
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Shop Order</h2>
         <div className="flex gap-2">
           <button
-            className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-            onClick={() => {
-              // Add revision column (future feature)
-              console.log('Add revision column');
-            }}
+            className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            onClick={handleAddRevision}
             disabled={currentRevision >= 5}
+            title={currentRevision >= 5 ? 'Maximum 6 revisions reached' : 'Add new revision column'}
           >
-            + Add Revision
+            + Add Revision {currentRevision >= 5 && '(Max)'}
           </button>
         </div>
       </div>
@@ -197,6 +280,9 @@ export function ShopOrderTable({ projectId }: ShopOrderTableProps) {
               <th className="px-3 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 w-20">
                 Rental
               </th>
+              <th className="px-3 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 w-16">
+                Notes
+              </th>
               <th className="px-3 py-2 w-16"></th>
             </tr>
           </thead>
@@ -211,7 +297,7 @@ export function ShopOrderTable({ projectId }: ShopOrderTableProps) {
                   {/* Section Header Row */}
                   <tr className="bg-gray-100 dark:bg-gray-800 border-t-2 border-gray-400 dark:border-gray-600">
                     <td
-                      colSpan={revisionNumbers.length + 7}
+                      colSpan={revisionNumbers.length + 8}
                       className="px-3 py-2 font-bold text-sm text-gray-900 dark:text-white"
                     >
                       {section.name.toUpperCase()}
@@ -228,9 +314,14 @@ export function ShopOrderTable({ projectId }: ShopOrderTableProps) {
                     return (
                       <tr
                         key={item.id}
+                        draggable={!isDeleted}
+                        onDragStart={(e) => handleRowDragStart(e, item)}
+                        onDragOver={handleRowDragOver}
+                        onDrop={(e) => handleRowDrop(e, item)}
                         className={`
                           border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800
-                          ${isDeleted ? 'opacity-50 line-through' : ''}
+                          ${isDeleted ? 'opacity-50 line-through' : 'cursor-move'}
+                          ${draggedItem?.id === item.id ? 'opacity-50' : ''}
                         `}
                       >
                         {/* Section Dropdown */}
@@ -369,6 +460,17 @@ export function ShopOrderTable({ projectId }: ShopOrderTableProps) {
                           <div className="text-sm font-bold">{rental}</div>
                         </td>
 
+                        {/* Notes */}
+                        <td className="px-3 py-2 text-center">
+                          <button
+                            onClick={() => setNotesModalItem(item)}
+                            className="text-blue-500 hover:text-blue-700 text-sm"
+                            title={item.notes ? 'Edit notes' : 'Add notes'}
+                          >
+                            {item.notes ? '📝' : '📄'}
+                          </button>
+                        </td>
+
                         {/* Actions */}
                         <td className="px-3 py-2 text-center">
                           <button
@@ -385,7 +487,7 @@ export function ShopOrderTable({ projectId }: ShopOrderTableProps) {
 
                   {/* Add Row Button */}
                   <tr className="border-b border-gray-200 dark:border-gray-700">
-                    <td colSpan={revisionNumbers.length + 7} className="px-3 py-2">
+                    <td colSpan={revisionNumbers.length + 8} className="px-3 py-2">
                       <button
                         onClick={() => handleAddRow(section.id)}
                         className="text-sm text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
@@ -405,6 +507,80 @@ export function ShopOrderTable({ projectId }: ShopOrderTableProps) {
             No sections yet. Add a section to start building your shop order.
           </div>
         )}
+      </div>
+
+      {/* Item Notes Modal */}
+      {notesModalItem && (
+        <ItemNotesModal
+          item={notesModalItem}
+          onClose={() => setNotesModalItem(null)}
+          onSave={async (notes) => {
+            await updateItem(notesModalItem.id, { notes });
+            setNotesModalItem(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+/**
+ * ItemNotesModal - Modal for editing item notes
+ */
+interface ItemNotesModalProps {
+  item: PrepEquipmentItem;
+  onClose: () => void;
+  onSave: (notes: string) => void;
+}
+
+function ItemNotesModal({ item, onClose, onSave }: ItemNotesModalProps) {
+  const [notes, setNotes] = useState(item.notes || '');
+
+  const handleSave = () => {
+    onSave(notes);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl mx-4">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Item Notes: {item.description}
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-4">
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Add notes about this item..."
+            className="w-full h-48 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none"
+          />
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-700">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Save
+          </button>
+        </div>
       </div>
     </div>
   );
