@@ -6,6 +6,32 @@ import {
   setRevisionQuantity,
 } from '../../utils/revisionUtils';
 
+// Constants
+const MAX_REVISIONS = 5; // Maximum number of revisions (0-5 = 6 total)
+const DEBOUNCE_DELAY_MS = 500; // Delay before saving edits
+const ERROR_TOAST_DURATION_MS = 5000; // Auto-dismiss error toasts after 5 seconds
+
+/**
+ * Sanitizes a string for safe CSV export to prevent formula injection attacks.
+ * Prefixes values starting with dangerous characters (=, +, -, @, tab, carriage return)
+ * with a single quote to prevent Excel from interpreting them as formulas.
+ *
+ * @param value - The string value to sanitize
+ * @returns Sanitized string safe for CSV export
+ */
+function sanitizeCSVValue(value: string): string {
+  if (!value) return '';
+
+  // Check if value starts with a dangerous character
+  const dangerousChars = ['=', '+', '-', '@', '\t', '\r'];
+  if (dangerousChars.some(char => value.startsWith(char))) {
+    // Prefix with single quote to prevent formula injection
+    return `'${value}`;
+  }
+
+  return value;
+}
+
 interface ShopOrderTableProps {
   projectId: string;
   onAddSection?: () => void;
@@ -173,12 +199,11 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
   // Show error message with auto-dismiss
   const showError = (message: string) => {
     setErrorMessage(message);
-    setTimeout(() => setErrorMessage(null), 5000); // Auto-dismiss after 5 seconds
+    setTimeout(() => setErrorMessage(null), ERROR_TOAST_DURATION_MS);
   };
 
   /**
-   * Debounced save function - waits 500ms before actually saving
-   * This reduces database writes when users are typing quickly
+   * Debounced save function - reduces database writes when users are typing quickly
    */
   const debouncedSave = (itemId: string, updates: Partial<PrepEquipmentItem>) => {
     // Store the pending update
@@ -201,12 +226,13 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
           await updateItem(id, updateData);
         } catch (error) {
           console.error('[Debounced Save] Error:', error);
+          showError('Failed to save changes. Please try again.');
         }
       }
-    }, 500); // 500ms delay
+    }, DEBOUNCE_DELAY_MS);
   };
 
-  // Flush pending saves on unmount
+  // Flush pending saves on unmount - use Promise.all to prevent race condition
   useEffect(() => {
     return () => {
       if (saveTimeoutRef.current) {
@@ -216,12 +242,21 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       if (pendingSavesRef.current.size > 0) {
         const savesMap = new Map(pendingSavesRef.current);
         pendingSavesRef.current.clear();
-        for (const [id, updates] of savesMap.entries()) {
-          updateItem(id, updates).catch(console.error);
-        }
+
+        // Use Promise.all to ensure all saves complete before unmount
+        const savePromises = Array.from(savesMap.entries()).map(([id, updates]) =>
+          updateItem(id, updates).catch((error) => {
+            console.error('[Unmount Save] Error saving item:', id, error);
+          })
+        );
+
+        // Wait for all saves to complete
+        Promise.all(savePromises).catch((error) => {
+          console.error('[Unmount Save] Error during cleanup:', error);
+        });
       }
     };
-  }, []);
+  }, [updateItem]);
 
   const cancelEdit = () => {
     setEditingCell(null);
@@ -293,7 +328,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
   };
 
   const handleAddRevision = async () => {
-    if (!currentProject || currentRevision >= 5) {
+    if (!currentProject || currentRevision >= MAX_REVISIONS) {
       console.log('Cannot add revision:', { currentProject: !!currentProject, currentRevision });
       return;
     }
@@ -347,7 +382,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
   const handleRemoveRevision = async (revisionNumber: number) => {
     if (!currentProject || revisionNumber === 0 || revisionNumber !== currentRevision) {
       console.log('Cannot remove revision:', { revisionNumber, currentRevision });
-      alert('Can only remove the latest revision');
+      showError('Can only remove the latest revision.');
       return;
     }
 
@@ -555,7 +590,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       const text = await navigator.clipboard.readText();
 
       if (!text.trim()) {
-        alert('Clipboard is empty.');
+        showError('Clipboard is empty.');
         return;
       }
 
@@ -563,7 +598,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       const parsedItems = parsePasteData(text);
 
       if (parsedItems.length === 0) {
-        alert('No valid items found in clipboard data.');
+        showError('No valid items found in clipboard data.');
         return;
       }
 
@@ -640,9 +675,13 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
           const activeQty = quantities[currentRevision] || 0;
           const totalQty = activeQty + (item.spare_qty || 0);
 
+          // Sanitize and escape description and notes for CSV safety
+          const sanitizedDescription = sanitizeCSVValue(item.description).replace(/"/g, '""');
+          const sanitizedNotes = sanitizeCSVValue(item.notes || '').replace(/"/g, '""');
+
           const row: string[] = [
             '', // Empty section column for items
-            `"${item.description.replace(/"/g, '""')}"`, // Escape quotes in description
+            `"${sanitizedDescription}"`, // Sanitized and escaped description
             String(activeQty),
             String(item.spare_qty || 0),
             String(totalQty),
@@ -654,7 +693,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
           }
 
           row.push(String(item.venue_qty || 0));
-          row.push(`"${(item.notes || '').replace(/"/g, '""')}"`); // Escape quotes in notes
+          row.push(`"${sanitizedNotes}"`); // Sanitized and escaped notes
 
           csvRows.push(row.join(','));
         });
@@ -682,7 +721,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       console.log('[Export CSV] Complete!');
     } catch (error) {
       console.error('[Export CSV] Error:', error);
-      alert('Error exporting to CSV. Check console for details.');
+      showError('Failed to export to CSV. Please try again.');
     }
   };
 
@@ -763,8 +802,8 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
           <button
             className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
             onClick={handleAddRevision}
-            disabled={currentRevision >= 5 || isLoading}
-            title={currentRevision >= 5 ? 'Maximum 6 revisions reached' : 'Add new revision column'}
+            disabled={currentRevision >= MAX_REVISIONS || isLoading}
+            title={currentRevision >= MAX_REVISIONS ? `Maximum ${MAX_REVISIONS + 1} revisions reached` : 'Add new revision column'}
           >
             {isLoading ? (
               <>
@@ -775,7 +814,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
                 <span>Adding...</span>
               </>
             ) : (
-              <>+ Add Revision {currentRevision >= 5 && '(Max)'}</>
+              <>+ Add Revision {currentRevision >= MAX_REVISIONS && '(Max)'}</>
             )}
           </button>
         </div>
