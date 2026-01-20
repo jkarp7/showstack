@@ -490,27 +490,37 @@ Comprehensive tracking system for network equipment, data distribution, audio/vi
 Import/export fixtures from Vectorworks with reconciliation.
 
 - ⬜ **Vectorworks Import/Export**
-  - XML import from Vectorworks
-  - Reconciliation workflow (detect changes)
+  - XML import from Vectorworks with user-defined field mapping
+  - Reconciliation workflow (detect changes, field-level conflict resolution)
   - Export back to Vectorworks
-  - Field mapping configuration
+  - MVR export (industry standard format)
+  - Field mapping preferences per project
 
-**Effort Estimate:** 8-12 weeks
+**Implementation Plan:** `docs/features/vectorworks-integration-plan.md`
+**Effort Estimate:** 13 weeks (3.25 months)
 
 ---
 
 #### Console Integration
 
-ETC Eos console communication via OSC.
+Bidirectional communication with lighting consoles via OSC/network protocols.
 
 - ⬜ **ETC Eos Integration**
-  - OSC communication library (osc-js)
-  - Patch import from console
-  - Send patch updates to console
+  - OSC communication for patch import/export
+  - Real-time sync
   - Channel number sync
-  - Fixture type mapping
+  - Fixture type/profile mapping
 
-**Effort Estimate:** 8-12 weeks
+- ⬜ **GrandMA2 Integration**
+  - Telnet + XML for patch import/export
+  - Fixture profile mapping
+
+- ⬜ **GrandMA3 Integration**
+  - MA-Net3 + OSC for patch import/export
+  - Modern protocol support
+
+**Implementation Plan:** `docs/features/console-integration-plan.md`
+**Effort Estimate:** 10 weeks (2.5 months)
 
 ---
 
@@ -576,12 +586,13 @@ Lightwright 6 parity feature - custom categorization system for grouping fixture
 - Integration with labels, paperwork, and shop order automation
 - Color-coded visual indicators and filtering
 - Menu bar integration with 4-tab dialog (Notes, Physical, Vectorworks, Position)
+- SQL-based rule engine with multiple operators
+- Equipment Manager integration (color indicators, filter dropdown)
 
 **Strategic Value:** Critical for shop order automation - provides grouping mechanism for Equipment Manager → Shop Order workflow
 
-**See:** `docs/features/maintenance-menu-system.md` for detailed specifications
-
-**Estimated Effort:** 3-4 weeks
+**Implementation Plan:** `docs/features/maintenance-menu-system-plan.md`
+**Estimated Effort:** 4 weeks (1 month)
 
 ---
 
