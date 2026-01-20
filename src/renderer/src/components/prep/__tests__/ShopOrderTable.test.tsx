@@ -503,7 +503,6 @@ describe('ShopOrderTable', () => {
 
       it('should handle empty clipboard', async () => {
         const user = userEvent.setup();
-        const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
         mockClipboard('');
 
         render(<ShopOrderTable projectId="proj-1" />);
@@ -511,8 +510,9 @@ describe('ShopOrderTable', () => {
         const pasteButtons = screen.getAllByText('Paste Items');
         await user.click(pasteButtons[0]);
 
+        // Check for error toast message
         await waitFor(() => {
-          expect(alertSpy).toHaveBeenCalledWith('Clipboard is empty.');
+          expect(screen.getByText('Clipboard is empty.')).toBeInTheDocument();
         });
       });
 

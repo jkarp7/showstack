@@ -10,6 +10,9 @@ import {
 const MAX_REVISIONS = 5; // Maximum number of revisions (0-5 = 6 total)
 const DEBOUNCE_DELAY_MS = 500; // Delay before saving edits
 const ERROR_TOAST_DURATION_MS = 5000; // Auto-dismiss error toasts after 5 seconds
+const MAX_PASTE_ROWS = 1000; // Maximum rows allowed in clipboard paste (prevent DoS)
+const MAX_DESCRIPTION_LENGTH = 500; // Maximum characters for item descriptions
+const MAX_QUANTITY_VALUE = 99999; // Maximum allowed quantity value
 
 /**
  * Sanitizes a string for safe CSV export to prevent formula injection attacks.
@@ -258,6 +261,38 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
     };
   }, [updateItem]);
 
+  // Add beforeunload handler to flush pending saves before window closes
+  // This provides additional safety beyond the component unmount cleanup
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // If there are pending saves, attempt to flush them
+      if (pendingSavesRef.current.size > 0 || saveTimeoutRef.current) {
+        // Clear debounce timeout to save immediately
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
+        }
+
+        // Attempt to save pending changes synchronously
+        const savesMap = new Map(pendingSavesRef.current);
+        pendingSavesRef.current.clear();
+
+        // Fire all pending saves immediately
+        for (const [id, updates] of savesMap.entries()) {
+          updateItem(id, updates).catch((error) => {
+            console.error('[BeforeUnload Save] Error saving item:', id, error);
+          });
+        }
+
+        // Show warning dialog if there are unsaved changes
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [updateItem]);
+
   const cancelEdit = () => {
     setEditingCell(null);
     setEditValue('');
@@ -497,10 +532,21 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
    * - Description, Active, Spare, Venue, Notes
    * - Description, Quantity (maps to Active)
    * - Description only
+   *
+   * Input validation:
+   * - Maximum 1000 rows to prevent memory issues
+   * - Descriptions truncated to 500 characters
+   * - Quantities capped at 99999
    */
   const parsePasteData = (text: string): Array<Partial<PrepEquipmentItem>> => {
     const lines = text.trim().split('\n');
     if (lines.length === 0) return [];
+
+    // Validate input size to prevent DoS
+    if (lines.length > MAX_PASTE_ROWS) {
+      showError(`Too many rows. Maximum ${MAX_PASTE_ROWS} items allowed per paste.`);
+      return [];
+    }
 
     // Detect delimiter (tab or comma)
     const delimiter = lines[0].includes('\t') ? '\t' : ',';
@@ -551,11 +597,14 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
           if (['description', 'name', 'item'].includes(header)) {
             description = value;
           } else if (['active', 'qty', 'quantity'].includes(header)) {
-            active_qty = parseInt(value, 10) || 0;
+            const parsed = parseInt(value, 10) || 0;
+            active_qty = Math.min(parsed, MAX_QUANTITY_VALUE);
           } else if (header === 'spare') {
-            spare_qty = parseInt(value, 10) || 0;
+            const parsed = parseInt(value, 10) || 0;
+            spare_qty = Math.min(parsed, MAX_QUANTITY_VALUE);
           } else if (header === 'venue') {
-            venue_qty = parseInt(value, 10) || 0;
+            const parsed = parseInt(value, 10) || 0;
+            venue_qty = Math.min(parsed, MAX_QUANTITY_VALUE);
           } else if (header === 'notes') {
             notes = value;
           }
@@ -563,9 +612,12 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       } else {
         // Map by position: Description, Active, Spare, Venue, Notes
         description = row[0] || '';
-        active_qty = row[1] ? parseInt(row[1], 10) || 0 : 0;
-        spare_qty = row[2] ? parseInt(row[2], 10) || 0 : 0;
-        venue_qty = row[3] ? parseInt(row[3], 10) || 0 : 0;
+        const parsedActive = row[1] ? parseInt(row[1], 10) || 0 : 0;
+        const parsedSpare = row[2] ? parseInt(row[2], 10) || 0 : 0;
+        const parsedVenue = row[3] ? parseInt(row[3], 10) || 0 : 0;
+        active_qty = Math.min(parsedActive, MAX_QUANTITY_VALUE);
+        spare_qty = Math.min(parsedSpare, MAX_QUANTITY_VALUE);
+        venue_qty = Math.min(parsedVenue, MAX_QUANTITY_VALUE);
         notes = row[4] || '';
       }
 
@@ -574,8 +626,14 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
         return null;
       }
 
+      // Truncate description to max length
+      const trimmedDescription = description.trim();
+      const validDescription = trimmedDescription.length > MAX_DESCRIPTION_LENGTH
+        ? trimmedDescription.substring(0, MAX_DESCRIPTION_LENGTH)
+        : trimmedDescription;
+
       return {
-        description: description.trim(),
+        description: validDescription,
         active_qty,
         spare_qty,
         venue_qty,
@@ -711,7 +769,9 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       const url = URL.createObjectURL(blob);
 
       link.setAttribute('href', url);
-      link.setAttribute('download', `${currentProject.production_name.replace(/[^a-z0-9]/gi, '_')}_shop_order.csv`);
+      // Sanitize filename - only remove characters that are invalid on filesystems (< > : " / \ | ? *)
+      const sanitizedFilename = currentProject.production_name.replace(/[<>:"/\\|?*]/g, '_');
+      link.setAttribute('download', `${sanitizedFilename}_shop_order.csv`);
       link.style.visibility = 'hidden';
 
       document.body.appendChild(link);
