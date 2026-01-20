@@ -235,57 +235,58 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
     }, DEBOUNCE_DELAY_MS);
   };
 
-  // Flush pending saves on unmount - use Promise.all to prevent race condition
+  // Flush pending saves on unmount
+  // NOTE: React cleanup functions cannot be async, so we fire saves and hope they complete.
+  // The beforeunload handler below provides additional safety for window close events.
   useEffect(() => {
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
-      // Immediately save any pending changes on unmount
+      // Fire all pending saves immediately (best effort)
       if (pendingSavesRef.current.size > 0) {
         const savesMap = new Map(pendingSavesRef.current);
         pendingSavesRef.current.clear();
 
-        // Use Promise.all to ensure all saves complete before unmount
-        const savePromises = Array.from(savesMap.entries()).map(([id, updates]) =>
+        // Fire saves without awaiting (React cleanup can't be async)
+        for (const [id, updates] of savesMap.entries()) {
           updateItem(id, updates).catch((error) => {
             console.error('[Unmount Save] Error saving item:', id, error);
-          })
-        );
-
-        // Wait for all saves to complete
-        Promise.all(savePromises).catch((error) => {
-          console.error('[Unmount Save] Error during cleanup:', error);
-        });
+          });
+        }
       }
     };
   }, [updateItem]);
 
   // Add beforeunload handler to flush pending saves before window closes
-  // This provides additional safety beyond the component unmount cleanup
+  // Only shows warning if there are unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      // If there are pending saves, attempt to flush them
-      if (pendingSavesRef.current.size > 0 || saveTimeoutRef.current) {
+      const hasPendingSaves = pendingSavesRef.current.size > 0 || saveTimeoutRef.current !== null;
+
+      if (hasPendingSaves) {
         // Clear debounce timeout to save immediately
         if (saveTimeoutRef.current) {
           clearTimeout(saveTimeoutRef.current);
+          saveTimeoutRef.current = null;
         }
 
-        // Attempt to save pending changes synchronously
-        const savesMap = new Map(pendingSavesRef.current);
-        pendingSavesRef.current.clear();
+        // Fire all pending saves (best effort)
+        if (pendingSavesRef.current.size > 0) {
+          const savesMap = new Map(pendingSavesRef.current);
+          pendingSavesRef.current.clear();
 
-        // Fire all pending saves immediately
-        for (const [id, updates] of savesMap.entries()) {
-          updateItem(id, updates).catch((error) => {
-            console.error('[BeforeUnload Save] Error saving item:', id, error);
-          });
+          for (const [id, updates] of savesMap.entries()) {
+            updateItem(id, updates).catch((error) => {
+              console.error('[BeforeUnload Save] Error saving item:', id, error);
+            });
+          }
         }
 
-        // Show warning dialog if there are unsaved changes
+        // Show warning dialog to give saves time to complete
         e.preventDefault();
-        e.returnValue = '';
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
       }
     };
 
@@ -383,16 +384,18 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       console.log('[Add Revision] Step 1: Complete');
 
       // Initialize revision_quantities for all items with the new revision
-      // Copy quantity from previous revision
-      console.log(`[Add Revision] Step 2: Updating ${items.length} items`);
-      for (const item of items) {
-        const quantities = parseRevisionQuantities(item.revision_quantities);
-        const previousQty = quantities[currentRevision] || 0;
-        quantities[newRevisionNumber] = previousQty;
-        await updateItem(item.id, {
-          revision_quantities: JSON.stringify(quantities),
-        });
-      }
+      // Copy quantity from previous revision (batched for performance)
+      console.log(`[Add Revision] Step 2: Updating ${items.length} items in parallel`);
+      await Promise.all(
+        items.map(async (item) => {
+          const quantities = parseRevisionQuantities(item.revision_quantities);
+          const previousQty = quantities[currentRevision] || 0;
+          quantities[newRevisionNumber] = previousQty;
+          return updateItem(item.id, {
+            revision_quantities: JSON.stringify(quantities),
+          });
+        })
+      );
       console.log('[Add Revision] Step 2: Complete');
 
       // Update project's current revision LAST
@@ -769,8 +772,12 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       const url = URL.createObjectURL(blob);
 
       link.setAttribute('href', url);
-      // Sanitize filename - only remove characters that are invalid on filesystems (< > : " / \ | ? *)
-      const sanitizedFilename = currentProject.production_name.replace(/[<>:"/\\|?*]/g, '_');
+      // Sanitize filename - remove invalid filesystem chars, prevent path traversal, limit length
+      const sanitizedFilename = currentProject.production_name
+        .replace(/[<>:"/\\|?*]/g, '_') // Remove invalid filesystem characters
+        .replace(/\.\./g, '_')          // Prevent path traversal
+        .replace(/^\.+/, '_')           // Remove leading dots
+        .substring(0, 200);             // Limit to 200 chars (+ 16 for "_shop_order.csv" = 216 total)
       link.setAttribute('download', `${sanitizedFilename}_shop_order.csv`);
       link.style.visibility = 'hidden';
 
