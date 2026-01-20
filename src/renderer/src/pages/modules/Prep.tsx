@@ -6,6 +6,7 @@ import { usePrepFileStore } from '../../store/prepFileStore';
 import { NewPrepProjectDialog } from '../../components/prep/NewPrepProjectDialog';
 import { PrepProjectCard } from '../../components/prep/PrepProjectCard';
 import { SectionList } from '../../components/prep/SectionList';
+import { ShopOrderTable } from '../../components/prep/ShopOrderTable';
 import { AddSectionDialog } from '../../components/prep/AddSectionDialog';
 import { EditSectionDialog } from '../../components/prep/EditSectionDialog';
 import { RevisionPanel } from '../../components/prep/RevisionPanel';
@@ -1137,26 +1138,14 @@ export function Prep() {
                   )}
                 </div>
 
-                {/* Equipment */}
+                {/* Shop Order Table */}
                 <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                  <button
-                    onClick={() => setEquipmentExpanded(!equipmentExpanded)}
-                    className="w-full px-6 py-4 flex items-center gap-4 hover:bg-gray-700 transition"
-                  >
-                    <span className="text-gray-600 dark:text-gray-400 text-lg">{equipmentExpanded ? '▼' : '▶'}</span>
-                    <h2 className="text-xl font-bold">Equipment</h2>
-                  </button>
-
-                  {equipmentExpanded && (
-                    <div className="p-6 pt-0">
-                      <SectionList
-                        projectId={currentProject.id}
-                        sections={sections}
-                        onAddSection={() => setShowAddSectionDialog(true)}
-                        onEditSection={handleEditSection}
-                      />
-                    </div>
-                  )}
+                  <div className="border-t border-gray-200 dark:border-gray-700">
+                    <ShopOrderTable
+                      projectId={currentProject.id}
+                      onAddSection={() => setShowAddSectionDialog(true)}
+                    />
+                  </div>
                 </div>
               </>
             )}
