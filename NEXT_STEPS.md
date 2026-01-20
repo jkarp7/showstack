@@ -1,8 +1,8 @@
 # Next Steps - ShowStack Development
 
 **Branch:** `develop`
-**Last Updated:** January 18, 2026
-**Status:** Telemetry hardening complete, planning cloud-native architecture
+**Last Updated:** January 20, 2026
+**Status:** Shop order table migration complete, focusing on Lightwright parity features
 
 ---
 
@@ -24,51 +24,50 @@ npm test
 
 ---
 
-## ✅ Just Completed (January 18, 2026)
+## ✅ Just Completed (January 20, 2026)
 
-### Telemetry System Hardening (PR #61)
-- Fixed all 5 critical security & reliability issues
-- Comprehensive test coverage (95 specs, 100% passing)
-- ErrorBoundary component with fallback UI
-- AnalyticsDashboard for admin panel
-- Production-ready telemetry implementation
+### Shop Order Table Migration (PR #63)
+- Migrated from dialog-based to modern spreadsheet-like table interface
+- Inline cell editing with cell selection system
+- Clipboard operations (paste TSV/CSV, export to CSV)
+- Keyboard shortcuts (Ctrl/Cmd+V, Delete, Enter)
+- Debounced saves (~90% reduction in database writes)
+- Input validation and security improvements
+- 82 comprehensive tests (100% passing)
+- 4,876 lines of production code across 17 files
+- Post-merge improvements tracked in Issue #65
 
-### Cloud-Native Architecture Planning
-- 15-16 week implementation plan for authentication + real-time collaboration
-- Backend server design (Express.js + PostgreSQL + Socket.io)
-- Operational Transform for conflict-free concurrent editing
-- Plan saved to: `docs/CLOUD_NATIVE_ARCHITECTURE_PLAN.md`
-- **Decision**: On hold until core features complete
+### Previous Completions
+- Telemetry System Hardening (PR #61 - January 18, 2026)
+- Cloud-Native Architecture Planning (On hold until core features complete)
 
 ---
 
 ## 🎯 Immediate Priorities
 
-### 1. Test Coverage (Issue #55)
-**Goal:** Minimum 50% overall coverage for alpha.2 release
-
-**Critical Path Testing:**
-- [ ] Label rendering tests
-- [ ] Phase template tests
-- [ ] Circuit parser tests
-- [ ] Power calculation tests
+### 1. Lightwright Parity Features (Short-term: 1-2 Months)
+**Focus:** Industry standard features to compete with Lightwright
 
 **High Priority:**
-- [ ] Port validation tests
-- [ ] Image upload tests
-- [ ] CSV import tests
+- [ ] **MVR export support** - Industry standard CAD/visualizer format (6-8 weeks)
+- [ ] **Enhanced error checking** - Overlapping patches, overloaded dimmers, duplicate channels (4-6 weeks)
+- [ ] **Basic console integration** - OSC protocol for ETC Eos (8-12 weeks)
 
-**Current Status:** Telemetry modules have 100% test coverage (baseline example)
+**Medium Priority:**
+- [ ] Add power distribution printable reports with visualization
+- [ ] Implement CSV import/export with field mapping
 
-### 2. Core Feature Completion
-**Before considering cloud-native architecture:**
-- [ ] Review and close open issues
-- [ ] Complete any incomplete features
-- [ ] Performance optimization
-- [ ] Bug fixes from alpha testing feedback
+### 2. Shop Order Post-Merge Improvements (Issue #65)
+**Non-critical enhancements from PR #63 review:**
+- [ ] Standardize error handling (toast notifications)
+- [ ] Add integration tests for critical workflows
+- [ ] Virtual scrolling for large tables (500+ items)
+- [ ] Configuration extraction to separate file
+- [ ] E2E tests with Playwright
 
 ### 3. Alpha.2 Release Preparation
-- [ ] Achieve 50% test coverage
+- [ ] Complete MVR export
+- [ ] Achieve 50% test coverage (in progress - shop order 100%, telemetry 100%)
 - [ ] Fix critical bugs from alpha.1 feedback
 - [ ] Update release notes
 - [ ] Build and test on all platforms
@@ -106,11 +105,12 @@ When ready to implement:
 ## 💡 Tips for Resuming
 
 1. **Check GitHub Issues** - Look for any critical bugs or feedback
-2. **Review PR #61** - Latest telemetry changes merged
-3. **Run test suite** - Ensure all tests passing: `npm test`
-4. **Check PROJECT_STATUS.md** - Review completion status
-5. **Focus on test coverage** - Priority for next alpha release
+2. **Review PR #63** - Latest shop order table migration merged
+3. **Review Issue #65** - Post-merge improvement tracking
+4. **Run test suite** - Ensure all tests passing: `npm test`
+5. **Check PROJECT_STATUS.md** - Review completion status
+6. **Focus on Lightwright parity** - MVR export, error checking, console integration
 
 ---
 
-**Current Focus:** Test coverage and core feature completion before cloud-native overhaul 🎯
+**Current Focus:** MVR export and industry standard features for competitive parity with Lightwright 🎯

@@ -1,7 +1,7 @@
 # ShowStack Project Status
 
 **Created:** December 18, 2025
-**Last Updated:** January 18, 2026
+**Last Updated:** January 20, 2026
 **Current Version:** 0.1.0-alpha
 **Development Phase:** Alpha
 **Active Branch:** `develop`
@@ -29,6 +29,20 @@ This document tracks the development status of all ShowStack feature domains and
 ### ✅ Recently Completed (December 2025 - January 2026)
 
 **Latest (January 2026):**
+9. ✅ Shop Order Table Migration (PR #63) - COMPLETED (January 20, 2026)
+   - Migrated from dialog-based to spreadsheet-like table interface
+   - Inline cell editing (double-click to edit, single-click to select)
+   - Paste from clipboard (TSV/CSV) with intelligent format detection
+   - Export to CSV with proper sanitization and escaping
+   - Keyboard shortcuts (Ctrl/Cmd+V paste, Delete to clear, Enter to edit)
+   - Debounced saves (500ms delay, reduces DB writes by ~90%)
+   - Input validation (max 1000 rows, 500 char descriptions, quantity caps)
+   - Enhanced filename sanitization (path traversal protection)
+   - Parallel database updates for revision creation
+   - Comprehensive test coverage (82 tests, 100% passing)
+   - 4,876 lines of production code added across 17 files
+   - Documentation: PHASE2_COMPLETE.md, PHASE3_COMPLETE.md, PHASE4_5_COMPLETE.md
+
 8. ✅ Telemetry System Hardening (PR #61) - COMPLETED (January 18, 2026)
    - Fixed 5 critical security & reliability issues from code review
    - Sanitized stack traces (removed file paths, obfuscated user data)
@@ -147,7 +161,6 @@ This document tracks the development status of all ShowStack feature domains and
 3. **Basic console integration** - OSC protocol for ETC Eos
 4. Add power distribution printable reports with visualization
 5. Implement CSV import/export with field mapping
-6. **Shop Order table-based redesign** - Migrate from dialog-based to spreadsheet-like table format for faster data entry and import support (See: `docs/features/migration-shop-order-table.md`)
 
 ### Medium-term (Next 3-6 Months) - **Professional Integration**
 1. **Vectorworks XML integration** - Automatic data sync with CAD
@@ -338,15 +351,22 @@ Grid-based visual label designer with batch printing and multi-label PDF sheet e
 
 #### Shop Order Tool
 
-Complete shop order and equipment specification builder with professional PDF output.
+Complete shop order and equipment specification builder with modern spreadsheet-like interface and professional PDF output.
 
 **Core Functionality:**
-- ✅ **Equipment Item Management** - `src/renderer/src/components/prep/EquipmentItemTable.tsx`
-  - Add, edit, delete equipment items
-  - Section-based organization
-  - Drag-and-drop reordering
-  - Quantity tracking (venue, rental, shop)
+- ✅ **Shop Order Table** - `src/renderer/src/components/prep/ShopOrderTable.tsx` (MIGRATED - PR #63)
+  - Spreadsheet-like table interface with inline editing
+  - Cell selection system (single-click select, double-click edit)
+  - Keyboard shortcuts (Ctrl/Cmd+V paste, Delete clear, Enter edit)
+  - Paste from clipboard (TSV/CSV) with intelligent format detection
+  - Export to CSV with sanitization and formula injection prevention
+  - Debounced saves (500ms delay, ~90% reduction in DB writes)
+  - Drag-and-drop row reordering within sections
+  - Quantity tracking across revisions (JSON-based revision_quantities)
+  - Merge duplicate items functionality
+  - Input validation (max 1000 rows, 500 char descriptions, quantity caps)
   - Multi-discipline support (lighting, audio, video, rigging, scenic, props)
+  - 82 comprehensive tests (100% passing)
 
 - ✅ **Section Management** - `src/renderer/src/components/prep/SectionList.tsx`
   - Create custom sections
@@ -381,6 +401,12 @@ Complete shop order and equipment specification builder with professional PDF ou
 
 **Planned Enhancements:**
 - ⬜ **Auto-populate from System Documentation** - Create shop order items automatically from fixture and infrastructure data
+- ⬜ **Post-Migration Improvements** (Issue #65) - Non-critical enhancements identified during PR #63 review:
+  - Standardize error handling (use toast notifications consistently)
+  - Add integration tests for critical workflows
+  - Virtual scrolling for large tables (500+ items)
+  - Configuration extraction to separate file
+  - E2E tests with Playwright
 
 ---
 
