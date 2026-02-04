@@ -27,6 +27,7 @@ import {
 import { seedDefaultPageLayoutsFromJSON } from '../database/seedDefaultLayoutsFromJSON';
 
 import { DatabaseError, ValidationError } from '../errors';
+import { performanceMonitor } from '../monitoring/PerformanceMonitor';
 
 /**
  * NOTE: This file contains 42 IPC handlers for the Prep module.
@@ -48,9 +49,13 @@ export function registerShopOrderHandlers(): void {
   // ============================================
 
   ipcMain.handle('shop-order:projects:getAll', async () => {
+    const start = Date.now();
     try {
-      return await shopOrderProjectService.getAll();
+      const result = await shopOrderProjectService.getAll();
+      performanceMonitor.trackIPCHandler('shop-order:projects:getAll', Date.now() - start);
+      return result;
     } catch (error) {
+      performanceMonitor.trackIPCHandler('shop-order:projects:getAll', Date.now() - start);
       console.error('Failed to get prep projects:', {
         operation: 'shop-order:projects:getAll',
         error: error instanceof Error ? error.message : error

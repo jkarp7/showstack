@@ -23,6 +23,7 @@ import { registerPhaseTemplateHandlers } from './ipc/phaseTemplates';
 import { registerInfrastructureHandlers } from './ipc/infrastructure';
 import { backgroundVerifier } from './services/BackgroundVerifier';
 import { licenseService } from './services/LicenseService';
+import { performanceMonitor } from './monitoring/PerformanceMonitor';
 
 // Set app name for macOS menu bar
 app.setName('ShowStack');
@@ -77,6 +78,15 @@ app.on('ready', async () => {
 
   // Create landing window
   windowManager.createLandingWindow();
+
+  // Start periodic performance monitoring
+  // Track memory usage every 5 minutes
+  setInterval(() => {
+    performanceMonitor.trackMemoryUsage();
+  }, 5 * 60 * 1000);
+
+  // Log initial memory baseline
+  performanceMonitor.trackMemoryUsage();
 });
 
 app.on('window-all-closed', () => {

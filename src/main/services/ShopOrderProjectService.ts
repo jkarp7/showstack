@@ -7,6 +7,7 @@ import {
   ShopOrderProject
 } from '../database/queries/shop-order';
 import { errorHandler, ValidationError } from '../errors';
+import { performanceMonitor } from '../monitoring/PerformanceMonitor';
 
 /**
  * ShopOrderProjectService
@@ -17,10 +18,25 @@ export class ShopOrderProjectService {
    * Get all shop order projects
    */
   async getAll(): Promise<ShopOrderProject[]> {
-    return await errorHandler.executeWithRetry(
-      async () => getAllShopOrderProjects(),
-      'shop-order:projects:getAll'
-    );
+    const start = Date.now();
+    try {
+      const result = await errorHandler.executeWithRetry(
+        async () => getAllShopOrderProjects(),
+        'shop-order:projects:getAll'
+      );
+      performanceMonitor.trackDatabaseQuery(
+        'shop-order:projects:getAll',
+        Date.now() - start,
+        result.length
+      );
+      return result;
+    } catch (error) {
+      performanceMonitor.trackDatabaseQuery(
+        'shop-order:projects:getAll',
+        Date.now() - start
+      );
+      throw error;
+    }
   }
 
   /**
