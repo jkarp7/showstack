@@ -8,14 +8,27 @@ import {
   getPDRacksWithUsage,
   PDRack
 } from '../database/queries/pdRacks';
+import { errorHandler } from '../errors';
+import { DatabaseError, ValidationError } from '../errors';
 
 export function registerPDRackHandlers(): void {
   // Get all PD racks for a project
   ipcMain.handle('pdRacks:getAll', async (_event, projectId?: string) => {
     try {
-      return getAllPDRacks(projectId);
+      return await errorHandler.executeWithRetry(
+        async () => getAllPDRacks(projectId),
+        'pdRacks:getAll'
+      );
     } catch (error) {
-      console.error('Error getting PD racks:', error);
+      console.error('Failed to get PD racks:', {
+        operation: 'pdRacks:getAll',
+        projectId,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to load PD racks: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -23,9 +36,20 @@ export function registerPDRackHandlers(): void {
   // Get PD rack by ID
   ipcMain.handle('pdRacks:getById', async (_event, id: string) => {
     try {
-      return getPDRackById(id);
+      return await errorHandler.executeWithRetry(
+        async () => getPDRackById(id),
+        'pdRacks:getById'
+      );
     } catch (error) {
-      console.error('Error getting PD rack:', error);
+      console.error('Failed to get PD rack:', {
+        operation: 'pdRacks:getById',
+        id,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to load PD rack: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -33,9 +57,32 @@ export function registerPDRackHandlers(): void {
   // Create PD rack
   ipcMain.handle('pdRacks:create', async (_event, rack: Omit<PDRack, 'id' | 'created_at' | 'updated_at'>, projectId?: string) => {
     try {
-      return createPDRack(rack, projectId);
+      // Basic validation
+      if (!rack.name || rack.name.trim().length === 0) {
+        throw new ValidationError(
+          'PD rack name is required',
+          'name',
+          rack.name
+        );
+      }
+
+      return await errorHandler.executeWithRetry(
+        async () => createPDRack(rack, projectId),
+        'pdRacks:create'
+      );
     } catch (error) {
-      console.error('Error creating PD rack:', error);
+      console.error('Failed to create PD rack:', {
+        operation: 'pdRacks:create',
+        rack,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof ValidationError) {
+        throw new Error(error.toUserMessage());
+      }
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to create PD rack: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -43,9 +90,33 @@ export function registerPDRackHandlers(): void {
   // Update PD rack
   ipcMain.handle('pdRacks:update', async (_event, id: string, updates: Partial<PDRack>) => {
     try {
-      return updatePDRack(id, updates);
+      // Validate name if being updated
+      if (updates.name !== undefined && (!updates.name || updates.name.trim().length === 0)) {
+        throw new ValidationError(
+          'PD rack name cannot be empty',
+          'name',
+          updates.name
+        );
+      }
+
+      return await errorHandler.executeWithRetry(
+        async () => updatePDRack(id, updates),
+        'pdRacks:update'
+      );
     } catch (error) {
-      console.error('Error updating PD rack:', error);
+      console.error('Failed to update PD rack:', {
+        operation: 'pdRacks:update',
+        id,
+        updates,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof ValidationError) {
+        throw new Error(error.toUserMessage());
+      }
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to update PD rack: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -53,9 +124,20 @@ export function registerPDRackHandlers(): void {
   // Delete PD rack
   ipcMain.handle('pdRacks:delete', async (_event, id: string) => {
     try {
-      deletePDRack(id);
+      await errorHandler.executeWithRetry(
+        async () => deletePDRack(id),
+        'pdRacks:delete'
+      );
     } catch (error) {
-      console.error('Error deleting PD rack:', error);
+      console.error('Failed to delete PD rack:', {
+        operation: 'pdRacks:delete',
+        id,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to delete PD rack: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -63,9 +145,20 @@ export function registerPDRackHandlers(): void {
   // Get PD racks with usage statistics
   ipcMain.handle('pdRacks:getWithUsage', async (_event, projectId?: string) => {
     try {
-      return getPDRacksWithUsage(projectId);
+      return await errorHandler.executeWithRetry(
+        async () => getPDRacksWithUsage(projectId),
+        'pdRacks:getWithUsage'
+      );
     } catch (error) {
-      console.error('Error getting PD racks with usage:', error);
+      console.error('Failed to get PD racks with usage:', {
+        operation: 'pdRacks:getWithUsage',
+        projectId,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to load PD rack usage: ${error.message}`);
+      }
       throw error;
     }
   });
