@@ -100,10 +100,22 @@ export async function saveBothDatabasesWithRetry(): Promise<void> {
 }
 
 /**
- * Export database manager for advanced usage
+ * Export database manager and transaction support for advanced usage
  */
 export { databaseManager } from './core/DatabaseManager';
 export { databaseWriter } from './persistence/DatabaseWriter';
+export { TransactionManager, createTransactionManager } from './core/TransactionManager';
+
+/**
+ * Export bulk operations utilities
+ */
+export {
+  bulkInsert,
+  bulkUpdate,
+  bulkDelete,
+  bulkUpsert,
+  executeInTransaction
+} from './utils/bulkOperations';
 
 /**
  * Export Database type for convenience
