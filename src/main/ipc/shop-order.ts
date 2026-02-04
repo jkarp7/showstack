@@ -2,47 +2,15 @@ import { ipcMain, dialog, BrowserWindow } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 import { formatNoteContentAsHTML } from '../utils/noteFormatting';
-import {
-  // Projects
-  getAllShopOrderProjects,
-  getShopOrderProjectById,
-  createShopOrderProject,
-  updateShopOrderProject,
-  deleteShopOrderProject,
-  ShopOrderProject,
-  // Sections
-  getSectionsByProjectId,
-  createShopOrderSection,
-  updateShopOrderSection,
-  deleteShopOrderSection,
-  ShopOrderSection,
-  // Equipment Items
-  getItemsBySectionId,
-  getItemsByProjectId,
-  createShopOrderItem,
-  updateShopOrderItem,
-  deleteShopOrderItem,
-  ShopOrderItem,
-  // Revisions
-  getRevisionsByProjectId,
-  createShopOrderRevision,
-  deleteShopOrderRevision,
-  ShopOrderRevision,
-  // Notes
-  getNotesByProjectId,
-  createShopOrderNote,
-  updateShopOrderNote,
-  deleteShopOrderNote,
-  ShopOrderNote,
-  // Note Templates
-  getAllNoteTemplates,
-  getNoteTemplateById,
-  getDefaultNoteTemplate,
-  createNoteTemplate,
-  updateNoteTemplate,
-  deleteNoteTemplate,
-  ShopOrderNoteTemplate,
-} from '../database/queries/shop-order';
+// Service imports (business logic layer)
+import { shopOrderProjectService } from '../services/ShopOrderProjectService';
+import { shopOrderSectionService } from '../services/ShopOrderSectionService';
+import { shopOrderItemService } from '../services/ShopOrderItemService';
+import { shopOrderRevisionService } from '../services/ShopOrderRevisionService';
+import { shopOrderNoteService } from '../services/ShopOrderNoteService';
+import { shopOrderFileService } from '../services/shopOrderFileService';
+
+// Direct database imports (for non-service operations)
 import { getProjectById } from '../database/queries/projects';
 import {
   // Layout Templates (app-level user preferences)
@@ -57,8 +25,7 @@ import {
   LayoutElement,
 } from '../database/queries/layoutTemplates';
 import { seedDefaultPageLayoutsFromJSON } from '../database/seedDefaultLayoutsFromJSON';
-import { shopOrderFileService } from '../services/shopOrderFileService';
-import { errorHandler } from '../errors';
+
 import { DatabaseError, ValidationError } from '../errors';
 
 /**
@@ -82,10 +49,7 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:projects:getAll', async () => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => getAllShopOrderProjects(),
-        'shop-order:projects:getAll'
-      );
+      return await shopOrderProjectService.getAll();
     } catch (error) {
       console.error('Failed to get prep projects:', {
         operation: 'shop-order:projects:getAll',
@@ -100,10 +64,7 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:projects:getById', async (_event, id: string) => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => getShopOrderProjectById(id),
-        'shop-order:projects:getById'
-      );
+      return await shopOrderProjectService.getById(id);
     } catch (error) {
       console.error('Failed to get prep project:', {
         operation: 'shop-order:projects:getById',
@@ -122,10 +83,7 @@ export function registerShopOrderHandlers(): void {
       if (!data.production_name || data.production_name.trim().length === 0) {
         throw new ValidationError('Production name is required', 'production_name', data.production_name);
       }
-      return await errorHandler.executeWithRetry(
-        async () => createShopOrderProject(data),
-        'shop-order:projects:create'
-      );
+      return await shopOrderProjectService.create(data);
     } catch (error) {
       console.error('Failed to create prep project:', {
         operation: 'shop-order:projects:create',
@@ -149,10 +107,7 @@ export function registerShopOrderHandlers(): void {
         if (updates.production_name !== undefined && (!updates.production_name || updates.production_name.trim().length === 0)) {
           throw new ValidationError('Production name cannot be empty', 'production_name', updates.production_name);
         }
-        return await errorHandler.executeWithRetry(
-          async () => updateShopOrderProject(id, updates),
-          'shop-order:projects:update'
-        );
+        return await shopOrderProjectService.update(id, updates);
       } catch (error) {
         console.error('Failed to update prep project:', {
           operation: 'shop-order:projects:update',
@@ -173,10 +128,7 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:projects:delete', async (_event, id: string) => {
     try {
-      await errorHandler.executeWithRetry(
-        async () => deleteShopOrderProject(id),
-        'shop-order:projects:delete'
-      );
+      await shopOrderProjectService.delete(id);
     } catch (error) {
       console.error('Failed to delete prep project:', {
         operation: 'shop-order:projects:delete',
@@ -196,7 +148,7 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:sections:getByProjectId', async (_event, projectId: string) => {
     try {
-      return getSectionsByProjectId(projectId);
+      return await shopOrderSectionService.getByProjectId(projectId);
     } catch (error) {
       console.error('Error getting prep sections:', error);
       throw error;
@@ -205,7 +157,7 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:sections:create', async (_event, data: Partial<ShopOrderSection>) => {
     try {
-      return createShopOrderSection(data);
+      return await shopOrderSectionService.create(data);
     } catch (error) {
       console.error('Error creating prep section:', error);
       throw error;
@@ -216,7 +168,7 @@ export function registerShopOrderHandlers(): void {
     'shop-order:sections:update',
     async (_event, id: string, updates: Partial<ShopOrderSection>) => {
       try {
-        return updateShopOrderSection(id, updates);
+        return await shopOrderSectionService.update(id, updates);
       } catch (error) {
         console.error('Error updating prep section:', error);
         throw error;
@@ -239,7 +191,7 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:items:getBySectionId', async (_event, sectionId: string) => {
     try {
-      return getItemsBySectionId(sectionId);
+      return await shopOrderItemService.getBySectionId(sectionId);
     } catch (error) {
       console.error('Error getting prep items by section:', error);
       throw error;
@@ -248,7 +200,7 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:items:getByProjectId', async (_event, projectId: string) => {
     try {
-      return getItemsByProjectId(projectId);
+      return await shopOrderItemService.getByProjectId(projectId);
     } catch (error) {
       console.error('Error getting prep items by project:', error);
       throw error;
@@ -257,7 +209,7 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:items:create', async (_event, data: Partial<ShopOrderItem>) => {
     try {
-      return createShopOrderItem(data);
+      return await shopOrderItemService.create(data);
     } catch (error) {
       console.error('Error creating prep item:', error);
       throw error;
@@ -268,7 +220,7 @@ export function registerShopOrderHandlers(): void {
     'shop-order:items:update',
     async (_event, id: string, updates: Partial<ShopOrderItem>) => {
       try {
-        return updateShopOrderItem(id, updates);
+        return await shopOrderItemService.update(id, updates);
       } catch (error) {
         console.error('Error updating prep item:', error);
         throw error;
@@ -291,7 +243,7 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:revisions:getByProjectId', async (_event, projectId: string) => {
     try {
-      return getRevisionsByProjectId(projectId);
+      return await shopOrderRevisionService.getByProjectId(projectId);
     } catch (error) {
       console.error('Error getting prep revisions:', error);
       throw error;
@@ -300,7 +252,7 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:revisions:create', async (_event, data: Partial<ShopOrderRevision>) => {
     try {
-      return createShopOrderRevision(data);
+      return await shopOrderRevisionService.create(data);
     } catch (error) {
       console.error('Error creating prep revision:', error);
       throw error;
@@ -334,7 +286,7 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:notes:create', async (_event, data: Partial<ShopOrderNote>) => {
     try {
-      return createShopOrderNote(data);
+      return await shopOrderNoteService.create(data);
     } catch (error) {
       console.error('Error creating prep note:', error);
       throw error;
@@ -343,7 +295,7 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:notes:update', async (_event, id: string, updates: { content?: string; format?: string }) => {
     try {
-      return updateShopOrderNote(id, updates);
+      return await shopOrderNoteService.update(id, updates);
     } catch (error) {
       console.error('Error updating prep note:', error);
       throw error;
@@ -374,7 +326,7 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:noteTemplates:getById', async (_event, id: string) => {
     try {
-      return getNoteTemplateById(id);
+      return await shopOrderNoteService.getTemplateById(id);
     } catch (error) {
       console.error('Error getting note template:', error);
       throw error;
@@ -383,7 +335,7 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:noteTemplates:getDefault', async (_event, type: string) => {
     try {
-      return getDefaultNoteTemplate(type);
+      return await shopOrderNoteService.getDefaultTemplate(type);
     } catch (error) {
       console.error('Error getting default note template:', error);
       throw error;
@@ -392,7 +344,7 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:noteTemplates:create', async (_event, data: Partial<ShopOrderNoteTemplate>) => {
     try {
-      return createNoteTemplate(data);
+      return await shopOrderNoteService.createTemplate(data);
     } catch (error) {
       console.error('Error creating note template:', error);
       throw error;
@@ -401,7 +353,7 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:noteTemplates:update', async (_event, id: string, updates: Partial<ShopOrderNoteTemplate>) => {
     try {
-      return updateNoteTemplate(id, updates);
+      return await shopOrderNoteService.updateTemplate(id, updates);
     } catch (error) {
       console.error('Error updating note template:', error);
       throw error;
