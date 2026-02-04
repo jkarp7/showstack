@@ -58,7 +58,23 @@ import {
 } from '../database/queries/layoutTemplates';
 import { seedDefaultPageLayoutsFromJSON } from '../database/seedDefaultLayoutsFromJSON';
 import { prepFileService } from '../services/prepFileService';
+import { errorHandler } from '../errors';
+import { DatabaseError, ValidationError } from '../errors';
 
+/**
+ * NOTE: This file contains 42 IPC handlers for the Prep module.
+ * Error handling has been added to critical handlers (Projects section).
+ * Remaining handlers follow the same pattern and should be updated similarly:
+ *
+ * Pattern:
+ * 1. Wrap with errorHandler.executeWithRetry() for database operations
+ * 2. Add validation for required fields using ValidationError
+ * 3. Log with structured data: { operation, ...args, error }
+ * 4. Convert DatabaseError and ValidationError to user-friendly messages
+ *
+ * TODO: Complete error handling for remaining 37 handlers in Phase 0.3 refactor
+ * (This file is scheduled for major refactoring/renaming in Phase 0.3)
+ */
 export function registerPrepHandlers(): void {
   // ============================================
   // PREP PROJECTS
@@ -66,27 +82,62 @@ export function registerPrepHandlers(): void {
 
   ipcMain.handle('prep:projects:getAll', async () => {
     try {
-      return getAllPrepProjects();
+      return await errorHandler.executeWithRetry(
+        async () => getAllPrepProjects(),
+        'prep:projects:getAll'
+      );
     } catch (error) {
-      console.error('Error getting prep projects:', error);
+      console.error('Failed to get prep projects:', {
+        operation: 'prep:projects:getAll',
+        error: error instanceof Error ? error.message : error
+      });
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to load prep projects: ${error.message}`);
+      }
       throw error;
     }
   });
 
   ipcMain.handle('prep:projects:getById', async (_event, id: string) => {
     try {
-      return getPrepProjectById(id);
+      return await errorHandler.executeWithRetry(
+        async () => getPrepProjectById(id),
+        'prep:projects:getById'
+      );
     } catch (error) {
-      console.error('Error getting prep project:', error);
+      console.error('Failed to get prep project:', {
+        operation: 'prep:projects:getById',
+        id,
+        error: error instanceof Error ? error.message : error
+      });
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to load prep project: ${error.message}`);
+      }
       throw error;
     }
   });
 
   ipcMain.handle('prep:projects:create', async (_event, data: Partial<PrepProject>) => {
     try {
-      return createPrepProject(data);
+      if (!data.production_name || data.production_name.trim().length === 0) {
+        throw new ValidationError('Production name is required', 'production_name', data.production_name);
+      }
+      return await errorHandler.executeWithRetry(
+        async () => createPrepProject(data),
+        'prep:projects:create'
+      );
     } catch (error) {
-      console.error('Error creating prep project:', error);
+      console.error('Failed to create prep project:', {
+        operation: 'prep:projects:create',
+        data,
+        error: error instanceof Error ? error.message : error
+      });
+      if (error instanceof ValidationError) {
+        throw new Error(error.toUserMessage());
+      }
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to create prep project: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -95,9 +146,26 @@ export function registerPrepHandlers(): void {
     'prep:projects:update',
     async (_event, id: string, updates: Partial<PrepProject>) => {
       try {
-        return updatePrepProject(id, updates);
+        if (updates.production_name !== undefined && (!updates.production_name || updates.production_name.trim().length === 0)) {
+          throw new ValidationError('Production name cannot be empty', 'production_name', updates.production_name);
+        }
+        return await errorHandler.executeWithRetry(
+          async () => updatePrepProject(id, updates),
+          'prep:projects:update'
+        );
       } catch (error) {
-        console.error('Error updating prep project:', error);
+        console.error('Failed to update prep project:', {
+          operation: 'prep:projects:update',
+          id,
+          updates,
+          error: error instanceof Error ? error.message : error
+        });
+        if (error instanceof ValidationError) {
+          throw new Error(error.toUserMessage());
+        }
+        if (error instanceof DatabaseError) {
+          throw new Error(`Unable to update prep project: ${error.message}`);
+        }
         throw error;
       }
     }
@@ -105,9 +173,19 @@ export function registerPrepHandlers(): void {
 
   ipcMain.handle('prep:projects:delete', async (_event, id: string) => {
     try {
-      deletePrepProject(id);
+      await errorHandler.executeWithRetry(
+        async () => deletePrepProject(id),
+        'prep:projects:delete'
+      );
     } catch (error) {
-      console.error('Error deleting prep project:', error);
+      console.error('Failed to delete prep project:', {
+        operation: 'prep:projects:delete',
+        id,
+        error: error instanceof Error ? error.message : error
+      });
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to delete prep project: ${error.message}`);
+      }
       throw error;
     }
   });
