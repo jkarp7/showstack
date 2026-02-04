@@ -348,11 +348,11 @@ export const PROJECT_SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_preferences_project ON user_preferences(project_id);
 
   -- ============================================
-  -- PREP MODULE TABLES
+  -- SHOP ORDER MODULE TABLES
   -- ============================================
 
-  -- Prep Projects table (shop orders for equipment rental)
-  CREATE TABLE IF NOT EXISTS prep_projects (
+  -- Shop Order Projects table (shop orders for equipment rental)
+  CREATE TABLE IF NOT EXISTS shop_order_projects (
     id TEXT PRIMARY KEY,
     user_id TEXT,
     parent_project_id TEXT, -- Optional link to parent ShowStack project
@@ -411,10 +411,10 @@ export const PROJECT_SCHEMA = `
     updated_at INTEGER NOT NULL
   );
 
-  -- Prep Sections table (e.g., "Moving Lights", "LED Fixtures")
-  CREATE TABLE IF NOT EXISTS prep_sections (
+  -- Shop Order Sections table (e.g., "Moving Lights", "LED Fixtures")
+  CREATE TABLE IF NOT EXISTS shop_order_sections (
     id TEXT PRIMARY KEY,
-    prep_project_id TEXT NOT NULL,
+    prep_project_id TEXT NOT NULL, -- TODO Phase 0.4: Rename to shop_order_project_id
 
     name TEXT NOT NULL,
     discipline TEXT NOT NULL,
@@ -425,11 +425,11 @@ export const PROJECT_SCHEMA = `
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
 
-    FOREIGN KEY (prep_project_id) REFERENCES prep_projects(id) ON DELETE CASCADE
+    FOREIGN KEY (prep_project_id) REFERENCES shop_order_projects(id) ON DELETE CASCADE
   );
 
-  -- Prep Equipment Items table
-  CREATE TABLE IF NOT EXISTS prep_equipment_items (
+  -- Shop Order Items table
+  CREATE TABLE IF NOT EXISTS shop_order_items (
     id TEXT PRIMARY KEY,
     section_id TEXT NOT NULL,
 
@@ -458,13 +458,13 @@ export const PROJECT_SCHEMA = `
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
 
-    FOREIGN KEY (section_id) REFERENCES prep_sections(id) ON DELETE CASCADE
+    FOREIGN KEY (section_id) REFERENCES shop_order_sections(id) ON DELETE CASCADE
   );
 
-  -- Prep Revisions table
-  CREATE TABLE IF NOT EXISTS prep_revisions (
+  -- Shop Order Revisions table
+  CREATE TABLE IF NOT EXISTS shop_order_revisions (
     id TEXT PRIMARY KEY,
-    prep_project_id TEXT NOT NULL,
+    prep_project_id TEXT NOT NULL, -- TODO Phase 0.4: Rename to shop_order_project_id
 
     revision_number INTEGER NOT NULL,
     revision_date INTEGER NOT NULL,
@@ -475,13 +475,13 @@ export const PROJECT_SCHEMA = `
     updated_at INTEGER NOT NULL,
 
     UNIQUE(prep_project_id, revision_number),
-    FOREIGN KEY (prep_project_id) REFERENCES prep_projects(id) ON DELETE CASCADE
+    FOREIGN KEY (prep_project_id) REFERENCES shop_order_projects(id) ON DELETE CASCADE
   );
 
-  -- Prep Notes table (3-tier: general conditions, general notes, fixture notes, revision)
-  CREATE TABLE IF NOT EXISTS prep_notes (
+  -- Shop Order Notes table (3-tier: general conditions, general notes, fixture notes, revision)
+  CREATE TABLE IF NOT EXISTS shop_order_notes (
     id TEXT PRIMARY KEY,
-    prep_project_id TEXT NOT NULL,
+    prep_project_id TEXT NOT NULL, -- TODO Phase 0.4: Rename to shop_order_project_id
 
     type TEXT NOT NULL CHECK(type IN ('general_conditions', 'general_notes', 'fixture_notes', 'revision')),
     content TEXT NOT NULL,
@@ -489,11 +489,11 @@ export const PROJECT_SCHEMA = `
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
 
-    FOREIGN KEY (prep_project_id) REFERENCES prep_projects(id) ON DELETE CASCADE
+    FOREIGN KEY (prep_project_id) REFERENCES shop_order_projects(id) ON DELETE CASCADE
   );
 
-  -- Prep Note Templates (for standard language)
-  CREATE TABLE IF NOT EXISTS prep_note_templates (
+  -- Shop Order Note Templates (for standard language)
+  CREATE TABLE IF NOT EXISTS shop_order_note_templates (
     id TEXT PRIMARY KEY,
     user_id TEXT,
 
@@ -506,12 +506,12 @@ export const PROJECT_SCHEMA = `
     updated_at INTEGER NOT NULL
   );
 
-  -- Indexes for Prep tables
-  CREATE INDEX IF NOT EXISTS idx_prep_sections_project ON prep_sections(prep_project_id);
-  CREATE INDEX IF NOT EXISTS idx_prep_items_section ON prep_equipment_items(section_id);
-  CREATE INDEX IF NOT EXISTS idx_prep_revisions_project ON prep_revisions(prep_project_id);
-  CREATE INDEX IF NOT EXISTS idx_prep_notes_project ON prep_notes(prep_project_id);
-  CREATE INDEX IF NOT EXISTS idx_prep_notes_type ON prep_notes(prep_project_id, type);
-  CREATE INDEX IF NOT EXISTS idx_prep_note_templates_type ON prep_note_templates(type);
-  CREATE INDEX IF NOT EXISTS idx_prep_note_templates_default ON prep_note_templates(type, is_default);
+  -- Indexes for Shop Order tables
+  CREATE INDEX IF NOT EXISTS idx_shop_order_sections_project ON shop_order_sections(prep_project_id);
+  CREATE INDEX IF NOT EXISTS idx_shop_order_items_section ON shop_order_items(section_id);
+  CREATE INDEX IF NOT EXISTS idx_shop_order_revisions_project ON shop_order_revisions(prep_project_id);
+  CREATE INDEX IF NOT EXISTS idx_shop_order_notes_project ON shop_order_notes(prep_project_id);
+  CREATE INDEX IF NOT EXISTS idx_shop_order_notes_type ON shop_order_notes(prep_project_id, type);
+  CREATE INDEX IF NOT EXISTS idx_shop_order_note_templates_type ON shop_order_note_templates(type);
+  CREATE INDEX IF NOT EXISTS idx_shop_order_note_templates_default ON shop_order_note_templates(type, is_default);
 `;
