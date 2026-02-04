@@ -22,26 +22,13 @@ export interface DimmerRackModule {
 export function getModulesByRackId(rackId: string): DimmerRackModule[] {
   const db = getDatabase();
 
-  const result = db.exec(`
+  const modules = db.prepare(`
     SELECT * FROM dimmer_rack_modules
     WHERE rack_id = ?
     ORDER BY start_circuit
-  `, [rackId]);
+  `).all(rackId);
 
-  if (!result[0]) {
-    return [];
-  }
-
-  const columns = result[0].columns;
-  const values = result[0].values;
-
-  return values.map(row => {
-    const module: any = {};
-    columns.forEach((col, idx) => {
-      module[col] = row[idx];
-    });
-    return module as DimmerRackModule;
-  });
+  return modules as DimmerRackModule[];
 }
 
 /**
@@ -54,12 +41,12 @@ export function createModule(
   const id = uuidv4();
   const now = Date.now();
 
-  db.run(`
+  db.prepare(`
     INSERT INTO dimmer_rack_modules (
       id, rack_id, start_circuit, end_circuit, module_type,
       watts_per_circuit, notes, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `, [
+  `).run(
     id,
     module.rack_id,
     module.start_circuit,
@@ -69,7 +56,7 @@ export function createModule(
     module.notes || null,
     now,
     now
-  ]);
+  );
 
   saveDatabase();
   return getModuleById(id);
@@ -81,22 +68,14 @@ export function createModule(
 export function getModuleById(id: string): DimmerRackModule {
   const db = getDatabase();
 
-  const result = db.exec(`
+  const module = db.prepare(`
     SELECT * FROM dimmer_rack_modules
     WHERE id = ?
-  `, [id]);
+  `).get(id);
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!module) {
     throw new Error(`Dimmer rack module not found: ${id}`);
   }
-
-  const columns = result[0].columns;
-  const values = result[0].values[0];
-
-  const module: any = {};
-  columns.forEach((col, idx) => {
-    module[col] = values[idx];
-  });
 
   return module as DimmerRackModule;
 }
@@ -140,11 +119,11 @@ export function updateModule(id: string, updates: Partial<DimmerRackModule>): Di
   values.push(now);
   values.push(id);
 
-  db.run(`
+  db.prepare(`
     UPDATE dimmer_rack_modules
     SET ${setClauses.join(', ')}
     WHERE id = ?
-  `, values);
+  `).run(...values);
 
   saveDatabase();
   return getModuleById(id);
@@ -156,7 +135,7 @@ export function updateModule(id: string, updates: Partial<DimmerRackModule>): Di
 export function deleteModule(id: string): void {
   const db = getDatabase();
 
-  db.run('DELETE FROM dimmer_rack_modules WHERE id = ?', [id]);
+  db.prepare('DELETE FROM dimmer_rack_modules WHERE id = ?').run(id);
 
   saveDatabase();
 }
@@ -167,7 +146,7 @@ export function deleteModule(id: string): void {
 export function deleteModulesByRackId(rackId: string): void {
   const db = getDatabase();
 
-  db.run('DELETE FROM dimmer_rack_modules WHERE rack_id = ?', [rackId]);
+  db.prepare('DELETE FROM dimmer_rack_modules WHERE rack_id = ?').run(rackId);
 
   saveDatabase();
 }
@@ -178,25 +157,17 @@ export function deleteModulesByRackId(rackId: string): void {
 export function getModuleTypeForCircuit(rackId: string, circuit: number): DimmerRackModule | null {
   const db = getDatabase();
 
-  const result = db.exec(`
+  const module = db.prepare(`
     SELECT * FROM dimmer_rack_modules
     WHERE rack_id = ?
       AND start_circuit <= ?
       AND end_circuit >= ?
     LIMIT 1
-  `, [rackId, circuit, circuit]);
+  `).get(rackId, circuit, circuit);
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!module) {
     return null;
   }
-
-  const columns = result[0].columns;
-  const values = result[0].values[0];
-
-  const module: any = {};
-  columns.forEach((col, idx) => {
-    module[col] = values[idx];
-  });
 
   return module as DimmerRackModule;
 }

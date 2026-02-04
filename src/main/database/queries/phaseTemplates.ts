@@ -23,26 +23,13 @@ export interface PhaseDistributionTemplate {
 export function getAllPhaseTemplates(projectId: string = 'default-project'): PhaseDistributionTemplate[] {
   const db = getDatabase();
 
-  const result = db.exec(`
+  const templates = db.prepare(`
     SELECT * FROM phase_distribution_templates
     WHERE project_id = ? OR is_system = 1
     ORDER BY is_system DESC, name ASC
-  `, [projectId]);
+  `).all(projectId);
 
-  if (!result[0]) {
-    return [];
-  }
-
-  const columns = result[0].columns;
-  const values = result[0].values;
-
-  return values.map(row => {
-    const template: any = {};
-    columns.forEach((col, idx) => {
-      template[col] = row[idx];
-    });
-    return template as PhaseDistributionTemplate;
-  });
+  return templates as PhaseDistributionTemplate[];
 }
 
 /**
@@ -51,22 +38,14 @@ export function getAllPhaseTemplates(projectId: string = 'default-project'): Pha
 export function getPhaseTemplateById(id: string): PhaseDistributionTemplate {
   const db = getDatabase();
 
-  const result = db.exec(`
+  const template = db.prepare(`
     SELECT * FROM phase_distribution_templates
     WHERE id = ?
-  `, [id]);
+  `).get(id);
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!template) {
     throw new Error(`Phase template not found: ${id}`);
   }
-
-  const columns = result[0].columns;
-  const values = result[0].values[0];
-
-  const template: any = {};
-  columns.forEach((col, idx) => {
-    template[col] = values[idx];
-  });
 
   return template as PhaseDistributionTemplate;
 }
@@ -82,12 +61,12 @@ export function createPhaseTemplate(
   const id = uuidv4();
   const now = Date.now();
 
-  db.run(`
+  db.prepare(`
     INSERT INTO phase_distribution_templates (
       id, project_id, name, description, phase_config, circuit_count,
       phase_distribution, is_system, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
-  `, [
+  `).run(
     id,
     projectId,
     template.name,
@@ -97,7 +76,7 @@ export function createPhaseTemplate(
     template.phase_distribution,
     now,
     now
-  ]);
+  );
 
   saveDatabase();
   return getPhaseTemplateById(id);
@@ -143,11 +122,11 @@ export function updatePhaseTemplate(id: string, updates: Partial<PhaseDistributi
   values.push(now);
   values.push(id);
 
-  db.run(`
+  db.prepare(`
     UPDATE phase_distribution_templates
     SET ${setClauses.join(', ')}
     WHERE id = ? AND is_system = 0
-  `, values);
+  `).run(...values);
 
   saveDatabase();
   return getPhaseTemplateById(id);
@@ -159,7 +138,7 @@ export function updatePhaseTemplate(id: string, updates: Partial<PhaseDistributi
 export function deletePhaseTemplate(id: string): void {
   const db = getDatabase();
 
-  db.run('DELETE FROM phase_distribution_templates WHERE id = ? AND is_system = 0', [id]);
+  db.prepare('DELETE FROM phase_distribution_templates WHERE id = ? AND is_system = 0').run(id);
 
   saveDatabase();
 }
@@ -171,12 +150,12 @@ export function seedSystemPhaseTemplates(projectId: string = 'default-project'):
   const db = getDatabase();
 
   // Check if system templates already exist for this project
-  const existing = db.exec(`
+  const existing = db.prepare(`
     SELECT COUNT(*) as count FROM phase_distribution_templates
     WHERE project_id = ? AND is_system = 1
-  `, [projectId]);
+  `).get(projectId);
 
-  if (existing[0] && existing[0].values[0][0] > 0) {
+  if (existing && (existing as any).count > 0) {
     console.log(`System phase templates already exist for project ${projectId}`);
     return;
   }
@@ -246,12 +225,12 @@ export function seedSystemPhaseTemplates(projectId: string = 'default-project'):
 
   systemTemplates.forEach(template => {
     const id = uuidv4();
-    db.run(`
+    db.prepare(`
       INSERT INTO phase_distribution_templates (
         id, project_id, name, description, phase_config, circuit_count,
         phase_distribution, is_system, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
-    `, [
+    `).run(
       id,
       projectId,
       template.name,
@@ -261,7 +240,7 @@ export function seedSystemPhaseTemplates(projectId: string = 'default-project'):
       template.phase_distribution,
       now,
       now
-    ]);
+    );
   });
 
   saveDatabase();

@@ -28,11 +28,18 @@ Replace in-memory sql.js with native better-sqlite3:
 - better-sqlite3 v12.6.2
 - @types/better-sqlite3 v7.6.13
 
-### 1.2 Update DatabaseManager (2 weeks)
-- [ ] Replace sql.js with better-sqlite3 in DatabaseManager.ts
-- [ ] Enable WAL mode: `db.pragma('journal_mode = WAL')`
-- [ ] Remove manual `saveDatabase()` calls
-- [ ] Test with existing .ss files
+### 1.2 Update DatabaseManager ✅ COMPLETED
+- [x] Replace sql.js with better-sqlite3 in DatabaseManager.ts
+- [x] Enable WAL mode: `db.pragma('journal_mode = WAL')`
+- [x] Remove manual `saveDatabase()` calls (converted to no-ops)
+- [x] Test with existing .ss files
+
+**Completed:**
+- Updated DatabaseManager.ts and MigrationRunner.ts to use better-sqlite3 API
+- Enabled WAL mode, foreign keys, and synchronous=NORMAL for all databases
+- Updated all 9 query files to use better-sqlite3 API (prepare/get/all/run)
+- Converted saveDatabase() functions to no-ops (WAL mode auto-persists)
+- Build successful with better-sqlite3
 
 ### 1.3 Add Transaction Support (1-2 weeks)
 - [ ] Create TransactionManager.ts

@@ -10,10 +10,8 @@
  * Reduced from 881 lines to ~120 lines through modularization.
  */
 
-import { Database } from 'sql.js';
+import Database from 'better-sqlite3';
 import { databaseManager } from './core/DatabaseManager';
-import { databaseWriter } from './persistence/DatabaseWriter';
-import { errorHandler } from '../errors';
 
 /**
  * Initialize both app and project databases
@@ -27,7 +25,7 @@ export async function initDatabase(): Promise<void> {
  * Get the app-level database (licenses, settings, templates)
  * Backwards compatible with existing code
  */
-export function getAppDatabase(): Database {
+export function getAppDatabase(): Database.Database {
   return databaseManager.getAppDatabase();
 }
 
@@ -35,28 +33,30 @@ export function getAppDatabase(): Database {
  * Get the project-level database (all project data)
  * Backwards compatible with existing code
  */
-export function getDatabase(): Database {
+export function getDatabase(): Database.Database {
   return databaseManager.getProjectDatabase();
 }
 
 /**
  * Save app database to disk
- * Backwards compatible with existing code
+ * NOTE: With better-sqlite3's WAL mode, this is a no-op.
+ * All writes are automatically persisted to disk.
+ * Kept for backwards compatibility with existing code.
  */
 export function saveAppDatabase(): void {
-  const db = databaseManager.getAppDatabase();
-  const { appDbPath } = databaseManager.getPaths();
-  databaseWriter.save(db, appDbPath, 'app');
+  // WAL mode handles auto-persistence - no manual save needed
+  console.log('[Database] saveAppDatabase() called - WAL mode handles auto-persistence');
 }
 
 /**
  * Save project database to disk
- * Backwards compatible with existing code
+ * NOTE: With better-sqlite3's WAL mode, this is a no-op.
+ * All writes are automatically persisted to disk.
+ * Kept for backwards compatibility with existing code.
  */
 export function saveDatabase(): void {
-  const db = databaseManager.getProjectDatabase();
-  const { projectDbPath } = databaseManager.getPaths();
-  databaseWriter.save(db, projectDbPath, 'project');
+  // WAL mode handles auto-persistence - no manual save needed
+  console.log('[Database] saveDatabase() called - WAL mode handles auto-persistence');
 }
 
 // Alias for backwards compatibility
@@ -65,22 +65,10 @@ export const saveProjectDatabase = saveDatabase;
 /**
  * Close both databases
  * Delegates to DatabaseManager
+ * NOTE: With WAL mode, no manual save is needed before closing
  */
 export function closeDatabase(): void {
-  // Save before closing
-  try {
-    saveAppDatabase();
-  } catch (error) {
-    console.error('Error saving app database before close:', error);
-  }
-
-  try {
-    saveProjectDatabase();
-  } catch (error) {
-    console.error('Error saving project database before close:', error);
-  }
-
-  // Close connections
+  // WAL mode auto-persists, so we just close connections
   databaseManager.close();
 }
 
@@ -102,20 +90,13 @@ export async function replaceProjectDatabase(importedData: Uint8Array): Promise<
 
 /**
  * Save both databases to disk with retry logic
- * New function that uses error handler for resilience
+ * NOTE: With better-sqlite3's WAL mode, this is a no-op.
+ * All writes are automatically persisted to disk.
+ * Kept for backwards compatibility with existing code.
  */
 export async function saveBothDatabasesWithRetry(): Promise<void> {
-  await errorHandler.executeWithRetry(
-    async () => {
-      const appDb = databaseManager.getAppDatabase();
-      const projectDb = databaseManager.getProjectDatabase();
-      const { appDbPath, projectDbPath } = databaseManager.getPaths();
-
-      await databaseWriter.saveWithRetry(appDb, appDbPath, 'app');
-      await databaseWriter.saveWithRetry(projectDb, projectDbPath, 'project');
-    },
-    'database:save:both'
-  );
+  // WAL mode handles auto-persistence - no manual save needed
+  console.log('[Database] saveBothDatabasesWithRetry() called - WAL mode handles auto-persistence');
 }
 
 /**

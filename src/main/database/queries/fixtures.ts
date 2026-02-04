@@ -109,25 +109,13 @@ export interface Fixture {
 export function getAllFixtures(projectId: string = 'default-project'): Fixture[] {
   const db = getDatabase();
 
-  const result = db.exec(`
+  const fixtures = db.prepare(`
     SELECT * FROM fixtures
     WHERE project_id = ?
     ORDER BY CAST(position AS INTEGER), position
-  `, [projectId]);
+  `).all(projectId);
 
-  if (!result[0]) {
-    return [];
-  }
-
-  const columns = result[0].columns;
-  const values = result[0].values;
-
-  return values.map(row => {
-    const fixture: any = {};
-    columns.forEach((col, idx) => {
-      fixture[col] = row[idx];
-    });
-
+  return fixtures.map((fixture: any) => {
     // Compute address from universe and dmx_address
     let address: string | undefined;
     if (fixture.universe && fixture.dmx_address) {
@@ -157,14 +145,14 @@ export function createFixture(
   const accessories = fixture.accessories ? JSON.stringify(fixture.accessories) : null;
   const customFields = fixture.custom_fields ? JSON.stringify(fixture.custom_fields) : null;
 
-  db.run(`
+  db.prepare(`
     INSERT INTO fixtures (
       id, project_id, position, unit_number, type, manufacturer, model, purpose,
       channel, universe, dmx_address, dimmer, circuit, circuit_number,
       color, gobo, accessories, location, system, wattage,
       status, notes, custom_fields, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `, [
+  `).run(
     id,
     projectId,
     fixture.position || '',
@@ -190,7 +178,7 @@ export function createFixture(
     customFields,
     now,
     now
-  ]);
+  );
 
   saveDatabase();
   return getFixtureById(id);
@@ -242,11 +230,11 @@ export function updateFixture(id: string, updates: Partial<Fixture>): Fixture {
     .filter(f => f !== 'unit')
     .map(f => f === 'unit_number' ? mappedUpdates.unit_number : mappedUpdates[f]);
 
-  db.run(`
+  db.prepare(`
     UPDATE fixtures
     SET ${setClause}, updated_at = ?
     WHERE id = ?
-  `, [...values, now, id]);
+  `).run(...values, now, id);
 
   saveDatabase();
   return getFixtureById(id);
@@ -254,7 +242,7 @@ export function updateFixture(id: string, updates: Partial<Fixture>): Fixture {
 
 export function deleteFixture(id: string): void {
   const db = getDatabase();
-  db.run('DELETE FROM fixtures WHERE id = ?', [id]);
+  db.prepare('DELETE FROM fixtures WHERE id = ?').run(id);
   saveDatabase();
 }
 
@@ -263,38 +251,30 @@ export function deleteMultipleFixtures(ids: string[]): void {
   if (ids.length === 0) return;
 
   const placeholders = ids.map(() => '?').join(',');
-  db.run(`DELETE FROM fixtures WHERE id IN (${placeholders})`, ids);
+  db.prepare(`DELETE FROM fixtures WHERE id IN (${placeholders})`).run(...ids);
   saveDatabase();
 }
 
 function getFixtureById(id: string): Fixture {
   const db = getDatabase();
-  const result = db.exec('SELECT * FROM fixtures WHERE id = ?', [id]);
+  const fixture = db.prepare('SELECT * FROM fixtures WHERE id = ?').get(id);
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!fixture) {
     throw new Error(`Fixture with id ${id} not found`);
   }
 
-  const columns = result[0].columns;
-  const values = result[0].values[0];
-
-  const fixture: any = {};
-  columns.forEach((col, idx) => {
-    fixture[col] = values[idx];
-  });
-
   // Compute address from universe and dmx_address
   let address: string | undefined;
-  if (fixture.universe && fixture.dmx_address) {
-    address = `${fixture.universe}/${fixture.dmx_address}`;
+  if ((fixture as any).universe && (fixture as any).dmx_address) {
+    address = `${(fixture as any).universe}/${(fixture as any).dmx_address}`;
   }
 
   return {
-    ...fixture,
-    unit: fixture.unit_number,
+    ...(fixture as any),
+    unit: (fixture as any).unit_number,
     address, // Computed field
-    accessories: fixture.accessories ? JSON.parse(fixture.accessories) : [],
-    custom_fields: fixture.custom_fields ? JSON.parse(fixture.custom_fields) : {},
-    on_light_plot: Boolean(fixture.on_light_plot) // Convert to boolean
+    accessories: (fixture as any).accessories ? JSON.parse((fixture as any).accessories) : [],
+    custom_fields: (fixture as any).custom_fields ? JSON.parse((fixture as any).custom_fields) : {},
+    on_light_plot: Boolean((fixture as any).on_light_plot) // Convert to boolean
   };
 }

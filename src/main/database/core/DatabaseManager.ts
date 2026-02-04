@@ -8,10 +8,9 @@
  * - Singleton pattern ensures single source of truth
  */
 
-import initSqlJs, { Database } from 'sql.js';
+import Database from 'better-sqlite3';
 import { app } from 'electron';
 import { join } from 'path';
-import { existsSync, readFileSync } from 'fs';
 import { APP_SCHEMA } from '../appSchema';
 import { PROJECT_SCHEMA } from '../projectSchema';
 import { MigrationRunner } from './MigrationRunner';
@@ -19,13 +18,11 @@ import { errorHandler } from '../../errors';
 import { DatabaseError } from '../../errors';
 
 export class DatabaseManager {
-  private appDb: Database | null = null;
-  private projectDb: Database | null = null;
+  private appDb: Database.Database | null = null;
+  private projectDb: Database.Database | null = null;
 
   private appDbPath: string = '';
   private projectDbPath: string = '';
-
-  private SQL: any = null; // sql.js module
 
   /**
    * Initialize both app and project databases
@@ -35,9 +32,6 @@ export class DatabaseManager {
       // Set paths
       this.appDbPath = join(app.getPath('userData'), 'showstack-app.db');
       this.projectDbPath = join(app.getPath('userData'), 'showstack-projects.db');
-
-      // Initialize sql.js
-      this.SQL = await initSqlJs();
 
       // Initialize databases
       await this.initializeAppDatabase();
@@ -64,19 +58,20 @@ export class DatabaseManager {
 
       await errorHandler.executeWithRetry(
         async () => {
-          // Load existing database or create new
-          if (existsSync(this.appDbPath)) {
-            const buffer = readFileSync(this.appDbPath);
-            this.appDb = new this.SQL.Database(buffer);
-          } else {
-            this.appDb = new this.SQL.Database();
-          }
+          // Create or open database
+          this.appDb = new Database(this.appDbPath);
+
+          // Enable WAL mode for auto-persistence and better concurrency
+          this.appDb.pragma('journal_mode = WAL');
 
           // Enable foreign keys
-          this.appDb!.run('PRAGMA foreign_keys = ON');
+          this.appDb.pragma('foreign_keys = ON');
+
+          // Set synchronous mode to NORMAL for better performance
+          this.appDb.pragma('synchronous = NORMAL');
 
           // Create tables from schema
-          this.appDb!.exec(APP_SCHEMA);
+          this.appDb.exec(APP_SCHEMA);
         },
         'app-database:initialize'
       );
@@ -106,19 +101,20 @@ export class DatabaseManager {
 
       await errorHandler.executeWithRetry(
         async () => {
-          // Load existing database or create new
-          if (existsSync(this.projectDbPath)) {
-            const buffer = readFileSync(this.projectDbPath);
-            this.projectDb = new this.SQL.Database(buffer);
-          } else {
-            this.projectDb = new this.SQL.Database();
-          }
+          // Create or open database
+          this.projectDb = new Database(this.projectDbPath);
+
+          // Enable WAL mode for auto-persistence and better concurrency
+          this.projectDb.pragma('journal_mode = WAL');
 
           // Enable foreign keys
-          this.projectDb!.run('PRAGMA foreign_keys = ON');
+          this.projectDb.pragma('foreign_keys = ON');
+
+          // Set synchronous mode to NORMAL for better performance
+          this.projectDb.pragma('synchronous = NORMAL');
 
           // Create tables from schema
-          this.projectDb!.exec(PROJECT_SCHEMA);
+          this.projectDb.exec(PROJECT_SCHEMA);
         },
         'project-database:initialize'
       );
@@ -128,14 +124,13 @@ export class DatabaseManager {
       await migrationRunner.run();
 
       // Create default project if none exists
-      const result = this.projectDb!.exec('SELECT COUNT(*) as count FROM projects');
-      const projectCount = result[0]?.values[0]?.[0] || 0;
+      const result = this.projectDb!.prepare('SELECT COUNT(*) as count FROM projects').get() as { count: number };
+      const projectCount = result?.count || 0;
 
       if (projectCount === 0) {
-        this.projectDb!.run(
-          'INSERT INTO projects (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)',
-          ['default-project', 'Untitled Project', Date.now(), Date.now()]
-        );
+        this.projectDb!.prepare(
+          'INSERT INTO projects (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)'
+        ).run('default-project', 'Untitled Project', Date.now(), Date.now());
       }
 
       console.log('✅ Project database initialized');
@@ -153,7 +148,7 @@ export class DatabaseManager {
   /**
    * Get the app-level database (licenses, settings, templates)
    */
-  getAppDatabase(): Database {
+  getAppDatabase(): Database.Database {
     if (!this.appDb) {
       throw new DatabaseError(
         'App database not initialized. Call initialize() first.',
@@ -167,7 +162,7 @@ export class DatabaseManager {
   /**
    * Get the project-level database (all project data)
    */
-  getProjectDatabase(): Database {
+  getProjectDatabase(): Database.Database {
     if (!this.projectDb) {
       throw new DatabaseError(
         'Project database not initialized. Call initialize() first.',
@@ -203,12 +198,17 @@ export class DatabaseManager {
 
       await errorHandler.executeWithRetry(
         async () => {
-          // Reload from disk
-          const buffer = readFileSync(this.projectDbPath);
-          this.projectDb = new this.SQL.Database(buffer);
+          // Reload from disk (better-sqlite3 automatically reads from file)
+          this.projectDb = new Database(this.projectDbPath);
+
+          // Enable WAL mode
+          this.projectDb.pragma('journal_mode = WAL');
 
           // Enable foreign keys
-          this.projectDb!.run('PRAGMA foreign_keys = ON');
+          this.projectDb.pragma('foreign_keys = ON');
+
+          // Set synchronous mode to NORMAL for better performance
+          this.projectDb.pragma('synchronous = NORMAL');
         },
         'project-database:reload'
       );
@@ -237,14 +237,28 @@ export class DatabaseManager {
     try {
       console.log('Replacing project database with imported data...');
 
+      const { writeFileSync } = await import('fs');
+
       // Close current project database
       if (this.projectDb) {
         this.projectDb.close();
         this.projectDb = null;
       }
 
-      // Create new database from imported data
-      this.projectDb = new this.SQL.Database(importedData);
+      // Write imported data to file
+      writeFileSync(this.projectDbPath, importedData);
+
+      // Open the new database
+      this.projectDb = new Database(this.projectDbPath);
+
+      // Enable WAL mode
+      this.projectDb.pragma('journal_mode = WAL');
+
+      // Enable foreign keys
+      this.projectDb.pragma('foreign_keys = ON');
+
+      // Set synchronous mode to NORMAL for better performance
+      this.projectDb.pragma('synchronous = NORMAL');
 
       console.log('✅ Project database replaced');
     } catch (error) {

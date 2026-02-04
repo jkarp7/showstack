@@ -16,30 +16,18 @@ export interface Project {
 export function getAllProjects(): Project[] {
   const db = getDatabase();
 
-  const result = db.exec('SELECT * FROM projects ORDER BY updated_at DESC');
+  const projects = db.prepare('SELECT * FROM projects ORDER BY updated_at DESC').all();
 
-  if (!result[0]) {
-    return [];
-  }
-
-  const columns = result[0].columns;
-  const values = result[0].values;
-
-  return values.map(row => {
-    const project: any = {};
-    columns.forEach((col, idx) => {
-      const value = row[idx];
-      // Parse JSON fields
-      if ((col === 'enabled_modules' || col === 'show_dates' ||
-           col === 'lighting_associates' || col === 'audio_associates' ||
-           col === 'video_associates') && value && typeof value === 'string') {
+  return projects.map((project: any) => {
+    // Parse JSON fields
+    const jsonFields = ['enabled_modules', 'show_dates', 'lighting_associates', 'audio_associates', 'video_associates'];
+    jsonFields.forEach(field => {
+      if (project[field] && typeof project[field] === 'string') {
         try {
-          project[col] = JSON.parse(value);
+          project[field] = JSON.parse(project[field]);
         } catch {
-          project[col] = value;
+          // Keep as is if parsing fails
         }
-      } else {
-        project[col] = value;
       }
     });
     return project as Project;
@@ -48,29 +36,21 @@ export function getAllProjects(): Project[] {
 
 export function getProjectById(id: string): Project | null {
   const db = getDatabase();
-  const result = db.exec('SELECT * FROM projects WHERE id = ?', [id]);
+  const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!project) {
     return null;
   }
 
-  const columns = result[0].columns;
-  const values = result[0].values[0];
-
-  const project: any = {};
-  columns.forEach((col, idx) => {
-    const value = values[idx];
-    // Parse JSON fields
-    if ((col === 'enabled_modules' || col === 'show_dates' ||
-         col === 'lighting_associates' || col === 'audio_associates' ||
-         col === 'video_associates') && value && typeof value === 'string') {
+  // Parse JSON fields
+  const jsonFields = ['enabled_modules', 'show_dates', 'lighting_associates', 'audio_associates', 'video_associates'];
+  jsonFields.forEach(field => {
+    if ((project as any)[field] && typeof (project as any)[field] === 'string') {
       try {
-        project[col] = JSON.parse(value);
+        (project as any)[field] = JSON.parse((project as any)[field]);
       } catch {
-        project[col] = value;
+        // Keep as is if parsing fails
       }
-    } else {
-      project[col] = value;
     }
   });
 
@@ -87,17 +67,16 @@ export function createProject(
   const id = uuidv4();
   const now = Date.now();
 
-  db.run(
-    'INSERT INTO projects (id, name, description, logo_path, enabled_modules, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [
-      id,
-      name,
-      description || null,
-      logoPath || null,
-      enabledModules ? JSON.stringify(enabledModules) : null,
-      now,
-      now
-    ]
+  db.prepare(
+    'INSERT INTO projects (id, name, description, logo_path, enabled_modules, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+  ).run(
+    id,
+    name,
+    description || null,
+    logoPath || null,
+    enabledModules ? JSON.stringify(enabledModules) : null,
+    now,
+    now
   );
 
   saveDatabase();
@@ -184,10 +163,9 @@ export function updateProject(id: string, updates: Partial<Project>): Project {
     return value;
   });
 
-  db.run(
-    `UPDATE projects SET ${setClause}, updated_at = ? WHERE id = ?`,
-    [...values, now, id]
-  );
+  db.prepare(
+    `UPDATE projects SET ${setClause}, updated_at = ? WHERE id = ?`
+  ).run(...values, now, id);
 
   saveDatabase();
 
@@ -201,7 +179,7 @@ export function updateProject(id: string, updates: Partial<Project>): Project {
 
 export function deleteProject(id: string): void {
   const db = getDatabase();
-  db.run('DELETE FROM projects WHERE id = ?', [id]);
+  db.prepare('DELETE FROM projects WHERE id = ?').run(id);
   saveDatabase();
 }
 
@@ -209,30 +187,22 @@ export function getCurrentProject(): Project {
   const db = getDatabase();
 
   // Get the most recently updated project
-  const result = db.exec('SELECT * FROM projects ORDER BY updated_at DESC LIMIT 1');
+  const project = db.prepare('SELECT * FROM projects ORDER BY updated_at DESC LIMIT 1').get();
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!project) {
     // If no projects exist, create a default one
     return createProject('Untitled Project');
   }
 
-  const columns = result[0].columns;
-  const values = result[0].values[0];
-
-  const project: any = {};
-  columns.forEach((col, idx) => {
-    const value = values[idx];
-    // Parse JSON fields
-    if ((col === 'enabled_modules' || col === 'show_dates' ||
-         col === 'lighting_associates' || col === 'audio_associates' ||
-         col === 'video_associates') && value && typeof value === 'string') {
+  // Parse JSON fields
+  const jsonFields = ['enabled_modules', 'show_dates', 'lighting_associates', 'audio_associates', 'video_associates'];
+  jsonFields.forEach(field => {
+    if ((project as any)[field] && typeof (project as any)[field] === 'string') {
       try {
-        project[col] = JSON.parse(value);
+        (project as any)[field] = JSON.parse((project as any)[field]);
       } catch {
-        project[col] = value;
+        // Keep as is if parsing fails
       }
-    } else {
-      project[col] = value;
     }
   });
 
