@@ -2,6 +2,8 @@ import { ipcMain, BrowserWindow, dialog } from 'electron';
 import * as fs from 'fs';
 import * as paperworkTemplateQueries from '../database/queries/paperworkTemplates';
 import puppeteer from 'puppeteer';
+import { errorHandler } from '../errors';
+import { DatabaseError, ValidationError } from '../errors';
 
 export function registerPaperworkHandlers(): void {
   // ============================================
@@ -11,9 +13,20 @@ export function registerPaperworkHandlers(): void {
   // Get all templates (optionally filtered by report type)
   ipcMain.handle('paperwork-templates:getAll', async (_event, reportType?: string) => {
     try {
-      return paperworkTemplateQueries.getAllPaperworkTemplates(reportType);
+      return await errorHandler.executeWithRetry(
+        async () => paperworkTemplateQueries.getAllPaperworkTemplates(reportType),
+        'paperwork-templates:getAll'
+      );
     } catch (error) {
-      console.error('Error getting paperwork templates:', error);
+      console.error('Failed to get paperwork templates:', {
+        operation: 'paperwork-templates:getAll',
+        reportType,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to load paperwork templates: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -21,9 +34,20 @@ export function registerPaperworkHandlers(): void {
   // Get template by ID
   ipcMain.handle('paperwork-templates:getById', async (_event, id: string) => {
     try {
-      return paperworkTemplateQueries.getPaperworkTemplateById(id);
+      return await errorHandler.executeWithRetry(
+        async () => paperworkTemplateQueries.getPaperworkTemplateById(id),
+        'paperwork-templates:getById'
+      );
     } catch (error) {
-      console.error('Error getting paperwork template:', error);
+      console.error('Failed to get paperwork template:', {
+        operation: 'paperwork-templates:getById',
+        id,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to load paperwork template: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -31,9 +55,28 @@ export function registerPaperworkHandlers(): void {
   // Create new template
   ipcMain.handle('paperwork-templates:create', async (_event, data: any) => {
     try {
-      return paperworkTemplateQueries.createPaperworkTemplate(data);
+      // Basic validation
+      if (!data.name || data.name.trim().length === 0) {
+        throw new ValidationError('Template name is required', 'name', data.name);
+      }
+
+      return await errorHandler.executeWithRetry(
+        async () => paperworkTemplateQueries.createPaperworkTemplate(data),
+        'paperwork-templates:create'
+      );
     } catch (error) {
-      console.error('Error creating paperwork template:', error);
+      console.error('Failed to create paperwork template:', {
+        operation: 'paperwork-templates:create',
+        data,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof ValidationError) {
+        throw new Error(error.toUserMessage());
+      }
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to create paperwork template: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -41,9 +84,29 @@ export function registerPaperworkHandlers(): void {
   // Update template
   ipcMain.handle('paperwork-templates:update', async (_event, id: string, updates: any) => {
     try {
-      return paperworkTemplateQueries.updatePaperworkTemplate(id, updates);
+      // Validate name if being updated
+      if (updates.name !== undefined && (!updates.name || updates.name.trim().length === 0)) {
+        throw new ValidationError('Template name cannot be empty', 'name', updates.name);
+      }
+
+      return await errorHandler.executeWithRetry(
+        async () => paperworkTemplateQueries.updatePaperworkTemplate(id, updates),
+        'paperwork-templates:update'
+      );
     } catch (error) {
-      console.error('Error updating paperwork template:', error);
+      console.error('Failed to update paperwork template:', {
+        operation: 'paperwork-templates:update',
+        id,
+        updates,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof ValidationError) {
+        throw new Error(error.toUserMessage());
+      }
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to update paperwork template: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -51,9 +114,20 @@ export function registerPaperworkHandlers(): void {
   // Delete template
   ipcMain.handle('paperwork-templates:delete', async (_event, id: string) => {
     try {
-      return paperworkTemplateQueries.deletePaperworkTemplate(id);
+      return await errorHandler.executeWithRetry(
+        async () => paperworkTemplateQueries.deletePaperworkTemplate(id),
+        'paperwork-templates:delete'
+      );
     } catch (error) {
-      console.error('Error deleting paperwork template:', error);
+      console.error('Failed to delete paperwork template:', {
+        operation: 'paperwork-templates:delete',
+        id,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to delete paperwork template: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -61,9 +135,21 @@ export function registerPaperworkHandlers(): void {
   // Duplicate template
   ipcMain.handle('paperwork-templates:duplicate', async (_event, id: string, newName?: string) => {
     try {
-      return paperworkTemplateQueries.duplicatePaperworkTemplate(id, newName);
+      return await errorHandler.executeWithRetry(
+        async () => paperworkTemplateQueries.duplicatePaperworkTemplate(id, newName),
+        'paperwork-templates:duplicate'
+      );
     } catch (error) {
-      console.error('Error duplicating paperwork template:', error);
+      console.error('Failed to duplicate paperwork template:', {
+        operation: 'paperwork-templates:duplicate',
+        id,
+        newName,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to duplicate paperwork template: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -76,6 +162,14 @@ export function registerPaperworkHandlers(): void {
   ipcMain.handle('paperwork:exportPDF', async (_event, htmlContent: string, filename: string, pageSettings: any, fontFamily?: string) => {
     let browser;
     try {
+      // Validation
+      if (!htmlContent || htmlContent.trim().length === 0) {
+        throw new ValidationError('HTML content is required', 'htmlContent', htmlContent);
+      }
+      if (!filename || filename.trim().length === 0) {
+        throw new ValidationError('Filename is required', 'filename', filename);
+      }
+
       // Show save dialog
       const mainWindow = BrowserWindow.getFocusedWindow();
       if (!mainWindow) {
@@ -178,11 +272,24 @@ export function registerPaperworkHandlers(): void {
         filePath: result.filePath,
       };
     } catch (error) {
-      console.error('❌ Error exporting PDF with Puppeteer:', error);
+      console.error('Failed to export PDF:', {
+        operation: 'paperwork:exportPDF',
+        filename,
+        error: error instanceof Error ? error.message : error
+      });
+
       if (browser) {
-        await browser.close();
+        try {
+          await browser.close();
+        } catch (closeError) {
+          console.error('Failed to close browser:', closeError);
+        }
       }
-      throw error;
+
+      if (error instanceof ValidationError) {
+        throw new Error(error.toUserMessage());
+      }
+      throw new Error(`Unable to export PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   });
 
