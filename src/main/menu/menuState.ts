@@ -8,7 +8,7 @@ export type MenuContext =
   | 'project'          // ProjectPage (project details)
   | 'module'           // ModuleLanding (tool selection)
   | 'equipment'        // Equipment Manager
-  | 'prep'             // Shop Order/Prep tool
+  | 'shop-order'       // Shop Order Builder tool
   | 'systemdocs'       // System Docs container
   | 'paperwork'        // Paperwork generator
   | 'labels'           // Label designer

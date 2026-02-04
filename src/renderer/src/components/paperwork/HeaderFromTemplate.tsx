@@ -6,8 +6,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { PageRenderer } from '../prep/PageRenderer';
-import type { PageLayoutTemplate, PrintSection, PrepProject } from '../../types/prep';
+import { PageRenderer } from '../shop-order/PageRenderer';
+import type { PageLayoutTemplate, PrintSection, PrepProject } from '../../types/shopOrder';
 import type { PrepTemplateData } from '../../utils/paperwork/dataFieldMapper';
 
 interface HeaderFromTemplateProps {

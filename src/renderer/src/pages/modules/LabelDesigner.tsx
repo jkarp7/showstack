@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFixtureStore } from '../../store/fixtureStore';
-import { promptAndMigrate, needsMigration } from '../../utils/prep/labelMigration';
+import { promptAndMigrate, needsMigration } from '../../utils/shop-order/labelMigration';
 
 type LabelType = 'cable' | 'circuit' | 'fixture' | 'dimmer' | 'custom';
 type PrinterType = 'dymo-450' | 'brother-pt' | 'zebra' | 'avery-sheet';

@@ -12,6 +12,8 @@ import {
 } from '../database/queries/layoutTemplates';
 import { seedDefaultPageLayouts } from '../database/seedDefaultLayouts';
 import { getSetting, setSetting } from '../database/queries/settings';
+import { errorHandler } from '../errors';
+import { DatabaseError, ValidationError } from '../errors';
 
 const SALT_ROUNDS = 10;
 const DEFAULT_LAYOUTS_DIR = path.join(__dirname, '..', 'database', 'defaultLayouts');
@@ -30,18 +32,38 @@ export function registerAdminHandlers(): void {
    */
   ipcMain.handle('admin:verifyPassword', async (_event, password: string) => {
     try {
-      const storedHash = await getSetting('admin_password_hash');
-
-      // If no password is set, allow access (first time setup)
-      if (!storedHash) {
-        return { success: true, firstTime: true };
+      // Validation
+      if (!password || password.length === 0) {
+        throw new ValidationError('Password is required', 'password', password);
       }
 
-      // Verify password
-      const isValid = await bcrypt.compare(password, storedHash);
-      return { success: isValid, firstTime: false };
+      return await errorHandler.executeWithRetry(
+        async () => {
+          const storedHash = await getSetting('admin_password_hash');
+
+          // If no password is set, allow access (first time setup)
+          if (!storedHash) {
+            return { success: true, firstTime: true };
+          }
+
+          // Verify password
+          const isValid = await bcrypt.compare(password, storedHash);
+          return { success: isValid, firstTime: false };
+        },
+        'admin:verifyPassword'
+      );
     } catch (error) {
-      console.error('Error verifying admin password:', error);
+      console.error('Failed to verify admin password:', {
+        operation: 'admin:verifyPassword',
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof ValidationError) {
+        throw new Error(error.toUserMessage());
+      }
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to verify password: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -51,15 +73,35 @@ export function registerAdminHandlers(): void {
    */
   ipcMain.handle('admin:setPassword', async (_event, password: string) => {
     try {
-      // Hash the password
-      const hash = await bcrypt.hash(password, SALT_ROUNDS);
+      // Validation
+      if (!password || password.length < 4) {
+        throw new ValidationError('Password must be at least 4 characters', 'password', password);
+      }
 
-      // Store the hash
-      await setSetting('admin_password_hash', hash);
+      return await errorHandler.executeWithRetry(
+        async () => {
+          // Hash the password
+          const hash = await bcrypt.hash(password, SALT_ROUNDS);
 
-      return { success: true };
+          // Store the hash
+          await setSetting('admin_password_hash', hash);
+
+          return { success: true };
+        },
+        'admin:setPassword'
+      );
     } catch (error) {
-      console.error('Error setting admin password:', error);
+      console.error('Failed to set admin password:', {
+        operation: 'admin:setPassword',
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof ValidationError) {
+        throw new Error(error.toUserMessage());
+      }
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to save password: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -69,10 +111,22 @@ export function registerAdminHandlers(): void {
    */
   ipcMain.handle('admin:hasPassword', async () => {
     try {
-      const storedHash = await getSetting('admin_password_hash');
-      return { hasPassword: !!storedHash };
+      return await errorHandler.executeWithRetry(
+        async () => {
+          const storedHash = await getSetting('admin_password_hash');
+          return { hasPassword: !!storedHash };
+        },
+        'admin:hasPassword'
+      );
     } catch (error) {
-      console.error('Error checking admin password:', error);
+      console.error('Failed to check admin password:', {
+        operation: 'admin:hasPassword',
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to check password: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -330,21 +384,33 @@ export function registerAdminHandlers(): void {
    */
   ipcMain.handle('admin:resetLayoutsToFactory', async () => {
     try {
-      // Delete all existing default layouts
-      const templates = getAllLayoutTemplates();
-      const defaultTemplates = templates.filter(t => t.is_default);
+      return await errorHandler.executeWithRetry(
+        async () => {
+          // Delete all existing default layouts
+          const templates = getAllLayoutTemplates();
+          const defaultTemplates = templates.filter(t => t.is_default);
 
-      for (const template of defaultTemplates) {
-        deleteLayoutTemplate(template.id);
-      }
+          for (const template of defaultTemplates) {
+            deleteLayoutTemplate(template.id);
+          }
 
-      // Re-seed default layouts
-      seedDefaultPageLayouts();
+          // Re-seed default layouts
+          seedDefaultPageLayouts();
 
-      return { success: true };
+          return { success: true };
+        },
+        'admin:resetLayoutsToFactory'
+      );
     } catch (error) {
-      console.error('Error resetting layouts to factory:', error);
-      throw error;
+      console.error('Failed to reset layouts to factory:', {
+        operation: 'admin:resetLayoutsToFactory',
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to reset layouts: ${error.message}`);
+      }
+      throw new Error(`Unable to reset layouts: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   });
 

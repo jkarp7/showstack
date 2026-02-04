@@ -6,7 +6,7 @@
  */
 
 import { useParams, useNavigate } from 'react-router-dom';
-import LabelLayoutDesigner from '../components/prep/label/LabelLayoutDesigner';
+import LabelLayoutDesigner from '../components/shop-order/label/LabelLayoutDesigner';
 
 export function LabelVisualDesigner() {
   const { projectId, averyCode } = useParams<{ projectId: string; averyCode: string }>();

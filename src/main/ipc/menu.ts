@@ -13,48 +13,85 @@ import { buildMenu } from '../menu/menuTemplate';
 export function registerMenuHandlers(): void {
   // Update menu state from renderer
   ipcMain.handle('menu:setState', async (event, newState: Partial<MenuStateData>) => {
-    menuState.setState(newState);
+    try {
+      menuState.setState(newState);
 
-    // Rebuild menu with new state
-    const menu = buildMenu(menuState.getState());
-    const window = BrowserWindow.fromWebContents(event.sender);
-    if (window) {
-      window.setMenu(menu);
+      // Rebuild menu with new state
+      const menu = buildMenu(menuState.getState());
+      const window = BrowserWindow.fromWebContents(event.sender);
+      if (window) {
+        window.setMenu(menu);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to set menu state:', {
+        operation: 'menu:setState',
+        error: error instanceof Error ? error.message : error
+      });
+
+      throw new Error(`Unable to update menu: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-
-    return { success: true };
   });
 
   // Get current menu state
   ipcMain.handle('menu:getState', async () => {
-    return menuState.getState();
+    try {
+      return menuState.getState();
+    } catch (error) {
+      console.error('Failed to get menu state:', {
+        operation: 'menu:getState',
+        error: error instanceof Error ? error.message : error
+      });
+
+      throw new Error(`Unable to get menu state: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   });
 
   // Reset menu state
   ipcMain.handle('menu:reset', async () => {
-    menuState.reset();
+    try {
+      menuState.reset();
 
-    // Rebuild menu with default state
-    const menu = buildMenu(menuState.getState());
-    const windows = BrowserWindow.getAllWindows();
-    windows.forEach(window => {
-      window.setMenu(menu);
-    });
+      // Rebuild menu with default state
+      const menu = buildMenu(menuState.getState());
+      const windows = BrowserWindow.getAllWindows();
+      windows.forEach(window => {
+        window.setMenu(menu);
+      });
 
-    return { success: true };
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to reset menu:', {
+        operation: 'menu:reset',
+        error: error instanceof Error ? error.message : error
+      });
+
+      throw new Error(`Unable to reset menu: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   });
 
   // Developer mode changed - open/close DevTools
   ipcMain.handle('menu:developerModeChanged', async (event, enabled: boolean) => {
-    const window = BrowserWindow.fromWebContents(event.sender);
-    if (window) {
-      if (enabled) {
-        window.webContents.openDevTools();
-      } else {
-        window.webContents.closeDevTools();
+    try {
+      const window = BrowserWindow.fromWebContents(event.sender);
+      if (window) {
+        if (enabled) {
+          window.webContents.openDevTools();
+        } else {
+          window.webContents.closeDevTools();
+        }
       }
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to toggle developer mode:', {
+        operation: 'menu:developerModeChanged',
+        enabled,
+        error: error instanceof Error ? error.message : error
+      });
+
+      throw new Error(`Unable to toggle developer mode: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-    return { success: true };
   });
 }
 

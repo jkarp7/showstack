@@ -1,4 +1,4 @@
-import type { PrepEquipmentItem, PrepSection, ItemChange, ChangeType } from '../types/prep';
+import type { PrepEquipmentItem, PrepSection, ItemChange, ChangeType } from '../types/shopOrder';
 
 /**
  * Snapshot of project state for revision comparison
@@ -167,7 +167,7 @@ export function formatChange(change: ItemChange): string {
  * ============================================
  */
 
-import type { RevisionQuantities, SpareSnapshot } from '../types/prep';
+import type { RevisionQuantities, SpareSnapshot } from '../types/shopOrder';
 
 /**
  * Parse revision quantities from JSON string

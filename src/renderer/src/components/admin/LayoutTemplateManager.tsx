@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Download, Upload, RefreshCw, FileJson, AlertCircle, CheckCircle, X, Edit2, Info } from 'lucide-react';
-import { LayoutDesigner } from '../prep/layout/LayoutDesigner';
+import { LayoutDesigner } from '../shop-order/layout/LayoutDesigner';
 
 export function LayoutTemplateManager() {
   const [layouts, setLayouts] = useState<any[]>([]);

@@ -7,14 +7,27 @@ import {
   getModuleTypeForCircuit,
   DimmerRackModule
 } from '../database/queries/dimmerRackModules';
+import { errorHandler } from '../errors';
+import { DatabaseError, ValidationError } from '../errors';
 
 export function registerDimmerRackModuleHandlers(): void {
   // Get all modules for a rack
   ipcMain.handle('dimmerRackModules:getByRackId', async (_event, rackId: string) => {
     try {
-      return getModulesByRackId(rackId);
+      return await errorHandler.executeWithRetry(
+        async () => getModulesByRackId(rackId),
+        'dimmerRackModules:getByRackId'
+      );
     } catch (error) {
-      console.error('Error getting dimmer rack modules:', error);
+      console.error('Failed to get dimmer rack modules:', {
+        operation: 'dimmerRackModules:getByRackId',
+        rackId,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to load dimmer rack modules: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -22,9 +35,32 @@ export function registerDimmerRackModuleHandlers(): void {
   // Create module
   ipcMain.handle('dimmerRackModules:create', async (_event, module: Omit<DimmerRackModule, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      return createModule(module);
+      // Basic validation
+      if (!module.module_type) {
+        throw new ValidationError(
+          'Module type is required',
+          'module_type',
+          module.module_type
+        );
+      }
+
+      return await errorHandler.executeWithRetry(
+        async () => createModule(module),
+        'dimmerRackModules:create'
+      );
     } catch (error) {
-      console.error('Error creating dimmer rack module:', error);
+      console.error('Failed to create dimmer rack module:', {
+        operation: 'dimmerRackModules:create',
+        module,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof ValidationError) {
+        throw new Error(error.toUserMessage());
+      }
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to create dimmer rack module: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -32,9 +68,21 @@ export function registerDimmerRackModuleHandlers(): void {
   // Update module
   ipcMain.handle('dimmerRackModules:update', async (_event, id: string, updates: Partial<DimmerRackModule>) => {
     try {
-      return updateModule(id, updates);
+      return await errorHandler.executeWithRetry(
+        async () => updateModule(id, updates),
+        'dimmerRackModules:update'
+      );
     } catch (error) {
-      console.error('Error updating dimmer rack module:', error);
+      console.error('Failed to update dimmer rack module:', {
+        operation: 'dimmerRackModules:update',
+        id,
+        updates,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to update dimmer rack module: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -42,9 +90,20 @@ export function registerDimmerRackModuleHandlers(): void {
   // Delete module
   ipcMain.handle('dimmerRackModules:delete', async (_event, id: string) => {
     try {
-      deleteModule(id);
+      await errorHandler.executeWithRetry(
+        async () => deleteModule(id),
+        'dimmerRackModules:delete'
+      );
     } catch (error) {
-      console.error('Error deleting dimmer rack module:', error);
+      console.error('Failed to delete dimmer rack module:', {
+        operation: 'dimmerRackModules:delete',
+        id,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to delete dimmer rack module: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -52,9 +111,21 @@ export function registerDimmerRackModuleHandlers(): void {
   // Get module type for a specific circuit
   ipcMain.handle('dimmerRackModules:getTypeForCircuit', async (_event, rackId: string, circuit: number) => {
     try {
-      return getModuleTypeForCircuit(rackId, circuit);
+      return await errorHandler.executeWithRetry(
+        async () => getModuleTypeForCircuit(rackId, circuit),
+        'dimmerRackModules:getTypeForCircuit'
+      );
     } catch (error) {
-      console.error('Error getting module type for circuit:', error);
+      console.error('Failed to get module type for circuit:', {
+        operation: 'dimmerRackModules:getTypeForCircuit',
+        rackId,
+        circuit,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to load module type: ${error.message}`);
+      }
       throw error;
     }
   });

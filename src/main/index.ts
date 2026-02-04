@@ -8,7 +8,7 @@ import { registerDialogHandlers } from './ipc/dialogs';
 import { registerPreferencesHandlers } from './ipc/preferences';
 import { registerFileHandlers } from './ipc/files';
 import { registerWindowHandlers } from './ipc/windows';
-import { registerPrepHandlers } from './ipc/prep';
+import { registerShopOrderHandlers } from './ipc/shop-order';
 import { registerPaperworkHandlers } from './ipc/paperwork';
 import { registerLabelPrinterHandlers } from './ipc/labelPrinter';
 import { registerLicenseHandlers } from './ipc/license';
@@ -23,6 +23,7 @@ import { registerPhaseTemplateHandlers } from './ipc/phaseTemplates';
 import { registerInfrastructureHandlers } from './ipc/infrastructure';
 import { backgroundVerifier } from './services/BackgroundVerifier';
 import { licenseService } from './services/LicenseService';
+import { performanceMonitor } from './monitoring/PerformanceMonitor';
 
 // Set app name for macOS menu bar
 app.setName('ShowStack');
@@ -50,7 +51,7 @@ app.on('ready', async () => {
   registerPreferencesHandlers();
   registerFileHandlers();
   registerWindowHandlers();
-  registerPrepHandlers();
+  registerShopOrderHandlers();
   registerPaperworkHandlers();
   registerLabelPrinterHandlers();
   registerLicenseHandlers();
@@ -77,6 +78,15 @@ app.on('ready', async () => {
 
   // Create landing window
   windowManager.createLandingWindow();
+
+  // Start periodic performance monitoring
+  // Track memory usage every 5 minutes
+  setInterval(() => {
+    performanceMonitor.trackMemoryUsage();
+  }, 5 * 60 * 1000);
+
+  // Log initial memory baseline
+  performanceMonitor.trackMemoryUsage();
 });
 
 app.on('window-all-closed', () => {

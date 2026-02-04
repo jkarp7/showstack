@@ -5,7 +5,7 @@
  * Wraps the generic layout template functions with paperwork-specific logic.
  */
 
-import type { PageLayoutTemplate, LayoutElement } from '../../types/prep';
+import type { PageLayoutTemplate, LayoutElement } from '../../types/shopOrder';
 
 const PAPERWORK_HEADER_PAGE_TYPE = 'paperwork-header';
 

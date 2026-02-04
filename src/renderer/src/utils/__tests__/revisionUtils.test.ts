@@ -12,7 +12,7 @@ import {
   parseSpareSnapshot,
   getDeltaIndicator,
 } from '../revisionUtils';
-import type { PrepEquipmentItem, RevisionQuantities, SpareSnapshot } from '../../types/prep';
+import type { PrepEquipmentItem, RevisionQuantities, SpareSnapshot } from '../../types/shopOrder';
 
 /**
  * Revision Utilities Tests

@@ -18,14 +18,27 @@ import {
   PortAssignment,
   CSVFieldMapping
 } from '../database/queries/infrastructure';
+import { errorHandler } from '../errors';
+import { DatabaseError, ValidationError } from '../errors';
 
 export function registerInfrastructureHandlers(): void {
   // Get all infrastructure equipment for a project
   ipcMain.handle('infrastructure:getAll', async (_event, projectId: string) => {
     try {
-      return getAllInfrastructure(projectId);
+      return await errorHandler.executeWithRetry(
+        async () => getAllInfrastructure(projectId),
+        'infrastructure:getAll'
+      );
     } catch (error) {
-      console.error('Error getting infrastructure:', error);
+      console.error('Failed to get infrastructure:', {
+        operation: 'infrastructure:getAll',
+        projectId,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to load infrastructure: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -33,9 +46,32 @@ export function registerInfrastructureHandlers(): void {
   // Create infrastructure equipment
   ipcMain.handle('infrastructure:create', async (_event, equipment: Partial<InfrastructureEquipment>, projectId: string) => {
     try {
-      return createInfrastructure(equipment, projectId);
+      // Basic validation
+      if (!equipment.type) {
+        throw new ValidationError(
+          'Equipment type is required',
+          'type',
+          equipment.type
+        );
+      }
+
+      return await errorHandler.executeWithRetry(
+        async () => createInfrastructure(equipment, projectId),
+        'infrastructure:create'
+      );
     } catch (error) {
-      console.error('Error creating infrastructure:', error);
+      console.error('Failed to create infrastructure:', {
+        operation: 'infrastructure:create',
+        equipment,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof ValidationError) {
+        throw new Error(error.toUserMessage());
+      }
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to create infrastructure: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -43,9 +79,21 @@ export function registerInfrastructureHandlers(): void {
   // Update infrastructure equipment
   ipcMain.handle('infrastructure:update', async (_event, id: string, updates: Partial<InfrastructureEquipment>) => {
     try {
-      return updateInfrastructure(id, updates);
+      return await errorHandler.executeWithRetry(
+        async () => updateInfrastructure(id, updates),
+        'infrastructure:update'
+      );
     } catch (error) {
-      console.error('Error updating infrastructure:', error);
+      console.error('Failed to update infrastructure:', {
+        operation: 'infrastructure:update',
+        id,
+        updates,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to update infrastructure: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -53,9 +101,20 @@ export function registerInfrastructureHandlers(): void {
   // Delete infrastructure equipment
   ipcMain.handle('infrastructure:delete', async (_event, id: string) => {
     try {
-      deleteInfrastructure(id);
+      await errorHandler.executeWithRetry(
+        async () => deleteInfrastructure(id),
+        'infrastructure:delete'
+      );
     } catch (error) {
-      console.error('Error deleting infrastructure:', error);
+      console.error('Failed to delete infrastructure:', {
+        operation: 'infrastructure:delete',
+        id,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to delete infrastructure: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -63,9 +122,20 @@ export function registerInfrastructureHandlers(): void {
   // Delete multiple infrastructure equipment
   ipcMain.handle('infrastructure:deleteMultiple', async (_event, ids: string[]) => {
     try {
-      deleteMultipleInfrastructure(ids);
+      await errorHandler.executeWithRetry(
+        async () => deleteMultipleInfrastructure(ids),
+        'infrastructure:deleteMultiple'
+      );
     } catch (error) {
-      console.error('Error deleting multiple infrastructure:', error);
+      console.error('Failed to delete multiple infrastructure:', {
+        operation: 'infrastructure:deleteMultiple',
+        count: ids.length,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to delete infrastructure: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -73,9 +143,21 @@ export function registerInfrastructureHandlers(): void {
   // Get port linkages for equipment
   ipcMain.handle('infrastructure:getPortLinkages', async (_event, equipmentId: string, projectId: string) => {
     try {
-      return getPortLinkages(equipmentId, projectId);
+      return await errorHandler.executeWithRetry(
+        async () => getPortLinkages(equipmentId, projectId),
+        'infrastructure:getPortLinkages'
+      );
     } catch (error) {
-      console.error('Error getting port linkages:', error);
+      console.error('Failed to get port linkages:', {
+        operation: 'infrastructure:getPortLinkages',
+        equipmentId,
+        projectId,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to load port linkages: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -83,9 +165,21 @@ export function registerInfrastructureHandlers(): void {
   // Get fixture connections
   ipcMain.handle('infrastructure:getFixtureConnections', async (_event, fixtureId: string, projectId: string) => {
     try {
-      return getFixtureConnections(fixtureId, projectId);
+      return await errorHandler.executeWithRetry(
+        async () => getFixtureConnections(fixtureId, projectId),
+        'infrastructure:getFixtureConnections'
+      );
     } catch (error) {
-      console.error('Error getting fixture connections:', error);
+      console.error('Failed to get fixture connections:', {
+        operation: 'infrastructure:getFixtureConnections',
+        fixtureId,
+        projectId,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to load fixture connections: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -93,9 +187,21 @@ export function registerInfrastructureHandlers(): void {
   // Get equipment connections
   ipcMain.handle('infrastructure:getEquipmentConnections', async (_event, equipmentId: string, projectId: string) => {
     try {
-      return getEquipmentConnections(equipmentId, projectId);
+      return await errorHandler.executeWithRetry(
+        async () => getEquipmentConnections(equipmentId, projectId),
+        'infrastructure:getEquipmentConnections'
+      );
     } catch (error) {
-      console.error('Error getting equipment connections:', error);
+      console.error('Failed to get equipment connections:', {
+        operation: 'infrastructure:getEquipmentConnections',
+        equipmentId,
+        projectId,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to load equipment connections: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -103,9 +209,21 @@ export function registerInfrastructureHandlers(): void {
   // Validate port assignment
   ipcMain.handle('infrastructure:validatePortAssignment', async (_event, equipmentId: string, portAssignment: PortAssignment, projectId: string) => {
     try {
-      return validatePortAssignment(equipmentId, portAssignment, projectId);
+      return await errorHandler.executeWithRetry(
+        async () => validatePortAssignment(equipmentId, portAssignment, projectId),
+        'infrastructure:validatePortAssignment'
+      );
     } catch (error) {
-      console.error('Error validating port assignment:', error);
+      console.error('Failed to validate port assignment:', {
+        operation: 'infrastructure:validatePortAssignment',
+        equipmentId,
+        portAssignment,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to validate port assignment: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -113,9 +231,20 @@ export function registerInfrastructureHandlers(): void {
   // Get port usage stats for specific equipment
   ipcMain.handle('infrastructure:getPortUsageStats', async (_event, equipmentId: string) => {
     try {
-      return getPortUsageStats(equipmentId);
+      return await errorHandler.executeWithRetry(
+        async () => getPortUsageStats(equipmentId),
+        'infrastructure:getPortUsageStats'
+      );
     } catch (error) {
-      console.error('Error getting port usage stats:', error);
+      console.error('Failed to get port usage stats:', {
+        operation: 'infrastructure:getPortUsageStats',
+        equipmentId,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to load port usage stats: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -123,9 +252,20 @@ export function registerInfrastructureHandlers(): void {
   // Get port usage stats for all equipment in project
   ipcMain.handle('infrastructure:getAllPortUsageStats', async (_event, projectId: string) => {
     try {
-      return getAllPortUsageStats(projectId);
+      return await errorHandler.executeWithRetry(
+        async () => getAllPortUsageStats(projectId),
+        'infrastructure:getAllPortUsageStats'
+      );
     } catch (error) {
-      console.error('Error getting all port usage stats:', error);
+      console.error('Failed to get all port usage stats:', {
+        operation: 'infrastructure:getAllPortUsageStats',
+        projectId,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to load port usage stats: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -133,28 +273,41 @@ export function registerInfrastructureHandlers(): void {
   // Export infrastructure to CSV
   ipcMain.handle('infrastructure:exportCSV', async (_event, projectId: string) => {
     try {
-      const csvContent = exportInfrastructureToCSV(projectId);
+      return await errorHandler.executeWithRetry(
+        async () => {
+          const csvContent = exportInfrastructureToCSV(projectId);
 
-      // Show save dialog
-      const result = await dialog.showSaveDialog({
-        title: 'Export Infrastructure to CSV',
-        defaultPath: `infrastructure-${projectId}.csv`,
-        filters: [
-          { name: 'CSV Files', extensions: ['csv'] },
-          { name: 'All Files', extensions: ['*'] }
-        ]
+          // Show save dialog
+          const result = await dialog.showSaveDialog({
+            title: 'Export Infrastructure to CSV',
+            defaultPath: `infrastructure-${projectId}.csv`,
+            filters: [
+              { name: 'CSV Files', extensions: ['csv'] },
+              { name: 'All Files', extensions: ['*'] }
+            ]
+          });
+
+          if (result.canceled || !result.filePath) {
+            return { success: false, canceled: true };
+          }
+
+          // Write CSV file
+          writeFileSync(result.filePath, csvContent, 'utf-8');
+
+          return { success: true, filePath: result.filePath };
+        },
+        'infrastructure:exportCSV'
+      );
+    } catch (error) {
+      console.error('Failed to export infrastructure CSV:', {
+        operation: 'infrastructure:exportCSV',
+        projectId,
+        error: error instanceof Error ? error.message : error
       });
 
-      if (result.canceled || !result.filePath) {
-        return { success: false, canceled: true };
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to export infrastructure: ${error.message}`);
       }
-
-      // Write CSV file
-      writeFileSync(result.filePath, csvContent, 'utf-8');
-
-      return { success: true, filePath: result.filePath };
-    } catch (error) {
-      console.error('Error exporting infrastructure CSV:', error);
       throw error;
     }
   });
@@ -162,12 +315,26 @@ export function registerInfrastructureHandlers(): void {
   // Import infrastructure from CSV
   ipcMain.handle('infrastructure:importCSV', async (_event, projectId: string, csvFilePath: string, fieldMapping: CSVFieldMapping[]) => {
     try {
-      const csvContent = readFileSync(csvFilePath, 'utf-8');
-      const result = importInfrastructureFromCSV(projectId, csvContent, fieldMapping);
+      return await errorHandler.executeWithRetry(
+        async () => {
+          const csvContent = readFileSync(csvFilePath, 'utf-8');
+          const result = importInfrastructureFromCSV(projectId, csvContent, fieldMapping);
 
-      return result;
+          return result;
+        },
+        'infrastructure:importCSV'
+      );
     } catch (error) {
-      console.error('Error importing infrastructure CSV:', error);
+      console.error('Failed to import infrastructure CSV:', {
+        operation: 'infrastructure:importCSV',
+        projectId,
+        csvFilePath,
+        error: error instanceof Error ? error.message : error
+      });
+
+      if (error instanceof DatabaseError) {
+        throw new Error(`Unable to import infrastructure: ${error.message}`);
+      }
       throw error;
     }
   });
@@ -175,38 +342,48 @@ export function registerInfrastructureHandlers(): void {
   // Read CSV file headers (for mapping UI)
   ipcMain.handle('infrastructure:readCSVHeaders', async (_event, filePath: string) => {
     try {
-      const csvContent = readFileSync(filePath, 'utf-8');
-      const firstLine = csvContent.split('\n')[0];
+      return await errorHandler.executeWithRetry(
+        async () => {
+          const csvContent = readFileSync(filePath, 'utf-8');
+          const firstLine = csvContent.split('\n')[0];
 
-      // Parse CSV header line
-      const headers: string[] = [];
-      let current = '';
-      let inQuotes = false;
+          // Parse CSV header line
+          const headers: string[] = [];
+          let current = '';
+          let inQuotes = false;
 
-      for (let i = 0; i < firstLine.length; i++) {
-        const char = firstLine[i];
+          for (let i = 0; i < firstLine.length; i++) {
+            const char = firstLine[i];
 
-        if (char === '"') {
-          if (inQuotes && firstLine[i + 1] === '"') {
-            current += '"';
-            i++;
-          } else {
-            inQuotes = !inQuotes;
+            if (char === '"') {
+              if (inQuotes && firstLine[i + 1] === '"') {
+                current += '"';
+                i++;
+              } else {
+                inQuotes = !inQuotes;
+              }
+            } else if (char === ',' && !inQuotes) {
+              headers.push(current.trim());
+              current = '';
+            } else {
+              current += char;
+            }
           }
-        } else if (char === ',' && !inQuotes) {
+
           headers.push(current.trim());
-          current = '';
-        } else {
-          current += char;
-        }
-      }
 
-      headers.push(current.trim());
-
-      return { success: true, headers };
+          return { success: true, headers };
+        },
+        'infrastructure:readCSVHeaders'
+      );
     } catch (error) {
-      console.error('Error reading CSV headers:', error);
-      throw error;
+      console.error('Failed to read CSV headers:', {
+        operation: 'infrastructure:readCSVHeaders',
+        filePath,
+        error: error instanceof Error ? error.message : error
+      });
+
+      throw new Error(`Unable to read CSV file: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   });
 
@@ -228,8 +405,12 @@ export function registerInfrastructureHandlers(): void {
 
       return { success: true, filePath: result.filePaths[0] };
     } catch (error) {
-      console.error('Error showing import dialog:', error);
-      throw error;
+      console.error('Failed to show import dialog:', {
+        operation: 'infrastructure:showImportDialog',
+        error: error instanceof Error ? error.message : error
+      });
+
+      throw new Error(`Unable to show import dialog: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   });
 
