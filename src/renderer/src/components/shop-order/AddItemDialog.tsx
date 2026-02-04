@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { usePrepStore } from '../../store/prepStore';
+import { useShopOrderStore } from '../../store/shopOrderStore';
 
 interface AddItemDialogProps {
   isOpen: boolean;
@@ -9,7 +9,7 @@ interface AddItemDialogProps {
 }
 
 export function AddItemDialog({ isOpen, onClose, sectionId, sectionName }: AddItemDialogProps) {
-  const { createItem, items } = usePrepStore();
+  const { createItem, items } = useShopOrderStore();
   const [description, setDescription] = useState('');
   const [activeQty, setActiveQty] = useState(0);
   const [spareQty, setSpareQty] = useState(0);

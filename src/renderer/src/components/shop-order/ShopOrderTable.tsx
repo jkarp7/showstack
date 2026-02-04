@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { usePrepStore } from '../../store/prepStore';
-import type { PrepSection, PrepEquipmentItem } from '../../types/prep';
+import { useShopOrderStore } from '../../store/shopOrderStore';
+import type { ShopOrderSection, ShopOrderItem } from '../../types/shopOrder';
 import {
   parseRevisionQuantities,
   setRevisionQuantity,
@@ -58,12 +58,12 @@ interface EditingCell {
  * - Row reordering via drag-and-drop
  */
 export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps) {
-  const { currentProject, sections, items, updateItem, createItem, deleteItem, updateProject, createRevision, loadProject } = usePrepStore();
+  const { currentProject, sections, items, updateItem, createItem, deleteItem, updateProject, createRevision, loadProject } = useShopOrderStore();
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null);
   const [editValue, setEditValue] = useState('');
   const editInputRef = useRef<HTMLInputElement>(null);
-  const [draggedItem, setDraggedItem] = useState<PrepEquipmentItem | null>(null);
-  const [notesModalItem, setNotesModalItem] = useState<PrepEquipmentItem | null>(null);
+  const [draggedItem, setDraggedItem] = useState<ShopOrderItem | null>(null);
+  const [notesModalItem, setNotesModalItem] = useState<ShopOrderItem | null>(null);
   const [selectedCell, setSelectedCell] = useState<{ itemId: string; field: string } | null>(null);
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -208,7 +208,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
   /**
    * Debounced save function - reduces database writes when users are typing quickly
    */
-  const debouncedSave = (itemId: string, updates: Partial<PrepEquipmentItem>) => {
+  const debouncedSave = (itemId: string, updates: Partial<ShopOrderItem>) => {
     // Store the pending update
     const existingUpdates = pendingSavesRef.current.get(itemId) || {};
     pendingSavesRef.current.set(itemId, { ...existingUpdates, ...updates });
@@ -462,7 +462,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
     const sectionItems = items.filter((item) => item.section_id === sectionId);
 
     // Group items by description
-    const grouped = new Map<string, PrepEquipmentItem[]>();
+    const grouped = new Map<string, ShopOrderItem[]>();
     sectionItems.forEach((item) => {
       const desc = item.description.trim().toLowerCase();
       if (!grouped.has(desc)) {
@@ -541,7 +541,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
    * - Descriptions truncated to 500 characters
    * - Quantities capped at 99999
    */
-  const parsePasteData = (text: string): Array<Partial<PrepEquipmentItem>> => {
+  const parsePasteData = (text: string): Array<Partial<ShopOrderItem>> => {
     const lines = text.trim().split('\n');
     if (lines.length === 0) return [];
 
@@ -642,7 +642,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
         venue_qty,
         notes: notes.trim(),
       };
-    }).filter((item): item is Partial<PrepEquipmentItem> => item !== null);
+    }).filter((item): item is Partial<ShopOrderItem> => item !== null);
   };
 
   const handlePasteItems = async (sectionId: string) => {
@@ -793,7 +793,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
   };
 
   // Drag and drop handlers for row reordering
-  const handleRowDragStart = (e: React.DragEvent, item: PrepEquipmentItem) => {
+  const handleRowDragStart = (e: React.DragEvent, item: ShopOrderItem) => {
     setDraggedItem(item);
     e.dataTransfer.effectAllowed = 'move';
   };
@@ -803,7 +803,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
     e.dataTransfer.dropEffect = 'move';
   };
 
-  const handleRowDrop = async (e: React.DragEvent, targetItem: PrepEquipmentItem) => {
+  const handleRowDrop = async (e: React.DragEvent, targetItem: ShopOrderItem) => {
     e.preventDefault();
 
     if (!draggedItem || draggedItem.id === targetItem.id) {
@@ -1207,7 +1207,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
  * ItemNotesModal - Modal for editing item notes
  */
 interface ItemNotesModalProps {
-  item: PrepEquipmentItem;
+  item: ShopOrderItem;
   onClose: () => void;
   onSave: (notes: string) => void;
 }

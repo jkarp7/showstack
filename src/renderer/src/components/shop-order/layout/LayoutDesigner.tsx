@@ -15,12 +15,12 @@ import type {
   ImageConfig,
   TableConfig,
   ShapeConfig,
-  PrepProject
-} from '../../../types/prep';
+  ShopOrderProject
+} from '../../../types/shopOrder';
 
 interface LayoutDesignerProps {
   projectId: string; // Used for identifying which project is being previewed
-  currentProject?: PrepProject; // Optional: actual project data for live preview
+  currentProject?: ShopOrderProject; // Optional: actual project data for live preview
   pageType: PrintSectionType;
   onSave?: (template: PageLayoutTemplate) => void;
   onClose: () => void;

@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import type { PrepEquipmentItem } from '../../types/prep';
-import { usePrepStore } from '../../store/prepStore';
+import type { ShopOrderItem } from '../../types/shopOrder';
+import { useShopOrderStore } from '../../store/shopOrderStore';
 
 interface EquipmentItemTableProps {
   sectionId: string;
-  items: PrepEquipmentItem[];
+  items: ShopOrderItem[];
   onAddItem: () => void;
-  onEditItem: (item: PrepEquipmentItem) => void;
+  onEditItem: (item: ShopOrderItem) => void;
   triggerAdd?: boolean; // Trigger to start adding a new row
 }
 
@@ -24,7 +24,7 @@ export function EquipmentItemTable({
   onEditItem,
   triggerAdd,
 }: EquipmentItemTableProps) {
-  const { updateItem, deleteItem, createItem } = usePrepStore();
+  const { updateItem, deleteItem, createItem } = useShopOrderStore();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingQty, setEditingQty] = useState<{
     itemId: string;
@@ -43,7 +43,7 @@ export function EquipmentItemTable({
     venue_qty: 0,
   });
   const [isSubmittingNewRow, setIsSubmittingNewRow] = useState(false);
-  const [draggedItem, setDraggedItem] = useState<PrepEquipmentItem | null>(null);
+  const [draggedItem, setDraggedItem] = useState<ShopOrderItem | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const descriptionInputRef = useRef<HTMLInputElement>(null);
 
@@ -133,7 +133,7 @@ export function EquipmentItemTable({
     }
   };
 
-  const calculateRentalQty = (item: PrepEquipmentItem) => {
+  const calculateRentalQty = (item: ShopOrderItem) => {
     return item.total_qty - item.venue_active - item.venue_spare;
   };
 
@@ -220,7 +220,7 @@ export function EquipmentItemTable({
   };
 
   // Drag and drop handlers
-  const handleDragStart = (e: React.DragEvent, item: PrepEquipmentItem) => {
+  const handleDragStart = (e: React.DragEvent, item: ShopOrderItem) => {
     setDraggedItem(item);
     e.dataTransfer.effectAllowed = 'move';
   };
@@ -266,7 +266,7 @@ export function EquipmentItemTable({
 
   const handleMergeDuplicates = async () => {
     // Find items with duplicate descriptions (case-insensitive)
-    const descriptionGroups = new Map<string, PrepEquipmentItem[]>();
+    const descriptionGroups = new Map<string, ShopOrderItem[]>();
 
     sortedItems.forEach((item) => {
       const normalizedDesc = item.description.trim().toLowerCase();

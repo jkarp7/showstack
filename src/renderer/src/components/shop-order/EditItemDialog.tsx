@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
-import { usePrepStore } from '../../store/prepStore';
-import type { PrepEquipmentItem } from '../../types/prep';
+import { useShopOrderStore } from '../../store/shopOrderStore';
+import type { ShopOrderItem } from '../../types/shopOrder';
 
 interface EditItemDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  item: PrepEquipmentItem | null;
+  item: ShopOrderItem | null;
 }
 
 export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
-  const updateItem = usePrepStore((state) => state.updateItem);
+  const updateItem = useShopOrderStore((state) => state.updateItem);
   const [description, setDescription] = useState('');
   const [activeQty, setActiveQty] = useState(0);
   const [spareQty, setSpareQty] = useState(0);

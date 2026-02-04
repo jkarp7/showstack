@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
-import { usePrepFileStore } from '../../store/prepFileStore';
-import { usePrepStore } from '../../store/prepStore';
+import { useShopOrderFileStore } from '../../store/shopOrderFileStore';
+import { useShopOrderStore } from '../../store/shopOrderStore';
 
-interface PrepFileMenuProps {
+interface ShopOrderFileMenuProps {
   className?: string;
   onNewProject?: () => void;
 }
 
-export function PrepFileMenu({ className = '', onNewProject }: PrepFileMenuProps) {
-  const { currentProject } = usePrepStore();
+export function ShopOrderFileMenu({ className = '', onNewProject }: PrepFileMenuProps) {
+  const { currentProject } = useShopOrderStore();
   const {
     isDirty,
     isSaving,
@@ -18,7 +18,7 @@ export function PrepFileMenu({ className = '', onNewProject }: PrepFileMenuProps
     openFile,
     saveFile,
     saveFileAs,
-  } = usePrepFileStore();
+  } = useShopOrderFileStore();
 
   const currentFileName = getCurrentFileName();
   const isLoading = isSaving || isOpening;
@@ -35,7 +35,7 @@ export function PrepFileMenu({ className = '', onNewProject }: PrepFileMenuProps
   };
 
   const handleOpen = async () => {
-    const { loadProject } = usePrepStore.getState();
+    const { loadProject } = useShopOrderStore.getState();
     await openFile(async (projectId) => {
       await loadProject(projectId);
     });

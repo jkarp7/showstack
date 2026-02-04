@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { PrepNoteTemplate } from '../../types/prep';
+import type { ShopOrderNoteTemplate } from '../../types/shopOrder';
 
 interface TemplateManagerDialogProps {
   isOpen: boolean;
@@ -8,8 +8,8 @@ interface TemplateManagerDialogProps {
 
 export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialogProps) {
   const [selectedType, setSelectedType] = useState<'general_conditions' | 'general_notes' | 'fixture_notes'>('general_conditions');
-  const [templates, setTemplates] = useState<PrepNoteTemplate[]>([]);
-  const [editingTemplate, setEditingTemplate] = useState<PrepNoteTemplate | null>(null);
+  const [templates, setTemplates] = useState<ShopOrderNoteTemplate[]>([]);
+  const [editingTemplate, setEditingTemplate] = useState<ShopOrderNoteTemplate | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
   const [formName, setFormName] = useState('');
@@ -39,7 +39,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
     setFormIsDefault(false);
   };
 
-  const handleEdit = (template: PrepNoteTemplate) => {
+  const handleEdit = (template: ShopOrderNoteTemplate) => {
     setIsCreating(false);
     setEditingTemplate(template);
     setFormName(template.name);

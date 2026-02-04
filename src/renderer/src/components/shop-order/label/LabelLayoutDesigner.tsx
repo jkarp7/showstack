@@ -13,8 +13,8 @@ import {
   calculateLabelGrid,
   getAveryTemplate,
   type LabelGridConfig
-} from '../../../utils/prep/labelGridCalculator';
-import type { PageLayoutTemplate, LayoutElement, PrintSectionType } from '../../../types/prep';
+} from '../../../utils/shop-order/labelGridCalculator';
+import type { PageLayoutTemplate, LayoutElement, PrintSectionType } from '../../../types/shopOrder';
 
 interface LabelLayoutDesignerProps {
   projectId: string; // Project identifier

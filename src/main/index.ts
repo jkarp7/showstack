@@ -8,7 +8,7 @@ import { registerDialogHandlers } from './ipc/dialogs';
 import { registerPreferencesHandlers } from './ipc/preferences';
 import { registerFileHandlers } from './ipc/files';
 import { registerWindowHandlers } from './ipc/windows';
-import { registerPrepHandlers } from './ipc/prep';
+import { registerShopOrderHandlers } from './ipc/shop-order';
 import { registerPaperworkHandlers } from './ipc/paperwork';
 import { registerLabelPrinterHandlers } from './ipc/labelPrinter';
 import { registerLicenseHandlers } from './ipc/license';
@@ -50,7 +50,7 @@ app.on('ready', async () => {
   registerPreferencesHandlers();
   registerFileHandlers();
   registerWindowHandlers();
-  registerPrepHandlers();
+  registerShopOrderHandlers();
   registerPaperworkHandlers();
   registerLabelPrinterHandlers();
   registerLicenseHandlers();

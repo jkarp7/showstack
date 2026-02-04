@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RevisionChangeLogPage } from '../RevisionChangeLogPage';
-import type { usePrepStore } from '../../../store/prepStore';
-import type { PrepProject, PrepSection, PrepEquipmentItem, PrepRevision } from '../../../types/prep';
+import type { useShopOrderStore } from '../../../store/shopOrderStore';
+import type { ShopOrderProject, ShopOrderSection, ShopOrderItem, ShopOrderRevision } from '../../../types/shopOrder';
 
 /**
  * RevisionChangeLogPage Component Tests
@@ -11,7 +11,7 @@ import type { PrepProject, PrepSection, PrepEquipmentItem, PrepRevision } from '
  * Tests the revision change log page
  */
 
-const defaultMockProject: PrepProject = {
+const defaultMockProject: ShopOrderProject = {
   id: 'proj-1',
   production_name: 'Test Show',
   current_revision: 2,
@@ -21,7 +21,7 @@ const defaultMockProject: PrepProject = {
   updated_at: Date.now(),
 };
 
-const defaultMockSections: PrepSection[] = [
+const defaultMockSections: ShopOrderSection[] = [
   {
     id: 'sec-1',
     prep_project_id: 'proj-1',
@@ -34,7 +34,7 @@ const defaultMockSections: PrepSection[] = [
   },
 ];
 
-const defaultMockItems: PrepEquipmentItem[] = [
+const defaultMockItems: ShopOrderItem[] = [
   {
     id: 'item-1',
     section_id: 'sec-1',
@@ -82,7 +82,7 @@ const defaultMockItems: PrepEquipmentItem[] = [
   },
 ];
 
-const defaultMockRevisions: PrepRevision[] = [
+const defaultMockRevisions: ShopOrderRevision[] = [
   {
     id: 'rev-0',
     prep_project_id: 'proj-1',
@@ -120,7 +120,7 @@ let mockStoreData = {
 };
 
 vi.mock('../../../store/prepStore', () => ({
-  usePrepStore: () => mockStoreData,
+  useShopOrderStore: () => mockStoreData,
 }));
 
 describe('RevisionChangeLogPage', () => {

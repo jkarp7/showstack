@@ -1,11 +1,11 @@
-import type { PrepProject } from '../../types/prep';
+import type { ShopOrderProject } from '../../types/shopOrder';
 
-interface PrepProjectCardProps {
-  project: PrepProject;
+interface ShopOrderProjectCardProps {
+  project: ShopOrderProject;
   onClick: () => void;
 }
 
-export function PrepProjectCard({ project, onClick }: PrepProjectCardProps) {
+export function ShopOrderProjectCard({ project, onClick }: ShopOrderProjectCardProps) {
   const disciplines = JSON.parse(project.disciplines || '["lighting"]');
   const formattedDate = new Date(project.updated_at).toLocaleDateString('en-US', {
     month: 'short',

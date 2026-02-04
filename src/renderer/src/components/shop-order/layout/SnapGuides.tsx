@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { LayoutElement } from '../../../types/prep';
+import type { LayoutElement } from '../../../types/shopOrder';
 
 interface SnapGuidesProps {
   elements: LayoutElement[];

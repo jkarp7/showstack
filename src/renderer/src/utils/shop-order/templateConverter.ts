@@ -16,7 +16,7 @@ import type {
   ShapeConfig,
   DataFieldConfig,
   ElementStyle
-} from '../../types/prep';
+} from '../../types/shopOrder';
 
 // Legacy canvas-based label graphic interface
 export interface LabelGraphic {

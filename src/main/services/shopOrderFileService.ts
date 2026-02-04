@@ -1,19 +1,19 @@
 import { dialog } from 'electron';
 import { readFileSync, writeFileSync } from 'fs';
 import {
-  getPrepProjectById,
+  getShopOrderProjectById,
   getSectionsByProjectId,
   getItemsByProjectId,
   getRevisionsByProjectId,
   getNotesByProjectId,
-  createPrepProject,
-  createPrepSection,
-  createPrepEquipmentItem,
-  createPrepRevision,
-  createPrepNote,
-} from '../database/queries/prep';
+  createShopOrderProject,
+  createShopOrderSection,
+  createShopOrderItem,
+  createShopOrderRevision,
+  createShopOrderNote,
+} from '../database/queries/shop-order';
 
-export interface PrepFileData {
+export interface ShopOrderFileData {
   version: string;
   project: any;
   sections: any[];
@@ -22,14 +22,14 @@ export interface PrepFileData {
   notes: any[];
 }
 
-export interface PrepFileResult {
+export interface ShopOrderFileResult {
   success: boolean;
   projectId?: string;
   projectName?: string;
   error?: string;
 }
 
-class PrepFileService {
+class ShopOrderFileService {
   private readonly VERSION = '1.0.0';
 
   /**
@@ -84,7 +84,7 @@ class PrepFileService {
   async exportProject(projectId: string, filePath: string): Promise<void> {
     try {
       // Load all project data
-      const project = getPrepProjectById(projectId);
+      const project = getShopOrderProjectById(projectId);
       if (!project) {
         throw new Error('Project not found');
       }
@@ -95,7 +95,7 @@ class PrepFileService {
       const notes = getNotesByProjectId(projectId);
 
       // Create export data structure
-      const exportData: PrepFileData = {
+      const exportData: ShopOrderFileData = {
         version: this.VERSION,
         project,
         sections,
@@ -116,11 +116,11 @@ class PrepFileService {
   /**
    * Import prep project from ShowStack file (.ss or legacy .ssd)
    */
-  async importProject(filePath: string): Promise<PrepFileResult> {
+  async importProject(filePath: string): Promise<ShopOrderFileResult> {
     try {
       // Read and parse file
       const fileContent = readFileSync(filePath, 'utf-8');
-      const data: PrepFileData = JSON.parse(fileContent);
+      const data: ShopOrderFileData = JSON.parse(fileContent);
 
       // Validate structure
       if (!data.project || !data.version) {
@@ -132,7 +132,7 @@ class PrepFileService {
 
       // Create new project (with new ID)
       const { id: _oldId, created_at: _created, updated_at: _updated, ...projectData } = data.project;
-      const newProject = createPrepProject({
+      const newProject = createShopOrderProject({
         ...projectData,
         production_name: projectData.production_name + ' (Imported)',
         order_date: Date.now(),
@@ -142,7 +142,7 @@ class PrepFileService {
       const sectionIdMap = new Map<string, string>();
       for (const section of data.sections) {
         const { id: oldId, created_at, updated_at, ...sectionData } = section;
-        const newSection = createPrepSection({
+        const newSection = createShopOrderSection({
           ...sectionData,
           prep_project_id: newProject.id,
         });
@@ -156,7 +156,7 @@ class PrepFileService {
         const newSectionId = sectionIdMap.get(item.section_id);
         if (!newSectionId) continue;
 
-        const newItem = createPrepEquipmentItem({
+        const newItem = createShopOrderItem({
           ...itemData,
           section_id: newSectionId,
         });
@@ -181,7 +181,7 @@ class PrepFileService {
             }));
           }
 
-          createPrepRevision({
+          createShopOrderRevision({
             ...revisionData,
             prep_project_id: newProject.id,
             change_log: JSON.stringify(changeLog),
@@ -193,7 +193,7 @@ class PrepFileService {
       if (data.notes) {
         for (const note of data.notes) {
           const { id: _id, created_at, updated_at, ...noteData } = note;
-          createPrepNote({
+          createShopOrderNote({
             ...noteData,
             prep_project_id: newProject.id,
           });
@@ -224,4 +224,4 @@ class PrepFileService {
   }
 }
 
-export const prepFileService = new PrepFileService();
+export const shopOrderFileService = new ShopOrderFileService();

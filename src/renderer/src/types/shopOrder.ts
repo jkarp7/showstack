@@ -25,7 +25,7 @@ export interface AdditionalContact extends Contact {
 /**
  * Prep Project - Main shop order/specification document
  */
-export interface PrepProject {
+export interface ShopOrderProject {
   id: string;
   user_id?: string;
   parent_project_id?: string; // Optional link to parent ShowStack project
@@ -88,7 +88,7 @@ export interface PrepProject {
  * Section - Organizational grouping of equipment
  * e.g., "Moving Lights", "LED Fixtures", "Audio Consoles"
  */
-export interface PrepSection {
+export interface ShopOrderSection {
   id: string;
   prep_project_id: string;
 
@@ -105,7 +105,7 @@ export interface PrepSection {
 /**
  * Equipment Item - Individual piece of equipment in a shop order
  */
-export interface PrepEquipmentItem {
+export interface ShopOrderItem {
   id: string;
   section_id: string;
 
@@ -157,14 +157,14 @@ export interface ItemChange {
   change_type: ChangeType;
   description: string;
   section_name?: string;
-  old_values?: Partial<PrepEquipmentItem>;
-  new_values?: Partial<PrepEquipmentItem>;
+  old_values?: Partial<ShopOrderItem>;
+  new_values?: Partial<ShopOrderItem>;
 }
 
 /**
  * Revision - Snapshot of changes between versions
  */
-export interface PrepRevision {
+export interface ShopOrderRevision {
   id: string;
   prep_project_id: string;
 
@@ -186,7 +186,7 @@ export type SpareSnapshot = Record<string, number>;
 /**
  * Note - 3-tier notes system
  */
-export interface PrepNote {
+export interface ShopOrderNote {
   id: string;
   prep_project_id: string;
 
@@ -201,7 +201,7 @@ export interface PrepNote {
 /**
  * Note Template - Reusable standard language for notes
  */
-export interface PrepNoteTemplate {
+export interface ShopOrderNoteTemplate {
   id: string;
   user_id?: string;
 
@@ -217,32 +217,32 @@ export interface PrepNoteTemplate {
 /**
  * Helper types for creating/updating records
  */
-export type CreatePrepProject = Omit<PrepProject, 'id' | 'created_at' | 'updated_at'>;
-export type UpdatePrepProject = Partial<Omit<PrepProject, 'id' | 'created_at' | 'updated_at'>>;
+export type CreateShopOrderProject = Omit<ShopOrderProject, 'id' | 'created_at' | 'updated_at'>;
+export type UpdateShopOrderProject = Partial<Omit<ShopOrderProject, 'id' | 'created_at' | 'updated_at'>>;
 
-export type CreatePrepSection = Omit<PrepSection, 'id' | 'created_at' | 'updated_at'>;
-export type UpdatePrepSection = Partial<Omit<PrepSection, 'id' | 'created_at' | 'updated_at'>>;
+export type CreateShopOrderSection = Omit<ShopOrderSection, 'id' | 'created_at' | 'updated_at'>;
+export type UpdateShopOrderSection = Partial<Omit<ShopOrderSection, 'id' | 'created_at' | 'updated_at'>>;
 
-export type CreatePrepEquipmentItem = Omit<PrepEquipmentItem, 'id' | 'created_at' | 'updated_at'>;
-export type UpdatePrepEquipmentItem = Partial<
-  Omit<PrepEquipmentItem, 'id' | 'created_at' | 'updated_at'>
+export type CreateShopOrderItem = Omit<ShopOrderItem, 'id' | 'created_at' | 'updated_at'>;
+export type UpdateShopOrderItem = Partial<
+  Omit<ShopOrderItem, 'id' | 'created_at' | 'updated_at'>
 >;
 
-export type CreatePrepRevision = Omit<PrepRevision, 'id' | 'created_at' | 'updated_at'>;
-export type CreatePrepNote = Omit<PrepNote, 'id' | 'created_at' | 'updated_at'>;
+export type CreateShopOrderRevision = Omit<ShopOrderRevision, 'id' | 'created_at' | 'updated_at'>;
+export type CreateShopOrderNote = Omit<ShopOrderNote, 'id' | 'created_at' | 'updated_at'>;
 
 /**
  * View models for UI display
  */
-export interface PrepProjectWithStats extends PrepProject {
+export interface ShopOrderProjectWithStats extends ShopOrderProject {
   section_count: number;
   item_count: number;
   total_weight?: number;
   total_power?: number;
 }
 
-export interface PrepSectionWithItems extends PrepSection {
-  items: PrepEquipmentItem[];
+export interface ShopOrderSectionWithItems extends ShopOrderSection {
+  items: ShopOrderItem[];
 }
 
 /**
@@ -257,8 +257,8 @@ export interface VenueAllocation {
  * Duplicate detection result
  */
 export interface DuplicateMatch {
-  item1: PrepEquipmentItem;
-  item2: PrepEquipmentItem;
+  item1: ShopOrderItem;
+  item2: ShopOrderItem;
   similarity: number;
 }
 
@@ -273,7 +273,7 @@ export interface EquipmentFilters {
 }
 
 export interface EquipmentSortOptions {
-  field: keyof PrepEquipmentItem;
+  field: keyof ShopOrderItem;
   direction: 'asc' | 'desc';
 }
 

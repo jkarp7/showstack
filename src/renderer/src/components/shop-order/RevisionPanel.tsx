@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import type { PrepRevision, PrepProject, ItemChange } from '../../types/prep';
+import type { ShopOrderRevision, ShopOrderProject, ItemChange } from '../../types/shopOrder';
 
 interface RevisionPanelProps {
-  project: PrepProject;
-  revisions: PrepRevision[];
+  project: ShopOrderProject;
+  revisions: ShopOrderRevision[];
   onGenerateRevision: (notes?: string) => Promise<void>;
   onDeleteRevision: (revisionId: string) => Promise<void>;
   onCompareRevisions: (rev1: number, rev2: number) => void;

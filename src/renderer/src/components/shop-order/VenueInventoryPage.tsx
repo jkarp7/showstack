@@ -1,6 +1,6 @@
 import React from 'react';
-import { usePrepStore } from '../../store/prepStore';
-import type { PrepEquipmentItem } from '../../types/prep';
+import { useShopOrderStore } from '../../store/shopOrderStore';
+import type { ShopOrderItem } from '../../types/shopOrder';
 import { calculateTotalQuantity, calculateRentalQuantity } from '../../utils/revisionUtils';
 
 interface VenueInventoryPageProps {
@@ -14,7 +14,7 @@ interface VenueInventoryPageProps {
  * Can be printed as a standalone report
  */
 export function VenueInventoryPage({ projectId }: VenueInventoryPageProps) {
-  const { currentProject, sections, items } = usePrepStore();
+  const { currentProject, sections, items } = useShopOrderStore();
 
   if (!currentProject) {
     return (

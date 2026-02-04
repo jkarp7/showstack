@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { usePrepStore } from '../../store/prepStore';
-import type { PrepEquipmentItem } from '../../types/prep';
+import { useShopOrderStore } from '../../store/shopOrderStore';
+import type { ShopOrderItem } from '../../types/shopOrder';
 import { detectRevisionChanges, parseSpareSnapshot } from '../../utils/revisionUtils';
 
 interface RevisionChangeLogPageProps {
@@ -17,7 +17,7 @@ type ChangeFilter = 'all' | 'addition' | 'modification' | 'deletion';
  * Can be filtered by change type
  */
 export function RevisionChangeLogPage({ projectId }: RevisionChangeLogPageProps) {
-  const { currentProject, sections, items, revisions } = usePrepStore();
+  const { currentProject, sections, items, revisions } = useShopOrderStore();
   const [selectedRevision, setSelectedRevision] = useState<number | null>(null);
   const [filter, setFilter] = useState<ChangeFilter>('all');
 

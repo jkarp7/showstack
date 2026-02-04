@@ -12,7 +12,7 @@ import {
   getMigrationSummary,
   type CustomLabelDesign
 } from './templateConverter';
-import type { PageLayoutTemplate, PrintSectionType } from '../../types/prep';
+import type { PageLayoutTemplate, PrintSectionType } from '../../types/shopOrder';
 
 export interface MigrationResult {
   success: boolean;

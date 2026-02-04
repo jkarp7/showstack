@@ -4,7 +4,7 @@ import { Login } from './pages/Login';
 import { LandingPage } from './pages/LandingPage';
 import { ProjectPage } from './pages/ProjectPage';
 import { ModuleLanding } from './pages/ModuleLanding';
-import { Prep } from './pages/modules/Prep';
+import { ShopOrderBuilder } from './pages/modules/ShopOrderBuilder';
 import { SystemDocs } from './pages/modules/SystemDocs';
 import { Manager } from './pages/modules/Manager';
 import { LabelVisualDesigner } from './pages/LabelVisualDesigner';
@@ -65,7 +65,7 @@ function AppContent() {
         <Route path="/project/:projectId" element={<ProjectPage />} />
         <Route path="/project/:projectId/module/:moduleType" element={<ModuleLanding />} />
         <Route path="/project/:projectId/module/production/system-docs" element={<SystemDocs />} />
-        <Route path="/project/:projectId/module/production/shop-order" element={<Prep />} />
+        <Route path="/project/:projectId/module/production/shop-order" element={<ShopOrderBuilder />} />
         <Route path="/project/:projectId/prep/label-designer/:averyCode" element={<LabelVisualDesigner />} />
         <Route path="/project/:projectId/module/design" element={<Navigate to="prep" replace />} />
         <Route path="/project/:projectId/module/prep" element={<Navigate to="/project/:projectId/module/production/shop-order" replace />} />
@@ -74,7 +74,7 @@ function AppContent() {
         {/* Direct module access (no project) */}
         <Route path="/module/:moduleType" element={<ModuleLanding />} />
         <Route path="/module/production/system-docs" element={<SystemDocs />} />
-        <Route path="/module/production/shop-order" element={<Prep />} />
+        <Route path="/module/production/shop-order" element={<ShopOrderBuilder />} />
         <Route path="/module/prep" element={<Navigate to="/module/production/shop-order" replace />} />
         <Route path="/module/manager" element={<Manager />} />
         <Route path="/module/production" element={<Navigate to="/module/production/system-docs" replace />} />

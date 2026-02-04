@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { usePrepStore } from '../../store/prepStore';
-import type { PrepSection, Discipline } from '../../types/prep';
+import { useShopOrderStore } from '../../store/shopOrderStore';
+import type { ShopOrderSection, Discipline } from '../../types/shopOrder';
 
 interface EditSectionDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  section: PrepSection | null;
+  section: ShopOrderSection | null;
   projectDisciplines: Discipline[];
 }
 
@@ -15,7 +15,7 @@ export function EditSectionDialog({
   section,
   projectDisciplines,
 }: EditSectionDialogProps) {
-  const updateSection = usePrepStore((state) => state.updateSection);
+  const updateSection = useShopOrderStore((state) => state.updateSection);
   const [name, setName] = useState('');
   const [discipline, setDiscipline] = useState<Discipline>('lighting');
   const [pageBreak, setPageBreak] = useState(false);

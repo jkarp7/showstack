@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-interface PrepFileStore {
+interface ShopOrderFileStore {
   // State
   currentFilePath: string | null;
   currentFileName: string;
@@ -22,7 +22,7 @@ interface PrepFileStore {
   getCurrentFileName: () => string;
 }
 
-export const usePrepFileStore = create<PrepFileStore>((set, get) => ({
+export const useShopOrderFileStore = create<ShopOrderFileStore>((set, get) => ({
   // Initial state
   currentFilePath: null,
   currentFileName: 'Untitled Shop Order',

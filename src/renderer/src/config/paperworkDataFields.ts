@@ -6,7 +6,7 @@
  * infrastructure summaries.
  */
 
-import type { DataFieldType } from '../types/prep';
+import type { DataFieldType } from '../types/shopOrder';
 
 interface PaperworkDataFieldDefinition {
   fieldType: DataFieldType;

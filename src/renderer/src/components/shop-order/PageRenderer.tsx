@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
-import type { PrintSection, PrepProject, PageLayoutTemplate, LayoutElement } from '../../types/prep';
+import type { PrintSection, ShopOrderProject, PageLayoutTemplate, LayoutElement } from '../../types/shopOrder';
 import { formatPhoneNumber } from '../../utils/phoneFormatter';
 
 interface PageRendererProps {
   section: PrintSection;
-  project: PrepProject;
+  project: ShopOrderProject;
   pageSettings: {
     pageSize: string;
     orientation: string;
@@ -156,12 +156,12 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
   // Load logo as data URL
   useEffect(() => {
     const loadLogo = async () => {
-      // Try to find logo path from PrepProject or parent Project
+      // Try to find logo path from ShopOrderProject or parent Project
       let logoPath = project.logo_path || (project as any).logo_storage_path;
 
-      // If no logo in PrepProject, check parent project
+      // If no logo in ShopOrderProject, check parent project
       if (!logoPath && (project as any).parent_project_id) {
-        console.log('[PageRenderer] No logo in PrepProject, checking parent project...');
+        console.log('[PageRenderer] No logo in ShopOrderProject, checking parent project...');
         try {
           const parentProject = await window.api.projects.getById((project as any).parent_project_id);
           if (parentProject?.logo_path) {

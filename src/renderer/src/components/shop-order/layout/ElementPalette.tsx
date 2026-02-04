@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { LayoutElementType, DataFieldType, ShapeType } from '../../../types/prep';
+import type { LayoutElementType, DataFieldType, ShapeType } from '../../../types/shopOrder';
 
 interface PaletteElement {
   type: LayoutElementType;

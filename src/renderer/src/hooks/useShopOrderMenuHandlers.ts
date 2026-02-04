@@ -11,7 +11,7 @@ interface PrepMenuHandlersProps {
  * Prep menu event handlers
  * Registers handlers when component mounts, unregisters on unmount
  */
-export function usePrepMenuHandlers(props: PrepMenuHandlersProps) {
+export function useShopOrderMenuHandlers(props: PrepMenuHandlersProps) {
   const {
     onNewProject,
     onAddSection,

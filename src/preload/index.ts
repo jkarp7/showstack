@@ -71,72 +71,72 @@ contextBridge.exposeInMainWorld('api', {
   prep: {
     // Projects
     projects: {
-      getAll: () => ipcRenderer.invoke('prep:projects:getAll'),
-      getById: (id: string) => ipcRenderer.invoke('prep:projects:getById', id),
-      create: (data: any) => ipcRenderer.invoke('prep:projects:create', data),
-      update: (id: string, updates: any) => ipcRenderer.invoke('prep:projects:update', id, updates),
-      delete: (id: string) => ipcRenderer.invoke('prep:projects:delete', id)
+      getAll: () => ipcRenderer.invoke('shop-order:projects:getAll'),
+      getById: (id: string) => ipcRenderer.invoke('shop-order:projects:getById', id),
+      create: (data: any) => ipcRenderer.invoke('shop-order:projects:create', data),
+      update: (id: string, updates: any) => ipcRenderer.invoke('shop-order:projects:update', id, updates),
+      delete: (id: string) => ipcRenderer.invoke('shop-order:projects:delete', id)
     },
     // Sections
     sections: {
-      getByProjectId: (projectId: string) => ipcRenderer.invoke('prep:sections:getByProjectId', projectId),
-      create: (data: any) => ipcRenderer.invoke('prep:sections:create', data),
-      update: (id: string, updates: any) => ipcRenderer.invoke('prep:sections:update', id, updates),
-      delete: (id: string) => ipcRenderer.invoke('prep:sections:delete', id)
+      getByProjectId: (projectId: string) => ipcRenderer.invoke('shop-order:sections:getByProjectId', projectId),
+      create: (data: any) => ipcRenderer.invoke('shop-order:sections:create', data),
+      update: (id: string, updates: any) => ipcRenderer.invoke('shop-order:sections:update', id, updates),
+      delete: (id: string) => ipcRenderer.invoke('shop-order:sections:delete', id)
     },
     // Equipment Items
     items: {
-      getBySectionId: (sectionId: string) => ipcRenderer.invoke('prep:items:getBySectionId', sectionId),
-      getByProjectId: (projectId: string) => ipcRenderer.invoke('prep:items:getByProjectId', projectId),
-      create: (data: any) => ipcRenderer.invoke('prep:items:create', data),
-      update: (id: string, updates: any) => ipcRenderer.invoke('prep:items:update', id, updates),
-      delete: (id: string) => ipcRenderer.invoke('prep:items:delete', id)
+      getBySectionId: (sectionId: string) => ipcRenderer.invoke('shop-order:items:getBySectionId', sectionId),
+      getByProjectId: (projectId: string) => ipcRenderer.invoke('shop-order:items:getByProjectId', projectId),
+      create: (data: any) => ipcRenderer.invoke('shop-order:items:create', data),
+      update: (id: string, updates: any) => ipcRenderer.invoke('shop-order:items:update', id, updates),
+      delete: (id: string) => ipcRenderer.invoke('shop-order:items:delete', id)
     },
     // Revisions
     revisions: {
-      getByProjectId: (projectId: string) => ipcRenderer.invoke('prep:revisions:getByProjectId', projectId),
-      create: (data: any) => ipcRenderer.invoke('prep:revisions:create', data),
-      delete: (id: string) => ipcRenderer.invoke('prep:revisions:delete', id)
+      getByProjectId: (projectId: string) => ipcRenderer.invoke('shop-order:revisions:getByProjectId', projectId),
+      create: (data: any) => ipcRenderer.invoke('shop-order:revisions:create', data),
+      delete: (id: string) => ipcRenderer.invoke('shop-order:revisions:delete', id)
     },
     // Notes
     notes: {
-      getByProjectId: (projectId: string, type?: string) => ipcRenderer.invoke('prep:notes:getByProjectId', projectId, type),
-      create: (data: any) => ipcRenderer.invoke('prep:notes:create', data),
-      update: (id: string, updates: { content?: string; format?: string }) => ipcRenderer.invoke('prep:notes:update', id, updates),
-      delete: (id: string) => ipcRenderer.invoke('prep:notes:delete', id)
+      getByProjectId: (projectId: string, type?: string) => ipcRenderer.invoke('shop-order:notes:getByProjectId', projectId, type),
+      create: (data: any) => ipcRenderer.invoke('shop-order:notes:create', data),
+      update: (id: string, updates: { content?: string; format?: string }) => ipcRenderer.invoke('shop-order:notes:update', id, updates),
+      delete: (id: string) => ipcRenderer.invoke('shop-order:notes:delete', id)
     },
     // Note Templates
     noteTemplates: {
-      getAll: (type?: string) => ipcRenderer.invoke('prep:noteTemplates:getAll', type),
-      getById: (id: string) => ipcRenderer.invoke('prep:noteTemplates:getById', id),
-      getDefault: (type: string) => ipcRenderer.invoke('prep:noteTemplates:getDefault', type),
-      create: (data: any) => ipcRenderer.invoke('prep:noteTemplates:create', data),
-      update: (id: string, updates: any) => ipcRenderer.invoke('prep:noteTemplates:update', id, updates),
-      delete: (id: string) => ipcRenderer.invoke('prep:noteTemplates:delete', id)
+      getAll: (type?: string) => ipcRenderer.invoke('shop-order:noteTemplates:getAll', type),
+      getById: (id: string) => ipcRenderer.invoke('shop-order:noteTemplates:getById', id),
+      getDefault: (type: string) => ipcRenderer.invoke('shop-order:noteTemplates:getDefault', type),
+      create: (data: any) => ipcRenderer.invoke('shop-order:noteTemplates:create', data),
+      update: (id: string, updates: any) => ipcRenderer.invoke('shop-order:noteTemplates:update', id, updates),
+      delete: (id: string) => ipcRenderer.invoke('shop-order:noteTemplates:delete', id)
     },
     // Layout Templates
     layoutTemplates: {
-      getByProjectId: (projectId: string, pageType?: string) => ipcRenderer.invoke('prep:layoutTemplates:getByProjectId', projectId, pageType),
-      getById: (id: string) => ipcRenderer.invoke('prep:layoutTemplates:getById', id),
-      getElements: (templateId: string) => ipcRenderer.invoke('prep:layoutTemplates:getElements', templateId),
-      getDefault: (projectId: string, pageType: string) => ipcRenderer.invoke('prep:layoutTemplates:getDefault', projectId, pageType),
-      create: (data: any, elements: any[]) => ipcRenderer.invoke('prep:layoutTemplates:create', data, elements),
-      update: (id: string, updates: any, elements?: any[]) => ipcRenderer.invoke('prep:layoutTemplates:update', id, updates, elements),
-      delete: (id: string) => ipcRenderer.invoke('prep:layoutTemplates:delete', id),
-      seedDefaults: () => ipcRenderer.invoke('prep:layoutTemplates:seedDefaults')
+      getByProjectId: (projectId: string, pageType?: string) => ipcRenderer.invoke('shop-order:layoutTemplates:getByProjectId', projectId, pageType),
+      getById: (id: string) => ipcRenderer.invoke('shop-order:layoutTemplates:getById', id),
+      getElements: (templateId: string) => ipcRenderer.invoke('shop-order:layoutTemplates:getElements', templateId),
+      getDefault: (projectId: string, pageType: string) => ipcRenderer.invoke('shop-order:layoutTemplates:getDefault', projectId, pageType),
+      create: (data: any, elements: any[]) => ipcRenderer.invoke('shop-order:layoutTemplates:create', data, elements),
+      update: (id: string, updates: any, elements?: any[]) => ipcRenderer.invoke('shop-order:layoutTemplates:update', id, updates, elements),
+      delete: (id: string) => ipcRenderer.invoke('shop-order:layoutTemplates:delete', id),
+      seedDefaults: () => ipcRenderer.invoke('shop-order:layoutTemplates:seedDefaults')
     },
     // File Operations
     file: {
-      showOpenDialog: () => ipcRenderer.invoke('prep:file:showOpenDialog'),
-      showSaveDialog: (defaultName?: string) => ipcRenderer.invoke('prep:file:showSaveDialog', defaultName),
-      export: (projectId: string, filePath: string) => ipcRenderer.invoke('prep:file:export', projectId, filePath),
-      import: (filePath: string) => ipcRenderer.invoke('prep:file:import', filePath),
-      getFileName: (filePath: string) => ipcRenderer.invoke('prep:file:getFileName', filePath)
+      showOpenDialog: () => ipcRenderer.invoke('shop-order:file:showOpenDialog'),
+      showSaveDialog: (defaultName?: string) => ipcRenderer.invoke('shop-order:file:showSaveDialog', defaultName),
+      export: (projectId: string, filePath: string) => ipcRenderer.invoke('shop-order:file:export', projectId, filePath),
+      import: (filePath: string) => ipcRenderer.invoke('shop-order:file:import', filePath),
+      getFileName: (filePath: string) => ipcRenderer.invoke('shop-order:file:getFileName', filePath)
     },
     // PDF Export
-    exportPDF: (projectId: string, templateData: any) => ipcRenderer.invoke('prep:exportPDF', projectId, templateData),
+    exportPDF: (projectId: string, templateData: any) => ipcRenderer.invoke('shop-order:exportPDF', projectId, templateData),
     // Print
-    print: (projectId: string, templateData: any) => ipcRenderer.invoke('prep:print', projectId, templateData)
+    print: (projectId: string, templateData: any) => ipcRenderer.invoke('shop-order:print', projectId, templateData)
   },
 
   // License operations

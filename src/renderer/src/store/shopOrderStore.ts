@@ -1,33 +1,33 @@
 import { create } from 'zustand';
 import type {
-  PrepProject,
-  PrepSection,
-  PrepEquipmentItem,
-  PrepRevision,
-  PrepNote,
+  ShopOrderProject,
+  ShopOrderSection,
+  ShopOrderItem,
+  ShopOrderRevision,
+  ShopOrderNote,
   Discipline,
   PrintTemplate,
-} from '../types/prep';
+} from '../types/shopOrder';
 
 // Type guard for window.api
 const hasAPI = (): boolean => {
   return typeof window !== 'undefined' && 'api' in window && window.api !== undefined;
 };
 
-interface PrepStore {
+interface ShopOrderStore {
   // Current project
-  currentProject: PrepProject | null;
+  currentProject: ShopOrderProject | null;
 
   // Related data for current project
-  sections: PrepSection[];
-  items: PrepEquipmentItem[];
-  revisions: PrepRevision[];
-  notes: PrepNote[];
+  sections: ShopOrderSection[];
+  items: ShopOrderItem[];
+  revisions: ShopOrderRevision[];
+  notes: ShopOrderNote[];
   printTemplates: PrintTemplate[];
   currentTemplate: PrintTemplate | null;
 
   // All projects (for project list view)
-  allProjects: PrepProject[];
+  allProjects: ShopOrderProject[];
 
   // Loading states
   isLoading: boolean;
@@ -40,8 +40,8 @@ interface PrepStore {
     disciplines?: Discipline[];
     parent_project_id?: string;
     venue?: string;
-  }) => Promise<PrepProject | undefined>;
-  updateProject: (id: string, updates: Partial<PrepProject>) => Promise<void>;
+  }) => Promise<ShopOrderProject | undefined>;
+  updateProject: (id: string, updates: Partial<ShopOrderProject>) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
   syncFromParent: (projectId: string, parentProjectId: string) => Promise<{
     success: boolean;
@@ -58,7 +58,7 @@ interface PrepStore {
     discipline: Discipline;
     sort_order?: number;
   }) => Promise<void>;
-  updateSection: (id: string, updates: Partial<PrepSection>) => Promise<void>;
+  updateSection: (id: string, updates: Partial<ShopOrderSection>) => Promise<void>;
   deleteSection: (id: string) => Promise<void>;
 
   // ===== EQUIPMENT ITEM ACTIONS =====
@@ -72,7 +72,7 @@ interface PrepStore {
     venue_qty?: number;
     sort_order?: number;
   }) => Promise<void>;
-  updateItem: (id: string, updates: Partial<PrepEquipmentItem>) => Promise<void>;
+  updateItem: (id: string, updates: Partial<ShopOrderItem>) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
 
   // ===== REVISION ACTIONS =====
@@ -108,7 +108,7 @@ interface PrepStore {
   clearCurrentProject: () => void;
 }
 
-export const usePrepStore = create<PrepStore>((set, get) => ({
+export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
   currentProject: null,
   sections: [],
   items: [],

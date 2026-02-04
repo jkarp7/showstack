@@ -10,7 +10,7 @@ import type {
   ShapeConfig,
   DataFieldType,
   ShapeType
-} from '../../../types/prep';
+} from '../../../types/shopOrder';
 import { ColorPicker } from './ColorPicker';
 
 interface ElementInspectorProps {

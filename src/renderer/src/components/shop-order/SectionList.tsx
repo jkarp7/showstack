@@ -1,26 +1,26 @@
 import { useState } from 'react';
-import type { PrepSection, PrepEquipmentItem } from '../../types/prep';
-import { usePrepStore } from '../../store/prepStore';
+import type { ShopOrderSection, ShopOrderItem } from '../../types/shopOrder';
+import { useShopOrderStore } from '../../store/shopOrderStore';
 import { EquipmentItemTable } from './EquipmentItemTable';
 import { AddItemDialog } from './AddItemDialog';
 import { EditItemDialog } from './EditItemDialog';
 
 interface SectionListProps {
   projectId: string;
-  sections: PrepSection[];
+  sections: ShopOrderSection[];
   onAddSection: () => void;
-  onEditSection: (section: PrepSection) => void;
+  onEditSection: (section: ShopOrderSection) => void;
 }
 
 export function SectionList({ projectId, sections, onAddSection, onEditSection }: SectionListProps) {
-  const { deleteSection, updateSection, items } = usePrepStore();
+  const { deleteSection, updateSection, items } = useShopOrderStore();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [showAddItemDialog, setShowAddItemDialog] = useState(false);
   const [showEditItemDialog, setShowEditItemDialog] = useState(false);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
-  const [itemToEdit, setItemToEdit] = useState<PrepEquipmentItem | null>(null);
-  const [draggedSection, setDraggedSection] = useState<PrepSection | null>(null);
+  const [itemToEdit, setItemToEdit] = useState<ShopOrderItem | null>(null);
+  const [draggedSection, setDraggedSection] = useState<ShopOrderSection | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [editingSectionNotes, setEditingSectionNotes] = useState<{
     sectionId: string;
@@ -58,7 +58,7 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
     setTimeout(() => setSelectedSectionId(null), 100);
   };
 
-  const handleEditItem = (item: PrepEquipmentItem) => {
+  const handleEditItem = (item: ShopOrderItem) => {
     setItemToEdit(item);
     setShowEditItemDialog(true);
   };
@@ -68,7 +68,7 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
   };
 
   // Drag and drop handlers for sections
-  const handleSectionDragStart = (e: React.DragEvent, section: PrepSection) => {
+  const handleSectionDragStart = (e: React.DragEvent, section: ShopOrderSection) => {
     setDraggedSection(section);
     e.dataTransfer.effectAllowed = 'move';
   };

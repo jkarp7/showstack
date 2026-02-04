@@ -7,10 +7,10 @@
  */
 
 import { useState, useEffect } from 'react';
-import { LayoutDesigner } from '../prep/layout/LayoutDesigner';
+import { LayoutDesigner } from '../shop-order/layout/LayoutDesigner';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { useInfrastructureStore } from '../../store/infrastructureStore';
-import type { PageLayoutTemplate } from '../../types/prep';
+import type { PageLayoutTemplate } from '../../types/shopOrder';
 import type { ReportType } from '../../types/paperwork';
 import { mapPaperworkToTemplateData, type PaperworkProjectData } from '../../utils/paperwork/dataFieldMapper';
 

@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ShopOrderTable } from '../ShopOrderTable';
-import type { usePrepStore } from '../../../store/prepStore';
-import type { PrepProject, PrepSection, PrepEquipmentItem } from '../../../types/prep';
+import type { useShopOrderStore } from '../../../store/shopOrderStore';
+import type { ShopOrderProject, ShopOrderSection, ShopOrderItem } from '../../../types/shopOrder';
 
 /**
  * ShopOrderTable Component Tests
@@ -19,7 +19,7 @@ const mockDeleteItem = vi.fn();
 const mockLoadProject = vi.fn();
 
 // Default mock data
-const defaultMockProject: PrepProject = {
+const defaultMockProject: ShopOrderProject = {
   id: 'proj-1',
   production_name: 'Test Show',
   current_revision: 1,
@@ -29,7 +29,7 @@ const defaultMockProject: PrepProject = {
   updated_at: Date.now(),
 };
 
-const defaultMockSections: PrepSection[] = [
+const defaultMockSections: ShopOrderSection[] = [
   {
     id: 'sec-1',
     prep_project_id: 'proj-1',
@@ -52,7 +52,7 @@ const defaultMockSections: PrepSection[] = [
   },
 ];
 
-const defaultMockItems: PrepEquipmentItem[] = [
+const defaultMockItems: ShopOrderItem[] = [
   {
     id: 'item-1',
     section_id: 'sec-1',
@@ -101,7 +101,7 @@ const defaultMockItems: PrepEquipmentItem[] = [
 ];
 
 // Mock store factory
-const createMockStore = (overrides?: Partial<ReturnType<typeof usePrepStore>>) => ({
+const createMockStore = (overrides?: Partial<ReturnType<typeof useShopOrderStore>>) => ({
   currentProject: defaultMockProject,
   sections: defaultMockSections,
   items: defaultMockItems,
@@ -116,7 +116,7 @@ const createMockStore = (overrides?: Partial<ReturnType<typeof usePrepStore>>) =
 let mockStoreData = createMockStore();
 
 vi.mock('../../../store/prepStore', () => ({
-  usePrepStore: () => mockStoreData,
+  useShopOrderStore: () => mockStoreData,
 }));
 
 // Helper to mock clipboard API

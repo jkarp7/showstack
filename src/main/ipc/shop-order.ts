@@ -4,36 +4,36 @@ import * as fs from 'fs';
 import { formatNoteContentAsHTML } from '../utils/noteFormatting';
 import {
   // Projects
-  getAllPrepProjects,
-  getPrepProjectById,
-  createPrepProject,
-  updatePrepProject,
-  deletePrepProject,
-  PrepProject,
+  getAllShopOrderProjects,
+  getShopOrderProjectById,
+  createShopOrderProject,
+  updateShopOrderProject,
+  deleteShopOrderProject,
+  ShopOrderProject,
   // Sections
   getSectionsByProjectId,
-  createPrepSection,
-  updatePrepSection,
-  deletePrepSection,
-  PrepSection,
+  createShopOrderSection,
+  updateShopOrderSection,
+  deleteShopOrderSection,
+  ShopOrderSection,
   // Equipment Items
   getItemsBySectionId,
   getItemsByProjectId,
-  createPrepEquipmentItem,
-  updatePrepEquipmentItem,
-  deletePrepEquipmentItem,
-  PrepEquipmentItem,
+  createShopOrderItem,
+  updateShopOrderItem,
+  deleteShopOrderItem,
+  ShopOrderItem,
   // Revisions
   getRevisionsByProjectId,
-  createPrepRevision,
-  deletePrepRevision,
-  PrepRevision,
+  createShopOrderRevision,
+  deleteShopOrderRevision,
+  ShopOrderRevision,
   // Notes
   getNotesByProjectId,
-  createPrepNote,
-  updatePrepNote,
-  deletePrepNote,
-  PrepNote,
+  createShopOrderNote,
+  updateShopOrderNote,
+  deleteShopOrderNote,
+  ShopOrderNote,
   // Note Templates
   getAllNoteTemplates,
   getNoteTemplateById,
@@ -41,8 +41,8 @@ import {
   createNoteTemplate,
   updateNoteTemplate,
   deleteNoteTemplate,
-  PrepNoteTemplate,
-} from '../database/queries/prep';
+  ShopOrderNoteTemplate,
+} from '../database/queries/shop-order';
 import { getProjectById } from '../database/queries/projects';
 import {
   // Layout Templates (app-level user preferences)
@@ -57,7 +57,7 @@ import {
   LayoutElement,
 } from '../database/queries/layoutTemplates';
 import { seedDefaultPageLayoutsFromJSON } from '../database/seedDefaultLayoutsFromJSON';
-import { prepFileService } from '../services/prepFileService';
+import { shopOrderFileService } from '../services/shopOrderFileService';
 import { errorHandler } from '../errors';
 import { DatabaseError, ValidationError } from '../errors';
 
@@ -75,20 +75,20 @@ import { DatabaseError, ValidationError } from '../errors';
  * TODO: Complete error handling for remaining 37 handlers in Phase 0.3 refactor
  * (This file is scheduled for major refactoring/renaming in Phase 0.3)
  */
-export function registerPrepHandlers(): void {
+export function registerShopOrderHandlers(): void {
   // ============================================
   // PREP PROJECTS
   // ============================================
 
-  ipcMain.handle('prep:projects:getAll', async () => {
+  ipcMain.handle('shop-order:projects:getAll', async () => {
     try {
       return await errorHandler.executeWithRetry(
-        async () => getAllPrepProjects(),
-        'prep:projects:getAll'
+        async () => getAllShopOrderProjects(),
+        'shop-order:projects:getAll'
       );
     } catch (error) {
       console.error('Failed to get prep projects:', {
-        operation: 'prep:projects:getAll',
+        operation: 'shop-order:projects:getAll',
         error: error instanceof Error ? error.message : error
       });
       if (error instanceof DatabaseError) {
@@ -98,15 +98,15 @@ export function registerPrepHandlers(): void {
     }
   });
 
-  ipcMain.handle('prep:projects:getById', async (_event, id: string) => {
+  ipcMain.handle('shop-order:projects:getById', async (_event, id: string) => {
     try {
       return await errorHandler.executeWithRetry(
-        async () => getPrepProjectById(id),
-        'prep:projects:getById'
+        async () => getShopOrderProjectById(id),
+        'shop-order:projects:getById'
       );
     } catch (error) {
       console.error('Failed to get prep project:', {
-        operation: 'prep:projects:getById',
+        operation: 'shop-order:projects:getById',
         id,
         error: error instanceof Error ? error.message : error
       });
@@ -117,18 +117,18 @@ export function registerPrepHandlers(): void {
     }
   });
 
-  ipcMain.handle('prep:projects:create', async (_event, data: Partial<PrepProject>) => {
+  ipcMain.handle('shop-order:projects:create', async (_event, data: Partial<ShopOrderProject>) => {
     try {
       if (!data.production_name || data.production_name.trim().length === 0) {
         throw new ValidationError('Production name is required', 'production_name', data.production_name);
       }
       return await errorHandler.executeWithRetry(
-        async () => createPrepProject(data),
-        'prep:projects:create'
+        async () => createShopOrderProject(data),
+        'shop-order:projects:create'
       );
     } catch (error) {
       console.error('Failed to create prep project:', {
-        operation: 'prep:projects:create',
+        operation: 'shop-order:projects:create',
         data,
         error: error instanceof Error ? error.message : error
       });
@@ -143,19 +143,19 @@ export function registerPrepHandlers(): void {
   });
 
   ipcMain.handle(
-    'prep:projects:update',
-    async (_event, id: string, updates: Partial<PrepProject>) => {
+    'shop-order:projects:update',
+    async (_event, id: string, updates: Partial<ShopOrderProject>) => {
       try {
         if (updates.production_name !== undefined && (!updates.production_name || updates.production_name.trim().length === 0)) {
           throw new ValidationError('Production name cannot be empty', 'production_name', updates.production_name);
         }
         return await errorHandler.executeWithRetry(
-          async () => updatePrepProject(id, updates),
-          'prep:projects:update'
+          async () => updateShopOrderProject(id, updates),
+          'shop-order:projects:update'
         );
       } catch (error) {
         console.error('Failed to update prep project:', {
-          operation: 'prep:projects:update',
+          operation: 'shop-order:projects:update',
           id,
           updates,
           error: error instanceof Error ? error.message : error
@@ -171,15 +171,15 @@ export function registerPrepHandlers(): void {
     }
   );
 
-  ipcMain.handle('prep:projects:delete', async (_event, id: string) => {
+  ipcMain.handle('shop-order:projects:delete', async (_event, id: string) => {
     try {
       await errorHandler.executeWithRetry(
-        async () => deletePrepProject(id),
-        'prep:projects:delete'
+        async () => deleteShopOrderProject(id),
+        'shop-order:projects:delete'
       );
     } catch (error) {
       console.error('Failed to delete prep project:', {
-        operation: 'prep:projects:delete',
+        operation: 'shop-order:projects:delete',
         id,
         error: error instanceof Error ? error.message : error
       });
@@ -194,7 +194,7 @@ export function registerPrepHandlers(): void {
   // PREP SECTIONS
   // ============================================
 
-  ipcMain.handle('prep:sections:getByProjectId', async (_event, projectId: string) => {
+  ipcMain.handle('shop-order:sections:getByProjectId', async (_event, projectId: string) => {
     try {
       return getSectionsByProjectId(projectId);
     } catch (error) {
@@ -203,9 +203,9 @@ export function registerPrepHandlers(): void {
     }
   });
 
-  ipcMain.handle('prep:sections:create', async (_event, data: Partial<PrepSection>) => {
+  ipcMain.handle('shop-order:sections:create', async (_event, data: Partial<ShopOrderSection>) => {
     try {
-      return createPrepSection(data);
+      return createShopOrderSection(data);
     } catch (error) {
       console.error('Error creating prep section:', error);
       throw error;
@@ -213,10 +213,10 @@ export function registerPrepHandlers(): void {
   });
 
   ipcMain.handle(
-    'prep:sections:update',
-    async (_event, id: string, updates: Partial<PrepSection>) => {
+    'shop-order:sections:update',
+    async (_event, id: string, updates: Partial<ShopOrderSection>) => {
       try {
-        return updatePrepSection(id, updates);
+        return updateShopOrderSection(id, updates);
       } catch (error) {
         console.error('Error updating prep section:', error);
         throw error;
@@ -224,9 +224,9 @@ export function registerPrepHandlers(): void {
     }
   );
 
-  ipcMain.handle('prep:sections:delete', async (_event, id: string) => {
+  ipcMain.handle('shop-order:sections:delete', async (_event, id: string) => {
     try {
-      deletePrepSection(id);
+      deleteShopOrderSection(id);
     } catch (error) {
       console.error('Error deleting prep section:', error);
       throw error;
@@ -237,7 +237,7 @@ export function registerPrepHandlers(): void {
   // PREP EQUIPMENT ITEMS
   // ============================================
 
-  ipcMain.handle('prep:items:getBySectionId', async (_event, sectionId: string) => {
+  ipcMain.handle('shop-order:items:getBySectionId', async (_event, sectionId: string) => {
     try {
       return getItemsBySectionId(sectionId);
     } catch (error) {
@@ -246,7 +246,7 @@ export function registerPrepHandlers(): void {
     }
   });
 
-  ipcMain.handle('prep:items:getByProjectId', async (_event, projectId: string) => {
+  ipcMain.handle('shop-order:items:getByProjectId', async (_event, projectId: string) => {
     try {
       return getItemsByProjectId(projectId);
     } catch (error) {
@@ -255,9 +255,9 @@ export function registerPrepHandlers(): void {
     }
   });
 
-  ipcMain.handle('prep:items:create', async (_event, data: Partial<PrepEquipmentItem>) => {
+  ipcMain.handle('shop-order:items:create', async (_event, data: Partial<ShopOrderItem>) => {
     try {
-      return createPrepEquipmentItem(data);
+      return createShopOrderItem(data);
     } catch (error) {
       console.error('Error creating prep item:', error);
       throw error;
@@ -265,10 +265,10 @@ export function registerPrepHandlers(): void {
   });
 
   ipcMain.handle(
-    'prep:items:update',
-    async (_event, id: string, updates: Partial<PrepEquipmentItem>) => {
+    'shop-order:items:update',
+    async (_event, id: string, updates: Partial<ShopOrderItem>) => {
       try {
-        return updatePrepEquipmentItem(id, updates);
+        return updateShopOrderItem(id, updates);
       } catch (error) {
         console.error('Error updating prep item:', error);
         throw error;
@@ -276,9 +276,9 @@ export function registerPrepHandlers(): void {
     }
   );
 
-  ipcMain.handle('prep:items:delete', async (_event, id: string) => {
+  ipcMain.handle('shop-order:items:delete', async (_event, id: string) => {
     try {
-      deletePrepEquipmentItem(id);
+      deleteShopOrderItem(id);
     } catch (error) {
       console.error('Error deleting prep item:', error);
       throw error;
@@ -289,7 +289,7 @@ export function registerPrepHandlers(): void {
   // PREP REVISIONS
   // ============================================
 
-  ipcMain.handle('prep:revisions:getByProjectId', async (_event, projectId: string) => {
+  ipcMain.handle('shop-order:revisions:getByProjectId', async (_event, projectId: string) => {
     try {
       return getRevisionsByProjectId(projectId);
     } catch (error) {
@@ -298,18 +298,18 @@ export function registerPrepHandlers(): void {
     }
   });
 
-  ipcMain.handle('prep:revisions:create', async (_event, data: Partial<PrepRevision>) => {
+  ipcMain.handle('shop-order:revisions:create', async (_event, data: Partial<ShopOrderRevision>) => {
     try {
-      return createPrepRevision(data);
+      return createShopOrderRevision(data);
     } catch (error) {
       console.error('Error creating prep revision:', error);
       throw error;
     }
   });
 
-  ipcMain.handle('prep:revisions:delete', async (_event, id: string) => {
+  ipcMain.handle('shop-order:revisions:delete', async (_event, id: string) => {
     try {
-      deletePrepRevision(id);
+      deleteShopOrderRevision(id);
     } catch (error) {
       console.error('Error deleting prep revision:', error);
       throw error;
@@ -321,7 +321,7 @@ export function registerPrepHandlers(): void {
   // ============================================
 
   ipcMain.handle(
-    'prep:notes:getByProjectId',
+    'shop-order:notes:getByProjectId',
     async (_event, projectId: string, type?: string) => {
       try {
         return getNotesByProjectId(projectId, type);
@@ -332,27 +332,27 @@ export function registerPrepHandlers(): void {
     }
   );
 
-  ipcMain.handle('prep:notes:create', async (_event, data: Partial<PrepNote>) => {
+  ipcMain.handle('shop-order:notes:create', async (_event, data: Partial<ShopOrderNote>) => {
     try {
-      return createPrepNote(data);
+      return createShopOrderNote(data);
     } catch (error) {
       console.error('Error creating prep note:', error);
       throw error;
     }
   });
 
-  ipcMain.handle('prep:notes:update', async (_event, id: string, updates: { content?: string; format?: string }) => {
+  ipcMain.handle('shop-order:notes:update', async (_event, id: string, updates: { content?: string; format?: string }) => {
     try {
-      return updatePrepNote(id, updates);
+      return updateShopOrderNote(id, updates);
     } catch (error) {
       console.error('Error updating prep note:', error);
       throw error;
     }
   });
 
-  ipcMain.handle('prep:notes:delete', async (_event, id: string) => {
+  ipcMain.handle('shop-order:notes:delete', async (_event, id: string) => {
     try {
-      deletePrepNote(id);
+      deleteShopOrderNote(id);
     } catch (error) {
       console.error('Error deleting prep note:', error);
       throw error;
@@ -363,7 +363,7 @@ export function registerPrepHandlers(): void {
   // PREP NOTE TEMPLATES
   // ============================================
 
-  ipcMain.handle('prep:noteTemplates:getAll', async (_event, type?: string) => {
+  ipcMain.handle('shop-order:noteTemplates:getAll', async (_event, type?: string) => {
     try {
       return getAllNoteTemplates(type);
     } catch (error) {
@@ -372,7 +372,7 @@ export function registerPrepHandlers(): void {
     }
   });
 
-  ipcMain.handle('prep:noteTemplates:getById', async (_event, id: string) => {
+  ipcMain.handle('shop-order:noteTemplates:getById', async (_event, id: string) => {
     try {
       return getNoteTemplateById(id);
     } catch (error) {
@@ -381,7 +381,7 @@ export function registerPrepHandlers(): void {
     }
   });
 
-  ipcMain.handle('prep:noteTemplates:getDefault', async (_event, type: string) => {
+  ipcMain.handle('shop-order:noteTemplates:getDefault', async (_event, type: string) => {
     try {
       return getDefaultNoteTemplate(type);
     } catch (error) {
@@ -390,7 +390,7 @@ export function registerPrepHandlers(): void {
     }
   });
 
-  ipcMain.handle('prep:noteTemplates:create', async (_event, data: Partial<PrepNoteTemplate>) => {
+  ipcMain.handle('shop-order:noteTemplates:create', async (_event, data: Partial<ShopOrderNoteTemplate>) => {
     try {
       return createNoteTemplate(data);
     } catch (error) {
@@ -399,7 +399,7 @@ export function registerPrepHandlers(): void {
     }
   });
 
-  ipcMain.handle('prep:noteTemplates:update', async (_event, id: string, updates: Partial<PrepNoteTemplate>) => {
+  ipcMain.handle('shop-order:noteTemplates:update', async (_event, id: string, updates: Partial<ShopOrderNoteTemplate>) => {
     try {
       return updateNoteTemplate(id, updates);
     } catch (error) {
@@ -408,7 +408,7 @@ export function registerPrepHandlers(): void {
     }
   });
 
-  ipcMain.handle('prep:noteTemplates:delete', async (_event, id: string) => {
+  ipcMain.handle('shop-order:noteTemplates:delete', async (_event, id: string) => {
     try {
       deleteNoteTemplate(id);
     } catch (error) {
@@ -421,27 +421,27 @@ export function registerPrepHandlers(): void {
   // PREP FILE OPERATIONS
   // ============================================
 
-  ipcMain.handle('prep:file:showOpenDialog', async () => {
+  ipcMain.handle('shop-order:file:showOpenDialog', async () => {
     try {
-      return await prepFileService.showOpenDialog();
+      return await shopOrderFileService.showOpenDialog();
     } catch (error) {
       console.error('Error showing open dialog:', error);
       throw error;
     }
   });
 
-  ipcMain.handle('prep:file:showSaveDialog', async (_event, defaultName?: string) => {
+  ipcMain.handle('shop-order:file:showSaveDialog', async (_event, defaultName?: string) => {
     try {
-      return await prepFileService.showSaveDialog(defaultName);
+      return await shopOrderFileService.showSaveDialog(defaultName);
     } catch (error) {
       console.error('Error showing save dialog:', error);
       throw error;
     }
   });
 
-  ipcMain.handle('prep:file:export', async (_event, projectId: string, filePath: string) => {
+  ipcMain.handle('shop-order:file:export', async (_event, projectId: string, filePath: string) => {
     try {
-      await prepFileService.exportProject(projectId, filePath);
+      await shopOrderFileService.exportProject(projectId, filePath);
       return { success: true };
     } catch (error) {
       console.error('Error exporting prep project:', error);
@@ -449,17 +449,17 @@ export function registerPrepHandlers(): void {
     }
   });
 
-  ipcMain.handle('prep:file:import', async (_event, filePath: string) => {
+  ipcMain.handle('shop-order:file:import', async (_event, filePath: string) => {
     try {
-      return await prepFileService.importProject(filePath);
+      return await shopOrderFileService.importProject(filePath);
     } catch (error) {
       console.error('Error importing prep project:', error);
       throw error;
     }
   });
 
-  ipcMain.handle('prep:file:getFileName', (_event, filePath: string) => {
-    return prepFileService.getFileName(filePath);
+  ipcMain.handle('shop-order:file:getFileName', (_event, filePath: string) => {
+    return shopOrderFileService.getFileName(filePath);
   });
 
   // ============================================
@@ -467,7 +467,7 @@ export function registerPrepHandlers(): void {
   // ============================================
 
   ipcMain.handle(
-    'prep:layoutTemplates:getByProjectId',
+    'shop-order:layoutTemplates:getByProjectId',
     async (_event, _projectId: string, pageType?: string) => {
       try {
         // Note: projectId is ignored since templates are now app-level user preferences
@@ -479,7 +479,7 @@ export function registerPrepHandlers(): void {
     }
   );
 
-  ipcMain.handle('prep:layoutTemplates:getById', async (_event, id: string) => {
+  ipcMain.handle('shop-order:layoutTemplates:getById', async (_event, id: string) => {
     try {
       return getLayoutTemplateById(id);
     } catch (error) {
@@ -488,7 +488,7 @@ export function registerPrepHandlers(): void {
     }
   });
 
-  ipcMain.handle('prep:layoutTemplates:getElements', async (_event, templateId: string) => {
+  ipcMain.handle('shop-order:layoutTemplates:getElements', async (_event, templateId: string) => {
     try {
       return getLayoutElementsByTemplateId(templateId);
     } catch (error) {
@@ -498,7 +498,7 @@ export function registerPrepHandlers(): void {
   });
 
   ipcMain.handle(
-    'prep:layoutTemplates:getDefault',
+    'shop-order:layoutTemplates:getDefault',
     async (_event, _projectId: string, pageType: string) => {
       try {
         // Note: projectId is ignored since templates are now app-level user preferences
@@ -511,7 +511,7 @@ export function registerPrepHandlers(): void {
   );
 
   ipcMain.handle(
-    'prep:layoutTemplates:create',
+    'shop-order:layoutTemplates:create',
     async (_event, data: Partial<PageLayoutTemplate>, elements: Partial<LayoutElement>[]) => {
       try {
         return createLayoutTemplate(data, elements);
@@ -523,7 +523,7 @@ export function registerPrepHandlers(): void {
   );
 
   ipcMain.handle(
-    'prep:layoutTemplates:update',
+    'shop-order:layoutTemplates:update',
     async (
       _event,
       id: string,
@@ -539,7 +539,7 @@ export function registerPrepHandlers(): void {
     }
   );
 
-  ipcMain.handle('prep:layoutTemplates:delete', async (_event, id: string) => {
+  ipcMain.handle('shop-order:layoutTemplates:delete', async (_event, id: string) => {
     try {
       deleteLayoutTemplate(id);
     } catch (error) {
@@ -549,7 +549,7 @@ export function registerPrepHandlers(): void {
   });
 
   // Seed default page layouts
-  ipcMain.handle('prep:layoutTemplates:seedDefaults', async () => {
+  ipcMain.handle('shop-order:layoutTemplates:seedDefaults', async () => {
     try {
       seedDefaultPageLayoutsFromJSON();
       return { success: true, message: 'Default page layouts created successfully' };
@@ -563,9 +563,9 @@ export function registerPrepHandlers(): void {
   // PDF EXPORT & PRINT
   // ============================================
 
-  ipcMain.handle('prep:exportPDF', async (_event, projectId: string, templateData: any) => {
+  ipcMain.handle('shop-order:exportPDF', async (_event, projectId: string, templateData: any) => {
     try {
-      const project = getPrepProjectById(projectId);
+      const project = getShopOrderProjectById(projectId);
       if (!project) {
         throw new Error('Project not found');
       }
@@ -630,9 +630,9 @@ export function registerPrepHandlers(): void {
   });
 
   // Direct Print
-  ipcMain.handle('prep:print', async (_event, projectId: string, templateData: any) => {
+  ipcMain.handle('shop-order:print', async (_event, projectId: string, templateData: any) => {
     try {
-      const project = getPrepProjectById(projectId);
+      const project = getShopOrderProjectById(projectId);
       if (!project) {
         throw new Error('Project not found');
       }
@@ -684,7 +684,7 @@ export function registerPrepHandlers(): void {
 }
 
 // Helper function to generate HTML content for PDF using page layouts
-function generatePDFContent(project: PrepProject, templateData: any): string {
+function generatePDFContent(project: ShopOrderProject, templateData: any): string {
   const sections = templateData.sections || [];
   const enabledSections = sections.filter((s: any) => s.enabled && s.type !== 'page-break');
 
@@ -768,7 +768,7 @@ function generatePDFContent(project: PrepProject, templateData: any): string {
 // Render a page section using its layout template
 function renderPageSection(
   section: any,
-  project: PrepProject,
+  project: ShopOrderProject,
   contentWidth: number,
   contentHeight: number,
   notesMap: Record<string, {content: string; format: string}>
@@ -810,7 +810,7 @@ function renderPageSection(
 // Render a single layout element to HTML
 function renderLayoutElement(
   element: any,
-  project: PrepProject,
+  project: ShopOrderProject,
   layout: any,
   contentWidth: number,
   contentHeight: number,
@@ -860,13 +860,13 @@ function renderLayoutElement(
       console.log('[PDF] Project logo_url:', project.logo_url);
       console.log('[PDF] Project parent_project_id:', project.parent_project_id);
 
-      // Support both unified Project (logo_path) and legacy PrepProject (logo_storage_path)
+      // Support both unified Project (logo_path) and legacy ShopOrderProject (logo_storage_path)
       // Prioritize logo_path as the unified field
       let logoPath = project.logo_path || project.logo_storage_path;
 
       // If no logo in prep project, check parent project
       if (!logoPath && project.parent_project_id) {
-        console.log('[PDF] No logo in PrepProject, checking parent project...');
+        console.log('[PDF] No logo in ShopOrderProject, checking parent project...');
         try {
           const parentProject = getProjectById(project.parent_project_id);
           if (parentProject?.logo_path) {
@@ -1299,7 +1299,7 @@ function renderLayoutElement(
 }
 
 // Get data field value for PDF
-function getDataFieldValue(fieldType: string, project: PrepProject): string {
+function getDataFieldValue(fieldType: string, project: ShopOrderProject): string {
   const formatDate = (timestamp?: string | number): string => {
     if (!timestamp) return '';
     try {

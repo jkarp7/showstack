@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VenueInventoryPage } from '../VenueInventoryPage';
-import type { usePrepStore } from '../../../store/prepStore';
-import type { PrepProject, PrepSection, PrepEquipmentItem } from '../../../types/prep';
+import type { useShopOrderStore } from '../../../store/shopOrderStore';
+import type { ShopOrderProject, ShopOrderSection, ShopOrderItem } from '../../../types/shopOrder';
 
 /**
  * VenueInventoryPage Component Tests
@@ -21,7 +21,7 @@ const mockStoreData = {
     order_date: Date.now(),
     created_at: Date.now(),
     updated_at: Date.now(),
-  } as PrepProject,
+  } as ShopOrderProject,
   sections: [
     {
       id: 'sec-1',
@@ -43,7 +43,7 @@ const mockStoreData = {
       created_at: Date.now(),
       updated_at: Date.now(),
     },
-  ] as PrepSection[],
+  ] as ShopOrderSection[],
   items: [
     {
       id: 'item-1',
@@ -90,11 +90,11 @@ const mockStoreData = {
       created_at: Date.now(),
       updated_at: Date.now(),
     },
-  ] as PrepEquipmentItem[],
+  ] as ShopOrderItem[],
 };
 
 vi.mock('../../../store/prepStore', () => ({
-  usePrepStore: () => mockStoreData,
+  useShopOrderStore: () => mockStoreData,
 }));
 
 describe('VenueInventoryPage', () => {

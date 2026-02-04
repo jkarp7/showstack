@@ -1,30 +1,30 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { usePrepStore } from '../../store/prepStore';
+import { useShopOrderStore } from '../../store/shopOrderStore';
 import { useProjectStore } from '../../store/projectStore';
-import { usePrepFileStore } from '../../store/prepFileStore';
-import { NewPrepProjectDialog } from '../../components/prep/NewPrepProjectDialog';
-import { PrepProjectCard } from '../../components/prep/PrepProjectCard';
-import { SectionList } from '../../components/prep/SectionList';
-import { ShopOrderTable } from '../../components/prep/ShopOrderTable';
-import { AddSectionDialog } from '../../components/prep/AddSectionDialog';
-import { EditSectionDialog } from '../../components/prep/EditSectionDialog';
-import { RevisionPanel } from '../../components/prep/RevisionPanel';
-import { NotesPanel } from '../../components/prep/NotesPanel';
-import { TemplateManagerDialog } from '../../components/prep/TemplateManagerDialog';
+import { useShopOrderFileStore } from '../../store/shopOrderFileStore';
+import { NewShopOrderProjectDialog } from '../../components/shop-order/NewShopOrderProjectDialog';
+import { ShopOrderProjectCard } from '../../components/shop-order/ShopOrderProjectCard';
+import { SectionList } from '../../components/shop-order/SectionList';
+import { ShopOrderTable } from '../../components/shop-order/ShopOrderTable';
+import { AddSectionDialog } from '../../components/shop-order/AddSectionDialog';
+import { EditSectionDialog } from '../../components/shop-order/EditSectionDialog';
+import { RevisionPanel } from '../../components/shop-order/RevisionPanel';
+import { NotesPanel } from '../../components/shop-order/NotesPanel';
+import { TemplateManagerDialog } from '../../components/shop-order/TemplateManagerDialog';
 import { Breadcrumbs } from '../../components/common/Breadcrumbs';
-import { PrintPreview } from '../../components/prep/PrintPreview';
+import { PrintPreview } from '../../components/shop-order/PrintPreview';
 import { DeveloperPanel } from '../../components/common/DeveloperPanel';
 import { telemetry } from '../../services/telemetry';
 import { formatPhoneNumber } from '../../utils/phoneFormatter';
-import type { PrepSection, Discipline, PrepProject } from '../../types/prep';
-import { usePrepMenuHandlers } from '../../hooks/usePrepMenuHandlers';
+import type { PrepSection, Discipline, PrepProject } from '../../types/shopOrder';
+import { useShopOrderMenuHandlers } from '../../hooks/useShopOrderMenuHandlers';
 
-export function Prep() {
+export function ShopOrderBuilder() {
   const navigate = useNavigate();
   const { projectId: parentProjectId } = useParams<{ projectId?: string }>();
   const { allProjects, currentProject, sections, revisions, currentTemplate, setCurrentTemplate, saveTemplate, loadAllProjects, loadProject, clearCurrentProject, updateProject, setRevisionZero, generateRevision, deleteRevision, syncFromParent } =
-    usePrepStore();
+    useShopOrderStore();
   const { projects, loadProjects } = useProjectStore();
   const [moduleStartTime] = useState(Date.now());
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
@@ -129,7 +129,7 @@ export function Prep() {
           const parentProject = projects.find(p => p.id === parentProjectId);
           if (parentProject) {
             try {
-              const newProject = await usePrepStore.getState().createProject({
+              const newProject = await useShopOrderStore.getState().createProject({
                 production_name: parentProject.name,
                 parent_project_id: parentProjectId,
                 venue: parentProject.venue || undefined,
@@ -153,7 +153,7 @@ export function Prep() {
   // Update file store when current project changes
   useEffect(() => {
     if (currentProject) {
-      usePrepFileStore.getState().setFileName(currentProject.production_name);
+      useShopOrderFileStore.getState().setFileName(currentProject.production_name);
     }
   }, [currentProject]);
 
@@ -437,7 +437,7 @@ export function Prep() {
   };
 
   // Register menu handlers
-  usePrepMenuHandlers({
+  useShopOrderMenuHandlers({
     onNewProject: handleNewProject,
     onAddSection: () => setShowAddSectionDialog(true),
     onPrint: () => {
@@ -1243,7 +1243,7 @@ export function Prep() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {allProjects.map((project) => (
-                  <PrepProjectCard
+                  <ShopOrderProjectCard
                     key={project.id}
                     project={project}
                     onClick={() => handleProjectClick(project.id)}
@@ -1255,7 +1255,7 @@ export function Prep() {
         </div>
       </main>
 
-      <NewPrepProjectDialog
+      <NewShopOrderProjectDialog
         isOpen={showNewProjectDialog}
         onClose={() => setShowNewProjectDialog(false)}
         onProjectCreated={handleProjectCreated}

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import type { PrintTemplate, PrepProject } from '../../types/prep';
+import type { PrintTemplate, ShopOrderProject } from '../../types/shopOrder';
 import { PrintBuilder } from './PrintBuilder';
 import { PageRenderer } from './PageRenderer';
 
 interface PrintPreviewProps {
-  currentProject: PrepProject;
+  currentProject: ShopOrderProject;
   template: PrintTemplate | null;
   onTemplateChange: (template: PrintTemplate) => void;
   onSaveTemplate: (template: PrintTemplate) => void;

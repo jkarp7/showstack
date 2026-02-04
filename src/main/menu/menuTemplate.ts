@@ -69,7 +69,7 @@ export function buildMenu(state: MenuStateData): Menu {
  * File Menu
  */
 function buildFileMenu(state: MenuStateData, isMac: boolean): MenuItemConstructorOptions {
-  const isToolContext = ['equipment', 'prep'].includes(state.context);
+  const isToolContext = ['equipment', 'shop-order'].includes(state.context);
   const isProjectContext = state.context === 'project' || state.context === 'landing';
 
   return {
@@ -167,9 +167,9 @@ function buildFileMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
  * Edit Menu
  */
 function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructorOptions {
-  const isToolContext = ['equipment', 'prep'].includes(state.context);
+  const isToolContext = ['equipment', 'shop-order'].includes(state.context);
   const isEquipment = state.context === 'equipment';
-  const isPrep = state.context === 'prep';
+  const isShopOrder = state.context === 'shop-order';
 
   return {
     label: 'Edit',

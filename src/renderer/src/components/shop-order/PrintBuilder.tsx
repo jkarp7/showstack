@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import type { PrintTemplate, PrintSection, PrintSectionType, PrepProject } from '../../types/prep';
+import type { PrintTemplate, PrintSection, PrintSectionType, ShopOrderProject } from '../../types/shopOrder';
 import { LayoutDesigner } from './layout/LayoutDesigner';
 
 interface PrintBuilderProps {
-  currentProject: PrepProject;
+  currentProject: ShopOrderProject;
   template: PrintTemplate | null;
   onTemplateChange: (template: PrintTemplate) => void;
   onSaveTemplate: (template: PrintTemplate) => void;

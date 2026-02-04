@@ -1,22 +1,22 @@
 import { useState, useEffect } from 'react';
-import { usePrepStore } from '../../store/prepStore';
+import { useShopOrderStore } from '../../store/shopOrderStore';
 import { useProjectStore } from '../../store/projectStore';
-import type { Discipline } from '../../types/prep';
+import type { Discipline } from '../../types/shopOrder';
 
-interface NewPrepProjectDialogProps {
+interface NewShopOrderProjectDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onProjectCreated?: (projectId: string) => void;
   parentProjectId?: string; // Optional parent project to link to
 }
 
-export function NewPrepProjectDialog({
+export function NewShopOrderProjectDialog({
   isOpen,
   onClose,
   onProjectCreated,
   parentProjectId,
-}: NewPrepProjectDialogProps) {
-  const createProject = usePrepStore((state) => state.createProject);
+}: NewShopOrderProjectDialogProps) {
+  const createProject = useShopOrderStore((state) => state.createProject);
   const { projects } = useProjectStore();
   const [productionName, setProductionName] = useState('');
   const [venue, setVenue] = useState('');

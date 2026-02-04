@@ -1,11 +1,11 @@
 import { useState, useRef } from 'react';
 import { SnapGuides } from './SnapGuides';
-import type { LayoutElement, PageLayoutTemplate, PrepProject, DataFieldType } from '../../../types/prep';
+import type { LayoutElement, PageLayoutTemplate, ShopOrderProject, DataFieldType } from '../../../types/shopOrder';
 
 /**
- * Helper function to get actual data value from PrepProject based on field type
+ * Helper function to get actual data value from ShopOrderProject based on field type
  */
-function getDataFieldValue(project: PrepProject | undefined, fieldType: DataFieldType): string {
+function getDataFieldValue(project: ShopOrderProject | undefined, fieldType: DataFieldType): string {
   if (!project) {
     return `{${fieldType}}`;
   }
@@ -109,7 +109,7 @@ function getDataFieldValue(project: PrepProject | undefined, fieldType: DataFiel
 
 interface LayoutCanvasProps {
   template: PageLayoutTemplate;
-  currentProject?: PrepProject; // Optional: actual project data for live preview
+  currentProject?: ShopOrderProject; // Optional: actual project data for live preview
   selectedElementId: string | null;
   onElementSelect: (elementId: string | null) => void;
   onElementDrop: (gridColumn: number, gridRow: number) => void;

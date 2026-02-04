@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { usePrepStore } from '../../store/prepStore';
-import type { Discipline } from '../../types/prep';
+import { useShopOrderStore } from '../../store/shopOrderStore';
+import type { Discipline } from '../../types/shopOrder';
 
 interface AddSectionDialogProps {
   isOpen: boolean;
@@ -15,7 +15,7 @@ export function AddSectionDialog({
   projectId,
   projectDisciplines,
 }: AddSectionDialogProps) {
-  const { createSection, sections } = usePrepStore();
+  const { createSection, sections } = useShopOrderStore();
   const [name, setName] = useState('');
   const [discipline, setDiscipline] = useState<Discipline>(projectDisciplines[0] || 'lighting');
   const [pageBreak, setPageBreak] = useState(false);

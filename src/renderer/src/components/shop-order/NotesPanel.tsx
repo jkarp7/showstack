@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import type { PrepProject, PrepNote, PrepNoteTemplate } from '../../types/prep';
+import type { ShopOrderProject, ShopOrderNote, ShopOrderNoteTemplate } from '../../types/shopOrder';
 
 interface NotesPanelProps {
-  project: PrepProject;
+  project: ShopOrderProject;
   onManageTemplates: () => void;
 }
 
@@ -30,7 +30,7 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
     try {
       const notes = await window.api.prep.notes.getByProjectId(project.id);
 
-      notes.forEach((note: PrepNote) => {
+      notes.forEach((note: ShopOrderNote) => {
         switch (note.type) {
           case 'general_conditions':
             setGeneralConditions(note.content);
