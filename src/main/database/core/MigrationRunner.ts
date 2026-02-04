@@ -156,6 +156,9 @@ export class MigrationRunner {
       // Infrastructure table migrations
       this.migrateInfrastructureTable();
 
+      // Prep to Shop Order table migrations (Phase 0.3)
+      this.migratePrepToShopOrder();
+
       console.log('✅ Project database migrations complete');
     } catch (error) {
       console.error('❌ Error running project migrations:', error);
@@ -304,6 +307,71 @@ export class MigrationRunner {
         console.log('Running migration: Adding port_count to infrastructure_equipment');
         this.db.run('ALTER TABLE infrastructure_equipment ADD COLUMN port_count INTEGER DEFAULT 0');
       }
+    }
+  }
+
+  /**
+   * Migrate prep tables to shop_order tables (Phase 0.3)
+   * Renames all prep_* tables to shop_order_* for clarity
+   */
+  private migratePrepToShopOrder(): void {
+    // Check if old prep tables exist
+    const prepProjectsExists = this.db.exec(`
+      SELECT COUNT(*) as count FROM sqlite_master
+      WHERE type='table' AND name='prep_projects'
+    `);
+    const hasOldTables = (prepProjectsExists[0]?.values[0]?.[0] || 0) > 0;
+
+    // Check if new shop_order tables already exist
+    const shopOrderProjectsExists = this.db.exec(`
+      SELECT COUNT(*) as count FROM sqlite_master
+      WHERE type='table' AND name='shop_order_projects'
+    `);
+    const hasNewTables = (shopOrderProjectsExists[0]?.values[0]?.[0] || 0) > 0;
+
+    // If new tables already exist, migration already done
+    if (hasNewTables) {
+      return;
+    }
+
+    // If old tables don't exist, nothing to migrate
+    if (!hasOldTables) {
+      return;
+    }
+
+    console.log('Running migration: Renaming prep tables to shop_order');
+
+    try {
+      // Rename tables (preserves all data and structure)
+      this.db.run('ALTER TABLE prep_projects RENAME TO shop_order_projects');
+      this.db.run('ALTER TABLE prep_sections RENAME TO shop_order_sections');
+      this.db.run('ALTER TABLE prep_equipment_items RENAME TO shop_order_items');
+      this.db.run('ALTER TABLE prep_revisions RENAME TO shop_order_revisions');
+      this.db.run('ALTER TABLE prep_notes RENAME TO shop_order_notes');
+      this.db.run('ALTER TABLE prep_note_templates RENAME TO shop_order_note_templates');
+
+      // Drop old indexes
+      this.db.run('DROP INDEX IF EXISTS idx_prep_sections_project');
+      this.db.run('DROP INDEX IF EXISTS idx_prep_items_section');
+      this.db.run('DROP INDEX IF EXISTS idx_prep_revisions_project');
+      this.db.run('DROP INDEX IF EXISTS idx_prep_notes_project');
+      this.db.run('DROP INDEX IF EXISTS idx_prep_notes_type');
+      this.db.run('DROP INDEX IF EXISTS idx_prep_note_templates_type');
+      this.db.run('DROP INDEX IF EXISTS idx_prep_note_templates_default');
+
+      // Create new indexes with shop_order naming
+      this.db.run('CREATE INDEX IF NOT EXISTS idx_shop_order_sections_project ON shop_order_sections(prep_project_id)');
+      this.db.run('CREATE INDEX IF NOT EXISTS idx_shop_order_items_section ON shop_order_items(section_id)');
+      this.db.run('CREATE INDEX IF NOT EXISTS idx_shop_order_revisions_project ON shop_order_revisions(prep_project_id)');
+      this.db.run('CREATE INDEX IF NOT EXISTS idx_shop_order_notes_project ON shop_order_notes(prep_project_id)');
+      this.db.run('CREATE INDEX IF NOT EXISTS idx_shop_order_notes_type ON shop_order_notes(prep_project_id, type)');
+      this.db.run('CREATE INDEX IF NOT EXISTS idx_shop_order_note_templates_type ON shop_order_note_templates(type)');
+      this.db.run('CREATE INDEX IF NOT EXISTS idx_shop_order_note_templates_default ON shop_order_note_templates(type, is_default)');
+
+      console.log('✅ Successfully renamed prep tables to shop_order');
+    } catch (error) {
+      console.error('❌ Error during prep to shop_order migration:', error);
+      // Don't throw - allow app to continue
     }
   }
 }
