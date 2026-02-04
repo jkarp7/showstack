@@ -8,6 +8,56 @@
 import { getDatabase, createTransactionManager } from '../index';
 
 /**
+ * Validate SQL identifier (table name, column name) to prevent SQL injection
+ * Identifiers must:
+ * - Start with a letter or underscore
+ * - Contain only letters, numbers, and underscores
+ * - Not be empty
+ *
+ * @param identifier - The identifier to validate
+ * @param type - Type of identifier for error messages (e.g., 'table name', 'column name')
+ * @throws Error if identifier is invalid
+ */
+function validateSqlIdentifier(identifier: string, type: string = 'identifier'): void {
+  if (!identifier || identifier.trim() === '') {
+    throw new Error(`Invalid ${type}: cannot be empty`);
+  }
+
+  // SQL identifiers must start with letter or underscore, contain only alphanumeric and underscore
+  const validIdentifierPattern = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+
+  if (!validIdentifierPattern.test(identifier)) {
+    throw new Error(
+      `Invalid ${type} "${identifier}": must start with letter or underscore and contain only letters, numbers, and underscores`
+    );
+  }
+
+  // Block SQL keywords and dangerous patterns
+  const upperIdentifier = identifier.toUpperCase();
+  const dangerousKeywords = [
+    'DROP', 'DELETE', 'TRUNCATE', 'ALTER', 'EXEC', 'EXECUTE',
+    'UNION', 'INSERT', 'UPDATE', 'CREATE', 'REPLACE', 'PRAGMA'
+  ];
+
+  if (dangerousKeywords.includes(upperIdentifier)) {
+    throw new Error(`Invalid ${type} "${identifier}": SQL keyword not allowed as identifier`);
+  }
+}
+
+/**
+ * Validate an array of SQL identifiers
+ *
+ * @param identifiers - Array of identifiers to validate
+ * @param type - Type of identifiers for error messages
+ * @throws Error if any identifier is invalid
+ */
+function validateSqlIdentifiers(identifiers: string[], type: string = 'identifier'): void {
+  for (const identifier of identifiers) {
+    validateSqlIdentifier(identifier, type);
+  }
+}
+
+/**
  * Bulk insert records into a table
  * Uses a transaction to ensure all inserts succeed or all fail
  *
@@ -32,6 +82,10 @@ export function bulkInsert(
   if (records.length === 0) {
     return 0;
   }
+
+  // Validate SQL identifiers to prevent injection
+  validateSqlIdentifier(tableName, 'table name');
+  validateSqlIdentifiers(columns, 'column name');
 
   const db = getDatabase();
   const txManager = createTransactionManager(db);
@@ -77,6 +131,10 @@ export function bulkUpdate(
     return 0;
   }
 
+  // Validate SQL identifiers to prevent injection
+  validateSqlIdentifier(tableName, 'table name');
+  validateSqlIdentifier(idColumn, 'column name');
+
   const db = getDatabase();
   const txManager = createTransactionManager(db);
 
@@ -84,6 +142,10 @@ export function bulkUpdate(
     let count = 0;
     for (const { id, updates: updateData } of updates) {
       const columns = Object.keys(updateData);
+
+      // Validate column names from updateData
+      validateSqlIdentifiers(columns, 'column name');
+
       const setClause = columns.map(col => `${col} = ?`).join(', ');
       const values = columns.map(col => updateData[col]);
 
@@ -118,6 +180,10 @@ export function bulkDelete(
   if (ids.length === 0) {
     return 0;
   }
+
+  // Validate SQL identifiers to prevent injection
+  validateSqlIdentifier(tableName, 'table name');
+  validateSqlIdentifier(idColumn, 'column name');
 
   const db = getDatabase();
   const txManager = createTransactionManager(db);
@@ -182,6 +248,10 @@ export function bulkUpsert(
   if (records.length === 0) {
     return 0;
   }
+
+  // Validate SQL identifiers to prevent injection
+  validateSqlIdentifier(tableName, 'table name');
+  validateSqlIdentifiers(columns, 'column name');
 
   const db = getDatabase();
   const txManager = createTransactionManager(db);

@@ -156,12 +156,43 @@ export class TransactionManager {
   }
 
   /**
+   * Validate savepoint name to prevent SQL injection
+   * Savepoint names must start with a letter or underscore and contain only
+   * alphanumeric characters and underscores
+   *
+   * @param name - Savepoint name to validate
+   * @throws DatabaseError if name is invalid
+   */
+  private validateSavepointName(name: string): void {
+    if (!name || name.trim() === '') {
+      throw new DatabaseError(
+        'Invalid savepoint name: cannot be empty',
+        'savepoint:validation',
+        false
+      );
+    }
+
+    // Savepoint names must start with letter or underscore, contain only alphanumeric and underscore
+    const validNamePattern = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+
+    if (!validNamePattern.test(name)) {
+      throw new DatabaseError(
+        `Invalid savepoint name "${name}": must start with letter or underscore and contain only letters, numbers, and underscores`,
+        'savepoint:validation',
+        false
+      );
+    }
+  }
+
+  /**
    * Create a savepoint within the current transaction
    * Useful for nested transaction-like behavior
    *
    * @param name - Name of the savepoint
+   * @throws DatabaseError if savepoint name is invalid
    */
   savepoint(name: string): void {
+    this.validateSavepointName(name);
     this.db.prepare(`SAVEPOINT ${name}`).run();
   }
 
@@ -169,8 +200,10 @@ export class TransactionManager {
    * Release a savepoint (commit the nested transaction)
    *
    * @param name - Name of the savepoint to release
+   * @throws DatabaseError if savepoint name is invalid
    */
   releaseSavepoint(name: string): void {
+    this.validateSavepointName(name);
     this.db.prepare(`RELEASE SAVEPOINT ${name}`).run();
   }
 
@@ -178,8 +211,10 @@ export class TransactionManager {
    * Rollback to a savepoint (undo changes since savepoint)
    *
    * @param name - Name of the savepoint to rollback to
+   * @throws DatabaseError if savepoint name is invalid
    */
   rollbackToSavepoint(name: string): void {
+    this.validateSavepointName(name);
     this.db.prepare(`ROLLBACK TO SAVEPOINT ${name}`).run();
   }
 }

@@ -234,12 +234,43 @@ export class DatabaseManager {
   }
 
   /**
+   * Validate that imported data is a valid SQLite database
+   * Checks for SQLite magic number and minimum file size
+   */
+  private validateSQLiteDatabase(data: Uint8Array): void {
+    // SQLite database files must be at least 100 bytes (header size)
+    if (!data || data.length < 100) {
+      throw new DatabaseError(
+        'Invalid database file: file too small (minimum 100 bytes required)',
+        'import:validation',
+        false
+      );
+    }
+
+    // Check for SQLite format 3 magic string
+    // SQLite header starts with: "SQLite format 3\0" (16 bytes)
+    const SQLITE_MAGIC = 'SQLite format 3\0';
+    const headerString = String.fromCharCode(...data.slice(0, 16));
+
+    if (headerString !== SQLITE_MAGIC) {
+      throw new DatabaseError(
+        'Invalid database file: not a valid SQLite format 3 database',
+        'import:validation',
+        false
+      );
+    }
+  }
+
+  /**
    * Replace project database with imported data
    * IMPORTANT: Only replaces PROJECT database, never touches APP database
    */
   async replaceProjectDatabase(importedData: Uint8Array): Promise<void> {
     try {
       console.log('Replacing project database with imported data...');
+
+      // Validate that the imported data is a valid SQLite database
+      this.validateSQLiteDatabase(importedData);
 
       const { writeFileSync } = await import('fs');
 
@@ -264,7 +295,17 @@ export class DatabaseManager {
       // Set synchronous mode to NORMAL for better performance
       this.projectDb.pragma('synchronous = NORMAL');
 
-      console.log('✅ Project database replaced');
+      // Run integrity check to ensure database is not corrupted
+      const integrityCheck = this.projectDb.pragma('integrity_check') as Array<{ integrity_check: string }>;
+      if (integrityCheck[0]?.integrity_check !== 'ok') {
+        throw new DatabaseError(
+          `Database integrity check failed: ${integrityCheck[0]?.integrity_check}`,
+          'import:integrity',
+          false
+        );
+      }
+
+      console.log('✅ Project database replaced and validated');
     } catch (error) {
       console.error('❌ Error replacing project database:', error);
       throw new DatabaseError(
