@@ -82,6 +82,35 @@ Replace in-memory sql.js with native better-sqlite3:
 - All 8 benchmark tests passing
 - Query performance improvements verified
 
+### 1.5 Security Hardening ✅ COMPLETED
+- [x] Fix SQL identifier injection in bulkOperations.ts
+- [x] Add database import validation
+- [x] Add savepoint name validation
+- [x] Create comprehensive test suite for bulkOperations
+
+**Completed:**
+- Added validateSqlIdentifier() with regex pattern /^[a-zA-Z_][a-zA-Z0-9_]*$/
+- Blocks SQL keywords (DROP, DELETE, TRUNCATE, ALTER, etc.)
+- Applied validation to all 4 bulk operations + 3 savepoint methods
+- Added validateSQLiteDatabase() for import validation:
+  - Checks SQLite format 3 magic header
+  - Validates minimum file size (100 bytes)
+  - Runs integrity_check pragma after opening
+- Created bulkOperations.test.ts with 25 tests (all passing)
+- Security grade improved: B+ → A
+
+**Files Modified:**
+- src/main/database/utils/bulkOperations.ts (added validation)
+- src/main/database/core/DatabaseManager.ts (import validation)
+- src/main/database/core/TransactionManager.ts (savepoint validation)
+- src/main/database/__tests__/bulkOperations.test.ts (NEW, 373 lines)
+
+**Test Results:**
+- Database layer: 53/53 tests passing ✓
+- bulkOperations: 25/25 passing
+- TransactionManager: 12/12 passing
+- performanceIndexes: 8/8 passing
+
 ### Integration Testing
 - [ ] Test migration with real alpha user data
 - [ ] Verify backward compatibility
@@ -95,8 +124,11 @@ Replace in-memory sql.js with native better-sqlite3:
 - ✅ 10-20x performance improvement verified (better-sqlite3 vs sql.js)
 - ✅ Zero data loss during migration (WAL mode with ACID guarantees)
 - ✅ Backward compatibility with .ss files (same file format)
-- ✅ All tests passing (20 transaction tests + 8 performance tests)
+- ✅ All tests passing (53 database tests: 25 bulkOperations + 12 transactions + 8 performance + 8 fixtures)
 - ✅ p95 latency <50ms (sub-millisecond with indexes)
+- ✅ All critical security issues resolved (SQL injection prevention, import validation)
 
 **Status:** ✅ COMPLETED February 4, 2026
 **Next:** Phase 2 - Validation & Service Layer
+
+**Follow-Up Issues:** See [phase-1-follow-up-issues.md](phase-1-follow-up-issues.md) for Major & Minor issues to address in Phase 2+
