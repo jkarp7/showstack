@@ -133,6 +133,10 @@ export class DatabaseManager {
         ).run('default-project', 'Untitled Project', Date.now(), Date.now());
       }
 
+      // Create performance indexes
+      const { createPerformanceIndexes } = await import('../indexes/performanceIndexes');
+      createPerformanceIndexes(this.projectDb!);
+
       console.log('✅ Project database initialized');
     } catch (error) {
       console.error('❌ Error initializing project database:', error);
