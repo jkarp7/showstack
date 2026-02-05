@@ -115,7 +115,7 @@ const createMockStore = (overrides?: Partial<ReturnType<typeof useShopOrderStore
 // Mocked store ref that can be updated per test
 let mockStoreData = createMockStore();
 
-vi.mock('../../../store/prepStore', () => ({
+vi.mock('../../../store/shopOrderStore', () => ({
   useShopOrderStore: () => mockStoreData,
 }));
 
