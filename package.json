@@ -72,7 +72,9 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^12.6.2",
     "clsx": "^2.1.1",
     "file-type": "^19.6.0",
     "lucide-react": "^0.460.0",

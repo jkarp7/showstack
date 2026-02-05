@@ -28,26 +28,13 @@ export interface PDRack {
 export function getAllPDRacks(projectId: string = 'default-project'): PDRack[] {
   const db = getDatabase();
 
-  const result = db.exec(`
+  const racks = db.prepare(`
     SELECT * FROM pd_racks
     WHERE project_id = ?
     ORDER BY name
-  `, [projectId]);
+  `).all(projectId);
 
-  if (!result[0]) {
-    return [];
-  }
-
-  const columns = result[0].columns;
-  const values = result[0].values;
-
-  return values.map(row => {
-    const rack: any = {};
-    columns.forEach((col, idx) => {
-      rack[col] = row[idx];
-    });
-    return rack as PDRack;
-  });
+  return racks as PDRack[];
 }
 
 /**
@@ -56,22 +43,14 @@ export function getAllPDRacks(projectId: string = 'default-project'): PDRack[] {
 export function getPDRackById(id: string): PDRack {
   const db = getDatabase();
 
-  const result = db.exec(`
+  const rack = db.prepare(`
     SELECT * FROM pd_racks
     WHERE id = ?
-  `, [id]);
+  `).get(id);
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!rack) {
     throw new Error(`PD rack not found: ${id}`);
   }
-
-  const columns = result[0].columns;
-  const values = result[0].values[0];
-
-  const rack: any = {};
-  columns.forEach((col, idx) => {
-    rack[col] = values[idx];
-  });
 
   return rack as PDRack;
 }
@@ -87,13 +66,13 @@ export function createPDRack(
   const id = uuidv4();
   const now = Date.now();
 
-  db.run(`
+  db.prepare(`
     INSERT INTO pd_racks (
       id, project_id, name, rack_identifier, voltage, is_dual_voltage, secondary_voltage,
       circuit_count, phase_config, amps_per_breaker, location, notes,
       building_service, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `, [
+  `).run(
     id,
     projectId,
     rack.name,
@@ -109,7 +88,7 @@ export function createPDRack(
     (rack as any).building_service || null,
     now,
     now
-  ]);
+  );
 
   saveDatabase();
   return getPDRackById(id);
@@ -179,11 +158,11 @@ export function updatePDRack(id: string, updates: Partial<PDRack>): PDRack {
   values.push(now);
   values.push(id);
 
-  db.run(`
+  db.prepare(`
     UPDATE pd_racks
     SET ${setClauses.join(', ')}
     WHERE id = ?
-  `, values);
+  `).run(...values);
 
   saveDatabase();
   return getPDRackById(id);
@@ -195,7 +174,7 @@ export function updatePDRack(id: string, updates: Partial<PDRack>): PDRack {
 export function deletePDRack(id: string): void {
   const db = getDatabase();
 
-  db.run('DELETE FROM pd_racks WHERE id = ?', [id]);
+  db.prepare('DELETE FROM pd_racks WHERE id = ?').run(id);
 
   saveDatabase();
 }
@@ -206,7 +185,7 @@ export function deletePDRack(id: string): void {
 export function getPDRacksWithUsage(projectId: string = 'default-project'): (PDRack & { circuits_used: number })[] {
   const db = getDatabase();
 
-  const result = db.exec(`
+  const racks = db.prepare(`
     SELECT
       pr.*,
       COUNT(DISTINCT f.pd_circuit_number) as circuits_used
@@ -215,20 +194,7 @@ export function getPDRacksWithUsage(projectId: string = 'default-project'): (PDR
     WHERE pr.project_id = ?
     GROUP BY pr.id
     ORDER BY pr.name
-  `, [projectId]);
+  `).all(projectId);
 
-  if (!result[0]) {
-    return [];
-  }
-
-  const columns = result[0].columns;
-  const values = result[0].values;
-
-  return values.map(row => {
-    const rack: any = {};
-    columns.forEach((col, idx) => {
-      rack[col] = row[idx];
-    });
-    return rack as PDRack & { circuits_used: number };
-  });
+  return racks as (PDRack & { circuits_used: number })[];
 }

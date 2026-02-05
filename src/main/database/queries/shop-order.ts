@@ -55,39 +55,18 @@ export interface ShopOrderProject {
 
 export function getAllShopOrderProjects(): ShopOrderProject[] {
   const db = getDatabase();
-  const result = db.exec(`SELECT * FROM shop_order_projects ORDER BY updated_at DESC`);
+  const projects = db.prepare(`SELECT * FROM shop_order_projects ORDER BY updated_at DESC`).all();
 
-  if (!result[0]) {
-    return [];
-  }
-
-  const columns = result[0].columns;
-  const values = result[0].values;
-
-  return values.map((row) => {
-    const project: any = {};
-    columns.forEach((col, idx) => {
-      project[col] = row[idx];
-    });
-    return project as ShopOrderProject;
-  });
+  return projects as ShopOrderProject[];
 }
 
 export function getShopOrderProjectById(id: string): ShopOrderProject | null {
   const db = getDatabase();
-  const result = db.exec(`SELECT * FROM shop_order_projects WHERE id = ?`, [id]);
+  const project = db.prepare(`SELECT * FROM shop_order_projects WHERE id = ?`).get(id);
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!project) {
     return null;
   }
-
-  const columns = result[0].columns;
-  const values = result[0].values[0];
-
-  const project: any = {};
-  columns.forEach((col, idx) => {
-    project[col] = values[idx];
-  });
 
   return project as ShopOrderProject;
 }
@@ -100,7 +79,7 @@ export function createShopOrderProject(data: Partial<ShopOrderProject>): ShopOrd
   const disciplines = data.disciplines || JSON.stringify(['lighting']);
   const additionalContacts = data.additional_contacts || null;
 
-  db.run(
+  db.prepare(
     `
     INSERT INTO shop_order_projects (
       id, user_id, parent_project_id, production_name, venue, venue_city, venue_state,
@@ -114,50 +93,49 @@ export function createShopOrderProject(data: Partial<ShopOrderProject>): ShopOrd
       additional_contacts, logo_path, logo_url, logo_storage_path,
       disciplines, current_revision, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `,
-    [
-      id,
-      data.user_id || null,
-      data.parent_project_id || null,
-      data.production_name || 'Untitled Shop Order',
-      data.venue || null,
-      data.venue_city || null,
-      data.venue_state || null,
-      data.order_date || now,
-      data.original_order_date || null,
-      data.prep_start_date || null,
-      data.prep_end_date || null,
-      data.load_in_date || null,
-      data.first_preview_date || null,
-      data.opening_night_date || null,
-      data.closing_date || null,
-      data.load_out_date || null,
-      data.gm_name || null,
-      data.gm_company || null,
-      data.gm_email || null,
-      data.gm_phone || null,
-      data.pm_name || null,
-      data.pm_company || null,
-      data.pm_email || null,
-      data.pm_phone || null,
-      data.ld_name || null,
-      data.ld_email || null,
-      data.ld_phone || null,
-      data.ald_name || null,
-      data.ald_email || null,
-      data.ald_phone || null,
-      data.pe_name || null,
-      data.pe_email || null,
-      data.pe_phone || null,
-      additionalContacts,
-      data.logo_path || null,
-      data.logo_url || null,
-      data.logo_storage_path || null,
-      disciplines,
-      data.current_revision || 0,
-      now,
-      now,
-    ]
+  `
+  ).run(
+    id,
+    data.user_id || null,
+    data.parent_project_id || null,
+    data.production_name || 'Untitled Shop Order',
+    data.venue || null,
+    data.venue_city || null,
+    data.venue_state || null,
+    data.order_date || now,
+    data.original_order_date || null,
+    data.prep_start_date || null,
+    data.prep_end_date || null,
+    data.load_in_date || null,
+    data.first_preview_date || null,
+    data.opening_night_date || null,
+    data.closing_date || null,
+    data.load_out_date || null,
+    data.gm_name || null,
+    data.gm_company || null,
+    data.gm_email || null,
+    data.gm_phone || null,
+    data.pm_name || null,
+    data.pm_company || null,
+    data.pm_email || null,
+    data.pm_phone || null,
+    data.ld_name || null,
+    data.ld_email || null,
+    data.ld_phone || null,
+    data.ald_name || null,
+    data.ald_email || null,
+    data.ald_phone || null,
+    data.pe_name || null,
+    data.pe_email || null,
+    data.pe_phone || null,
+    additionalContacts,
+    data.logo_path || null,
+    data.logo_url || null,
+    data.logo_storage_path || null,
+    disciplines,
+    data.current_revision || 0,
+    now,
+    now
   );
 
   saveDatabase();
@@ -217,14 +195,13 @@ export function updateShopOrderProject(id: string, updates: Partial<ShopOrderPro
   const setClause = fields.map((f) => `${f} = ?`).join(', ');
   const values = fields.map((f) => updates[f]);
 
-  db.run(
+  db.prepare(
     `
     UPDATE shop_order_projects
     SET ${setClause}, updated_at = ?
     WHERE id = ?
-  `,
-    [...values, now, id]
-  );
+  `
+  ).run(...values, now, id);
 
   saveDatabase();
   return getShopOrderProjectById(id)!;
@@ -232,7 +209,7 @@ export function updateShopOrderProject(id: string, updates: Partial<ShopOrderPro
 
 export function deleteShopOrderProject(id: string): void {
   const db = getDatabase();
-  db.run('DELETE FROM shop_order_projects WHERE id = ?', [id]);
+  db.prepare('DELETE FROM shop_order_projects WHERE id = ?').run(id);
   saveDatabase();
 }
 
@@ -253,25 +230,11 @@ export interface ShopOrderSection {
 
 export function getSectionsByProjectId(projectId: string): ShopOrderSection[] {
   const db = getDatabase();
-  const result = db.exec(
-    `SELECT * FROM shop_order_sections WHERE prep_project_id = ? ORDER BY sort_order`,
-    [projectId]
-  );
+  const sections = db.prepare(
+    `SELECT * FROM shop_order_sections WHERE prep_project_id = ? ORDER BY sort_order`
+  ).all(projectId);
 
-  if (!result[0]) {
-    return [];
-  }
-
-  const columns = result[0].columns;
-  const values = result[0].values;
-
-  return values.map((row) => {
-    const section: any = {};
-    columns.forEach((col, idx) => {
-      section[col] = row[idx];
-    });
-    return section as ShopOrderSection;
-  });
+  return sections as ShopOrderSection[];
 }
 
 export function createShopOrderSection(data: Partial<ShopOrderSection>): ShopOrderSection {
@@ -279,23 +242,22 @@ export function createShopOrderSection(data: Partial<ShopOrderSection>): ShopOrd
   const id = uuidv4();
   const now = Date.now();
 
-  db.run(
+  db.prepare(
     `
     INSERT INTO shop_order_sections (
       id, prep_project_id, name, discipline, sort_order, page_break, notes, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `,
-    [
-      id,
-      data.prep_project_id!,
-      data.name || 'Untitled Section',
-      data.discipline || 'lighting',
-      data.sort_order || 0,
-      data.page_break ? 1 : 0,
-      data.notes || null,
-      now,
-      now,
-    ]
+  `
+  ).run(
+    id,
+    data.prep_project_id!,
+    data.name || 'Untitled Section',
+    data.discipline || 'lighting',
+    data.sort_order || 0,
+    data.page_break ? 1 : 0,
+    data.notes || null,
+    now,
+    now
   );
 
   saveDatabase();
@@ -322,14 +284,13 @@ export function updateShopOrderSection(id: string, updates: Partial<ShopOrderSec
     return value === undefined ? null : value;
   });
 
-  db.run(
+  db.prepare(
     `
     UPDATE shop_order_sections
     SET ${setClause}, updated_at = ?
     WHERE id = ?
-  `,
-    [...values, now, id]
-  );
+  `
+  ).run(...values, now, id);
 
   saveDatabase();
   return getShopOrderSectionById(id)!;
@@ -337,25 +298,17 @@ export function updateShopOrderSection(id: string, updates: Partial<ShopOrderSec
 
 export function deleteShopOrderSection(id: string): void {
   const db = getDatabase();
-  db.run('DELETE FROM shop_order_sections WHERE id = ?', [id]);
+  db.prepare('DELETE FROM shop_order_sections WHERE id = ?').run(id);
   saveDatabase();
 }
 
 function getShopOrderSectionById(id: string): ShopOrderSection | null {
   const db = getDatabase();
-  const result = db.exec(`SELECT * FROM shop_order_sections WHERE id = ?`, [id]);
+  const section = db.prepare(`SELECT * FROM shop_order_sections WHERE id = ?`).get(id);
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!section) {
     return null;
   }
-
-  const columns = result[0].columns;
-  const values = result[0].values[0];
-
-  const section: any = {};
-  columns.forEach((col, idx) => {
-    section[col] = values[idx];
-  });
 
   return section as ShopOrderSection;
 }
@@ -387,53 +340,25 @@ export interface ShopOrderItem {
 
 export function getItemsBySectionId(sectionId: string): ShopOrderItem[] {
   const db = getDatabase();
-  const result = db.exec(
-    `SELECT * FROM shop_order_items WHERE section_id = ? ORDER BY sort_order`,
-    [sectionId]
-  );
+  const items = db.prepare(
+    `SELECT * FROM shop_order_items WHERE section_id = ? ORDER BY sort_order`
+  ).all(sectionId);
 
-  if (!result[0]) {
-    return [];
-  }
-
-  const columns = result[0].columns;
-  const values = result[0].values;
-
-  return values.map((row) => {
-    const item: any = {};
-    columns.forEach((col, idx) => {
-      item[col] = row[idx];
-    });
-    return item as ShopOrderItem;
-  });
+  return items as ShopOrderItem[];
 }
 
 export function getItemsByProjectId(projectId: string): ShopOrderItem[] {
   const db = getDatabase();
-  const result = db.exec(
+  const items = db.prepare(
     `
     SELECT i.* FROM shop_order_items i
     JOIN shop_order_sections s ON i.section_id = s.id
     WHERE s.prep_project_id = ?
     ORDER BY s.sort_order, i.sort_order
-  `,
-    [projectId]
-  );
+  `
+  ).all(projectId);
 
-  if (!result[0]) {
-    return [];
-  }
-
-  const columns = result[0].columns;
-  const values = result[0].values;
-
-  return values.map((row) => {
-    const item: any = {};
-    columns.forEach((col, idx) => {
-      item[col] = row[idx];
-    });
-    return item as ShopOrderItem;
-  });
+  return items as ShopOrderItem[];
 }
 
 export function createShopOrderItem(data: Partial<ShopOrderItem>): ShopOrderItem {
@@ -460,7 +385,7 @@ export function createShopOrderItem(data: Partial<ShopOrderItem>): ShopOrderItem
     }
   }
 
-  db.run(
+  db.prepare(
     `
     INSERT INTO shop_order_items (
       id, section_id, description, active_qty, spare_qty, venue_qty,
@@ -468,27 +393,26 @@ export function createShopOrderItem(data: Partial<ShopOrderItem>): ShopOrderItem
       sort_order, added_in_revision, removed_in_revision, modified_in_revision,
       created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `,
-    [
-      id,
-      data.section_id!,
-      data.description || 'Untitled Item',
-      activeQty,
-      spareQty,
-      venueQty,
-      activeQty + spareQty,
-      venueActive,
-      venueSpare,
-      data.weight || null,
-      data.power || null,
-      data.notes || null,
-      data.sort_order || 0,
-      data.added_in_revision || null,
-      data.removed_in_revision || null,
-      data.modified_in_revision || null,
-      now,
-      now,
-    ]
+  `
+  ).run(
+    id,
+    data.section_id!,
+    data.description || 'Untitled Item',
+    activeQty,
+    spareQty,
+    venueQty,
+    activeQty + spareQty,
+    venueActive,
+    venueSpare,
+    data.weight || null,
+    data.power || null,
+    data.notes || null,
+    data.sort_order || 0,
+    data.added_in_revision || null,
+    data.removed_in_revision || null,
+    data.modified_in_revision || null,
+    now,
+    now
   );
 
   saveDatabase();
@@ -558,14 +482,13 @@ export function updateShopOrderItem(
     return value === undefined ? null : value;
   });
 
-  db.run(
+  db.prepare(
     `
     UPDATE shop_order_items
     SET ${setClause}, updated_at = ?
     WHERE id = ?
-  `,
-    [...values, now, id]
-  );
+  `
+  ).run(...values, now, id);
 
   saveDatabase();
   return getShopOrderItemById(id)!;
@@ -573,25 +496,17 @@ export function updateShopOrderItem(
 
 export function deleteShopOrderItem(id: string): void {
   const db = getDatabase();
-  db.run('DELETE FROM shop_order_items WHERE id = ?', [id]);
+  db.prepare('DELETE FROM shop_order_items WHERE id = ?').run(id);
   saveDatabase();
 }
 
 function getShopOrderItemById(id: string): ShopOrderItem | null {
   const db = getDatabase();
-  const result = db.exec(`SELECT * FROM shop_order_items WHERE id = ?`, [id]);
+  const item = db.prepare(`SELECT * FROM shop_order_items WHERE id = ?`).get(id);
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!item) {
     return null;
   }
-
-  const columns = result[0].columns;
-  const values = result[0].values[0];
-
-  const item: any = {};
-  columns.forEach((col, idx) => {
-    item[col] = values[idx];
-  });
 
   return item as ShopOrderItem;
 }
@@ -613,25 +528,11 @@ export interface ShopOrderRevision {
 
 export function getRevisionsByProjectId(projectId: string): ShopOrderRevision[] {
   const db = getDatabase();
-  const result = db.exec(
-    `SELECT * FROM shop_order_revisions WHERE prep_project_id = ? ORDER BY revision_number`,
-    [projectId]
-  );
+  const revisions = db.prepare(
+    `SELECT * FROM shop_order_revisions WHERE prep_project_id = ? ORDER BY revision_number`
+  ).all(projectId);
 
-  if (!result[0]) {
-    return [];
-  }
-
-  const columns = result[0].columns;
-  const values = result[0].values;
-
-  return values.map((row) => {
-    const revision: any = {};
-    columns.forEach((col, idx) => {
-      revision[col] = row[idx];
-    });
-    return revision as ShopOrderRevision;
-  });
+  return revisions as ShopOrderRevision[];
 }
 
 export function createShopOrderRevision(data: Partial<ShopOrderRevision>): ShopOrderRevision {
@@ -641,22 +542,21 @@ export function createShopOrderRevision(data: Partial<ShopOrderRevision>): ShopO
 
   const changeLog = data.change_log || JSON.stringify([]);
 
-  db.run(
+  db.prepare(
     `
     INSERT INTO shop_order_revisions (
       id, prep_project_id, revision_number, revision_date, notes, change_log, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `,
-    [
-      id,
-      data.prep_project_id!,
-      data.revision_number!,
-      data.revision_date || now,
-      data.notes || null,
-      changeLog,
-      now,
-      now,
-    ]
+  `
+  ).run(
+    id,
+    data.prep_project_id!,
+    data.revision_number!,
+    data.revision_date || now,
+    data.notes || null,
+    changeLog,
+    now,
+    now
   );
 
   saveDatabase();
@@ -665,25 +565,17 @@ export function createShopOrderRevision(data: Partial<ShopOrderRevision>): ShopO
 
 export function deleteShopOrderRevision(id: string): void {
   const db = getDatabase();
-  db.run('DELETE FROM shop_order_revisions WHERE id = ?', [id]);
+  db.prepare('DELETE FROM shop_order_revisions WHERE id = ?').run(id);
   saveDatabase();
 }
 
 function getShopOrderRevisionById(id: string): ShopOrderRevision | null {
   const db = getDatabase();
-  const result = db.exec(`SELECT * FROM shop_order_revisions WHERE id = ?`, [id]);
+  const revision = db.prepare(`SELECT * FROM shop_order_revisions WHERE id = ?`).get(id);
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!revision) {
     return null;
   }
-
-  const columns = result[0].columns;
-  const values = result[0].values[0];
-
-  const revision: any = {};
-  columns.forEach((col, idx) => {
-    revision[col] = values[idx];
-  });
 
   return revision as ShopOrderRevision;
 }
@@ -715,22 +607,9 @@ export function getNotesByProjectId(projectId: string, type?: string): ShopOrder
 
   query += ` ORDER BY created_at DESC`;
 
-  const result = db.exec(query, params);
+  const notes = db.prepare(query).all(...params);
 
-  if (!result[0]) {
-    return [];
-  }
-
-  const columns = result[0].columns;
-  const values = result[0].values;
-
-  return values.map((row) => {
-    const note: any = {};
-    columns.forEach((col, idx) => {
-      note[col] = row[idx];
-    });
-    return note as ShopOrderNote;
-  });
+  return notes as ShopOrderNote[];
 }
 
 export function createShopOrderNote(data: Partial<ShopOrderNote>): ShopOrderNote {
@@ -738,21 +617,20 @@ export function createShopOrderNote(data: Partial<ShopOrderNote>): ShopOrderNote
   const id = uuidv4();
   const now = Date.now();
 
-  db.run(
+  db.prepare(
     `
     INSERT INTO shop_order_notes (
       id, prep_project_id, type, content, format, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?)
-  `,
-    [
-      id,
-      data.prep_project_id!,
-      data.type!,
-      data.content || '',
-      data.format || 'plain',
-      now,
-      now,
-    ]
+  `
+  ).run(
+    id,
+    data.prep_project_id!,
+    data.type!,
+    data.content || '',
+    data.format || 'plain',
+    now,
+    now
   );
 
   saveDatabase();
@@ -783,14 +661,13 @@ export function updateShopOrderNote(id: string, updates: Partial<Pick<ShopOrderN
   fields.push('updated_at = ?');
   values.push(now, id);
 
-  db.run(
+  db.prepare(
     `
     UPDATE shop_order_notes
     SET ${fields.join(', ')}
     WHERE id = ?
-  `,
-    values
-  );
+  `
+  ).run(...values);
 
   saveDatabase();
   return getShopOrderNoteById(id)!;
@@ -798,25 +675,17 @@ export function updateShopOrderNote(id: string, updates: Partial<Pick<ShopOrderN
 
 export function deleteShopOrderNote(id: string): void {
   const db = getDatabase();
-  db.run('DELETE FROM shop_order_notes WHERE id = ?', [id]);
+  db.prepare('DELETE FROM shop_order_notes WHERE id = ?').run(id);
   saveDatabase();
 }
 
 function getShopOrderNoteById(id: string): ShopOrderNote | null {
   const db = getDatabase();
-  const result = db.exec(`SELECT * FROM shop_order_notes WHERE id = ?`, [id]);
+  const note = db.prepare(`SELECT * FROM shop_order_notes WHERE id = ?`).get(id);
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!note) {
     return null;
   }
-
-  const columns = result[0].columns;
-  const values = result[0].values[0];
-
-  const note: any = {};
-  columns.forEach((col, idx) => {
-    note[col] = values[idx];
-  });
 
   return note as ShopOrderNote;
 }
@@ -849,61 +718,33 @@ export function getAllNoteTemplates(type?: string): ShopOrderNoteTemplate[] {
 
   query += ` ORDER BY is_default DESC, name ASC`;
 
-  const result = db.exec(query, params);
+  const templates = params.length > 0
+    ? db.prepare(query).all(...params)
+    : db.prepare(query).all();
 
-  if (!result[0]) {
-    return [];
-  }
-
-  const columns = result[0].columns;
-  const values = result[0].values;
-
-  return values.map((row) => {
-    const template: any = {};
-    columns.forEach((col, idx) => {
-      template[col] = row[idx];
-    });
-    return template as ShopOrderNoteTemplate;
-  });
+  return templates as ShopOrderNoteTemplate[];
 }
 
 export function getNoteTemplateById(id: string): ShopOrderNoteTemplate | null {
   const db = getDatabase();
-  const result = db.exec(`SELECT * FROM shop_order_note_templates WHERE id = ?`, [id]);
+  const template = db.prepare(`SELECT * FROM shop_order_note_templates WHERE id = ?`).get(id);
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!template) {
     return null;
   }
-
-  const columns = result[0].columns;
-  const values = result[0].values[0];
-
-  const template: any = {};
-  columns.forEach((col, idx) => {
-    template[col] = values[idx];
-  });
 
   return template as ShopOrderNoteTemplate;
 }
 
 export function getDefaultNoteTemplate(type: string): ShopOrderNoteTemplate | null {
   const db = getDatabase();
-  const result = db.exec(
-    `SELECT * FROM shop_order_note_templates WHERE type = ? AND is_default = 1 LIMIT 1`,
-    [type]
-  );
+  const template = db.prepare(
+    `SELECT * FROM shop_order_note_templates WHERE type = ? AND is_default = 1 LIMIT 1`
+  ).get(type);
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!template) {
     return null;
   }
-
-  const columns = result[0].columns;
-  const values = result[0].values[0];
-
-  const template: any = {};
-  columns.forEach((col, idx) => {
-    template[col] = values[idx];
-  });
 
   return template as ShopOrderNoteTemplate;
 }
@@ -915,28 +756,26 @@ export function createNoteTemplate(data: Partial<ShopOrderNoteTemplate>): ShopOr
 
   // If setting as default, unset any existing defaults for this type
   if (data.is_default) {
-    db.run(
-      `UPDATE shop_order_note_templates SET is_default = 0 WHERE type = ?`,
-      [data.type!]
-    );
+    db.prepare(
+      `UPDATE shop_order_note_templates SET is_default = 0 WHERE type = ?`
+    ).run(data.type!);
   }
 
-  db.run(
+  db.prepare(
     `
     INSERT INTO shop_order_note_templates (
       id, user_id, type, name, content, is_default, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `,
-    [
-      id,
-      data.user_id || null,
-      data.type!,
-      data.name!,
-      data.content || '',
-      data.is_default || 0,
-      now,
-      now,
-    ]
+  `
+  ).run(
+    id,
+    data.user_id || null,
+    data.type!,
+    data.name!,
+    data.content || '',
+    data.is_default || 0,
+    now,
+    now
   );
 
   saveDatabase();
@@ -954,10 +793,9 @@ export function updateNoteTemplate(id: string, updates: Partial<ShopOrderNoteTem
 
   // If setting as default, unset any existing defaults for this type
   if (updates.is_default) {
-    db.run(
-      `UPDATE shop_order_note_templates SET is_default = 0 WHERE type = ?`,
-      [template.type]
-    );
+    db.prepare(
+      `UPDATE shop_order_note_templates SET is_default = 0 WHERE type = ?`
+    ).run(template.type);
   }
 
   const fields = [];
@@ -980,10 +818,9 @@ export function updateNoteTemplate(id: string, updates: Partial<ShopOrderNoteTem
   values.push(now);
   values.push(id);
 
-  db.run(
-    `UPDATE shop_order_note_templates SET ${fields.join(', ')} WHERE id = ?`,
-    values
-  );
+  db.prepare(
+    `UPDATE shop_order_note_templates SET ${fields.join(', ')} WHERE id = ?`
+  ).run(...values);
 
   saveDatabase();
   return getNoteTemplateById(id)!;
@@ -991,6 +828,6 @@ export function updateNoteTemplate(id: string, updates: Partial<ShopOrderNoteTem
 
 export function deleteNoteTemplate(id: string): void {
   const db = getDatabase();
-  db.run('DELETE FROM shop_order_note_templates WHERE id = ?', [id]);
+  db.prepare('DELETE FROM shop_order_note_templates WHERE id = ?').run(id);
   saveDatabase();
 }

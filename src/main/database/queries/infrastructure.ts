@@ -72,37 +72,25 @@ export interface InfrastructureEquipment {
 export function getAllInfrastructure(projectId: string): InfrastructureEquipment[] {
   const db = getDatabase();
 
-  const result = db.exec(`
+  const equipment = db.prepare(`
     SELECT * FROM infrastructure_equipment
     WHERE project_id = ?
     ORDER BY category, name
-  `, [projectId]);
+  `).all(projectId);
 
-  if (!result[0]) {
-    return [];
-  }
-
-  const columns = result[0].columns;
-  const values = result[0].values;
-
-  return values.map(row => {
-    const equipment: any = {};
-    columns.forEach((col, idx) => {
-      equipment[col] = row[idx];
-    });
-
+  return equipment.map((eq: any) => {
     // Parse JSON fields
-    if (equipment.port_assignments) {
+    if (eq.port_assignments) {
       try {
-        equipment.port_assignments = JSON.parse(equipment.port_assignments);
+        eq.port_assignments = JSON.parse(eq.port_assignments);
       } catch {
-        equipment.port_assignments = [];
+        eq.port_assignments = [];
       }
     } else {
-      equipment.port_assignments = [];
+      eq.port_assignments = [];
     }
 
-    return equipment as InfrastructureEquipment;
+    return eq as InfrastructureEquipment;
   });
 }
 
@@ -119,7 +107,7 @@ export function createInfrastructure(
     ? JSON.stringify(equipment.port_assignments)
     : null;
 
-  db.run(`
+  db.prepare(`
     INSERT INTO infrastructure_equipment (
       id, project_id, name, manufacturer, model, quantity, category,
       ip_address, mac_address, subnet_mask, gateway, vlan_id, hostname,
@@ -128,7 +116,7 @@ export function createInfrastructure(
       circuit, circuit_number, location, position_x, position_y, position_z,
       notes, status, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `, [
+  `).run(
     id,
     projectId,
     equipment.name || '',
@@ -163,7 +151,7 @@ export function createInfrastructure(
     equipment.status || 'Active',
     now,
     now
-  ]);
+  );
 
   saveDatabase();
   return getInfrastructureById(id);
@@ -202,11 +190,11 @@ export function updateInfrastructure(
   // Convert undefined to null for SQL.js compatibility
   const values = fields.map(f => mappedUpdates[f] === undefined ? null : mappedUpdates[f]);
 
-  db.run(`
+  db.prepare(`
     UPDATE infrastructure_equipment
     SET ${setClause}, updated_at = ?
     WHERE id = ?
-  `, [...values, now, id]);
+  `).run(...values, now, id);
 
   saveDatabase();
   return getInfrastructureById(id);
@@ -214,7 +202,7 @@ export function updateInfrastructure(
 
 export function deleteInfrastructure(id: string): void {
   const db = getDatabase();
-  db.run('DELETE FROM infrastructure_equipment WHERE id = ?', [id]);
+  db.prepare('DELETE FROM infrastructure_equipment WHERE id = ?').run(id);
   saveDatabase();
 }
 
@@ -223,35 +211,27 @@ export function deleteMultipleInfrastructure(ids: string[]): void {
   if (ids.length === 0) return;
 
   const placeholders = ids.map(() => '?').join(',');
-  db.run(`DELETE FROM infrastructure_equipment WHERE id IN (${placeholders})`, ids);
+  db.prepare(`DELETE FROM infrastructure_equipment WHERE id IN (${placeholders})`).run(...ids);
   saveDatabase();
 }
 
 function getInfrastructureById(id: string): InfrastructureEquipment {
   const db = getDatabase();
-  const result = db.exec('SELECT * FROM infrastructure_equipment WHERE id = ?', [id]);
+  const equipment = db.prepare('SELECT * FROM infrastructure_equipment WHERE id = ?').get(id);
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!equipment) {
     throw new Error(`Infrastructure equipment with id ${id} not found`);
   }
 
-  const columns = result[0].columns;
-  const values = result[0].values[0];
-
-  const equipment: any = {};
-  columns.forEach((col, idx) => {
-    equipment[col] = values[idx];
-  });
-
   // Parse JSON fields
-  if (equipment.port_assignments) {
+  if ((equipment as any).port_assignments) {
     try {
-      equipment.port_assignments = JSON.parse(equipment.port_assignments);
+      (equipment as any).port_assignments = JSON.parse((equipment as any).port_assignments);
     } catch {
-      equipment.port_assignments = [];
+      (equipment as any).port_assignments = [];
     }
   } else {
-    equipment.port_assignments = [];
+    (equipment as any).port_assignments = [];
   }
 
   return equipment as InfrastructureEquipment;
@@ -308,9 +288,9 @@ export function getPortLinkages(equipmentId: string, projectId: string): PortLin
       // Get linked fixture name if applicable
       if (pa.linked_fixture_id) {
         try {
-          const result = db.exec('SELECT position FROM fixtures WHERE id = ?', [pa.linked_fixture_id]);
-          if (result[0] && result[0].values.length > 0) {
-            linkage.linked_to_name = result[0].values[0][0] as string;
+          const fixture = db.prepare('SELECT position FROM fixtures WHERE id = ?').get(pa.linked_fixture_id);
+          if (fixture) {
+            linkage.linked_to_name = (fixture as any).position;
           }
         } catch (error) {
           console.error('Error fetching fixture name:', error);
