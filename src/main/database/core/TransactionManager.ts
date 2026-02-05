@@ -29,6 +29,7 @@
 
 import Database from 'better-sqlite3';
 import { DatabaseError } from '../../errors';
+import { logger } from '../../utils/logger';
 
 export class TransactionManager {
   constructor(private db: Database.Database) {}
@@ -47,7 +48,7 @@ export class TransactionManager {
     try {
       return transaction();
     } catch (error) {
-      console.error('❌ Transaction failed and was rolled back:', error);
+      logger.error('Transaction failed and was rolled back', error instanceof Error ? error : new Error(String(error)));
       throw new DatabaseError(
         'Transaction failed',
         'transaction:execute',
@@ -77,7 +78,7 @@ export class TransactionManager {
       this.db.prepare('COMMIT').run();
       return result;
     } catch (error) {
-      console.error('❌ Async transaction failed and was rolled back:', error);
+      logger.error('Async transaction failed and was rolled back', error instanceof Error ? error : new Error(String(error)));
       this.db.prepare('ROLLBACK').run();
       throw new DatabaseError(
         'Async transaction failed',
@@ -104,7 +105,7 @@ export class TransactionManager {
     try {
       return transaction();
     } catch (error) {
-      console.error('❌ Immediate transaction failed and was rolled back:', error);
+      logger.error('Immediate transaction failed and was rolled back', error instanceof Error ? error : new Error(String(error)));
       throw new DatabaseError(
         'Immediate transaction failed',
         'transaction:executeImmediate',
@@ -130,7 +131,7 @@ export class TransactionManager {
     try {
       return transaction();
     } catch (error) {
-      console.error('❌ Exclusive transaction failed and was rolled back:', error);
+      logger.error('Exclusive transaction failed and was rolled back', error instanceof Error ? error : new Error(String(error)));
       throw new DatabaseError(
         'Exclusive transaction failed',
         'transaction:executeExclusive',

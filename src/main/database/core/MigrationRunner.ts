@@ -16,6 +16,7 @@ import { updatePaperworkTemplateHeaders } from '../updatePaperworkTemplateHeader
 import * as fs from 'fs';
 import * as path from 'path';
 import { createLayoutTemplate } from '../queries/layoutTemplates';
+import { logger } from '../../utils/logger';
 
 export class MigrationRunner {
   constructor(
@@ -35,7 +36,7 @@ export class MigrationRunner {
         await this.runProjectMigrations();
       }
     } catch (error) {
-      console.error(`❌ Error running ${this.dbType} migrations:`, error);
+      logger.error(`Error running ${this.dbType} migrations`, error instanceof Error ? error : new Error(String(error)));
       // Continue anyway - don't block app startup
       // But log the error for debugging
     }
@@ -45,7 +46,7 @@ export class MigrationRunner {
    * Run app-level database migrations
    */
   private async runAppMigrations(): Promise<void> {
-    console.log('Running app database migrations...');
+    logger.info('Running app database migrations');
 
     try {
       // Seed default page layouts if none exist
@@ -53,9 +54,9 @@ export class MigrationRunner {
       const layoutCount = layoutResult?.count || 0;
 
       if (layoutCount === 0) {
-        console.log('No default page layouts found - seeding defaults...');
+        logger.info('No default page layouts found - seeding defaults');
         seedDefaultPageLayoutsFromJSON();
-        console.log('✅ Default page layouts seeded');
+        logger.info('Default page layouts seeded');
       } else {
         // Migration: Add v2 layouts with dynamic content if they don't exist
         const dynamicLayoutsResult = this.db.prepare(`
@@ -65,7 +66,7 @@ export class MigrationRunner {
         const hasDynamicLayouts = (dynamicLayoutsResult?.count || 0) > 0;
 
         if (!hasDynamicLayouts) {
-          console.log('Adding v2 layouts with dynamic content support...');
+          logger.info('Adding v2 layouts with dynamic content support');
 
           // Unset all current defaults (they'll become v1 backups)
           this.db.prepare('UPDATE page_layout_templates SET is_default = 0').run();
@@ -81,7 +82,7 @@ export class MigrationRunner {
           // Create new v2 layouts with dynamic content
           seedDefaultPageLayoutsFromJSON();
 
-          console.log('✅ V2 layouts with dynamic content added (old layouts preserved as v1)');
+          logger.info('V2 layouts with dynamic content added (old layouts preserved as v1)');
         }
 
         // Migration: Add paperwork-header layout if it doesn't exist
@@ -92,7 +93,7 @@ export class MigrationRunner {
         const hasPaperworkHeader = (paperworkHeaderResult?.count || 0) > 0;
 
         if (!hasPaperworkHeader) {
-          console.log('Adding paperwork-header default layout...');
+          logger.info('Adding paperwork-header default layout');
 
           // Load just the paperwork-header layout from JSON
           const layoutPath = path.join(__dirname, '..', 'defaultLayouts', 'paperwork-header_default_layout.json');
@@ -111,9 +112,9 @@ export class MigrationRunner {
                 data.elements
               );
 
-              console.log('✅ Paperwork-header layout added');
+              logger.info('Paperwork-header layout added');
             } catch (err) {
-              console.error('Error loading paperwork-header layout:', err);
+              logger.error('Error loading paperwork-header layout', err instanceof Error ? err : new Error(String(err)));
             }
           }
         }
@@ -134,9 +135,9 @@ export class MigrationRunner {
       // Update existing paperwork templates to reference the default header
       updatePaperworkTemplateHeaders();
 
-      console.log('✅ App database migrations complete');
+      logger.info('App database migrations complete');
     } catch (error) {
-      console.error('❌ Error running app migrations:', error);
+      logger.error('Error running app migrations', error instanceof Error ? error : new Error(String(error)));
       // Continue anyway - don't block app startup
     }
   }
@@ -145,7 +146,7 @@ export class MigrationRunner {
    * Run project-level database migrations
    */
   private runProjectMigrations(): void {
-    console.log('Running project database migrations...');
+    logger.info('Running project database migrations');
 
     try {
       // Projects table migrations
@@ -157,9 +158,9 @@ export class MigrationRunner {
       // Prep to Shop Order table migrations (Phase 0.3)
       this.migratePrepToShopOrder();
 
-      console.log('✅ Project database migrations complete');
+      logger.info('Project database migrations complete');
     } catch (error) {
-      console.error('❌ Error running project migrations:', error);
+      logger.error('Error running project migrations', error instanceof Error ? error : new Error(String(error)));
       // Continue anyway - don't block app startup
     }
   }
@@ -173,19 +174,19 @@ export class MigrationRunner {
 
     // Add logo_path
     if (!projectsColumns.includes('logo_path')) {
-      console.log('Running migration: Adding logo_path to projects');
+      logger.info('Running migration: Adding logo_path to projects');
       this.db.prepare('ALTER TABLE projects ADD COLUMN logo_path TEXT').run();
     }
 
     // Add enabled_modules
     if (!projectsColumns.includes('enabled_modules')) {
-      console.log('Running migration: Adding enabled_modules to projects');
+      logger.info('Running migration: Adding enabled_modules to projects');
       this.db.prepare('ALTER TABLE projects ADD COLUMN enabled_modules TEXT').run();
     }
 
     // Design team fields - name columns
     if (!projectsColumns.includes('lighting_designer')) {
-      console.log('Running migration: Adding design team name fields to projects');
+      logger.info('Running migration: Adding design team name fields to projects');
       this.db.prepare('ALTER TABLE projects ADD COLUMN lighting_designer TEXT').run();
       this.db.prepare('ALTER TABLE projects ADD COLUMN lighting_associates TEXT').run();
       this.db.prepare('ALTER TABLE projects ADD COLUMN audio_designer TEXT').run();
@@ -196,7 +197,7 @@ export class MigrationRunner {
 
     // Design team fields - contact info
     if (!projectsColumns.includes('lighting_designer_email')) {
-      console.log('Running migration: Adding design team contact fields to projects');
+      logger.info('Running migration: Adding design team contact fields to projects');
       this.db.prepare('ALTER TABLE projects ADD COLUMN lighting_designer_email TEXT').run();
       this.db.prepare('ALTER TABLE projects ADD COLUMN lighting_designer_phone TEXT').run();
       this.db.prepare('ALTER TABLE projects ADD COLUMN audio_designer_email TEXT').run();
@@ -207,7 +208,7 @@ export class MigrationRunner {
 
     // Production staff fields - name columns
     if (!projectsColumns.includes('electrician')) {
-      console.log('Running migration: Adding production staff name fields to projects');
+      logger.info('Running migration: Adding production staff name fields to projects');
       this.db.prepare('ALTER TABLE projects ADD COLUMN electrician TEXT').run();
       this.db.prepare('ALTER TABLE projects ADD COLUMN audio_tech TEXT').run();
       this.db.prepare('ALTER TABLE projects ADD COLUMN video_tech TEXT').run();
@@ -219,7 +220,7 @@ export class MigrationRunner {
 
     // Production staff fields - contact info
     if (!projectsColumns.includes('electrician_email')) {
-      console.log('Running migration: Adding production staff contact fields to projects');
+      logger.info('Running migration: Adding production staff contact fields to projects');
       this.db.prepare('ALTER TABLE projects ADD COLUMN electrician_email TEXT').run();
       this.db.prepare('ALTER TABLE projects ADD COLUMN electrician_phone TEXT').run();
       this.db.prepare('ALTER TABLE projects ADD COLUMN audio_tech_email TEXT').run();
@@ -234,22 +235,22 @@ export class MigrationRunner {
 
     // Venue and dates fields
     if (!projectsColumns.includes('venue')) {
-      console.log('Running migration: Adding venue to projects');
+      logger.info('Running migration: Adding venue to projects');
       this.db.prepare('ALTER TABLE projects ADD COLUMN venue TEXT').run();
     }
 
     if (!projectsColumns.includes('venue_city')) {
-      console.log('Running migration: Adding venue_city to projects');
+      logger.info('Running migration: Adding venue_city to projects');
       this.db.prepare('ALTER TABLE projects ADD COLUMN venue_city TEXT').run();
     }
 
     if (!projectsColumns.includes('venue_state')) {
-      console.log('Running migration: Adding venue_state to projects');
+      logger.info('Running migration: Adding venue_state to projects');
       this.db.prepare('ALTER TABLE projects ADD COLUMN venue_state TEXT').run();
     }
 
     if (!projectsColumns.includes('show_dates')) {
-      console.log('Running migration: Adding show_dates to projects');
+      logger.info('Running migration: Adding show_dates to projects');
       this.db.prepare('ALTER TABLE projects ADD COLUMN show_dates TEXT').run();
     }
   }
@@ -267,7 +268,7 @@ export class MigrationRunner {
 
     if (!exists) {
       // Create infrastructure_equipment table
-      console.log('Running migration: Creating infrastructure_equipment table');
+      logger.info('Running migration: Creating infrastructure_equipment table');
       this.db.prepare(`
         CREATE TABLE IF NOT EXISTS infrastructure_equipment (
           id TEXT PRIMARY KEY,
@@ -302,7 +303,7 @@ export class MigrationRunner {
       const columnNames = infrastructureColumns.map(row => row.name);
 
       if (!columnNames.includes('port_count')) {
-        console.log('Running migration: Adding port_count to infrastructure_equipment');
+        logger.info('Running migration: Adding port_count to infrastructure_equipment');
         this.db.prepare('ALTER TABLE infrastructure_equipment ADD COLUMN port_count INTEGER DEFAULT 0').run();
       }
     }
@@ -337,7 +338,7 @@ export class MigrationRunner {
       return;
     }
 
-    console.log('Running migration: Renaming prep tables to shop_order');
+    logger.info('Running migration: Renaming prep tables to shop_order');
 
     try {
       // Rename tables (preserves all data and structure)
@@ -366,9 +367,9 @@ export class MigrationRunner {
       this.db.prepare('CREATE INDEX IF NOT EXISTS idx_shop_order_note_templates_type ON shop_order_note_templates(type)').run();
       this.db.prepare('CREATE INDEX IF NOT EXISTS idx_shop_order_note_templates_default ON shop_order_note_templates(type, is_default)').run();
 
-      console.log('✅ Successfully renamed prep tables to shop_order');
+      logger.info('Successfully renamed prep tables to shop_order');
     } catch (error) {
-      console.error('❌ Error during prep to shop_order migration:', error);
+      logger.error('Error during prep to shop_order migration', error instanceof Error ? error : new Error(String(error)));
       // Don't throw - allow app to continue
     }
   }

@@ -16,6 +16,7 @@ import { PROJECT_SCHEMA } from '../projectSchema';
 import { MigrationRunner } from './MigrationRunner';
 import { errorHandler } from '../../errors';
 import { DatabaseError } from '../../errors';
+import { logger } from '../../utils/logger';
 
 export class DatabaseManager {
   private appDb: Database.Database | null = null;
@@ -37,9 +38,9 @@ export class DatabaseManager {
       await this.initializeAppDatabase();
       await this.initializeProjectDatabase();
 
-      console.log('✅ Database initialization complete');
+      logger.info('Database initialization complete');
     } catch (error) {
-      console.error('❌ Fatal error during database initialization:', error);
+      logger.error('Fatal error during database initialization', error instanceof Error ? error : new Error(String(error)));
       throw new DatabaseError(
         'Failed to initialize databases',
         'database:initialize',
@@ -54,7 +55,7 @@ export class DatabaseManager {
    */
   private async initializeAppDatabase(): Promise<void> {
     try {
-      console.log('Initializing app database:', this.appDbPath);
+      logger.info('Initializing app database', { path: this.appDbPath });
 
       await errorHandler.executeWithRetry(
         async () => {
@@ -80,9 +81,9 @@ export class DatabaseManager {
       const migrationRunner = new MigrationRunner(this.appDb!, 'app', this.appDbPath);
       await migrationRunner.run();
 
-      console.log('✅ App database initialized');
+      logger.info('App database initialized');
     } catch (error) {
-      console.error('❌ Error initializing app database:', error);
+      logger.error('Error initializing app database', error instanceof Error ? error : new Error(String(error)));
       throw new DatabaseError(
         'Failed to initialize app database',
         'app-database:initialize',
@@ -97,7 +98,7 @@ export class DatabaseManager {
    */
   private async initializeProjectDatabase(): Promise<void> {
     try {
-      console.log('Initializing project database:', this.projectDbPath);
+      logger.info('Initializing project database', { path: this.projectDbPath });
 
       await errorHandler.executeWithRetry(
         async () => {
@@ -137,9 +138,9 @@ export class DatabaseManager {
       const { createPerformanceIndexes } = await import('../indexes/performanceIndexes');
       createPerformanceIndexes(this.projectDb!);
 
-      console.log('✅ Project database initialized');
+      logger.info('Project database initialized');
     } catch (error) {
-      console.error('❌ Error initializing project database:', error);
+      logger.error('Error initializing project database', error instanceof Error ? error : new Error(String(error)));
       throw new DatabaseError(
         'Failed to initialize project database',
         'project-database:initialize',
@@ -192,7 +193,7 @@ export class DatabaseManager {
    */
   async reloadProjectDatabase(): Promise<void> {
     try {
-      console.log('Reloading project database from disk...');
+      logger.info('Reloading project database from disk');
 
       // Close current project database
       if (this.projectDb) {
@@ -221,9 +222,9 @@ export class DatabaseManager {
       const migrationRunner = new MigrationRunner(this.projectDb!, 'project', this.projectDbPath);
       await migrationRunner.run();
 
-      console.log('✅ Project database reloaded');
+      logger.info('Project database reloaded');
     } catch (error) {
-      console.error('❌ Error reloading project database:', error);
+      logger.error('Error reloading project database', error instanceof Error ? error : new Error(String(error)));
       throw new DatabaseError(
         'Failed to reload project database',
         'project-database:reload',
@@ -267,7 +268,7 @@ export class DatabaseManager {
    */
   async replaceProjectDatabase(importedData: Uint8Array): Promise<void> {
     try {
-      console.log('Replacing project database with imported data...');
+      logger.info('Replacing project database with imported data');
 
       // Validate that the imported data is a valid SQLite database
       this.validateSQLiteDatabase(importedData);
@@ -305,9 +306,9 @@ export class DatabaseManager {
         );
       }
 
-      console.log('✅ Project database replaced and validated');
+      logger.info('Project database replaced and validated');
     } catch (error) {
-      console.error('❌ Error replacing project database:', error);
+      logger.error('Error replacing project database', error instanceof Error ? error : new Error(String(error)));
       throw new DatabaseError(
         'Failed to replace project database',
         'project-database:replace',
@@ -329,7 +330,7 @@ export class DatabaseManager {
       this.projectDb.close();
       this.projectDb = null;
     }
-    console.log('✅ Databases closed');
+    logger.info('Databases closed');
   }
 }
 

@@ -12,6 +12,7 @@
  */
 
 import Database from 'better-sqlite3';
+import { logger } from '../../utils/logger';
 
 export class DatabaseWriter {
   /**
@@ -20,7 +21,7 @@ export class DatabaseWriter {
    */
   save(db: Database.Database, dbPath: string, dbName: string): void {
     // WAL mode handles auto-persistence - no manual save needed
-    console.log(`[DatabaseWriter] save() called for ${dbName} - WAL mode handles auto-persistence`);
+    logger.info('DatabaseWriter save() called - WAL mode handles auto-persistence', { dbName });
   }
 
   /**
@@ -29,7 +30,7 @@ export class DatabaseWriter {
    */
   async saveWithRetry(db: Database.Database, dbPath: string, dbName: string): Promise<void> {
     // WAL mode handles auto-persistence - no manual save needed
-    console.log(`[DatabaseWriter] saveWithRetry() called for ${dbName} - WAL mode handles auto-persistence`);
+    logger.info('DatabaseWriter saveWithRetry() called - WAL mode handles auto-persistence', { dbName });
   }
 }
 
