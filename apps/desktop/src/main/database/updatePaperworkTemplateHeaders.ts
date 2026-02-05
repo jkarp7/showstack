@@ -11,11 +11,11 @@ export function updatePaperworkTemplateHeaders(): void {
 
   try {
     // Update all system paperwork templates to use the default header
-    db.run(
+    db.prepare(
       `UPDATE paperwork_templates
        SET header_template_id = 'default-paperwork-header'
        WHERE is_system = 1 AND (header_template_id IS NULL OR header_template_id = '')`
-    );
+    ).run();
 
     saveAppDatabase(db);
     console.log('✅ Updated paperwork templates with default header');

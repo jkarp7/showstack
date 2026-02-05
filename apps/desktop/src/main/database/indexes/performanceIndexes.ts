@@ -126,9 +126,6 @@ function createInfrastructureIndexes(db: Database.Database): void {
   // Filter by location (e.g., "FOH", "Stage Left")
   safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_infrastructure_location ON infrastructure_equipment(project_id, location)');
 
-  // Filter by type within project
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_infrastructure_type ON infrastructure_equipment(project_id, type)');
-
   // Status filtering (Active, Inactive, etc.)
   safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_infrastructure_status ON infrastructure_equipment(project_id, status)');
 }
@@ -140,9 +137,6 @@ function createInfrastructureIndexes(db: Database.Database): void {
 function createPowerDistributionIndexes(db: Database.Database): void {
   // PD Racks - by project
   safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_pd_racks_project ON pd_racks(project_id)');
-
-  // PD Racks - by type and project
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_pd_racks_type ON pd_racks(project_id, type)');
 
   // PD Racks - by location
   safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_pd_racks_location ON pd_racks(project_id, location)');
@@ -162,8 +156,8 @@ function createDimmerRackIndexes(db: Database.Database): void {
   // Dimmer Rack Modules - by rack
   safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_dimmer_modules_rack ON dimmer_rack_modules(rack_id)');
 
-  // Dimmer Rack Modules - by position for sorted display
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_dimmer_modules_position ON dimmer_rack_modules(rack_id, position)');
+  // Dimmer Rack Modules - by start_circuit for sorted display
+  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_dimmer_modules_start_circuit ON dimmer_rack_modules(rack_id, start_circuit)');
 }
 
 /**
@@ -216,19 +210,17 @@ export function dropPerformanceIndexes(db: Database.Database): void {
     'idx_infrastructure_project',
     'idx_infrastructure_category',
     'idx_infrastructure_location',
-    'idx_infrastructure_type',
     'idx_infrastructure_status',
 
     // Power Distribution
     'idx_pd_racks_project',
-    'idx_pd_racks_type',
     'idx_pd_racks_location',
 
     // Dimmer Racks
     'idx_dimmer_racks_project',
     'idx_dimmer_racks_location',
     'idx_dimmer_modules_rack',
-    'idx_dimmer_modules_position',
+    'idx_dimmer_modules_start_circuit',
 
     // Projects
     'idx_projects_updated',

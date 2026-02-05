@@ -104,17 +104,15 @@ export function resetPaperworkHeaderTemplate(): void {
 
       // First, clear foreign key references from paperwork_templates
       const db = getAppDatabase();
-      db.run(
-        `UPDATE paperwork_templates SET header_template_id = NULL WHERE header_template_id = ?`,
-        ['default-paperwork-header']
-      );
+      db.prepare(
+        `UPDATE paperwork_templates SET header_template_id = NULL WHERE header_template_id = ?`
+      ).run('default-paperwork-header');
       saveAppDatabase();
 
       // Explicitly delete all elements first (should CASCADE but being extra thorough)
-      db.run(
-        `DELETE FROM page_layout_elements WHERE template_id = ?`,
-        ['default-paperwork-header']
-      );
+      db.prepare(
+        `DELETE FROM page_layout_elements WHERE template_id = ?`
+      ).run('default-paperwork-header');
       saveAppDatabase();
 
       // Now delete the template

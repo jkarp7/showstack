@@ -132,63 +132,62 @@ export function createLayoutTemplate(
 
   // If setting as default, unset any existing defaults for this page type
   if (data.is_default) {
-    db.run(
-      `UPDATE page_layout_templates SET is_default = 0 WHERE page_type = ?`,
-      [data.page_type!]
-    );
+    db.prepare(
+      `UPDATE page_layout_templates SET is_default = 0 WHERE page_type = ?`
+    ).run(data.page_type!);
   }
 
   // Insert template
-  db.run(
+  db.prepare(
     `
     INSERT INTO page_layout_templates (
       id, user_id, name, description, page_type,
       grid_columns, grid_rows, grid_gap, page_width, page_height,
       is_default, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `,
-    [
-      id,
-      data.user_id || null,
-      data.name || 'Untitled Layout',
-      data.description || null,
-      data.page_type!,
-      data.grid_columns || 12,
-      data.grid_rows || 20,
-      data.grid_gap || 8,
-      data.page_width || 816,
-      data.page_height || 1056,
-      data.is_default ? 1 : 0,
-      now,
-      now,
-    ]
+  `
+  ).run(
+    id,
+    data.user_id || null,
+    data.name || 'Untitled Layout',
+    data.description || null,
+    data.page_type!,
+    data.grid_columns || 12,
+    data.grid_rows || 20,
+    data.grid_gap || 8,
+    data.page_width || 816,
+    data.page_height || 1056,
+    data.is_default ? 1 : 0,
+    now,
+    now
   );
 
   // Insert elements
+  const insertElementStmt = db.prepare(
+    `
+    INSERT INTO page_layout_elements (
+      id, template_id, element_type, config,
+      grid_column, grid_row, column_span, row_span,
+      layer, style, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `
+  );
+
   for (const element of elements) {
     const elementId = uuidv4();
-    db.run(
-      `
-      INSERT INTO page_layout_elements (
-        id, template_id, element_type, config,
-        grid_column, grid_row, column_span, row_span,
-        layer, style, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `,
-      [
-        elementId,
-        id,
-        element.element_type!,
-        element.config || '{}',
-        element.grid_column!,
-        element.grid_row!,
-        element.column_span || 1,
-        element.row_span || 1,
-        element.layer || 0,
-        element.style || '{}',
-        now,
-        now,
-      ]
+    insertElementStmt.run(
+      elementId,
+      id,
+      element.element_type!,
+      element.config || '{}',
+      element.grid_column!,
+      element.grid_row!,
+      element.column_span || 1,
+      element.row_span || 1,
+      element.layer || 0,
+      element.style || '{}',
+      now,
+      now
     );
   }
 
@@ -214,10 +213,9 @@ export function updateLayoutTemplate(
 
   // If setting as default, unset any existing defaults for this page type
   if (updates.is_default) {
-    db.run(
-      `UPDATE page_layout_templates SET is_default = 0 WHERE page_type = ?`,
-      [template.page_type]
-    );
+    db.prepare(
+      `UPDATE page_layout_templates SET is_default = 0 WHERE page_type = ?`
+    ).run(template.page_type);
   }
 
   // Update template metadata
@@ -243,42 +241,42 @@ export function updateLayoutTemplate(
       return updates[f];
     });
 
-    db.run(
-      `UPDATE page_layout_templates SET ${setClause}, updated_at = ? WHERE id = ?`,
-      [...values, now, id]
-    );
+    db.prepare(
+      `UPDATE page_layout_templates SET ${setClause}, updated_at = ? WHERE id = ?`
+    ).run(...values, now, id);
   }
 
   // If elements are provided, replace all elements
   if (elements !== undefined) {
     // Delete existing elements
-    db.run('DELETE FROM page_layout_elements WHERE template_id = ?', [id]);
+    db.prepare('DELETE FROM page_layout_elements WHERE template_id = ?').run(id);
 
     // Insert new elements
+    const insertElementStmt = db.prepare(
+      `
+      INSERT INTO page_layout_elements (
+        id, template_id, element_type, config,
+        grid_column, grid_row, column_span, row_span,
+        layer, style, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `
+    );
+
     for (const element of elements) {
       const elementId = element.id || uuidv4();
-      db.run(
-        `
-        INSERT INTO page_layout_elements (
-          id, template_id, element_type, config,
-          grid_column, grid_row, column_span, row_span,
-          layer, style, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `,
-        [
-          elementId,
-          id,
-          element.element_type!,
-          element.config || '{}',
-          element.grid_column!,
-          element.grid_row!,
-          element.column_span || 1,
-          element.row_span || 1,
-          element.layer || 0,
-          element.style || '{}',
-          element.created_at || now,
-          now,
-        ]
+      insertElementStmt.run(
+        elementId,
+        id,
+        element.element_type!,
+        element.config || '{}',
+        element.grid_column!,
+        element.grid_row!,
+        element.column_span || 1,
+        element.row_span || 1,
+        element.layer || 0,
+        element.style || '{}',
+        element.created_at || now,
+        now
       );
     }
   }
@@ -292,7 +290,7 @@ export function updateLayoutTemplate(
  */
 export function deleteLayoutTemplate(id: string): void {
   const db = getAppDatabase();
-  db.run('DELETE FROM page_layout_templates WHERE id = ?', [id]);
+  db.prepare('DELETE FROM page_layout_templates WHERE id = ?').run(id);
   saveAppDatabase();
 }
 

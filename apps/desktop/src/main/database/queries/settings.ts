@@ -32,17 +32,17 @@ export function saveSettings(settings: AppSettings): void {
 
   if (existing[0] && existing[0].values.length > 0) {
     // Update existing
-    db.run(`
+    db.prepare(`
       UPDATE app_settings
       SET data = ?, updated_at = ?
       WHERE id = 1
-    `, [data, now]);
+    `).run(data, now);
   } else {
     // Insert new
-    db.run(`
+    db.prepare(`
       INSERT INTO app_settings (id, data, updated_at)
       VALUES (1, ?, ?)
-    `, [data, now]);
+    `).run(1, data, now);
   }
 
   saveAppDatabase();
@@ -129,17 +129,17 @@ export function setSetting(key: string, value: string): void {
 
   if (existing[0] && existing[0].values.length > 0) {
     // Update existing
-    db.run(`
+    db.prepare(`
       UPDATE app_settings_kv
       SET value = ?, updated_at = ?
       WHERE key = ?
-    `, [value, now, key]);
+    `).run(value, now, key);
   } else {
     // Insert new
-    db.run(`
+    db.prepare(`
       INSERT INTO app_settings_kv (key, value, updated_at)
       VALUES (?, ?, ?)
-    `, [key, value, now]);
+    `).run(key, value, now);
   }
 
   saveAppDatabase();

@@ -78,13 +78,13 @@ export function createLicense(data: {
   const now = Date.now();
   const id = uuidv4();
 
-  db.run(`
+  db.prepare(`
     INSERT INTO licenses (
       id, email, name, license_key, tier, status, modules,
       expiration_date, last_verified, created_at, updated_at
     )
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `, [
+  `).run(
     id,
     data.email,
     data.name || '',
@@ -96,7 +96,7 @@ export function createLicense(data: {
     now,
     now,
     now
-  ]);
+  );
 
   saveAppDatabase();
 
@@ -157,11 +157,11 @@ export function updateLicense(
   values.push(now);
   values.push(id);
 
-  db.run(`
+  db.prepare(`
     UPDATE licenses
     SET ${fields.join(', ')}
     WHERE id = ?
-  `, values);
+  `).run(...values);
 
   saveAppDatabase();
 
@@ -174,11 +174,11 @@ export function updateLicense(
 export function deleteLicense(id: string): void {
   const db = getAppDatabase();
 
-  db.run(`
+  db.prepare(`
     UPDATE licenses
     SET status = 'deleted', updated_at = ?
     WHERE id = ?
-  `, [Date.now(), id]);
+  `).run(Date.now(), id);
 
   saveAppDatabase();
 }

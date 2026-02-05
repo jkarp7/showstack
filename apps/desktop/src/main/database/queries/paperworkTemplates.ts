@@ -168,7 +168,7 @@ export function createPaperworkTemplate(data: PaperworkTemplateInput): any {
   const id = uuidv4();
   const now = Date.now();
 
-  db.run(
+  db.prepare(
     `
     INSERT INTO paperwork_templates (
       id, user_id, name, description, report_type,
@@ -176,22 +176,21 @@ export function createPaperworkTemplate(data: PaperworkTemplateInput): any {
       column_config, organization_config, page_setup,
       is_system, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `,
-    [
-      id,
-      null, // user_id
-      data.name,
-      data.description || null,
-      data.reportType,
-      data.headerTemplateId || null,
-      data.footerTemplateId || null,
-      JSON.stringify(data.columns),
-      JSON.stringify(data.organization),
-      JSON.stringify(data.pageSetup),
-      data.isSystem ? 1 : 0,
-      now,
-      now
-    ]
+  `
+  ).run(
+    id,
+    null, // user_id
+    data.name,
+    data.description || null,
+    data.reportType,
+    data.headerTemplateId || null,
+    data.footerTemplateId || null,
+    JSON.stringify(data.columns),
+    JSON.stringify(data.organization),
+    JSON.stringify(data.pageSetup),
+    data.isSystem ? 1 : 0,
+    now,
+    now
   );
 
   saveAppDatabase();
@@ -266,7 +265,7 @@ export function updatePaperworkTemplate(
     const query = `UPDATE paperwork_templates SET ${updateFields.join(', ')} WHERE id = ?`;
     values.push(id);
 
-    db.run(query, values);
+    db.prepare(query).run(...values);
     saveAppDatabase();
   }
 
@@ -285,7 +284,7 @@ export function deletePaperworkTemplate(id: string): void {
     throw new Error('Cannot delete system templates');
   }
 
-  db.run('DELETE FROM paperwork_templates WHERE id = ?', [id]);
+  db.prepare('DELETE FROM paperwork_templates WHERE id = ?').run(id);
   saveAppDatabase();
 }
 

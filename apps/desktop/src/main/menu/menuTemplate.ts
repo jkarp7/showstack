@@ -203,7 +203,7 @@ function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
       },
       {
         label: 'Add Section',
-        enabled: isPrep,
+        enabled: isShopOrder,
         click: () => sendToRenderer('menu:addSection')
       },
       {

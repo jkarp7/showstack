@@ -12,7 +12,7 @@ export default defineConfig({
         formats: ['cjs']
       },
       rollupOptions: {
-        external: ['sql.js', 'puppeteer'],
+        external: ['sql.js', 'puppeteer', 'better-sqlite3'],
         output: {
           entryFileNames: '[name].cjs'
         },
