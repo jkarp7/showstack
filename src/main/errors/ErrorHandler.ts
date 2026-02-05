@@ -38,10 +38,19 @@ export class ErrorHandler {
 
         // Only retry if error is recoverable and we haven't exhausted attempts
         if (attempt < maxRetries && this.isRetryable(lastError)) {
-          // Exponential backoff: 100ms, 200ms, 400ms, 800ms...
-          const delayMs = Math.pow(2, attempt) * 100;
-          logger.info(`Retrying ${operationName} in ${delayMs}ms`);
-          await this.delay(delayMs);
+          // Exponential backoff with jitter to prevent thundering herd
+          // Base: 100ms, 200ms, 400ms, 800ms...
+          // Jitter: Random 0-10% of base delay
+          const baseDelay = 100 * Math.pow(2, attempt - 1);
+          const jitter = Math.random() * baseDelay * 0.1;
+          const delay = Math.round(baseDelay + jitter);
+
+          logger.info(`Retrying ${operationName} in ${delay}ms`, {
+            attempt,
+            baseDelay,
+            jitter: Math.round(jitter)
+          });
+          await this.delay(delay);
         } else {
           // Not retryable or max attempts reached
           break;
@@ -89,10 +98,14 @@ export class ErrorHandler {
           break;
         }
 
-        // Synchronous delay (not ideal, but necessary for sync operations)
-        const delayMs = Math.pow(2, attempt) * 100;
+        // Synchronous delay with jitter (not ideal, but necessary for sync operations)
+        // Exponential backoff with jitter to prevent thundering herd
+        const baseDelay = 100 * Math.pow(2, attempt - 1);
+        const jitter = Math.random() * baseDelay * 0.1;
+        const delay = Math.round(baseDelay + jitter);
+
         const start = Date.now();
-        while (Date.now() - start < delayMs) {
+        while (Date.now() - start < delay) {
           // Busy wait
         }
       }
