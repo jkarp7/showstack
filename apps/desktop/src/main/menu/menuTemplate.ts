@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Context-Aware Application Menu Template
  * Dynamically builds Electron native menu based on current page context

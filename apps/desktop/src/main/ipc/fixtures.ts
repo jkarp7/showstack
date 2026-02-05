@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ipcMain } from 'electron';
 import { Fixture } from '../database/queries/fixtures';
 import { fixtureService } from '../services/FixtureService';

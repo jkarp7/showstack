@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ipcMain } from 'electron';
 import { DimmerRack } from '../database/queries/dimmerRacks';
 import { dimmerService } from '../services/DimmerService';

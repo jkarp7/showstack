@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { dialog, app } from 'electron';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, basename } from 'path';

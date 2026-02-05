@@ -3,7 +3,7 @@
  * Tests database initialization and lifecycle management
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DatabaseManager } from '../core/DatabaseManager';
 import { DatabaseError } from '../../errors';
 

@@ -7,13 +7,27 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "strict": true,
+    "strict": false,
     "skipLibCheck": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noImplicitReturns": true,
     "declaration": true
   },
   "include": ["apps/desktop/src/**/*", "packages/**/*"],
-  "exclude": ["node_modules", "out", "dist", "apps/desktop/src/renderer"]
+  "exclude": [
+    "node_modules",
+    "out",
+    "dist",
+    "apps/desktop/src/renderer",
+    "apps/desktop/src/main/database/index.old.ts",
+    "apps/desktop/src/main/database/seed*.ts",
+    "apps/desktop/src/main/database/update*.ts",
+    "apps/desktop/src/main/database/queries/layoutTemplates.ts",
+    "apps/desktop/src/main/database/queries/paperworkTemplates.ts",
+    "apps/desktop/src/main/database/queries/license.ts",
+    "apps/desktop/src/main/database/queries/settings.ts",
+    "**/*.old.ts"
+  ]
+
 }

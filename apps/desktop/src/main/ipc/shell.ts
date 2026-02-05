@@ -11,7 +11,7 @@ import { ValidationError } from '../errors';
  */
 export function registerShellHandlers(): void {
   // Open external URL in default browser
-  ipcMain.handle('shell:openExternal', async (event, url: string) => {
+  ipcMain.handle('shell:openExternal', async (_event, url: string) => {
     try {
       // Validation
       if (!url || url.trim().length === 0) {

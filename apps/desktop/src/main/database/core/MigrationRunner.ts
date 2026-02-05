@@ -22,7 +22,7 @@ export class MigrationRunner {
   constructor(
     private db: Database.Database,
     private dbType: 'app' | 'project',
-    private _dbPath: string
+    _dbPath: string
   ) {}
 
   /**

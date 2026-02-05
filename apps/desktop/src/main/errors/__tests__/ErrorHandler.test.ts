@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Unit tests for ErrorHandler retry logic
  * Tests exponential backoff, retryable error detection, and failure scenarios

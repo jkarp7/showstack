@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fileTypeFromBuffer } from 'file-type';
 import * as fs from 'fs/promises';

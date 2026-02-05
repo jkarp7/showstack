@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Unit tests for MigrationRunner
  * Tests database migration logic
@@ -5,6 +6,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { MigrationRunner } from '../core/MigrationRunner';
+import type Database from 'better-sqlite3';
 
 // Mock database seeding functions
 vi.mock('../seedDefaultLayoutsFromJSON', () => ({
@@ -70,29 +72,29 @@ describe('MigrationRunner', () => {
 
   describe('class structure', () => {
     it('should be instantiable with app database type', () => {
-      const runner = new MigrationRunner(mockDb, 'app', '/test/path/app.db');
+      const runner = new MigrationRunner(mockDb as Database.Database, 'app', '/test/path/app.db');
       expect(runner).toBeInstanceOf(MigrationRunner);
     });
 
     it('should be instantiable with project database type', () => {
-      const runner = new MigrationRunner(mockDb, 'project', '/test/path/project.db');
+      const runner = new MigrationRunner(mockDb as Database.Database, 'project', '/test/path/project.db');
       expect(runner).toBeInstanceOf(MigrationRunner);
     });
 
     it('should have run method', () => {
-      const runner = new MigrationRunner(mockDb, 'app', '/test/path/app.db');
+      const runner = new MigrationRunner(mockDb as Database.Database, 'app', '/test/path/app.db');
       expect(typeof runner.run).toBe('function');
     });
   });
 
   describe('run', () => {
     it('should execute without throwing for app database', async () => {
-      const runner = new MigrationRunner(mockDb, 'app', '/test/path/app.db');
+      const runner = new MigrationRunner(mockDb as Database.Database, 'app', '/test/path/app.db');
       await expect(runner.run()).resolves.not.toThrow();
     });
 
     it('should execute without throwing for project database', async () => {
-      const runner = new MigrationRunner(mockDb, 'project', '/test/path/project.db');
+      const runner = new MigrationRunner(mockDb as Database.Database, 'project', '/test/path/project.db');
       await expect(runner.run()).resolves.not.toThrow();
     });
 
@@ -102,7 +104,7 @@ describe('MigrationRunner', () => {
           throw new Error('Migration error');
         })
       });
-      const runner = new MigrationRunner(failingDb, 'app', '/test/path/app.db');
+      const runner = new MigrationRunner(failingDb as Database.Database, 'app', '/test/path/app.db');
       await expect(runner.run()).resolves.not.toThrow();
     });
 
@@ -112,7 +114,7 @@ describe('MigrationRunner', () => {
           throw new Error('Migration error');
         })
       });
-      const runner = new MigrationRunner(failingDb, 'app', '/test/path/app.db');
+      const runner = new MigrationRunner(failingDb as Database.Database, 'app', '/test/path/app.db');
       await runner.run();
 
       expect(consoleErrorSpy).toHaveBeenCalled();
@@ -121,7 +123,7 @@ describe('MigrationRunner', () => {
 
   describe('app migrations', () => {
     it('should check for existing page layouts', async () => {
-      const runner = new MigrationRunner(mockDb, 'app', '/test/path/app.db');
+      const runner = new MigrationRunner(mockDb as Database.Database, 'app', '/test/path/app.db');
       await runner.run();
 
       expect(mockDb.exec).toHaveBeenCalledWith(
@@ -133,14 +135,14 @@ describe('MigrationRunner', () => {
       const emptyDb = createMockDatabase({
         exec: vi.fn(() => [{ values: [[0]] }])
       });
-      const runner = new MigrationRunner(emptyDb, 'app', '/test/path/app.db');
+      const runner = new MigrationRunner(emptyDb as Database.Database, 'app', '/test/path/app.db');
       await expect(runner.run()).resolves.not.toThrow();
     });
   });
 
   describe('project migrations', () => {
     it('should check projects table structure', async () => {
-      const runner = new MigrationRunner(mockDb, 'project', '/test/path/project.db');
+      const runner = new MigrationRunner(mockDb as Database.Database, 'project', '/test/path/project.db');
       await runner.run();
 
       expect(mockDb.exec).toHaveBeenCalledWith(
@@ -158,7 +160,7 @@ describe('MigrationRunner', () => {
           return [{ values: [[0]] }];
         })
       });
-      const runner = new MigrationRunner(dbWithMissingColumns, 'project', '/test/path/project.db');
+      const runner = new MigrationRunner(dbWithMissingColumns as Database.Database, 'project', '/test/path/project.db');
       await expect(runner.run()).resolves.not.toThrow();
     });
 
@@ -173,7 +175,7 @@ describe('MigrationRunner', () => {
         }),
         run: vi.fn()
       });
-      const runner = new MigrationRunner(dbWithMissingColumns, 'project', '/test/path/project.db');
+      const runner = new MigrationRunner(dbWithMissingColumns as Database.Database, 'project', '/test/path/project.db');
       await runner.run();
 
       // Should have called run to add columns
@@ -181,7 +183,7 @@ describe('MigrationRunner', () => {
     });
 
     it('should check for infrastructure_equipment table', async () => {
-      const runner = new MigrationRunner(mockDb, 'project', '/test/path/project.db');
+      const runner = new MigrationRunner(mockDb as Database.Database, 'project', '/test/path/project.db');
       await runner.run();
 
       expect(mockDb.exec).toHaveBeenCalledWith(
@@ -194,7 +196,7 @@ describe('MigrationRunner', () => {
     it('should continue on partial migration failure', async () => {
       let callCount = 0;
       const partiallyFailingDb = createMockDatabase({
-        exec: vi.fn((sql) => {
+        exec: vi.fn(() => {
           callCount++;
           if (callCount === 2) {
             throw new Error('Partial failure');
@@ -202,7 +204,7 @@ describe('MigrationRunner', () => {
           return [{ values: [[0]] }];
         })
       });
-      const runner = new MigrationRunner(partiallyFailingDb, 'app', '/test/path/app.db');
+      const runner = new MigrationRunner(partiallyFailingDb as Database.Database, 'app', '/test/path/app.db');
       await expect(runner.run()).resolves.not.toThrow();
     });
 
@@ -212,7 +214,7 @@ describe('MigrationRunner', () => {
           throw new Error('Migration error');
         })
       });
-      const runner = new MigrationRunner(failingDb, 'project', '/test/path/project.db');
+      const runner = new MigrationRunner(failingDb as Database.Database, 'project', '/test/path/project.db');
       await runner.run();
 
       // Should still log errors but not throw

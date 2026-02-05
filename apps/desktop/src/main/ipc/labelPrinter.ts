@@ -12,7 +12,7 @@ import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { renderLabelSheet, calculatePageCount } from '../utils/labelSheetRenderer';
 import { getLayoutTemplateById, getLayoutElementsByTemplateId } from '../database/queries/layoutTemplates';
-import { getAppDatabase } from '../database';
+// import { getAppDatabase } from '../database';
 
 /**
  * Print label batch - full PDF rendering with labelSheetRenderer

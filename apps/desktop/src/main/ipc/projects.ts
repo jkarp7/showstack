@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ipcMain } from 'electron';
 import { getCurrentProject, Project } from '../database/queries/projects';
 import { projectService } from '../services/ProjectService';

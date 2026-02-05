@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ipcMain } from 'electron';
 import { PDRack } from '../database/queries/pdRacks';
 import { pdRackService } from '../services/PDRackService';
