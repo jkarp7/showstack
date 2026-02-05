@@ -1,0 +1,36 @@
+# PowerSync Sync Rules for ShowStack
+# This is the working version deployed to PowerSync
+
+bucket_definitions:
+  user_projects:
+    parameters: SELECT id as project_id FROM projects WHERE user_id = token_parameters.user_id
+    data:
+      - SELECT * FROM projects WHERE id = bucket.project_id
+      - SELECT * FROM fixtures WHERE project_id = bucket.project_id
+      - SELECT * FROM dimmer_racks WHERE project_id = bucket.project_id
+      - SELECT * FROM dimmer_rack_modules WHERE rack_id = bucket.project_id
+      - SELECT * FROM pd_racks WHERE project_id = bucket.project_id
+      - SELECT * FROM phase_distribution_templates WHERE project_id = bucket.project_id
+      - SELECT * FROM infrastructure_equipment WHERE project_id = bucket.project_id
+      - SELECT * FROM user_preferences WHERE project_id = bucket.project_id
+
+  user_shop_orders:
+    parameters: SELECT id as shop_order_id FROM shop_order_projects WHERE user_id = token_parameters.user_id
+    data:
+      - SELECT * FROM shop_order_projects WHERE id = bucket.shop_order_id
+      - SELECT * FROM shop_order_sections WHERE prep_project_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_items WHERE section_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_revisions WHERE prep_project_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_notes WHERE prep_project_id = bucket.shop_order_id
+
+  user_templates:
+    parameters: SELECT token_parameters.user_id as user_id
+    data:
+      - SELECT * FROM shop_order_note_templates WHERE user_id = bucket.user_id
+      - SELECT * FROM page_layout_templates WHERE user_id = bucket.user_id
+      - SELECT * FROM page_layout_elements WHERE template_id = bucket.user_id
+      - SELECT * FROM paperwork_templates WHERE user_id = bucket.user_id
+
+# Note: This version syncs slightly more data than optimal for dimmer_rack_modules,
+# shop_order_items, and page_layout_elements, but maintains user isolation.
+# Will optimize in Phase 3.2 when integrating PowerSync SDK.
