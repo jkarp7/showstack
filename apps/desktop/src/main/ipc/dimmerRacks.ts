@@ -1,14 +1,6 @@
 import { ipcMain } from 'electron';
-import {
-  getAllDimmerRacks,
-  getDimmerRackById,
-  createDimmerRack,
-  updateDimmerRack,
-  deleteDimmerRack,
-  getDimmerRacksWithUsage,
-  DimmerRack
-} from '../database/queries/dimmerRacks';
-import { errorHandler } from '../errors';
+import { DimmerRack } from '../database/queries/dimmerRacks';
+import { dimmerService } from '../services/DimmerService';
 import { DatabaseError, ValidationError } from '../errors';
 import {
   CreateDimmerRackSchema,
@@ -21,10 +13,7 @@ export function registerDimmerRackHandlers(): void {
   // Get all dimmer racks for a project
   ipcMain.handle('dimmerRacks:getAll', async (_event, projectId?: string) => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => getAllDimmerRacks(projectId),
-        'dimmerRacks:getAll'
-      );
+      return await dimmerService.getAll(projectId);
     } catch (error) {
       console.error('Failed to get dimmer racks:', {
         operation: 'dimmerRacks:getAll',
@@ -42,10 +31,7 @@ export function registerDimmerRackHandlers(): void {
   // Get dimmer rack by ID
   ipcMain.handle('dimmerRacks:getById', async (_event, id: string) => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => getDimmerRackById(id),
-        'dimmerRacks:getById'
-      );
+      return await dimmerService.getById(id);
     } catch (error) {
       console.error('Failed to get dimmer rack:', {
         operation: 'dimmerRacks:getById',
@@ -78,10 +64,7 @@ export function registerDimmerRackHandlers(): void {
         );
       }
 
-      return await errorHandler.executeWithRetry(
-        async () => createDimmerRack(rack, projectId),
-        'dimmerRacks:create'
-      );
+      return await dimmerService.create(rack, projectId);
     } catch (error) {
       console.error('Failed to create dimmer rack:', {
         operation: 'dimmerRacks:create',
@@ -114,10 +97,7 @@ export function registerDimmerRackHandlers(): void {
         );
       }
 
-      return await errorHandler.executeWithRetry(
-        async () => updateDimmerRack(id, updates),
-        'dimmerRacks:update'
-      );
+      return await dimmerService.update(id, updates);
     } catch (error) {
       console.error('Failed to update dimmer rack:', {
         operation: 'dimmerRacks:update',
@@ -139,10 +119,7 @@ export function registerDimmerRackHandlers(): void {
   // Delete dimmer rack
   ipcMain.handle('dimmerRacks:delete', async (_event, id: string) => {
     try {
-      await errorHandler.executeWithRetry(
-        async () => deleteDimmerRack(id),
-        'dimmerRacks:delete'
-      );
+      await dimmerService.delete(id);
     } catch (error) {
       console.error('Failed to delete dimmer rack:', {
         operation: 'dimmerRacks:delete',
@@ -160,10 +137,7 @@ export function registerDimmerRackHandlers(): void {
   // Get dimmer racks with usage statistics
   ipcMain.handle('dimmerRacks:getWithUsage', async (_event, projectId?: string) => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => getDimmerRacksWithUsage(projectId),
-        'dimmerRacks:getWithUsage'
-      );
+      return await dimmerService.getWithUsage(projectId);
     } catch (error) {
       console.error('Failed to get dimmer racks with usage:', {
         operation: 'dimmerRacks:getWithUsage',

@@ -1,14 +1,6 @@
 import { ipcMain } from 'electron';
-import {
-  getAllPDRacks,
-  getPDRackById,
-  createPDRack,
-  updatePDRack,
-  deletePDRack,
-  getPDRacksWithUsage,
-  PDRack
-} from '../database/queries/pdRacks';
-import { errorHandler } from '../errors';
+import { PDRack } from '../database/queries/pdRacks';
+import { pdRackService } from '../services/PDRackService';
 import { DatabaseError, ValidationError } from '../errors';
 import {
   CreatePDRackSchema,
@@ -21,10 +13,7 @@ export function registerPDRackHandlers(): void {
   // Get all PD racks for a project
   ipcMain.handle('pdRacks:getAll', async (_event, projectId?: string) => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => getAllPDRacks(projectId),
-        'pdRacks:getAll'
-      );
+      return await pdRackService.getAll(projectId);
     } catch (error) {
       console.error('Failed to get PD racks:', {
         operation: 'pdRacks:getAll',
@@ -42,10 +31,7 @@ export function registerPDRackHandlers(): void {
   // Get PD rack by ID
   ipcMain.handle('pdRacks:getById', async (_event, id: string) => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => getPDRackById(id),
-        'pdRacks:getById'
-      );
+      return await pdRackService.getById(id);
     } catch (error) {
       console.error('Failed to get PD rack:', {
         operation: 'pdRacks:getById',
@@ -78,10 +64,7 @@ export function registerPDRackHandlers(): void {
         );
       }
 
-      return await errorHandler.executeWithRetry(
-        async () => createPDRack(rack, projectId),
-        'pdRacks:create'
-      );
+      return await pdRackService.create(rack, projectId);
     } catch (error) {
       console.error('Failed to create PD rack:', {
         operation: 'pdRacks:create',
@@ -114,10 +97,7 @@ export function registerPDRackHandlers(): void {
         );
       }
 
-      return await errorHandler.executeWithRetry(
-        async () => updatePDRack(id, updates),
-        'pdRacks:update'
-      );
+      return await pdRackService.update(id, updates);
     } catch (error) {
       console.error('Failed to update PD rack:', {
         operation: 'pdRacks:update',
@@ -139,10 +119,7 @@ export function registerPDRackHandlers(): void {
   // Delete PD rack
   ipcMain.handle('pdRacks:delete', async (_event, id: string) => {
     try {
-      await errorHandler.executeWithRetry(
-        async () => deletePDRack(id),
-        'pdRacks:delete'
-      );
+      await pdRackService.delete(id);
     } catch (error) {
       console.error('Failed to delete PD rack:', {
         operation: 'pdRacks:delete',
@@ -160,10 +137,7 @@ export function registerPDRackHandlers(): void {
   // Get PD racks with usage statistics
   ipcMain.handle('pdRacks:getWithUsage', async (_event, projectId?: string) => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => getPDRacksWithUsage(projectId),
-        'pdRacks:getWithUsage'
-      );
+      return await pdRackService.getWithUsage(projectId);
     } catch (error) {
       console.error('Failed to get PD racks with usage:', {
         operation: 'pdRacks:getWithUsage',

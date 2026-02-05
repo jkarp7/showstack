@@ -1,13 +1,6 @@
 import { ipcMain } from 'electron';
-import {
-  getAllFixtures,
-  createFixture,
-  updateFixture,
-  deleteFixture,
-  deleteMultipleFixtures,
-  Fixture
-} from '../database/queries/fixtures';
-import { errorHandler } from '../errors';
+import { Fixture } from '../database/queries/fixtures';
+import { fixtureService } from '../services/FixtureService';
 import { DatabaseError, ValidationError } from '../errors';
 import {
   CreateFixtureSchema,
@@ -20,10 +13,7 @@ export function registerFixtureHandlers(): void {
   // Get all fixtures for a project
   ipcMain.handle('fixtures:getAll', async (_event, projectId?: string) => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => getAllFixtures(projectId),
-        'fixtures:getAll'
-      );
+      return await fixtureService.getAll(projectId);
     } catch (error) {
       console.error('Failed to get fixtures:', {
         operation: 'fixtures:getAll',
@@ -31,7 +21,6 @@ export function registerFixtureHandlers(): void {
         error: error instanceof Error ? error.message : error
       });
 
-      // Return user-friendly error
       if (error instanceof DatabaseError) {
         throw new Error(`Unable to load fixtures: ${error.message}`);
       }
@@ -54,10 +43,7 @@ export function registerFixtureHandlers(): void {
         );
       }
 
-      return await errorHandler.executeWithRetry(
-        async () => createFixture(validation.data, projectId),
-        'fixtures:create'
-      );
+      return await fixtureService.create(validation.data, projectId);
     } catch (error) {
       console.error('Failed to create fixture:', {
         operation: 'fixtures:create',
@@ -65,7 +51,6 @@ export function registerFixtureHandlers(): void {
         error: error instanceof Error ? error.message : error
       });
 
-      // Return user-friendly error
       if (error instanceof ValidationError) {
         throw new Error(error.toUserMessage());
       }
@@ -91,10 +76,7 @@ export function registerFixtureHandlers(): void {
         );
       }
 
-      return await errorHandler.executeWithRetry(
-        async () => updateFixture(id, updates),
-        'fixtures:update'
-      );
+      return await fixtureService.update(id, updates);
     } catch (error) {
       console.error('Failed to update fixture:', {
         operation: 'fixtures:update',
@@ -116,10 +98,7 @@ export function registerFixtureHandlers(): void {
   // Delete fixture
   ipcMain.handle('fixtures:delete', async (_event, id: string) => {
     try {
-      await errorHandler.executeWithRetry(
-        async () => deleteFixture(id),
-        'fixtures:delete'
-      );
+      await fixtureService.delete(id);
     } catch (error) {
       console.error('Failed to delete fixture:', {
         operation: 'fixtures:delete',
@@ -137,10 +116,7 @@ export function registerFixtureHandlers(): void {
   // Delete multiple fixtures
   ipcMain.handle('fixtures:deleteMultiple', async (_event, ids: string[]) => {
     try {
-      await errorHandler.executeWithRetry(
-        async () => deleteMultipleFixtures(ids),
-        'fixtures:deleteMultiple'
-      );
+      await fixtureService.deleteMultiple(ids);
     } catch (error) {
       console.error('Failed to delete multiple fixtures:', {
         operation: 'fixtures:deleteMultiple',

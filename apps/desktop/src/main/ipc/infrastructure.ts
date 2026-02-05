@@ -1,11 +1,6 @@
 import { ipcMain, dialog } from 'electron';
 import { writeFileSync, readFileSync } from 'fs';
 import {
-  getAllInfrastructure,
-  createInfrastructure,
-  updateInfrastructure,
-  deleteInfrastructure,
-  deleteMultipleInfrastructure,
   getPortLinkages,
   getFixtureConnections,
   getEquipmentConnections,
@@ -18,6 +13,7 @@ import {
   PortAssignment,
   CSVFieldMapping
 } from '../database/queries/infrastructure';
+import { infrastructureService } from '../services/InfrastructureService';
 import { errorHandler } from '../errors';
 import { DatabaseError, ValidationError } from '../errors';
 import {
@@ -31,10 +27,7 @@ export function registerInfrastructureHandlers(): void {
   // Get all infrastructure equipment for a project
   ipcMain.handle('infrastructure:getAll', async (_event, projectId: string) => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => getAllInfrastructure(projectId),
-        'infrastructure:getAll'
-      );
+      return await infrastructureService.getAll(projectId);
     } catch (error) {
       console.error('Failed to get infrastructure:', {
         operation: 'infrastructure:getAll',
@@ -67,10 +60,7 @@ export function registerInfrastructureHandlers(): void {
         );
       }
 
-      return await errorHandler.executeWithRetry(
-        async () => createInfrastructure(equipment, projectId),
-        'infrastructure:create'
-      );
+      return await infrastructureService.create(equipment, projectId);
     } catch (error) {
       console.error('Failed to create infrastructure:', {
         operation: 'infrastructure:create',
@@ -103,10 +93,7 @@ export function registerInfrastructureHandlers(): void {
         );
       }
 
-      return await errorHandler.executeWithRetry(
-        async () => updateInfrastructure(id, updates),
-        'infrastructure:update'
-      );
+      return await infrastructureService.update(id, updates);
     } catch (error) {
       console.error('Failed to update infrastructure:', {
         operation: 'infrastructure:update',
@@ -128,10 +115,7 @@ export function registerInfrastructureHandlers(): void {
   // Delete infrastructure equipment
   ipcMain.handle('infrastructure:delete', async (_event, id: string) => {
     try {
-      await errorHandler.executeWithRetry(
-        async () => deleteInfrastructure(id),
-        'infrastructure:delete'
-      );
+      await infrastructureService.delete(id);
     } catch (error) {
       console.error('Failed to delete infrastructure:', {
         operation: 'infrastructure:delete',

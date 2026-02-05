@@ -1,13 +1,6 @@
 import { ipcMain } from 'electron';
-import {
-  getAllProjects,
-  getProjectById,
-  createProject,
-  updateProject,
-  deleteProject,
-  getCurrentProject,
-  Project
-} from '../database/queries/projects';
+import { getCurrentProject, Project } from '../database/queries/projects';
+import { projectService } from '../services/ProjectService';
 import { errorHandler } from '../errors';
 import { DatabaseError, ValidationError } from '../errors';
 import {
@@ -20,10 +13,7 @@ import {
 export function registerProjectHandlers(): void {
   ipcMain.handle('projects:getAll', async () => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => getAllProjects(),
-        'projects:getAll'
-      );
+      return await projectService.getAll();
     } catch (error) {
       console.error('Failed to get projects:', {
         operation: 'projects:getAll',
@@ -58,10 +48,7 @@ export function registerProjectHandlers(): void {
 
   ipcMain.handle('projects:getById', async (_event, id: string) => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => getProjectById(id),
-        'projects:getById'
-      );
+      return await projectService.getById(id);
     } catch (error) {
       console.error('Failed to get project by id:', {
         operation: 'projects:getById',
@@ -98,10 +85,7 @@ export function registerProjectHandlers(): void {
         );
       }
 
-      return await errorHandler.executeWithRetry(
-        async () => createProject(name, description, logoPath, enabledModules),
-        'projects:create'
-      );
+      return await projectService.create(name, description, logoPath, enabledModules);
     } catch (error) {
       console.error('Failed to create project:', {
         operation: 'projects:create',
@@ -133,10 +117,7 @@ export function registerProjectHandlers(): void {
         );
       }
 
-      return await errorHandler.executeWithRetry(
-        async () => updateProject(id, updates),
-        'projects:update'
-      );
+      return await projectService.update(id, updates);
     } catch (error) {
       console.error('Failed to update project:', {
         operation: 'projects:update',
@@ -157,10 +138,7 @@ export function registerProjectHandlers(): void {
 
   ipcMain.handle('projects:delete', async (_event, id: string) => {
     try {
-      await errorHandler.executeWithRetry(
-        async () => deleteProject(id),
-        'projects:delete'
-      );
+      await projectService.delete(id);
     } catch (error) {
       console.error('Failed to delete project:', {
         operation: 'projects:delete',
