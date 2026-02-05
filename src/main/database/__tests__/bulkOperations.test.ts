@@ -187,7 +187,7 @@ describe('bulkUpdate', () => {
       bulkUpdate('test_items', [
         { id: '1', updates: { 'quantity; DROP TABLE test_items; --': 15 } }
       ]);
-    }).toThrow(); // Wrapped in DatabaseError "Transaction failed", but validates column names
+    }).toThrow(/Invalid column name/);
   });
 
   it('should rollback all updates on error', () => {

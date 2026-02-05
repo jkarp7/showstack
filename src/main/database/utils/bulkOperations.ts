@@ -131,9 +131,16 @@ export function bulkUpdate(
     return 0;
   }
 
-  // Validate SQL identifiers to prevent injection
+  // Validate SQL identifiers to prevent injection - ALL validation before transaction
   validateSqlIdentifier(tableName, 'table name');
   validateSqlIdentifier(idColumn, 'column name');
+
+  // Pre-validate all column names from all updates before starting transaction
+  // This ensures fast failure without wasting transaction resources
+  for (const { updates: updateData } of updates) {
+    const columns = Object.keys(updateData);
+    validateSqlIdentifiers(columns, 'column name');
+  }
 
   const db = getDatabase();
   const txManager = createTransactionManager(db);
@@ -142,10 +149,6 @@ export function bulkUpdate(
     let count = 0;
     for (const { id, updates: updateData } of updates) {
       const columns = Object.keys(updateData);
-
-      // Validate column names from updateData
-      validateSqlIdentifiers(columns, 'column name');
-
       const setClause = columns.map(col => `${col} = ?`).join(', ');
       const values = columns.map(col => updateData[col]);
 
