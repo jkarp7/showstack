@@ -55,7 +55,8 @@ export class DatabaseManager {
    */
   private async initializeAppDatabase(): Promise<void> {
     try {
-      logger.info('Initializing app database', { path: this.appDbPath });
+      logger.info('Initializing app database');
+      logger.debug('App database path', { path: this.appDbPath });
 
       await errorHandler.executeWithRetry(
         async () => {
@@ -98,7 +99,8 @@ export class DatabaseManager {
    */
   private async initializeProjectDatabase(): Promise<void> {
     try {
-      logger.info('Initializing project database', { path: this.projectDbPath });
+      logger.info('Initializing project database');
+      logger.debug('Project database path', { path: this.projectDbPath });
 
       await errorHandler.executeWithRetry(
         async () => {

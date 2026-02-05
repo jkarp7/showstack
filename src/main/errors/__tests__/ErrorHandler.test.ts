@@ -11,12 +11,14 @@ describe('ErrorHandler', () => {
   let errorHandler: ErrorHandler;
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
   let consoleLogSpy: ReturnType<typeof vi.spyOn>;
+  let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     errorHandler = new ErrorHandler();
     // Suppress console output in tests
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   describe('executeWithRetry - Success Cases', () => {
@@ -298,9 +300,10 @@ describe('ErrorHandler', () => {
         await errorHandler.executeWithRetry(operation, 'test-operation', 2);
       } catch {}
 
-      expect(consoleErrorSpy).toHaveBeenCalled();
-      const errorCalls = consoleErrorSpy.mock.calls;
-      expect(errorCalls.some(call =>
+      // ErrorHandler now uses logger.warn which calls console.warn
+      expect(consoleWarnSpy).toHaveBeenCalled();
+      const warnCalls = consoleWarnSpy.mock.calls;
+      expect(warnCalls.some(call =>
         call[0].includes('test-operation') && call[0].includes('failed')
       )).toBe(true);
     });

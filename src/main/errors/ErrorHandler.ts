@@ -4,6 +4,7 @@
  */
 
 import { DatabaseError, ConnectionError } from './DatabaseError';
+import { logger } from '../utils/logger';
 
 export class ErrorHandler {
   /**
@@ -28,7 +29,7 @@ export class ErrorHandler {
       } catch (error) {
         lastError = error as Error;
 
-        console.error(`${operationName} failed (attempt ${attempt}/${maxRetries})`, {
+        logger.warn(`${operationName} failed (attempt ${attempt}/${maxRetries})`, {
           error: lastError.message,
           attempt,
           maxRetries,
@@ -39,7 +40,7 @@ export class ErrorHandler {
         if (attempt < maxRetries && this.isRetryable(lastError)) {
           // Exponential backoff: 100ms, 200ms, 400ms, 800ms...
           const delayMs = Math.pow(2, attempt) * 100;
-          console.log(`Retrying ${operationName} in ${delayMs}ms...`);
+          logger.info(`Retrying ${operationName} in ${delayMs}ms`);
           await this.delay(delayMs);
         } else {
           // Not retryable or max attempts reached
@@ -78,7 +79,7 @@ export class ErrorHandler {
       } catch (error) {
         lastError = error as Error;
 
-        console.error(`${operationName} failed (attempt ${attempt}/${maxRetries})`, {
+        logger.warn(`${operationName} failed (attempt ${attempt}/${maxRetries})`, {
           error: lastError.message,
           attempt
         });
