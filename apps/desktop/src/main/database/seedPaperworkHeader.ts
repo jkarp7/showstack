@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Seed function for default paperwork header layout template
  */

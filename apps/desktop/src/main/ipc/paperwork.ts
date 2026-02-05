@@ -1,5 +1,5 @@
 import { ipcMain, BrowserWindow, dialog } from 'electron';
-import * as fs from 'fs';
+// import fs from 'fs'';
 import * as paperworkTemplateQueries from '../database/queries/paperworkTemplates';
 import puppeteer from 'puppeteer';
 import { errorHandler } from '../errors';

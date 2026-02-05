@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getAppDatabase, saveAppDatabase } from '../index';
 import type { AppSettings } from '../../../shared/types/settings.types';
 

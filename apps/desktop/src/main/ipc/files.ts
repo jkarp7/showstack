@@ -1,6 +1,6 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { fileService, ProjectImportResult, ProjectConflictResolution } from '../services/fileService';
-import * as path from 'path';
+// import path from 'path';
 import { readImageAsDataUrl } from '../utils/imageValidation';
 import { sanitizeError, sanitizeErrorForLogging } from '../utils/errorSanitizer';
 

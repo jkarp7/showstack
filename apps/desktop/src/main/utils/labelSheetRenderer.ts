@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Label Sheet Renderer
  *

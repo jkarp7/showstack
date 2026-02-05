@@ -1,5 +1,4 @@
 import { app, BrowserWindow } from 'electron';
-import { join } from 'path';
 import { initDatabase } from './database';
 import { windowManager } from './services/WindowManager';
 import { registerFixtureHandlers } from './ipc/fixtures';

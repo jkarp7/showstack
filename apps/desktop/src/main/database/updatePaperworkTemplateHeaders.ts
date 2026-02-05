@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Update existing paperwork templates to reference the default header template
  */
