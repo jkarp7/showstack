@@ -8,10 +8,14 @@ export default defineConfig({
   main: {
     build: {
       lib: {
-        entry: resolve(__dirname, 'apps/desktop/src/main/index.ts')
+        entry: resolve(__dirname, 'apps/desktop/src/main/index.ts'),
+        formats: ['cjs']
       },
       rollupOptions: {
         external: ['sql.js', 'puppeteer'],
+        output: {
+          entryFileNames: '[name].cjs'
+        },
         plugins: [
           {
             name: 'copy-default-layouts',
