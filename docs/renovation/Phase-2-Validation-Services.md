@@ -409,6 +409,25 @@ See [Phase 3 Documentation](./Phase-3-Cloud-Collaboration.md) for detailed integ
 
 Extract business logic from IPC handlers into testable service classes.
 
+#### 2.3.0 Pre-Service Refactoring
+**From PR #67/#68 Code Review - Validation Timing Issue**
+
+**Issue:** In `bulkOperations.ts`, column validation occurs inside transactions (e.g., `bulkUpdate`), causing validation errors to be wrapped in transaction errors instead of failing fast.
+
+**Tasks:**
+- [ ] Move column validation in `bulkUpdate` before transaction initiation
+- [ ] Move column validation in `bulkInsert` before transaction initiation (verify current placement)
+- [ ] Ensure all validation happens before `executeImmediate()` calls
+- [ ] Update tests to verify validation errors are not wrapped in transaction errors
+- [ ] Document fail-fast validation pattern in code comments
+
+**Effort:** 1-2 hours
+**Priority:** HIGH (architectural improvement)
+
+**Status:** ⏳ PENDING
+
+---
+
 #### 2.3.1 Service Infrastructure
 **Tasks:**
 - [ ] Create `src/main/services/` directory
