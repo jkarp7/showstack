@@ -17,6 +17,80 @@ Phase 2 focuses on three main areas:
 
 ---
 
+## 🚨 Testing Philosophy & Requirements
+
+**CRITICAL PRINCIPLE:** Code must pass existing tests. Tests must NOT be altered to make code pass.
+
+### Senior Developer Standards
+
+1. **Tests are contracts** - When a test fails, the code is wrong, not the test
+2. **Fix the code, not the test** - If a test fails, investigate and fix the root cause
+3. **Proper assertions** - Tests must verify specific behavior, not just "something happened"
+4. **No weakening** - Changing `toThrow(/Specific error/)` to `toThrow()` is not acceptable
+5. **Architecture over shortcuts** - If tests can't pass, the architecture needs fixing
+
+### Phase 2 Testing Requirements
+
+**For every code change in Phase 2:**
+
+✅ **MUST:** All existing tests pass without modification
+✅ **MUST:** New functionality includes new tests
+✅ **MUST:** Tests verify specific expected behavior
+✅ **MUST:** Test assertions are not weakened or generalized
+✅ **MUST:** Code changes fix architecture, not test expectations
+
+**Unacceptable Practices:**
+❌ Modifying test assertions to make failing tests pass
+❌ Commenting out failing tests
+❌ Using `any` or weakening types to avoid test failures
+❌ Changing test mocks to hide bugs
+❌ Skipping tests with `.skip()` or `xit()`
+
+### Testing Workflow
+
+```
+1. Write/modify code
+2. Run tests
+3. If tests fail:
+   a. Analyze WHY the test failed
+   b. Determine if code or architecture is wrong
+   c. Fix the CODE, not the test
+   d. Re-run tests
+4. If tests pass: proceed
+5. Add tests for new functionality
+6. Ensure all tests pass before committing
+```
+
+### Example: Phase 1 Validation Fix
+
+**❌ WRONG APPROACH:**
+```typescript
+// Test was: expect(() => fn()).toThrow(/Invalid column name/)
+// Developer weakened it to:
+expect(() => fn()).toThrow(); // Now accepts ANY error
+```
+
+**✅ CORRECT APPROACH:**
+```typescript
+// Moved validation BEFORE transaction so error isn't wrapped
+// Test remains: expect(() => fn()).toThrow(/Invalid column name/)
+// Architecture fixed, test unchanged, specific error verified
+```
+
+### Accountability
+
+Every commit message must include:
+- Test status: "All tests passing ✓"
+- Test count: "53/53 database tests passing"
+- If tests were added: "Added X tests for Y functionality"
+
+**Reviewers must verify:**
+- No test modifications to force passing
+- Test assertions remain specific
+- Architecture fixes, not test workarounds
+
+---
+
 ## Phase 1 Follow-Up Issues (Integrated)
 
 Based on PR #67 code review, the following improvements from Phase 1 will be addressed in Phase 2:
