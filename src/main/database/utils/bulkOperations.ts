@@ -8,6 +8,12 @@
 import { getDatabase, createTransactionManager } from '../index';
 
 /**
+ * Allowed SQL value types for bulk operations
+ * Represents all valid types that can be stored in SQLite
+ */
+export type SQLValue = string | number | null | boolean | Buffer;
+
+/**
  * Validate SQL identifier (table name, column name) to prevent SQL injection
  * Identifiers must:
  * - Start with a letter or underscore
@@ -62,7 +68,7 @@ function validateSqlIdentifiers(identifiers: string[], type: string = 'identifie
  * Uses a transaction to ensure all inserts succeed or all fail
  *
  * @param tableName - Name of the table
- * @param records - Array of records to insert
+ * @param records - Array of records to insert (each record is an array of SQLValue types)
  * @param columns - Column names in order
  * @returns Number of records inserted
  *
@@ -72,11 +78,12 @@ function validateSqlIdentifiers(identifiers: string[], type: string = 'identifie
  *   ['id1', 'project1', 'Moving Light', 10],
  *   ['id2', 'project1', 'LED Par', 20]
  * ], ['id', 'project_id', 'type', 'quantity']);
+ * // Each value must be: string | number | null | boolean | Buffer
  * ```
  */
 export function bulkInsert(
   tableName: string,
-  records: any[][],
+  records: Array<Array<SQLValue>>,
   columns: string[]
 ): number {
   if (records.length === 0) {
@@ -110,21 +117,22 @@ export function bulkInsert(
  * Uses a transaction to ensure all updates succeed or all fail
  *
  * @param tableName - Name of the table
- * @param updates - Array of {id, updates} objects
+ * @param updates - Array of {id, updates} objects (update values must be SQLValue types)
  * @param idColumn - Name of the ID column (default: 'id')
  * @returns Number of records updated
  *
  * @example
  * ```typescript
  * const count = bulkUpdate('fixtures', [
- *   { id: 'id1', updates: { quantity: 15 } },
- *   { id: 'id2', updates: { quantity: 25 } }
+ *   { id: 'id1', updates: { quantity: 15, name: 'Moving Light' } },
+ *   { id: 'id2', updates: { quantity: 25, name: 'LED Par' } }
  * ]);
+ * // Update values must be: string | number | null | boolean | Buffer
  * ```
  */
 export function bulkUpdate(
   tableName: string,
-  updates: Array<{ id: string; updates: Record<string, any> }>,
+  updates: Array<{ id: string; updates: Record<string, SQLValue> }>,
   idColumn: string = 'id'
 ): number {
   if (updates.length === 0) {
@@ -231,7 +239,7 @@ export function executeInTransaction<T>(operations: Array<() => T>): T[] {
  * Uses INSERT OR REPLACE for efficiency
  *
  * @param tableName - Name of the table
- * @param records - Array of records to upsert
+ * @param records - Array of records to upsert (each record is an array of SQLValue types)
  * @param columns - Column names in order
  * @returns Number of records upserted
  *
@@ -241,11 +249,12 @@ export function executeInTransaction<T>(operations: Array<() => T>): T[] {
  *   ['id1', 'project1', 'Moving Light', 10],
  *   ['id2', 'project1', 'LED Par', 20]
  * ], ['id', 'project_id', 'type', 'quantity']);
+ * // Each value must be: string | number | null | boolean | Buffer
  * ```
  */
 export function bulkUpsert(
   tableName: string,
-  records: any[][],
+  records: Array<Array<SQLValue>>,
   columns: string[]
 ): number {
   if (records.length === 0) {
