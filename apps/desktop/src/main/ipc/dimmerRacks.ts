@@ -10,6 +10,12 @@ import {
 } from '../database/queries/dimmerRacks';
 import { errorHandler } from '../errors';
 import { DatabaseError, ValidationError } from '../errors';
+import {
+  CreateDimmerRackSchema,
+  UpdateDimmerRackSchema,
+  parseWithZod,
+  formatValidationErrors
+} from '@showstack/shared';
 
 export function registerDimmerRackHandlers(): void {
   // Get all dimmer racks for a project
@@ -57,12 +63,18 @@ export function registerDimmerRackHandlers(): void {
   // Create dimmer rack
   ipcMain.handle('dimmerRacks:create', async (_event, rack: Omit<DimmerRack, 'id' | 'created_at' | 'updated_at'>, projectId?: string) => {
     try {
-      // Basic validation
-      if (!rack.name || rack.name.trim().length === 0) {
+      // Add project_id for validation
+      const rackWithProject = { ...rack, project_id: projectId || rack.project_id };
+
+      // Validate with Zod schema
+      const validation = parseWithZod(CreateDimmerRackSchema, rackWithProject);
+
+      if (!validation.success) {
+        const errorMessage = formatValidationErrors(validation.errors);
         throw new ValidationError(
-          'Dimmer rack name is required',
-          'name',
-          rack.name
+          `Invalid dimmer rack data:\n${errorMessage}`,
+          validation.errors[0]?.field || 'unknown',
+          rack
         );
       }
 
@@ -90,12 +102,15 @@ export function registerDimmerRackHandlers(): void {
   // Update dimmer rack
   ipcMain.handle('dimmerRacks:update', async (_event, id: string, updates: Partial<DimmerRack>) => {
     try {
-      // Validate name if being updated
-      if (updates.name !== undefined && (!updates.name || updates.name.trim().length === 0)) {
+      // Validate with Zod schema
+      const validation = parseWithZod(UpdateDimmerRackSchema, { id, ...updates });
+
+      if (!validation.success) {
+        const errorMessage = formatValidationErrors(validation.errors);
         throw new ValidationError(
-          'Dimmer rack name cannot be empty',
-          'name',
-          updates.name
+          `Invalid dimmer rack update data:\n${errorMessage}`,
+          validation.errors[0]?.field || 'unknown',
+          updates
         );
       }
 

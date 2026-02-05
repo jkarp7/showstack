@@ -10,6 +10,12 @@ import {
 } from '../database/queries/pdRacks';
 import { errorHandler } from '../errors';
 import { DatabaseError, ValidationError } from '../errors';
+import {
+  CreatePDRackSchema,
+  UpdatePDRackSchema,
+  parseWithZod,
+  formatValidationErrors
+} from '@showstack/shared';
 
 export function registerPDRackHandlers(): void {
   // Get all PD racks for a project
@@ -57,12 +63,18 @@ export function registerPDRackHandlers(): void {
   // Create PD rack
   ipcMain.handle('pdRacks:create', async (_event, rack: Omit<PDRack, 'id' | 'created_at' | 'updated_at'>, projectId?: string) => {
     try {
-      // Basic validation
-      if (!rack.name || rack.name.trim().length === 0) {
+      // Add project_id for validation
+      const rackWithProject = { ...rack, project_id: projectId || rack.project_id };
+
+      // Validate with Zod schema
+      const validation = parseWithZod(CreatePDRackSchema, rackWithProject);
+
+      if (!validation.success) {
+        const errorMessage = formatValidationErrors(validation.errors);
         throw new ValidationError(
-          'PD rack name is required',
-          'name',
-          rack.name
+          `Invalid PD rack data:\n${errorMessage}`,
+          validation.errors[0]?.field || 'unknown',
+          rack
         );
       }
 
@@ -90,12 +102,15 @@ export function registerPDRackHandlers(): void {
   // Update PD rack
   ipcMain.handle('pdRacks:update', async (_event, id: string, updates: Partial<PDRack>) => {
     try {
-      // Validate name if being updated
-      if (updates.name !== undefined && (!updates.name || updates.name.trim().length === 0)) {
+      // Validate with Zod schema
+      const validation = parseWithZod(UpdatePDRackSchema, { id, ...updates });
+
+      if (!validation.success) {
+        const errorMessage = formatValidationErrors(validation.errors);
         throw new ValidationError(
-          'PD rack name cannot be empty',
-          'name',
-          updates.name
+          `Invalid PD rack update data:\n${errorMessage}`,
+          validation.errors[0]?.field || 'unknown',
+          updates
         );
       }
 

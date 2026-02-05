@@ -10,6 +10,12 @@ import {
 } from '../database/queries/projects';
 import { errorHandler } from '../errors';
 import { DatabaseError, ValidationError } from '../errors';
+import {
+  CreateProjectSchema,
+  UpdateProjectSchema,
+  parseWithZod,
+  formatValidationErrors
+} from '@showstack/shared';
 
 export function registerProjectHandlers(): void {
   ipcMain.handle('projects:getAll', async () => {
@@ -72,12 +78,23 @@ export function registerProjectHandlers(): void {
 
   ipcMain.handle('projects:create', async (_event, name: string, description?: string, logoPath?: string, enabledModules?: string[]) => {
     try {
-      // Basic validation
-      if (!name || name.trim().length === 0) {
+      // Construct project data for validation
+      const projectData = {
+        name,
+        description,
+        logo_path: logoPath,
+        enabled_modules: enabledModules ? JSON.stringify(enabledModules) : undefined
+      };
+
+      // Validate with Zod schema
+      const validation = parseWithZod(CreateProjectSchema, projectData);
+
+      if (!validation.success) {
+        const errorMessage = formatValidationErrors(validation.errors);
         throw new ValidationError(
-          'Project name is required',
-          'name',
-          name
+          `Invalid project data:\n${errorMessage}`,
+          validation.errors[0]?.field || 'unknown',
+          projectData
         );
       }
 
@@ -104,12 +121,15 @@ export function registerProjectHandlers(): void {
 
   ipcMain.handle('projects:update', async (_event, id: string, updates: Partial<Project>) => {
     try {
-      // Validate project name if being updated
-      if (updates.name !== undefined && (!updates.name || updates.name.trim().length === 0)) {
+      // Validate with Zod schema
+      const validation = parseWithZod(UpdateProjectSchema, { id, ...updates });
+
+      if (!validation.success) {
+        const errorMessage = formatValidationErrors(validation.errors);
         throw new ValidationError(
-          'Project name cannot be empty',
-          'name',
-          updates.name
+          `Invalid project update data:\n${errorMessage}`,
+          validation.errors[0]?.field || 'unknown',
+          updates
         );
       }
 

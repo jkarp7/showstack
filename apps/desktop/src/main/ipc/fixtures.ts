@@ -9,6 +9,12 @@ import {
 } from '../database/queries/fixtures';
 import { errorHandler } from '../errors';
 import { DatabaseError, ValidationError } from '../errors';
+import {
+  CreateFixtureSchema,
+  UpdateFixtureSchema,
+  parseWithZod,
+  formatValidationErrors
+} from '@showstack/shared';
 
 export function registerFixtureHandlers(): void {
   // Get all fixtures for a project
@@ -36,17 +42,20 @@ export function registerFixtureHandlers(): void {
   // Create fixture
   ipcMain.handle('fixtures:create', async (_event, fixture: Partial<Fixture>, projectId?: string) => {
     try {
-      // Basic validation
-      if (!fixture.type) {
+      // Validate with Zod schema
+      const validation = parseWithZod(CreateFixtureSchema, fixture);
+
+      if (!validation.success) {
+        const errorMessage = formatValidationErrors(validation.errors);
         throw new ValidationError(
-          'Fixture type is required',
-          'type',
-          fixture.type
+          `Invalid fixture data:\n${errorMessage}`,
+          validation.errors[0]?.field || 'unknown',
+          fixture
         );
       }
 
       return await errorHandler.executeWithRetry(
-        async () => createFixture(fixture, projectId),
+        async () => createFixture(validation.data, projectId),
         'fixtures:create'
       );
     } catch (error) {
@@ -70,6 +79,18 @@ export function registerFixtureHandlers(): void {
   // Update fixture
   ipcMain.handle('fixtures:update', async (_event, id: string, updates: Partial<Fixture>) => {
     try {
+      // Validate with Zod schema
+      const validation = parseWithZod(UpdateFixtureSchema, { id, ...updates });
+
+      if (!validation.success) {
+        const errorMessage = formatValidationErrors(validation.errors);
+        throw new ValidationError(
+          `Invalid fixture update data:\n${errorMessage}`,
+          validation.errors[0]?.field || 'unknown',
+          updates
+        );
+      }
+
       return await errorHandler.executeWithRetry(
         async () => updateFixture(id, updates),
         'fixtures:update'
@@ -82,6 +103,9 @@ export function registerFixtureHandlers(): void {
         error: error instanceof Error ? error.message : error
       });
 
+      if (error instanceof ValidationError) {
+        throw new Error(error.toUserMessage());
+      }
       if (error instanceof DatabaseError) {
         throw new Error(`Unable to update fixture: ${error.message}`);
       }

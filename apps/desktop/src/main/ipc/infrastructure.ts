@@ -20,6 +20,12 @@ import {
 } from '../database/queries/infrastructure';
 import { errorHandler } from '../errors';
 import { DatabaseError, ValidationError } from '../errors';
+import {
+  CreateInfrastructureEquipmentSchema,
+  UpdateInfrastructureEquipmentSchema,
+  parseWithZod,
+  formatValidationErrors
+} from '@showstack/shared';
 
 export function registerInfrastructureHandlers(): void {
   // Get all infrastructure equipment for a project
@@ -46,12 +52,18 @@ export function registerInfrastructureHandlers(): void {
   // Create infrastructure equipment
   ipcMain.handle('infrastructure:create', async (_event, equipment: Partial<InfrastructureEquipment>, projectId: string) => {
     try {
-      // Basic validation
-      if (!equipment.type) {
+      // Add project_id for validation
+      const equipmentWithProject = { ...equipment, project_id: projectId };
+
+      // Validate with Zod schema
+      const validation = parseWithZod(CreateInfrastructureEquipmentSchema, equipmentWithProject);
+
+      if (!validation.success) {
+        const errorMessage = formatValidationErrors(validation.errors);
         throw new ValidationError(
-          'Equipment type is required',
-          'type',
-          equipment.type
+          `Invalid infrastructure equipment data:\n${errorMessage}`,
+          validation.errors[0]?.field || 'unknown',
+          equipment
         );
       }
 
@@ -79,6 +91,18 @@ export function registerInfrastructureHandlers(): void {
   // Update infrastructure equipment
   ipcMain.handle('infrastructure:update', async (_event, id: string, updates: Partial<InfrastructureEquipment>) => {
     try {
+      // Validate with Zod schema
+      const validation = parseWithZod(UpdateInfrastructureEquipmentSchema, { id, ...updates });
+
+      if (!validation.success) {
+        const errorMessage = formatValidationErrors(validation.errors);
+        throw new ValidationError(
+          `Invalid infrastructure equipment update data:\n${errorMessage}`,
+          validation.errors[0]?.field || 'unknown',
+          updates
+        );
+      }
+
       return await errorHandler.executeWithRetry(
         async () => updateInfrastructure(id, updates),
         'infrastructure:update'
@@ -91,6 +115,9 @@ export function registerInfrastructureHandlers(): void {
         error: error instanceof Error ? error.message : error
       });
 
+      if (error instanceof ValidationError) {
+        throw new Error(error.toUserMessage());
+      }
       if (error instanceof DatabaseError) {
         throw new Error(`Unable to update infrastructure: ${error.message}`);
       }

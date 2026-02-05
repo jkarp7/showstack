@@ -28,6 +28,20 @@ import { seedDefaultPageLayoutsFromJSON } from '../database/seedDefaultLayoutsFr
 
 import { DatabaseError, ValidationError } from '../errors';
 import { performanceMonitor } from '../monitoring/PerformanceMonitor';
+import {
+  CreateShopOrderProjectSchema,
+  UpdateShopOrderProjectSchema,
+  CreateShopOrderSectionSchema,
+  UpdateShopOrderSectionSchema,
+  CreateShopOrderItemSchema,
+  UpdateShopOrderItemSchema,
+  CreateShopOrderRevisionSchema,
+  CreateShopOrderNoteSchema,
+  UpdateShopOrderNoteSchema,
+  parseWithZod,
+  formatValidationErrors,
+  type ShopOrderProject
+} from '@showstack/shared';
 
 /**
  * NOTE: This file contains 42 IPC handlers for the Prep module.
@@ -85,10 +99,19 @@ export function registerShopOrderHandlers(): void {
 
   ipcMain.handle('shop-order:projects:create', async (_event, data: Partial<ShopOrderProject>) => {
     try {
-      if (!data.production_name || data.production_name.trim().length === 0) {
-        throw new ValidationError('Production name is required', 'production_name', data.production_name);
+      // Validate with Zod schema
+      const validation = parseWithZod(CreateShopOrderProjectSchema, data);
+
+      if (!validation.success) {
+        const errorMessage = formatValidationErrors(validation.errors);
+        throw new ValidationError(
+          `Invalid shop order project data:\n${errorMessage}`,
+          validation.errors[0]?.field || 'unknown',
+          data
+        );
       }
-      return await shopOrderProjectService.create(data);
+
+      return await shopOrderProjectService.create(validation.data);
     } catch (error) {
       console.error('Failed to create prep project:', {
         operation: 'shop-order:projects:create',
@@ -109,9 +132,18 @@ export function registerShopOrderHandlers(): void {
     'shop-order:projects:update',
     async (_event, id: string, updates: Partial<ShopOrderProject>) => {
       try {
-        if (updates.production_name !== undefined && (!updates.production_name || updates.production_name.trim().length === 0)) {
-          throw new ValidationError('Production name cannot be empty', 'production_name', updates.production_name);
+        // Validate with Zod schema
+        const validation = parseWithZod(UpdateShopOrderProjectSchema, { id, ...updates });
+
+        if (!validation.success) {
+          const errorMessage = formatValidationErrors(validation.errors);
+          throw new ValidationError(
+            `Invalid shop order project update data:\n${errorMessage}`,
+            validation.errors[0]?.field || 'unknown',
+            updates
+          );
         }
+
         return await shopOrderProjectService.update(id, updates);
       } catch (error) {
         console.error('Failed to update prep project:', {
