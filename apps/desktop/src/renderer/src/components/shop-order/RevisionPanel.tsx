@@ -14,7 +14,7 @@ export function RevisionPanel({
   revisions,
   onGenerateRevision,
   onDeleteRevision,
-  onCompareRevisions
+  onCompareRevisions,
 }: RevisionPanelProps) {
   const [expandedRevision, setExpandedRevision] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -79,9 +79,10 @@ export function RevisionPanel({
           </div>
         ) : (
           sortedRevisions.map((revision) => {
-            const changeLog = typeof revision.change_log === 'string'
-              ? JSON.parse(revision.change_log)
-              : revision.change_log;
+            const changeLog =
+              typeof revision.change_log === 'string'
+                ? JSON.parse(revision.change_log)
+                : revision.change_log;
             const isExpanded = expandedRevision === revision.id;
 
             return (
@@ -95,12 +96,10 @@ export function RevisionPanel({
                     className="flex-1 text-left hover:bg-gray-200 dark:hover:bg-gray-600 rounded px-2 py-1 -ml-2 transition text-gray-900 dark:text-white"
                   >
                     <div>
-                      <div className="font-medium">
-                        Revision {revision.revision_number}
-                      </div>
+                      <div className="font-medium">Revision {revision.revision_number}</div>
                       <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                        {new Date(revision.revision_date).toLocaleString()} •{' '}
-                        {changeLog.length} change{changeLog.length !== 1 ? 's' : ''}
+                        {new Date(revision.revision_date).toLocaleString()} • {changeLog.length}{' '}
+                        change{changeLog.length !== 1 ? 's' : ''}
                       </div>
                     </div>
                   </button>
@@ -135,14 +134,18 @@ export function RevisionPanel({
 
                     <div className="space-y-2">
                       {changeLog.length === 0 ? (
-                        <p className="text-sm text-gray-600 dark:text-gray-500">No changes detected</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-500">
+                          No changes detected
+                        </p>
                       ) : (
                         changeLog.map((change: ItemChange, idx: number) => (
                           <div
                             key={idx}
                             className="text-sm p-2 bg-gray-100 dark:bg-gray-700 rounded flex items-start gap-2 text-gray-900 dark:text-white"
                           >
-                            <span className={`font-bold ${getChangeTypeColor(change.change_type)} mt-0.5`}>
+                            <span
+                              className={`font-bold ${getChangeTypeColor(change.change_type)} mt-0.5`}
+                            >
                               {getChangeTypeSymbol(change.change_type)}
                             </span>
                             <div className="flex-1">
@@ -161,8 +164,14 @@ export function RevisionPanel({
                                       if (oldVal === newVal) return null;
                                       return (
                                         <li key={key}>
-                                          {key}: <span className="text-red-600 dark:text-red-400">{String(oldVal)}</span>{' '}
-                                          → <span className="text-green-600 dark:text-green-400">{String(newVal)}</span>
+                                          {key}:{' '}
+                                          <span className="text-red-600 dark:text-red-400">
+                                            {String(oldVal)}
+                                          </span>{' '}
+                                          →{' '}
+                                          <span className="text-green-600 dark:text-green-400">
+                                            {String(newVal)}
+                                          </span>
                                         </li>
                                       );
                                     })}

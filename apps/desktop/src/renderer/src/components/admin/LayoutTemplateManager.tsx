@@ -1,5 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Download, Upload, RefreshCw, FileJson, AlertCircle, CheckCircle, X, Edit2, Info } from 'lucide-react';
+import {
+  Download,
+  Upload,
+  RefreshCw,
+  FileJson,
+  AlertCircle,
+  CheckCircle,
+  X,
+  Edit2,
+  Info,
+} from 'lucide-react';
 import { LayoutDesigner } from '../shop-order/layout/LayoutDesigner';
 
 export function LayoutTemplateManager() {
@@ -83,7 +93,7 @@ export function LayoutTemplateManager() {
       if (result.success) {
         showNotification(
           'success',
-          `Exported ${result.count} layout${result.count !== 1 ? 's' : ''} to ${result.directory}`
+          `Exported ${result.count} layout${result.count !== 1 ? 's' : ''} to ${result.directory}`,
         );
         await loadDefaultLayoutFiles();
       } else {
@@ -132,7 +142,11 @@ export function LayoutTemplateManager() {
   };
 
   const handleResetToFactory = async () => {
-    if (!confirm('Are you sure you want to reset all default layouts to factory settings? This will delete any customizations.')) {
+    if (
+      !confirm(
+        'Are you sure you want to reset all default layouts to factory settings? This will delete any customizations.',
+      )
+    ) {
       return;
     }
 
@@ -207,7 +221,9 @@ export function LayoutTemplateManager() {
     setEditingElements(template.elements);
 
     // Prompt for new name to distinguish from system default
-    const baseName = editingLayout.name.replace(' - ShowStack Default', '').replace(' (Custom)', '');
+    const baseName = editingLayout.name
+      .replace(' - ShowStack Default', '')
+      .replace(' (Custom)', '');
     setNewLayoutName(baseName + ' (Custom)');
     setShowRenameDialog(true);
   };
@@ -242,7 +258,7 @@ export function LayoutTemplateManager() {
         grid_gap: editingLayout.grid_gap,
         page_width: editingLayout.page_width,
         page_height: editingLayout.page_height,
-        is_default: true // Mark as default so it shows in admin panel and gets used
+        is_default: true, // Mark as default so it shows in admin panel and gets used
       };
 
       await window.api.prep.layoutTemplates.create(newTemplateData, serializedElements);
@@ -265,7 +281,7 @@ export function LayoutTemplateManager() {
     // Construct the full template object with elements for LayoutDesigner
     const fullTemplate = {
       ...editingLayout,
-      elements: editingElements
+      elements: editingElements,
     };
 
     return (
@@ -285,10 +301,12 @@ export function LayoutTemplateManager() {
         {showRenameDialog && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Save Layout As</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Save Layout As
+              </h3>
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                Enter a name for your customized layout. This will create a new version
-                distinct from the system default.
+                Enter a name for your customized layout. This will create a new version distinct
+                from the system default.
               </p>
               <input
                 type="text"
@@ -329,8 +347,8 @@ export function LayoutTemplateManager() {
             notification.type === 'success'
               ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800'
               : notification.type === 'error'
-              ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800'
-              : 'bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800'
+                ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800'
+                : 'bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800'
           }`}
         >
           {notification.type === 'success' ? (
@@ -341,10 +359,7 @@ export function LayoutTemplateManager() {
             <FileJson className="w-5 h-5" />
           )}
           <span className="text-sm font-medium">{notification.message}</span>
-          <button
-            onClick={() => setNotification(null)}
-            className="ml-2 hover:opacity-70"
-          >
+          <button onClick={() => setNotification(null)} className="ml-2 hover:opacity-70">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -352,7 +367,9 @@ export function LayoutTemplateManager() {
 
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Layout Template Management</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          Layout Template Management
+        </h2>
         <p className="text-gray-600 dark:text-gray-400">
           Export, import, and manage default page layout templates for ShowStack:Prep
         </p>
@@ -365,7 +382,10 @@ export function LayoutTemplateManager() {
           <div>
             <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">How to Use</h4>
             <ol className="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">
-              <li>Click <strong>Edit</strong> to customize layouts visually or <strong>Export</strong> to save as JSON files</li>
+              <li>
+                Click <strong>Edit</strong> to customize layouts visually or <strong>Export</strong>{' '}
+                to save as JSON files
+              </li>
               <li>Edit exported JSON files in a text editor if needed</li>
               <li>Import modified JSON files to update default layouts</li>
               <li>Use "Reset to Factory Defaults" to restore original templates</li>
@@ -376,7 +396,9 @@ export function LayoutTemplateManager() {
 
       {/* Quick Actions */}
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-6">
-        <h3 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">Quick Actions</h3>
+        <h3 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">
+          Quick Actions
+        </h3>
         <div className="flex flex-wrap gap-3">
           <button
             onClick={handleExportAllLayouts}
@@ -413,7 +435,9 @@ export function LayoutTemplateManager() {
           <div className="flex items-start gap-2">
             <FileJson className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
             <div>
-              <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Default Layout JSON Files</h4>
+              <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                Default Layout JSON Files
+              </h4>
               <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
                 {defaultLayoutFiles.map((file) => (
                   <li key={file} className="font-mono">
@@ -429,7 +453,9 @@ export function LayoutTemplateManager() {
       {/* Current Default Layouts */}
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Current Default Layouts</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Current Default Layouts
+          </h3>
         </div>
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
           {layouts.length === 0 ? (
@@ -438,17 +464,28 @@ export function LayoutTemplateManager() {
             </div>
           ) : (
             layouts.map((layout) => (
-              <div key={layout.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <div
+                key={layout.id}
+                className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <h4 className="font-medium text-gray-900 dark:text-white">{layout.name}</h4>
                     {layout.description && (
-                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{layout.description}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                        {layout.description}
+                      </p>
                     )}
                     <div className="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
-                      <span>Type: <span className="font-mono">{layout.page_type}</span></span>
-                      <span>Grid: {layout.grid_columns}x{layout.grid_rows}</span>
-                      <span>Size: {layout.page_width}x{layout.page_height}px</span>
+                      <span>
+                        Type: <span className="font-mono">{layout.page_type}</span>
+                      </span>
+                      <span>
+                        Grid: {layout.grid_columns}x{layout.grid_rows}
+                      </span>
+                      <span>
+                        Size: {layout.page_width}x{layout.page_height}px
+                      </span>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -475,7 +512,6 @@ export function LayoutTemplateManager() {
           )}
         </div>
       </div>
-
     </div>
   );
 }

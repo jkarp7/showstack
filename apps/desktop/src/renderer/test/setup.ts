@@ -90,10 +90,15 @@ if (isJsdom) {
 
   // Mock lucide-react icons (to avoid SVG rendering issues)
   const mockIcon = (name: string) => {
-    return (props: any) => React.createElement('div', {
-      'data-testid': `icon-${name.toLowerCase()}`,
-      ...props
-    }, name);
+    return (props: any) =>
+      React.createElement(
+        'div',
+        {
+          'data-testid': `icon-${name.toLowerCase()}`,
+          ...props,
+        },
+        name,
+      );
   };
 
   vi.mock('lucide-react', () => ({
@@ -145,16 +150,18 @@ if (isJsdom) {
 
 // Mock sql.js (used by database) - safe in both environments
 vi.mock('sql.js', () => ({
-  default: vi.fn(() => Promise.resolve({
-    Database: vi.fn(() => ({
-      run: vi.fn(),
-      exec: vi.fn(),
-      prepare: vi.fn(() => ({
-        step: vi.fn(),
-        getAsObject: vi.fn(),
-        free: vi.fn(),
+  default: vi.fn(() =>
+    Promise.resolve({
+      Database: vi.fn(() => ({
+        run: vi.fn(),
+        exec: vi.fn(),
+        prepare: vi.fn(() => ({
+          step: vi.fn(),
+          getAsObject: vi.fn(),
+          free: vi.fn(),
+        })),
+        close: vi.fn(),
       })),
-      close: vi.fn(),
-    })),
-  })),
+    }),
+  ),
 }));

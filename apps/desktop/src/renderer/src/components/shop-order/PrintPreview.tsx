@@ -14,7 +14,7 @@ export function PrintPreview({
   currentProject,
   template,
   onTemplateChange,
-  onSaveTemplate
+  onSaveTemplate,
 }: PrintPreviewProps) {
   const [showSectionEditor, setShowSectionEditor] = useState(false);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
@@ -56,8 +56,8 @@ export function PrintPreview({
             showLogo: true,
             showDate: true,
             title: 'ELECTRICS SHOP ORDER',
-            subtitle: 'For Bid Only'
-          }
+            subtitle: 'For Bid Only',
+          },
         },
         { id: 's2', type: 'page-break', order: 1, enabled: true, config: {} },
 
@@ -68,8 +68,8 @@ export function PrintPreview({
           order: 2,
           enabled: true,
           config: {
-            contactTypes: ['gm', 'pm', 'ld', 'ald', 'pe']
-          }
+            contactTypes: ['gm', 'pm', 'ld', 'ald', 'pe'],
+          },
         },
         { id: 's4', type: 'page-break', order: 3, enabled: true, config: {} },
 
@@ -80,8 +80,8 @@ export function PrintPreview({
           order: 4,
           enabled: true,
           config: {
-            noteType: 'general_notes'
-          }
+            noteType: 'general_notes',
+          },
         },
         { id: 's6', type: 'page-break', order: 5, enabled: true, config: {} },
 
@@ -94,8 +94,8 @@ export function PrintPreview({
           config: {
             showRevisionDetails: true,
             includeChangelog: true,
-            onlyShowIfRevisions: true
-          }
+            onlyShowIfRevisions: true,
+          },
         },
         { id: 's8', type: 'page-break', order: 7, enabled: true, config: {} },
 
@@ -110,8 +110,8 @@ export function PrintPreview({
             showVenueColumn: true,
             showWeightColumn: false,
             showPowerColumn: false,
-            showRevisionMarkers: true
-          }
+            showRevisionMarkers: true,
+          },
         },
       ],
     };
@@ -153,7 +153,7 @@ export function PrintPreview({
 
   // Get enabled sections that are not page breaks
   const contentSections = template.sections
-    .filter(s => s.enabled && s.type !== 'page-break')
+    .filter((s) => s.enabled && s.type !== 'page-break')
     .sort((a, b) => a.order - b.order);
 
   const totalPages = contentSections.length;
@@ -209,7 +209,10 @@ export function PrintPreview({
       </div>
 
       {/* Right Side - Settings Panel */}
-      <div className="w-96 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 flex flex-col" style={{ maxHeight: 'calc(100vh - 300px)' }}>
+      <div
+        className="w-96 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 flex flex-col"
+        style={{ maxHeight: 'calc(100vh - 300px)' }}
+      >
         {/* Header */}
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Print Settings</h3>
@@ -221,17 +224,23 @@ export function PrintPreview({
 
         {/* Page Settings */}
         <div className="mb-6">
-          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase mb-3">Page Settings</h4>
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase mb-3">
+            Page Settings
+          </h4>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Page Size</label>
+              <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                Page Size
+              </label>
               <select
                 value={template.pageSettings.pageSize}
-                onChange={(e) => onTemplateChange({
-                  ...template,
-                  pageSettings: { ...template.pageSettings, pageSize: e.target.value as any },
-                  updated_at: Date.now()
-                })}
+                onChange={(e) =>
+                  onTemplateChange({
+                    ...template,
+                    pageSettings: { ...template.pageSettings, pageSize: e.target.value as any },
+                    updated_at: Date.now(),
+                  })
+                }
                 className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white"
               >
                 <option value="letter">Letter</option>
@@ -241,14 +250,18 @@ export function PrintPreview({
               </select>
             </div>
             <div>
-              <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Orientation</label>
+              <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                Orientation
+              </label>
               <select
                 value={template.pageSettings.orientation}
-                onChange={(e) => onTemplateChange({
-                  ...template,
-                  pageSettings: { ...template.pageSettings, orientation: e.target.value as any },
-                  updated_at: Date.now()
-                })}
+                onChange={(e) =>
+                  onTemplateChange({
+                    ...template,
+                    pageSettings: { ...template.pageSettings, orientation: e.target.value as any },
+                    updated_at: Date.now(),
+                  })
+                }
                 className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white"
               >
                 <option value="portrait">Portrait</option>
@@ -260,11 +273,13 @@ export function PrintPreview({
                 <input
                   type="checkbox"
                   checked={template.pageSettings.showPageNumbers ?? true}
-                  onChange={(e) => onTemplateChange({
-                    ...template,
-                    pageSettings: { ...template.pageSettings, showPageNumbers: e.target.checked },
-                    updated_at: Date.now()
-                  })}
+                  onChange={(e) =>
+                    onTemplateChange({
+                      ...template,
+                      pageSettings: { ...template.pageSettings, showPageNumbers: e.target.checked },
+                      updated_at: Date.now(),
+                    })
+                  }
                   className="w-4 h-4 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded"
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-300">Show page numbers</span>
@@ -275,9 +290,11 @@ export function PrintPreview({
 
         {/* Section Info */}
         <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
-          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase mb-2">Sections</h4>
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase mb-2">
+            Sections
+          </h4>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            {template.sections.filter(s => s.enabled).length} sections enabled
+            {template.sections.filter((s) => s.enabled).length} sections enabled
           </p>
           <button
             onClick={() => setShowSectionEditor(true)}
@@ -316,7 +333,12 @@ export function PrintPreview({
                 className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>

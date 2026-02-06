@@ -7,6 +7,7 @@
 **Labels**: `enhancement`, `epic`, `UX`, `major-feature`
 
 **Body**:
+
 ```markdown
 ## Overview
 
@@ -36,18 +37,21 @@ Consolidate all visual editing (Paperwork, Labels, Shop Orders) into a single, m
 ## Benefits
 
 ### For Users
+
 - Consistent UX across all paperwork/label tasks
 - Professional-grade formatting control
 - Faster workflow with keyboard shortcuts
 - Works in dark theaters and bright shops
 
 ### For Development
+
 - Single codebase for all visual editing (~40% less code)
 - Easier maintenance and bug fixes
 - New features benefit all contexts
 - Better testability
 
 ### Competitive Advantage
+
 - Modern visual editor vs. LightWright's settings-based approach
 - Drag-and-drop WYSIWYG beats form-based configuration
 - Production-optimized UX (keyboard-first, dark mode, touch-friendly)
@@ -72,6 +76,7 @@ Consolidate all visual editing (Paperwork, Labels, Shop Orders) into a single, m
 **Estimated**: 2 weeks
 
 **Body**:
+
 ```markdown
 ## Goal
 
@@ -80,18 +85,21 @@ Extract common editor components from Prep's LayoutDesigner and create a unified
 ## Tasks
 
 ### Architecture
+
 - [ ] Create `src/renderer/src/components/unified-editor/` directory structure
 - [ ] Design `UnifiedLayoutEditor.tsx` main wrapper component
 - [ ] Define context types: `paperwork-report`, `paperwork-header`, `label`, `shop-order`
 - [ ] Create unified data model for LayoutElement (text, shape, image, table, barcode)
 
 ### Component Extraction
+
 - [ ] Extract reusable canvas logic from Prep's LayoutCanvas
 - [ ] Extract grid system with configurable rows/columns
 - [ ] Extract element rendering logic (Text, Shape, Image, Table)
 - [ ] Create element factory based on context
 
 ### UI Framework
+
 - [ ] Build FloatingToolbar component (Figma-style)
   - Tool buttons with keyboard shortcut hints
   - Undo/Redo controls
@@ -106,11 +114,13 @@ Extract common editor components from Prep's LayoutDesigner and create a unified
   - Element-specific properties (show when element selected)
 
 ### Keyboard Shortcuts
+
 - [ ] Implement keyboard shortcut system
 - [ ] Add shortcut handlers for common actions (Cmd+Z, Cmd+D, Delete, etc.)
 - [ ] Create keyboard shortcut help overlay (Cmd+/)
 
 ### Testing
+
 - [ ] Unit tests for context switching
 - [ ] Component tests for toolbar and panels
 - [ ] Integration test for basic element creation
@@ -145,6 +155,7 @@ Extract common editor components from Prep's LayoutDesigner and create a unified
 **Estimated**: 1 week
 
 **Body**:
+
 ```markdown
 ## Goal
 
@@ -153,6 +164,7 @@ Add comprehensive text and shape formatting controls with professional-grade UI 
 ## Tasks
 
 ### Text Formatting
+
 - [ ] Create FontSelector component
   - Dropdown with production fonts (Inter, Helvetica, Arial, Roboto, Roboto Mono, Courier)
   - Font preview in dropdown
@@ -176,6 +188,7 @@ Add comprehensive text and shape formatting controls with professional-grade UI 
   - Letter spacing input
 
 ### Shape Formatting
+
 - [ ] Create FillControls component
   - Enable/disable toggle
   - Color picker integration
@@ -189,6 +202,7 @@ Add comprehensive text and shape formatting controls with professional-grade UI 
   - Corner radius slider (0-100px)
 
 ### Properties Panels
+
 - [ ] Build TextProperties panel
   - Integrate all text controls
   - Collapsible sections
@@ -199,12 +213,14 @@ Add comprehensive text and shape formatting controls with professional-grade UI 
   - Live preview
 
 ### Inline Editing
+
 - [ ] Implement double-click to edit text
 - [ ] Create inline text editor overlay
 - [ ] Add Enter to confirm, Escape to cancel
 - [ ] Tab key navigation between text elements
 
 ### Testing
+
 - [ ] Unit tests for all formatting controls
 - [ ] Visual regression tests for color picker
 - [ ] Integration tests for inline editing
@@ -241,6 +257,7 @@ Add comprehensive text and shape formatting controls with professional-grade UI 
 **Estimated**: 1 week
 
 **Body**:
+
 ```markdown
 ## Goal
 
@@ -249,6 +266,7 @@ Replace Paperwork tab's preview mode with the unified layout editor, transformin
 ## Tasks
 
 ### UI Restructure
+
 - [ ] Remove report selection buttons (replace with sidebar template library)
 - [ ] Remove preview-only display
 - [ ] Integrate UnifiedLayoutEditor with `context="paperwork-report"`
@@ -258,6 +276,7 @@ Replace Paperwork tab's preview mode with the unified layout editor, transformin
   - Drag to add to column list
 
 ### Column Configuration
+
 - [ ] Build ColumnConfiguration component
   - Selected fields list
   - Drag-and-drop reordering
@@ -265,12 +284,14 @@ Replace Paperwork tab's preview mode with the unified layout editor, transformin
   - Enable/disable individual columns
 
 ### Grouping & Sorting
+
 - [ ] Create GroupingSortingControls
   - Group by dropdown (None, Location, Type, Color, etc.)
   - Sort by dropdown (Channel, Dimmer, Position, etc.)
   - Ascending/Descending toggle
 
 ### Template Library
+
 - [ ] Build paperwork template library (left panel)
   - System templates section (Channel Hookup, Dimmer Schedule, etc.)
   - Custom templates section
@@ -287,12 +308,14 @@ Replace Paperwork tab's preview mode with the unified layout editor, transformin
   - Infrastructure List (5 types)
 
 ### Live Preview
+
 - [ ] Integrate live data preview in canvas
 - [ ] Support multi-page rendering
 - [ ] Add page navigation controls
 - [ ] Implement zoom controls
 
 ### Testing
+
 - [ ] Test loading all 12 system templates
 - [ ] Test custom template save/load
 - [ ] Test field selection and column configuration
@@ -331,6 +354,7 @@ Replace Paperwork tab's preview mode with the unified layout editor, transformin
 **Estimated**: 1 week
 
 **Body**:
+
 ```markdown
 ## Goal
 
@@ -339,6 +363,7 @@ Migrate Label Designer to use the unified editor with barcode/QR code support.
 ## Tasks
 
 ### Barcode Elements
+
 - [ ] Create BarcodeElement component
   - QR Code rendering
   - Code 128 rendering
@@ -354,6 +379,7 @@ Migrate Label Designer to use the unified editor with barcode/QR code support.
   - Preview with sample data
 
 ### Label Presets
+
 - [ ] Build label size preset selector
   - 2×4" preset
   - 4×6" preset
@@ -367,6 +393,7 @@ Migrate Label Designer to use the unified editor with barcode/QR code support.
   - Equipment label template (barcode-focused)
 
 ### Equipment Fields
+
 - [ ] Create equipment FieldSelector (label context)
   - Name, Type, ID, Location, Channel, Dimmer, Circuit
   - Manufacturer, Model, Serial Number
@@ -374,6 +401,7 @@ Migrate Label Designer to use the unified editor with barcode/QR code support.
 - [ ] Support variable data fields (not just static text)
 
 ### Batch Generation
+
 - [ ] Implement batch label generation
   - Select data source (fixtures, equipment, cables)
   - Filter which items to print
@@ -381,12 +409,14 @@ Migrate Label Designer to use the unified editor with barcode/QR code support.
   - Export to PDF (multi-page sheet)
 
 ### Label Sheet Layout
+
 - [ ] Build sheet layout calculator
   - Calculate labels per sheet based on label + sheet size
   - Add spacing/margins between labels
   - Preview full sheet before print
 
 ### Testing
+
 - [ ] Test all barcode types render correctly
 - [ ] Test variable data substitution
 - [ ] Test batch generation with 100+ items
@@ -423,6 +453,7 @@ Migrate Label Designer to use the unified editor with barcode/QR code support.
 **Estimated**: 1 week
 
 **Body**:
+
 ```markdown
 ## Goal
 
@@ -431,6 +462,7 @@ Add professional polish, smart guides, command palette, and production environme
 ## Tasks
 
 ### Smart Guides & Snapping
+
 - [ ] Implement snap-to-grid
   - Configurable grid spacing
   - Visual grid overlay
@@ -444,6 +476,7 @@ Add professional polish, smart guides, command palette, and production environme
   - Show alignment type (center, edge, etc.)
 
 ### Command Palette
+
 - [ ] Build command palette (Cmd+K)
   - Fuzzy search
   - Recent actions
@@ -457,6 +490,7 @@ Add professional polish, smart guides, command palette, and production environme
 - [ ] Show keyboard shortcuts in palette
 
 ### Preview Mode
+
 - [ ] Improve Edit ⇄ Preview toggle
   - Clear visual mode indicator
   - Hide toolbars/panels in preview mode
@@ -468,6 +502,7 @@ Add professional polish, smart guides, command palette, and production environme
   - Zoom slider
 
 ### Dark Mode Refinement
+
 - [ ] Optimize dark mode colors for theater environments
   - Canvas: `#1A1A1A` (not pure black)
   - Grid: `#2D2D2D` (subtle)
@@ -477,6 +512,7 @@ Add professional polish, smart guides, command palette, and production environme
 - [ ] Smooth theme transitions
 
 ### Keyboard Shortcuts
+
 - [ ] Implement full shortcut system
   - Text formatting (Cmd+B, Cmd+I, Cmd+U)
   - Alignment (Cmd+Shift+L/E/R)
@@ -488,6 +524,7 @@ Add professional polish, smart guides, command palette, and production environme
   - Print reference card
 
 ### Touch Optimization
+
 - [ ] Increase touch target sizes for tablet use
   - Minimum 56×56px for all interactive elements
   - Larger button padding
@@ -498,6 +535,7 @@ Add professional polish, smart guides, command palette, and production environme
 - [ ] Test on iPad in field conditions
 
 ### Responsive Design
+
 - [ ] Implement breakpoint system
   - Desktop (≥1400px): Three-panel layout
   - Compact (<1400px): Drawer panels
@@ -508,6 +546,7 @@ Add professional polish, smart guides, command palette, and production environme
   - Smooth transitions
 
 ### Performance
+
 - [ ] Optimize canvas rendering
   - Debounce drag operations
   - Use React.memo for static elements
@@ -518,12 +557,14 @@ Add professional polish, smart guides, command palette, and production environme
   - Batch operations
 
 ### Documentation
+
 - [ ] Create user guide for unified editor
 - [ ] Record demo videos for each context
 - [ ] Write keyboard shortcut reference
 - [ ] Document template creation workflow
 
 ### Testing
+
 - [ ] Accessibility audit (WCAG AAA)
 - [ ] Keyboard navigation testing
 - [ ] Touch device testing (iPad)
@@ -555,6 +596,7 @@ Add professional polish, smart guides, command palette, and production environme
 ## Summary
 
 **Total Issues to Create**: 6
+
 1. Main Epic (tracking issue)
 2. Phase 1: Core Refactor
 3. Phase 2: Text & Shape Formatting

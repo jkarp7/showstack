@@ -11,7 +11,7 @@
  */
 export function formatNoteContentAsHTML(
   content: string,
-  format: 'plain' | 'bullets' | 'numbered'
+  format: 'plain' | 'bullets' | 'numbered',
 ): string {
   if (!content || !content.trim()) {
     return '';
@@ -20,8 +20,8 @@ export function formatNoteContentAsHTML(
   // Split content by line breaks and filter out empty lines
   const lines = content
     .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0);
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
 
   if (lines.length === 0) {
     return '';
@@ -29,14 +29,14 @@ export function formatNoteContentAsHTML(
 
   switch (format) {
     case 'bullets':
-      return `<ul style="margin-left: 20pt; margin-bottom: 8pt;">${lines.map(line => `<li style="margin: 2pt 0;">${escapeHtml(line)}</li>`).join('')}</ul>`;
+      return `<ul style="margin-left: 20pt; margin-bottom: 8pt;">${lines.map((line) => `<li style="margin: 2pt 0;">${escapeHtml(line)}</li>`).join('')}</ul>`;
 
     case 'numbered':
-      return `<ol style="margin-left: 20pt; margin-bottom: 8pt;">${lines.map(line => `<li style="margin: 2pt 0;">${escapeHtml(line)}</li>`).join('')}</ol>`;
+      return `<ol style="margin-left: 20pt; margin-bottom: 8pt;">${lines.map((line) => `<li style="margin: 2pt 0;">${escapeHtml(line)}</li>`).join('')}</ol>`;
 
     case 'plain':
     default:
-      return lines.map(line => `<p style="margin: 2pt 0;">${escapeHtml(line)}</p>`).join('');
+      return lines.map((line) => `<p style="margin: 2pt 0;">${escapeHtml(line)}</p>`).join('');
   }
 }
 
@@ -49,7 +49,7 @@ function escapeHtml(text: string): string {
     '<': '&lt;',
     '>': '&gt;',
     '"': '&quot;',
-    "'": '&#039;'
+    "'": '&#039;',
   };
-  return text.replace(/[&<>"']/g, char => map[char]);
+  return text.replace(/[&<>"']/g, (char) => map[char]);
 }

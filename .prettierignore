@@ -1,0 +1,10 @@
+out/
+dist/
+coverage/
+node_modules/
+proof-of-concept/
+html/
+**/html/assets/
+*.old.ts
+package-lock.json
+.github/workflows/claude*.yml

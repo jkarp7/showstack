@@ -224,9 +224,12 @@ describe('ShopOrderTable', () => {
       await user.keyboard('{Enter}');
 
       // Wait for debounced save
-      await waitFor(() => {
-        expect(mockUpdateItem).toHaveBeenCalled();
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(mockUpdateItem).toHaveBeenCalled();
+        },
+        { timeout: 1000 },
+      );
     });
 
     it('should cancel edit on Escape key', async () => {
@@ -261,9 +264,12 @@ describe('ShopOrderTable', () => {
       const header = screen.getByText('Shop Order');
       await user.click(header);
 
-      await waitFor(() => {
-        expect(mockUpdateItem).toHaveBeenCalled();
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(mockUpdateItem).toHaveBeenCalled();
+        },
+        { timeout: 1000 },
+      );
     });
   });
 
@@ -328,7 +334,6 @@ describe('ShopOrderTable', () => {
     });
   });
 
-
   describe('Add Item', () => {
     it('should add new item to section', async () => {
       const user = userEvent.setup();
@@ -345,7 +350,7 @@ describe('ShopOrderTable', () => {
             active_qty: 0,
             spare_qty: 0,
             venue_qty: 0,
-          })
+          }),
         );
       });
     });
@@ -461,7 +466,7 @@ describe('ShopOrderTable', () => {
               spare_qty: 1,
               venue_qty: 0,
               notes: 'Test notes',
-            })
+            }),
           );
         });
       });
@@ -496,7 +501,7 @@ describe('ShopOrderTable', () => {
             expect.objectContaining({
               description: 'Test Item',
               active_qty: 5,
-            })
+            }),
           );
         });
       });
@@ -533,7 +538,6 @@ describe('ShopOrderTable', () => {
     });
 
     describe('Export to CSV', () => {
-
       it('should have export button', () => {
         render(<ShopOrderTable projectId="proj-1" />);
 
@@ -646,7 +650,6 @@ describe('ShopOrderTable', () => {
   });
 
   describe('Phase 5: Performance & Polish', () => {
-
     describe('Keyboard Shortcuts', () => {
       it('should paste on Ctrl+V (or Cmd+V on Mac)', async () => {
         mockClipboard('Test Item\t5\t1\t0\tTest notes');
@@ -662,9 +665,12 @@ describe('ShopOrderTable', () => {
         });
         window.dispatchEvent(event);
 
-        await waitFor(() => {
-          expect(mockCreateItem).toHaveBeenCalled();
-        }, { timeout: 2000 });
+        await waitFor(
+          () => {
+            expect(mockCreateItem).toHaveBeenCalled();
+          },
+          { timeout: 2000 },
+        );
       });
     });
 
@@ -709,13 +715,16 @@ describe('ShopOrderTable', () => {
         await user.keyboard('{Enter}');
 
         // Wait for debounced save (500ms + processing time)
-        await waitFor(() => {
-          expect(mockUpdateItem).toHaveBeenCalled();
-        }, { timeout: 1500 });
+        await waitFor(
+          () => {
+            expect(mockUpdateItem).toHaveBeenCalled();
+          },
+          { timeout: 1500 },
+        );
 
         // Should only save once despite multiple keystrokes
         const updateCalls = mockUpdateItem.mock.calls.filter(
-          call => call[1].description !== undefined
+          (call) => call[1].description !== undefined,
         );
         expect(updateCalls.length).toBeLessThanOrEqual(1);
       });
@@ -753,9 +762,12 @@ describe('ShopOrderTable', () => {
         await user.click(pasteButtons[0]);
 
         // Should show error toast
-        await waitFor(() => {
-          expect(screen.getByText(/Failed to paste items/)).toBeInTheDocument();
-        }, { timeout: 2000 });
+        await waitFor(
+          () => {
+            expect(screen.getByText(/Failed to paste items/)).toBeInTheDocument();
+          },
+          { timeout: 2000 },
+        );
       });
 
       it('should have error toast dismiss button', async () => {
@@ -767,9 +779,12 @@ describe('ShopOrderTable', () => {
         const pasteButtons = screen.getAllByText('Paste Items');
         await user.click(pasteButtons[0]);
 
-        await waitFor(() => {
-          expect(screen.getByText(/Failed to paste items/)).toBeInTheDocument();
-        }, { timeout: 2000 });
+        await waitFor(
+          () => {
+            expect(screen.getByText(/Failed to paste items/)).toBeInTheDocument();
+          },
+          { timeout: 2000 },
+        );
 
         // Should have close button(s) - check that at least one exists
         const closeButtons = screen.getAllByText('×');

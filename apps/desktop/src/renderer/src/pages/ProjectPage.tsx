@@ -11,7 +11,7 @@ export function ProjectPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { projects, loadProjects, updateProject, setCurrentProject } = useProjectStore();
-  const [project, setProject] = useState(projects.find(p => p.id === projectId) || null);
+  const [project, setProject] = useState(projects.find((p) => p.id === projectId) || null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
 
@@ -22,7 +22,7 @@ export function ProjectPage() {
   }, [projects.length, loadProjects]);
 
   useEffect(() => {
-    const foundProject = projects.find(p => p.id === projectId);
+    const foundProject = projects.find((p) => p.id === projectId);
     if (foundProject) {
       setProject(foundProject);
       setCurrentProject(projectId!);
@@ -152,7 +152,9 @@ export function ProjectPage() {
                     <p className="text-gray-700 dark:text-gray-300">{project.venue}</p>
                     {(project.venue_city || project.venue_state) && (
                       <p className="text-gray-600 dark:text-gray-400 text-sm">
-                        {project.venue_city}{project.venue_city && project.venue_state ? ', ' : ''}{project.venue_state}
+                        {project.venue_city}
+                        {project.venue_city && project.venue_state ? ', ' : ''}
+                        {project.venue_state}
                       </p>
                     )}
                   </div>
@@ -167,125 +169,198 @@ export function ProjectPage() {
       <main className="flex-1 min-h-0 overflow-auto">
         <div className="max-w-7xl mx-auto p-8">
           {/* Project Metadata Section */}
-          {(project.lighting_designer || project.audio_designer || project.video_designer ||
-            project.electrician || project.audio_tech || project.video_tech ||
-            project.production_manager || project.general_manager ||
+          {(project.lighting_designer ||
+            project.audio_designer ||
+            project.video_designer ||
+            project.electrician ||
+            project.audio_tech ||
+            project.video_tech ||
+            project.production_manager ||
+            project.general_manager ||
             project.show_dates) && (
             <div className="mb-8 space-y-6">
               {/* Design Team */}
               {(project.lighting_designer || project.audio_designer || project.video_designer) && (
                 <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                  <h2 className="text-xl font-bold mb-4 text-blue-600 dark:text-blue-400">Design Team</h2>
+                  <h2 className="text-xl font-bold mb-4 text-blue-600 dark:text-blue-400">
+                    Design Team
+                  </h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {project.lighting_designer && (
                       <div className="space-y-1">
-                        <div className="text-gray-500 text-xs font-medium uppercase">Lighting Designer</div>
-                        <div className="text-gray-800 dark:text-gray-200 font-medium">{project.lighting_designer}</div>
+                        <div className="text-gray-500 text-xs font-medium uppercase">
+                          Lighting Designer
+                        </div>
+                        <div className="text-gray-800 dark:text-gray-200 font-medium">
+                          {project.lighting_designer}
+                        </div>
                         {project.lighting_designer_email && (
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">{project.lighting_designer_email}</div>
+                          <div className="text-gray-600 dark:text-gray-400 text-sm">
+                            {project.lighting_designer_email}
+                          </div>
                         )}
                         {project.lighting_designer_phone && (
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">{project.lighting_designer_phone}</div>
+                          <div className="text-gray-600 dark:text-gray-400 text-sm">
+                            {project.lighting_designer_phone}
+                          </div>
                         )}
                         {/* Associate Lighting Designers */}
-                        {project.lighting_associates && (() => {
-                          try {
-                            const associates = typeof project.lighting_associates === 'string'
-                              ? JSON.parse(project.lighting_associates)
-                              : project.lighting_associates;
-                            if (Array.isArray(associates) && associates.length > 0) {
-                              return (
-                                <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
-                                  <div className="text-gray-500 text-xs font-medium uppercase mb-2">Associates</div>
-                                  {associates.map((assoc: any, idx: number) => (
-                                    <div key={idx} className="mb-2">
-                                      <div className="text-gray-700 dark:text-gray-300 text-sm">{assoc.name}</div>
-                                      {assoc.email && <div className="text-gray-600 dark:text-gray-400 text-xs">{assoc.email}</div>}
-                                      {assoc.phone && <div className="text-gray-600 dark:text-gray-400 text-xs">{assoc.phone}</div>}
+                        {project.lighting_associates &&
+                          (() => {
+                            try {
+                              const associates =
+                                typeof project.lighting_associates === 'string'
+                                  ? JSON.parse(project.lighting_associates)
+                                  : project.lighting_associates;
+                              if (Array.isArray(associates) && associates.length > 0) {
+                                return (
+                                  <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+                                    <div className="text-gray-500 text-xs font-medium uppercase mb-2">
+                                      Associates
                                     </div>
-                                  ))}
-                                </div>
-                              );
+                                    {associates.map((assoc: any, idx: number) => (
+                                      <div key={idx} className="mb-2">
+                                        <div className="text-gray-700 dark:text-gray-300 text-sm">
+                                          {assoc.name}
+                                        </div>
+                                        {assoc.email && (
+                                          <div className="text-gray-600 dark:text-gray-400 text-xs">
+                                            {assoc.email}
+                                          </div>
+                                        )}
+                                        {assoc.phone && (
+                                          <div className="text-gray-600 dark:text-gray-400 text-xs">
+                                            {assoc.phone}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                );
+                              }
+                            } catch (e) {
+                              return null;
                             }
-                          } catch (e) {
                             return null;
-                          }
-                          return null;
-                        })()}
+                          })()}
                       </div>
                     )}
                     {project.audio_designer && (
                       <div className="space-y-1">
-                        <div className="text-gray-500 text-xs font-medium uppercase">Audio Designer</div>
-                        <div className="text-gray-800 dark:text-gray-200 font-medium">{project.audio_designer}</div>
+                        <div className="text-gray-500 text-xs font-medium uppercase">
+                          Audio Designer
+                        </div>
+                        <div className="text-gray-800 dark:text-gray-200 font-medium">
+                          {project.audio_designer}
+                        </div>
                         {project.audio_designer_email && (
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">{project.audio_designer_email}</div>
+                          <div className="text-gray-600 dark:text-gray-400 text-sm">
+                            {project.audio_designer_email}
+                          </div>
                         )}
                         {project.audio_designer_phone && (
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">{project.audio_designer_phone}</div>
+                          <div className="text-gray-600 dark:text-gray-400 text-sm">
+                            {project.audio_designer_phone}
+                          </div>
                         )}
                         {/* Associate Audio Designers */}
-                        {project.audio_associates && (() => {
-                          try {
-                            const associates = typeof project.audio_associates === 'string'
-                              ? JSON.parse(project.audio_associates)
-                              : project.audio_associates;
-                            if (Array.isArray(associates) && associates.length > 0) {
-                              return (
-                                <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
-                                  <div className="text-gray-500 text-xs font-medium uppercase mb-2">Associates</div>
-                                  {associates.map((assoc: any, idx: number) => (
-                                    <div key={idx} className="mb-2">
-                                      <div className="text-gray-700 dark:text-gray-300 text-sm">{assoc.name}</div>
-                                      {assoc.email && <div className="text-gray-600 dark:text-gray-400 text-xs">{assoc.email}</div>}
-                                      {assoc.phone && <div className="text-gray-600 dark:text-gray-400 text-xs">{assoc.phone}</div>}
+                        {project.audio_associates &&
+                          (() => {
+                            try {
+                              const associates =
+                                typeof project.audio_associates === 'string'
+                                  ? JSON.parse(project.audio_associates)
+                                  : project.audio_associates;
+                              if (Array.isArray(associates) && associates.length > 0) {
+                                return (
+                                  <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+                                    <div className="text-gray-500 text-xs font-medium uppercase mb-2">
+                                      Associates
                                     </div>
-                                  ))}
-                                </div>
-                              );
+                                    {associates.map((assoc: any, idx: number) => (
+                                      <div key={idx} className="mb-2">
+                                        <div className="text-gray-700 dark:text-gray-300 text-sm">
+                                          {assoc.name}
+                                        </div>
+                                        {assoc.email && (
+                                          <div className="text-gray-600 dark:text-gray-400 text-xs">
+                                            {assoc.email}
+                                          </div>
+                                        )}
+                                        {assoc.phone && (
+                                          <div className="text-gray-600 dark:text-gray-400 text-xs">
+                                            {assoc.phone}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                );
+                              }
+                            } catch (e) {
+                              return null;
                             }
-                          } catch (e) {
                             return null;
-                          }
-                          return null;
-                        })()}
+                          })()}
                       </div>
                     )}
                     {project.video_designer && (
                       <div className="space-y-1">
-                        <div className="text-gray-500 text-xs font-medium uppercase">Video Designer</div>
-                        <div className="text-gray-800 dark:text-gray-200 font-medium">{project.video_designer}</div>
+                        <div className="text-gray-500 text-xs font-medium uppercase">
+                          Video Designer
+                        </div>
+                        <div className="text-gray-800 dark:text-gray-200 font-medium">
+                          {project.video_designer}
+                        </div>
                         {project.video_designer_email && (
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">{project.video_designer_email}</div>
+                          <div className="text-gray-600 dark:text-gray-400 text-sm">
+                            {project.video_designer_email}
+                          </div>
                         )}
                         {project.video_designer_phone && (
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">{project.video_designer_phone}</div>
+                          <div className="text-gray-600 dark:text-gray-400 text-sm">
+                            {project.video_designer_phone}
+                          </div>
                         )}
                         {/* Associate Video Designers */}
-                        {project.video_associates && (() => {
-                          try {
-                            const associates = typeof project.video_associates === 'string'
-                              ? JSON.parse(project.video_associates)
-                              : project.video_associates;
-                            if (Array.isArray(associates) && associates.length > 0) {
-                              return (
-                                <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
-                                  <div className="text-gray-500 text-xs font-medium uppercase mb-2">Associates</div>
-                                  {associates.map((assoc: any, idx: number) => (
-                                    <div key={idx} className="mb-2">
-                                      <div className="text-gray-700 dark:text-gray-300 text-sm">{assoc.name}</div>
-                                      {assoc.email && <div className="text-gray-600 dark:text-gray-400 text-xs">{assoc.email}</div>}
-                                      {assoc.phone && <div className="text-gray-600 dark:text-gray-400 text-xs">{assoc.phone}</div>}
+                        {project.video_associates &&
+                          (() => {
+                            try {
+                              const associates =
+                                typeof project.video_associates === 'string'
+                                  ? JSON.parse(project.video_associates)
+                                  : project.video_associates;
+                              if (Array.isArray(associates) && associates.length > 0) {
+                                return (
+                                  <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+                                    <div className="text-gray-500 text-xs font-medium uppercase mb-2">
+                                      Associates
                                     </div>
-                                  ))}
-                                </div>
-                              );
+                                    {associates.map((assoc: any, idx: number) => (
+                                      <div key={idx} className="mb-2">
+                                        <div className="text-gray-700 dark:text-gray-300 text-sm">
+                                          {assoc.name}
+                                        </div>
+                                        {assoc.email && (
+                                          <div className="text-gray-600 dark:text-gray-400 text-xs">
+                                            {assoc.email}
+                                          </div>
+                                        )}
+                                        {assoc.phone && (
+                                          <div className="text-gray-600 dark:text-gray-400 text-xs">
+                                            {assoc.phone}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                );
+                              }
+                            } catch (e) {
+                              return null;
                             }
-                          } catch (e) {
                             return null;
-                          }
-                          return null;
-                        })()}
+                          })()}
                       </div>
                     )}
                   </div>
@@ -293,50 +368,81 @@ export function ProjectPage() {
               )}
 
               {/* Production Staff */}
-              {(project.electrician || project.audio_tech || project.video_tech ||
-                project.production_manager || project.general_manager) && (
+              {(project.electrician ||
+                project.audio_tech ||
+                project.video_tech ||
+                project.production_manager ||
+                project.general_manager) && (
                 <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                  <h2 className="text-xl font-bold mb-4 text-blue-600 dark:text-blue-400">Production Staff</h2>
+                  <h2 className="text-xl font-bold mb-4 text-blue-600 dark:text-blue-400">
+                    Production Staff
+                  </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {project.electrician && (
                       <div className="space-y-1">
-                        <div className="text-gray-500 text-xs font-medium uppercase">Electrician</div>
-                        <div className="text-gray-800 dark:text-gray-200 font-medium">{project.electrician}</div>
+                        <div className="text-gray-500 text-xs font-medium uppercase">
+                          Electrician
+                        </div>
+                        <div className="text-gray-800 dark:text-gray-200 font-medium">
+                          {project.electrician}
+                        </div>
                         {project.electrician_email && (
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">{project.electrician_email}</div>
+                          <div className="text-gray-600 dark:text-gray-400 text-sm">
+                            {project.electrician_email}
+                          </div>
                         )}
                         {project.electrician_phone && (
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">{project.electrician_phone}</div>
+                          <div className="text-gray-600 dark:text-gray-400 text-sm">
+                            {project.electrician_phone}
+                          </div>
                         )}
                       </div>
                     )}
                     {project.audio_tech && (
                       <div className="space-y-1">
-                        <div className="text-gray-500 text-xs font-medium uppercase">Audio Tech</div>
-                        <div className="text-gray-800 dark:text-gray-200 font-medium">{project.audio_tech}</div>
+                        <div className="text-gray-500 text-xs font-medium uppercase">
+                          Audio Tech
+                        </div>
+                        <div className="text-gray-800 dark:text-gray-200 font-medium">
+                          {project.audio_tech}
+                        </div>
                         {project.audio_tech_email && (
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">{project.audio_tech_email}</div>
+                          <div className="text-gray-600 dark:text-gray-400 text-sm">
+                            {project.audio_tech_email}
+                          </div>
                         )}
                         {project.audio_tech_phone && (
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">{project.audio_tech_phone}</div>
+                          <div className="text-gray-600 dark:text-gray-400 text-sm">
+                            {project.audio_tech_phone}
+                          </div>
                         )}
                       </div>
                     )}
                     {project.video_tech && (
                       <div className="space-y-1">
-                        <div className="text-gray-500 text-xs font-medium uppercase">Video Tech</div>
-                        <div className="text-gray-800 dark:text-gray-200 font-medium">{project.video_tech}</div>
+                        <div className="text-gray-500 text-xs font-medium uppercase">
+                          Video Tech
+                        </div>
+                        <div className="text-gray-800 dark:text-gray-200 font-medium">
+                          {project.video_tech}
+                        </div>
                         {project.video_tech_email && (
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">{project.video_tech_email}</div>
+                          <div className="text-gray-600 dark:text-gray-400 text-sm">
+                            {project.video_tech_email}
+                          </div>
                         )}
                         {project.video_tech_phone && (
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">{project.video_tech_phone}</div>
+                          <div className="text-gray-600 dark:text-gray-400 text-sm">
+                            {project.video_tech_phone}
+                          </div>
                         )}
                       </div>
                     )}
                     {project.production_manager && (
                       <div className="space-y-1">
-                        <div className="text-gray-500 text-xs font-medium uppercase">Production Manager</div>
+                        <div className="text-gray-500 text-xs font-medium uppercase">
+                          Production Manager
+                        </div>
                         <div className="text-gray-800 dark:text-gray-200 font-medium">
                           {project.production_manager}
                           {project.production_manager_company && (
@@ -346,16 +452,22 @@ export function ProjectPage() {
                           )}
                         </div>
                         {project.production_manager_email && (
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">{project.production_manager_email}</div>
+                          <div className="text-gray-600 dark:text-gray-400 text-sm">
+                            {project.production_manager_email}
+                          </div>
                         )}
                         {project.production_manager_phone && (
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">{project.production_manager_phone}</div>
+                          <div className="text-gray-600 dark:text-gray-400 text-sm">
+                            {project.production_manager_phone}
+                          </div>
                         )}
                       </div>
                     )}
                     {project.general_manager && (
                       <div className="space-y-1">
-                        <div className="text-gray-500 text-xs font-medium uppercase">General Manager</div>
+                        <div className="text-gray-500 text-xs font-medium uppercase">
+                          General Manager
+                        </div>
                         <div className="text-gray-800 dark:text-gray-200 font-medium">
                           {project.general_manager}
                           {project.general_manager_company && (
@@ -365,10 +477,14 @@ export function ProjectPage() {
                           )}
                         </div>
                         {project.general_manager_email && (
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">{project.general_manager_email}</div>
+                          <div className="text-gray-600 dark:text-gray-400 text-sm">
+                            {project.general_manager_email}
+                          </div>
                         )}
                         {project.general_manager_phone && (
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">{project.general_manager_phone}</div>
+                          <div className="text-gray-600 dark:text-gray-400 text-sm">
+                            {project.general_manager_phone}
+                          </div>
                         )}
                       </div>
                     )}
@@ -379,7 +495,9 @@ export function ProjectPage() {
               {/* Show Dates */}
               {project.show_dates && Object.keys(project.show_dates).length > 0 && (
                 <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                  <h2 className="text-xl font-bold mb-4 text-blue-600 dark:text-blue-400">Show Dates</h2>
+                  <h2 className="text-xl font-bold mb-4 text-blue-600 dark:text-blue-400">
+                    Show Dates
+                  </h2>
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 text-sm">
                     {project.show_dates.prep_start && (
                       <div>

@@ -12,7 +12,7 @@ vi.mock('../../database/queries/dimmerRacks', () => ({
   getDimmerRacksWithUsage: vi.fn(),
   createDimmerRack: vi.fn(),
   updateDimmerRack: vi.fn(),
-  deleteDimmerRack: vi.fn()
+  deleteDimmerRack: vi.fn(),
 }));
 
 vi.mock('../../errors', async () => {
@@ -20,21 +20,21 @@ vi.mock('../../errors', async () => {
   return {
     ...actual,
     errorHandler: {
-      executeWithRetry: vi.fn((fn) => fn())
-    }
+      executeWithRetry: vi.fn((fn) => fn()),
+    },
   };
 });
 
 vi.mock('../../monitoring/PerformanceMonitor', () => ({
   performanceMonitor: {
-    trackDatabaseQuery: vi.fn()
-  }
+    trackDatabaseQuery: vi.fn(),
+  },
 }));
 
 vi.mock('../../database/monitoring/DatabaseMonitor', () => ({
   databaseMonitor: {
-    recordQuery: vi.fn()
-  }
+    recordQuery: vi.fn(),
+  },
 }));
 
 // Import after mocking
@@ -45,7 +45,7 @@ import {
   getDimmerRacksWithUsage,
   createDimmerRack,
   updateDimmerRack,
-  deleteDimmerRack
+  deleteDimmerRack,
 } from '../../database/queries/dimmerRacks';
 import type { DimmerRack } from '../../database/queries/dimmerRacks';
 
@@ -59,7 +59,7 @@ describe('DimmerService', () => {
     watts_per_module: 2400,
     project_id: 'project-1',
     created_at: 1704067200000,
-    updated_at: 1704067200000
+    updated_at: 1704067200000,
   };
 
   const mockDimmerRack2: DimmerRack = {
@@ -69,7 +69,7 @@ describe('DimmerService', () => {
     watts_per_module: 1200,
     project_id: 'project-1',
     created_at: 1704067200000,
-    updated_at: 1704067200000
+    updated_at: 1704067200000,
   };
 
   beforeEach(() => {
@@ -163,13 +163,13 @@ describe('DimmerService', () => {
         name: 'New Rack',
         circuit_count: 24 as number,
         watts_per_module: 2400,
-        project_id: 'project-1'
+        project_id: 'project-1',
       };
       vi.mocked(createDimmerRack).mockResolvedValue({
         ...data,
         id: 'dimmer-3',
         created_at: 1704067200000,
-        updated_at: 1704067200000
+        updated_at: 1704067200000,
       });
 
       const result = await service.create(data, 'project-1');
@@ -183,13 +183,13 @@ describe('DimmerService', () => {
         name: 'New Rack',
         circuit_count: 12 as number,
         watts_per_module: 2400,
-        project_id: 'project-1'
+        project_id: 'project-1',
       };
       vi.mocked(createDimmerRack).mockResolvedValue({
         ...data,
         id: 'dimmer-3',
         created_at: 1704067200000,
-        updated_at: 1704067200000
+        updated_at: 1704067200000,
       });
 
       await service.create(data);
@@ -198,63 +198,128 @@ describe('DimmerService', () => {
     });
 
     it('should accept circuit_count of 12', async () => {
-      const data = { name: 'Rack', circuit_count: 12 as number, watts_per_module: 2400, project_id: 'p1' };
-      vi.mocked(createDimmerRack).mockResolvedValue({ ...data, id: 'id', created_at: 0, updated_at: 0 });
+      const data = {
+        name: 'Rack',
+        circuit_count: 12 as number,
+        watts_per_module: 2400,
+        project_id: 'p1',
+      };
+      vi.mocked(createDimmerRack).mockResolvedValue({
+        ...data,
+        id: 'id',
+        created_at: 0,
+        updated_at: 0,
+      });
 
       await expect(service.create(data)).resolves.toBeDefined();
     });
 
     it('should accept circuit_count of 24', async () => {
-      const data = { name: 'Rack', circuit_count: 24 as number, watts_per_module: 2400, project_id: 'p1' };
-      vi.mocked(createDimmerRack).mockResolvedValue({ ...data, id: 'id', created_at: 0, updated_at: 0 });
+      const data = {
+        name: 'Rack',
+        circuit_count: 24 as number,
+        watts_per_module: 2400,
+        project_id: 'p1',
+      };
+      vi.mocked(createDimmerRack).mockResolvedValue({
+        ...data,
+        id: 'id',
+        created_at: 0,
+        updated_at: 0,
+      });
 
       await expect(service.create(data)).resolves.toBeDefined();
     });
 
     it('should accept circuit_count of 48', async () => {
-      const data = { name: 'Rack', circuit_count: 48 as number, watts_per_module: 2400, project_id: 'p1' };
-      vi.mocked(createDimmerRack).mockResolvedValue({ ...data, id: 'id', created_at: 0, updated_at: 0 });
+      const data = {
+        name: 'Rack',
+        circuit_count: 48 as number,
+        watts_per_module: 2400,
+        project_id: 'p1',
+      };
+      vi.mocked(createDimmerRack).mockResolvedValue({
+        ...data,
+        id: 'id',
+        created_at: 0,
+        updated_at: 0,
+      });
 
       await expect(service.create(data)).resolves.toBeDefined();
     });
 
     it('should accept circuit_count of 96', async () => {
-      const data = { name: 'Rack', circuit_count: 96 as number, watts_per_module: 2400, project_id: 'p1' };
-      vi.mocked(createDimmerRack).mockResolvedValue({ ...data, id: 'id', created_at: 0, updated_at: 0 });
+      const data = {
+        name: 'Rack',
+        circuit_count: 96 as number,
+        watts_per_module: 2400,
+        project_id: 'p1',
+      };
+      vi.mocked(createDimmerRack).mockResolvedValue({
+        ...data,
+        id: 'id',
+        created_at: 0,
+        updated_at: 0,
+      });
 
       await expect(service.create(data)).resolves.toBeDefined();
     });
 
     it('should throw ValidationError for empty name', async () => {
-      const data = { name: '', circuit_count: 24 as number, watts_per_module: 2400, project_id: 'p1' };
+      const data = {
+        name: '',
+        circuit_count: 24 as number,
+        watts_per_module: 2400,
+        project_id: 'p1',
+      };
 
       await expect(service.create(data)).rejects.toThrow(ValidationError);
       expect(createDimmerRack).not.toHaveBeenCalled();
     });
 
     it('should throw ValidationError for whitespace-only name', async () => {
-      const data = { name: '   ', circuit_count: 24 as number, watts_per_module: 2400, project_id: 'p1' };
+      const data = {
+        name: '   ',
+        circuit_count: 24 as number,
+        watts_per_module: 2400,
+        project_id: 'p1',
+      };
 
       await expect(service.create(data)).rejects.toThrow(ValidationError);
       expect(createDimmerRack).not.toHaveBeenCalled();
     });
 
     it('should throw Error for invalid circuit_count', async () => {
-      const data = { name: 'Rack', circuit_count: 30 as number, watts_per_module: 2400, project_id: 'p1' };
+      const data = {
+        name: 'Rack',
+        circuit_count: 30 as number,
+        watts_per_module: 2400,
+        project_id: 'p1',
+      };
 
       await expect(service.create(data)).rejects.toThrow('Circuit count must be 12, 24, 48, or 96');
       expect(createDimmerRack).not.toHaveBeenCalled();
     });
 
     it('should throw Error for circuit_count of 0', async () => {
-      const data = { name: 'Rack', circuit_count: 0 as number, watts_per_module: 2400, project_id: 'p1' };
+      const data = {
+        name: 'Rack',
+        circuit_count: 0 as number,
+        watts_per_module: 2400,
+        project_id: 'p1',
+      };
 
       await expect(service.create(data)).rejects.toThrow('Circuit count must be 12, 24, 48, or 96');
       expect(createDimmerRack).not.toHaveBeenCalled();
     });
 
     it('should throw Error for negative circuit_count', async () => {
-      const data = { name: 'Rack', circuit_count: -12 as number, watts_per_module: 2400, project_id: 'p1' };
+      const data = {
+        name: 'Rack',
+        circuit_count: -12 as number,
+        watts_per_module: 2400,
+        project_id: 'p1',
+      };
 
       await expect(service.create(data)).rejects.toThrow('Circuit count must be 12, 24, 48, or 96');
       expect(createDimmerRack).not.toHaveBeenCalled();
@@ -314,14 +379,14 @@ describe('DimmerService', () => {
 
     it('should throw Error for invalid circuit_count when circuit_count is provided', async () => {
       await expect(service.update('dimmer-1', { circuit_count: 50 })).rejects.toThrow(
-        'Circuit count must be 12, 24, 48, or 96'
+        'Circuit count must be 12, 24, 48, or 96',
       );
       expect(updateDimmerRack).not.toHaveBeenCalled();
     });
 
     it('should throw Error for circuit_count of 0 when provided', async () => {
       await expect(service.update('dimmer-1', { circuit_count: 0 })).rejects.toThrow(
-        'Circuit count must be 12, 24, 48, or 96'
+        'Circuit count must be 12, 24, 48, or 96',
       );
       expect(updateDimmerRack).not.toHaveBeenCalled();
     });
@@ -370,7 +435,7 @@ describe('DimmerService', () => {
         watts_per_module: undefined as unknown as number,
         project_id: 'project-1',
         created_at: 1704067200000,
-        updated_at: 1704067200000
+        updated_at: 1704067200000,
       };
 
       const result = service.calculatePowerCapacity(rack);
@@ -383,7 +448,7 @@ describe('DimmerService', () => {
       const rack: DimmerRack = {
         ...mockDimmerRack,
         circuit_count: 12,
-        watts_per_module: 2400
+        watts_per_module: 2400,
       };
 
       const result = service.calculatePowerCapacity(rack);
@@ -396,7 +461,7 @@ describe('DimmerService', () => {
       const rack: DimmerRack = {
         ...mockDimmerRack,
         circuit_count: 96,
-        watts_per_module: 600
+        watts_per_module: 600,
       };
 
       const result = service.calculatePowerCapacity(rack);
@@ -422,7 +487,7 @@ describe('DimmerService', () => {
     it('should return circuit_count for a 12-circuit rack', () => {
       const rack: DimmerRack = {
         ...mockDimmerRack,
-        circuit_count: 12
+        circuit_count: 12,
       };
 
       const result = service.calculateAvailableCircuits(rack);

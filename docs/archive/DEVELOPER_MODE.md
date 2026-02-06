@@ -38,10 +38,12 @@ useSettingsStore.getState().updateAdvanced({ developerMode: true });
 ### 1. Chrome DevTools Access
 
 **Keyboard Shortcuts:**
+
 - **F12** - Toggle DevTools open/close
 - **Right-click** → Inspect - Inspect any element
 
 **DevTools Features:**
+
 - Console logging and debugging
 - Element inspection
 - Network monitoring
@@ -53,21 +55,21 @@ useSettingsStore.getState().updateAdvanced({ developerMode: true });
 
 When developer mode is enabled, **ALL** feature flags are automatically enabled:
 
-| Feature Flag | Description | Status |
-|--------------|-------------|--------|
-| `collaboration` | Real-time collaboration with team members | Future |
-| `realTimeSync` | Sync changes in real-time across devices | Future |
-| `teamComments` | Add comments and annotations for team review | Future |
-| `aiAssistant` | AI-powered assistant for common tasks | Future |
-| `smartSuggestions` | Intelligent suggestions based on workflow | Future |
-| `autoFixErrors` | Automatically fix common errors | Future |
-| `advancedReports` | Advanced reporting with custom layouts | In Dev |
-| `customCharts` | Create custom charts and visualizations | In Dev |
-| `dataExport` | Export data in multiple formats | ✅ Live |
-| `cloudBackup` | Automatic cloud backup of projects | Future |
-| `thirdPartyIntegrations` | Integrate with third-party services | Future |
-| `betaFeatures` | Early access to beta features | Future |
-| `experimentalUI` | Try experimental UI improvements | Future |
+| Feature Flag             | Description                                  | Status  |
+| ------------------------ | -------------------------------------------- | ------- |
+| `collaboration`          | Real-time collaboration with team members    | Future  |
+| `realTimeSync`           | Sync changes in real-time across devices     | Future  |
+| `teamComments`           | Add comments and annotations for team review | Future  |
+| `aiAssistant`            | AI-powered assistant for common tasks        | Future  |
+| `smartSuggestions`       | Intelligent suggestions based on workflow    | Future  |
+| `autoFixErrors`          | Automatically fix common errors              | Future  |
+| `advancedReports`        | Advanced reporting with custom layouts       | In Dev  |
+| `customCharts`           | Create custom charts and visualizations      | In Dev  |
+| `dataExport`             | Export data in multiple formats              | ✅ Live |
+| `cloudBackup`            | Automatic cloud backup of projects           | Future  |
+| `thirdPartyIntegrations` | Integrate with third-party services          | Future  |
+| `betaFeatures`           | Early access to beta features                | Future  |
+| `experimentalUI`         | Try experimental UI improvements             | Future  |
 
 **Usage:**
 
@@ -126,6 +128,7 @@ function MyComponent() {
 ```
 
 **Features:**
+
 - State inspector (JSON view)
 - Performance metrics display
 - Custom debug content
@@ -152,25 +155,25 @@ if (import.meta.env.DEV) {
 
 ### Core Components
 
-| File | Purpose |
-|------|---------|
-| `src/renderer/src/hooks/useDeveloperMode.ts` | Hook to check if dev mode is enabled |
-| `src/renderer/src/components/common/DeveloperPanel.tsx` | Debug panel component |
-| `src/renderer/src/config/featureFlags.ts` | Feature flag system |
-| `src/renderer/src/components/settings/AdvancedSettings.tsx` | Settings UI for dev mode toggle |
+| File                                                        | Purpose                              |
+| ----------------------------------------------------------- | ------------------------------------ |
+| `src/renderer/src/hooks/useDeveloperMode.ts`                | Hook to check if dev mode is enabled |
+| `src/renderer/src/components/common/DeveloperPanel.tsx`     | Debug panel component                |
+| `src/renderer/src/config/featureFlags.ts`                   | Feature flag system                  |
+| `src/renderer/src/components/settings/AdvancedSettings.tsx` | Settings UI for dev mode toggle      |
 
 ### Backend Integration
 
-| File | Purpose |
-|------|---------|
-| `src/main/ipc/settings.ts` | IPC handlers for DevTools |
-| `src/main/window.ts:43-50` | F12 keyboard shortcut handler |
-| `src/preload/index.ts:160-161` | IPC API definitions |
+| File                           | Purpose                       |
+| ------------------------------ | ----------------------------- |
+| `src/main/ipc/settings.ts`     | IPC handlers for DevTools     |
+| `src/main/window.ts:43-50`     | F12 keyboard shortcut handler |
+| `src/preload/index.ts:160-161` | IPC API definitions           |
 
 ### State Management
 
-| File | Purpose |
-|------|---------|
+| File                                            | Purpose              |
+| ----------------------------------------------- | -------------------- |
 | `src/renderer/src/store/settingsStore.ts:63-67` | Developer mode state |
 
 ---
@@ -340,11 +343,13 @@ if (hasAI) showAIFeature();
 ## Performance Impact
 
 ### Memory Usage
+
 - **DeveloperPanel**: ~2-5 MB per instance
 - **DevTools**: ~50-100 MB (Chrome DevTools overhead)
 - **Console logging**: Minimal (<1 MB)
 
 ### Recommendations
+
 - Close DevTools when not actively debugging
 - Limit DeveloperPanel instances (1 per page max)
 - Disable dev mode in production builds
@@ -355,12 +360,14 @@ if (hasAI) showAIFeature();
 ## Security Considerations
 
 ### What Developer Mode Does NOT Expose
+
 - ❌ User credentials or passwords
 - ❌ API keys or secrets (unless explicitly added to panels)
 - ❌ Personal user data
 - ❌ Production database access
 
 ### What It DOES Expose
+
 - ✅ Application state (Redux/Zustand stores)
 - ✅ Component props and local state
 - ✅ Network requests (visible in DevTools)
@@ -368,9 +375,10 @@ if (hasAI) showAIFeature();
 - ✅ Console logs
 
 ### Production Safeguards
+
 ```typescript
 // Store checks prevent dev mode in production
-const isDev = useSettingsStore(state => state.advanced.developerMode);
+const isDev = useSettingsStore((state) => state.advanced.developerMode);
 
 // Build-time checks
 if (import.meta.env.PROD && isDev) {
@@ -385,26 +393,30 @@ if (import.meta.env.PROD && isDev) {
 ### DevTools Won't Open
 
 **Check:**
+
 1. Is developer mode enabled in Settings → Advanced?
 2. Try F12 keyboard shortcut
 3. Check console for errors
 4. Restart the application
 
 **Debug:**
+
 ```typescript
 // In browser console
-localStorage.getItem('showstack-settings')
+localStorage.getItem('showstack-settings');
 // Check if advanced.developerMode is true
 ```
 
 ### DeveloperPanel Not Showing
 
 **Check:**
+
 1. Developer mode is enabled
 2. Component is imported correctly
 3. Component is rendered (check React DevTools)
 
 **Debug:**
+
 ```typescript
 import { useDeveloperMode } from './hooks/useDeveloperMode';
 
@@ -419,6 +431,7 @@ function MyComponent() {
 ### Feature Flags Not Working
 
 **Check:**
+
 ```typescript
 import { getFeatureFlags, isFeatureEnabled } from './config/featureFlags';
 
@@ -434,12 +447,12 @@ console.log('AI enabled:', isFeatureEnabled('aiAssistant'));
 
 ## Keyboard Shortcuts Reference
 
-| Shortcut | Action |
-|----------|--------|
-| **F12** | Toggle DevTools |
-| **Cmd/Ctrl+Shift+A** | Open Admin Panel |
-| **Cmd/Ctrl+,** | Open Settings |
-| **Right-click** | Context menu with Inspect option |
+| Shortcut             | Action                           |
+| -------------------- | -------------------------------- |
+| **F12**              | Toggle DevTools                  |
+| **Cmd/Ctrl+Shift+A** | Open Admin Panel                 |
+| **Cmd/Ctrl+,**       | Open Settings                    |
+| **Right-click**      | Context menu with Inspect option |
 
 ---
 
@@ -455,6 +468,7 @@ console.log('AI enabled:', isFeatureEnabled('aiAssistant'));
 ## Future Enhancements
 
 ### Planned Features
+
 - [ ] Performance regression detection
 - [ ] Automated error reporting in dev mode
 - [ ] State time-travel debugging
@@ -465,6 +479,7 @@ console.log('AI enabled:', isFeatureEnabled('aiAssistant'));
 - [ ] Screenshot/video capture for bug reports
 
 ### Community Contributions
+
 If you have ideas for developer mode features, please open an issue or PR!
 
 ---

@@ -108,7 +108,10 @@ export const useFixtureStore = create<FixtureStore>((set, get) => ({
           if (!oldFixture) return null;
           return { id, oldData: oldFixture, newData: updates };
         })
-        .filter((update): update is { id: string; oldData: Fixture; newData: Partial<Fixture> } => update !== null);
+        .filter(
+          (update): update is { id: string; oldData: Fixture; newData: Partial<Fixture> } =>
+            update !== null,
+        );
 
       if (fixtureUpdates.length === 0) {
         console.error('No fixtures found to update');

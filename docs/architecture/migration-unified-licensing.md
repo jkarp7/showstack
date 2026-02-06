@@ -1,4 +1,5 @@
 # Unified App License-Based Feature Access Migration
+
 ## Implementation Guide for Edition-Based Licensing in ShowStack
 
 **Document Version:** 1.0
@@ -13,12 +14,14 @@
 This document provides implementation guidance for transforming ShowStack from a lighting-only application into a unified multi-discipline platform with edition-based licensing.
 
 **Core Concept:**
+
 - **One ShowStack application** (single codebase)
 - **Six feature domains** (Lighting, Sound, Video, Production, Tour, Producer)
 - **License-based activation** (feature flags control access)
 - **Role-based UI** (show only activated features)
 
 **User Experience:**
+
 - User downloads one ShowStack app
 - License key determines which features are activated
 - UI dynamically shows/hides features based on license
@@ -31,21 +34,21 @@ This document provides implementation guidance for transforming ShowStack from a
 
 ### Professional Editions
 
-| Edition | Price | Activated Features | License Tier |
-|---------|-------|-------------------|--------------|
-| **Lighting Edition** | $249/year | Lighting | `tier-lighting` |
-| **Sound Edition** | $199/year | Sound | `tier-sound` |
-| **Video Edition** | $199/year | Video | `tier-video` |
-| **Designer Edition** | $449/year | Lighting + Sound + Video | `tier-designer` |
+| Edition                | Price     | Activated Features        | License Tier      |
+| ---------------------- | --------- | ------------------------- | ----------------- |
+| **Lighting Edition**   | $249/year | Lighting                  | `tier-lighting`   |
+| **Sound Edition**      | $199/year | Sound                     | `tier-sound`      |
+| **Video Edition**      | $199/year | Video                     | `tier-video`      |
+| **Designer Edition**   | $449/year | Lighting + Sound + Video  | `tier-designer`   |
 | **Production Edition** | $599/year | L+S+V + Production + Tour | `tier-production` |
-| **Complete Edition** | $999/year | All features | `tier-complete` |
+| **Complete Edition**   | $999/year | All features              | `tier-complete`   |
 
 ### Student & Institutional
 
-| Edition | Price | Activated Features | License Tier |
-|---------|-------|-------------------|--------------|
-| **Student Edition** | $99/year | All features | `tier-student` |
-| **Institutional** | Custom | Based on contract | `tier-institutional` |
+| Edition             | Price    | Activated Features | License Tier         |
+| ------------------- | -------- | ------------------ | -------------------- |
+| **Student Edition** | $99/year | All features       | `tier-student`       |
+| **Institutional**   | Custom   | Based on contract  | `tier-institutional` |
 
 ---
 
@@ -62,7 +65,7 @@ export enum FeatureDomain {
   VIDEO = 'video',
   PRODUCTION = 'production',
   TOUR = 'tour',
-  PRODUCER = 'producer'
+  PRODUCER = 'producer',
 }
 
 export enum LicenseTier {
@@ -74,7 +77,7 @@ export enum LicenseTier {
   PRODUCTION = 'tier-production',
   COMPLETE = 'tier-complete',
   STUDENT = 'tier-student',
-  INSTITUTIONAL = 'tier-institutional'
+  INSTITUTIONAL = 'tier-institutional',
 }
 
 export interface LicenseConfig {
@@ -91,17 +94,13 @@ const TIER_FEATURE_MAP: Record<LicenseTier, FeatureDomain[]> = {
   [LicenseTier.LIGHTING]: [FeatureDomain.LIGHTING],
   [LicenseTier.SOUND]: [FeatureDomain.SOUND],
   [LicenseTier.VIDEO]: [FeatureDomain.VIDEO],
-  [LicenseTier.DESIGNER]: [
-    FeatureDomain.LIGHTING,
-    FeatureDomain.SOUND,
-    FeatureDomain.VIDEO
-  ],
+  [LicenseTier.DESIGNER]: [FeatureDomain.LIGHTING, FeatureDomain.SOUND, FeatureDomain.VIDEO],
   [LicenseTier.PRODUCTION]: [
     FeatureDomain.LIGHTING,
     FeatureDomain.SOUND,
     FeatureDomain.VIDEO,
     FeatureDomain.PRODUCTION,
-    FeatureDomain.TOUR
+    FeatureDomain.TOUR,
   ],
   [LicenseTier.COMPLETE]: [
     FeatureDomain.LIGHTING,
@@ -109,7 +108,7 @@ const TIER_FEATURE_MAP: Record<LicenseTier, FeatureDomain[]> = {
     FeatureDomain.VIDEO,
     FeatureDomain.PRODUCTION,
     FeatureDomain.TOUR,
-    FeatureDomain.PRODUCER
+    FeatureDomain.PRODUCER,
   ],
   [LicenseTier.STUDENT]: [
     FeatureDomain.LIGHTING,
@@ -117,9 +116,9 @@ const TIER_FEATURE_MAP: Record<LicenseTier, FeatureDomain[]> = {
     FeatureDomain.VIDEO,
     FeatureDomain.PRODUCTION,
     FeatureDomain.TOUR,
-    FeatureDomain.PRODUCER
+    FeatureDomain.PRODUCER,
   ],
-  [LicenseTier.INSTITUTIONAL]: [] // Determined by contract
+  [LicenseTier.INSTITUTIONAL]: [], // Determined by contract
 };
 
 export class LicenseManager {
@@ -173,10 +172,10 @@ export class LicenseManager {
     return fetch('/api/license/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ licenseKey })
+      body: JSON.stringify({ licenseKey }),
     })
-      .then(response => response.json())
-      .then(data => {
+      .then((response) => response.json())
+      .then((data) => {
         if (data.valid) {
           this.currentLicense = data.license;
           localStorage.setItem('showstack-license', JSON.stringify(data.license));
@@ -200,9 +199,7 @@ import { useEffect, useState } from 'react';
 import { FeatureDomain, licenseManager } from './featureFlags';
 
 export function useFeature(domain: FeatureDomain): boolean {
-  const [enabled, setEnabled] = useState(() =>
-    licenseManager.isFeatureEnabled(domain)
-  );
+  const [enabled, setEnabled] = useState(() => licenseManager.isFeatureEnabled(domain));
 
   useEffect(() => {
     // Listen for license updates
@@ -218,9 +215,7 @@ export function useFeature(domain: FeatureDomain): boolean {
 }
 
 export function useActiveDomains(): FeatureDomain[] {
-  const [domains, setDomains] = useState(() =>
-    licenseManager.getActivatedDomains()
-  );
+  const [domains, setDomains] = useState(() => licenseManager.getActivatedDomains());
 
   useEffect(() => {
     const handleLicenseChange = () => {
@@ -302,27 +297,27 @@ All existing features in ShowStack should be flagged as `FeatureDomain.LIGHTING`
 
 ```typescript
 // Flag as LIGHTING domain
-- components/lighting/FixtureGrid.tsx
-- components/lighting/FixtureToolbar.tsx
-- components/lighting/PowerManagement.tsx
-- components/lighting/DimmerRackConfig.tsx
-- components/lighting/CircuitManager.tsx
-- components/lighting/MultiCableConfig.tsx
-- components/lighting/VectorworksSync.tsx
-- components/lighting/EosIntegration.tsx
+-components / lighting / FixtureGrid.tsx -
+  components / lighting / FixtureToolbar.tsx -
+  components / lighting / PowerManagement.tsx -
+  components / lighting / DimmerRackConfig.tsx -
+  components / lighting / CircuitManager.tsx -
+  components / lighting / MultiCableConfig.tsx -
+  components / lighting / VectorworksSync.tsx -
+  components / lighting / EosIntegration.tsx;
 ```
 
 **Shared Components (No domain flag - available to all):**
 
 ```typescript
 // These remain accessible regardless of license
-- components/shared/VirtualDataGrid.tsx
-- components/shared/EditableCell.tsx
-- components/shared/FilterBar.tsx
-- components/shared/Toolbar.tsx
-- components/shared/LabelDesigner.tsx
-- components/shared/ReportGenerator.tsx
-- components/shared/ProjectSettings.tsx
+-components / shared / VirtualDataGrid.tsx -
+  components / shared / EditableCell.tsx -
+  components / shared / FilterBar.tsx -
+  components / shared / Toolbar.tsx -
+  components / shared / LabelDesigner.tsx -
+  components / shared / ReportGenerator.tsx -
+  components / shared / ProjectSettings.tsx;
 ```
 
 #### Routes (Lighting Domain)
@@ -467,6 +462,7 @@ export function MainMenu() {
 **Key Principle:** Project file contains ALL data for ALL domains, but UI only shows data for activated features.
 
 **Example:**
+
 - User has Lighting Edition license
 - Opens project file that contains lighting + sound data
 - **Can see:** Fixtures, power, circuits (lighting features)
@@ -475,6 +471,7 @@ export function MainMenu() {
 - **Upgrade path:** If user upgrades to Designer Edition, sound data becomes visible
 
 **Benefits:**
+
 - Collaboration: Users with different licenses can work on same project
 - Upgrade: No data migration needed when upgrading license
 - Downgrade: Data preserved if user downgrades (just hidden)
@@ -495,17 +492,17 @@ export interface ProjectMetadata {
 // When opening project, check domains
 export function canViewAllProjectData(
   projectDomains: FeatureDomain[],
-  licenseDomains: FeatureDomain[]
+  licenseDomains: FeatureDomain[],
 ): boolean {
-  return projectDomains.every(domain => licenseDomains.includes(domain));
+  return projectDomains.every((domain) => licenseDomains.includes(domain));
 }
 
 // Warning if project has data for inactive domains
 export function getHiddenDomains(
   projectDomains: FeatureDomain[],
-  licenseDomains: FeatureDomain[]
+  licenseDomains: FeatureDomain[],
 ): FeatureDomain[] {
-  return projectDomains.filter(domain => !licenseDomains.includes(domain));
+  return projectDomains.filter((domain) => !licenseDomains.includes(domain));
 }
 ```
 
@@ -516,11 +513,13 @@ export function getHiddenDomains(
 ### 1. Clean Interface (No Bloat)
 
 **DO:**
+
 - Hide entire menu sections for inactive domains
 - Remove inactive domain tabs/buttons
 - Show focused view for active domains only
 
 **DON'T:**
+
 - Show grayed-out/disabled features (feels crippled)
 - Display "Upgrade to unlock" everywhere (annoying)
 - Make inactive features visible but non-clickable
@@ -547,6 +546,7 @@ export function getHiddenDomains(
 Show upgrade prompts **only** in these contexts:
 
 **A. Settings/Account Page:**
+
 ```typescript
 <LicenseManager>
   <CurrentPlan tier="Lighting Edition" price="$249/year" />
@@ -559,6 +559,7 @@ Show upgrade prompts **only** in these contexts:
 ```
 
 **B. Project Open Warning (if project has hidden data):**
+
 ```typescript
 <ProjectOpenDialog>
   <Warning>
@@ -573,6 +574,7 @@ Show upgrade prompts **only** in these contexts:
 ```
 
 **C. Collaboration Invitation:**
+
 ```typescript
 <CollaboratorInvite>
   <Info>
@@ -713,13 +715,14 @@ src/
 5. Add license storage (localStorage for dev, secure storage for prod)
 
 **Testing:**
+
 ```typescript
 // Test license manager
 describe('LicenseManager', () => {
   it('should activate lighting features for Lighting Edition', () => {
     const license = {
       tier: LicenseTier.LIGHTING,
-      activatedDomains: [FeatureDomain.LIGHTING]
+      activatedDomains: [FeatureDomain.LIGHTING],
     };
     licenseManager.updateLicense(license);
     expect(licenseManager.isFeatureEnabled(FeatureDomain.LIGHTING)).toBe(true);
@@ -736,6 +739,7 @@ describe('LicenseManager', () => {
 4. Ensure all tests still pass
 
 **Migration script:**
+
 ```bash
 # Create new directory structure
 mkdir -p src/domains/lighting/components
@@ -759,6 +763,7 @@ find src -name "*.tsx" -type f -exec sed -i '' \
 3. Update navigation menu to be dynamic
 
 **Example:**
+
 ```typescript
 // Before
 <Route path="/fixtures" component={FixtureGrid} />
@@ -812,6 +817,7 @@ find src -name "*.tsx" -type f -exec sed -i '' \
 ### Database Queries (Add Domain Check)
 
 **Before:**
+
 ```typescript
 // Get all fixtures for project
 export function getFixtures(projectId: string): Fixture[] {
@@ -820,6 +826,7 @@ export function getFixtures(projectId: string): Fixture[] {
 ```
 
 **After:**
+
 ```typescript
 // Get fixtures only if lighting feature is enabled
 export function getFixtures(projectId: string): Fixture[] {
@@ -831,6 +838,7 @@ export function getFixtures(projectId: string): Fixture[] {
 ```
 
 **Better Approach (declarative):**
+
 ```typescript
 // Decorator pattern for feature-gated queries
 import { requireFeature } from '@/core/licensing/decorators';
@@ -851,6 +859,7 @@ export class FixtureRepository {
 ### UI Components (Feature Gate Wrapper)
 
 **Before:**
+
 ```typescript
 // Always render fixture grid
 export function LightingPage() {
@@ -865,6 +874,7 @@ export function LightingPage() {
 ```
 
 **After:**
+
 ```typescript
 // Only render if lighting features enabled
 export function LightingPage() {
@@ -912,6 +922,7 @@ export function generateReport(reportType: string, projectId: string): void {
 Mark these existing features with `FeatureDomain.LIGHTING` flag:
 
 ### Database Access
+
 - [ ] Fixture CRUD operations
 - [ ] Power system CRUD
 - [ ] Dimmer rack CRUD
@@ -923,6 +934,7 @@ Mark these existing features with `FeatureDomain.LIGHTING` flag:
 - [ ] Cue list operations
 
 ### UI Components
+
 - [ ] FixtureGrid
 - [ ] FixtureToolbar
 - [ ] FixtureForm (add/edit)
@@ -937,6 +949,7 @@ Mark these existing features with `FeatureDomain.LIGHTING` flag:
 - [ ] LightingDashboard
 
 ### Routes
+
 - [ ] `/lighting` - Main lighting page
 - [ ] `/lighting/fixtures` - Fixture grid
 - [ ] `/lighting/power` - Power management
@@ -946,6 +959,7 @@ Mark these existing features with `FeatureDomain.LIGHTING` flag:
 - [ ] `/lighting/eos` - Console integration
 
 ### Reports
+
 - [ ] Instrument Schedule
 - [ ] Channel Hookup
 - [ ] Dimmer Hookup
@@ -956,6 +970,7 @@ Mark these existing features with `FeatureDomain.LIGHTING` flag:
 - [ ] Equipment Count
 
 ### Menu Items
+
 - [ ] "Lighting" top-level menu
 - [ ] "Fixtures" submenu
 - [ ] "Power & Dimmers" submenu
@@ -969,22 +984,26 @@ Mark these existing features with `FeatureDomain.LIGHTING` flag:
 ## 🚀 Deployment & Rollout
 
 ### Phase 1: Internal Testing (Week 1-2)
+
 - Implement licensing infrastructure
 - Add feature gates to existing lighting features
 - Test with different license tiers
 - Ensure no regressions
 
 ### Phase 2: Beta Testing (Week 3-4)
+
 - Deploy to beta testers with Lighting Edition licenses
 - Ensure feature flags work correctly
 - Gather feedback on UX (is anything confusing?)
 
 ### Phase 3: Add Sound Features (Month 2-3)
+
 - Implement sound features (see migration-sound-features.md)
 - Gate sound features with `FeatureDomain.SOUND`
 - Launch Designer Edition (Lighting + Sound)
 
 ### Phase 4: Expand to All Editions (Month 4-12)
+
 - Add Video, Production, Tour, Producer features
 - Launch all edition tiers
 - Complete rollout
@@ -996,11 +1015,13 @@ Mark these existing features with `FeatureDomain.LIGHTING` flag:
 ### License Verification
 
 **Development:**
+
 - Store license in localStorage
 - Simple JSON validation
 - No cryptographic verification (for speed)
 
 **Production:**
+
 - Store license in secure storage (Electron secure storage)
 - Cryptographic signature verification (RSA or ECDSA)
 - Server-side validation on startup
@@ -1008,6 +1029,7 @@ Mark these existing features with `FeatureDomain.LIGHTING` flag:
 - Offline grace period (7 days)
 
 **Example production license format:**
+
 ```json
 {
   "licenseKey": "ABCD-EFGH-IJKL-MNOP",
@@ -1042,7 +1064,7 @@ export function trackFeatureUsage(domain: FeatureDomain, action: string): void {
     domain,
     action,
     licenseTier: licenseManager.getLicenseTier(),
-    timestamp: new Date()
+    timestamp: new Date(),
   });
 }
 
@@ -1052,6 +1074,7 @@ trackFeatureUsage(FeatureDomain.SOUND, 'wireless_mic_assigned');
 ```
 
 **Metrics to track:**
+
 - Which features are most used per license tier?
 - Do Lighting Edition users try to access Sound features? (upgrade funnel)
 - Which edition has highest retention?
@@ -1064,12 +1087,14 @@ trackFeatureUsage(FeatureDomain.SOUND, 'wireless_mic_assigned');
 ### Onboarding Flow
 
 **First launch:**
+
 1. Show welcome screen
 2. Ask user to enter license key OR start trial
 3. Explain which features are included in their edition
 4. Show focused tour of activated features only
 
 **Trial Edition (14 days, Lighting only):**
+
 - Watermark all PDFs with "TRIAL VERSION"
 - Show "X days remaining" in header
 - Upgrade CTA on day 10
@@ -1078,10 +1103,12 @@ trackFeatureUsage(FeatureDomain.SOUND, 'wireless_mic_assigned');
 ### In-App Education
 
 **Tooltips on first use:**
+
 - "You have Lighting Edition - manage fixtures, power, and circuits"
 - "Upgrade to Designer Edition to add sound and video features"
 
 **Contextual help:**
+
 - Help docs filtered by active features
 - Tutorial videos only for licensed features
 
@@ -1090,6 +1117,7 @@ trackFeatureUsage(FeatureDomain.SOUND, 'wireless_mic_assigned');
 ## ✅ Success Criteria
 
 ### Implementation Complete When:
+
 - [ ] License manager implemented and tested
 - [ ] All existing lighting features gated with `FeatureDomain.LIGHTING`
 - [ ] Dynamic navigation menu works correctly
@@ -1102,6 +1130,7 @@ trackFeatureUsage(FeatureDomain.SOUND, 'wireless_mic_assigned');
 - [ ] Documentation complete for developers
 
 ### User Experience Success:
+
 - [ ] Users report clean, focused interface
 - [ ] No confusion about which features are available
 - [ ] Upgrade prompts clear and non-intrusive
@@ -1113,11 +1142,13 @@ trackFeatureUsage(FeatureDomain.SOUND, 'wireless_mic_assigned');
 ## 🔄 Migration Checklist
 
 ### Pre-Migration
+
 - [ ] Backup current codebase
 - [ ] Create feature branch for licensing implementation
 - [ ] Set up test environment with multiple license tiers
 
 ### During Migration
+
 - [ ] Implement licensing infrastructure
 - [ ] Reorganize file structure (domains/)
 - [ ] Add feature gates to all routes
@@ -1127,6 +1158,7 @@ trackFeatureUsage(FeatureDomain.SOUND, 'wireless_mic_assigned');
 - [ ] Update documentation
 
 ### Post-Migration
+
 - [ ] Beta test with real users
 - [ ] Monitor analytics for feature usage
 - [ ] Gather feedback on UX
@@ -1138,12 +1170,14 @@ trackFeatureUsage(FeatureDomain.SOUND, 'wireless_mic_assigned');
 ## 📝 Documentation Updates Needed
 
 ### Developer Docs
+
 - [ ] Update architecture diagrams
 - [ ] Document feature flag system
 - [ ] Add examples of gating new features
 - [ ] Update file structure guide
 
 ### User Docs
+
 - [ ] Create edition comparison page
 - [ ] Update getting started guide (per edition)
 - [ ] Add upgrade/downgrade instructions
@@ -1158,6 +1192,7 @@ trackFeatureUsage(FeatureDomain.SOUND, 'wireless_mic_assigned');
 ---
 
 **See Also:**
+
 - `docs/migration-sound-features.md` - Sound feature implementation
 - `docs/unified-vs-modular-analysis.md` - Architecture rationale
 - `docs/project-status.md` - Overall project roadmap

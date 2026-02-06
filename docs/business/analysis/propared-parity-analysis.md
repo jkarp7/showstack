@@ -1,4 +1,5 @@
 # Propared Parity Analysis
+
 ## Production Management Software Competitive Analysis
 
 **Created:** December 28, 2024
@@ -25,19 +26,19 @@
 
 ### Core Features
 
-| Feature Category | Propared | ShowStack Current | ShowStack Planned (Production Edition) | Parity Status |
-|-----------------|----------|-------------------|----------------------------------------|---------------|
-| **Scheduling** | ✅ Full | ❌ None | 🎯 Planned | ⚠️ **GAP** |
-| **Budgeting** | ✅ Full | ❌ None | 🎯 Planned | ⚠️ **GAP** |
-| **Inventory Management** | ✅ Full | ⚠️ Partial (fixtures/equipment only) | 🎯 Planned | ⚠️ **GAP** |
-| **Labor Management** | ✅ Full | ❌ None | 🎯 Planned | ⚠️ **GAP** |
-| **Production Books** | ✅ Full | ❌ None | 🎯 Planned | ⚠️ **GAP** |
-| **Mobile App** | ✅ Yes (inventory companion) | ❌ None | 💡 Future | ⚠️ **GAP** |
-| **Lighting Design Tools** | ❌ None | ✅ **Full** | ✅ Full | 🚀 **ADVANTAGE** |
-| **Sound Design Tools** | ❌ None | ⬜ Planned | 🎯 Planned (Year 2) | 🚀 **ADVANTAGE** |
-| **Video Design Tools** | ❌ None | ⬜ Planned | 🎯 Planned (Year 3) | 🚀 **ADVANTAGE** |
-| **Technical Paperwork** | ❌ Limited | ✅ **12 reports** | ✅ Full | 🚀 **ADVANTAGE** |
-| **Shop Orders** | ❌ None | ✅ **Full** | ✅ Full | 🚀 **ADVANTAGE** |
+| Feature Category          | Propared                     | ShowStack Current                    | ShowStack Planned (Production Edition) | Parity Status    |
+| ------------------------- | ---------------------------- | ------------------------------------ | -------------------------------------- | ---------------- |
+| **Scheduling**            | ✅ Full                      | ❌ None                              | 🎯 Planned                             | ⚠️ **GAP**       |
+| **Budgeting**             | ✅ Full                      | ❌ None                              | 🎯 Planned                             | ⚠️ **GAP**       |
+| **Inventory Management**  | ✅ Full                      | ⚠️ Partial (fixtures/equipment only) | 🎯 Planned                             | ⚠️ **GAP**       |
+| **Labor Management**      | ✅ Full                      | ❌ None                              | 🎯 Planned                             | ⚠️ **GAP**       |
+| **Production Books**      | ✅ Full                      | ❌ None                              | 🎯 Planned                             | ⚠️ **GAP**       |
+| **Mobile App**            | ✅ Yes (inventory companion) | ❌ None                              | 💡 Future                              | ⚠️ **GAP**       |
+| **Lighting Design Tools** | ❌ None                      | ✅ **Full**                          | ✅ Full                                | 🚀 **ADVANTAGE** |
+| **Sound Design Tools**    | ❌ None                      | ⬜ Planned                           | 🎯 Planned (Year 2)                    | 🚀 **ADVANTAGE** |
+| **Video Design Tools**    | ❌ None                      | ⬜ Planned                           | 🎯 Planned (Year 3)                    | 🚀 **ADVANTAGE** |
+| **Technical Paperwork**   | ❌ Limited                   | ✅ **12 reports**                    | ✅ Full                                | 🚀 **ADVANTAGE** |
+| **Shop Orders**           | ❌ None                      | ✅ **Full**                          | ✅ Full                                | 🚀 **ADVANTAGE** |
 
 ---
 
@@ -46,6 +47,7 @@
 ### 1. Scheduling
 
 **Propared Capabilities:**
+
 - Build calendars and timelines with cloning and template capabilities
 - Unlimited customized views (by venue, show, person, department)
 - Year, month, week, day, and list view layouts
@@ -56,6 +58,7 @@
 **Priority:** 🔴 HIGH - Core production management feature
 
 **Implementation Requirements:**
+
 - Production calendar component
 - Multi-view system (timeline, calendar, list, Gantt chart)
 - Event types: rehearsals, performances, load-in, load-out, tech, focus, notes
@@ -72,6 +75,7 @@
 ### 2. Budgeting
 
 **Propared Capabilities:**
+
 - Real-time cost tracking that updates automatically when schedules change
 - Labor cost calculations with overtime rules
 - Weekly hour tracking
@@ -82,6 +86,7 @@
 **Priority:** 🔴 HIGH - Critical for production management
 
 **Implementation Requirements:**
+
 - Budget creation and templates
 - Line-item budget tracking
 - Labor cost integration
@@ -100,6 +105,7 @@
 ### 3. Inventory Management
 
 **Propared Capabilities:**
+
 - Track owned, rented, and borrowed items
 - QR code system for item identification
 - Mobile Companion app for cataloging
@@ -111,12 +117,14 @@
 **Priority:** 🟡 MEDIUM - Extend existing system
 
 **ShowStack Advantages:**
+
 - Already tracks lighting fixtures with 68+ fields
 - Infrastructure equipment tracking with port-level detail
 - Power management and calculations
 - Integration with technical paperwork
 
 **Propared Advantages:**
+
 - QR code system
 - Mobile app for field cataloging
 - Cross-department inventory (props, costumes, scenery, etc.)
@@ -124,6 +132,7 @@
 - Conflict detection across productions
 
 **Implementation Requirements:**
+
 - Extend inventory system to props, costumes, scenery, sound, video
 - QR code generation and scanning
 - Rental vs. owned vs. borrowed status
@@ -140,6 +149,7 @@
 ### 4. Labor Management
 
 **Propared Capabilities:**
+
 - Crew position setup with configurable pay rates
 - Booking system with status tracking (confirmed, tentative, etc.)
 - Conflict detection across overlapping bookings
@@ -150,6 +160,7 @@
 **Priority:** 🔴 HIGH - Essential for production management
 
 **Implementation Requirements:**
+
 - Crew database with contact information
 - Position/role definitions with pay rates
 - Booking calendar integration
@@ -169,6 +180,7 @@
 ### 5. Production Books
 
 **Propared Capabilities:**
+
 - Web-based information sharing (no login required)
 - Automatic updates reflecting real-time data
 - Filterable by team, department, or custom criteria
@@ -180,11 +192,13 @@
 **Priority:** 🟡 MEDIUM - Nice to have, but can leverage existing paperwork system
 
 **ShowStack Alternative:**
+
 - Already has comprehensive paperwork generation (12 reports)
 - PDF export for all technical paperwork
 - Shop order system with professional PDFs
 
 **Implementation Requirements:**
+
 - Web-based sharing portal (optional login)
 - Real-time updates from project data
 - Filterable views
@@ -201,6 +215,7 @@
 ### 6. Project Management
 
 **Propared Capabilities:**
+
 - Project cloning to reuse past production structures
 - Template projects for standardized workflows
 - Cross-project resource allocation visibility
@@ -210,6 +225,7 @@
 **Priority:** 🟡 MEDIUM - Workflow enhancement
 
 **Implementation Requirements:**
+
 - Project template system
 - Clone project functionality
 - Multi-project view (season planning)
@@ -226,11 +242,13 @@
 ### 1. Unified Technical Design + Production Management
 
 **ShowStack's Unique Position:**
+
 - **Only platform** offering lighting + sound + video design tools integrated with production management
 - Technical designers can use same platform as production managers
 - Data flows seamlessly from design to budget to schedule
 
 **Example Workflow:**
+
 1. Lighting designer creates fixture plot in ShowStack (Lighting Edition)
 2. Production manager sees equipment list automatically populated in inventory
 3. Budget updates with rental costs from shop order
@@ -244,6 +262,7 @@
 ### 2. Offline-First Architecture
 
 **ShowStack Advantage:**
+
 - Works fully offline (SQLite database)
 - No internet required for day-to-day work
 - Fast performance (no cloud latency)
@@ -266,6 +285,7 @@
 ### 4. Technical Paperwork Generation
 
 **ShowStack Advantage:**
+
 - 12 automated technical reports (fixture, infrastructure, power, etc.)
 - Customizable headers with visual designer
 - Professional PDF export
@@ -278,6 +298,7 @@
 ### 5. Shop Order System
 
 **ShowStack Advantage:**
+
 - Complete shop order builder with equipment sections
 - Revision tracking (up to 5 revisions)
 - Notes system (3-tier)
@@ -292,11 +313,11 @@
 
 ### 1. 🔴 HIGH PRIORITY
 
-| Feature | Propared | ShowStack Needs | Effort |
-|---------|----------|----------------|--------|
-| **Production Scheduling** | ✅ Full | Build from scratch | 8-10 weeks |
-| **Budget Tracking** | ✅ Full | Build from scratch | 6-8 weeks |
-| **Labor Management** | ✅ Full | Build from scratch | 8-10 weeks |
+| Feature                   | Propared | ShowStack Needs    | Effort     |
+| ------------------------- | -------- | ------------------ | ---------- |
+| **Production Scheduling** | ✅ Full  | Build from scratch | 8-10 weeks |
+| **Budget Tracking**       | ✅ Full  | Build from scratch | 6-8 weeks  |
+| **Labor Management**      | ✅ Full  | Build from scratch | 8-10 weeks |
 
 **Total Effort for Core Parity:** 22-28 weeks (5-7 months)
 
@@ -304,11 +325,11 @@
 
 ### 2. 🟡 MEDIUM PRIORITY
 
-| Feature | Propared | ShowStack Needs | Effort |
-|---------|----------|----------------|--------|
-| **Inventory Extensions** | ✅ Full | Extend existing system | 6-8 weeks |
-| **Production Books** | ✅ Full | Web sharing portal | 6-8 weeks |
-| **Project Templates** | ✅ Full | Cloning/templates | 4-6 weeks |
+| Feature                  | Propared | ShowStack Needs        | Effort    |
+| ------------------------ | -------- | ---------------------- | --------- |
+| **Inventory Extensions** | ✅ Full  | Extend existing system | 6-8 weeks |
+| **Production Books**     | ✅ Full  | Web sharing portal     | 6-8 weeks |
+| **Project Templates**    | ✅ Full  | Cloning/templates      | 4-6 weeks |
 
 **Total Effort for Enhanced Features:** 16-22 weeks (4-5.5 months)
 
@@ -316,21 +337,23 @@
 
 ### 3. 🟢 LOW PRIORITY
 
-| Feature | Propared | ShowStack Needs | Effort |
-|---------|----------|----------------|--------|
-| **Mobile App** | ✅ Companion app | Native mobile app | 12-16 weeks |
-| **QR Code System** | ✅ Full | QR generation/scanning | 2-3 weeks |
+| Feature            | Propared         | ShowStack Needs        | Effort      |
+| ------------------ | ---------------- | ---------------------- | ----------- |
+| **Mobile App**     | ✅ Companion app | Native mobile app      | 12-16 weeks |
+| **QR Code System** | ✅ Full          | QR generation/scanning | 2-3 weeks   |
 
 ---
 
 ## Market Positioning Strategy
 
 ### Option 1: "Technical Design First, Production Second"
+
 **Focus:** Launch Lighting Edition (Year 1), Sound Edition (Year 2), add production features gradually
 **Pros:** Compete with LightWright/Minotaur first, add production management as differentiator
 **Cons:** Delayed entry into production management market, Propared has head start
 
 **Timeline:**
+
 - Year 1 (2025): Lighting Edition launch
 - Year 2 (2026): Sound Edition launch
 - Year 3 (2027): Production Edition with basic features (scheduling, budgeting, labor)
@@ -339,11 +362,13 @@
 ---
 
 ### Option 2: "Integrated Solution from Day One"
+
 **Focus:** Launch Production Edition (Year 2-3) with core production features alongside design tools
 **Pros:** Unique market position, compete on integration + price
 **Cons:** Longer development timeline, more complex initial offering
 
 **Timeline:**
+
 - Year 1 (2025): Lighting Edition launch
 - Year 2 (2026): Sound Edition + Production Edition (scheduling, budgeting, labor)
 - Year 3 (2027): Production Edition parity with Propared
@@ -352,20 +377,24 @@
 ---
 
 ### Option 3: "Hybrid Approach" (RECOMMENDED)
+
 **Focus:** Launch design tools first, add production features incrementally based on user demand
 
 **Phase 1 (Year 1-2): Design Tools**
+
 - Lighting Edition (Year 1)
 - Sound Edition (Year 2)
 - Designer Edition bundle
 
 **Phase 2 (Year 2-3): Basic Production Features**
+
 - Production calendar (lightweight)
 - Budget tracking (basic)
 - Crew roster management
 - Position as "integrated design + lightweight production"
 
 **Phase 3 (Year 3-4): Production Edition Parity**
+
 - Full scheduling with templates
 - Advanced budgeting with real-time updates
 - Labor management with payroll integration
@@ -373,12 +402,14 @@
 - Production books
 
 **Pros:**
+
 - Faster to market with design tools
 - Test production features with existing users
 - Iterate based on feedback
 - Gradual development investment
 
 **Cons:**
+
 - Feature set builds slowly
 - May lose some production managers to Propared initially
 
@@ -387,6 +418,7 @@
 ## Target Users
 
 ### Propared's Target Users:
+
 1. Producing theaters and opera companies
 2. University theater programs
 3. Dance companies and ballet organizations
@@ -395,6 +427,7 @@
 6. Educational institutions
 
 ### ShowStack Production Edition Target Users:
+
 1. **Technical Directors** - Need design tools AND production management
 2. **Production Managers** - Manage budgets, schedules, crew
 3. **Lighting/Sound/Video Designers who produce** - Freelance designers who also produce shows
@@ -409,24 +442,27 @@
 ## Pricing Strategy
 
 ### Propared Pricing:
+
 - **Starting:** $1,750/user/year
 - **Target:** Mid-to-large producing organizations
 - **Value Prop:** Unified production management, eliminates spreadsheets
 
 ### ShowStack Production Edition Pricing:
+
 - **Proposed:** $599/year
 - **Includes:** All design features (Lighting + Sound + Video) + Production Management + Tour Logistics
 - **Target:** Technical directors, production managers, multi-discipline designers
 - **Value Prop:** "Technical design tools AND production management for 66% less than Propared alone"
 
 ### Competitive Comparison:
-| Solution | Annual Cost | Features | Cost Savings with ShowStack |
-|----------|-------------|----------|----------------------------|
-| **LightWright 6** | $845 (one-time, ~$170/year amortized) | Lighting only | - |
-| **Minotaur** | ~$200-400/year (est.) | Sound only | - |
-| **Propared** | $1,750/year | Production mgmt only | - |
-| **Total (all three)** | ~$2,320/year | Lighting + Sound + Production | **$1,721/year saved** |
-| **ShowStack Production Edition** | $599/year | Lighting + Sound + Video + Production + Tour | **74% cheaper** |
+
+| Solution                         | Annual Cost                           | Features                                     | Cost Savings with ShowStack |
+| -------------------------------- | ------------------------------------- | -------------------------------------------- | --------------------------- |
+| **LightWright 6**                | $845 (one-time, ~$170/year amortized) | Lighting only                                | -                           |
+| **Minotaur**                     | ~$200-400/year (est.)                 | Sound only                                   | -                           |
+| **Propared**                     | $1,750/year                           | Production mgmt only                         | -                           |
+| **Total (all three)**            | ~$2,320/year                          | Lighting + Sound + Production                | **$1,721/year saved**       |
+| **ShowStack Production Edition** | $599/year                             | Lighting + Sound + Video + Production + Tour | **74% cheaper**             |
 
 **Value Proposition:** "Replace 3+ tools with one integrated platform and save $1,700+/year"
 
@@ -435,6 +471,7 @@
 ## Recommended Development Priorities
 
 ### Phase 1: Core Production Features (Year 3, 2027-2028)
+
 **Focus:** Essential features to compete with Propared
 
 1. **Production Scheduling** (8-10 weeks)
@@ -461,6 +498,7 @@
 ---
 
 ### Phase 2: Enhanced Features (Year 3-4, 2028-2029)
+
 **Focus:** Differentiation and advanced capabilities
 
 1. **Inventory Extensions** (6-8 weeks)
@@ -485,6 +523,7 @@
 ---
 
 ### Phase 3: Advanced Features (Year 4+, 2029+)
+
 **Focus:** Market leadership and mobile
 
 1. **Mobile App** (12-16 weeks)
@@ -504,14 +543,17 @@
 ## Strategic Recommendations
 
 ### 1. Lean into Integration Advantage
+
 **Strategy:** Position ShowStack as the ONLY platform that integrates technical design with production management
 
 **Marketing Angle:**
+
 - "Stop using 3+ separate tools. Design, plan, and produce in one platform."
 - "Your fixture list becomes your inventory. Your inventory becomes your budget. Your budget drives your schedule."
 - "Data flows automatically from design to production to performance."
 
 **Proof Points:**
+
 - Fixture plot → Equipment list → Shop order → Budget → Schedule
 - Labor hours for focus call calculated from fixture count
 - Rental costs from shop order feed budget automatically
@@ -519,9 +561,11 @@
 ---
 
 ### 2. Competitive Pricing
+
 **Strategy:** Undercut Propared by 66% while offering MORE features (design tools included)
 
 **Pricing Messaging:**
+
 - "Propared costs $1,750/year for production management alone."
 - "ShowStack Production Edition: $599/year for lighting + sound + video + production + tour."
 - "Save $1,151/year and get technical design tools included."
@@ -529,9 +573,11 @@
 ---
 
 ### 3. Target Technical Directors
+
 **Strategy:** Focus on technical staff who need BOTH design and production tools
 
 **User Persona:**
+
 - **Name:** Sarah, Technical Director at Regional Theater
 - **Current Tools:** LightWright ($845) + Excel (free) + Propared ($1,750) = $2,595/year
 - **Pain Points:**
@@ -545,23 +591,28 @@
 ---
 
 ### 4. Gradual Rollout (Recommended)
+
 **Strategy:** Launch production features incrementally, validate with users
 
 **Year 1 (2025):**
+
 - Lighting Edition launch
 - Gather user feedback on production management needs
 
 **Year 2 (2026):**
+
 - Sound Edition launch
 - Add basic production features (calendar, simple budgets, crew roster)
 - Beta test with existing users
 
 **Year 3 (2027):**
+
 - Production Edition official launch
 - Core feature parity (scheduling, budgeting, labor)
 - Target technical directors and production managers
 
 **Year 4 (2028+):**
+
 - Advanced features (inventory extensions, production books, mobile app)
 - Enterprise features
 - Market leadership positioning
@@ -571,21 +622,25 @@
 ## Success Metrics
 
 ### User Adoption
+
 - **Year 3:** 200+ Production Edition users
 - **Year 4:** 500+ Production Edition users
 - **Year 5:** 1,000+ Production Edition users
 
 ### Revenue Targets
+
 - **Year 3:** $120k ARR from Production Edition
 - **Year 4:** $300k ARR from Production Edition
 - **Year 5:** $600k ARR from Production Edition
 
 ### Feature Parity
+
 - **Year 3:** 70% parity with Propared (core features)
 - **Year 4:** 90% parity with Propared (enhanced features)
 - **Year 5:** 100% parity + unique advantages (design integration)
 
 ### Competitive Wins
+
 - **Year 3:** 20+ users switching from Propared
 - **Year 4:** 50+ users switching from Propared
 - **Year 5:** 100+ users switching from Propared or choosing ShowStack over Propared
@@ -602,6 +657,7 @@
 4. **Technical Paperwork:** Best-in-class reporting for design + production
 
 **Recommended Path Forward:**
+
 - Launch Lighting Edition (Year 1) and Sound Edition (Year 2) first
 - Add basic production features incrementally (Year 2-3)
 - Launch Production Edition with core parity (Year 3)
@@ -614,6 +670,7 @@
 ---
 
 **See Also:**
+
 - `migration-production-features.md` - Detailed feature specifications for Production Edition
 - `PROJECT_STATUS.md` - Current development status and roadmap
 - `docs/architecture/naming-and-editions.md` - Edition structure and pricing
@@ -621,6 +678,7 @@
 ---
 
 **Sources:**
+
 - [Propared Official Website](https://www.propared.com/)
 - [Propared Pricing on Capterra](https://www.capterra.com/p/141392/Propared/)
 - [Propared Features on SaaSCounter](https://www.saascounter.com/products/propared)

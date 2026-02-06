@@ -242,12 +242,15 @@ export const trackSettingsChange = (
   category: string,
   setting: string,
   value: any,
-  properties: EventProperties = {}
+  properties: EventProperties = {},
 ) => {
   telemetry.track('settings_changed', {
     category,
     setting,
-    value: (value !== null && value !== undefined && typeof value === 'object') ? JSON.stringify(value) : value,
+    value:
+      value !== null && value !== undefined && typeof value === 'object'
+        ? JSON.stringify(value)
+        : value,
     ...properties,
   });
 };
@@ -292,7 +295,7 @@ export const trackFileOperation = {
 export const trackNavigation = (
   destination: string,
   source: string,
-  properties: EventProperties = {}
+  properties: EventProperties = {},
 ) => {
   telemetry.track('navigation', {
     destination,
@@ -307,7 +310,7 @@ export const trackNavigation = (
 export const trackFeatureUsage = (
   feature: string,
   action: string,
-  properties: EventProperties = {}
+  properties: EventProperties = {},
 ) => {
   telemetry.track('feature_used', {
     feature,

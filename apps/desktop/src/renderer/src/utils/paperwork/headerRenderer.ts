@@ -68,7 +68,7 @@ export async function loadHeaderTemplate(templateId: string): Promise<{
 
     return {
       template: template as LayoutTemplate,
-      elements: (elements || []) as LayoutElement[]
+      elements: (elements || []) as LayoutElement[],
     };
   } catch (error) {
     console.error('Error loading header template:', error);
@@ -116,15 +116,13 @@ function renderTextContent(content: string, data: HeaderData): string {
 /**
  * Calculate element position and size in pixels
  */
-function calculateElementStyle(
-  element: LayoutElement,
-  template: LayoutTemplate
-): string {
+function calculateElementStyle(element: LayoutElement, template: LayoutTemplate): string {
   const gap = template.grid_gap;
 
   // Calculate column/row sizes accounting for gaps
   // Total width = columns * columnWidth + (columns - 1) * gap
-  const columnWidth = (template.page_width - (template.grid_columns - 1) * gap) / template.grid_columns;
+  const columnWidth =
+    (template.page_width - (template.grid_columns - 1) * gap) / template.grid_columns;
   const rowHeight = (template.page_height - (template.grid_rows - 1) * gap) / template.grid_rows;
 
   // Position = (column index) * (column width + gap)
@@ -208,7 +206,7 @@ function renderElement(element: LayoutElement, template: LayoutTemplate, data: H
  */
 export async function renderHeaderHTML(
   templateId: string,
-  data: HeaderData
+  data: HeaderData,
 ): Promise<string | null> {
   const headerLayout = await loadHeaderTemplate(templateId);
 
@@ -222,48 +220,49 @@ export async function renderHeaderHTML(
   const rowHeight = Math.floor(template.page_height / template.grid_rows);
 
   // Render all elements with explicit grid positioning
-  const elementsHTML = elements.map(element => {
-    const config = JSON.parse(element.config);
-    const style = JSON.parse(element.style);
-    let content = '';
+  const elementsHTML = elements
+    .map((element) => {
+      const config = JSON.parse(element.config);
+      const style = JSON.parse(element.style);
+      let content = '';
 
-    if (element.element_type === 'dataField') {
-      const fieldValue = resolveDataField(config.fieldType, data);
-      const prefix = config.prefix || '';
-      const suffix = config.suffix || '';
-      content = `${prefix}${fieldValue}${suffix}`;
-    } else if (element.element_type === 'text') {
-      content = renderTextContent(config.content || '', data);
-    } else if (element.element_type === 'image') {
-      // Render image element
-      const imageSrc = config.src || '';
-      const objectFit = config.objectFit || 'contain';
-      if (imageSrc) {
-        content = `<img src="${imageSrc}" alt="${config.altText || 'Image'}" style="width: 100%; height: 100%; object-fit: ${objectFit};" />`;
+      if (element.element_type === 'dataField') {
+        const fieldValue = resolveDataField(config.fieldType, data);
+        const prefix = config.prefix || '';
+        const suffix = config.suffix || '';
+        content = `${prefix}${fieldValue}${suffix}`;
+      } else if (element.element_type === 'text') {
+        content = renderTextContent(config.content || '', data);
+      } else if (element.element_type === 'image') {
+        // Render image element
+        const imageSrc = config.src || '';
+        const objectFit = config.objectFit || 'contain';
+        if (imageSrc) {
+          content = `<img src="${imageSrc}" alt="${config.altText || 'Image'}" style="width: 100%; height: 100%; object-fit: ${objectFit};" />`;
+        }
+      } else if (element.element_type === 'shape') {
+        // Render shape element
+        const shapeType = config.shapeType || 'rectangle';
+        const color = config.color || '#000000';
+        const thickness = config.thickness || 1;
+
+        if (shapeType === 'rectangle') {
+          content = `<div style="width: 100%; height: 100%; border: ${thickness}px solid ${color};"></div>`;
+        } else if (shapeType === 'line' || shapeType === 'divider') {
+          content = `<div style="width: 100%; height: ${thickness}px; background-color: ${color};"></div>`;
+        }
       }
-    } else if (element.element_type === 'shape') {
-      // Render shape element
-      const shapeType = config.shapeType || 'rectangle';
-      const color = config.color || '#000000';
-      const thickness = config.thickness || 1;
 
-      if (shapeType === 'rectangle') {
-        content = `<div style="width: 100%; height: 100%; border: ${thickness}px solid ${color};"></div>`;
-      } else if (shapeType === 'line' || shapeType === 'divider') {
-        content = `<div style="width: 100%; height: ${thickness}px; background-color: ${color};"></div>`;
-      }
-    }
+      // Calculate grid position (1-based for CSS grid)
+      const gridColumnStart = element.grid_column + 1;
+      const gridColumnEnd = gridColumnStart + element.column_span;
+      const gridRowStart = element.grid_row + 1;
+      const gridRowEnd = gridRowStart + element.row_span;
 
-    // Calculate grid position (1-based for CSS grid)
-    const gridColumnStart = element.grid_column + 1;
-    const gridColumnEnd = gridColumnStart + element.column_span;
-    const gridRowStart = element.grid_row + 1;
-    const gridRowEnd = gridRowStart + element.row_span;
+      // For images and shapes, use different flex alignment
+      const isImageOrShape = element.element_type === 'image' || element.element_type === 'shape';
 
-    // For images and shapes, use different flex alignment
-    const isImageOrShape = element.element_type === 'image' || element.element_type === 'shape';
-
-    return `
+      return `
       <div style="
         grid-column: ${gridColumnStart} / ${gridColumnEnd};
         grid-row: ${gridRowStart} / ${gridRowEnd};
@@ -274,13 +273,14 @@ export async function renderHeaderHTML(
         color: ${style.color || '#000000'};
         display: flex;
         align-items: ${isImageOrShape ? 'stretch' : 'center'};
-        justify-content: ${isImageOrShape ? 'stretch' : (style.textAlign === 'center' ? 'center' : style.textAlign === 'right' ? 'flex-end' : 'flex-start')};
+        justify-content: ${isImageOrShape ? 'stretch' : style.textAlign === 'center' ? 'center' : style.textAlign === 'right' ? 'flex-end' : 'flex-start'};
         overflow: hidden;
       ">
         ${content}
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 
   return `
     <div style="
@@ -302,7 +302,7 @@ export async function renderHeaderHTML(
  */
 export async function renderHeaderTemplate(
   templateId: string,
-  data: HeaderData
+  data: HeaderData,
 ): Promise<string | null> {
   const headerLayout = await loadHeaderTemplate(templateId);
 
@@ -314,7 +314,7 @@ export async function renderHeaderTemplate(
 
   // Render elements with special handling for page numbers
   const elementsHTML = elements
-    .map(element => {
+    .map((element) => {
       const style = calculateElementStyle(element, template);
       let content = '';
 
@@ -386,10 +386,7 @@ export async function renderHeaderTemplate(
 /**
  * Render footer HTML for inline display
  */
-export function renderFooterHTML(
-  userName: string,
-  dataRange: string
-): string {
+export function renderFooterHTML(userName: string, dataRange: string): string {
   return `
     <div class="page-footer" style="
       width: 100%;
@@ -410,10 +407,7 @@ export function renderFooterHTML(
 /**
  * Render footer template for Electron's printToPDF footerTemplate option
  */
-export function renderFooterTemplate(
-  userName: string,
-  dataRange: string
-): string {
+export function renderFooterTemplate(userName: string, dataRange: string): string {
   return `
     <div style="
       width: 100%;
@@ -434,10 +428,7 @@ export function renderFooterTemplate(
  * Calculate data range for report
  * Note: Range indicators have been removed as per requirements
  */
-export function calculateDataRange(
-  reportType: string,
-  data: any[]
-): string {
+export function calculateDataRange(reportType: string, data: any[]): string {
   // Return empty string - range indicators are no longer displayed
   return '';
 }

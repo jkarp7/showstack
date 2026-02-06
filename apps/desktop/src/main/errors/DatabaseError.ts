@@ -8,7 +8,7 @@ export class DatabaseError extends Error {
     message: string,
     public readonly operation: string,
     public readonly recoverable: boolean,
-    public readonly originalError?: Error
+    public readonly originalError?: Error,
   ) {
     super(message);
     this.name = 'DatabaseError';
@@ -38,7 +38,7 @@ export class QueryError extends DatabaseError {
   constructor(
     message: string,
     public readonly query: string,
-    originalError?: Error
+    originalError?: Error,
   ) {
     super(message, 'query', false, originalError);
     this.name = 'QueryError';
@@ -64,7 +64,7 @@ export class MigrationError extends DatabaseError {
   constructor(
     message: string,
     public readonly migrationVersion: number,
-    originalError?: Error
+    originalError?: Error,
   ) {
     super(message, 'migration', false, originalError);
     this.name = 'MigrationError';

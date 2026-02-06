@@ -100,7 +100,10 @@ export function NewShopOrderProjectDialog({
                   className="w-4 h-4 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
                 />
                 <span className="text-sm text-gray-300">
-                  Link to project: <span className="font-medium text-gray-900 dark:text-white">{parentProject.name}</span>
+                  Link to project:{' '}
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {parentProject.name}
+                  </span>
                 </span>
               </label>
               <p className="text-xs text-gray-500 mt-1 ml-6">
@@ -110,9 +113,7 @@ export function NewShopOrderProjectDialog({
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Production Name
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Production Name</label>
             <input
               type="text"
               value={productionName}
@@ -124,9 +125,7 @@ export function NewShopOrderProjectDialog({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Venue (Optional)
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Venue (Optional)</label>
             <input
               type="text"
               value={venue}

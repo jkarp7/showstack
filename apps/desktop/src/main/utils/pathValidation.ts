@@ -46,7 +46,7 @@ export function isPathAllowed(filePath: string): boolean {
 
     // Check if path is within any allowed base path using path.relative()
     // This prevents edge cases like /Users/test matching /Users/test-other
-    return allowedPaths.some(allowed => {
+    return allowedPaths.some((allowed) => {
       const resolvedAllowed = path.resolve(allowed);
       const relative = path.relative(resolvedAllowed, normalized);
 

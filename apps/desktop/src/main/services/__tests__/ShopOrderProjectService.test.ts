@@ -11,7 +11,7 @@ vi.mock('../../database/queries/shop-order', () => ({
   getShopOrderProjectById: vi.fn(),
   createShopOrderProject: vi.fn(),
   updateShopOrderProject: vi.fn(),
-  deleteShopOrderProject: vi.fn()
+  deleteShopOrderProject: vi.fn(),
 }));
 
 vi.mock('../../errors', async () => {
@@ -19,15 +19,15 @@ vi.mock('../../errors', async () => {
   return {
     ...actual,
     errorHandler: {
-      executeWithRetry: vi.fn(async (fn) => fn())
-    }
+      executeWithRetry: vi.fn(async (fn) => fn()),
+    },
   };
 });
 
 vi.mock('../../monitoring/PerformanceMonitor', () => ({
   performanceMonitor: {
-    trackDatabaseQuery: vi.fn()
-  }
+    trackDatabaseQuery: vi.fn(),
+  },
 }));
 
 import { ShopOrderProjectService } from '../ShopOrderProjectService';
@@ -36,7 +36,7 @@ import {
   getShopOrderProjectById,
   createShopOrderProject,
   updateShopOrderProject,
-  deleteShopOrderProject
+  deleteShopOrderProject,
 } from '../../database/queries/shop-order';
 import { performanceMonitor } from '../../monitoring/PerformanceMonitor';
 
@@ -54,7 +54,7 @@ describe('ShopOrderProjectService', () => {
     id: 'proj-1',
     production_name: 'Test Production',
     created_at: Date.now(),
-    updated_at: Date.now()
+    updated_at: Date.now(),
   };
 
   const mockProjects = [
@@ -63,8 +63,8 @@ describe('ShopOrderProjectService', () => {
       id: 'proj-2',
       production_name: 'Another Production',
       created_at: Date.now(),
-      updated_at: Date.now()
-    }
+      updated_at: Date.now(),
+    },
   ];
 
   beforeEach(() => {
@@ -99,7 +99,7 @@ describe('ShopOrderProjectService', () => {
       expect(mockTrackQuery).toHaveBeenCalledWith(
         'shop-order:projects:getAll',
         expect.any(Number),
-        mockProjects.length
+        mockProjects.length,
       );
     });
 
@@ -109,10 +109,7 @@ describe('ShopOrderProjectService', () => {
 
       await expect(service.getAll()).rejects.toThrow('Database error');
 
-      expect(mockTrackQuery).toHaveBeenCalledWith(
-        'shop-order:projects:getAll',
-        expect.any(Number)
-      );
+      expect(mockTrackQuery).toHaveBeenCalledWith('shop-order:projects:getAll', expect.any(Number));
     });
 
     it('should re-throw errors from the database layer', async () => {
@@ -217,7 +214,7 @@ describe('ShopOrderProjectService', () => {
       const input = {
         production_name: 'My Show',
         parent_project_id: 'parent-1',
-        user_id: 'user-1'
+        user_id: 'user-1',
       };
       mockCreate.mockResolvedValue({ ...mockProject, ...input } as any);
 
@@ -239,21 +236,33 @@ describe('ShopOrderProjectService', () => {
     });
 
     it('should throw ValidationError for empty id', async () => {
-      await expect(service.update('', { production_name: 'Name' })).rejects.toThrow(ValidationError);
-      await expect(service.update('', { production_name: 'Name' })).rejects.toThrow('Project ID is required');
+      await expect(service.update('', { production_name: 'Name' })).rejects.toThrow(
+        ValidationError,
+      );
+      await expect(service.update('', { production_name: 'Name' })).rejects.toThrow(
+        'Project ID is required',
+      );
     });
 
     it('should throw ValidationError for whitespace-only id', async () => {
-      await expect(service.update('  ', { production_name: 'Name' })).rejects.toThrow(ValidationError);
+      await expect(service.update('  ', { production_name: 'Name' })).rejects.toThrow(
+        ValidationError,
+      );
     });
 
     it('should throw ValidationError when production_name is explicitly empty string', async () => {
-      await expect(service.update('proj-1', { production_name: '' })).rejects.toThrow(ValidationError);
-      await expect(service.update('proj-1', { production_name: '' })).rejects.toThrow('Production name cannot be empty');
+      await expect(service.update('proj-1', { production_name: '' })).rejects.toThrow(
+        ValidationError,
+      );
+      await expect(service.update('proj-1', { production_name: '' })).rejects.toThrow(
+        'Production name cannot be empty',
+      );
     });
 
     it('should throw ValidationError when production_name is whitespace only', async () => {
-      await expect(service.update('proj-1', { production_name: '   ' })).rejects.toThrow(ValidationError);
+      await expect(service.update('proj-1', { production_name: '   ' })).rejects.toThrow(
+        ValidationError,
+      );
     });
 
     it('should allow updates without production_name', async () => {

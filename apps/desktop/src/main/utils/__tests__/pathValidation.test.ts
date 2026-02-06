@@ -5,7 +5,7 @@ import {
   hasPathTraversal,
   isPathAllowed,
   validateFilePath,
-  sanitizeFilePath
+  sanitizeFilePath,
 } from '../pathValidation';
 import { PathTraversalError, NullByteError, InvalidPathError } from '../errors';
 import { app } from 'electron';
@@ -20,11 +20,11 @@ vi.mock('electron', () => ({
         temp: '/tmp',
         documents: '/Users/test/Documents',
         downloads: '/Users/test/Downloads',
-        desktop: '/Users/test/Desktop'
+        desktop: '/Users/test/Desktop',
       };
       return paths[name] || '/mock/path';
-    })
-  }
+    }),
+  },
 }));
 
 /**
@@ -126,28 +126,23 @@ describe('Path Validation Security', () => {
     });
 
     it('should throw for null byte injection', () => {
-      expect(() => validateFilePath('file.png\x00.exe'))
-        .toThrow(NullByteError);
+      expect(() => validateFilePath('file.png\x00.exe')).toThrow(NullByteError);
     });
 
     it('should throw for path traversal attempts', () => {
-      expect(() => validateFilePath('../../etc/passwd'))
-        .toThrow('traversal');
+      expect(() => validateFilePath('../../etc/passwd')).toThrow('traversal');
     });
 
     it('should throw for empty string', () => {
-      expect(() => validateFilePath(''))
-        .toThrow('non-empty string');
+      expect(() => validateFilePath('')).toThrow('non-empty string');
     });
 
     it('should throw for null input', () => {
-      expect(() => validateFilePath(null as any))
-        .toThrow('non-empty string');
+      expect(() => validateFilePath(null as any)).toThrow('non-empty string');
     });
 
     it('should throw for non-string input', () => {
-      expect(() => validateFilePath(123 as any))
-        .toThrow('non-empty string');
+      expect(() => validateFilePath(123 as any)).toThrow('non-empty string');
     });
 
     it('should allow Windows-style paths', () => {
@@ -167,8 +162,7 @@ describe('Path Validation Security', () => {
     });
 
     it('should throw for invalid paths', () => {
-      expect(() => sanitizeFilePath('../../etc/passwd'))
-        .toThrow('traversal');
+      expect(() => sanitizeFilePath('../../etc/passwd')).toThrow('traversal');
     });
 
     it('should normalize path separators', () => {
@@ -177,8 +171,7 @@ describe('Path Validation Security', () => {
     });
 
     it('should throw for null byte injection', () => {
-      expect(() => sanitizeFilePath('file.png\x00.exe'))
-        .toThrow(NullByteError);
+      expect(() => sanitizeFilePath('file.png\x00.exe')).toThrow(NullByteError);
     });
   });
 

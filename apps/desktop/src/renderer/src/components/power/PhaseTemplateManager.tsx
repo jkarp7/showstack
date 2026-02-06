@@ -10,12 +10,17 @@ interface PhaseTemplateManagerProps {
   onSelectTemplate?: (template: PhaseDistributionTemplate) => void;
 }
 
-export function PhaseTemplateManager({ projectId = 'default-project', onSelectTemplate }: PhaseTemplateManagerProps) {
+export function PhaseTemplateManager({
+  projectId = 'default-project',
+  onSelectTemplate,
+}: PhaseTemplateManagerProps) {
   const currentProject = useProjectStore((state) => state.currentProject);
   const [templates, setTemplates] = useState<PhaseDistributionTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<PhaseDistributionTemplate | undefined>(undefined);
+  const [editingTemplate, setEditingTemplate] = useState<PhaseDistributionTemplate | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     loadTemplates();
@@ -56,13 +61,18 @@ export function PhaseTemplateManager({ projectId = 'default-project', onSelectTe
     // Parse the JSON string to object for editing
     const templateWithParsedDistribution = {
       ...template,
-      phase_distribution: JSON.parse(template.phase_distribution as any) as PhaseDistribution
+      phase_distribution: JSON.parse(template.phase_distribution as any) as PhaseDistribution,
     };
     setEditingTemplate(templateWithParsedDistribution);
     setShowEditor(true);
   };
 
-  const handleSaveTemplate = async (templateData: Omit<PhaseDistributionTemplate, 'id' | 'created_at' | 'updated_at' | 'is_system' | 'project_id'>) => {
+  const handleSaveTemplate = async (
+    templateData: Omit<
+      PhaseDistributionTemplate,
+      'id' | 'created_at' | 'updated_at' | 'is_system' | 'project_id'
+    >,
+  ) => {
     try {
       if (editingTemplate) {
         // Update existing template
@@ -71,17 +81,20 @@ export function PhaseTemplateManager({ projectId = 'default-project', onSelectTe
           description: templateData.description,
           phase_config: templateData.phase_config,
           circuit_count: templateData.circuit_count,
-          phase_distribution: JSON.stringify(templateData.phase_distribution)
+          phase_distribution: JSON.stringify(templateData.phase_distribution),
         });
       } else {
         // Create new template
-        await window.api.phaseTemplates.create({
-          name: templateData.name,
-          description: templateData.description,
-          phase_config: templateData.phase_config,
-          circuit_count: templateData.circuit_count,
-          phase_distribution: JSON.stringify(templateData.phase_distribution)
-        }, projectId);
+        await window.api.phaseTemplates.create(
+          {
+            name: templateData.name,
+            description: templateData.description,
+            phase_config: templateData.phase_config,
+            circuit_count: templateData.circuit_count,
+            phase_distribution: JSON.stringify(templateData.phase_distribution),
+          },
+          projectId,
+        );
       }
       await loadTemplates();
       setShowEditor(false);
@@ -98,14 +111,16 @@ export function PhaseTemplateManager({ projectId = 'default-project', onSelectTe
   };
 
   const renderPhasePreview = (distribution: PhaseDistribution) => {
-    const phaseLabels = currentProject ? {
-      phase_label_a: currentProject.phase_label_a,
-      phase_label_b: currentProject.phase_label_b,
-      phase_label_c: currentProject.phase_label_c
-    } : undefined;
+    const phaseLabels = currentProject
+      ? {
+          phase_label_a: currentProject.phase_label_a,
+          phase_label_b: currentProject.phase_label_b,
+          phase_label_c: currentProject.phase_label_c,
+        }
+      : undefined;
 
     const circuits = Object.keys(distribution).sort((a, b) => parseInt(a) - parseInt(b));
-    const preview = circuits.slice(0, 8).map(circuit => {
+    const preview = circuits.slice(0, 8).map((circuit) => {
       const phase = distribution[circuit];
       return getPhaseLabel(phase, phaseLabels);
     });
@@ -131,7 +146,7 @@ export function PhaseTemplateManager({ projectId = 'default-project', onSelectTe
 
   const calculateBalance = (distribution: PhaseDistribution) => {
     const counts = { A: 0, B: 0, C: 0 };
-    Object.values(distribution).forEach(phase => {
+    Object.values(distribution).forEach((phase) => {
       counts[phase]++;
     });
     return counts;
@@ -139,14 +154,12 @@ export function PhaseTemplateManager({ projectId = 'default-project', onSelectTe
 
   if (loading) {
     return (
-      <div className="p-6 text-center text-gray-500 dark:text-gray-400">
-        Loading templates...
-      </div>
+      <div className="p-6 text-center text-gray-500 dark:text-gray-400">Loading templates...</div>
     );
   }
 
-  const systemTemplates = templates.filter(t => t.is_system);
-  const userTemplates = templates.filter(t => !t.is_system);
+  const systemTemplates = templates.filter((t) => t.is_system);
+  const userTemplates = templates.filter((t) => !t.is_system);
 
   return (
     <div className="space-y-6">
@@ -161,7 +174,7 @@ export function PhaseTemplateManager({ projectId = 'default-project', onSelectTe
           </div>
 
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {systemTemplates.map(template => {
+            {systemTemplates.map((template) => {
               const distribution = JSON.parse(template.phase_distribution) as PhaseDistribution;
               const balance = calculateBalance(distribution);
 
@@ -175,7 +188,9 @@ export function PhaseTemplateManager({ projectId = 'default-project', onSelectTe
                     <div className="flex-1">
                       <h4 className="font-medium text-gray-900 dark:text-white">{template.name}</h4>
                       {template.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{template.description}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {template.description}
+                        </p>
                       )}
                       <div className="mt-3 space-y-2">
                         <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -213,7 +228,7 @@ export function PhaseTemplateManager({ projectId = 'default-project', onSelectTe
 
         {userTemplates.length > 0 ? (
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {userTemplates.map(template => {
+            {userTemplates.map((template) => {
               const distribution = JSON.parse(template.phase_distribution) as PhaseDistribution;
               const balance = calculateBalance(distribution);
 
@@ -223,10 +238,16 @@ export function PhaseTemplateManager({ projectId = 'default-project', onSelectTe
                   className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                 >
                   <div className="flex justify-between items-start">
-                    <div className="flex-1" onClick={() => onSelectTemplate?.(template)} role="button">
+                    <div
+                      className="flex-1"
+                      onClick={() => onSelectTemplate?.(template)}
+                      role="button"
+                    >
                       <h4 className="font-medium text-gray-900 dark:text-white">{template.name}</h4>
                       {template.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{template.description}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {template.description}
+                        </p>
                       )}
                       <div className="mt-3 space-y-2">
                         <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -260,7 +281,9 @@ export function PhaseTemplateManager({ projectId = 'default-project', onSelectTe
         ) : (
           <div className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
             <p>No custom templates yet</p>
-            <p className="text-sm mt-1">Create a template to save your phase distribution patterns</p>
+            <p className="text-sm mt-1">
+              Create a template to save your phase distribution patterns
+            </p>
           </div>
         )}
       </div>

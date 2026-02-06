@@ -12,7 +12,7 @@ import { LayoutDesigner } from '../layout/LayoutDesigner';
 import {
   calculateLabelGrid,
   getAveryTemplate,
-  type LabelGridConfig
+  type LabelGridConfig,
 } from '../../../utils/shop-order/labelGridCalculator';
 import type { PageLayoutTemplate, LayoutElement, PrintSectionType } from '../../../types/shopOrder';
 
@@ -29,7 +29,7 @@ export default function LabelLayoutDesigner({
   templateCode,
   initialTemplate,
   onSave,
-  onCancel
+  onCancel,
 }: LabelLayoutDesignerProps): JSX.Element {
   const [template, setTemplate] = useState<PageLayoutTemplate | null>(null);
   const [gridConfig, setGridConfig] = useState<LabelGridConfig | null>(null);
@@ -65,7 +65,7 @@ export default function LabelLayoutDesigner({
         elements: [],
         is_default: false,
         created_at: Date.now(),
-        updated_at: Date.now()
+        updated_at: Date.now(),
       };
 
       setTemplate(newTemplate);
@@ -90,7 +90,7 @@ export default function LabelLayoutDesigner({
           grid_rows: savedTemplate.grid_rows,
           grid_gap: savedTemplate.grid_gap,
           page_width: savedTemplate.page_width,
-          page_height: savedTemplate.page_height
+          page_height: savedTemplate.page_height,
         });
         savedId = savedTemplate.id;
       } else {
@@ -105,7 +105,7 @@ export default function LabelLayoutDesigner({
           grid_gap: savedTemplate.grid_gap,
           page_width: savedTemplate.page_width,
           page_height: savedTemplate.page_height,
-          is_default: savedTemplate.is_default
+          is_default: savedTemplate.is_default,
         });
       }
 

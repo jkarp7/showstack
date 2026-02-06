@@ -27,7 +27,7 @@ export const PrintSectionTypeSchema = z.enum([
   'label_5163',
   'label_5164',
   'label_8160',
-  'label_5167'
+  'label_5167',
 ]);
 
 /**
@@ -41,7 +41,7 @@ export const LayoutElementTypeSchema = z.enum([
   'shape',
   'equipment_list',
   'notes_content',
-  'revision_log'
+  'revision_log',
 ]);
 
 /**
@@ -101,7 +101,7 @@ export const DataFieldTypeSchema = z.enum([
   'data_distribution_count',
   'total_ports',
   'active_infrastructure',
-  'inactive_infrastructure'
+  'inactive_infrastructure',
 ]);
 
 /**
@@ -116,7 +116,7 @@ export const DataFieldConfigSchema = z.object({
   fieldType: DataFieldTypeSchema,
   label: z.string().optional(), // Optional label to show before the value
   showLabel: z.boolean().optional(),
-  dateFormat: z.string().optional() // For date fields
+  dateFormat: z.string().optional(), // For date fields
 });
 
 /**
@@ -124,7 +124,7 @@ export const DataFieldConfigSchema = z.object({
  */
 export const TextConfigSchema = z.object({
   content: z.string(),
-  placeholder: z.string().optional()
+  placeholder: z.string().optional(),
 });
 
 /**
@@ -133,7 +133,7 @@ export const TextConfigSchema = z.object({
 export const ImageConfigSchema = z.object({
   src: z.string().optional(), // URL or base64
   altText: z.string().optional(),
-  objectFit: z.enum(['contain', 'cover', 'fill']).optional()
+  objectFit: z.enum(['contain', 'cover', 'fill']).optional(),
 });
 
 /**
@@ -146,9 +146,9 @@ export const TableConfigSchema = z.object({
     z.object({
       field: z.string(),
       label: z.string(),
-      width: z.number().optional()
-    })
-  )
+      width: z.number().optional(),
+    }),
+  ),
 });
 
 /**
@@ -157,7 +157,7 @@ export const TableConfigSchema = z.object({
 export const ShapeConfigSchema = z.object({
   shapeType: ShapeTypeSchema,
   thickness: z.number().optional(),
-  color: z.string().optional()
+  color: z.string().optional(),
 });
 
 /**
@@ -171,7 +171,7 @@ export const EquipmentListConfigSchema = z.object({
  * Configuration for notes content elements (dynamic content)
  */
 export const NotesContentConfigSchema = z.object({
-  noteType: z.enum(['general_conditions', 'general_notes', 'fixture_notes']).optional()
+  noteType: z.enum(['general_conditions', 'general_notes', 'fixture_notes']).optional(),
 });
 
 /**
@@ -192,7 +192,7 @@ export const ElementConfigSchema = z.union([
   ShapeConfigSchema,
   EquipmentListConfigSchema,
   NotesContentConfigSchema,
-  RevisionLogConfigSchema
+  RevisionLogConfigSchema,
 ]);
 
 /**
@@ -209,7 +209,7 @@ export const FontWeightSchema = z.enum([
   '600',
   '700',
   '800',
-  '900'
+  '900',
 ]);
 
 /**
@@ -244,7 +244,7 @@ export const ElementStyleSchema = z.object({
   paddingLeft: z.number().optional(),
 
   // Display
-  opacity: z.number().optional()
+  opacity: z.number().optional(),
 });
 
 /**
@@ -264,14 +264,14 @@ export const LayoutElementSchema = extendBaseEntity({
   layer: z.number().int().nonnegative(),
 
   // Styling
-  style: ElementStyleSchema
+  style: ElementStyleSchema,
 });
 
 /**
  * Page layout template config (stored as JSON in database)
  */
 export const PageLayoutTemplateConfigSchema = z.object({
-  backgroundColor: z.string().optional() // Hex color code (e.g., '#ffffff')
+  backgroundColor: z.string().optional(), // Hex color code (e.g., '#ffffff')
 });
 
 /**
@@ -299,7 +299,7 @@ export const PageLayoutTemplateSchema = extendBaseEntity({
   config: PageLayoutTemplateConfigSchema.optional(),
 
   // Elements (optional, can be empty array)
-  elements: z.array(LayoutElementSchema).optional()
+  elements: z.array(LayoutElementSchema).optional(),
 });
 
 /**
@@ -330,7 +330,7 @@ export type PageLayoutTemplate = z.infer<typeof PageLayoutTemplateSchema>;
 export const CreateLayoutElementSchema = LayoutElementSchema.omit({
   id: true,
   created_at: true,
-  updated_at: true
+  updated_at: true,
 });
 
 /**
@@ -340,7 +340,7 @@ export const CreatePageLayoutTemplateSchema = PageLayoutTemplateSchema.omit({
   id: true,
   created_at: true,
   updated_at: true,
-  elements: true
+  elements: true,
 });
 
 /**
@@ -352,7 +352,7 @@ export const UpdateLayoutElementSchema = LayoutElementSchema.partial().required(
  * Schema for updating a page layout template (all fields optional except id)
  */
 export const UpdatePageLayoutTemplateSchema = PageLayoutTemplateSchema.partial().required({
-  id: true
+  id: true,
 });
 
 /**

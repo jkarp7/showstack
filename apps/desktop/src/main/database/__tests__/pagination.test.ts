@@ -11,7 +11,7 @@ import {
   calculatePageNumber,
   calculateOffset,
   DEFAULT_PAGINATION,
-  MAX_PAGINATION_LIMIT
+  MAX_PAGINATION_LIMIT,
 } from '../utils/pagination';
 
 const ALLOWED_FIELDS = ['id', 'name', 'created_at', 'updated_at'] as const;
@@ -28,12 +28,15 @@ describe('pagination utility', () => {
     });
 
     it('should use provided values', () => {
-      const result = normalizePaginationOptions({
-        offset: 10,
-        limit: 25,
-        sortBy: 'name',
-        sortOrder: 'DESC'
-      }, ALLOWED_FIELDS);
+      const result = normalizePaginationOptions(
+        {
+          offset: 10,
+          limit: 25,
+          sortBy: 'name',
+          sortOrder: 'DESC',
+        },
+        ALLOWED_FIELDS,
+      );
 
       expect(result.offset).toBe(10);
       expect(result.limit).toBe(25);
@@ -177,59 +180,48 @@ describe('pagination utility', () => {
   describe('edge cases', () => {
     describe('empty allowedSortFields', () => {
       it('should throw error in normalizePaginationOptions with empty allowedSortFields', () => {
-        expect(() => normalizePaginationOptions({}, [])).toThrow('allowedSortFields must not be empty');
+        expect(() => normalizePaginationOptions({}, [])).toThrow(
+          'allowedSortFields must not be empty',
+        );
       });
 
       it('should throw error in buildOrderByClause with empty allowedSortFields', () => {
-        expect(() => buildOrderByClause('name', 'ASC', [])).toThrow('allowedSortFields must not be empty');
+        expect(() => buildOrderByClause('name', 'ASC', [])).toThrow(
+          'allowedSortFields must not be empty',
+        );
       });
     });
 
     describe('large offset values', () => {
       it('should handle very large offset values without overflow', () => {
         const largeOffset = Number.MAX_SAFE_INTEGER - 1000;
-        const result = normalizePaginationOptions(
-          { offset: largeOffset },
-          ['id']
-        );
+        const result = normalizePaginationOptions({ offset: largeOffset }, ['id']);
         expect(result.offset).toBe(largeOffset);
       });
 
       it('should handle offset values exceeding MAX_SAFE_INTEGER', () => {
         const hugeOffset = Number.MAX_SAFE_INTEGER + 1000;
-        const result = normalizePaginationOptions(
-          { offset: hugeOffset },
-          ['id']
-        );
+        const result = normalizePaginationOptions({ offset: hugeOffset }, ['id']);
         // Should still be a valid number (though precision may be lost)
         expect(typeof result.offset).toBe('number');
         expect(result.offset).toBeGreaterThan(0);
       });
 
       it('should handle Infinity by falling back to default', () => {
-        const result = normalizePaginationOptions(
-          { offset: Infinity },
-          ['id']
-        );
+        const result = normalizePaginationOptions({ offset: Infinity }, ['id']);
         // Non-finite values fall back to default (0) to prevent SQLite issues
         expect(result.offset).toBe(0);
       });
 
       it('should handle NaN by falling back to default', () => {
-        const result = normalizePaginationOptions(
-          { offset: NaN, limit: NaN },
-          ['id']
-        );
+        const result = normalizePaginationOptions({ offset: NaN, limit: NaN }, ['id']);
         // NaN falls back to defaults
         expect(result.offset).toBe(0);
         expect(result.limit).toBe(50); // DEFAULT_PAGINATION.limit
       });
 
       it('should handle negative Infinity by falling back to default', () => {
-        const result = normalizePaginationOptions(
-          { offset: -Infinity },
-          ['id']
-        );
+        const result = normalizePaginationOptions({ offset: -Infinity }, ['id']);
         expect(result.offset).toBe(0);
       });
     });

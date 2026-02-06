@@ -1,10 +1,30 @@
 export type InfrastructureColumnKey =
-  | 'name' | 'manufacturer' | 'model' | 'quantity' | 'category'
-  | 'ip_address' | 'mac_address' | 'subnet_mask' | 'gateway' | 'vlan_id' | 'hostname'
-  | 'port_count' | 'voltage' | 'amperage' | 'wattage' | 'phase'
-  | 'circuit' | 'circuit_number' | 'dimmer_rack' | 'pd_rack'
-  | 'location' | 'position_x' | 'position_y' | 'position_z'
-  | 'notes' | 'status';
+  | 'name'
+  | 'manufacturer'
+  | 'model'
+  | 'quantity'
+  | 'category'
+  | 'ip_address'
+  | 'mac_address'
+  | 'subnet_mask'
+  | 'gateway'
+  | 'vlan_id'
+  | 'hostname'
+  | 'port_count'
+  | 'voltage'
+  | 'amperage'
+  | 'wattage'
+  | 'phase'
+  | 'circuit'
+  | 'circuit_number'
+  | 'dimmer_rack'
+  | 'pd_rack'
+  | 'location'
+  | 'position_x'
+  | 'position_y'
+  | 'position_z'
+  | 'notes'
+  | 'status';
 
 export interface InfrastructureColumnConfig {
   key: InfrastructureColumnKey;
@@ -51,7 +71,7 @@ export const INFRASTRUCTURE_COLUMN_CONFIGS: InfrastructureColumnConfig[] = [
 
   // Other
   { key: 'notes', label: 'Notes', width: 'w-48' },
-  { key: 'status', label: 'Status', width: 'w-24' }
+  { key: 'status', label: 'Status', width: 'w-24' },
 ];
 
 export const DEFAULT_INFRASTRUCTURE_COLUMN_VISIBILITY: Record<InfrastructureColumnKey, boolean> = {
@@ -91,7 +111,7 @@ export const DEFAULT_INFRASTRUCTURE_COLUMN_VISIBILITY: Record<InfrastructureColu
 
   // Other
   notes: true,
-  status: true
+  status: true,
 };
 
 export const DEFAULT_INFRASTRUCTURE_COLUMN_ORDER: InfrastructureColumnKey[] = [
@@ -102,5 +122,5 @@ export const DEFAULT_INFRASTRUCTURE_COLUMN_ORDER: InfrastructureColumnKey[] = [
   'category',
   'location',
   'notes',
-  'status'
+  'status',
 ];

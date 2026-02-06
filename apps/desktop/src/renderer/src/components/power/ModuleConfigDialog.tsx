@@ -51,7 +51,7 @@ export function ModuleConfigDialog({ rack, onClose }: ModuleConfigDialogProps) {
         start_circuit: startCircuit,
         end_circuit: endCircuit,
         module_type: 'dimmer',
-        watts_per_circuit: 2400
+        watts_per_circuit: 2400,
       });
       await loadModules();
     } catch (error) {
@@ -115,8 +115,11 @@ export function ModuleConfigDialog({ rack, onClose }: ModuleConfigDialogProps) {
               {/* Module List */}
               {modules.length > 0 ? (
                 <div className="space-y-4 mb-6">
-                  {modules.map(module => (
-                    <div key={module.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  {modules.map((module) => (
+                    <div
+                      key={module.id}
+                      className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+                    >
                       <div className="grid grid-cols-12 gap-4 items-center">
                         {/* Circuit Range */}
                         <div className="col-span-3">
@@ -127,7 +130,11 @@ export function ModuleConfigDialog({ rack, onClose }: ModuleConfigDialogProps) {
                             <input
                               type="number"
                               value={module.start_circuit}
-                              onChange={e => handleUpdateModule(module.id, { start_circuit: parseInt(e.target.value) })}
+                              onChange={(e) =>
+                                handleUpdateModule(module.id, {
+                                  start_circuit: parseInt(e.target.value),
+                                })
+                              }
                               min={1}
                               max={rack.circuit_count}
                               className="w-20 px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white"
@@ -136,7 +143,11 @@ export function ModuleConfigDialog({ rack, onClose }: ModuleConfigDialogProps) {
                             <input
                               type="number"
                               value={module.end_circuit}
-                              onChange={e => handleUpdateModule(module.id, { end_circuit: parseInt(e.target.value) })}
+                              onChange={(e) =>
+                                handleUpdateModule(module.id, {
+                                  end_circuit: parseInt(e.target.value),
+                                })
+                              }
                               min={module.start_circuit}
                               max={rack.circuit_count}
                               className="w-20 px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white"
@@ -151,10 +162,14 @@ export function ModuleConfigDialog({ rack, onClose }: ModuleConfigDialogProps) {
                           </label>
                           <select
                             value={module.module_type}
-                            onChange={e => handleUpdateModule(module.id, { module_type: e.target.value as ModuleType })}
+                            onChange={(e) =>
+                              handleUpdateModule(module.id, {
+                                module_type: e.target.value as ModuleType,
+                              })
+                            }
                             className="w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white"
                           >
-                            {MODULE_TYPE_OPTIONS.map(type => (
+                            {MODULE_TYPE_OPTIONS.map((type) => (
                               <option key={type} value={type}>
                                 {type}
                               </option>
@@ -170,7 +185,11 @@ export function ModuleConfigDialog({ rack, onClose }: ModuleConfigDialogProps) {
                           <input
                             type="number"
                             value={module.watts_per_circuit || 2400}
-                            onChange={e => handleUpdateModule(module.id, { watts_per_circuit: parseInt(e.target.value) })}
+                            onChange={(e) =>
+                              handleUpdateModule(module.id, {
+                                watts_per_circuit: parseInt(e.target.value),
+                              })
+                            }
                             className="w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white"
                           />
                         </div>
@@ -183,7 +202,9 @@ export function ModuleConfigDialog({ rack, onClose }: ModuleConfigDialogProps) {
                           <input
                             type="text"
                             value={module.notes || ''}
-                            onChange={e => handleUpdateModule(module.id, { notes: e.target.value })}
+                            onChange={(e) =>
+                              handleUpdateModule(module.id, { notes: e.target.value })
+                            }
                             placeholder="Optional"
                             className="w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white"
                           />

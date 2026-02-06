@@ -6,12 +6,15 @@
 ---
 
 ## Phase 0: The Monorepo Restructure (Week 1)
-*Goal: Create the structural home for the new architecture without breaking the current app.*
+
+_Goal: Create the structural home for the new architecture without breaking the current app._
 
 ### Step 0.1: Workspace Setup
+
 1.  **Initialize Workspaces:**
     In your root `package.json`, replace the current contents with the workspace configuration.
-    *Action:* Rename the current `package.json` to `package.old.json` (as a backup) and create a new `package.json`:
+    _Action:_ Rename the current `package.json` to `package.old.json` (as a backup) and create a new `package.json`:
+
     ```json
     {
       "name": "showstack-monorepo",
@@ -21,28 +24,25 @@
         "build": "npm run build --workspace=@showstack/desktop",
         "test": "npm run test --workspaces"
       },
-      "workspaces": [
-        "apps/*",
-        "packages/*"
-      ]
+      "workspaces": ["apps/*", "packages/*"]
     }
     ```
 
 2.  **Move Existing App:**
-    * Create directory `apps/desktop`.
-    * Move **all** current source code and config files (`src`, `electron.vite.config.ts`, `tsconfig.json`, `tailwind.config.js`, `.eslintrc.cjs`, etc.) into `apps/desktop`.
-    * Move the `package.old.json` into `apps/desktop`, rename it back to `package.json`, and update its name:
+    - Create directory `apps/desktop`.
+    - Move **all** current source code and config files (`src`, `electron.vite.config.ts`, `tsconfig.json`, `tailwind.config.js`, `.eslintrc.cjs`, etc.) into `apps/desktop`.
+    - Move the `package.old.json` into `apps/desktop`, rename it back to `package.json`, and update its name:
       ```json
       {
         "name": "@showstack/desktop",
-        "version": "0.1.0-alpha",
+        "version": "0.1.0-alpha"
         // ... rest of file (dependencies, scripts, etc.)
       }
       ```
 
 3.  **Create Shared Package:**
-    * Create directory `packages/shared`.
-    * Initialize `packages/shared/package.json`:
+    - Create directory `packages/shared`.
+    - Initialize `packages/shared/package.json`:
       ```json
       {
         "name": "@showstack/shared",
@@ -60,9 +60,10 @@
         }
       }
       ```
-    * Create `packages/shared/tsconfig.json` extending the base config.
+    - Create `packages/shared/tsconfig.json` extending the base config.
 
 ### Step 0.2: Fix Paths & Dependencies
+
 1.  **Install Shared Package:**
     In `apps/desktop/package.json`, add the dependency:
     ```json
@@ -77,90 +78,103 @@
 ---
 
 ## Phase 1: The "Contract" (Type Safety) (Week 1-2)
-*Goal: Define the strict shape of data using Zod to ensure runtime safety across boundaries.*
+
+_Goal: Define the strict shape of data using Zod to ensure runtime safety across boundaries._
 
 ### Step 1.1: Install Zod
+
 In `packages/shared`:
+
 ```bash
 npm install zod
 ```
 
 ### Step 1.2: Define Schemas
+
 Create Zod schemas mirroring your current TypeScript interfaces.
 
-* **File:** `packages/shared/src/schemas/fixture.ts`
-    ```typescript
-    import { z } from 'zod';
+- **File:** `packages/shared/src/schemas/fixture.ts`
 
-    export const FixtureSchema = z.object({
-      id: z.string().uuid(),
-      manufacturer: z.string(),
-      model: z.string(),
-      mode: z.string().optional(),
-      universe: z.number().int().min(1),
-      address: z.number().int().min(1).max(512),
-      channel: z.string().optional(),
-      type: z.string(),
-      // Add all other fields from your projectSchema.ts
-    });
+  ```typescript
+  import { z } from 'zod';
 
-    export type Fixture = z.infer<typeof FixtureSchema>;
-    ```
+  export const FixtureSchema = z.object({
+    id: z.string().uuid(),
+    manufacturer: z.string(),
+    model: z.string(),
+    mode: z.string().optional(),
+    universe: z.number().int().min(1),
+    address: z.number().int().min(1).max(512),
+    channel: z.string().optional(),
+    type: z.string(),
+    // Add all other fields from your projectSchema.ts
+  });
 
-* **File:** `packages/shared/src/schemas/project.ts`
-    ```typescript
-    import { z } from 'zod';
+  export type Fixture = z.infer<typeof FixtureSchema>;
+  ```
 
-    export const ProjectSchema = z.object({
-      id: z.string().uuid(),
-      name: z.string().min(1),
-      venue: z.string().optional(),
-      created_at: z.number(),
-      updated_at: z.number(),
-    });
-    
-    export type Project = z.infer<typeof ProjectSchema>;
-    ```
+- **File:** `packages/shared/src/schemas/project.ts`
 
-* **File:** `packages/shared/src/index.ts`
-    ```typescript
-    export * from './schemas/fixture';
-    export * from './schemas/project';
-    export * from './constants/ipc';
-    ```
+  ```typescript
+  import { z } from 'zod';
+
+  export const ProjectSchema = z.object({
+    id: z.string().uuid(),
+    name: z.string().min(1),
+    venue: z.string().optional(),
+    created_at: z.number(),
+    updated_at: z.number(),
+  });
+
+  export type Project = z.infer<typeof ProjectSchema>;
+  ```
+
+- **File:** `packages/shared/src/index.ts`
+  ```typescript
+  export * from './schemas/fixture';
+  export * from './schemas/project';
+  export * from './constants/ipc';
+  ```
 
 ### Step 1.3: Define IPC Channels
+
 Create a single source of truth for IPC strings to prevent typos.
-* **File:** `packages/shared/src/constants/ipc.ts`
-    ```typescript
-    export const CHANNELS = {
-      FIXTURES: {
-        GET_ALL: 'fixtures:get-all',
-        CREATE: 'fixtures:create',
-        UPDATE: 'fixtures:update',
-        DELETE: 'fixtures:delete',
-      },
-      PROJECTS: {
-        GET_CURRENT: 'projects:get-current',
-        SAVE: 'projects:save',
-      }
-    } as const;
-    ```
+
+- **File:** `packages/shared/src/constants/ipc.ts`
+  ```typescript
+  export const CHANNELS = {
+    FIXTURES: {
+      GET_ALL: 'fixtures:get-all',
+      CREATE: 'fixtures:create',
+      UPDATE: 'fixtures:update',
+      DELETE: 'fixtures:delete',
+    },
+    PROJECTS: {
+      GET_CURRENT: 'projects:get-current',
+      SAVE: 'projects:save',
+    },
+  } as const;
+  ```
 
 ---
 
 ## Phase 2: The Heart Transplant (Database Layer) (Week 2-3)
-*Goal: Replace in-memory `sql.js` with native `better-sqlite3` via Prisma.*
+
+_Goal: Replace in-memory `sql.js` with native `better-sqlite3` via Prisma._
 
 ### Step 2.1: Install Prisma in Desktop
+
 In `apps/desktop`:
+
 ```bash
 npm install prisma --save-dev
 npm install @prisma/client
 ```
 
 ### Step 2.2: Define Prisma Schema
+
 Create `apps/desktop/prisma/schema.prisma`.
+
 ```prisma
 datasource db {
   provider = "sqlite"
@@ -182,7 +196,7 @@ model Fixture {
   channel      String?
   type         String
   // ... rest of fields
-  
+
   projectId    String
   project      Project @relation(fields: [projectId], references: [id])
 }
@@ -197,6 +211,7 @@ model Project {
 ```
 
 ### Step 2.3: Database Service
+
 Create `apps/desktop/src/main/services/DatabaseService.ts`. This replaces your current `database/index.ts`.
 
 ```typescript
@@ -213,7 +228,7 @@ export class DatabaseService {
 
     // Define path in User Data folder (e.g., AppData/Roaming/ShowStack)
     this.dbPath = path.join(app.getPath('userData'), 'showstack.db');
-    
+
     // We use an environment variable to tell Prisma where the file is
     process.env.DATABASE_URL = `file:${this.dbPath}`;
 
@@ -228,10 +243,10 @@ export class DatabaseService {
     // Run migrations (if you have them) or push schema
     // For local desktop apps, 'db push' is often safer/easier than migrations
     // Warning: In production, you will need a migration strategy.
-    
+
     // CRITICAL: Enable Write-Ahead Logging for performance and concurrency
     await this.instance.$executeRaw`PRAGMA journal_mode = WAL;`;
-    
+
     return this.instance;
   }
 
@@ -247,9 +262,11 @@ export class DatabaseService {
 ---
 
 ## Phase 3: The Brain Surgery (Service Layer) (Week 3-4)
-*Goal: Decouple business logic from IPC handlers.*
+
+_Goal: Decouple business logic from IPC handlers._
 
 ### Step 3.1: Create Feature Services
+
 Move logic from `src/main/ipc/fixtures.ts` to `apps/desktop/src/main/services/FixtureService.ts`.
 
 ```typescript
@@ -259,7 +276,7 @@ import { FixtureSchema } from '@showstack/shared';
 export class FixtureService {
   static async create(projectId: string, data: unknown) {
     const db = DatabaseService.client;
-    
+
     // Validate incoming data against Zod schema
     // This throws an error if data is invalid, protecting the DB
     const validated = FixtureSchema.parse(data);
@@ -282,6 +299,7 @@ export class FixtureService {
 ```
 
 ### Step 3.2: Rewire IPC Handlers
+
 Refactor `src/main/ipc/fixtures.ts` to be a "dumb" wrapper.
 
 ```typescript
@@ -308,16 +326,21 @@ export function registerFixtureHandlers() {
 ---
 
 ## Phase 4: Nerve Rewiring (Frontend State) (Week 5-6)
-*Goal: Remove data fetching from Zustand and use React Query.*
+
+_Goal: Remove data fetching from Zustand and use React Query._
 
 ### Step 4.1: Install TanStack Query
+
 In `apps/desktop`:
+
 ```bash
 npm install @tanstack/react-query
 ```
 
 ### Step 4.2: Setup Provider
+
 Wrap your app in `apps/desktop/src/renderer/src/App.tsx`:
+
 ```tsx
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -333,7 +356,9 @@ export function App() {
 ```
 
 ### Step 4.3: Create Query Hooks
+
 Create `apps/desktop/src/renderer/src/hooks/queries/useFixtures.ts`.
+
 ```typescript
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CHANNELS } from '@showstack/shared';
@@ -358,7 +383,9 @@ export function useCreateFixture(projectId: string) {
 ```
 
 ### Step 4.4: Refactor Components
+
 Update `VirtualDataGrid.tsx` to remove Zustand usage.
+
 ```tsx
 // Before
 // const fixtures = useFixtureStore(state => state.fixtures);
@@ -373,9 +400,11 @@ return <DataGrid data={fixtures} ... />;
 ---
 
 ## Phase 5: The "OS" Pivot (Unified Resource Model) (Week 7+)
-*Goal: Implement the polymorphic "Asset" structure to support Sound/Video.*
+
+_Goal: Implement the polymorphic "Asset" structure to support Sound/Video._
 
 ### Step 5.1: Update Prisma Schema
+
 Refactor `schema.prisma` to support polymorphism.
 
 ```prisma
@@ -385,7 +414,7 @@ model Asset {
   weight      Float
   cost        Float
   projectId   String
-  
+
   // Relations
   fixtureData FixtureData?
   audioData   AudioData?
@@ -408,7 +437,9 @@ model AudioData {
 ```
 
 ### Step 5.2: Create Migration Script
+
 Write a script to migrate existing `Fixture` rows into `Asset` + `FixtureData` rows.
+
 1. Read all rows from old `Fixture` table.
 2. For each, create an `Asset` row with common fields (weight, cost).
 3. Create a `FixtureData` row with lighting-specific fields.
@@ -419,28 +450,33 @@ Write a script to migrate existing `Fixture` rows into `Asset` + `FixtureData` r
 ## Execution Checklist
 
 ### Week 1: Setup
+
 - [ ] Create Monorepo structure (apps/desktop, packages/shared).
 - [ ] Set up `@showstack/shared` with Zod.
 - [ ] Define `Fixture` and `Project` schemas in shared package.
 - [ ] Verify `npm run dev` works in the new structure.
 
 ### Week 2: Database
+
 - [ ] Install Prisma & `better-sqlite3` in desktop app.
 - [ ] Create `schema.prisma` mirroring current data structure.
 - [ ] Implement `DatabaseService.ts` with correct path resolution and WAL mode.
 
 ### Week 3: Services
+
 - [ ] Create `FixtureService.ts` (CRUD logic).
 - [ ] Create `ProjectService.ts` (CRUD logic).
 - [ ] Refactor IPC handlers to import CHANNELS and call Services.
 
 ### Week 4: Frontend Hookup
+
 - [ ] Setup `QueryClientProvider` in root App component.
 - [ ] Create `useFixtures` and `useCreateFixture` hooks.
 - [ ] Refactor `VirtualDataGrid` to use React Query.
 - [ ] Remove data fetching logic from `fixtureStore.ts` (keep UI state).
 
 ### Week 5: Cleanup & Verification
+
 - [ ] Delete `sql.js` dependency.
 - [ ] Delete manual SQL migration scripts (`src/main/database`).
 - [ ] Verify 100% feature parity with Alpha v0.1.0.

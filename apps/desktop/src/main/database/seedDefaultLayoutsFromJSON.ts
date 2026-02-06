@@ -52,8 +52,7 @@ export function seedDefaultPageLayoutsFromJSON(): void {
     }
 
     // Read all JSON files in the directory
-    const files = fs.readdirSync(DEFAULT_LAYOUTS_DIR)
-      .filter(file => file.endsWith('.json'));
+    const files = fs.readdirSync(DEFAULT_LAYOUTS_DIR).filter((file) => file.endsWith('.json'));
 
     if (files.length === 0) {
       console.warn('⚠️  No JSON layout files found in directory');
@@ -90,11 +89,11 @@ export function seedDefaultPageLayoutsFromJSON(): void {
           grid_gap: data.template.grid_gap,
           page_width: data.template.page_width,
           page_height: data.template.page_height,
-          is_default: data.template.is_default
+          is_default: data.template.is_default,
         };
 
         // Prepare elements data (stringify config and style)
-        const elementsData = data.elements.map(el => ({
+        const elementsData = data.elements.map((el) => ({
           element_type: el.element_type,
           config: JSON.stringify(el.config),
           grid_column: el.grid_column,
@@ -102,7 +101,7 @@ export function seedDefaultPageLayoutsFromJSON(): void {
           column_span: el.column_span,
           row_span: el.row_span,
           layer: el.layer || 0,
-          style: JSON.stringify(el.style)
+          style: JSON.stringify(el.style),
         }));
 
         // Create the layout

@@ -13,6 +13,7 @@
 Transform the Prep module's Shop Order builder from the current section-based dialog workflow to a spreadsheet-like table interface where revisions are columns rather than snapshots. This better supports vectorworks imports, bulk data entry, and matches designers' familiar workflows (Excel/Google Sheets/Numbers).
 
 **Key Problem Being Solved:**
+
 - Current dialog-based item insertion is slow for bulk data entry
 - "Generate Revision" button workflow is cumbersome
 - Doesn't match designers' familiar spreadsheet workflows
@@ -23,6 +24,7 @@ Transform the Prep module's Shop Order builder from the current section-based di
 ## Current vs. New Architecture
 
 ### Current Workflow
+
 ```
 1. Click "+ Add Item" → Dialog opens
 2. Fill in description, active, spare, venue quantities
@@ -32,6 +34,7 @@ Transform the Prep module's Shop Order builder from the current section-based di
 ```
 
 ### New Workflow
+
 ```
 1. Inline table editing (like Excel)
 2. Type description, quantities directly in cells
@@ -52,6 +55,7 @@ Moving Lights      | MAC Aura XB |   8   |   8   |  10   |   2   |   3
 ```
 
 **Key Characteristics:**
+
 - Simple, spreadsheet-like layout
 - Section dropdown with carry-down behavior
 - Revision columns = Active quantity only
@@ -74,6 +78,7 @@ DELTA | RENTAL | TOTAL | Active | Spare | Description        | Venue
 ```
 
 **Key Features:**
+
 - **DELTA column**: First column, shows revision changes (+/-/~)
 - **RENTAL & TOTAL**: Prominent styling (bold, highlighted)
 - **Venue Qty**: Right-aligned
@@ -162,7 +167,7 @@ const migrateToTableFormat = async (projectId: string) => {
 
     await updateItem(item.id, {
       revision_quantities: JSON.stringify(revQty),
-      deleted_in_revision: item.removed_in_revision
+      deleted_in_revision: item.removed_in_revision,
       // spare_qty already exists, no migration needed
     });
   }
@@ -172,11 +177,13 @@ const migrateToTableFormat = async (projectId: string) => {
 ### Rollback Safety
 
 **Keep old columns for 2 releases:**
+
 - Don't drop `active_qty`, `added_in_revision`, `modified_in_revision`, `removed_in_revision`
 - Dual-write to both old and new columns during transition
 - Feature flag allows instant rollback
 
 **Feature Flag:**
+
 ```typescript
 const useTableBasedEditor = localStorage.getItem('prep.useTableEditor') === 'true';
 
@@ -192,13 +199,16 @@ const useTableBasedEditor = localStorage.getItem('prep.useTableEditor') === 'tru
 ## Implementation Phases
 
 ### Phase 1: Database & Core Logic (1 week)
+
 **Files:**
+
 - `/src/main/database/schema.ts` - Add columns
 - `/src/renderer/src/types/prep.ts` - Update interfaces
 - `/src/store/prepStore.ts` - Update store methods
 - `/src/main/database/queries/prep.ts` - Update queries
 
 **Tasks:**
+
 1. Add `revision_quantities` and `deleted_in_revision` columns
 2. Update TypeScript interfaces
 3. Create utilities for JSON parsing/updating
@@ -207,12 +217,15 @@ const useTableBasedEditor = localStorage.getItem('prep.useTableEditor') === 'tru
 6. Update prepStore methods
 
 ### Phase 2: ShopOrderTable Component (1.5 weeks)
+
 **Files:**
+
 - `/src/renderer/src/components/prep/ShopOrderTable.tsx` (NEW)
 - `/src/renderer/src/components/prep/RevisionColumnHeader.tsx` (NEW)
 - `/src/renderer/src/components/prep/SectionDropdownCell.tsx` (NEW)
 
 **Tasks:**
+
 1. Build main table component
 2. Implement inline cell editing
 3. Section dropdown with carry-down behavior
@@ -222,13 +235,16 @@ const useTableBasedEditor = localStorage.getItem('prep.useTableEditor') === 'tru
 7. Notes modal
 
 ### Phase 3: Print View with DELTA Column (1 week)
+
 **Files:**
+
 - `/src/renderer/src/components/prep/ItemNotesModal.tsx` (NEW)
 - `/src/renderer/src/components/prep/VenueInventoryPage.tsx` (NEW)
 - `/src/renderer/src/components/prep/RevisionChangeLogPage.tsx` (NEW)
 - `/src/renderer/src/pages/modules/Prep.tsx`
 
 **Tasks:**
+
 1. DELTA column showing +/-/~ for changes
 2. RENTAL & TOTAL columns with prominent styling
 3. Venue Qty right-aligned
@@ -238,18 +254,23 @@ const useTableBasedEditor = localStorage.getItem('prep.useTableEditor') === 'tru
 7. Revision Change Log page
 
 ### Phase 4: Import/Export (0.5 weeks)
+
 **Files:**
+
 - `/src/renderer/src/components/prep/ShopOrderTable.tsx`
 - `/src/main/ipc/prep.ts`
 
 **Tasks:**
+
 1. Paste from clipboard (TSV/CSV)
 2. Vectorworks import mapping
 3. Export to spreadsheet
 4. Copy/paste individual cells
 
 ### Phase 5: Performance & Polish (0.5 weeks)
+
 **Tasks:**
+
 1. Virtual scrolling for 100+ items
 2. Debounced saves
 3. Keyboard shortcuts
@@ -265,6 +286,7 @@ const useTableBasedEditor = localStorage.getItem('prep.useTableEditor') === 'tru
 ### Paste from Spreadsheet
 
 **Input format:**
+
 ```
 Description    Section         Rev 0 Active  Rev 0 Spare  Venue
 LED Par        Moving Lights   10            2            0
@@ -274,12 +296,14 @@ MAC Aura       Moving Lights   8             1            2
 ### Vectorworks Import
 
 **LightWright export format:**
+
 ```csv
 Position,Type,Unit #,Wattage,Purpose
 1st Electric,Source Four 750W 26°,1,750,Front Light
 ```
 
 **Mapping:**
+
 - Group by Type → Description
 - Map Position → Section
 - Count units → Rev 0 Active quantity
@@ -294,7 +318,7 @@ Calculate on-demand by comparing column values horizontally:
 
 ```typescript
 const detectChanges = (items, fromRev, toRev, previousSpareSnapshot) => {
-  items.forEach(item => {
+  items.forEach((item) => {
     const revQty = JSON.parse(item.revision_quantities);
     const prevActive = revQty[fromRev] || 0;
     const currActive = revQty[toRev] || 0;
@@ -320,17 +344,20 @@ const detectChanges = (items, fromRev, toRev, previousSpareSnapshot) => {
 ## Print Output Pages
 
 ### 1. Main Shop Order
+
 - DELTA column with change indicators
 - RENTAL & TOTAL columns prominent
 - Section headers with notes
 - Line notes below items
 
 ### 2. Venue-Owned Equipment Inventory (Optional)
+
 - Lists all items with venue_qty > 0
 - Shows allocation breakdown
 - Optional printable page
 
 ### 3. Revision Change Log (Optional)
+
 - Full change log for revision
 - Additions, deletions, modifications
 - Old → new quantities
@@ -350,15 +377,18 @@ const detectChanges = (items, fromRev, toRev, previousSpareSnapshot) => {
 ## Breaking Changes
 
 ### For Users
+
 - New UI requires retraining
 - Different revision workflow (columns vs. snapshots)
 - Notes accessed via modal instead of inline
 
 ### For Data
+
 - Existing projects need migration
 - Old revision tracking replaced by column-based approach
 
 ### Mitigation
+
 - Feature flag for gradual rollout
 - Migration script for existing data
 - Keep old columns for rollback safety
@@ -377,9 +407,11 @@ const detectChanges = (items, fromRev, toRev, previousSpareSnapshot) => {
 ## Notes
 
 **User Feedback:**
+
 > "Most designers/associates are used to using Google Sheets, Excel, Numbers, or even a table inside a Pages document to generate their shop order. I think a more table format would work better here instead of this insert item methodology we have going now."
 
 **Section Notes Problem Solution:**
+
 > "I had built out a similar system within google sheets but had issues with finding an elegant way to handle section notes and line notes."
 
 **Solution:** Section notes and line notes stored separately, rendered in print view only (not in table). Keeps data entry table clean and focused.

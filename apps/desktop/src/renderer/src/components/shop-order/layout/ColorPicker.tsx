@@ -57,7 +57,7 @@ function saveCustomColors(colors: string[]): void {
     const data: CustomColorStorage = {
       version: 1,
       colors: colors.slice(0, MAX_CUSTOM_COLORS),
-      lastUpdated: Date.now()
+      lastUpdated: Date.now(),
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (error) {
@@ -79,7 +79,7 @@ function addCustomColor(color: string, existing: string[]): string[] {
 }
 
 function removeCustomColor(color: string, existing: string[]): string[] {
-  return existing.filter(c => c !== color);
+  return existing.filter((c) => c !== color);
 }
 
 // Hex validation and formatting
@@ -95,7 +95,7 @@ function formatHex(hex: string): string {
   if (cleaned.length === 3) {
     cleaned = cleaned
       .split('')
-      .map(c => c + c)
+      .map((c) => c + c)
       .join('');
   }
 
@@ -109,7 +109,7 @@ export function ColorPicker({
   onOpacityChange,
   label,
   showOpacity = false,
-  allowTransparent = false
+  allowTransparent = false,
 }: ColorPickerProps) {
   const [customColors, setCustomColors] = useState<string[]>([]);
   const [hexInput, setHexInput] = useState<string>('');
@@ -174,13 +174,11 @@ export function ColorPicker({
   return (
     <div className="space-y-3">
       {/* Label */}
-      {label && (
-        <label className="block text-sm font-medium text-gray-300 mb-2">{label}</label>
-      )}
+      {label && <label className="block text-sm font-medium text-gray-300 mb-2">{label}</label>}
 
       {/* Preset Color Swatches */}
       <div className="grid grid-cols-4 gap-2">
-        {PRESET_COLORS.map(color => (
+        {PRESET_COLORS.map((color) => (
           <button
             key={color}
             onClick={() => handlePresetClick(color)}
@@ -203,7 +201,7 @@ export function ColorPicker({
             <span className="text-xs font-semibold text-gray-400 uppercase">Custom Colors</span>
           </div>
           <div className="flex items-center gap-2 overflow-x-auto pb-2">
-            {customColors.map(color => (
+            {customColors.map((color) => (
               <div key={color} className="relative group flex-shrink-0">
                 <button
                   onClick={() => handlePresetClick(color)}
@@ -263,9 +261,7 @@ export function ColorPicker({
             }`}
           />
         </div>
-        {hexError && (
-          <p className="text-xs text-red-400 mt-1">Invalid hex code</p>
-        )}
+        {hexError && <p className="text-xs text-red-400 mt-1">Invalid hex code</p>}
       </div>
 
       {/* Transparent Button */}
@@ -290,7 +286,7 @@ export function ColorPicker({
           <input
             type="range"
             value={(opacity !== undefined ? opacity : 1) * 100}
-            onChange={e => onOpacityChange(parseInt(e.target.value) / 100)}
+            onChange={(e) => onOpacityChange(parseInt(e.target.value) / 100)}
             min="0"
             max="100"
             step="1"
@@ -317,7 +313,7 @@ export function ColorPicker({
             <input
               type="color"
               value={value === 'transparent' ? '#000000' : value}
-              onChange={e => onChange(e.target.value)}
+              onChange={(e) => onChange(e.target.value)}
               className="w-full h-10 rounded cursor-pointer"
             />
           </div>

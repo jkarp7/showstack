@@ -10,11 +10,14 @@ export function PhaseLabelsSettings() {
   const [phaseLabels, setPhaseLabels] = useState({
     phase_label_a: currentProject?.phase_label_a || 'A',
     phase_label_b: currentProject?.phase_label_b || 'B',
-    phase_label_c: currentProject?.phase_label_c || 'C'
+    phase_label_c: currentProject?.phase_label_c || 'C',
   });
 
   const [isSaving, setIsSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [saveMessage, setSaveMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   const hasChanges =
     phaseLabels.phase_label_a !== (currentProject?.phase_label_a || 'A') ||
@@ -36,7 +39,7 @@ export function PhaseLabelsSettings() {
       await updateProject(currentProject.id, {
         phase_label_a: phaseLabels.phase_label_a,
         phase_label_b: phaseLabels.phase_label_b,
-        phase_label_c: phaseLabels.phase_label_c
+        phase_label_c: phaseLabels.phase_label_c,
       });
 
       setSaveMessage({ type: 'success', text: 'Phase labels saved successfully' });
@@ -56,7 +59,7 @@ export function PhaseLabelsSettings() {
     setPhaseLabels({
       phase_label_a: defaults.phase_label_a!,
       phase_label_b: defaults.phase_label_b!,
-      phase_label_c: defaults.phase_label_c!
+      phase_label_c: defaults.phase_label_c!,
     });
   };
 
@@ -65,10 +68,14 @@ export function PhaseLabelsSettings() {
       <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Phase Labels</h2>
-          <p className="text-gray-600 dark:text-gray-400">Customize phase labels for power distribution</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            Customize phase labels for power distribution
+          </p>
         </div>
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 text-center">
-          <p className="text-yellow-800 dark:text-yellow-200">Please select or create a project to configure phase labels</p>
+          <p className="text-yellow-800 dark:text-yellow-200">
+            Please select or create a project to configure phase labels
+          </p>
         </div>
       </div>
     );
@@ -79,7 +86,8 @@ export function PhaseLabelsSettings() {
       <div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Phase Labels</h2>
         <p className="text-gray-600 dark:text-gray-400">
-          Customize power phase labels for <span className="font-semibold">{currentProject.name}</span>
+          Customize power phase labels for{' '}
+          <span className="font-semibold">{currentProject.name}</span>
         </p>
       </div>
 
@@ -90,8 +98,9 @@ export function PhaseLabelsSettings() {
         </h3>
 
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-          Customize how power phases are labeled throughout this project. Common alternatives include numeric (1/2/3) or
-          line notation (L1/L2/L3). Changes apply to all power displays, reports, and exports.
+          Customize how power phases are labeled throughout this project. Common alternatives
+          include numeric (1/2/3) or line notation (L1/L2/L3). Changes apply to all power displays,
+          reports, and exports.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -143,28 +152,38 @@ export function PhaseLabelsSettings() {
 
         {/* Common Presets */}
         <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-6">
-          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Common Presets</h4>
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+            Common Presets
+          </h4>
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setPhaseLabels({ phase_label_a: 'A', phase_label_b: 'B', phase_label_c: 'C' })}
+              onClick={() =>
+                setPhaseLabels({ phase_label_a: 'A', phase_label_b: 'B', phase_label_c: 'C' })
+              }
               className="px-3 py-1.5 text-sm bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-500 transition"
             >
               A / B / C (Default)
             </button>
             <button
-              onClick={() => setPhaseLabels({ phase_label_a: '1', phase_label_b: '2', phase_label_c: '3' })}
+              onClick={() =>
+                setPhaseLabels({ phase_label_a: '1', phase_label_b: '2', phase_label_c: '3' })
+              }
               className="px-3 py-1.5 text-sm bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-500 transition"
             >
               1 / 2 / 3 (Numeric)
             </button>
             <button
-              onClick={() => setPhaseLabels({ phase_label_a: 'L1', phase_label_b: 'L2', phase_label_c: 'L3' })}
+              onClick={() =>
+                setPhaseLabels({ phase_label_a: 'L1', phase_label_b: 'L2', phase_label_c: 'L3' })
+              }
               className="px-3 py-1.5 text-sm bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-500 transition"
             >
               L1 / L2 / L3 (Line)
             </button>
             <button
-              onClick={() => setPhaseLabels({ phase_label_a: 'X', phase_label_b: 'Y', phase_label_c: 'Z' })}
+              onClick={() =>
+                setPhaseLabels({ phase_label_a: 'X', phase_label_b: 'Y', phase_label_c: 'Z' })
+              }
               className="px-3 py-1.5 text-sm bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-500 transition"
             >
               X / Y / Z

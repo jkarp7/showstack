@@ -20,7 +20,12 @@ interface ImportConflictDialogProps {
   onResolve: (action: 'replace' | 'keep-both' | 'cancel') => void;
 }
 
-export function ImportConflictDialog({ isOpen, conflict, filePath, onResolve }: ImportConflictDialogProps) {
+export function ImportConflictDialog({
+  isOpen,
+  conflict,
+  filePath,
+  onResolve,
+}: ImportConflictDialogProps) {
   const [selectedAction, setSelectedAction] = useState<'replace' | 'keep-both'>('replace');
 
   if (!isOpen) return null;
@@ -33,7 +38,7 @@ export function ImportConflictDialog({ isOpen, conflict, filePath, onResolve }: 
       year: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
-      hour12: true
+      hour12: true,
     });
   };
 
@@ -50,13 +55,19 @@ export function ImportConflictDialog({ isOpen, conflict, filePath, onResolve }: 
       <div className="bg-gray-800 rounded-lg border border-gray-700 shadow-xl w-full max-w-md mx-4">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Project Already Exists</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            Project Already Exists
+          </h2>
         </div>
 
         {/* Content */}
         <div className="px-6 py-4 space-y-4">
           <p className="text-gray-300 text-sm">
-            The project <span className="font-semibold text-gray-900 dark:text-white">"{conflict.importedProject.name}"</span> already exists in your database.
+            The project{' '}
+            <span className="font-semibold text-gray-900 dark:text-white">
+              "{conflict.importedProject.name}"
+            </span>{' '}
+            already exists in your database.
           </p>
 
           {/* Version Comparison */}
@@ -72,7 +83,9 @@ export function ImportConflictDialog({ isOpen, conflict, filePath, onResolve }: 
             </div>
 
             <div className="border-t border-gray-700 pt-3">
-              <div className="text-xs font-medium text-gray-500 uppercase mb-1">Imported Version</div>
+              <div className="text-xs font-medium text-gray-500 uppercase mb-1">
+                Imported Version
+              </div>
               <div className="text-sm text-gray-300">
                 <div className="font-medium">{conflict.importedProject.name}</div>
                 <div className="text-xs text-gray-400 mt-1">

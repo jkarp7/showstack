@@ -9,7 +9,7 @@ import {
   ConnectionError,
   QueryError,
   TransactionError,
-  MigrationError
+  MigrationError,
 } from '../DatabaseError';
 
 describe('DatabaseError', () => {

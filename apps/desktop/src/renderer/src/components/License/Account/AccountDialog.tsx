@@ -53,7 +53,7 @@ export function AccountDialog({ isOpen, onClose }: AccountDialogProps) {
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'license', label: 'License', icon: Key },
-    { id: 'subscription', label: 'Subscription', icon: CreditCard }
+    { id: 'subscription', label: 'Subscription', icon: CreditCard },
   ] as const;
 
   return (

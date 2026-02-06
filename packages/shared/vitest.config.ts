@@ -23,12 +23,12 @@ export default defineConfig({
         '**/test/**',
         '**/__tests__/**',
         '**/*.test.*',
-        '**/*.spec.*'
-      ]
+        '**/*.spec.*',
+      ],
     },
 
     // Timeouts
     testTimeout: 5000,
-    hookTimeout: 5000
-  }
+    hookTimeout: 5000,
+  },
 });

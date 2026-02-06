@@ -14,7 +14,7 @@ export enum LogLevel {
   DEBUG = 'DEBUG',
   INFO = 'INFO',
   WARN = 'WARN',
-  ERROR = 'ERROR'
+  ERROR = 'ERROR',
 }
 
 interface LogContext {
@@ -89,7 +89,7 @@ class Logger {
       console.error(formatted, {
         name: context.name,
         message: context.message,
-        stack: context.stack
+        stack: context.stack,
       });
     } else if (context) {
       console.error(formatted, context);

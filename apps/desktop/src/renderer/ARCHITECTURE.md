@@ -101,6 +101,7 @@ import { COLORS, UI_PATTERNS, MODULE_COLORS } from '@/constants';
 ```
 
 **Available constants:**
+
 - `COLORS`: Background, text, border, and action colors
 - `SPACING`: Consistent padding/margin values
 - `ROUNDED`: Border radius values
@@ -125,6 +126,7 @@ const debouncedSave = debounce(saveData, 500);
 ```
 
 **Available utilities:**
+
 - Date/time formatting
 - DMX address calculations and parsing
 - Debounce function

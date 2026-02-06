@@ -15,11 +15,13 @@
 Console integration enables **bidirectional communication** between ShowStack and professional lighting consoles, eliminating manual data entry and ensuring fixture data stays synchronized between design and control systems.
 
 ### Supported Consoles (Phase 1-2)
+
 - **ETC Eos Family** - Eos, Ion, Gio, Element, ColorSource (via OSC)
 - **GrandMA2** - grandMA2, grandMA2 light, onPC (via Telnet/XML)
 - **GrandMA3** - grandMA3, grandMA3 light, onPC (via MA-Net3/OSC)
 
 ### Core Capabilities
+
 - **Patch Import:** Import patch from console → ShowStack
 - **Patch Export:** Send fixture updates from ShowStack → console
 - **Live Sync:** Real-time updates when fixtures change
@@ -43,6 +45,7 @@ Console integration enables **bidirectional communication** between ShowStack an
 ## Architecture Decisions
 
 ### 1. Protocol Strategy
+
 - **ETC Eos:** OSC (Open Sound Control) over UDP
   - Library: `osc` or `node-osc`
   - Port: 3032 (default Eos OSC RX port)
@@ -59,23 +62,27 @@ Console integration enables **bidirectional communication** between ShowStack an
   - Port: 8000+ (OSC), 9000+ (MA-Net3)
 
 ### 2. Connection Management
+
 - **Discovery:** Auto-discover consoles on network (mDNS/Bonjour)
 - **Persistent Connections:** Keep socket connections alive
 - **Reconnection:** Auto-reconnect on network changes
 - **Multiple Consoles:** Support multiple console connections per project
 
 ### 3. Data Synchronization
+
 - **Conflict Resolution:** User chooses sync direction (Console → ShowStack or ShowStack → Console)
 - **Field Mapping:** Map console fields to ShowStack fields (configurable)
 - **Partial Sync:** Sync only selected fixtures or fields
 - **Change Detection:** Track what changed since last sync
 
 ### 4. State Management
+
 - **Console Store:** Zustand store for console connections and sync state
 - **Connection Status:** Track online/offline, last sync time
 - **Sync History:** Log all sync operations for troubleshooting
 
 ### 5. Security & Validation
+
 - **Network Isolation:** Warn users about network security
 - **Command Validation:** Validate all OSC/Telnet commands before sending
 - **Rate Limiting:** Prevent console overload with rate-limited requests
@@ -139,7 +146,7 @@ export class EosOSCClient {
       localPort: 0, // Auto-assign
       remoteAddress: this.consoleIP,
       remotePort: this.consolePort,
-      metadata: true
+      metadata: true,
     });
 
     this.udpPort.on('ready', () => {
@@ -188,7 +195,7 @@ export class EosOSCClient {
 
     this.udpPort.send({
       address,
-      args
+      args,
     });
   }
 
@@ -273,7 +280,7 @@ export class EosCommandBuilder {
    * Build batch patch commands for multiple fixtures
    */
   buildBatchPatchCommands(fixtures: Fixture[]): string[] {
-    return fixtures.map(f => this.buildPatchCommand(f));
+    return fixtures.map((f) => this.buildPatchCommand(f));
   }
 }
 
@@ -320,7 +327,7 @@ export class EosPatchParser {
         eos_channel: channel.number,
         eos_profile: channel.profile,
         import_source: 'eos',
-        last_console_sync: Date.now()
+        last_console_sync: Date.now(),
       });
     }
 
@@ -355,7 +362,7 @@ function parseLabel(label: string): { position: string; unit: number | null } {
   if (match) {
     return {
       position: match[1],
-      unit: parseInt(match[2])
+      unit: parseInt(match[2]),
     };
   }
 
@@ -401,29 +408,28 @@ export function registerConsoleHandlers(): void {
   });
 
   // Send patch to console
-  ipcMain.handle('console:exportPatch', async (
-    _event,
-    consoleType: string,
-    fixtures: Fixture[]
-  ) => {
-    try {
-      if (consoleType === 'eos') {
-        const client = getEosClient();
-        const builder = new EosCommandBuilder();
-        const commands = builder.buildBatchPatchCommands(fixtures);
+  ipcMain.handle(
+    'console:exportPatch',
+    async (_event, consoleType: string, fixtures: Fixture[]) => {
+      try {
+        if (consoleType === 'eos') {
+          const client = getEosClient();
+          const builder = new EosCommandBuilder();
+          const commands = builder.buildBatchPatchCommands(fixtures);
 
-        for (const command of commands) {
-          client.sendCommand('/eos/newcmd', [command]);
-          await delay(100); // Rate limit to avoid overwhelming console
+          for (const command of commands) {
+            client.sendCommand('/eos/newcmd', [command]);
+            await delay(100); // Rate limit to avoid overwhelming console
+          }
+
+          return { success: true, sent: commands.length };
         }
-
-        return { success: true, sent: commands.length };
+        return { success: false, error: 'Unknown console type' };
+      } catch (error) {
+        return { success: false, error: error.message };
       }
-      return { success: false, error: 'Unknown console type' };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  });
+    },
+  );
 
   // Disconnect from console
   ipcMain.handle('console:disconnect', async (_event, consoleType: string) => {
@@ -440,6 +446,7 @@ export function registerConsoleHandlers(): void {
 ### Testing Strategy
 
 **Key Tests:**
+
 - OSC client connection/disconnection
 - OSC command sending
 - Patch data parsing
@@ -449,12 +456,14 @@ export function registerConsoleHandlers(): void {
 - Error handling (network timeout, invalid commands)
 
 **Coverage Targets:**
+
 - OSC Client: 80%+ (critical utility)
 - Command Builder: 80%+ (critical utility)
 - Patch Parser: 80%+ (critical utility)
 - IPC Handlers: 70%+ (IPC handlers)
 
 ### Deliverables
+
 - [x] ETC Eos OSC client with 80%+ coverage
 - [x] Patch import from Eos
 - [x] Command builder with fixture type mapping
@@ -688,6 +697,7 @@ export function ConsoleSyncDialog({ onClose }: Props) {
 ### Testing Strategy
 
 **Key Tests:**
+
 - Connection dialog UI
 - Sync dialog with import/export
 - Status indicator updates
@@ -695,9 +705,11 @@ export function ConsoleSyncDialog({ onClose }: Props) {
 - Conflict detection and resolution
 
 **Coverage Targets:**
+
 - UI Components: 50%+ (standard for UI)
 
 ### Deliverables
+
 - [x] Console connection dialog
 - [x] Sync dialog with conflict resolution
 - [x] Export patch to Eos
@@ -729,6 +741,7 @@ src/main/console/grandma2/
 ### GrandMA2 Implementation
 
 **Key Differences from Eos:**
+
 - Uses Telnet for live commands (not OSC)
 - Uses XML export for full patch import
 - Requires HTTP access for XML file download
@@ -794,19 +807,21 @@ export class GrandMA2Client {
       // Request XML export from GrandMA2 HTTP server
       const url = `http://${this.consoleIP}/GetData?File=show.xml`;
 
-      http.get(url, (res) => {
-        let data = '';
+      http
+        .get(url, (res) => {
+          let data = '';
 
-        res.on('data', (chunk) => {
-          data += chunk;
-        });
+          res.on('data', (chunk) => {
+            data += chunk;
+          });
 
-        res.on('end', () => {
-          resolve(data);
+          res.on('end', () => {
+            resolve(data);
+          });
+        })
+        .on('error', (error) => {
+          reject(error);
         });
-      }).on('error', (error) => {
-        reject(error);
-      });
     });
   }
 
@@ -831,6 +846,7 @@ export class GrandMA2Client {
 Similar to Eos Phase 1 testing
 
 ### Deliverables
+
 - [x] GrandMA2 Telnet client with 80%+ coverage
 - [x] XML parser for MA2 show files
 - [x] Patch import/export
@@ -858,11 +874,13 @@ src/main/console/grandma3/
 ### GrandMA3 Implementation
 
 **Key Differences from MA2:**
+
 - Uses MA-Net3 protocol (JSON-RPC)
 - OSC for real-time control
 - Different show file format
 
 ### Deliverables
+
 - [x] GrandMA3 MA-Net3 + OSC client
 - [x] Patch import/export
 - [x] Documentation: MA3 setup guide
@@ -901,6 +919,7 @@ src/main/console/grandma3/
    - Audit trail for troubleshooting
 
 ### Deliverables
+
 - [x] Auto-discovery implementation
 - [x] Live sync engine
 - [x] Profile management UI
@@ -913,15 +932,15 @@ src/main/console/grandma3/
 
 ## Testing Summary
 
-| Component | Files | Tests | Coverage |
-|-----------|-------|-------|----------|
-| Eos OSC Client | 3 | 30 | 80%+ |
-| GrandMA2 Client | 3 | 30 | 80%+ |
-| GrandMA3 Client | 3 | 30 | 80%+ |
-| IPC Handlers | 1 | 25 | 70%+ |
-| UI Components | 5 | 30 | 50%+ |
-| Integration Tests | 3 | 15 | N/A |
-| **TOTAL** | **18** | **160** | **75%** |
+| Component         | Files  | Tests   | Coverage |
+| ----------------- | ------ | ------- | -------- |
+| Eos OSC Client    | 3      | 30      | 80%+     |
+| GrandMA2 Client   | 3      | 30      | 80%+     |
+| GrandMA3 Client   | 3      | 30      | 80%+     |
+| IPC Handlers      | 1      | 25      | 70%+     |
+| UI Components     | 5      | 30      | 50%+     |
+| Integration Tests | 3      | 15      | N/A      |
+| **TOTAL**         | **18** | **160** | **75%**  |
 
 ---
 
@@ -970,6 +989,7 @@ Week 9-10: Phase 5 - Advanced Features & Polish
 ## Success Criteria
 
 ### Technical Requirements
+
 - [x] Connect to Eos, MA2, MA3 consoles
 - [x] Import patch from console to ShowStack
 - [x] Export patch from ShowStack to console
@@ -978,6 +998,7 @@ Week 9-10: Phase 5 - Advanced Features & Polish
 - [x] Auto-reconnect on network changes
 
 ### User Experience Requirements
+
 - [x] Connection setup is simple (< 2 clicks + IP entry)
 - [x] Sync conflicts are clearly shown
 - [x] Real-time sync is configurable

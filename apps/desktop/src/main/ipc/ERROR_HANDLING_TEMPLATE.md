@@ -12,24 +12,20 @@ ipcMain.handle('domain:operation', async (_event, ...args) => {
   try {
     // 1. Basic validation (if needed)
     if (!requiredField) {
-      throw new ValidationError(
-        'Field is required',
-        'fieldName',
-        actualValue
-      );
+      throw new ValidationError('Field is required', 'fieldName', actualValue);
     }
 
     // 2. Wrap operation with retry logic
     return await errorHandler.executeWithRetry(
       async () => actualOperation(...args),
-      'domain:operation' // operation name for logging
+      'domain:operation', // operation name for logging
     );
   } catch (error) {
     // 3. Structured logging
     console.error('Failed to perform operation:', {
       operation: 'domain:operation',
       args: sanitizedArgs, // Be careful not to log sensitive data
-      error: error instanceof Error ? error.message : error
+      error: error instanceof Error ? error.message : error,
     });
 
     // 4. User-friendly error messages

@@ -11,9 +11,15 @@ import { ConditionalFormattingDialog } from '../../components/fixture/Conditiona
 import { InfrastructureToolbar } from '../../components/infrastructure/InfrastructureToolbar';
 import { AddInfrastructureDialog } from '../../components/infrastructure/AddInfrastructureDialog';
 import { EditInfrastructureDialog } from '../../components/infrastructure/EditInfrastructureDialog';
-import { ExportHeaderDialog, ExportHeaderOptions } from '../../components/fixture/ExportHeaderDialog';
+import {
+  ExportHeaderDialog,
+  ExportHeaderOptions,
+} from '../../components/fixture/ExportHeaderDialog';
 import { Breadcrumbs } from '../../components/common/Breadcrumbs';
-import { UnsavedChangesDialog, useUnsavedChangesDialog } from '../../components/common/UnsavedChangesDialog';
+import {
+  UnsavedChangesDialog,
+  useUnsavedChangesDialog,
+} from '../../components/common/UnsavedChangesDialog';
 import { PowerSummaryPanel } from '../../components/power/PowerSummaryPanel';
 import { RackManager } from '../../components/power/RackManager';
 import { useFixtureStore } from '../../store/fixtureStore';
@@ -22,12 +28,27 @@ import { useFileStore } from '../../store/fileStore';
 import { useUndoRedoStore } from '../../store/undoRedoStore';
 import { Fixture } from '../../types';
 import { DimmerRack, PDRack } from '../../types/power';
-import { DEFAULT_COLUMN_VISIBILITY, ColumnVisibility, DEFAULT_COLUMN_ORDER, ColumnKey } from '../../types/columns';
-import { DEFAULT_INFRASTRUCTURE_COLUMN_VISIBILITY, INFRASTRUCTURE_COLUMN_CONFIGS, InfrastructureColumnKey } from '../../types/infrastructureColumns';
+import {
+  DEFAULT_COLUMN_VISIBILITY,
+  ColumnVisibility,
+  DEFAULT_COLUMN_ORDER,
+  ColumnKey,
+} from '../../types/columns';
+import {
+  DEFAULT_INFRASTRUCTURE_COLUMN_VISIBILITY,
+  INFRASTRUCTURE_COLUMN_CONFIGS,
+  InfrastructureColumnKey,
+} from '../../types/infrastructureColumns';
 import { InfrastructureColumnVisibility } from '../../components/infrastructure/InfrastructureColumnVisibilityMenu';
 import { useEquipmentMenuHandlers } from '../../hooks/useEquipmentMenuHandlers';
 import { autoLinkCircuit } from '../../utils/circuitParser';
-import { Project, buildExportHeader, formatHeaderForCSV, formatHeaderForEos, formatHeaderForGrandMA } from '../../utils/exportHeaders';
+import {
+  Project,
+  buildExportHeader,
+  formatHeaderForCSV,
+  formatHeaderForEos,
+  formatHeaderForGrandMA,
+} from '../../utils/exportHeaders';
 import { HighlightRule, DEFAULT_HIGHLIGHT_RULES } from '../../types/highlighting';
 
 interface EquipmentManagerProps {
@@ -37,8 +58,17 @@ interface EquipmentManagerProps {
 export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {}) {
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId?: string; moduleType?: string }>();
-  const { fixtures, loadFixtures, addMultipleFixtures, deleteMultiple, updateFixture, bulkUpdate, setCurrentProjectId } = useFixtureStore();
-  const { equipment: infrastructureEquipment, loadEquipment: loadInfrastructure } = useInfrastructureStore();
+  const {
+    fixtures,
+    loadFixtures,
+    addMultipleFixtures,
+    deleteMultiple,
+    updateFixture,
+    bulkUpdate,
+    setCurrentProjectId,
+  } = useFixtureStore();
+  const { equipment: infrastructureEquipment, loadEquipment: loadInfrastructure } =
+    useInfrastructureStore();
   const { undo, redo, canUndo, canRedo } = useUndoRedoStore();
 
   // Tab state
@@ -49,7 +79,9 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   const [isAddFixtureDialogOpen, setIsAddFixtureDialogOpen] = useState(false);
   const [isAddInfrastructureDialogOpen, setIsAddInfrastructureDialogOpen] = useState(false);
   const [isEditInfrastructureDialogOpen, setIsEditInfrastructureDialogOpen] = useState(false);
-  const [editingInfrastructureEquipment, setEditingInfrastructureEquipment] = useState<any | null>(null);
+  const [editingInfrastructureEquipment, setEditingInfrastructureEquipment] = useState<any | null>(
+    null,
+  );
   const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = useState(false);
   const [isUserColumnSettingsOpen, setIsUserColumnSettingsOpen] = useState(false);
   const [isConditionalFormattingOpen, setIsConditionalFormattingOpen] = useState(false);
@@ -97,7 +129,8 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   const [showHidden, setShowHidden] = useState(false);
 
   // Column visibility state (fixtures)
-  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(DEFAULT_COLUMN_VISIBILITY);
+  const [columnVisibility, setColumnVisibility] =
+    useState<ColumnVisibility>(DEFAULT_COLUMN_VISIBILITY);
 
   // Column order state
   const [columnOrder, setColumnOrder] = useState<ColumnKey[]>(DEFAULT_COLUMN_ORDER);
@@ -106,11 +139,12 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   const [columnWidths, setColumnWidths] = useState<Partial<Record<ColumnKey, number>>>({});
 
   // Infrastructure column visibility state
-  const [infrastructureColumnVisibility, setInfrastructureColumnVisibility] = useState<InfrastructureColumnVisibility>(DEFAULT_INFRASTRUCTURE_COLUMN_VISIBILITY);
+  const [infrastructureColumnVisibility, setInfrastructureColumnVisibility] =
+    useState<InfrastructureColumnVisibility>(DEFAULT_INFRASTRUCTURE_COLUMN_VISIBILITY);
 
   // Calculate visible infrastructure columns
   const visibleInfrastructureColumns = useMemo(() => {
-    return INFRASTRUCTURE_COLUMN_CONFIGS.filter(col => infrastructureColumnVisibility[col.key]);
+    return INFRASTRUCTURE_COLUMN_CONFIGS.filter((col) => infrastructureColumnVisibility[col.key]);
   }, [infrastructureColumnVisibility]);
 
   // Helper function to render infrastructure cell value
@@ -120,20 +154,23 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     // Special rendering for certain columns
     if (columnKey === 'category' && value) {
       return (
-        <span className="px-2 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-800">
-          {value}
-        </span>
+        <span className="px-2 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-800">{value}</span>
       );
     }
 
     if (columnKey === 'status') {
       return (
-        <span className={`px-2 py-1 rounded-full text-xs ${
-          value === 'Active' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' :
-          value === 'Spare' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' :
-          value === 'Needs Repair' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' :
-          'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300'
-        }`}>
+        <span
+          className={`px-2 py-1 rounded-full text-xs ${
+            value === 'Active'
+              ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+              : value === 'Spare'
+                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
+                : value === 'Needs Repair'
+                  ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300'
+          }`}
+        >
           {value || 'N/A'}
         </span>
       );
@@ -150,7 +187,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     try {
       const [dimmer, pd] = await Promise.all([
         window.api.dimmerRacks.getAll(currentProjectId),
-        window.api.pdRacks.getAll(currentProjectId)
+        window.api.pdRacks.getAll(currentProjectId),
       ]);
       setDimmerRacks(dimmer);
       setPDRacks(pd);
@@ -213,7 +250,10 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
         // Load column preferences
         if (window.api.preferences) {
-          const savedVisibility = await window.api.preferences.get(currentProjectId, 'columnVisibility');
+          const savedVisibility = await window.api.preferences.get(
+            currentProjectId,
+            'columnVisibility',
+          );
           if (savedVisibility) {
             setColumnVisibility(savedVisibility);
           }
@@ -228,19 +268,28 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
             setColumnWidths(savedWidths);
           }
 
-          const savedUserColumns = await window.api.preferences.get(currentProjectId, 'userColumnDefinitions');
+          const savedUserColumns = await window.api.preferences.get(
+            currentProjectId,
+            'userColumnDefinitions',
+          );
           if (savedUserColumns) {
             setUserColumnDefinitions(savedUserColumns);
           }
 
           // Load infrastructure column preferences
-          const savedInfrastructureVisibility = await window.api.preferences.get(currentProjectId, 'infrastructureColumnVisibility');
+          const savedInfrastructureVisibility = await window.api.preferences.get(
+            currentProjectId,
+            'infrastructureColumnVisibility',
+          );
           if (savedInfrastructureVisibility) {
             setInfrastructureColumnVisibility(savedInfrastructureVisibility);
           }
 
           // Load highlight rules
-          const savedHighlightRules = await window.api.preferences.get(currentProjectId, 'highlightRules');
+          const savedHighlightRules = await window.api.preferences.get(
+            currentProjectId,
+            'highlightRules',
+          );
           if (savedHighlightRules) {
             setHighlightRules(savedHighlightRules);
           }
@@ -272,9 +321,14 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     const autoLinkExistingFixtures = async () => {
       const fixturesToUpdate: Array<{ id: string; updates: Partial<Fixture> }> = [];
 
-      fixtures.forEach(fixture => {
+      fixtures.forEach((fixture) => {
         // Skip if already linked or missing circuit info
-        if (fixture.dimmer_rack_id || fixture.pd_rack_id || !fixture.circuit || !fixture.circuit_number) {
+        if (
+          fixture.dimmer_rack_id ||
+          fixture.pd_rack_id ||
+          !fixture.circuit ||
+          !fixture.circuit_number
+        ) {
           return;
         }
 
@@ -285,7 +339,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
             ? parseInt(fixture.circuit_number, 10)
             : fixture.circuit_number,
           dimmerRacks,
-          pdRacks
+          pdRacks,
         );
 
         // If we got a link result, queue it for update
@@ -296,8 +350,8 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
               dimmer_rack_id: linkResult.dimmer_rack_id,
               dimmer_channel_number: linkResult.dimmer_channel_number,
               pd_rack_id: null,
-              pd_circuit_number: null
-            }
+              pd_circuit_number: null,
+            },
           });
         } else if (linkResult.pd_rack_id) {
           fixturesToUpdate.push({
@@ -306,8 +360,8 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
               pd_rack_id: linkResult.pd_rack_id,
               pd_circuit_number: linkResult.pd_circuit_number,
               dimmer_rack_id: null,
-              dimmer_channel_number: null
-            }
+              dimmer_channel_number: null,
+            },
           });
         }
       });
@@ -392,7 +446,11 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     const savePreference = async () => {
       if (!window.api?.preferences) return;
       try {
-        await window.api.preferences.set(currentProjectId, 'infrastructureColumnVisibility', infrastructureColumnVisibility);
+        await window.api.preferences.set(
+          currentProjectId,
+          'infrastructureColumnVisibility',
+          infrastructureColumnVisibility,
+        );
       } catch (error) {
         console.error('Failed to save infrastructure column visibility:', error);
       }
@@ -404,7 +462,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   const handleSort = (field: string, addToExisting: boolean = false) => {
     if (addToExisting) {
       // Multi-column sort (Shift+Click)
-      const existingIndex = sortConfigs.findIndex(s => s.field === field);
+      const existingIndex = sortConfigs.findIndex((s) => s.field === field);
 
       if (existingIndex >= 0) {
         // Field already in sort chain - toggle direction or remove
@@ -416,7 +474,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
           setSortConfigs(newConfigs);
         } else {
           // Remove from chain
-          setSortConfigs(sortConfigs.filter(s => s.field !== field));
+          setSortConfigs(sortConfigs.filter((s) => s.field !== field));
         }
       } else {
         // Add to end of sort chain
@@ -424,7 +482,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
       }
     } else {
       // Single column sort (normal click)
-      const existing = sortConfigs.find(s => s.field === field);
+      const existing = sortConfigs.find((s) => s.field === field);
       if (existing && sortConfigs.length === 1) {
         // Toggle direction
         setSortConfigs([{ field, direction: existing.direction === 'asc' ? 'desc' : 'asc' }]);
@@ -479,7 +537,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
   // Handle auto-numbering
   const handleAutoNumber = async (field: keyof Fixture, start: number, increment: number) => {
-    const selectedFixtures = processedFixtures.filter(f => selectedRows.has(f.id));
+    const selectedFixtures = processedFixtures.filter((f) => selectedRows.has(f.id));
 
     // Build individual update operations for each fixture
     // Use BulkUpdateFixturesCommand directly for different values per fixture
@@ -487,7 +545,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     const { useUndoRedoStore } = await import('../../store/undoRedoStore');
 
     const fixtureUpdates = selectedFixtures.map((fixture, index) => {
-      const value = start + (index * increment);
+      const value = start + index * increment;
       return {
         id: fixture.id,
         oldData: fixture,
@@ -543,29 +601,31 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
     // Get visible columns
     const visibleColumns = columnOrder
-      .filter(key => columnVisibility[key])
-      .map(key => {
-        const config = DEFAULT_COLUMN_ORDER.find(c => c === key);
+      .filter((key) => columnVisibility[key])
+      .map((key) => {
+        const config = DEFAULT_COLUMN_ORDER.find((c) => c === key);
         return { key, label: userColumnDefinitions[key] || key };
       });
 
     if (options.format === 'csv') {
       // Build CSV with headers
       const headerText = formatHeaderForCSV(header);
-      const columnHeaders = visibleColumns.map(col => col.label).join(',');
+      const columnHeaders = visibleColumns.map((col) => col.label).join(',');
 
-      const rows = processedFixtures.map(fixture => {
-        return visibleColumns.map(col => {
-          let value = fixture[col.key as keyof Fixture];
+      const rows = processedFixtures.map((fixture) => {
+        return visibleColumns
+          .map((col) => {
+            const value = fixture[col.key as keyof Fixture];
 
-          // Handle special cases
-          if (value === undefined || value === null) return '';
-          if (Array.isArray(value)) return `"${value.join(', ')}"`;
-          if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-          if (typeof value === 'string' && value.includes(',')) return `"${value}"`;
+            // Handle special cases
+            if (value === undefined || value === null) return '';
+            if (Array.isArray(value)) return `"${value.join(', ')}"`;
+            if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+            if (typeof value === 'string' && value.includes(',')) return `"${value}"`;
 
-          return value;
-        }).join(',');
+            return value;
+          })
+          .join(',');
       });
 
       const csv = headerText + columnHeaders + '\n' + rows.join('\n');
@@ -575,7 +635,10 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
-      link.setAttribute('download', `${projectName}_fixtures_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute(
+        'download',
+        `${projectName}_fixtures_${new Date().toISOString().split('T')[0]}.csv`,
+      );
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -586,8 +649,8 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
       // Eos format: Chan Patch <channel> <fixture_type> <universe>/<address>
       const eosLines = processedFixtures
-        .filter(f => f.channel && f.universe && f.dmx_address)
-        .map(fixture => {
+        .filter((f) => f.channel && f.universe && f.dmx_address)
+        .map((fixture) => {
           const type = fixture.type || 'Generic';
           return `Chan Patch ${fixture.channel} "${type}" ${fixture.universe}/${fixture.dmx_address}`;
         });
@@ -599,7 +662,10 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
-      link.setAttribute('download', `${projectName}_eos_${new Date().toISOString().split('T')[0]}.txt`);
+      link.setAttribute(
+        'download',
+        `${projectName}_eos_${new Date().toISOString().split('T')[0]}.txt`,
+      );
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -610,13 +676,17 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
       // GrandMA format: Simple patch list XML
       const fixtures = processedFixtures
-        .filter(f => f.channel && f.universe && f.dmx_address)
+        .filter((f) => f.channel && f.universe && f.dmx_address)
         .map((fixture, idx) => {
           const type = fixture.type || 'Generic';
           return `  <Fixture id="${idx + 1}" name="${type}" channel="${fixture.channel}" universe="${fixture.universe}" address="${fixture.dmx_address}" />`;
         });
 
-      const xmlContent = headerText + '<GrandMA>\n  <Fixtures>\n' + fixtures.join('\n') + '\n  </Fixtures>\n</GrandMA>';
+      const xmlContent =
+        headerText +
+        '<GrandMA>\n  <Fixtures>\n' +
+        fixtures.join('\n') +
+        '\n  </Fixtures>\n</GrandMA>';
 
       // Download XML file
       const blob = new Blob([xmlContent], { type: 'application/xml;charset=utf-8;' });
@@ -624,7 +694,10 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
       const format = options.format === 'grandma2' ? 'gma2' : 'gma3';
-      link.setAttribute('download', `${projectName}_${format}_${new Date().toISOString().split('T')[0]}.xml`);
+      link.setAttribute(
+        'download',
+        `${projectName}_${format}_${new Date().toISOString().split('T')[0]}.xml`,
+      );
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -714,9 +787,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter((fixture) =>
-        Object.values(fixture).some((value) =>
-          String(value).toLowerCase().includes(query)
-        )
+        Object.values(fixture).some((value) => String(value).toLowerCase().includes(query)),
       );
     }
 
@@ -832,7 +903,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
         const target = e.target as HTMLElement;
         if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
           e.preventDefault();
-          const allIds = new Set(processedFixtures.map(f => f.id));
+          const allIds = new Set(processedFixtures.map((f) => f.id));
           setSelectedRows(allIds);
         }
       }
@@ -846,12 +917,12 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     isUserColumnSettingsOpen,
     selectedRows,
     processedFixtures,
-    deleteMultiple
+    deleteMultiple,
   ]);
 
   // Handle select all
   const handleSelectAll = () => {
-    const allIds = new Set(processedFixtures.map(f => f.id));
+    const allIds = new Set(processedFixtures.map((f) => f.id));
     setSelectedRows(allIds);
   };
 
@@ -896,7 +967,9 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
                 {!embedded && (
                   <>
                     <span className="text-gray-500">•</span>
-                    <span className="text-lg text-gray-600 dark:text-gray-400">ShowStack:Lighting</span>
+                    <span className="text-lg text-gray-600 dark:text-gray-400">
+                      ShowStack:Lighting
+                    </span>
                   </>
                 )}
               </div>
@@ -908,7 +981,9 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
               {processedFixtures.length} / {fixtures.length} fixtures
             </span>
             <span className="text-sm text-gray-600 dark:text-gray-400">•</span>
-            <span className="text-sm text-gray-600 dark:text-gray-400">{selectedRows.size} selected</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {selectedRows.size} selected
+            </span>
           </div>
         </div>
       </header>
@@ -951,83 +1026,83 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
       {/* Fixtures Tab */}
       {activeTab === 'fixtures' && (
-      <>
-      {/* Toolbar */}
-      <div className="flex-shrink-0">
-        <Toolbar
-          selectedCount={selectedRows.size}
-          onAddFixture={() => setIsAddFixtureDialogOpen(true)}
-          onBulkEdit={() => setIsBulkEditDialogOpen(true)}
-          onDeleteSelected={async () => {
-            await deleteMultiple(Array.from(selectedRows));
-            setSelectedRows(new Set());
-          }}
-          onDeselectAll={() => setSelectedRows(new Set())}
-          onHideSelected={handleHideSelected}
-          onUnhideSelected={handleUnhideSelected}
-          onUserColumnSettings={() => setIsUserColumnSettingsOpen(true)}
-          onConditionalFormatting={() => setIsConditionalFormattingOpen(true)}
-          columnVisibility={columnVisibility}
-          onColumnVisibilityChange={handleColumnVisibilityChange}
-          userColumnDefinitions={userColumnDefinitions}
-        />
-      </div>
+        <>
+          {/* Toolbar */}
+          <div className="flex-shrink-0">
+            <Toolbar
+              selectedCount={selectedRows.size}
+              onAddFixture={() => setIsAddFixtureDialogOpen(true)}
+              onBulkEdit={() => setIsBulkEditDialogOpen(true)}
+              onDeleteSelected={async () => {
+                await deleteMultiple(Array.from(selectedRows));
+                setSelectedRows(new Set());
+              }}
+              onDeselectAll={() => setSelectedRows(new Set())}
+              onHideSelected={handleHideSelected}
+              onUnhideSelected={handleUnhideSelected}
+              onUserColumnSettings={() => setIsUserColumnSettingsOpen(true)}
+              onConditionalFormatting={() => setIsConditionalFormattingOpen(true)}
+              columnVisibility={columnVisibility}
+              onColumnVisibilityChange={handleColumnVisibilityChange}
+              userColumnDefinitions={userColumnDefinitions}
+            />
+          </div>
 
-      {/* Sort Bar */}
-      <div className="flex-shrink-0">
-        <SortBar
-          sortConfigs={sortConfigs}
-          onSort={handleSort}
-          onClearSort={() => setSortConfigs([])}
-        />
-      </div>
+          {/* Sort Bar */}
+          <div className="flex-shrink-0">
+            <SortBar
+              sortConfigs={sortConfigs}
+              onSort={handleSort}
+              onClearSort={() => setSortConfigs([])}
+            />
+          </div>
 
-      {/* Filter Bar */}
-      <div className="flex-shrink-0">
-        <FilterBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          locationFilter={locationFilter}
-          onLocationChange={setLocationFilter}
-          typeFilter={typeFilter}
-          onTypeChange={setTypeFilter}
-          statusFilter={statusFilter}
-          onStatusChange={setStatusFilter}
-          showHidden={showHidden}
-          onShowHiddenChange={setShowHidden}
-          onClearFilters={handleClearFilters}
-          availableLocations={availableLocations}
-          availableTypes={availableTypes}
-          availableStatuses={availableStatuses}
-        />
-      </div>
+          {/* Filter Bar */}
+          <div className="flex-shrink-0">
+            <FilterBar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              locationFilter={locationFilter}
+              onLocationChange={setLocationFilter}
+              typeFilter={typeFilter}
+              onTypeChange={setTypeFilter}
+              statusFilter={statusFilter}
+              onStatusChange={setStatusFilter}
+              showHidden={showHidden}
+              onShowHiddenChange={setShowHidden}
+              onClearFilters={handleClearFilters}
+              availableLocations={availableLocations}
+              availableTypes={availableTypes}
+              availableStatuses={availableStatuses}
+            />
+          </div>
 
-      {/* Main Content - Virtual Data Grid */}
-      <main className="flex-1 min-h-0 overflow-hidden">
-        <VirtualDataGrid
-          fixtures={processedFixtures}
-          selectedRows={selectedRows}
-          onSelectRows={setSelectedRows}
-          onUpdateFixture={updateFixture}
-          columnVisibility={columnVisibility}
-          columnOrder={columnOrder}
-          onColumnOrderChange={setColumnOrder}
-          columnWidths={columnWidths}
-          onColumnWidthChange={setColumnWidths}
-          userColumnDefinitions={userColumnDefinitions}
-          dimmerRacks={dimmerRacks}
-          pdRacks={pdRacks}
-          autoFillSuggestions={autoFillSuggestions}
-          highlightRules={highlightRules}
-        />
-      </main>
+          {/* Main Content - Virtual Data Grid */}
+          <main className="flex-1 min-h-0 overflow-hidden">
+            <VirtualDataGrid
+              fixtures={processedFixtures}
+              selectedRows={selectedRows}
+              onSelectRows={setSelectedRows}
+              onUpdateFixture={updateFixture}
+              columnVisibility={columnVisibility}
+              columnOrder={columnOrder}
+              onColumnOrderChange={setColumnOrder}
+              columnWidths={columnWidths}
+              onColumnWidthChange={setColumnWidths}
+              userColumnDefinitions={userColumnDefinitions}
+              dimmerRacks={dimmerRacks}
+              pdRacks={pdRacks}
+              autoFillSuggestions={autoFillSuggestions}
+              highlightRules={highlightRules}
+            />
+          </main>
 
-      {/* Status Bar */}
-      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-        <div>Ready</div>
-        <div>ShowStack:Lighting v0.1.0-alpha</div>
-      </footer>
-      </>
+          {/* Status Bar */}
+          <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+            <div>Ready</div>
+            <div>ShowStack:Lighting v0.1.0-alpha</div>
+          </footer>
+        </>
       )}
 
       {/* Infrastructure Tab */}
@@ -1058,10 +1133,15 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
                     <th className="w-12 px-4 py-3 text-left">
                       <input
                         type="checkbox"
-                        checked={selectedInfrastructure.size === infrastructureEquipment.length && infrastructureEquipment.length > 0}
+                        checked={
+                          selectedInfrastructure.size === infrastructureEquipment.length &&
+                          infrastructureEquipment.length > 0
+                        }
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedInfrastructure(new Set(infrastructureEquipment.map(eq => eq.id)));
+                            setSelectedInfrastructure(
+                              new Set(infrastructureEquipment.map((eq) => eq.id)),
+                            );
                           } else {
                             setSelectedInfrastructure(new Set());
                           }
@@ -1070,7 +1150,10 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
                       />
                     </th>
                     {visibleInfrastructureColumns.map((column) => (
-                      <th key={column.key} className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      <th
+                        key={column.key}
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
                         {column.label}
                       </th>
                     ))}
@@ -1079,10 +1162,15 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
                 <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                   {infrastructureEquipment.length === 0 ? (
                     <tr>
-                      <td colSpan={visibleInfrastructureColumns.length + 1} className="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                      <td
+                        colSpan={visibleInfrastructureColumns.length + 1}
+                        className="px-4 py-12 text-center text-gray-500 dark:text-gray-400"
+                      >
                         <div className="flex flex-col items-center">
                           <div className="text-5xl mb-3">📡</div>
-                          <p className="text-lg font-medium mb-1">No infrastructure equipment yet</p>
+                          <p className="text-lg font-medium mb-1">
+                            No infrastructure equipment yet
+                          </p>
                           <p className="text-sm">Click "Add Equipment" to get started</p>
                         </div>
                       </td>
@@ -1092,7 +1180,9 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
                       <tr
                         key={equipment.id}
                         className={`hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer ${
-                          selectedInfrastructure.has(equipment.id) ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                          selectedInfrastructure.has(equipment.id)
+                            ? 'bg-blue-50 dark:bg-blue-900/20'
+                            : ''
                         }`}
                         onDoubleClick={() => {
                           setEditingInfrastructureEquipment(equipment);
@@ -1119,9 +1209,11 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
                           <td
                             key={column.key}
                             className={`px-4 py-3 text-sm ${
-                              column.key === 'name' ? 'text-gray-900 dark:text-white font-medium' :
-                              column.key === 'ip_address' ? 'text-gray-600 dark:text-gray-400 font-mono' :
-                              'text-gray-600 dark:text-gray-400'
+                              column.key === 'name'
+                                ? 'text-gray-900 dark:text-white font-medium'
+                                : column.key === 'ip_address'
+                                  ? 'text-gray-600 dark:text-gray-400 font-mono'
+                                  : 'text-gray-600 dark:text-gray-400'
                             }`}
                           >
                             {renderInfrastructureCellValue(equipment, column.key)}
@@ -1164,19 +1256,36 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Identifier</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Service</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Voltage</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Circuit Count</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Identifier
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Service
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Voltage
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Circuit Count
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Location
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {dimmerRacks.length === 0 && pdRacks.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                      <td
+                        colSpan={7}
+                        className="px-4 py-12 text-center text-gray-500 dark:text-gray-400"
+                      >
                         <div className="flex flex-col items-center">
                           <div className="text-5xl mb-3">⚡</div>
                           <p className="text-sm">No power racks configured</p>
@@ -1191,7 +1300,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
                     </tr>
                   ) : (
                     <>
-                      {dimmerRacks.map(rack => (
+                      {dimmerRacks.map((rack) => (
                         <tr
                           key={rack.id}
                           className="hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer"
@@ -1202,15 +1311,27 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
                               Dimmer
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-white font-medium">{rack.name}</td>
-                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{rack.rack_identifier || '-'}</td>
-                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{rack.building_service || 'Unassigned'}</td>
-                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{rack.voltage}V</td>
-                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{rack.circuit_count}</td>
-                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{rack.location || '-'}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-white font-medium">
+                            {rack.name}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                            {rack.rack_identifier || '-'}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                            {rack.building_service || 'Unassigned'}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                            {rack.voltage}V
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                            {rack.circuit_count}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                            {rack.location || '-'}
+                          </td>
                         </tr>
                       ))}
-                      {pdRacks.map(rack => (
+                      {pdRacks.map((rack) => (
                         <tr
                           key={rack.id}
                           className="hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer"
@@ -1221,12 +1342,24 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
                               PD
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-white font-medium">{rack.name}</td>
-                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{rack.rack_identifier || '-'}</td>
-                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{rack.building_service || 'Unassigned'}</td>
-                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{rack.voltage}V</td>
-                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{rack.circuit_count}</td>
-                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{rack.location || '-'}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-white font-medium">
+                            {rack.name}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                            {rack.rack_identifier || '-'}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                            {rack.building_service || 'Unassigned'}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                            {rack.voltage}V
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                            {rack.circuit_count}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                            {rack.location || '-'}
+                          </td>
                         </tr>
                       ))}
                     </>
@@ -1239,7 +1372,8 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
           {/* Footer */}
           <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
             <div>
-              {dimmerRacks.length} dimmer racks | {pdRacks.length} PD racks | {dimmerRacks.length + pdRacks.length} total
+              {dimmerRacks.length} dimmer racks | {pdRacks.length} PD racks |{' '}
+              {dimmerRacks.length + pdRacks.length} total
             </div>
             <div>ShowStack:Lighting v0.1.0-alpha</div>
           </footer>
@@ -1313,21 +1447,25 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Power Rack Management</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Power Rack Management
+              </h2>
               <button
                 onClick={() => setIsRackManagerOpen(false)}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
             <div className="flex-1 overflow-auto p-6">
-              <RackManager
-                projectId={currentProjectId}
-                onRacksChange={loadRacks}
-              />
+              <RackManager projectId={currentProjectId} onRacksChange={loadRacks} />
             </div>
             <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
               <button

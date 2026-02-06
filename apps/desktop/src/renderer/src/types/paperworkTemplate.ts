@@ -8,7 +8,14 @@ import { ReportType } from './paperwork';
 /**
  * Column format types for display formatting
  */
-export type ColumnFormatType = 'text' | 'number' | 'power' | 'amperage' | 'boolean' | 'date' | 'color';
+export type ColumnFormatType =
+  | 'text'
+  | 'number'
+  | 'power'
+  | 'amperage'
+  | 'boolean'
+  | 'date'
+  | 'color';
 
 /**
  * Column display mode for header labels
@@ -103,7 +110,9 @@ export type PaperworkTemplateInput = Omit<PaperworkTemplate, 'id' | 'created_at'
 /**
  * Update type for modifying paperwork templates
  */
-export type PaperworkTemplateUpdate = Partial<Omit<PaperworkTemplate, 'id' | 'created_at' | 'updated_at' | 'isSystem'>>;
+export type PaperworkTemplateUpdate = Partial<
+  Omit<PaperworkTemplate, 'id' | 'created_at' | 'updated_at' | 'isSystem'>
+>;
 
 /**
  * Helper type for column field names based on report type

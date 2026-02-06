@@ -15,6 +15,7 @@
 The Maintenance Menu System provides custom categorization for fixtures with rule-based auto-assignment. This is a **critical foundation** for Equipment Manager → Shop Order automation and achieves Lightwright 6 parity.
 
 ### Core Capabilities
+
 - **Custom Categories:** Create categories like "ALL Moving Lights", "FOH Fixtures", "Rental Package"
 - **Rule-Based Auto-Assignment:** Define rules (e.g., Type contains "MAC" → "Moving Lights")
 - **4-Tab Dialog:** Notes, Physical, Vectorworks, Position notes per category
@@ -37,28 +38,33 @@ The Maintenance Menu System provides custom categorization for fixtures with rul
 ## Architecture Decisions
 
 ### 1. Database Schema: Three Tables
+
 - `fixture_categories` - Category definitions with 4 note types
 - `category_rules` - Auto-assignment rules
 - `fixture_category_assignments` - Many-to-many with manual override flag
 
 ### 2. Rule Engine: SQL-Based Evaluation
+
 - Evaluate rules on fixture create/update
 - Support operators: equals, contains, starts_with, ends_with, is_empty, is_not_empty, greater_than, less_than
 - Priority-based (first matching rule wins)
 - Manual assignment overrides auto-assignment
 
 ### 3. State Management: Zustand Store
+
 - `categoryStore.ts` for category CRUD and rule management
 - Integrates with existing `fixtureStore.ts`
 - Real-time category assignment on fixture changes
 
 ### 4. UI Pattern: Menu Bar + Dialog
+
 - Menu bar "Maintenance" menu (dynamic based on columns)
 - 4-tab dialog (Notes, Physical, Vectorworks, Position)
 - Rule builder UI (similar to conditional formatting dialog)
 - Follows existing dialog patterns
 
 ### 5. Integration Points
+
 - **Equipment Manager:** Color indicators, filter dropdown
 - **Labels:** Category field available in label designer
 - **Paperwork:** Group by category option
@@ -210,16 +216,18 @@ export class CategoryRuleEngine {
    */
   evaluateRules(
     fixture: Fixture,
-    categoriesWithRules: Array<{ category: FixtureCategory; rules: CategoryRule[] }>
+    categoriesWithRules: Array<{ category: FixtureCategory; rules: CategoryRule[] }>,
   ): string[] {
     const matchingCategories: string[] = [];
 
     // Sort categories by sort_order (priority)
-    const sorted = categoriesWithRules.sort((a, b) => a.category.sort_order - b.category.sort_order);
+    const sorted = categoriesWithRules.sort(
+      (a, b) => a.category.sort_order - b.category.sort_order,
+    );
 
     for (const { category, rules } of sorted) {
       // ALL rules must match for category assignment
-      const allRulesMatch = rules.every(rule => this.evaluateRule(fixture, rule));
+      const allRulesMatch = rules.every((rule) => this.evaluateRule(fixture, rule));
 
       if (allRulesMatch) {
         matchingCategories.push(category.id);
@@ -293,10 +301,10 @@ export class CategoryRuleEngine {
     // Get all categories with rules
     const categories = await getAllCategories(projectId);
     const categoriesWithRules = await Promise.all(
-      categories.map(async category => ({
+      categories.map(async (category) => ({
         category,
-        rules: await getCategoryRules(category.id)
-      }))
+        rules: await getCategoryRules(category.id),
+      })),
     );
 
     // Evaluate each fixture
@@ -332,9 +340,12 @@ export function registerCategoryHandlers(): void {
   });
 
   // Update category
-  ipcMain.handle('categories:update', async (_event, id: string, updates: Partial<FixtureCategory>) => {
-    return updateCategory(id, updates);
-  });
+  ipcMain.handle(
+    'categories:update',
+    async (_event, id: string, updates: Partial<FixtureCategory>) => {
+      return updateCategory(id, updates);
+    },
+  );
 
   // Delete category
   ipcMain.handle('categories:delete', async (_event, id: string) => {
@@ -362,13 +373,12 @@ export function registerCategoryHandlers(): void {
   });
 
   // Manually assign fixture to category
-  ipcMain.handle('categories:assignFixture', async (
-    _event,
-    fixtureId: string,
-    categoryId: string
-  ) => {
-    return assignFixtureToCategory(fixtureId, categoryId, true); // is_manual = true
-  });
+  ipcMain.handle(
+    'categories:assignFixture',
+    async (_event, fixtureId: string, categoryId: string) => {
+      return assignFixtureToCategory(fixtureId, categoryId, true); // is_manual = true
+    },
+  );
 
   // Re-evaluate all fixtures (run rule engine)
   ipcMain.handle('categories:reevaluateAll', async (_event, projectId: string) => {
@@ -381,6 +391,7 @@ export function registerCategoryHandlers(): void {
 ### Testing Strategy
 
 **Key Tests:**
+
 - Category CRUD operations
 - Rule engine evaluation (all operators)
 - Auto-assignment on fixture create/update
@@ -391,11 +402,13 @@ export function registerCategoryHandlers(): void {
 - Edge cases (null values, empty strings, special characters)
 
 **Coverage Targets:**
+
 - Rule Engine: 80%+ (critical utility)
 - Database Queries: 80%+ (critical utility)
 - IPC Handlers: 70%+ (IPC handlers)
 
 ### Deliverables
+
 - [x] Database schema with 3 tables
 - [x] Category CRUD operations with 80%+ coverage
 - [x] Rule engine with 80%+ coverage
@@ -444,6 +457,7 @@ src/main/menu/menuTemplate.ts                      (Add "Maintenance" menu)
 ### UI Components
 
 #### 1. MaintenanceMenuDialog
+
 **Pattern:** Multi-tab dialog with category list sidebar
 
 ```typescript
@@ -534,6 +548,7 @@ export function MaintenanceMenuDialog({ onClose }: Props) {
 ```
 
 #### 2. CategoryList
+
 **Pattern:** Sidebar list with add/delete actions
 
 ```typescript
@@ -589,6 +604,7 @@ export function CategoryList({ categories, selectedCategory, onSelectCategory }:
 ```
 
 #### 3. RuleBuilder
+
 **Pattern:** Rule list with add/remove actions (similar to conditional formatting)
 
 ```typescript
@@ -683,6 +699,7 @@ export function RuleBuilder({ category }: Props) {
 ### Testing Strategy
 
 **Key Tests:**
+
 - Dialog opens/closes correctly
 - Category creation/deletion
 - Tab navigation
@@ -692,9 +709,11 @@ export function RuleBuilder({ category }: Props) {
 - Category color picker
 
 **Coverage Targets:**
+
 - UI Components: 50%+ (standard for UI)
 
 ### Deliverables
+
 - [x] Maintenance menu dialog with 4 tabs
 - [x] Category list with CRUD operations
 - [x] Rule builder UI
@@ -732,6 +751,7 @@ src/renderer/src/components/fixture/FixtureContextMenu.tsx  (Add category assign
 ### Equipment Manager Enhancements
 
 #### 1. Category Column
+
 Add category column to VirtualDataGrid showing color indicators
 
 ```typescript
@@ -753,6 +773,7 @@ export function CategoryIndicator({ categories }: Props) {
 ```
 
 #### 2. Category Filter
+
 Add dropdown to filter fixtures by category
 
 ```typescript
@@ -784,6 +805,7 @@ export function CategoryFilterDropdown({ onFilterChange }: Props) {
 ```
 
 #### 3. Context Menu Integration
+
 Add "Assign to Category" option in right-click menu
 
 ```typescript
@@ -798,6 +820,7 @@ Add "Assign to Category" option in right-click menu
 ```
 
 #### 4. Bulk Assignment
+
 Add bulk action to assign multiple fixtures to category
 
 ```typescript
@@ -822,6 +845,7 @@ Add bulk action to assign multiple fixtures to category
 ### Testing Strategy
 
 **Key Tests:**
+
 - Category indicators render correctly
 - Filter dropdown filters fixtures
 - Context menu assigns category
@@ -829,9 +853,11 @@ Add bulk action to assign multiple fixtures to category
 - Visual indicators update in real-time
 
 **Coverage Targets:**
+
 - UI Components: 50%+ (standard for UI)
 
 ### Deliverables
+
 - [x] Category column in Equipment Manager
 - [x] Category filter dropdown
 - [x] Context menu integration
@@ -864,6 +890,7 @@ src/renderer/src/components/prep/
 ### Label Integration
 
 **Add Category Field:**
+
 ```typescript
 // labelDataMapper.ts
 export const AVAILABLE_FIELDS = [
@@ -874,21 +901,22 @@ export const AVAILABLE_FIELDS = [
     type: 'text',
     getValue: (fixture: Fixture) => {
       const categories = getFixtureCategories(fixture.id);
-      return categories.map(c => c.name).join(', ');
-    }
-  }
+      return categories.map((c) => c.name).join(', ');
+    },
+  },
 ];
 ```
 
 ### Paperwork Integration
 
 **Group by Category Option:**
+
 ```typescript
 // reportGenerators.ts
 export function generateChannelHookup(fixtures: Fixture[], options: ReportOptions) {
   if (options.groupBy === 'category') {
     // Group fixtures by category
-    const grouped = groupBy(fixtures, fixture => {
+    const grouped = groupBy(fixtures, (fixture) => {
       const categories = getFixtureCategories(fixture.id);
       return categories[0]?.name || 'Uncategorized';
     });
@@ -896,7 +924,7 @@ export function generateChannelHookup(fixtures: Fixture[], options: ReportOption
     // Generate report with category sections
     return Object.entries(grouped).map(([categoryName, fixtures]) => ({
       sectionTitle: categoryName,
-      fixtures: sortFixtures(fixtures, options.sortBy)
+      fixtures: sortFixtures(fixtures, options.sortBy),
     }));
   }
 
@@ -907,6 +935,7 @@ export function generateChannelHookup(fixtures: Fixture[], options: ReportOption
 ### Shop Order Automation
 
 **Auto-populate from Categories:**
+
 ```typescript
 // ShopOrderTable.tsx
 const handleAutoPopulateFromCategories = async () => {
@@ -919,7 +948,7 @@ const handleAutoPopulateFromCategories = async () => {
     // Create shop order section
     const section = await createShopOrderSection({
       name: category.name,
-      notes: category.notes
+      notes: category.notes,
     });
 
     // Group fixtures by type and create items
@@ -930,7 +959,7 @@ const handleAutoPopulateFromCategories = async () => {
         section_id: section.id,
         description: type,
         quantity: fixturesOfType.length,
-        notes: category.physical_notes
+        notes: category.physical_notes,
       });
     }
   }
@@ -940,6 +969,7 @@ const handleAutoPopulateFromCategories = async () => {
 ### Testing Strategy
 
 **Key Tests:**
+
 - Category field available in label designer
 - Labels render category correctly
 - Paperwork groups by category
@@ -947,9 +977,11 @@ const handleAutoPopulateFromCategories = async () => {
 - Quantity rollup by category/type
 
 **Coverage Targets:**
+
 - Integration Functions: 60%+ (important integrations)
 
 ### Deliverables
+
 - [x] Category field in label designer
 - [x] Paperwork group by category
 - [x] Shop order auto-populate from categories
@@ -962,16 +994,17 @@ const handleAutoPopulateFromCategories = async () => {
 
 ## Testing Summary
 
-| Component | Files | Tests | Coverage |
-|-----------|-------|-------|----------|
-| Rule Engine | 1 | 25 | 80%+ |
-| Database Queries | 1 | 20 | 80%+ |
-| IPC Handlers | 1 | 15 | 70%+ |
-| UI Components | 10 | 40 | 50%+ |
-| Integration Functions | 3 | 15 | 60%+ |
-| **TOTAL** | **16** | **115** | **70%** |
+| Component             | Files  | Tests   | Coverage |
+| --------------------- | ------ | ------- | -------- |
+| Rule Engine           | 1      | 25      | 80%+     |
+| Database Queries      | 1      | 20      | 80%+     |
+| IPC Handlers          | 1      | 15      | 70%+     |
+| UI Components         | 10     | 40      | 50%+     |
+| Integration Functions | 3      | 15      | 60%+     |
+| **TOTAL**             | **16** | **115** | **70%**  |
 
 **Testing Tools:**
+
 - Vitest + React Testing Library
 - Mock data for categories and rules
 - CI/CD: GitHub Actions
@@ -1018,6 +1051,7 @@ Week 4: Phase 4 - Label/Paperwork/Shop Order Integration
 ## Success Criteria
 
 ### Technical Requirements
+
 - [x] Rule engine evaluates 5000 fixtures in < 5 seconds
 - [x] 70%+ overall test coverage
 - [x] Manual assignment overrides auto-assignment
@@ -1025,6 +1059,7 @@ Week 4: Phase 4 - Label/Paperwork/Shop Order Integration
 - [x] Integration with all major features (labels, paperwork, shop orders)
 
 ### User Experience Requirements
+
 - [x] Maintenance menu is discoverable
 - [x] Rule builder is intuitive
 - [x] Visual indicators are clear

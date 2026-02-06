@@ -11,7 +11,14 @@ interface BulkEditDialogProps {
   onAutoNumber: (field: keyof Fixture, start: number, increment: number) => void;
 }
 
-export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, onSubmit, onAutoNumber }: BulkEditDialogProps) {
+export function BulkEditDialog({
+  isOpen,
+  selectedCount,
+  selectedIds,
+  onClose,
+  onSubmit,
+  onAutoNumber,
+}: BulkEditDialogProps) {
   const [updates, setUpdates] = useState<Partial<Fixture>>({});
   const [showAutoNumber, setShowAutoNumber] = useState(false);
   const [autoNumberField, setAutoNumberField] = useState<keyof Fixture>('channel');
@@ -31,14 +38,16 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
   });
 
   const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Only submit non-empty fields
     const filteredUpdates = Object.fromEntries(
-      Object.entries(updates).filter(([_, value]) => value !== '' && value !== undefined && value !== null)
+      Object.entries(updates).filter(
+        ([_, value]) => value !== '' && value !== undefined && value !== null,
+      ),
     );
     onSubmit(filteredUpdates as Partial<Fixture>);
     setUpdates({});
@@ -52,7 +61,7 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
   };
 
   const handleChange = (field: keyof Fixture, value: string | number | null) => {
-    setUpdates(prev => ({ ...prev, [field]: value }));
+    setUpdates((prev) => ({ ...prev, [field]: value }));
   };
 
   if (!isOpen) return null;
@@ -73,7 +82,6 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
           <div className="px-6 py-4 space-y-3">
-
             {/* BASIC INFORMATION */}
             <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
               <button
@@ -87,7 +95,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
               {expandedSections.basic && (
                 <div className="p-4 grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Type
+                    </label>
                     <input
                       type="text"
                       value={updates.type || ''}
@@ -97,7 +107,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Manufacturer</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Manufacturer
+                    </label>
                     <input
                       type="text"
                       value={updates.manufacturer || ''}
@@ -107,7 +119,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Model</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Model
+                    </label>
                     <input
                       type="text"
                       value={updates.model || ''}
@@ -117,7 +131,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Purpose</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Purpose
+                    </label>
                     <input
                       type="text"
                       value={updates.purpose || ''}
@@ -127,7 +143,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mark</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Mark
+                    </label>
                     <input
                       type="text"
                       value={updates.mark || ''}
@@ -137,11 +155,18 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Unit Number</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Unit Number
+                    </label>
                     <input
                       type="number"
                       value={updates.unit_number !== undefined ? updates.unit_number : ''}
-                      onChange={(e) => handleChange('unit_number', e.target.value ? parseInt(e.target.value) : null)}
+                      onChange={(e) =>
+                        handleChange(
+                          'unit_number',
+                          e.target.value ? parseInt(e.target.value) : null,
+                        )
+                      }
                       className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white"
                       placeholder="Leave blank to skip"
                     />
@@ -157,13 +182,17 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                 onClick={() => toggleSection('control')}
                 className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-between text-left transition"
               >
-                <span className="font-medium text-gray-900 dark:text-white">Control & Addressing</span>
+                <span className="font-medium text-gray-900 dark:text-white">
+                  Control & Addressing
+                </span>
                 <span className="text-gray-500">{expandedSections.control ? '▼' : '▶'}</span>
               </button>
               {expandedSections.control && (
                 <div className="p-4 grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Channel</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Channel
+                    </label>
                     <input
                       type="text"
                       value={updates.channel || ''}
@@ -173,11 +202,15 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Universe</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Universe
+                    </label>
                     <input
                       type="number"
                       value={updates.universe !== undefined ? updates.universe : ''}
-                      onChange={(e) => handleChange('universe', e.target.value ? parseInt(e.target.value) : null)}
+                      onChange={(e) =>
+                        handleChange('universe', e.target.value ? parseInt(e.target.value) : null)
+                      }
                       className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white"
                       placeholder="Leave blank to skip"
                       min="0"
@@ -185,11 +218,18 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">DMX Address</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      DMX Address
+                    </label>
                     <input
                       type="number"
                       value={updates.dmx_address !== undefined ? updates.dmx_address : ''}
-                      onChange={(e) => handleChange('dmx_address', e.target.value ? parseInt(e.target.value) : null)}
+                      onChange={(e) =>
+                        handleChange(
+                          'dmx_address',
+                          e.target.value ? parseInt(e.target.value) : null,
+                        )
+                      }
                       className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white"
                       placeholder="Leave blank to skip"
                       min="1"
@@ -197,7 +237,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mode</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Mode
+                    </label>
                     <input
                       type="text"
                       value={updates.mode || ''}
@@ -223,7 +265,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
               {expandedSections.power && (
                 <div className="p-4 grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dimmer</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Dimmer
+                    </label>
                     <input
                       type="text"
                       value={updates.dimmer || ''}
@@ -233,7 +277,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Circuit Name</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Circuit Name
+                    </label>
                     <input
                       type="text"
                       value={updates.circuit || ''}
@@ -243,7 +289,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Circuit Number</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Circuit Number
+                    </label>
                     <input
                       type="text"
                       value={updates.circuit_number || ''}
@@ -253,7 +301,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phase</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Phase
+                    </label>
                     <select
                       value={updates.phase || ''}
                       onChange={(e) => handleChange('phase', e.target.value || null)}
@@ -266,23 +316,31 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Wattage</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Wattage
+                    </label>
                     <input
                       type="number"
                       value={updates.wattage !== undefined ? updates.wattage : ''}
-                      onChange={(e) => handleChange('wattage', e.target.value ? parseInt(e.target.value) : null)}
+                      onChange={(e) =>
+                        handleChange('wattage', e.target.value ? parseInt(e.target.value) : null)
+                      }
                       className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white"
                       placeholder="Leave blank to skip"
                       min="0"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amperage</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Amperage
+                    </label>
                     <input
                       type="number"
                       step="0.1"
                       value={updates.amperage !== undefined ? updates.amperage : ''}
-                      onChange={(e) => handleChange('amperage', e.target.value ? parseFloat(e.target.value) : null)}
+                      onChange={(e) =>
+                        handleChange('amperage', e.target.value ? parseFloat(e.target.value) : null)
+                      }
                       className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white"
                       placeholder="Leave blank to skip"
                       min="0"
@@ -299,13 +357,19 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                 onClick={() => toggleSection('colorAccessories')}
                 className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-between text-left transition"
               >
-                <span className="font-medium text-gray-900 dark:text-white">Color & Accessories</span>
-                <span className="text-gray-500">{expandedSections.colorAccessories ? '▼' : '▶'}</span>
+                <span className="font-medium text-gray-900 dark:text-white">
+                  Color & Accessories
+                </span>
+                <span className="text-gray-500">
+                  {expandedSections.colorAccessories ? '▼' : '▶'}
+                </span>
               </button>
               {expandedSections.colorAccessories && (
                 <div className="p-4 grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Color
+                    </label>
                     <input
                       type="text"
                       value={updates.color || ''}
@@ -315,7 +379,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color Frame</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Color Frame
+                    </label>
                     <input
                       type="text"
                       value={updates.color_frame || ''}
@@ -325,7 +391,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gobo</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Gobo
+                    </label>
                     <input
                       type="text"
                       value={updates.gobo || ''}
@@ -335,7 +403,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gobo Size</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Gobo Size
+                    </label>
                     <input
                       type="text"
                       value={updates.gobo_size || ''}
@@ -345,7 +415,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Template Size</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Template Size
+                    </label>
                     <input
                       type="text"
                       value={updates.template_size || ''}
@@ -371,7 +443,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
               {expandedSections.location && (
                 <div className="p-4 grid grid-cols-2 gap-4">
                   <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Location
+                    </label>
                     <input
                       type="text"
                       value={updates.location || ''}
@@ -381,7 +455,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cable</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Cable
+                    </label>
                     <input
                       type="text"
                       value={updates.cable || ''}
@@ -391,7 +467,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Cable</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Data Cable
+                    </label>
                     <input
                       type="text"
                       value={updates.data_cable || ''}
@@ -417,7 +495,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
               {expandedSections.focus && (
                 <div className="p-4 grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Focus L/R</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Focus L/R
+                    </label>
                     <input
                       type="text"
                       value={updates.focus_lr || ''}
@@ -427,7 +507,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Focus U/D</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Focus U/D
+                    </label>
                     <input
                       type="text"
                       value={updates.focus_ud || ''}
@@ -437,7 +519,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Focus Note</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Focus Note
+                    </label>
                     <textarea
                       value={updates.focus_note || ''}
                       onChange={(e) => handleChange('focus_note', e.target.value)}
@@ -447,7 +531,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Focus Status</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Focus Status
+                    </label>
                     <select
                       value={updates.focus_status || ''}
                       onChange={(e) => handleChange('focus_status', e.target.value || null)}
@@ -477,7 +563,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                 <div className="p-4 space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">System</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        System
+                      </label>
                       <input
                         type="text"
                         value={updates.system || ''}
@@ -487,7 +575,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Scenery</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Scenery
+                      </label>
                       <input
                         type="text"
                         value={updates.scenery || ''}
@@ -497,7 +587,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Status
+                      </label>
                       <select
                         value={updates.status || ''}
                         onChange={(e) => handleChange('status', e.target.value || null)}
@@ -511,7 +603,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Work Note Status</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Work Note Status
+                      </label>
                       <select
                         value={updates.work_note_status || ''}
                         onChange={(e) => handleChange('work_note_status', e.target.value || null)}
@@ -525,7 +619,9 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Notes
+                    </label>
                     <textarea
                       value={updates.notes || ''}
                       onChange={(e) => handleChange('notes', e.target.value)}
@@ -545,8 +641,12 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                 onClick={() => toggleSection('flagsVisibility')}
                 className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-between text-left transition"
               >
-                <span className="font-medium text-gray-900 dark:text-white">Flags & Visibility</span>
-                <span className="text-gray-500">{expandedSections.flagsVisibility ? '▼' : '▶'}</span>
+                <span className="font-medium text-gray-900 dark:text-white">
+                  Flags & Visibility
+                </span>
+                <span className="text-gray-500">
+                  {expandedSections.flagsVisibility ? '▼' : '▶'}
+                </span>
               </button>
               {expandedSections.flagsVisibility && (
                 <div className="p-4 space-y-4">
@@ -606,8 +706,12 @@ export function BulkEditDialog({ isOpen, selectedCount, selectedIds, onClose, on
                 onClick={() => setShowAutoNumber(!showAutoNumber)}
                 className="w-full px-4 py-3 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 flex items-center justify-between text-left transition"
               >
-                <span className="font-medium text-purple-900 dark:text-purple-100">Auto-Number Fields</span>
-                <span className="text-purple-600 dark:text-purple-400">{showAutoNumber ? '▼' : '▶'}</span>
+                <span className="font-medium text-purple-900 dark:text-purple-100">
+                  Auto-Number Fields
+                </span>
+                <span className="text-purple-600 dark:text-purple-400">
+                  {showAutoNumber ? '▼' : '▶'}
+                </span>
               </button>
 
               {showAutoNumber && (

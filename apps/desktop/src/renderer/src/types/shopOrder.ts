@@ -218,15 +218,17 @@ export interface ShopOrderNoteTemplate {
  * Helper types for creating/updating records
  */
 export type CreateShopOrderProject = Omit<ShopOrderProject, 'id' | 'created_at' | 'updated_at'>;
-export type UpdateShopOrderProject = Partial<Omit<ShopOrderProject, 'id' | 'created_at' | 'updated_at'>>;
+export type UpdateShopOrderProject = Partial<
+  Omit<ShopOrderProject, 'id' | 'created_at' | 'updated_at'>
+>;
 
 export type CreateShopOrderSection = Omit<ShopOrderSection, 'id' | 'created_at' | 'updated_at'>;
-export type UpdateShopOrderSection = Partial<Omit<ShopOrderSection, 'id' | 'created_at' | 'updated_at'>>;
+export type UpdateShopOrderSection = Partial<
+  Omit<ShopOrderSection, 'id' | 'created_at' | 'updated_at'>
+>;
 
 export type CreateShopOrderItem = Omit<ShopOrderItem, 'id' | 'created_at' | 'updated_at'>;
-export type UpdateShopOrderItem = Partial<
-  Omit<ShopOrderItem, 'id' | 'created_at' | 'updated_at'>
->;
+export type UpdateShopOrderItem = Partial<Omit<ShopOrderItem, 'id' | 'created_at' | 'updated_at'>>;
 
 export type CreateShopOrderRevision = Omit<ShopOrderRevision, 'id' | 'created_at' | 'updated_at'>;
 export type CreateShopOrderNote = Omit<ShopOrderNote, 'id' | 'created_at' | 'updated_at'>;
@@ -387,7 +389,15 @@ export interface PrintPageSettings {
  */
 
 // Element types that can be placed on the canvas
-export type LayoutElementType = 'dataField' | 'text' | 'image' | 'table' | 'shape' | 'equipment_list' | 'notes_content' | 'revision_log';
+export type LayoutElementType =
+  | 'dataField'
+  | 'text'
+  | 'image'
+  | 'table'
+  | 'shape'
+  | 'equipment_list'
+  | 'notes_content'
+  | 'revision_log';
 
 // Data fields that can be displayed
 export type DataFieldType =
@@ -516,7 +526,18 @@ export interface ElementStyle {
   // Typography
   fontFamily?: string;
   fontSize?: number;
-  fontWeight?: 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
+  fontWeight?:
+    | 'normal'
+    | 'bold'
+    | '100'
+    | '200'
+    | '300'
+    | '400'
+    | '500'
+    | '600'
+    | '700'
+    | '800'
+    | '900';
   fontStyle?: 'normal' | 'italic';
   textAlign?: 'left' | 'center' | 'right' | 'justify';
   textDecoration?: 'none' | 'underline' | 'line-through';
@@ -599,8 +620,13 @@ export interface PageLayoutTemplate {
 }
 
 // Helper types for creating/updating
-export type CreateLayoutTemplate = Omit<PageLayoutTemplate, 'id' | 'created_at' | 'updated_at' | 'elements'>;
-export type UpdateLayoutTemplate = Partial<Omit<PageLayoutTemplate, 'id' | 'created_at' | 'updated_at'>>;
+export type CreateLayoutTemplate = Omit<
+  PageLayoutTemplate,
+  'id' | 'created_at' | 'updated_at' | 'elements'
+>;
+export type UpdateLayoutTemplate = Partial<
+  Omit<PageLayoutTemplate, 'id' | 'created_at' | 'updated_at'>
+>;
 
 export type CreateLayoutElement = Omit<LayoutElement, 'id' | 'created_at' | 'updated_at'>;
 export type UpdateLayoutElement = Partial<Omit<LayoutElement, 'id' | 'created_at' | 'updated_at'>>;

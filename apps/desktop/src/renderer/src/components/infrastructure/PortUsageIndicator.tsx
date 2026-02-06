@@ -20,7 +20,11 @@ interface PortUsageIndicatorProps {
   showDetails?: boolean; // Show detailed breakdown
 }
 
-export function PortUsageIndicator({ equipmentId, compact = false, showDetails = true }: PortUsageIndicatorProps) {
+export function PortUsageIndicator({
+  equipmentId,
+  compact = false,
+  showDetails = true,
+}: PortUsageIndicatorProps) {
   const [stats, setStats] = useState<PortUsageStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -41,19 +45,11 @@ export function PortUsageIndicator({ equipmentId, compact = false, showDetails =
   };
 
   if (loading || !stats) {
-    return (
-      <div className="text-xs text-gray-500 dark:text-gray-400">
-        Loading stats...
-      </div>
-    );
+    return <div className="text-xs text-gray-500 dark:text-gray-400">Loading stats...</div>;
   }
 
   if (stats.total_ports === 0) {
-    return (
-      <div className="text-xs text-gray-500 dark:text-gray-400">
-        No ports configured
-      </div>
-    );
+    return <div className="text-xs text-gray-500 dark:text-gray-400">No ports configured</div>;
   }
 
   const getUsageColor = () => {
@@ -88,9 +84,7 @@ export function PortUsageIndicator({ equipmentId, compact = false, showDetails =
       <div className="flex items-center gap-3">
         <div className="flex-1">
           <div className="flex justify-between items-center mb-1">
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-              Port Usage
-            </span>
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Port Usage</span>
             <span className={`text-xs font-medium ${getUsageColor()}`}>
               {stats.usage_percentage}%
             </span>
@@ -108,9 +102,7 @@ export function PortUsageIndicator({ equipmentId, compact = false, showDetails =
       <div className="flex items-center gap-4 text-xs">
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full bg-green-500" />
-          <span className="text-gray-700 dark:text-gray-300">
-            {stats.used_ports} used
-          </span>
+          <span className="text-gray-700 dark:text-gray-300">{stats.used_ports} used</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600" />
@@ -119,9 +111,7 @@ export function PortUsageIndicator({ equipmentId, compact = false, showDetails =
           </span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="text-gray-500 dark:text-gray-400">
-            Total: {stats.total_ports}
-          </span>
+          <span className="text-gray-500 dark:text-gray-400">Total: {stats.total_ports}</span>
         </div>
       </div>
 

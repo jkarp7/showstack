@@ -20,8 +20,7 @@ export function SubscriptionSection() {
       {license && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-sm mb-2 text-gray-900">
-            <strong>Plan:</strong>{' '}
-            <span className="capitalize">{license.tier}</span>
+            <strong>Plan:</strong> <span className="capitalize">{license.tier}</span>
           </p>
           <p className="text-sm text-gray-900">
             <strong>Renews:</strong>{' '}
@@ -33,7 +32,8 @@ export function SubscriptionSection() {
       <div className="pt-4 border-t border-gray-200">
         <h4 className="font-medium mb-2 text-gray-900">Need help with billing?</h4>
         <p className="text-sm text-gray-600 mb-3">
-          Contact our support team for assistance with subscriptions, renewals, or billing questions.
+          Contact our support team for assistance with subscriptions, renewals, or billing
+          questions.
         </p>
         <a
           href="mailto:billing@showstack.app"

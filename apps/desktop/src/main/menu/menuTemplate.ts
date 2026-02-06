@@ -26,7 +26,7 @@ export function buildMenu(state: MenuStateData): Menu {
         {
           label: 'Settings...',
           accelerator: 'Cmd+,',
-          click: () => sendToRenderer('menu:settings')
+          click: () => sendToRenderer('menu:settings'),
         },
         { type: 'separator' },
         { role: 'services' },
@@ -35,8 +35,8 @@ export function buildMenu(state: MenuStateData): Menu {
         { role: 'hideOthers' },
         { role: 'unhide' },
         { type: 'separator' },
-        { role: 'quit' }
-      ]
+        { role: 'quit' },
+      ],
     });
   }
 
@@ -80,13 +80,13 @@ function buildFileMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
       {
         label: isToolContext ? 'New File' : 'New Project',
         accelerator: 'CmdOrCtrl+N',
-        click: () => sendToRenderer('menu:new')
+        click: () => sendToRenderer('menu:new'),
       },
       // Open
       {
         label: 'Open...',
         accelerator: 'CmdOrCtrl+O',
-        click: () => sendToRenderer('menu:open')
+        click: () => sendToRenderer('menu:open'),
       },
       // Recent (placeholder - will be populated dynamically)
       {
@@ -94,9 +94,9 @@ function buildFileMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
         submenu: [
           {
             label: 'No Recent Items',
-            enabled: false
-          }
-        ]
+            enabled: false,
+          },
+        ],
       },
       { type: 'separator' },
       // Save
@@ -104,14 +104,14 @@ function buildFileMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
         label: 'Save',
         accelerator: 'CmdOrCtrl+S',
         enabled: isToolContext && state.isDirty,
-        click: () => sendToRenderer('menu:save')
+        click: () => sendToRenderer('menu:save'),
       },
       // Save As
       {
         label: 'Save As...',
         accelerator: 'CmdOrCtrl+Shift+S',
         enabled: isToolContext,
-        click: () => sendToRenderer('menu:saveAs')
+        click: () => sendToRenderer('menu:saveAs'),
       },
       { type: 'separator' },
       // Export
@@ -121,46 +121,43 @@ function buildFileMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
           {
             label: 'Export to CSV',
             enabled: state.context === 'equipment',
-            click: () => sendToRenderer('menu:export:csv')
+            click: () => sendToRenderer('menu:export:csv'),
           },
           { type: 'separator' },
           {
             label: 'Export for ETC Eos...',
             enabled: state.context === 'equipment',
-            click: () => sendToRenderer('menu:export:eos')
+            click: () => sendToRenderer('menu:export:eos'),
           },
           {
             label: 'Export for GrandMA2...',
             enabled: state.context === 'equipment',
-            click: () => sendToRenderer('menu:export:grandma2')
+            click: () => sendToRenderer('menu:export:grandma2'),
           },
           {
             label: 'Export for GrandMA3...',
             enabled: state.context === 'equipment',
-            click: () => sendToRenderer('menu:export:grandma3')
-          }
-        ]
+            click: () => sendToRenderer('menu:export:grandma3'),
+          },
+        ],
       },
       // Print
       {
         label: 'Print...',
         accelerator: 'CmdOrCtrl+P',
         enabled: isToolContext,
-        click: () => sendToRenderer('menu:print')
+        click: () => sendToRenderer('menu:print'),
       },
       { type: 'separator' },
       // Close Window
       {
         label: 'Close Window',
         accelerator: 'CmdOrCtrl+W',
-        role: 'close'
+        role: 'close',
       },
       // Quit (non-macOS)
-      ...(!isMac ? [
-        { type: 'separator' as const },
-        { role: 'quit' as const }
-      ] : [])
-    ]
+      ...(!isMac ? [{ type: 'separator' as const }, { role: 'quit' as const }] : []),
+    ],
   };
 }
 
@@ -180,13 +177,13 @@ function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
         label: 'Undo',
         accelerator: 'CmdOrCtrl+Z',
         enabled: isToolContext && state.canUndo,
-        click: () => sendToRenderer('menu:undo')
+        click: () => sendToRenderer('menu:undo'),
       },
       {
         label: 'Redo',
         accelerator: 'CmdOrCtrl+Shift+Z',
         enabled: isToolContext && state.canRedo,
-        click: () => sendToRenderer('menu:redo')
+        click: () => sendToRenderer('menu:redo'),
       },
       { type: 'separator' },
       // Standard edit operations
@@ -200,23 +197,23 @@ function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
         label: 'Add Fixture',
         accelerator: 'CmdOrCtrl+Shift+N',
         enabled: isEquipment,
-        click: () => sendToRenderer('menu:addFixture')
+        click: () => sendToRenderer('menu:addFixture'),
       },
       {
         label: 'Add Section',
         enabled: isShopOrder,
-        click: () => sendToRenderer('menu:addSection')
+        click: () => sendToRenderer('menu:addSection'),
       },
       {
         label: 'Bulk Edit...',
         enabled: isEquipment && state.hasSelection,
-        click: () => sendToRenderer('menu:bulkEdit')
+        click: () => sendToRenderer('menu:bulkEdit'),
       },
       {
         label: 'Duplicate',
         accelerator: 'CmdOrCtrl+D',
         enabled: isToolContext && state.hasSelection,
-        click: () => sendToRenderer('menu:duplicate')
+        click: () => sendToRenderer('menu:duplicate'),
       },
       { type: 'separator' },
       // Selection
@@ -224,15 +221,15 @@ function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
         label: 'Select All',
         accelerator: 'CmdOrCtrl+A',
         enabled: isToolContext,
-        click: () => sendToRenderer('menu:selectAll')
+        click: () => sendToRenderer('menu:selectAll'),
       },
       {
         label: 'Deselect All',
         accelerator: 'Escape',
         enabled: isToolContext && state.hasSelection,
-        click: () => sendToRenderer('menu:deselectAll')
-      }
-    ]
+        click: () => sendToRenderer('menu:deselectAll'),
+      },
+    ],
   };
 }
 
@@ -252,13 +249,13 @@ function buildViewMenu(state: MenuStateData): MenuItemConstructorOptions {
         submenu: [
           {
             label: 'Column Visibility...',
-            click: () => sendToRenderer('menu:columns')
+            click: () => sendToRenderer('menu:columns'),
           },
           {
             label: 'User Columns...',
-            click: () => sendToRenderer('menu:userColumns')
-          }
-        ]
+            click: () => sendToRenderer('menu:userColumns'),
+          },
+        ],
       },
       {
         label: 'Sort By',
@@ -266,13 +263,13 @@ function buildViewMenu(state: MenuStateData): MenuItemConstructorOptions {
         submenu: [
           {
             label: 'Sort Options...',
-            click: () => sendToRenderer('menu:sort')
+            click: () => sendToRenderer('menu:sort'),
           },
           {
             label: 'Clear Sort',
-            click: () => sendToRenderer('menu:clearSort')
-          }
-        ]
+            click: () => sendToRenderer('menu:clearSort'),
+          },
+        ],
       },
       {
         label: 'Filters',
@@ -280,53 +277,53 @@ function buildViewMenu(state: MenuStateData): MenuItemConstructorOptions {
         submenu: [
           {
             label: 'Filter Options...',
-            click: () => sendToRenderer('menu:filters')
+            click: () => sendToRenderer('menu:filters'),
           },
           {
             label: 'Clear Filters',
-            click: () => sendToRenderer('menu:clearFilters')
-          }
-        ]
+            click: () => sendToRenderer('menu:clearFilters'),
+          },
+        ],
       },
       {
         label: 'Reset View',
         enabled: isEquipment,
-        click: () => sendToRenderer('menu:resetView')
+        click: () => sendToRenderer('menu:resetView'),
       },
       { type: 'separator' },
       // Theme
       {
         label: 'Toggle Dark Mode',
         accelerator: 'CmdOrCtrl+Shift+D',
-        click: () => sendToRenderer('menu:toggleDarkMode')
+        click: () => sendToRenderer('menu:toggleDarkMode'),
       },
       { type: 'separator' },
       // Zoom
       {
         label: 'Zoom In',
         accelerator: 'CmdOrCtrl+Plus',
-        role: 'zoomIn'
+        role: 'zoomIn',
       },
       {
         label: 'Zoom Out',
         accelerator: 'CmdOrCtrl+-',
-        role: 'zoomOut'
+        role: 'zoomOut',
       },
       {
         label: 'Reset Zoom',
         accelerator: 'CmdOrCtrl+0',
-        role: 'resetZoom'
+        role: 'resetZoom',
       },
       { type: 'separator' },
       // Developer Tools
       {
         label: 'Toggle Developer Tools',
         accelerator: 'CmdOrCtrl+Alt+I',
-        role: 'toggleDevTools'
+        role: 'toggleDevTools',
       },
       { role: 'reload' },
-      { role: 'forceReload' }
-    ]
+      { role: 'forceReload' },
+    ],
   };
 }
 
@@ -339,30 +336,30 @@ function buildProjectMenu(state: MenuStateData): MenuItemConstructorOptions {
     submenu: [
       {
         label: 'Edit Project Info...',
-        click: () => sendToRenderer('menu:editProject')
+        click: () => sendToRenderer('menu:editProject'),
       },
       {
         label: 'Project Settings...',
-        click: () => sendToRenderer('menu:projectSettings')
+        click: () => sendToRenderer('menu:projectSettings'),
       },
       { type: 'separator' },
       {
         label: 'Sync Now',
         accelerator: 'CmdOrCtrl+Shift+Y',
         enabled: false, // Will be enabled in Phase 5
-        click: () => sendToRenderer('menu:sync')
+        click: () => sendToRenderer('menu:sync'),
       },
       {
         label: 'Manage Team...',
         enabled: false, // Will be enabled in Phase 6
-        click: () => sendToRenderer('menu:manageTeam')
+        click: () => sendToRenderer('menu:manageTeam'),
       },
       {
         label: 'Share Project...',
         enabled: false, // Will be enabled in Phase 6
-        click: () => sendToRenderer('menu:shareProject')
-      }
-    ]
+        click: () => sendToRenderer('menu:shareProject'),
+      },
+    ],
   };
 }
 
@@ -376,18 +373,20 @@ function buildToolsMenu(state: MenuStateData, isMac: boolean): MenuItemConstruct
       {
         label: 'Developer Panel',
         accelerator: 'CmdOrCtrl+Alt+D',
-        click: () => sendToRenderer('menu:developerPanel')
+        click: () => sendToRenderer('menu:developerPanel'),
       },
       // Settings (non-macOS)
-      ...(!isMac ? [
-        { type: 'separator' as const },
-        {
-          label: 'Settings...',
-          accelerator: 'CmdOrCtrl+,',
-          click: () => sendToRenderer('menu:settings')
-        }
-      ] : [])
-    ]
+      ...(!isMac
+        ? [
+            { type: 'separator' as const },
+            {
+              label: 'Settings...',
+              accelerator: 'CmdOrCtrl+,',
+              click: () => sendToRenderer('menu:settings'),
+            },
+          ]
+        : []),
+    ],
   };
 }
 
@@ -400,22 +399,24 @@ function buildWindowMenu(isMac: boolean): MenuItemConstructorOptions {
     submenu: [
       { role: 'minimize' },
       { role: 'zoom' },
-      ...(isMac ? [
-        { type: 'separator' as const },
-        { role: 'front' as const },
-        { type: 'separator' as const }
-      ] : []),
+      ...(isMac
+        ? [
+            { type: 'separator' as const },
+            { role: 'front' as const },
+            { type: 'separator' as const },
+          ]
+        : []),
       { type: 'separator' },
       {
         label: 'Home',
         accelerator: 'CmdOrCtrl+Shift+H',
-        click: () => sendToRenderer('menu:home')
+        click: () => sendToRenderer('menu:home'),
       },
       {
         label: 'Account',
-        click: () => sendToRenderer('menu:account')
-      }
-    ]
+        click: () => sendToRenderer('menu:account'),
+      },
+    ],
   };
 }
 
@@ -428,33 +429,33 @@ function buildHelpMenu(): MenuItemConstructorOptions {
     submenu: [
       {
         label: 'ShowStack Documentation',
-        click: () => sendToRenderer('menu:help:docs')
+        click: () => sendToRenderer('menu:help:docs'),
       },
       {
         label: 'Console Export Guide',
-        click: () => sendToRenderer('menu:help:consoleExport')
+        click: () => sendToRenderer('menu:help:consoleExport'),
       },
       {
         label: 'Keyboard Shortcuts',
         accelerator: 'CmdOrCtrl+/',
-        click: () => sendToRenderer('menu:help:shortcuts')
+        click: () => sendToRenderer('menu:help:shortcuts'),
       },
       { type: 'separator' },
       {
         label: 'Check for Updates',
-        click: () => sendToRenderer('menu:help:updates')
+        click: () => sendToRenderer('menu:help:updates'),
       },
       {
         label: 'Admin Panel',
         accelerator: 'CmdOrCtrl+Shift+A',
-        click: () => sendToRenderer('menu:admin')
+        click: () => sendToRenderer('menu:admin'),
       },
       { type: 'separator' },
       {
         label: 'About ShowStack',
-        click: () => sendToRenderer('menu:help:about')
-      }
-    ]
+        click: () => sendToRenderer('menu:help:about'),
+      },
+    ],
   };
 }
 

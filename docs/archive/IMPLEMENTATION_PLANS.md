@@ -3,6 +3,7 @@
 **Last Updated:** December 24, 2024
 
 This document outlines detailed implementation plans for the three core features needed to complete the System Docs tool:
+
 1. Undo/Redo System
 2. Paperwork Generator & Headers
 3. Label Designer
@@ -12,9 +13,11 @@ This document outlines detailed implementation plans for the three core features
 ## 1. UNDO/REDO SYSTEM
 
 ### Overview
+
 Implement a Command pattern-based undo/redo system that works across all editing operations (fixtures, infrastructure, prep module, bulk edits).
 
 ### Current State
+
 - **No existing undo/redo pattern** - needs to be built from scratch
 - All stores (fixture, infrastructure, prep) use Zustand for state management
 - Dirty state tracking exists via `fileStore.setDirty(true)`
@@ -25,6 +28,7 @@ Implement a Command pattern-based undo/redo system that works across all editing
 #### Core Components
 
 **1. Command Interface** (`src/renderer/src/types/commands.ts`)
+
 ```typescript
 interface Command {
   id: string;
@@ -37,6 +41,7 @@ interface Command {
 ```
 
 **2. Undo/Redo Store** (`src/renderer/src/store/undoRedoStore.ts`)
+
 - **State:**
   - `undoStack: Command[]` - Stack of commands that can be undone
   - `redoStack: Command[]` - Stack of commands that can be redone
@@ -86,30 +91,33 @@ Create separate files for each domain:
 Modify all store actions to use the command system:
 
 Before (fixtureStore.ts:78-96):
+
 ```typescript
 updateFixture: async (id: string, updates: Partial<Fixture>) => {
   const updated = await window.api.fixtures.update(id, updates);
   set((state) => ({
-    fixtures: state.fixtures.map(f => f.id === id ? updated : f)
+    fixtures: state.fixtures.map((f) => (f.id === id ? updated : f)),
   }));
   useFileStore.getState().setDirty(true);
-}
+};
 ```
 
 After:
+
 ```typescript
 updateFixture: async (id: string, updates: Partial<Fixture>) => {
-  const oldFixture = get().fixtures.find(f => f.id === id);
+  const oldFixture = get().fixtures.find((f) => f.id === id);
   if (!oldFixture) return;
 
   const command = new UpdateFixtureCommand(id, oldFixture, updates);
   await useUndoRedoStore.getState().executeCommand(command);
-}
+};
 ```
 
 **2. Keyboard Shortcuts** (`src/main/ipc/menu.ts`)
 
 Add menu items and keyboard shortcuts:
+
 - Edit → Undo (Cmd+Z / Ctrl+Z)
 - Edit → Redo (Cmd+Shift+Z / Ctrl+Shift+Z)
 - Show/hide undo description in menu
@@ -117,6 +125,7 @@ Add menu items and keyboard shortcuts:
 **3. UI Indicators** (Optional but recommended)
 
 Add undo/redo buttons to toolbars:
+
 - Equipment Manager toolbar
 - Prep module toolbar
 - Show tooltip with operation description on hover
@@ -147,9 +156,11 @@ Add undo/redo buttons to toolbars:
 ## 2. PAPERWORK GENERATOR & HEADERS
 
 ### Overview
+
 Extend existing paperwork/export system with comprehensive report generation and customizable headers with field selection and positioning.
 
 ### Current State
+
 - **Export headers exist** (`src/renderer/src/utils/exportHeaders.ts`) - supports CSV, EOS, GrandMA formats
 - **Export dialog exists** (`src/renderer/src/components/fixture/ExportHeaderDialog.tsx`) - basic field toggles
 - **PrintBuilder exists** (`src/renderer/src/components/prep/PrintBuilder.tsx`) - drag-and-drop template builder
@@ -190,6 +201,7 @@ CREATE TABLE paperwork_header_templates (
 **2. Header Layout Editor** (`src/renderer/src/components/paperwork/HeaderLayoutEditor.tsx`)
 
 New component for drag-and-drop header design:
+
 - **Canvas-based editor** similar to LabelDesigner
 - **Available fields** (left panel):
   - Show Name
@@ -209,6 +221,7 @@ New component for drag-and-drop header design:
 **3. Header Rendering** (`src/renderer/src/utils/headerRenderer.ts`)
 
 New utility to render headers in various formats:
+
 - `renderHeaderHTML(template, data)` - For PDF export
 - `renderHeaderCSV(template, data)` - For CSV comments
 - `renderHeaderXML(template, data)` - For console exports
@@ -216,6 +229,7 @@ New utility to render headers in various formats:
 **4. Integration with Export Dialog**
 
 Update `ExportHeaderDialog.tsx`:
+
 - Add "Header Template" dropdown - select from saved templates
 - Add "Customize" button - opens HeaderLayoutEditor
 - Preview header before export
@@ -225,6 +239,7 @@ Update `ExportHeaderDialog.tsx`:
 **1. New Report Pages** (`src/renderer/src/pages/modules/reports/`)
 
 Create dedicated report pages:
+
 - `ChannelHookup.tsx` - Channel listing with fixture info
 - `InstrumentSchedule.tsx` - Fixture schedule grouped by position/type
 - `DimmerSchedule.tsx` - Dimmer/circuit assignments
@@ -237,6 +252,7 @@ Create dedicated report pages:
 **2. Report Builder** (`src/renderer/src/components/paperwork/ReportBuilder.tsx`)
 
 Similar to PrintBuilder but for individual reports:
+
 - **Select report type** from list
 - **Configure columns** - show/hide, reorder, custom column names
 - **Filter data** - by position, type, status, etc.
@@ -249,6 +265,7 @@ Similar to PrintBuilder but for individual reports:
 **3. Data Aggregation** (`src/renderer/src/utils/reportData.ts`)
 
 New utility functions to aggregate data for reports:
+
 - `getChannelHookupData(fixtures, options)` - Returns sorted fixture list
 - `getColorCuts(fixtures)` - Groups fixtures by color, calculates quantities
 - `getAccessoryInventory(fixtures)` - Groups by gobo, template, etc.
@@ -269,6 +286,7 @@ New utility functions to aggregate data for reports:
 Current state: 31,310 tokens (very large file, likely already has significant functionality)
 
 Enhancements:
+
 - **Template library** - Browse saved report templates
 - **Quick export** - One-click export of common reports
 - **Batch generation** - Generate all standard paperwork at once
@@ -291,6 +309,7 @@ Enhancements:
 ### Field Positioning Details (Per User Request)
 
 For header field positioning:
+
 - **Grid-based layout** - Snap to grid for alignment
 - **Pixel-perfect positioning** - X/Y coordinates
 - **Alignment guides** - Show when fields align
@@ -302,9 +321,11 @@ For header field positioning:
 ## 3. LABEL DESIGNER
 
 ### Overview
+
 Complete the existing Label Designer implementation by adding actual printing and PDF export functionality.
 
 ### Current State
+
 - **UI fully built** (`src/pages/modules/LabelDesigner.tsx`, 1182 lines)
 - **Canvas-based designer** with graphics editor (text, shapes, lines)
 - **Template system** for cable, circuit, fixture, dimmer labels
@@ -351,10 +372,10 @@ CREATE TABLE label_designs (
 **2. Query Functions** (`src/main/database/queries/labels.ts`)
 
 ```typescript
-export function getAllLabelDesigns(projectId: string): LabelDesign[]
-export function createLabelDesign(design: Partial<LabelDesign>, projectId: string): LabelDesign
-export function updateLabelDesign(id: string, updates: Partial<LabelDesign>): LabelDesign
-export function deleteLabelDesign(id: string): void
+export function getAllLabelDesigns(projectId: string): LabelDesign[];
+export function createLabelDesign(design: Partial<LabelDesign>, projectId: string): LabelDesign;
+export function updateLabelDesign(id: string, updates: Partial<LabelDesign>): LabelDesign;
+export function deleteLabelDesign(id: string): void;
 ```
 
 **3. IPC Handlers** (`src/main/ipc/labels.ts`)
@@ -380,6 +401,7 @@ ipcMain.handle('labels:delete', async (_, id: string) => {
 **4. Update Preload** (`src/preload/index.ts`)
 
 Add to API:
+
 ```typescript
 labels: {
   getAll: (projectId: string) => ipcRenderer.invoke('labels:getAll', projectId),
@@ -420,7 +442,7 @@ ipcMain.handle('labels:print', async (_, designId: string, count: number, printe
     printer: printerName || undefined, // Use default if not specified
     data: imageBuffer,
     type: 'RAW', // or 'PDF' depending on printer
-    copies: count
+    copies: count,
   });
 
   return { success: true };
@@ -441,12 +463,12 @@ import { createCanvas } from 'canvas';
 export function renderLabelAsImage(design: LabelDesign): Buffer {
   const canvas = createCanvas(
     design.width * 96, // Convert inches to pixels (96 DPI)
-    design.height * 96
+    design.height * 96,
   );
   const ctx = canvas.getContext('2d');
 
   // Render each graphic from design.graphics
-  design.graphics.forEach(graphic => {
+  design.graphics.forEach((graphic) => {
     if (graphic.type === 'text') {
       ctx.font = `${graphic.fontSize}px ${graphic.fontFamily}`;
       ctx.fillText(graphic.text, graphic.x, graphic.y);
@@ -473,7 +495,7 @@ ipcMain.handle('labels:exportPDF', async (_, designId: string, count: number, fi
   // Create PDF
   const doc = new PDFDocument({
     size: [design.width * 72, design.height * 72], // Convert inches to points
-    margin: 0
+    margin: 0,
   });
 
   // Pipe to file
@@ -486,7 +508,7 @@ ipcMain.handle('labels:exportPDF', async (_, designId: string, count: number, fi
     const imageBuffer = await renderLabelAsImage(design);
     doc.image(imageBuffer, 0, 0, {
       width: design.width * 72,
-      height: design.height * 72
+      height: design.height * 72,
     });
   }
 
@@ -498,11 +520,16 @@ ipcMain.handle('labels:exportPDF', async (_, designId: string, count: number, fi
 **2. For Avery Sheets** (Multiple labels per page)
 
 Special handling for Avery templates:
+
 ```typescript
-function renderAverySheet(design: LabelDesign, averyTemplate: AveryTemplate, count: number): Buffer {
+function renderAverySheet(
+  design: LabelDesign,
+  averyTemplate: AveryTemplate,
+  count: number,
+): Buffer {
   const doc = new PDFDocument({
     size: 'LETTER',
-    margin: 0
+    margin: 0,
   });
 
   const labelsPerPage = averyTemplate.rows * averyTemplate.cols;
@@ -516,13 +543,17 @@ function renderAverySheet(design: LabelDesign, averyTemplate: AveryTemplate, cou
       for (let col = 0; col < averyTemplate.cols; col++) {
         if (labelIndex >= count) break;
 
-        const x = averyTemplate.marginLeft + (col * (averyTemplate.labelWidth + averyTemplate.horizontalSpacing));
-        const y = averyTemplate.marginTop + (row * (averyTemplate.labelHeight + averyTemplate.verticalSpacing));
+        const x =
+          averyTemplate.marginLeft +
+          col * (averyTemplate.labelWidth + averyTemplate.horizontalSpacing);
+        const y =
+          averyTemplate.marginTop +
+          row * (averyTemplate.labelHeight + averyTemplate.verticalSpacing);
 
         const labelImage = await renderLabelAsImage(design);
         doc.image(labelImage, x * 72, y * 72, {
           width: averyTemplate.labelWidth * 72,
-          height: averyTemplate.labelHeight * 72
+          height: averyTemplate.labelHeight * 72,
         });
 
         labelIndex++;
@@ -540,6 +571,7 @@ function renderAverySheet(design: LabelDesign, averyTemplate: AveryTemplate, cou
 **1. Add Variable Fields to Designer**
 
 Update LabelDesigner.tsx to support placeholder fields:
+
 - `[Channel]` - Replaced with fixture channel
 - `[Address]` - Replaced with DMX address
 - `[Color]` - Replaced with color
@@ -552,11 +584,11 @@ Update LabelDesigner.tsx to support placeholder fields:
 ```typescript
 export function generateLabelsFromFixtures(
   designTemplate: LabelDesign,
-  fixtures: Fixture[]
+  fixtures: Fixture[],
 ): LabelDesign[] {
-  return fixtures.map(fixture => {
+  return fixtures.map((fixture) => {
     const design = { ...designTemplate };
-    design.graphics = design.graphics.map(graphic => {
+    design.graphics = design.graphics.map((graphic) => {
       if (graphic.type === 'text') {
         let text = graphic.text;
         text = text.replace('[Channel]', fixture.channel?.toString() || '');
@@ -576,6 +608,7 @@ export function generateLabelsFromFixtures(
 **3. UI for Batch Generation**
 
 Add to LabelDesigner.tsx:
+
 - "Generate from Fixtures" button
 - Fixture selection dialog (multi-select)
 - Preview batch with variable replacement
@@ -630,10 +663,11 @@ useEffect(() => {
 - **Avery (Standard Printer):** PDF export to standard printer is simplest approach
 
 Consider using ZPL for Zebra printers:
+
 ```typescript
 function generateZPL(design: LabelDesign): string {
   let zpl = '^XA'; // Start format
-  design.graphics.forEach(graphic => {
+  design.graphics.forEach((graphic) => {
     if (graphic.type === 'text') {
       zpl += `^FO${graphic.x},${graphic.y}^A0N,${graphic.fontSize},${graphic.fontSize}^FD${graphic.text}^FS`;
     }
@@ -674,18 +708,21 @@ npm install pdfkit
 ## TESTING STRATEGY
 
 ### Undo/Redo
+
 - Unit tests for Command implementations
 - Integration tests for each store
 - Manual testing: Perform 100+ operations, undo all, redo all
 - Edge case: Undo after file reload (should clear history)
 
 ### Paperwork Generator
+
 - Generate reports with varying data sizes (10 fixtures vs 1000 fixtures)
 - Test all report types with edge cases (missing data, special characters)
 - PDF generation on different OS (macOS, Windows, Linux)
 - Header positioning accuracy across different page sizes
 
 ### Label Designer
+
 - Test printing on actual hardware (Dymo, Brother, Zebra)
 - Verify Avery spacing matches physical labels
 - Batch generation with 100+ fixtures

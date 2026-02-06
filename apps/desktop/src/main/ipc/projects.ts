@@ -8,7 +8,7 @@ import {
   CreateProjectSchema,
   UpdateProjectSchema,
   parseWithZod,
-  formatValidationErrors
+  formatValidationErrors,
 } from '@showstack/shared';
 
 export function registerProjectHandlers(): void {
@@ -18,7 +18,7 @@ export function registerProjectHandlers(): void {
     } catch (error) {
       console.error('Failed to get projects:', {
         operation: 'projects:getAll',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -32,12 +32,12 @@ export function registerProjectHandlers(): void {
     try {
       return await errorHandler.executeWithRetry(
         async () => getCurrentProject(),
-        'projects:getCurrent'
+        'projects:getCurrent',
       );
     } catch (error) {
       console.error('Failed to get current project:', {
         operation: 'projects:getCurrent',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -54,7 +54,7 @@ export function registerProjectHandlers(): void {
       console.error('Failed to get project by id:', {
         operation: 'projects:getById',
         id,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -64,45 +64,54 @@ export function registerProjectHandlers(): void {
     }
   });
 
-  ipcMain.handle('projects:create', async (_event, name: string, description?: string, logoPath?: string, enabledModules?: string[]) => {
-    try {
-      // Construct project data for validation
-      const projectData = {
-        name,
-        description,
-        logo_path: logoPath,
-        enabled_modules: enabledModules ? JSON.stringify(enabledModules) : undefined
-      };
+  ipcMain.handle(
+    'projects:create',
+    async (
+      _event,
+      name: string,
+      description?: string,
+      logoPath?: string,
+      enabledModules?: string[],
+    ) => {
+      try {
+        // Construct project data for validation
+        const projectData = {
+          name,
+          description,
+          logo_path: logoPath,
+          enabled_modules: enabledModules ? JSON.stringify(enabledModules) : undefined,
+        };
 
-      // Validate with Zod schema
-      const validation = parseWithZod(CreateProjectSchema, projectData);
+        // Validate with Zod schema
+        const validation = parseWithZod(CreateProjectSchema, projectData);
 
-      if (!validation.success) {
-        const errorMessage = formatValidationErrors(validation.errors);
-        throw new ValidationError(
-          `Invalid project data:\n${errorMessage}`,
-          validation.errors[0]?.field || 'unknown',
-          projectData
-        );
+        if (!validation.success) {
+          const errorMessage = formatValidationErrors(validation.errors);
+          throw new ValidationError(
+            `Invalid project data:\n${errorMessage}`,
+            validation.errors[0]?.field || 'unknown',
+            projectData,
+          );
+        }
+
+        return await projectService.create(name, description, logoPath, enabledModules);
+      } catch (error) {
+        console.error('Failed to create project:', {
+          operation: 'projects:create',
+          name,
+          error: error instanceof Error ? error.message : error,
+        });
+
+        if (error instanceof ValidationError) {
+          throw new Error(error.toUserMessage());
+        }
+        if (error instanceof DatabaseError) {
+          throw new Error(`Unable to create project: ${error.message}`);
+        }
+        throw error;
       }
-
-      return await projectService.create(name, description, logoPath, enabledModules);
-    } catch (error) {
-      console.error('Failed to create project:', {
-        operation: 'projects:create',
-        name,
-        error: error instanceof Error ? error.message : error
-      });
-
-      if (error instanceof ValidationError) {
-        throw new Error(error.toUserMessage());
-      }
-      if (error instanceof DatabaseError) {
-        throw new Error(`Unable to create project: ${error.message}`);
-      }
-      throw error;
-    }
-  });
+    },
+  );
 
   ipcMain.handle('projects:update', async (_event, id: string, updates: Partial<Project>) => {
     try {
@@ -114,7 +123,7 @@ export function registerProjectHandlers(): void {
         throw new ValidationError(
           `Invalid project update data:\n${errorMessage}`,
           validation.errors[0]?.field || 'unknown',
-          updates
+          updates,
         );
       }
 
@@ -124,7 +133,7 @@ export function registerProjectHandlers(): void {
         operation: 'projects:update',
         id,
         updates,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof ValidationError) {
@@ -144,7 +153,7 @@ export function registerProjectHandlers(): void {
       console.error('Failed to delete project:', {
         operation: 'projects:delete',
         id,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {

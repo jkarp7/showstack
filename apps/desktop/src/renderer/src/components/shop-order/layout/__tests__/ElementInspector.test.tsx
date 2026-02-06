@@ -13,11 +13,11 @@ describe('ElementInspector - Type Safety', () => {
    */
   const createUpdateConfig = (
     currentConfig: ElementConfig,
-    onUpdate: (updates: { config: ElementConfig }) => void
+    onUpdate: (updates: { config: ElementConfig }) => void,
   ) => {
     return (configUpdates: Partial<ElementConfig>) => {
       onUpdate({
-        config: { ...currentConfig, ...configUpdates } as ElementConfig
+        config: { ...currentConfig, ...configUpdates } as ElementConfig,
       });
     };
   };
@@ -26,7 +26,7 @@ describe('ElementInspector - Type Safety', () => {
     it('should allow valid TextConfig updates', () => {
       const currentConfig: TextConfig = {
         content: 'Hello',
-        placeholder: 'Enter text'
+        placeholder: 'Enter text',
       };
 
       let capturedUpdate: ElementConfig | null = null;
@@ -38,14 +38,14 @@ describe('ElementInspector - Type Safety', () => {
 
       expect(capturedUpdate).toEqual({
         content: 'Updated text',
-        placeholder: 'Enter text'
+        placeholder: 'Enter text',
       });
     });
 
     it('should allow partial updates to TextConfig', () => {
       const currentConfig: TextConfig = {
         content: 'Hello',
-        placeholder: 'Enter text'
+        placeholder: 'Enter text',
       };
 
       let capturedUpdate: ElementConfig | null = null;
@@ -57,7 +57,7 @@ describe('ElementInspector - Type Safety', () => {
 
       expect(capturedUpdate).toEqual({
         content: 'Hello',
-        placeholder: 'New placeholder'
+        placeholder: 'New placeholder',
       });
     });
   });
@@ -67,7 +67,7 @@ describe('ElementInspector - Type Safety', () => {
       const currentConfig: ImageConfig = {
         src: 'https://example.com/image.png',
         alt: 'Test image',
-        objectFit: 'contain'
+        objectFit: 'contain',
       };
 
       let capturedUpdate: ElementConfig | null = null;
@@ -80,7 +80,7 @@ describe('ElementInspector - Type Safety', () => {
       expect(capturedUpdate).toEqual({
         src: 'https://example.com/new-image.png',
         alt: 'Test image',
-        objectFit: 'contain'
+        objectFit: 'contain',
       });
     });
 
@@ -88,7 +88,7 @@ describe('ElementInspector - Type Safety', () => {
       const currentConfig: ImageConfig = {
         src: 'https://example.com/image.png',
         alt: 'Test image',
-        objectFit: 'contain'
+        objectFit: 'contain',
       };
 
       let capturedUpdate: ElementConfig | null = null;
@@ -101,7 +101,7 @@ describe('ElementInspector - Type Safety', () => {
       expect(capturedUpdate).toEqual({
         src: 'https://example.com/image.png',
         alt: 'Test image',
-        objectFit: 'cover'
+        objectFit: 'cover',
       });
     });
 
@@ -109,7 +109,7 @@ describe('ElementInspector - Type Safety', () => {
       const currentConfig: ImageConfig = {
         src: 'https://example.com/image.png',
         alt: 'Test image',
-        objectFit: 'contain'
+        objectFit: 'contain',
       };
 
       let capturedUpdate: ElementConfig | null = null;
@@ -122,7 +122,7 @@ describe('ElementInspector - Type Safety', () => {
       expect(capturedUpdate).toEqual({
         src: '',
         alt: 'Test image',
-        objectFit: 'contain'
+        objectFit: 'contain',
       });
     });
   });
@@ -131,7 +131,7 @@ describe('ElementInspector - Type Safety', () => {
     it('should preserve config structure during updates', () => {
       const currentConfig: TextConfig = {
         content: 'Original',
-        placeholder: 'Original placeholder'
+        placeholder: 'Original placeholder',
       };
 
       let capturedUpdate: ElementConfig | null = null;
@@ -150,7 +150,7 @@ describe('ElementInspector - Type Safety', () => {
     it('should handle empty partial updates', () => {
       const currentConfig: TextConfig = {
         content: 'Hello',
-        placeholder: 'Enter text'
+        placeholder: 'Enter text',
       };
 
       let capturedUpdate: ElementConfig | null = null;
@@ -167,7 +167,7 @@ describe('ElementInspector - Type Safety', () => {
       const currentConfig: ImageConfig = {
         src: 'old.png',
         alt: 'Old alt',
-        objectFit: 'contain'
+        objectFit: 'contain',
       };
 
       let capturedUpdate: ElementConfig | null = null;
@@ -178,13 +178,13 @@ describe('ElementInspector - Type Safety', () => {
       updateConfig({
         src: 'new.png',
         alt: 'New alt',
-        objectFit: 'cover'
+        objectFit: 'cover',
       });
 
       expect(capturedUpdate).toEqual({
         src: 'new.png',
         alt: 'New alt',
-        objectFit: 'cover'
+        objectFit: 'cover',
       });
     });
   });
@@ -196,13 +196,13 @@ describe('ElementInspector - Type Safety', () => {
 
       const textConfig: ElementConfig = {
         content: 'Text',
-        placeholder: 'Placeholder'
+        placeholder: 'Placeholder',
       };
 
       const imageConfig: ElementConfig = {
         src: 'image.png',
         alt: 'Alt text',
-        objectFit: 'contain'
+        objectFit: 'contain',
       };
 
       expect(textConfig).toBeDefined();

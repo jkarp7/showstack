@@ -29,5 +29,4 @@
     "apps/desktop/src/main/database/queries/settings.ts",
     "**/*.old.ts"
   ]
-
 }

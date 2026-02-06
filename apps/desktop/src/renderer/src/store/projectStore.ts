@@ -70,7 +70,12 @@ interface ProjectStore {
   projects: Project[];
   currentProject: Project | null;
   loadProjects: () => Promise<void>;
-  createProject: (name: string, description?: string, logoPath?: string, enabledModules?: string[]) => Promise<Project>;
+  createProject: (
+    name: string,
+    description?: string,
+    logoPath?: string,
+    enabledModules?: string[],
+  ) => Promise<Project>;
   updateProject: (projectId: string, updates: Partial<Project>) => Promise<void>;
   deleteProject: (projectId: string) => Promise<void>;
   setCurrentProject: (projectId: string) => void;
@@ -100,7 +105,12 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     }
   },
 
-  createProject: async (name: string, description?: string, logoPath?: string, enabledModules?: string[]) => {
+  createProject: async (
+    name: string,
+    description?: string,
+    logoPath?: string,
+    enabledModules?: string[],
+  ) => {
     if (!hasAPI()) {
       console.warn('API not available');
       throw new Error('API not available');
@@ -132,9 +142,10 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       const currentProject = get().currentProject;
       set({
         projects: allProjects,
-        currentProject: currentProject?.id === projectId
-          ? allProjects.find((p) => p.id === projectId) || null
-          : currentProject
+        currentProject:
+          currentProject?.id === projectId
+            ? allProjects.find((p) => p.id === projectId) || null
+            : currentProject,
       });
     } catch (error) {
       console.error('Failed to update project:', error);

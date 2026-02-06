@@ -63,7 +63,7 @@ function exportCoverPageLayout() {
       element_type: 'dataField',
       config: {
         fieldType: 'logo',
-        showLabel: false
+        showLabel: false,
       },
       grid_column: 3,
       grid_row: 1,
@@ -76,8 +76,8 @@ function exportCoverPageLayout() {
         textAlign: 'center',
         color: '#666666',
         backgroundColor: 'transparent',
-        padding: 16
-      }
+        padding: 16,
+      },
     },
     // Designer name (below logo)
     {
@@ -85,7 +85,7 @@ function exportCoverPageLayout() {
       config: {
         fieldType: 'ld_name',
         label: 'Lighting Designer:',
-        showLabel: true
+        showLabel: true,
       },
       grid_column: 0,
       grid_row: 6,
@@ -99,15 +99,15 @@ function exportCoverPageLayout() {
         textAlign: 'center',
         color: '#000000',
         backgroundColor: 'transparent',
-        padding: 8
-      }
+        padding: 8,
+      },
     },
     // Venue name
     {
       element_type: 'dataField',
       config: {
         fieldType: 'venue',
-        showLabel: false
+        showLabel: false,
       },
       grid_column: 0,
       grid_row: 8,
@@ -119,14 +119,14 @@ function exportCoverPageLayout() {
         fontSize: 11,
         textAlign: 'center',
         color: '#000000',
-        padding: 2
-      }
+        padding: 2,
+      },
     },
     // Venue address (city, state)
     {
       element_type: 'text',
       config: {
-        content: '{venue_city}, {venue_state}'
+        content: '{venue_city}, {venue_state}',
       },
       grid_column: 0,
       grid_row: 9,
@@ -138,14 +138,14 @@ function exportCoverPageLayout() {
         fontSize: 11,
         textAlign: 'center',
         color: '#000000',
-        padding: 2
-      }
+        padding: 2,
+      },
     },
     // Document title
     {
       element_type: 'text',
       config: {
-        content: 'ELECTRICS SHOP ORDER'
+        content: 'ELECTRICS SHOP ORDER',
       },
       grid_column: 0,
       grid_row: 11,
@@ -159,14 +159,14 @@ function exportCoverPageLayout() {
         textAlign: 'center',
         textDecoration: 'underline',
         color: '#000000',
-        padding: 6
-      }
+        padding: 6,
+      },
     },
     // Subtitle
     {
       element_type: 'text',
       config: {
-        content: 'For Bid Only'
+        content: 'For Bid Only',
       },
       grid_column: 0,
       grid_row: 12,
@@ -178,15 +178,15 @@ function exportCoverPageLayout() {
         fontSize: 11,
         textAlign: 'center',
         color: '#000000',
-        padding: 2
-      }
+        padding: 2,
+      },
     },
     // Order date
     {
       element_type: 'dataField',
       config: {
         fieldType: 'order_date',
-        showLabel: false
+        showLabel: false,
       },
       grid_column: 0,
       grid_row: 13,
@@ -198,8 +198,8 @@ function exportCoverPageLayout() {
         fontSize: 11,
         textAlign: 'center',
         color: '#000000',
-        padding: 2
-      }
+        padding: 2,
+      },
     },
     // Revision date
     {
@@ -207,7 +207,7 @@ function exportCoverPageLayout() {
       config: {
         fieldType: 'revision_date',
         label: 'REVISION ISSUED:',
-        showLabel: true
+        showLabel: true,
       },
       grid_column: 0,
       grid_row: 17,
@@ -219,8 +219,8 @@ function exportCoverPageLayout() {
         fontSize: 11,
         textAlign: 'center',
         color: '#000000',
-        padding: 2
-      }
+        padding: 2,
+      },
     },
     // Revision number
     {
@@ -228,7 +228,7 @@ function exportCoverPageLayout() {
       config: {
         fieldType: 'current_revision',
         label: 'REVISION #',
-        showLabel: true
+        showLabel: true,
       },
       grid_column: 0,
       grid_row: 18,
@@ -240,9 +240,9 @@ function exportCoverPageLayout() {
         fontSize: 11,
         textAlign: 'center',
         color: '#000000',
-        padding: 2
-      }
-    }
+        padding: 2,
+      },
+    },
   ];
 
   const data: LayoutExportData = {
@@ -255,9 +255,9 @@ function exportCoverPageLayout() {
       grid_gap: 8,
       page_width: 816,
       page_height: 1056,
-      is_default: true
+      is_default: true,
     },
-    elements
+    elements,
   };
 
   saveLayoutToJSON('cover_default_layout.json', data);
@@ -282,9 +282,9 @@ function exportContactsPageLayout() {
         textAlign: 'center',
         color: '#000000',
         backgroundColor: '#D1D5DB',
-        padding: 8
-      }
-    }
+        padding: 8,
+      },
+    },
     // Add all the contact fields here (omitted for brevity)
   ];
 
@@ -298,9 +298,9 @@ function exportContactsPageLayout() {
       grid_gap: 4,
       page_width: 816,
       page_height: 1056,
-      is_default: true
+      is_default: true,
     },
-    elements
+    elements,
   };
 
   saveLayoutToJSON('contacts_default_layout.json', data);
@@ -321,8 +321,8 @@ function exportEquipmentPageLayout() {
         fontSize: 14,
         fontWeight: 'bold',
         textAlign: 'center',
-        padding: 6
-      }
+        padding: 6,
+      },
     },
     {
       element_type: 'equipment_list',
@@ -335,9 +335,9 @@ function exportEquipmentPageLayout() {
       style: {
         fontFamily: 'Arial',
         fontSize: 9,
-        padding: 0
-      }
-    }
+        padding: 0,
+      },
+    },
   ];
 
   const data: LayoutExportData = {
@@ -350,9 +350,9 @@ function exportEquipmentPageLayout() {
       grid_gap: 4,
       page_width: 816,
       page_height: 1056,
-      is_default: true
+      is_default: true,
     },
-    elements
+    elements,
   };
 
   saveLayoutToJSON('equipment-by-section_default_layout.json', data);
@@ -375,8 +375,8 @@ function exportRevisionSummaryLayout() {
         textAlign: 'center',
         color: '#000000',
         backgroundColor: '#D1D5DB',
-        padding: 10
-      }
+        padding: 10,
+      },
     },
     {
       element_type: 'revision_log',
@@ -389,9 +389,9 @@ function exportRevisionSummaryLayout() {
       style: {
         fontFamily: 'Arial',
         fontSize: 9,
-        padding: 0
-      }
-    }
+        padding: 0,
+      },
+    },
   ];
 
   const data: LayoutExportData = {
@@ -404,9 +404,9 @@ function exportRevisionSummaryLayout() {
       grid_gap: 4,
       page_width: 816,
       page_height: 1056,
-      is_default: true
+      is_default: true,
     },
-    elements
+    elements,
   };
 
   saveLayoutToJSON('revision-summary_default_layout.json', data);
@@ -429,8 +429,8 @@ function exportNotesPageLayout() {
         textAlign: 'center',
         color: '#000000',
         backgroundColor: '#D1D5DB',
-        padding: 10
-      }
+        padding: 10,
+      },
     },
     {
       element_type: 'text',
@@ -449,8 +449,8 @@ function exportNotesPageLayout() {
         backgroundColor: '#F3F4F6',
         padding: 6,
         paddingBottom: 0,
-        paddingLeft: 12
-      }
+        paddingLeft: 12,
+      },
     },
     {
       element_type: 'notes_content',
@@ -469,8 +469,8 @@ function exportNotesPageLayout() {
         paddingTop: 0,
         paddingBottom: 8,
         paddingLeft: 16,
-        lineHeight: 1.4
-      }
+        lineHeight: 1.4,
+      },
     },
     {
       element_type: 'text',
@@ -489,8 +489,8 @@ function exportNotesPageLayout() {
         backgroundColor: '#F3F4F6',
         padding: 6,
         paddingBottom: 0,
-        paddingLeft: 12
-      }
+        paddingLeft: 12,
+      },
     },
     {
       element_type: 'notes_content',
@@ -509,8 +509,8 @@ function exportNotesPageLayout() {
         paddingTop: 0,
         paddingBottom: 8,
         paddingLeft: 16,
-        lineHeight: 1.4
-      }
+        lineHeight: 1.4,
+      },
     },
     {
       element_type: 'text',
@@ -529,8 +529,8 @@ function exportNotesPageLayout() {
         backgroundColor: '#F3F4F6',
         padding: 6,
         paddingBottom: 0,
-        paddingLeft: 12
-      }
+        paddingLeft: 12,
+      },
     },
     {
       element_type: 'notes_content',
@@ -549,9 +549,9 @@ function exportNotesPageLayout() {
         paddingTop: 0,
         paddingBottom: 8,
         paddingLeft: 16,
-        lineHeight: 1.4
-      }
-    }
+        lineHeight: 1.4,
+      },
+    },
   ];
 
   const data: LayoutExportData = {
@@ -564,9 +564,9 @@ function exportNotesPageLayout() {
       grid_gap: 4,
       page_width: 816,
       page_height: 1056,
-      is_default: true
+      is_default: true,
     },
-    elements
+    elements,
   };
 
   saveLayoutToJSON('notes_default_layout.json', data);

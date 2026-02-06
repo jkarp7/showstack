@@ -9,7 +9,7 @@ import { ValidationError } from '../../errors';
 vi.mock('../../database/queries/shop-order', () => ({
   getRevisionsByProjectId: vi.fn(),
   createShopOrderRevision: vi.fn(),
-  deleteShopOrderRevision: vi.fn()
+  deleteShopOrderRevision: vi.fn(),
 }));
 
 vi.mock('../../errors', async () => {
@@ -17,8 +17,8 @@ vi.mock('../../errors', async () => {
   return {
     ...actual,
     errorHandler: {
-      executeWithRetry: vi.fn(async (fn) => fn())
-    }
+      executeWithRetry: vi.fn(async (fn) => fn()),
+    },
   };
 });
 
@@ -27,7 +27,7 @@ import { ShopOrderRevisionService } from '../ShopOrderRevisionService';
 import {
   getRevisionsByProjectId,
   createShopOrderRevision,
-  deleteShopOrderRevision
+  deleteShopOrderRevision,
 } from '../../database/queries/shop-order';
 import type { ShopOrderRevision } from '../../database/queries/shop-order';
 import { errorHandler } from '../../errors';
@@ -43,7 +43,7 @@ describe('ShopOrderRevisionService', () => {
     notes: 'Initial revision',
     change_log: JSON.stringify([{ action: 'created', description: 'Initial order' }]),
     created_at: 1700000000000,
-    updated_at: 1700000000000
+    updated_at: 1700000000000,
   };
 
   const mockRevision2: ShopOrderRevision = {
@@ -54,7 +54,7 @@ describe('ShopOrderRevisionService', () => {
     notes: 'Added fixtures',
     change_log: JSON.stringify([{ action: 'added', description: '10x Source Four' }]),
     created_at: 1700100000000,
-    updated_at: 1700100000000
+    updated_at: 1700100000000,
   };
 
   beforeEach(() => {
@@ -92,7 +92,7 @@ describe('ShopOrderRevisionService', () => {
 
       expect(errorHandler.executeWithRetry).toHaveBeenCalledWith(
         expect.any(Function),
-        'shop-order:revisions:getByProjectId'
+        'shop-order:revisions:getByProjectId',
       );
     });
 
@@ -138,7 +138,7 @@ describe('ShopOrderRevisionService', () => {
       const data: Partial<ShopOrderRevision> = {
         prep_project_id: 'project-1',
         revision_number: 1,
-        notes: 'Initial revision'
+        notes: 'Initial revision',
       };
 
       const result = await service.create(data);
@@ -153,7 +153,7 @@ describe('ShopOrderRevisionService', () => {
 
       const data: Partial<ShopOrderRevision> = {
         prep_project_id: 'project-1',
-        revision_number: 0
+        revision_number: 0,
       };
 
       const result = await service.create(data);
@@ -167,34 +167,32 @@ describe('ShopOrderRevisionService', () => {
 
       await service.create({
         prep_project_id: 'project-1',
-        revision_number: 1
+        revision_number: 1,
       });
 
       expect(errorHandler.executeWithRetry).toHaveBeenCalledWith(
         expect.any(Function),
-        'shop-order:revisions:create'
+        'shop-order:revisions:create',
       );
     });
 
     // Validation: prep_project_id
     it('should throw ValidationError when prep_project_id is missing', async () => {
-      await expect(
-        service.create({ revision_number: 1 })
-      ).rejects.toThrow(ValidationError);
+      await expect(service.create({ revision_number: 1 })).rejects.toThrow(ValidationError);
       expect(createShopOrderRevision).not.toHaveBeenCalled();
     });
 
     it('should throw ValidationError when prep_project_id is empty string', async () => {
-      await expect(
-        service.create({ prep_project_id: '', revision_number: 1 })
-      ).rejects.toThrow(ValidationError);
+      await expect(service.create({ prep_project_id: '', revision_number: 1 })).rejects.toThrow(
+        ValidationError,
+      );
       expect(createShopOrderRevision).not.toHaveBeenCalled();
     });
 
     it('should throw ValidationError when prep_project_id is whitespace only', async () => {
-      await expect(
-        service.create({ prep_project_id: '   ', revision_number: 1 })
-      ).rejects.toThrow(ValidationError);
+      await expect(service.create({ prep_project_id: '   ', revision_number: 1 })).rejects.toThrow(
+        ValidationError,
+      );
       expect(createShopOrderRevision).not.toHaveBeenCalled();
     });
 
@@ -210,9 +208,9 @@ describe('ShopOrderRevisionService', () => {
 
     // Validation: revision_number
     it('should throw ValidationError when revision_number is undefined', async () => {
-      await expect(
-        service.create({ prep_project_id: 'project-1' })
-      ).rejects.toThrow(ValidationError);
+      await expect(service.create({ prep_project_id: 'project-1' })).rejects.toThrow(
+        ValidationError,
+      );
       expect(createShopOrderRevision).not.toHaveBeenCalled();
     });
 
@@ -220,8 +218,8 @@ describe('ShopOrderRevisionService', () => {
       await expect(
         service.create({
           prep_project_id: 'project-1',
-          revision_number: null as unknown as number
-        })
+          revision_number: null as unknown as number,
+        }),
       ).rejects.toThrow(ValidationError);
       expect(createShopOrderRevision).not.toHaveBeenCalled();
     });
@@ -268,7 +266,7 @@ describe('ShopOrderRevisionService', () => {
 
       expect(errorHandler.executeWithRetry).toHaveBeenCalledWith(
         expect.any(Function),
-        'shop-order:revisions:delete'
+        'shop-order:revisions:delete',
       );
     });
 
@@ -310,32 +308,28 @@ describe('ShopOrderRevisionService', () => {
   describe('error propagation', () => {
     it('should propagate database errors from getByProjectId', async () => {
       vi.mocked(errorHandler.executeWithRetry).mockRejectedValueOnce(
-        new Error('Database connection lost')
+        new Error('Database connection lost'),
       );
 
-      await expect(service.getByProjectId('project-1')).rejects.toThrow(
-        'Database connection lost'
-      );
+      await expect(service.getByProjectId('project-1')).rejects.toThrow('Database connection lost');
     });
 
     it('should propagate database errors from create', async () => {
       vi.mocked(errorHandler.executeWithRetry).mockRejectedValueOnce(
-        new Error('Unique constraint violation')
+        new Error('Unique constraint violation'),
       );
 
       await expect(
-        service.create({ prep_project_id: 'project-1', revision_number: 1 })
+        service.create({ prep_project_id: 'project-1', revision_number: 1 }),
       ).rejects.toThrow('Unique constraint violation');
     });
 
     it('should propagate database errors from delete', async () => {
       vi.mocked(errorHandler.executeWithRetry).mockRejectedValueOnce(
-        new Error('Foreign key constraint')
+        new Error('Foreign key constraint'),
       );
 
-      await expect(service.delete('rev-1')).rejects.toThrow(
-        'Foreign key constraint'
-      );
+      await expect(service.delete('rev-1')).rejects.toThrow('Foreign key constraint');
     });
   });
 });

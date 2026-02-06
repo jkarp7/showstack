@@ -4,24 +4,24 @@
  */
 
 export type MenuContext =
-  | 'landing'          // LandingPage (projects list)
-  | 'project'          // ProjectPage (project details)
-  | 'module'           // ModuleLanding (tool selection)
-  | 'equipment'        // Equipment Manager
-  | 'shop-order'       // Shop Order Builder tool
-  | 'systemdocs'       // System Docs container
-  | 'paperwork'        // Paperwork generator
-  | 'labels'           // Label designer
-  | 'manager'          // Manager module
-  | 'account'          // Account page
-  | 'settings';        // Settings page
+  | 'landing' // LandingPage (projects list)
+  | 'project' // ProjectPage (project details)
+  | 'module' // ModuleLanding (tool selection)
+  | 'equipment' // Equipment Manager
+  | 'shop-order' // Shop Order Builder tool
+  | 'systemdocs' // System Docs container
+  | 'paperwork' // Paperwork generator
+  | 'labels' // Label designer
+  | 'manager' // Manager module
+  | 'account' // Account page
+  | 'settings'; // Settings page
 
 export interface MenuStateData {
   context: MenuContext;
   projectId?: string;
   projectName?: string;
-  isDirty?: boolean;           // Has unsaved changes
-  hasSelection?: boolean;       // Has selected rows (for bulk actions)
+  isDirty?: boolean; // Has unsaved changes
+  hasSelection?: boolean; // Has selected rows (for bulk actions)
   canUndo?: boolean;
   canRedo?: boolean;
   filePath?: string;
@@ -29,7 +29,7 @@ export interface MenuStateData {
 
 class MenuStateManager {
   private currentState: MenuStateData = {
-    context: 'landing'
+    context: 'landing',
   };
 
   private stateChangeCallbacks: Array<(state: MenuStateData) => void> = [];
@@ -40,11 +40,11 @@ class MenuStateManager {
   setState(newState: Partial<MenuStateData>): void {
     this.currentState = {
       ...this.currentState,
-      ...newState
+      ...newState,
     };
 
     // Notify all callbacks
-    this.stateChangeCallbacks.forEach(callback => {
+    this.stateChangeCallbacks.forEach((callback) => {
       callback(this.currentState);
     });
   }
@@ -83,7 +83,7 @@ class MenuStateManager {
       hasSelection: false,
       canUndo: false,
       canRedo: false,
-      filePath: undefined
+      filePath: undefined,
     });
   }
 }

@@ -9,6 +9,7 @@
 **Milestone**: TBD
 
 **Body**:
+
 ```markdown
 ## Overview
 
@@ -29,12 +30,13 @@ Current shop order workflow doesn't match how designers actually work:
 ## Proposed Solution
 
 ### Data Entry Table (Spreadsheet-like)
-
 ```
+
 Section (dropdown) | Description | Rev 0 | Rev 1 | Rev N | Spare | Venue
 ───────────────────┼─────────────┼───────┼───────┼───────┼───────┼───────
-Moving Lights      | LED Par 64  |  10   |  12   |  12   |   2   |   0
-Moving Lights      | MAC Aura XB |   8   |   8   |  10   |   2   |   3
+Moving Lights | LED Par 64 | 10 | 12 | 12 | 2 | 0
+Moving Lights | MAC Aura XB | 8 | 8 | 10 | 2 | 3
+
 ```
 
 **Features:**
@@ -47,15 +49,18 @@ Moving Lights      | MAC Aura XB |   8   |   8   |  10   |   2   |   3
 ### Print Output (Professional)
 
 ```
+
 SECTION: Moving Lights
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DELTA | RENTAL | TOTAL | Active | Spare | Description        | Venue
+DELTA | RENTAL | TOTAL | Active | Spare | Description | Venue
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  +   |   12   |   14  |   12   |   2   | LED Par 64         |    0
-  ~   |    7   |   10  |    8   |   2   | MAC Aura XB        |    3
-      |   18   |   20  |   18   |   2   | Source Four 26°    |    0
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+
+- | 12 | 14 | 12 | 2 | LED Par 64 | 0
+  ~ | 7 | 10 | 8 | 2 | MAC Aura XB | 3
+  | 18 | 20 | 18 | 2 | Source Four 26° | 0
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+````
 
 **Features:**
 - **DELTA column**: Shows +/-/~ for revision changes (FIRST column)
@@ -131,15 +136,15 @@ DELTA | RENTAL | TOTAL | Active | Spare | Description        | Venue
 ```sql
 ALTER TABLE prep_equipment_items ADD COLUMN revision_quantities TEXT;
 ALTER TABLE prep_equipment_items ADD COLUMN deleted_in_revision INTEGER;
-```
+````
 
 ### Data Structure
 
 ```typescript
 interface PrepEquipmentItem {
   revision_quantities: string; // JSON: { "0": 10, "1": 12, "2": 8 }
-  spare_qty: number;           // Single value (not per-revision)
-  venue_qty: number;           // Constant across revisions
+  spare_qty: number; // Single value (not per-revision)
+  venue_qty: number; // Constant across revisions
   deleted_in_revision?: number;
 }
 ```
@@ -157,6 +162,7 @@ const rental = total - venue_qty;
 ## Import/Export Support
 
 ### Paste from Spreadsheet
+
 ```
 Description    Section         Active  Spare  Venue
 LED Par        Moving Lights   10      2      0
@@ -164,6 +170,7 @@ MAC Aura       Moving Lights   8       1      2
 ```
 
 ### Vectorworks Import
+
 ```csv
 Position,Type,Unit #,Wattage,Purpose
 1st Electric,Source Four 750W 26°,1,750,Front Light
@@ -178,6 +185,7 @@ Position,Type,Unit #,Wattage,Purpose
 5. **Phase 5**: Full rollout, deprecate old UI
 
 **Feature Flag:**
+
 ```typescript
 const useTableBasedEditor = localStorage.getItem('prep.useTableEditor') === 'true';
 ```
@@ -193,6 +201,7 @@ const useTableBasedEditor = localStorage.getItem('prep.useTableEditor') === 'tru
 ## Benefits
 
 ### For Users
+
 - **Familiar workflow**: Matches Excel/Google Sheets UX
 - **Faster data entry**: Inline editing, paste from clipboard
 - **Better vectorworks support**: Direct import from LightWright
@@ -200,6 +209,7 @@ const useTableBasedEditor = localStorage.getItem('prep.useTableEditor') === 'tru
 - **Prominent rental info**: RENTAL column hard to miss
 
 ### For Development
+
 - **Simpler revision model**: Compare columns instead of snapshots
 - **Better import/export**: Standard TSV/CSV format
 - **Performance**: Fewer database queries, virtual scrolling
@@ -222,11 +232,13 @@ const useTableBasedEditor = localStorage.getItem('prep.useTableEditor') === 'tru
 ## Breaking Changes
 
 ⚠️ **User Impact:**
+
 - New UI requires retraining
 - Different revision workflow (columns vs. snapshots)
 - Notes accessed via modal instead of inline
 
 **Mitigation:**
+
 - Feature flag for gradual rollout
 - User documentation and video tutorials
 - Migration script handles data conversion
@@ -246,6 +258,7 @@ const useTableBasedEditor = localStorage.getItem('prep.useTableEditor') === 'tru
 - [ ] Feature flag allows rollback to old UI
 - [ ] Migration script converts existing projects
 - [ ] All tests pass
+
 ```
 
 ---
@@ -296,3 +309,4 @@ const useTableBasedEditor = localStorage.getItem('prep.useTableEditor') === 'tru
 ## Estimated Effort
 
 **4.5 weeks** (see phase breakdown above)
+```

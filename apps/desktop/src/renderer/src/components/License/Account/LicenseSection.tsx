@@ -29,7 +29,7 @@ export function LicenseSection() {
         expirationDate: license.expirationDate,
         licenseKey: license.licenseKey,
         email: license.email,
-        modules: license.modules
+        modules: license.modules,
       });
     }
   }, [license, loading]);
@@ -57,7 +57,13 @@ export function LicenseSection() {
   }
 
   // Check if license is truly valid with all required fields
-  if (!license || !license.email || !license.licenseKey || !license.modules || license.modules.length === 0) {
+  if (
+    !license ||
+    !license.email ||
+    !license.licenseKey ||
+    !license.modules ||
+    license.modules.length === 0
+  ) {
     return (
       <div className="space-y-6">
         <h3 className="text-lg font-semibold text-gray-900">Activate License</h3>
@@ -84,11 +90,7 @@ export function LicenseSection() {
           />
         </div>
 
-        {error && (
-          <div className="text-red-600 text-sm">
-            {error}
-          </div>
-        )}
+        {error && <div className="text-red-600 text-sm">{error}</div>}
 
         <button
           onClick={handleActivate}
@@ -101,8 +103,12 @@ export function LicenseSection() {
     );
   }
 
-  const StatusIcon = license.status === 'active' ? CheckCircle :
-                     license.status === 'expired' ? AlertCircle : XCircle;
+  const StatusIcon =
+    license.status === 'active'
+      ? CheckCircle
+      : license.status === 'expired'
+        ? AlertCircle
+        : XCircle;
 
   return (
     <div className="space-y-6">
@@ -110,9 +116,9 @@ export function LicenseSection() {
 
       <div className="bg-gray-50 rounded-lg p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <StatusIcon className={`w-5 h-5 ${
-            license.status === 'active' ? 'text-green-500' : 'text-red-500'
-          }`} />
+          <StatusIcon
+            className={`w-5 h-5 ${license.status === 'active' ? 'text-green-500' : 'text-red-500'}`}
+          />
           <span className="font-medium capitalize text-gray-900">{license.status}</span>
         </div>
 
@@ -152,20 +158,24 @@ export function LicenseSection() {
           <ul className="space-y-1">
             <li className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-green-500" />
-              <span className="text-gray-900">Max Revisions: {license.modules[0].features.maxRevisions ?? 'Unlimited'}</span>
+              <span className="text-gray-900">
+                Max Revisions: {license.modules[0].features.maxRevisions ?? 'Unlimited'}
+              </span>
             </li>
             <li className="flex items-center gap-2">
-              {license.modules[0].features.multiDiscipline ?
-                <CheckCircle className="w-4 h-4 text-green-500" /> :
+              {license.modules[0].features.multiDiscipline ? (
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              ) : (
                 <XCircle className="w-4 h-4 text-gray-400" />
-              }
+              )}
               <span className="text-gray-900">Multi-Discipline Support</span>
             </li>
             <li className="flex items-center gap-2">
-              {license.modules[0].features.advancedExport ?
-                <CheckCircle className="w-4 h-4 text-green-500" /> :
+              {license.modules[0].features.advancedExport ? (
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              ) : (
                 <XCircle className="w-4 h-4 text-gray-400" />
-              }
+              )}
               <span className="text-gray-900">Advanced Export Options</span>
             </li>
           </ul>

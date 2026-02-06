@@ -78,9 +78,7 @@ export function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="text-center mb-6">
         <h2 className="text-xl font-semibold text-gray-900">Create Account</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Sign up to sync your projects to the cloud
-        </p>
+        <p className="text-sm text-gray-500 mt-1">Sign up to sync your projects to the cloud</p>
       </div>
 
       {/* Email Field */}
@@ -141,12 +139,20 @@ export function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
         {/* Password Requirements */}
         {password.length > 0 && (
           <div className="mt-2 space-y-1">
-            <div className={`text-xs flex items-center gap-1 ${passwordMinLength ? 'text-green-600' : 'text-gray-400'}`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${passwordMinLength ? 'bg-green-500' : 'bg-gray-300'}`} />
+            <div
+              className={`text-xs flex items-center gap-1 ${passwordMinLength ? 'text-green-600' : 'text-gray-400'}`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${passwordMinLength ? 'bg-green-500' : 'bg-gray-300'}`}
+              />
               At least 8 characters
             </div>
-            <div className={`text-xs flex items-center gap-1 ${passwordHasNumber ? 'text-green-600' : 'text-gray-400'}`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${passwordHasNumber ? 'bg-green-500' : 'bg-gray-300'}`} />
+            <div
+              className={`text-xs flex items-center gap-1 ${passwordHasNumber ? 'text-green-600' : 'text-gray-400'}`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${passwordHasNumber ? 'bg-green-500' : 'bg-gray-300'}`}
+              />
               Contains a number
             </div>
           </div>
@@ -169,9 +175,7 @@ export function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Confirm your password"
             className={`block w-full pl-10 pr-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm ${
-              confirmPassword && !passwordsMatch
-                ? 'border-red-300'
-                : 'border-gray-300'
+              confirmPassword && !passwordsMatch ? 'border-red-300' : 'border-gray-300'
             }`}
             disabled={isLoading}
             autoComplete="new-password"

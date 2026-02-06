@@ -10,6 +10,7 @@
 ## Checklist
 
 ### 6.1 Sentry Integration (1-2 weeks)
+
 - [ ] Install @sentry/electron
 - [ ] Initialize Sentry in main + renderer
 - [ ] Configure error sampling
@@ -17,6 +18,7 @@
 - [ ] Test error capture
 
 ### 6.2 Health Check System (1-2 weeks)
+
 - [ ] Create HealthChecker class
 - [ ] Check database, filesystem, memory, cloud connection
 - [ ] Add health check IPC handler

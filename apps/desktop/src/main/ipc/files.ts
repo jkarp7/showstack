@@ -1,5 +1,9 @@
 import { ipcMain, BrowserWindow } from 'electron';
-import { fileService, ProjectImportResult, ProjectConflictResolution } from '../services/fileService';
+import {
+  fileService,
+  ProjectImportResult,
+  ProjectConflictResolution,
+} from '../services/fileService';
 // import path from 'path';
 import { readImageAsDataUrl } from '../utils/imageValidation';
 import { sanitizeError, sanitizeErrorForLogging } from '../utils/errorSanitizer';
@@ -23,13 +27,13 @@ export function registerFileHandlers(): void {
       // Include the file path in the result
       return {
         ...result,
-        filePath: result.success ? filePath : undefined
+        filePath: result.success ? filePath : undefined,
       } as ProjectImportResult & { filePath?: string };
     } catch (error) {
       console.error('Error in file:open handler:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to open file'
+        error: error instanceof Error ? error.message : 'Failed to open file',
       };
     }
   });
@@ -44,13 +48,13 @@ export function registerFileHandlers(): void {
       // Include the file path in the result
       return {
         ...result,
-        filePath: result.success ? filePath : undefined
+        filePath: result.success ? filePath : undefined,
       } as ProjectImportResult & { filePath?: string };
     } catch (error) {
       console.error('Error in file:openByPath handler:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to open file'
+        error: error instanceof Error ? error.message : 'Failed to open file',
       };
     }
   });
@@ -58,21 +62,28 @@ export function registerFileHandlers(): void {
   /**
    * Resolve import conflict
    */
-  ipcMain.handle('file:resolveConflict', async (_, filePath: string, resolution: ProjectConflictResolution): Promise<ProjectImportResult> => {
-    try {
-      const result = await fileService.resolveImportConflict(filePath, resolution);
-      return {
-        ...result,
-        filePath: result.success ? filePath : undefined
-      } as ProjectImportResult & { filePath?: string };
-    } catch (error) {
-      console.error('Error in file:resolveConflict handler:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to resolve conflict'
-      };
-    }
-  });
+  ipcMain.handle(
+    'file:resolveConflict',
+    async (
+      _,
+      filePath: string,
+      resolution: ProjectConflictResolution,
+    ): Promise<ProjectImportResult> => {
+      try {
+        const result = await fileService.resolveImportConflict(filePath, resolution);
+        return {
+          ...result,
+          filePath: result.success ? filePath : undefined,
+        } as ProjectImportResult & { filePath?: string };
+      } catch (error) {
+        console.error('Error in file:resolveConflict handler:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to resolve conflict',
+        };
+      }
+    },
+  );
 
   /**
    * Save project to file
@@ -102,20 +113,23 @@ export function registerFileHandlers(): void {
   /**
    * Show save as dialog and save project
    */
-  ipcMain.handle('file:saveAs', async (_, defaultName?: string, module: string = 'PRODUCTION'): Promise<string | null> => {
-    try {
-      const filePath = await fileService.showSaveDialog(defaultName, module as any);
-      if (!filePath) {
-        return null; // User canceled
-      }
+  ipcMain.handle(
+    'file:saveAs',
+    async (_, defaultName?: string, module: string = 'PRODUCTION'): Promise<string | null> => {
+      try {
+        const filePath = await fileService.showSaveDialog(defaultName, module as any);
+        if (!filePath) {
+          return null; // User canceled
+        }
 
-      await fileService.exportProject(filePath);
-      return filePath;
-    } catch (error) {
-      console.error('Error in file:saveAs handler:', error);
-      throw new Error(error instanceof Error ? error.message : 'Failed to save file');
-    }
-  });
+        await fileService.exportProject(filePath);
+        return filePath;
+      } catch (error) {
+        console.error('Error in file:saveAs handler:', error);
+        throw new Error(error instanceof Error ? error.message : 'Failed to save file');
+      }
+    },
+  );
 
   /**
    * Create new project (clears current data)
@@ -140,7 +154,7 @@ export function registerFileHandlers(): void {
       console.error('Error in file:validate handler:', error);
       return {
         valid: false,
-        error: error instanceof Error ? error.message : 'Failed to validate file'
+        error: error instanceof Error ? error.message : 'Failed to validate file',
       };
     }
   });
@@ -169,18 +183,21 @@ export function registerFileHandlers(): void {
    * SECURITY: Validates file type via magic numbers and enforces size limits
    * SECURITY: Sanitizes error messages to prevent information disclosure
    */
-  ipcMain.handle('file:readImageAsDataUrl', async (_, imagePath: string): Promise<string | null> => {
-    try {
-      return await readImageAsDataUrl(imagePath);
-    } catch (error) {
-      // Log full error details securely (console only, not sent to renderer)
-      console.error('Error reading image file:', sanitizeErrorForLogging(error));
+  ipcMain.handle(
+    'file:readImageAsDataUrl',
+    async (_, imagePath: string): Promise<string | null> => {
+      try {
+        return await readImageAsDataUrl(imagePath);
+      } catch (error) {
+        // Log full error details securely (console only, not sent to renderer)
+        console.error('Error reading image file:', sanitizeErrorForLogging(error));
 
-      // Sanitize error message before sending to renderer (prevents path disclosure)
-      const sanitizedMessage = sanitizeError(error);
-      throw new Error(sanitizedMessage);
-    }
-  });
+        // Sanitize error message before sending to renderer (prevents path disclosure)
+        const sanitizedMessage = sanitizeError(error);
+        throw new Error(sanitizedMessage);
+      }
+    },
+  );
 
   console.log('✅ File IPC handlers registered');
 }

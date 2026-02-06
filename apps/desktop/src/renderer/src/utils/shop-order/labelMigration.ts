@@ -10,7 +10,7 @@ import {
   convertLabelDesignToTemplate,
   clearLabelDesignsFromLocalStorage,
   getMigrationSummary,
-  type CustomLabelDesign
+  type CustomLabelDesign,
 } from './templateConverter';
 import type { PageLayoutTemplate, PrintSectionType } from '../../types/shopOrder';
 
@@ -31,7 +31,7 @@ export async function migrateLabelDesigns(projectId: string): Promise<MigrationR
     migratedCount: 0,
     failedCount: 0,
     errors: [],
-    templateIds: []
+    templateIds: [],
   };
 
   try {
@@ -61,7 +61,7 @@ export async function migrateLabelDesigns(projectId: string): Promise<MigrationR
           grid_gap: converted.gridConfig.gridGap,
           page_width: converted.gridConfig.pageWidth,
           page_height: converted.gridConfig.pageHeight,
-          is_default: false
+          is_default: false,
         });
 
         // Save elements
@@ -84,9 +84,10 @@ export async function migrateLabelDesigns(projectId: string): Promise<MigrationR
       clearLabelDesignsFromLocalStorage(projectId);
       console.log(`✅ Migration complete. Migrated ${result.migratedCount} designs.`);
     } else if (result.failedCount > 0) {
-      console.warn(`⚠️ Migration completed with errors: ${result.migratedCount} succeeded, ${result.failedCount} failed.`);
+      console.warn(
+        `⚠️ Migration completed with errors: ${result.migratedCount} succeeded, ${result.failedCount} failed.`,
+      );
     }
-
   } catch (error) {
     result.success = false;
     result.errors.push(`Migration failed: ${error}`);
@@ -141,7 +142,7 @@ export function getMigrationPreview(projectId: string): {
   return {
     needsMigration: summary.totalDesigns > 0,
     designCount: summary.totalDesigns,
-    summary: summaryText
+    summary: summaryText,
   };
 }
 
@@ -158,10 +159,10 @@ export async function promptAndMigrate(projectId: string): Promise<MigrationResu
   // Show confirmation dialog
   const confirmed = confirm(
     `Label Migration\n\n` +
-    `${preview.summary}\n\n` +
-    `These will be converted to the new grid-based label designer.\n\n` +
-    `Original designs will be backed up in localStorage.\n\n` +
-    `Proceed with migration?`
+      `${preview.summary}\n\n` +
+      `These will be converted to the new grid-based label designer.\n\n` +
+      `Original designs will be backed up in localStorage.\n\n` +
+      `Proceed with migration?`,
   );
 
   if (!confirmed) {
@@ -176,21 +177,21 @@ export async function promptAndMigrate(projectId: string): Promise<MigrationResu
   if (result.success && result.failedCount === 0) {
     alert(
       `Migration Successful!\n\n` +
-      `Migrated ${result.migratedCount} label design${result.migratedCount > 1 ? 's' : ''}.\n\n` +
-      `Your labels are now available in the new grid-based designer.`
+        `Migrated ${result.migratedCount} label design${result.migratedCount > 1 ? 's' : ''}.\n\n` +
+        `Your labels are now available in the new grid-based designer.`,
     );
   } else if (result.migratedCount > 0) {
     alert(
       `Migration Completed with Errors\n\n` +
-      `Successfully migrated: ${result.migratedCount}\n` +
-      `Failed: ${result.failedCount}\n\n` +
-      `Errors:\n${result.errors.join('\n')}`
+        `Successfully migrated: ${result.migratedCount}\n` +
+        `Failed: ${result.failedCount}\n\n` +
+        `Errors:\n${result.errors.join('\n')}`,
     );
   } else {
     alert(
       `Migration Failed\n\n` +
-      `No designs were migrated.\n\n` +
-      `Errors:\n${result.errors.join('\n')}`
+        `No designs were migrated.\n\n` +
+        `Errors:\n${result.errors.join('\n')}`,
     );
   }
 

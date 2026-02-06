@@ -54,23 +54,23 @@ export function ModuleSelector({ currentModule, onModuleChange }: ModuleSelector
     prep: {
       icon: Package,
       label: 'Prep',
-      description: 'Shop orders & equipment tracking'
+      description: 'Shop orders & equipment tracking',
     },
     production: {
       icon: Wrench,
       label: 'Production',
-      description: 'Production management & paperwork'
+      description: 'Production management & paperwork',
     },
     manager: {
       icon: Briefcase,
       label: 'Manager',
-      description: 'Tour & financial management'
+      description: 'Tour & financial management',
     },
     student: {
       icon: GraduationCap,
       label: 'Student',
-      description: 'Educational version'
-    }
+      description: 'Educational version',
+    },
   };
 
   if (loading) {
@@ -96,13 +96,11 @@ export function ModuleSelector({ currentModule, onModuleChange }: ModuleSelector
             disabled={!hasAccess}
             className={`
               flex items-center gap-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap
-              ${isActive
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-900'
-              }
-              ${!hasAccess
-                ? 'opacity-50 cursor-not-allowed'
-                : 'hover:bg-blue-400 hover:text-gray-900 dark:hover:text-white'
+              ${isActive ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'}
+              ${
+                !hasAccess
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:bg-blue-400 hover:text-gray-900 dark:hover:text-white'
               }
             `}
           >

@@ -31,9 +31,7 @@ export function initializeGlobalErrorHandlers(): void {
 
   // Handle unhandled promise rejections
   window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
-    const error = event.reason instanceof Error
-      ? event.reason
-      : new Error(String(event.reason));
+    const error = event.reason instanceof Error ? event.reason : new Error(String(event.reason));
 
     telemetry.trackError(error, {
       type: 'unhandled_promise_rejection',
@@ -80,10 +78,7 @@ export function initializeGlobalErrorHandlers(): void {
  * @param error Error object or message
  * @param context Additional context
  */
-export function reportError(
-  error: Error | string,
-  context: EventProperties = {}
-): void {
+export function reportError(error: Error | string, context: EventProperties = {}): void {
   telemetry.trackError(error, {
     type: 'manual_report',
     ...context,

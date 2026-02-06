@@ -6,7 +6,11 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import Database from 'better-sqlite3';
-import { createPerformanceIndexes, dropPerformanceIndexes, analyzeQueryPerformance } from '../indexes/performanceIndexes';
+import {
+  createPerformanceIndexes,
+  dropPerformanceIndexes,
+  analyzeQueryPerformance,
+} from '../indexes/performanceIndexes';
 import { mkdtempSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -140,7 +144,9 @@ describe('Performance Indexes', () => {
         db.prepare('SELECT * FROM fixtures WHERE project_id = ?').all(projectId);
       });
 
-      console.log(`Fixture lookup: ${timeWithoutIndex}ms (no index) → ${timeWithIndex}ms (with index)`);
+      console.log(
+        `Fixture lookup: ${timeWithoutIndex}ms (no index) → ${timeWithIndex}ms (with index)`,
+      );
 
       // With indexes should be faster or equal (small dataset may not show difference)
       expect(timeWithIndex).toBeLessThanOrEqual(timeWithoutIndex + 1); // Allow 1ms margin
@@ -159,7 +165,9 @@ describe('Performance Indexes', () => {
         db.prepare('SELECT * FROM shop_order_sections WHERE prep_project_id = ?').all(projectId);
       });
 
-      console.log(`Shop order sections: ${timeWithoutIndex}ms (no index) → ${timeWithIndex}ms (with index)`);
+      console.log(
+        `Shop order sections: ${timeWithoutIndex}ms (no index) → ${timeWithIndex}ms (with index)`,
+      );
 
       expect(timeWithIndex).toBeLessThanOrEqual(timeWithoutIndex + 1);
     });
@@ -169,18 +177,22 @@ describe('Performance Indexes', () => {
       const category = 'Network';
 
       const timeWithoutIndex = measureQueryTime(() => {
-        db.prepare('SELECT * FROM infrastructure_equipment WHERE project_id = ? AND category = ?')
-          .all(projectId, category);
+        db.prepare(
+          'SELECT * FROM infrastructure_equipment WHERE project_id = ? AND category = ?',
+        ).all(projectId, category);
       });
 
       createPerformanceIndexes(db);
 
       const timeWithIndex = measureQueryTime(() => {
-        db.prepare('SELECT * FROM infrastructure_equipment WHERE project_id = ? AND category = ?')
-          .all(projectId, category);
+        db.prepare(
+          'SELECT * FROM infrastructure_equipment WHERE project_id = ? AND category = ?',
+        ).all(projectId, category);
       });
 
-      console.log(`Infrastructure filter: ${timeWithoutIndex}ms (no index) → ${timeWithIndex}ms (with index)`);
+      console.log(
+        `Infrastructure filter: ${timeWithoutIndex}ms (no index) → ${timeWithIndex}ms (with index)`,
+      );
 
       expect(timeWithIndex).toBeLessThanOrEqual(timeWithoutIndex + 1);
     });
@@ -196,7 +208,9 @@ describe('Performance Indexes', () => {
         db.prepare('SELECT * FROM projects ORDER BY updated_at DESC LIMIT 10').all();
       });
 
-      console.log(`Project sorting: ${timeWithoutIndex}ms (no index) → ${timeWithIndex}ms (with index)`);
+      console.log(
+        `Project sorting: ${timeWithoutIndex}ms (no index) → ${timeWithIndex}ms (with index)`,
+      );
 
       expect(timeWithIndex).toBeLessThanOrEqual(timeWithoutIndex + 1);
     });
@@ -209,7 +223,7 @@ describe('Performance Indexes', () => {
       expect(stats.tableStats).toBeDefined();
       expect(stats.tableStats.length).toBeGreaterThan(0);
 
-      const projectsStats = stats.tableStats.find(t => t.table === 'projects');
+      const projectsStats = stats.tableStats.find((t) => t.table === 'projects');
       expect(projectsStats).toBeDefined();
       expect(projectsStats!.rowCount).toBeGreaterThan(0);
     });
@@ -255,7 +269,7 @@ function seedTestData(db: Database.Database): void {
       Math.floor(i / 32) + 1,
       (i % 32) * 10 + 1,
       now,
-      now
+      now,
     );
   }
 
@@ -301,7 +315,7 @@ function seedTestData(db: Database.Database): void {
       location,
       'Active',
       now,
-      now
+      now,
     );
   }
 }

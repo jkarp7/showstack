@@ -22,7 +22,7 @@ export function useKeyPress(
     alt?: boolean;
     shift?: boolean;
     meta?: boolean;
-  }
+  },
 ): boolean {
   const [keyPressed, setKeyPressed] = useState(false);
 

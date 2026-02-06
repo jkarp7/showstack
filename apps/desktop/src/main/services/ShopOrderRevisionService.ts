@@ -2,7 +2,7 @@ import {
   getRevisionsByProjectId,
   createShopOrderRevision,
   deleteShopOrderRevision,
-  ShopOrderRevision
+  ShopOrderRevision,
 } from '../database/queries/shop-order';
 import { errorHandler, ValidationError } from '../errors';
 
@@ -21,7 +21,7 @@ export class ShopOrderRevisionService {
 
     return await errorHandler.executeWithRetry(
       async () => getRevisionsByProjectId(projectId),
-      'shop-order:revisions:getByProjectId'
+      'shop-order:revisions:getByProjectId',
     );
   }
 
@@ -31,24 +31,20 @@ export class ShopOrderRevisionService {
   async create(data: Partial<ShopOrderRevision>): Promise<ShopOrderRevision> {
     // Validate required fields
     if (!data.prep_project_id || data.prep_project_id.trim().length === 0) {
-      throw new ValidationError(
-        'Project ID is required',
-        'prep_project_id',
-        data.prep_project_id
-      );
+      throw new ValidationError('Project ID is required', 'prep_project_id', data.prep_project_id);
     }
 
     if (data.revision_number === undefined || data.revision_number === null) {
       throw new ValidationError(
         'Revision number is required',
         'revision_number',
-        data.revision_number
+        data.revision_number,
       );
     }
 
     return await errorHandler.executeWithRetry(
       async () => createShopOrderRevision(data),
-      'shop-order:revisions:create'
+      'shop-order:revisions:create',
     );
   }
 
@@ -62,7 +58,7 @@ export class ShopOrderRevisionService {
 
     return await errorHandler.executeWithRetry(
       async () => deleteShopOrderRevision(id),
-      'shop-order:revisions:delete'
+      'shop-order:revisions:delete',
     );
   }
 }

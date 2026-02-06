@@ -9,6 +9,7 @@
 ## 🎯 Current State
 
 ✅ **Completed:**
+
 - POC proof-of-concept working (virtual grid at 60 FPS)
 - Complete technical specification
 - Pricing strategy and business plan
@@ -16,6 +17,7 @@
 - `develop` branch created
 
 🚧 **Next Up:**
+
 - Phase 1: Electron app shell + SQLite database (Weeks 1-4)
 
 ---
@@ -53,6 +55,7 @@
 **Timeline:** 4 weeks (can go faster with Claude Code!)
 
 **Key Milestones:**
+
 1. Week 1: Electron shell running with POC embedded
 2. Week 2: SQLite database with full schema
 3. Week 3: IPC connecting renderer to database
@@ -68,7 +71,7 @@ Electron 27+
 Node.js 20+
 better-sqlite3 (database)
 
-// Frontend  
+// Frontend
 React 18+
 TypeScript 5+
 Zustand (state)
@@ -161,6 +164,7 @@ CREATE TABLE fixtures (
 ## 🎨 UI/UX Guidelines (From POC)
 
 **Keep these patterns from POC:**
+
 - Dark theme (bg-gray-900)
 - Virtual scrolling for performance
 - In-cell editing (click → edit → Tab/Enter)
@@ -169,11 +173,13 @@ CREATE TABLE fixtures (
 - Status bar at bottom
 
 **Don't change:**
+
 - Grid performance optimizations (React.memo, virtualization)
 - Keyboard navigation
 - Cell editing UX
 
 **Can improve:**
+
 - Add sorting controls
 - Add filter UI
 - Add column management
@@ -184,6 +190,7 @@ CREATE TABLE fixtures (
 ## 🔧 Development Workflow
 
 ### **1. Start Each Session**
+
 ```bash
 git checkout develop
 git pull origin develop
@@ -191,11 +198,13 @@ npm run dev
 ```
 
 ### **2. Make Changes**
+
 - Work in feature branches: `git checkout -b feature/electron-setup`
 - Test frequently: `npm run dev`
 - Commit often: `git commit -m "Add electron window management"`
 
 ### **3. Push to GitHub**
+
 ```bash
 git push origin feature/electron-setup
 # Create PR on GitHub
@@ -207,18 +216,21 @@ git push origin feature/electron-setup
 ## ✅ Phase 1 Success Criteria
 
 **Week 1 (Electron Shell):**
+
 - [ ] `npm run dev` launches Electron window
 - [ ] POC UI visible in Electron
 - [ ] Hot reload working
 - [ ] No console errors
 
 **Week 2 (Database):**
+
 - [ ] SQLite database created on app start
 - [ ] Schema matches technical spec
 - [ ] Can insert/query fixtures via SQL
 - [ ] Database file persists in user data folder
 
 **Week 3 (IPC Integration):**
+
 - [ ] Renderer can call window.api.fixtures.getAll()
 - [ ] Add fixture → saves to database
 - [ ] Edit fixture → updates database
@@ -226,6 +238,7 @@ git push origin feature/electron-setup
 - [ ] Data survives app restart
 
 **Week 4 (Testing):**
+
 - [ ] Load 10,000 fixtures in <2 seconds
 - [ ] Scroll maintains 60 FPS
 - [ ] Edit latency <100ms
@@ -237,6 +250,7 @@ git push origin feature/electron-setup
 ## 🎯 What to Build First (Priority Order)
 
 ### **Immediate (This Session)**
+
 1. Set up Electron project structure
 2. Install dependencies (electron, electron-vite, better-sqlite3)
 3. Create basic main process (src/main/index.ts)
@@ -244,11 +258,13 @@ git push origin feature/electron-setup
 5. Test Electron launches
 
 ### **Next Session**
+
 1. Copy POC code to src/renderer/
 2. Configure electron-vite for renderer
 3. Test POC loads in Electron window
 
 ### **Following Sessions**
+
 1. Create database schema
 2. Create IPC handlers
 3. Connect renderer to database
@@ -261,18 +277,21 @@ git push origin feature/electron-setup
 ## 📝 Code Guidelines
 
 **TypeScript:**
+
 - Strict mode enabled
 - No `any` types
 - Explicit return types
 - Descriptive names
 
 **React:**
+
 - Functional components only
 - Use hooks (useState, useEffect, useCallback)
 - Memoize list items (React.memo)
 - Zustand for global state
 
 **Performance:**
+
 - Virtual scrolling for lists >100 items
 - Debounce search/filter inputs
 - Lazy load heavy components
@@ -283,16 +302,19 @@ git push origin feature/electron-setup
 ## 🐛 Common Issues & Solutions
 
 **"better-sqlite3 won't build"**
+
 ```bash
 npm rebuild better-sqlite3 --build-from-source
 ```
 
 **"Electron window blank"**
+
 - Check console for errors (Ctrl+Shift+I in Electron)
 - Verify preload script path is correct
 - Check VITE_DEV_SERVER_URL is set
 
 **"IPC not working"**
+
 - Verify contextBridge in preload
 - Check handler registered in main
 - Console.log both sides to debug
@@ -302,6 +324,7 @@ npm rebuild better-sqlite3 --build-from-source
 ## 📞 Questions to Ask
 
 When you need help, provide:
+
 1. **What you're trying to do** (e.g., "Set up SQLite database")
 2. **What you tried** (code snippet)
 3. **What happened** (error message or unexpected behavior)
@@ -322,6 +345,7 @@ When you need help, provide:
 ## 🚀 Ready to Start!
 
 **First command:**
+
 ```bash
 cd ~/showstack
 git checkout develop

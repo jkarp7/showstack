@@ -71,7 +71,7 @@ app.on('ready', async () => {
   registerSyncHandlers();
 
   // Initialize PowerSync (non-blocking, works offline)
-  initializePowerSync().catch(err => {
+  initializePowerSync().catch((err) => {
     console.log('[Sync] PowerSync initialization deferred:', err.message);
   });
 
@@ -79,7 +79,7 @@ app.on('ready', async () => {
   backgroundVerifier.start();
 
   // Initial license check (non-blocking)
-  licenseService.checkAndVerifyIfNeeded().catch(err => {
+  licenseService.checkAndVerifyIfNeeded().catch((err) => {
     console.log('Initial license verification skipped (offline mode)');
   });
 
@@ -91,9 +91,12 @@ app.on('ready', async () => {
 
   // Start periodic performance monitoring
   // Track memory usage every 5 minutes
-  setInterval(() => {
-    performanceMonitor.trackMemoryUsage();
-  }, 5 * 60 * 1000);
+  setInterval(
+    () => {
+      performanceMonitor.trackMemoryUsage();
+    },
+    5 * 60 * 1000,
+  );
 
   // Log initial memory baseline
   performanceMonitor.trackMemoryUsage();

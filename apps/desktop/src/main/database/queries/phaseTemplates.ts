@@ -20,14 +20,20 @@ export interface PhaseDistributionTemplate {
 /**
  * Get all phase templates for a project (including system templates)
  */
-export function getAllPhaseTemplates(projectId: string = 'default-project'): PhaseDistributionTemplate[] {
+export function getAllPhaseTemplates(
+  projectId: string = 'default-project',
+): PhaseDistributionTemplate[] {
   const db = getDatabase();
 
-  const templates = db.prepare(`
+  const templates = db
+    .prepare(
+      `
     SELECT * FROM phase_distribution_templates
     WHERE project_id = ? OR is_system = 1
     ORDER BY is_system DESC, name ASC
-  `).all(projectId);
+  `,
+    )
+    .all(projectId);
 
   return templates as PhaseDistributionTemplate[];
 }
@@ -38,10 +44,14 @@ export function getAllPhaseTemplates(projectId: string = 'default-project'): Pha
 export function getPhaseTemplateById(id: string): PhaseDistributionTemplate {
   const db = getDatabase();
 
-  const template = db.prepare(`
+  const template = db
+    .prepare(
+      `
     SELECT * FROM phase_distribution_templates
     WHERE id = ?
-  `).get(id);
+  `,
+    )
+    .get(id);
 
   if (!template) {
     throw new Error(`Phase template not found: ${id}`);
@@ -55,18 +65,20 @@ export function getPhaseTemplateById(id: string): PhaseDistributionTemplate {
  */
 export function createPhaseTemplate(
   template: Omit<PhaseDistributionTemplate, 'id' | 'created_at' | 'updated_at' | 'is_system'>,
-  projectId: string = 'default-project'
+  projectId: string = 'default-project',
 ): PhaseDistributionTemplate {
   const db = getDatabase();
   const id = uuidv4();
   const now = Date.now();
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO phase_distribution_templates (
       id, project_id, name, description, phase_config, circuit_count,
       phase_distribution, is_system, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
-  `).run(
+  `,
+  ).run(
     id,
     projectId,
     template.name,
@@ -75,7 +87,7 @@ export function createPhaseTemplate(
     template.circuit_count,
     template.phase_distribution,
     now,
-    now
+    now,
   );
 
   saveDatabase();
@@ -85,7 +97,10 @@ export function createPhaseTemplate(
 /**
  * Update an existing phase template
  */
-export function updatePhaseTemplate(id: string, updates: Partial<PhaseDistributionTemplate>): PhaseDistributionTemplate {
+export function updatePhaseTemplate(
+  id: string,
+  updates: Partial<PhaseDistributionTemplate>,
+): PhaseDistributionTemplate {
   const db = getDatabase();
   const now = Date.now();
 
@@ -122,11 +137,13 @@ export function updatePhaseTemplate(id: string, updates: Partial<PhaseDistributi
   values.push(now);
   values.push(id);
 
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE phase_distribution_templates
     SET ${setClauses.join(', ')}
     WHERE id = ? AND is_system = 0
-  `).run(...values);
+  `,
+  ).run(...values);
 
   saveDatabase();
   return getPhaseTemplateById(id);
@@ -150,10 +167,14 @@ export function seedSystemPhaseTemplates(projectId: string = 'default-project'):
   const db = getDatabase();
 
   // Check if system templates already exist for this project
-  const existing = db.prepare(`
+  const existing = db
+    .prepare(
+      `
     SELECT COUNT(*) as count FROM phase_distribution_templates
     WHERE project_id = ? AND is_system = 1
-  `).get(projectId);
+  `,
+    )
+    .get(projectId);
 
   if (existing && (existing as any).count > 0) {
     console.log(`System phase templates already exist for project ${projectId}`);
@@ -171,13 +192,31 @@ export function seedSystemPhaseTemplates(projectId: string = 'default-project'):
       phase_config: 'split',
       circuit_count: 24,
       phase_distribution: JSON.stringify({
-        '1': 'A', '2': 'B', '3': 'A', '4': 'B',
-        '5': 'A', '6': 'B', '7': 'A', '8': 'B',
-        '9': 'A', '10': 'B', '11': 'A', '12': 'B',
-        '13': 'A', '14': 'B', '15': 'A', '16': 'B',
-        '17': 'A', '18': 'B', '19': 'A', '20': 'B',
-        '21': 'A', '22': 'B', '23': 'A', '24': 'B'
-      })
+        '1': 'A',
+        '2': 'B',
+        '3': 'A',
+        '4': 'B',
+        '5': 'A',
+        '6': 'B',
+        '7': 'A',
+        '8': 'B',
+        '9': 'A',
+        '10': 'B',
+        '11': 'A',
+        '12': 'B',
+        '13': 'A',
+        '14': 'B',
+        '15': 'A',
+        '16': 'B',
+        '17': 'A',
+        '18': 'B',
+        '19': 'A',
+        '20': 'B',
+        '21': 'A',
+        '22': 'B',
+        '23': 'A',
+        '24': 'B',
+      }),
     },
     {
       name: 'AC Phasing (Alternating)',
@@ -185,13 +224,31 @@ export function seedSystemPhaseTemplates(projectId: string = 'default-project'):
       phase_config: 'split',
       circuit_count: 24,
       phase_distribution: JSON.stringify({
-        '1': 'A', '2': 'C', '3': 'A', '4': 'C',
-        '5': 'A', '6': 'C', '7': 'A', '8': 'C',
-        '9': 'A', '10': 'C', '11': 'A', '12': 'C',
-        '13': 'A', '14': 'C', '15': 'A', '16': 'C',
-        '17': 'A', '18': 'C', '19': 'A', '20': 'C',
-        '21': 'A', '22': 'C', '23': 'A', '24': 'C'
-      })
+        '1': 'A',
+        '2': 'C',
+        '3': 'A',
+        '4': 'C',
+        '5': 'A',
+        '6': 'C',
+        '7': 'A',
+        '8': 'C',
+        '9': 'A',
+        '10': 'C',
+        '11': 'A',
+        '12': 'C',
+        '13': 'A',
+        '14': 'C',
+        '15': 'A',
+        '16': 'C',
+        '17': 'A',
+        '18': 'C',
+        '19': 'A',
+        '20': 'C',
+        '21': 'A',
+        '22': 'C',
+        '23': 'A',
+        '24': 'C',
+      }),
     },
     {
       name: 'BC Phasing (Alternating)',
@@ -199,13 +256,31 @@ export function seedSystemPhaseTemplates(projectId: string = 'default-project'):
       phase_config: 'split',
       circuit_count: 24,
       phase_distribution: JSON.stringify({
-        '1': 'B', '2': 'C', '3': 'B', '4': 'C',
-        '5': 'B', '6': 'C', '7': 'B', '8': 'C',
-        '9': 'B', '10': 'C', '11': 'B', '12': 'C',
-        '13': 'B', '14': 'C', '15': 'B', '16': 'C',
-        '17': 'B', '18': 'C', '19': 'B', '20': 'C',
-        '21': 'B', '22': 'C', '23': 'B', '24': 'C'
-      })
+        '1': 'B',
+        '2': 'C',
+        '3': 'B',
+        '4': 'C',
+        '5': 'B',
+        '6': 'C',
+        '7': 'B',
+        '8': 'C',
+        '9': 'B',
+        '10': 'C',
+        '11': 'B',
+        '12': 'C',
+        '13': 'B',
+        '14': 'C',
+        '15': 'B',
+        '16': 'C',
+        '17': 'B',
+        '18': 'C',
+        '19': 'B',
+        '20': 'C',
+        '21': 'B',
+        '22': 'C',
+        '23': 'B',
+        '24': 'C',
+      }),
     },
     {
       name: 'Three Phase ABC (Sequential)',
@@ -213,24 +288,44 @@ export function seedSystemPhaseTemplates(projectId: string = 'default-project'):
       phase_config: 'three',
       circuit_count: 24,
       phase_distribution: JSON.stringify({
-        '1': 'A', '2': 'B', '3': 'C', '4': 'A',
-        '5': 'B', '6': 'C', '7': 'A', '8': 'B',
-        '9': 'C', '10': 'A', '11': 'B', '12': 'C',
-        '13': 'A', '14': 'B', '15': 'C', '16': 'A',
-        '17': 'B', '18': 'C', '19': 'A', '20': 'B',
-        '21': 'C', '22': 'A', '23': 'B', '24': 'C'
-      })
-    }
+        '1': 'A',
+        '2': 'B',
+        '3': 'C',
+        '4': 'A',
+        '5': 'B',
+        '6': 'C',
+        '7': 'A',
+        '8': 'B',
+        '9': 'C',
+        '10': 'A',
+        '11': 'B',
+        '12': 'C',
+        '13': 'A',
+        '14': 'B',
+        '15': 'C',
+        '16': 'A',
+        '17': 'B',
+        '18': 'C',
+        '19': 'A',
+        '20': 'B',
+        '21': 'C',
+        '22': 'A',
+        '23': 'B',
+        '24': 'C',
+      }),
+    },
   ];
 
-  systemTemplates.forEach(template => {
+  systemTemplates.forEach((template) => {
     const id = uuidv4();
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO phase_distribution_templates (
         id, project_id, name, description, phase_config, circuit_count,
         phase_distribution, is_system, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
-    `).run(
+    `,
+    ).run(
       id,
       projectId,
       template.name,
@@ -239,7 +334,7 @@ export function seedSystemPhaseTemplates(projectId: string = 'default-project'):
       template.circuit_count,
       template.phase_distribution,
       now,
-      now
+      now,
     );
   });
 

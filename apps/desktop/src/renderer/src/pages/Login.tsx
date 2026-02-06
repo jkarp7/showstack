@@ -61,7 +61,12 @@ export function Login() {
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-400">
-          <p>Don't have an account? <a href="#" className="text-blue-500 hover:text-blue-400">Sign up</a></p>
+          <p>
+            Don't have an account?{' '}
+            <a href="#" className="text-blue-500 hover:text-blue-400">
+              Sign up
+            </a>
+          </p>
         </div>
 
         {/* Development bypass */}

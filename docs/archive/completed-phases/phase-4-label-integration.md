@@ -14,11 +14,11 @@ Converts physical label dimensions to grid cell coordinates using a 4 cells per 
 
 ```typescript
 export interface LabelGridConfig {
-  columns: number;        // Grid columns (width * 4)
-  rows: number;           // Grid rows (height * 4)
-  pageWidth: number;      // Width in points (72 DPI)
-  pageHeight: number;     // Height in points
-  gridGap: number;        // Gap between cells
+  columns: number; // Grid columns (width * 4)
+  rows: number; // Grid rows (height * 4)
+  pageWidth: number; // Width in points (72 DPI)
+  pageHeight: number; // Height in points
+  gridGap: number; // Gap between cells
 }
 
 // Example: 2.625" × 1" label (Avery 5160)
@@ -42,13 +42,14 @@ Converts legacy canvas-based graphics to grid-based layout elements:
 
 ```typescript
 // Canvas coordinate (pixels) → Grid position (cells)
-function pixelsToGridPosition(x: number, y: number, cellWidth: number, cellHeight: number)
+function pixelsToGridPosition(x: number, y: number, cellWidth: number, cellHeight: number);
 
 // Canvas graphic → Layout element
-function convertCanvasToGrid(canvasGraphic: LabelGraphic, labelWidth, labelHeight): LayoutElement
+function convertCanvasToGrid(canvasGraphic: LabelGraphic, labelWidth, labelHeight): LayoutElement;
 ```
 
 **Mapping Logic**:
+
 - Position: Pixel coordinates divided by cell dimensions
 - Size: Width/height converted to column/row spans
 - Text: fontSize, fontFamily, fontWeight, textAlign preserved
@@ -78,6 +79,7 @@ export async function migrateLabelDesigns(projectId: string): Promise<MigrationR
 ```
 
 **Migration Flow**:
+
 1. Check on component mount if migration needed
 2. Show preview dialog with design list
 3. User confirms migration
@@ -93,15 +95,16 @@ Generates HTML with CSS Grid for Avery-compliant multi-label sheets:
 
 **Avery Template Specifications** (all dimensions in points, 72pt = 1 inch):
 
-| Code | Name | Per Row | Per Column | Label Size | Margins | Gaps |
-|------|------|---------|------------|------------|---------|------|
-| 5160 | Address Labels | 3 | 10 | 2.625" × 1" | 0.5", 0.156" | 0.125", 0 |
-| 5163 | Shipping Labels | 2 | 5 | 4" × 2" | 0.5", 0.156" | 0.188", 0 |
-| 5164 | Shipping Labels | 2 | 3 | 4" × 3.33" | 0.5", 0.156" | 0.188", 0 |
-| 8160 | Address Labels | 3 | 10 | 2.625" × 1" | 0.5", 0.156" | 0.125", 0 |
-| 5167 | Return Address | 4 | 20 | 1.75" × 0.5" | 0.5", 0.156" | 0.125", 0 |
+| Code | Name            | Per Row | Per Column | Label Size   | Margins      | Gaps      |
+| ---- | --------------- | ------- | ---------- | ------------ | ------------ | --------- |
+| 5160 | Address Labels  | 3       | 10         | 2.625" × 1"  | 0.5", 0.156" | 0.125", 0 |
+| 5163 | Shipping Labels | 2       | 5          | 4" × 2"      | 0.5", 0.156" | 0.188", 0 |
+| 5164 | Shipping Labels | 2       | 3          | 4" × 3.33"   | 0.5", 0.156" | 0.188", 0 |
+| 8160 | Address Labels  | 3       | 10         | 2.625" × 1"  | 0.5", 0.156" | 0.125", 0 |
+| 5167 | Return Address  | 4       | 20         | 1.75" × 0.5" | 0.5", 0.156" | 0.125", 0 |
 
 **Rendering Algorithm**:
+
 ```typescript
 1. Calculate labelsPerPage (rows × columns)
 2. Split label data into pages
@@ -118,27 +121,25 @@ Electron IPC handlers for batch printing and preview:
 
 ```typescript
 // Batch print multiple labels
-ipcMain.handle('label-printer:batch', async (
-  event,
-  templateId: string,
-  labelDataArray: LabelData[],
-  averyCode: string
-) => {
-  // 1. Load template and elements from database
-  const template = await getById(db, templateId);
-  const elements = await getElements(db, templateId);
+ipcMain.handle(
+  'label-printer:batch',
+  async (event, templateId: string, labelDataArray: LabelData[], averyCode: string) => {
+    // 1. Load template and elements from database
+    const template = await getById(db, templateId);
+    const elements = await getElements(db, templateId);
 
-  // 2. Render multi-label HTML
-  const html = renderLabelSheet(template, elements, labelDataArray, averyCode);
+    // 2. Render multi-label HTML
+    const html = renderLabelSheet(template, elements, labelDataArray, averyCode);
 
-  // 3. Generate PDF with Puppeteer
-  const browser = await puppeteer.launch({ headless: true });
-  const page = await browser.newPage();
-  await page.setContent(html);
-  await page.pdf({ format: 'letter', printBackground: true });
+    // 3. Generate PDF with Puppeteer
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
+    await page.setContent(html);
+    await page.pdf({ format: 'letter', printBackground: true });
 
-  return pdfPath;
-});
+    return pdfPath;
+  },
+);
 ```
 
 #### 7. Label Data Mapper (`src/renderer/src/utils/prep/labelDataMapper.ts`)
@@ -146,6 +147,7 @@ ipcMain.handle('label-printer:batch', async (
 Maps theatrical lighting fixture data to label fields (40+ fields supported):
 
 **Field Categories**:
+
 - **Identification**: position, unitNumber, channel, dmxAddress
 - **Equipment**: fixtureName, fixtureType, manufacturer, wattage
 - **Color**: color, colorCode, gelManufacturer, transmission
@@ -190,6 +192,7 @@ CREATE TABLE IF NOT EXISTS page_layout_templates (
 ```
 
 **Label Page Types**:
+
 - `label_5160` - Address Labels (3×10)
 - `label_5163` - Shipping Labels (2×5)
 - `label_5164` - Shipping Labels (2×3)
@@ -200,7 +203,7 @@ CREATE TABLE IF NOT EXISTS page_layout_templates (
 
 ```typescript
 interface PageLayoutTemplateConfig {
-  backgroundColor?: string;  // Hex color code (e.g., '#ffffff')
+  backgroundColor?: string; // Hex color code (e.g., '#ffffff')
 }
 ```
 
@@ -276,13 +279,13 @@ export const AVERY_SPECS: Record<string, AverySpec> = {
     name: 'Easy Peel Address Labels',
     labelsPerRow: 2,
     labelsPerColumn: 10,
-    labelWidth: 288,      // 4 inches × 72 pt/in
-    labelHeight: 72,      // 1 inch × 72 pt/in
-    topMargin: 36,        // 0.5 inches × 72 pt/in
-    leftMargin: 11.25,    // 0.15625 inches × 72 pt/in
-    horizontalGap: 13.5,  // 0.1875 inches × 72 pt/in
-    verticalGap: 0
-  }
+    labelWidth: 288, // 4 inches × 72 pt/in
+    labelHeight: 72, // 1 inch × 72 pt/in
+    topMargin: 36, // 0.5 inches × 72 pt/in
+    leftMargin: 11.25, // 0.15625 inches × 72 pt/in
+    horizontalGap: 13.5, // 0.1875 inches × 72 pt/in
+    verticalGap: 0,
+  },
 };
 ```
 
@@ -297,7 +300,7 @@ export type PageType =
   | 'label_5164'
   | 'label_8160'
   | 'label_5167'
-  | 'label_5161';  // Add new type
+  | 'label_5161'; // Add new type
 ```
 
 3. **Add to template selection dropdown**:
@@ -327,7 +330,7 @@ export interface LabelData {
 export function mapFixtureToLabelData(fixture: Fixture): LabelData {
   return {
     // ... existing mappings
-    newField: fixture.new_field || ''
+    newField: fixture.new_field || '',
   };
 }
 ```
@@ -349,9 +352,9 @@ For non-Avery custom labels:
 import { calculateLabelGrid } from '../utils/prep/labelGridCalculator';
 
 const customGrid = calculateLabelGrid(
-  3.5,  // width in inches
-  2.0,  // height in inches
-  4     // cells per inch
+  3.5, // width in inches
+  2.0, // height in inches
+  4, // cells per inch
 );
 // Returns: { columns: 14, rows: 8, pageWidth: 252, pageHeight: 144 }
 ```
@@ -369,7 +372,7 @@ const CUSTOM_SPEC: AverySpec = {
   topMargin: 36,
   leftMargin: 36,
   horizontalGap: 18,
-  verticalGap: 0
+  verticalGap: 0,
 };
 ```
 
@@ -413,11 +416,13 @@ If you have existing label designs from the canvas-based system:
 If migration fails or results are unsatisfactory:
 
 1. **Locate backup file**:
+
    ```
    ~/showstack/label_designs_backup.json
    ```
 
 2. **Restore to localStorage**:
+
    ```javascript
    const backup = JSON.parse(fs.readFileSync('label_designs_backup.json'));
    localStorage.setItem('label_designs', JSON.stringify(backup));
@@ -435,6 +440,7 @@ If migration fails or results are unsatisfactory:
 **Symptoms**: Printed labels offset from Avery sheet positions
 
 **Solutions**:
+
 1. Verify printer margins set to 0 in print dialog
 2. Check PDF page size is Letter (8.5" × 11")
 3. Ensure "Fit to Page" is disabled
@@ -446,6 +452,7 @@ If migration fails or results are unsatisfactory:
 **Symptoms**: Images visible in designer but missing in PDF
 
 **Solutions**:
+
 1. Check image format (PNG/JPG supported)
 2. Verify base64 encoding in database
 3. Ensure Puppeteer `waitUntil: 'networkidle0'` option set
@@ -457,6 +464,7 @@ If migration fails or results are unsatisfactory:
 **Symptoms**: Label shows `{undefined}` instead of fixture data
 
 **Solutions**:
+
 1. Verify fixture has required field populated
 2. Check field name spelling in data mapper
 3. Ensure field type selected in element config
@@ -468,6 +476,7 @@ If migration fails or results are unsatisfactory:
 **Symptoms**: localStorage data exists but no migration prompt
 
 **Solutions**:
+
 1. Check browser console for errors
 2. Verify `needsMigration()` function logic
 3. Clear session storage and reload
@@ -481,6 +490,7 @@ If migration fails or results are unsatisfactory:
 **Symptoms**: Background color visible in designer but white in PDF
 
 **Solutions**:
+
 1. Verify `printBackground: true` in Puppeteer options
 2. Check CSS includes `-webkit-print-color-adjust: exact`
 3. Test with different PDF viewer
@@ -607,6 +617,7 @@ Phase 4 successfully migrates the Label Designer to the unified visual editor sy
 The grid-based approach provides flexibility for future enhancements while maintaining simplicity for users. All 5 Avery templates are fully supported with tested specifications ensuring professional-quality label printing.
 
 **Total Implementation**:
+
 - 6 days development
 - 12 files created/modified
 - ~1,200 lines new code

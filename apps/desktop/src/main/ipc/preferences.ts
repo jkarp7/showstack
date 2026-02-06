@@ -8,23 +8,19 @@ export function registerPreferencesHandlers() {
     try {
       // Basic validation
       if (!key || key.trim().length === 0) {
-        throw new ValidationError(
-          'Preference key is required',
-          'key',
-          key
-        );
+        throw new ValidationError('Preference key is required', 'key', key);
       }
 
       return await errorHandler.executeWithRetry(
         async () => getPreference(projectId, key),
-        'preferences:get'
+        'preferences:get',
       );
     } catch (error) {
       console.error('Failed to get preference:', {
         operation: 'preferences:get',
         projectId,
         key,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof ValidationError) {
@@ -41,16 +37,12 @@ export function registerPreferencesHandlers() {
     try {
       // Basic validation
       if (!key || key.trim().length === 0) {
-        throw new ValidationError(
-          'Preference key is required',
-          'key',
-          key
-        );
+        throw new ValidationError('Preference key is required', 'key', key);
       }
 
       await errorHandler.executeWithRetry(
         async () => setPreference(projectId, key, value),
-        'preferences:set'
+        'preferences:set',
       );
     } catch (error) {
       console.error('Failed to set preference:', {
@@ -58,7 +50,7 @@ export function registerPreferencesHandlers() {
         projectId,
         key,
         value,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof ValidationError) {
@@ -75,13 +67,13 @@ export function registerPreferencesHandlers() {
     try {
       return await errorHandler.executeWithRetry(
         async () => getAllPreferences(projectId),
-        'preferences:getAll'
+        'preferences:getAll',
       );
     } catch (error) {
       console.error('Failed to get all preferences:', {
         operation: 'preferences:getAll',
         projectId,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {

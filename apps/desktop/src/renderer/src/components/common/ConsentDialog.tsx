@@ -40,8 +40,8 @@ export function ConsentDialog({ onClose }: ConsentDialogProps) {
         {/* Content - Scrollable */}
         <div className="px-6 py-6 space-y-4 overflow-y-auto flex-1">
           <p className="text-gray-700 dark:text-gray-300">
-            We'd like to collect anonymous usage data to understand which features
-            are most valuable and identify bugs. Your privacy is important to us.
+            We'd like to collect anonymous usage data to understand which features are most valuable
+            and identify bugs. Your privacy is important to us.
           </p>
 
           {/* What we collect */}

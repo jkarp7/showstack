@@ -34,7 +34,10 @@ interface FileStore {
   setConflict: (conflict: ConflictInfo | null, filePath: string | null) => void;
   openFile: (onSuccess?: () => Promise<void>) => Promise<boolean>;
   openFileByPath: (filePath: string, onSuccess?: () => Promise<void>) => Promise<boolean>;
-  resolveConflict: (action: 'replace' | 'keep-both' | 'cancel', onSuccess?: () => Promise<void>) => Promise<boolean>;
+  resolveConflict: (
+    action: 'replace' | 'keep-both' | 'cancel',
+    onSuccess?: () => Promise<void>,
+  ) => Promise<boolean>;
   saveFile: () => Promise<boolean>;
   saveFileAs: (projectName?: string, onSuccess?: () => Promise<void>) => Promise<boolean>;
   newFile: (onSuccess?: () => Promise<void>) => Promise<boolean>;
@@ -103,8 +106,8 @@ export const useFileStore = create<FileStore>((set, get) => ({
             },
             onCancel: () => {
               resolve(false);
-            }
-          }
+            },
+          },
         });
         window.dispatchEvent(event);
       });
@@ -131,10 +134,10 @@ export const useFileStore = create<FileStore>((set, get) => ({
         set({
           conflictInfo: {
             existingProject: result.conflict.existingProject,
-            importedProject: result.conflict.importedProject
+            importedProject: result.conflict.importedProject,
           },
           conflictFilePath: result.filePath,
-          isOpening: false
+          isOpening: false,
         });
         return false; // Conflict needs resolution
       }
@@ -150,7 +153,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
         currentFilePath: result.filePath || null,
         isDirty: false,
         isOpening: false,
-        lastSavedAt: Date.now()
+        lastSavedAt: Date.now(),
       });
 
       // Add to recent files
@@ -192,8 +195,8 @@ export const useFileStore = create<FileStore>((set, get) => ({
             },
             onCancel: () => {
               resolve(false);
-            }
-          }
+            },
+          },
         });
         window.dispatchEvent(event);
       });
@@ -214,10 +217,10 @@ export const useFileStore = create<FileStore>((set, get) => ({
         set({
           conflictInfo: {
             existingProject: result.conflict.existingProject,
-            importedProject: result.conflict.importedProject
+            importedProject: result.conflict.importedProject,
           },
           conflictFilePath: filePath,
-          isOpening: false
+          isOpening: false,
         });
         return false; // Conflict needs resolution
       }
@@ -233,7 +236,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
         currentFilePath: filePath,
         isDirty: false,
         isOpening: false,
-        lastSavedAt: Date.now()
+        lastSavedAt: Date.now(),
       });
 
       // Add to recent files
@@ -273,13 +276,10 @@ export const useFileStore = create<FileStore>((set, get) => ({
     try {
       set({ isOpening: true, error: null });
 
-      const result = await window.api.files.resolveConflict(
-        state.conflictFilePath,
-        {
-          action,
-          projectId: state.conflictInfo.importedProject.id
-        }
-      );
+      const result = await window.api.files.resolveConflict(state.conflictFilePath, {
+        action,
+        projectId: state.conflictInfo.importedProject.id,
+      });
 
       if (!result.success) {
         console.error('Conflict resolution failed:', result.error);
@@ -294,7 +294,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
         currentFilePath: result.filePath || null,
         isDirty: false,
         isOpening: false,
-        lastSavedAt: Date.now()
+        lastSavedAt: Date.now(),
       });
 
       // Add to recent files
@@ -343,11 +343,16 @@ export const useFileStore = create<FileStore>((set, get) => ({
         currentFilePath: filePath,
         isDirty: false,
         isSaving: false,
-        lastSavedAt: Date.now()
+        lastSavedAt: Date.now(),
       });
 
       // Update recent files timestamp
-      const filename = filePath.replace(/\\/g, '/').split('/').pop()?.replace(/\.(ssp|ssm|ssd|showstack)$/, '') || 'Untitled Project';
+      const filename =
+        filePath
+          .replace(/\\/g, '/')
+          .split('/')
+          .pop()
+          ?.replace(/\.(ssp|ssm|ssd|showstack)$/, '') || 'Untitled Project';
       const moduleType = getModuleTypeFromPath(filePath);
       await addRecentFile(filePath, filename, moduleType);
 
@@ -395,7 +400,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
         currentFilePath: filePath,
         isDirty: false,
         isSaving: false,
-        lastSavedAt: Date.now()
+        lastSavedAt: Date.now(),
       });
 
       // Add to recent files
@@ -434,8 +439,8 @@ export const useFileStore = create<FileStore>((set, get) => ({
             },
             onCancel: () => {
               resolve(false);
-            }
-          }
+            },
+          },
         });
         window.dispatchEvent(event);
       });
@@ -455,7 +460,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
       set({
         currentFilePath: null,
         isDirty: false,
-        lastSavedAt: null
+        lastSavedAt: null,
       });
 
       // Call success callback to reload data
@@ -470,7 +475,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
       set({ error: errorMessage });
       return false;
     }
-  }
+  },
 }));
 
 // Expose store to window for close handler in main process
@@ -481,6 +486,6 @@ if (typeof window !== 'undefined') {
     },
     async saveFile() {
       return await useFileStore.getState().saveFile();
-    }
+    },
   };
 }

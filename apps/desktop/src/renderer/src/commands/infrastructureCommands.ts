@@ -31,7 +31,7 @@ export class AddInfrastructureCommand implements Command {
       const { project_id, ...equipmentWithoutProjectId } = this.equipmentData;
       const addedEquipment = await window.api.infrastructure.create(
         equipmentWithoutProjectId,
-        project_id
+        project_id,
       );
       this.addedEquipment = addedEquipment;
       this.hasExecuted = true;
@@ -48,10 +48,7 @@ export class AddInfrastructureCommand implements Command {
 
       // Remove id/timestamps and recreate
       const { id, created_at, updated_at, project_id, ...equipmentData } = this.addedEquipment;
-      const restoredEquipment = await window.api.infrastructure.create(
-        equipmentData,
-        project_id
-      );
+      const restoredEquipment = await window.api.infrastructure.create(equipmentData, project_id);
       this.addedEquipment = restoredEquipment; // Update with new ID
 
       const { useInfrastructureStore } = await import('../store/infrastructureStore');
@@ -98,7 +95,7 @@ export class UpdateInfrastructureCommand implements Command {
   constructor(
     equipmentId: string,
     oldData: InfrastructureEquipment,
-    newData: Partial<InfrastructureEquipment>
+    newData: Partial<InfrastructureEquipment>,
   ) {
     this.id = uuidv4();
     this.timestamp = Date.now();
@@ -179,10 +176,7 @@ export class DeleteInfrastructureCommand implements Command {
 
     // Re-create the equipment
     const { id, created_at, updated_at, project_id, ...equipmentData } = this.deletedEquipment;
-    const restoredEquipment = await window.api.infrastructure.create(
-      equipmentData,
-      project_id
-    );
+    const restoredEquipment = await window.api.infrastructure.create(equipmentData, project_id);
 
     const { useInfrastructureStore } = await import('../store/infrastructureStore');
     useInfrastructureStore.setState((state) => ({
@@ -245,7 +239,7 @@ export class BulkDeleteInfrastructureCommand implements Command {
       this.deletedEquipment.map((equipment) => {
         const { id, created_at, updated_at, project_id, ...equipmentData } = equipment;
         return window.api.infrastructure.create(equipmentData, project_id);
-      })
+      }),
     );
 
     useInfrastructureStore.setState((state) => ({

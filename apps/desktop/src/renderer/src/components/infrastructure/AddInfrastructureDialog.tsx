@@ -5,7 +5,9 @@ import { PortAssignmentEditor } from './PortAssignmentEditor';
 interface AddInfrastructureDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (equipment: Omit<InfrastructureEquipment, 'id' | 'project_id' | 'created_at' | 'updated_at'>) => Promise<void>;
+  onAdd: (
+    equipment: Omit<InfrastructureEquipment, 'id' | 'project_id' | 'created_at' | 'updated_at'>,
+  ) => Promise<void>;
 }
 
 export function AddInfrastructureDialog({ isOpen, onClose, onAdd }: AddInfrastructureDialogProps) {
@@ -13,7 +15,9 @@ export function AddInfrastructureDialog({ isOpen, onClose, onAdd }: AddInfrastru
   const [manufacturer, setManufacturer] = useState('');
   const [model, setModel] = useState('');
   const [quantity, setQuantity] = useState(1);
-  const [category, setCategory] = useState<'network' | 'data_distribution' | 'audio' | 'video'>('network');
+  const [category, setCategory] = useState<'network' | 'data_distribution' | 'audio' | 'video'>(
+    'network',
+  );
   const [ipAddress, setIpAddress] = useState('');
   const [macAddress, setMacAddress] = useState('');
   const [hostname, setHostname] = useState('');
@@ -31,7 +35,10 @@ export function AddInfrastructureDialog({ isOpen, onClose, onAdd }: AddInfrastru
       return;
     }
 
-    const equipment: Omit<InfrastructureEquipment, 'id' | 'project_id' | 'created_at' | 'updated_at'> = {
+    const equipment: Omit<
+      InfrastructureEquipment,
+      'id' | 'project_id' | 'created_at' | 'updated_at'
+    > = {
       name: name.trim(),
       manufacturer: manufacturer.trim() || undefined,
       model: model.trim() || undefined,
@@ -79,13 +86,20 @@ export function AddInfrastructureDialog({ isOpen, onClose, onAdd }: AddInfrastru
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Add Infrastructure Equipment</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Add Infrastructure Equipment
+          </h2>
           <button
             onClick={handleCancel}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>

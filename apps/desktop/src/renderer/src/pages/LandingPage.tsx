@@ -10,7 +10,8 @@ import { useFileStore } from '../store/fileStore';
 
 export function LandingPage() {
   const navigate = useNavigate();
-  const { projects, loadProjects, createProject, deleteProject, setCurrentProject } = useProjectStore();
+  const { projects, loadProjects, createProject, deleteProject, setCurrentProject } =
+    useProjectStore();
   const { conflictInfo, conflictFilePath, resolveConflict } = useFileStore();
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
@@ -63,7 +64,12 @@ export function LandingPage() {
     loadLogos();
   }, [projects]);
 
-  const handleCreateProject = async (name: string, description: string, logoPath: string, enabledModules: string[]) => {
+  const handleCreateProject = async (
+    name: string,
+    description: string,
+    logoPath: string,
+    enabledModules: string[],
+  ) => {
     try {
       await createProject(name, description, logoPath, enabledModules);
     } catch (error) {
@@ -104,7 +110,9 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">ShowStack</h1>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Production Management Suite</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+              Production Management Suite
+            </p>
           </div>
           <div className="flex items-center gap-4">
             <SyncStatusIndicator />
@@ -181,7 +189,9 @@ export function LandingPage() {
                       </div>
                       <h3 className="text-lg font-semibold mb-2 truncate">{project.name}</h3>
                       {project.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">{project.description}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                          {project.description}
+                        </p>
                       )}
                       <p className="text-xs text-gray-500 dark:text-gray-500">
                         Created: {new Date(project.created_at).toLocaleDateString()}
@@ -294,10 +304,7 @@ export function LandingPage() {
       />
 
       {/* Account Dialog */}
-      <AccountDialog
-        isOpen={isAccountDialogOpen}
-        onClose={() => setIsAccountDialogOpen(false)}
-      />
+      <AccountDialog isOpen={isAccountDialogOpen} onClose={() => setIsAccountDialogOpen(false)} />
 
       {/* Import Conflict Dialog */}
       {conflictInfo && conflictFilePath && (

@@ -15,7 +15,7 @@ import type {
   ImageConfig,
   TableConfig,
   ShapeConfig,
-  ShopOrderProject
+  ShopOrderProject,
 } from '../../../types/shopOrder';
 
 interface LayoutDesignerProps {
@@ -40,7 +40,7 @@ export function LayoutDesigner({
   initialTemplate,
   adminMode = false,
   onRestore,
-  onUpdate
+  onUpdate,
 }: LayoutDesignerProps) {
   // Initialize template with blank template (will be replaced if default exists)
   const [template, setTemplate] = useState<PageLayoutTemplate>(() => {
@@ -62,7 +62,7 @@ export function LayoutDesigner({
       elements: [],
       is_default: false,
       created_at: now,
-      updated_at: now
+      updated_at: now,
     };
   });
 
@@ -94,22 +94,25 @@ export function LayoutDesigner({
 
         // If no initial layout was provided, try to load the default layout
         if (!initialTemplate) {
-          const defaultTemplate = await window.api.prep.layoutTemplates.getDefault(projectId, pageType);
+          const defaultTemplate = await window.api.prep.layoutTemplates.getDefault(
+            projectId,
+            pageType,
+          );
 
           if (defaultTemplate) {
             // Load the default layout with its elements
             const elements = await window.api.prep.layoutTemplates.getElements(defaultTemplate.id);
 
             // Parse JSON fields
-            const parsedElements = elements.map(el => ({
+            const parsedElements = elements.map((el) => ({
               ...el,
               config: JSON.parse(el.config),
-              style: JSON.parse(el.style)
+              style: JSON.parse(el.style),
             }));
 
             setTemplate({
               ...defaultTemplate,
-              elements: parsedElements
+              elements: parsedElements,
             });
           }
         }
@@ -124,7 +127,7 @@ export function LayoutDesigner({
 
   // Get selected element
   const selectedElement = selectedElementId
-    ? template.elements.find(el => el.id === selectedElementId) || null
+    ? template.elements.find((el) => el.id === selectedElementId) || null
     : null;
 
   // Handle drag start from palette
@@ -138,87 +141,97 @@ export function LayoutDesigner({
   }, []);
 
   // Handle drop on canvas
-  const handleElementDrop = useCallback((gridColumn: number, gridRow: number) => {
-    if (!draggedPaletteElement) {
-      return;
-    }
+  const handleElementDrop = useCallback(
+    (gridColumn: number, gridRow: number) => {
+      if (!draggedPaletteElement) {
+        return;
+      }
 
-    const now = Date.now();
-    const newElement: LayoutElement = {
-      id: uuidv4(),
-      element_type: draggedPaletteElement.type,
-      config: createDefaultConfig(draggedPaletteElement),
-      grid_column: gridColumn,
-      grid_row: gridRow,
-      column_span: getDefaultSpan(draggedPaletteElement.type).columnSpan,
-      row_span: getDefaultSpan(draggedPaletteElement.type).rowSpan,
-      layer: template.elements.length, // Place on top
-      style: createDefaultStyle(draggedPaletteElement.type),
-      created_at: now,
-      updated_at: now
-    };
+      const now = Date.now();
+      const newElement: LayoutElement = {
+        id: uuidv4(),
+        element_type: draggedPaletteElement.type,
+        config: createDefaultConfig(draggedPaletteElement),
+        grid_column: gridColumn,
+        grid_row: gridRow,
+        column_span: getDefaultSpan(draggedPaletteElement.type).columnSpan,
+        row_span: getDefaultSpan(draggedPaletteElement.type).rowSpan,
+        layer: template.elements.length, // Place on top
+        style: createDefaultStyle(draggedPaletteElement.type),
+        created_at: now,
+        updated_at: now,
+      };
 
-    setTemplate(prev => ({
-      ...prev,
-      elements: [...prev.elements, newElement],
-      updated_at: now
-    }));
+      setTemplate((prev) => ({
+        ...prev,
+        elements: [...prev.elements, newElement],
+        updated_at: now,
+      }));
 
-    setDraggedPaletteElement(null);
-    setSelectedElementId(newElement.id);
-    setHasChanges(true);
-  }, [draggedPaletteElement, template.elements.length]);
+      setDraggedPaletteElement(null);
+      setSelectedElementId(newElement.id);
+      setHasChanges(true);
+    },
+    [draggedPaletteElement, template.elements.length],
+  );
 
   // Handle element move
-  const handleElementMove = useCallback((elementId: string, gridColumn: number, gridRow: number) => {
-    setTemplate(prev => ({
-      ...prev,
-      elements: prev.elements.map(el =>
-        el.id === elementId
-          ? { ...el, grid_column: gridColumn, grid_row: gridRow, updated_at: Date.now() }
-          : el
-      ),
-      updated_at: Date.now()
-    }));
-    setHasChanges(true);
-  }, []);
+  const handleElementMove = useCallback(
+    (elementId: string, gridColumn: number, gridRow: number) => {
+      setTemplate((prev) => ({
+        ...prev,
+        elements: prev.elements.map((el) =>
+          el.id === elementId
+            ? { ...el, grid_column: gridColumn, grid_row: gridRow, updated_at: Date.now() }
+            : el,
+        ),
+        updated_at: Date.now(),
+      }));
+      setHasChanges(true);
+    },
+    [],
+  );
 
   // Handle element resize
-  const handleElementResize = useCallback((elementId: string, columnSpan: number, rowSpan: number) => {
-    setTemplate(prev => ({
-      ...prev,
-      elements: prev.elements.map(el =>
-        el.id === elementId
-          ? { ...el, column_span: columnSpan, row_span: rowSpan, updated_at: Date.now() }
-          : el
-      ),
-      updated_at: Date.now()
-    }));
-    setHasChanges(true);
-  }, []);
+  const handleElementResize = useCallback(
+    (elementId: string, columnSpan: number, rowSpan: number) => {
+      setTemplate((prev) => ({
+        ...prev,
+        elements: prev.elements.map((el) =>
+          el.id === elementId
+            ? { ...el, column_span: columnSpan, row_span: rowSpan, updated_at: Date.now() }
+            : el,
+        ),
+        updated_at: Date.now(),
+      }));
+      setHasChanges(true);
+    },
+    [],
+  );
 
   // Handle element update from inspector
-  const handleElementUpdate = useCallback((updates: Partial<LayoutElement>) => {
-    if (!selectedElementId) return;
+  const handleElementUpdate = useCallback(
+    (updates: Partial<LayoutElement>) => {
+      if (!selectedElementId) return;
 
-    setTemplate(prev => ({
-      ...prev,
-      elements: prev.elements.map(el =>
-        el.id === selectedElementId
-          ? { ...el, ...updates, updated_at: Date.now() }
-          : el
-      ),
-      updated_at: Date.now()
-    }));
-    setHasChanges(true);
-  }, [selectedElementId]);
+      setTemplate((prev) => ({
+        ...prev,
+        elements: prev.elements.map((el) =>
+          el.id === selectedElementId ? { ...el, ...updates, updated_at: Date.now() } : el,
+        ),
+        updated_at: Date.now(),
+      }));
+      setHasChanges(true);
+    },
+    [selectedElementId],
+  );
 
   // Handle element delete
   const handleElementDelete = useCallback((elementId: string) => {
-    setTemplate(prev => ({
+    setTemplate((prev) => ({
       ...prev,
-      elements: prev.elements.filter(el => el.id !== elementId),
-      updated_at: Date.now()
+      elements: prev.elements.filter((el) => el.id !== elementId),
+      updated_at: Date.now(),
     }));
     setSelectedElementId(null);
     setHasChanges(true);
@@ -228,10 +241,10 @@ export function LayoutDesigner({
   const handleSave = useCallback(async () => {
     try {
       // Convert elements to database format (stringify JSON fields)
-      const dbElements = template.elements.map(el => ({
+      const dbElements = template.elements.map((el) => ({
         ...el,
         config: JSON.stringify(el.config),
-        style: JSON.stringify(el.style)
+        style: JSON.stringify(el.style),
       }));
 
       // Determine if this is a create or update operation
@@ -250,23 +263,23 @@ export function LayoutDesigner({
             grid_gap: template.grid_gap,
             page_width: template.page_width,
             page_height: template.page_height,
-            is_default: true
+            is_default: true,
           },
-          dbElements
+          dbElements,
         );
 
         // Update template with returned ID
         const savedElements = await window.api.prep.layoutTemplates.getElements(result.id);
 
-        const parsedElements = savedElements.map(el => ({
+        const parsedElements = savedElements.map((el) => ({
           ...el,
           config: JSON.parse(el.config),
-          style: JSON.parse(el.style)
+          style: JSON.parse(el.style),
         }));
 
         setTemplate({
           ...result,
-          elements: parsedElements
+          elements: parsedElements,
         });
       } else {
         // Update existing template
@@ -281,9 +294,9 @@ export function LayoutDesigner({
             grid_gap: template.grid_gap,
             page_width: template.page_width,
             page_height: template.page_height,
-            is_default: true
+            is_default: true,
           },
-          dbElements
+          dbElements,
         );
       }
 
@@ -306,23 +319,23 @@ export function LayoutDesigner({
       const loadedElements = await window.api.prep.layoutTemplates.getElements(templateId);
 
       // Parse JSON fields
-      const parsedElements = loadedElements.map(el => ({
+      const parsedElements = loadedElements.map((el) => ({
         ...el,
         config: JSON.parse(el.config),
-        style: JSON.parse(el.style)
+        style: JSON.parse(el.style),
       }));
 
       // Mark this template as the default so it persists
       await window.api.prep.layoutTemplates.update(
         templateId,
         { is_default: true },
-        undefined // Don't update elements, just metadata
+        undefined, // Don't update elements, just metadata
       );
 
       setTemplate({
         ...loadedTemplate,
         is_default: true,
-        elements: parsedElements
+        elements: parsedElements,
       });
 
       setSelectedElementId(null);
@@ -412,7 +425,7 @@ export function LayoutDesigner({
       // Preview Mode: Cmd+P
       if (modifier && e.key === 'p') {
         e.preventDefault();
-        setPreviewMode(prev => !prev);
+        setPreviewMode((prev) => !prev);
         return;
       }
 
@@ -434,21 +447,24 @@ export function LayoutDesigner({
       if (modifier && e.key === 'd') {
         e.preventDefault();
         if (selectedElementId) {
-          const element = template.elements.find(el => el.id === selectedElementId);
+          const element = template.elements.find((el) => el.id === selectedElementId);
           if (element) {
             const newElement = {
               ...element,
               id: uuidv4(),
-              grid_column: Math.min(element.grid_column + 1, template.grid_columns - element.column_span),
+              grid_column: Math.min(
+                element.grid_column + 1,
+                template.grid_columns - element.column_span,
+              ),
               grid_row: Math.min(element.grid_row + 1, template.grid_rows - element.row_span),
               layer: template.elements.length,
               created_at: Date.now(),
-              updated_at: Date.now()
+              updated_at: Date.now(),
             };
-            setTemplate(prev => ({
+            setTemplate((prev) => ({
               ...prev,
               elements: [...prev.elements, newElement],
-              updated_at: Date.now()
+              updated_at: Date.now(),
             }));
             setSelectedElementId(newElement.id);
             setHasChanges(true);
@@ -460,14 +476,14 @@ export function LayoutDesigner({
       // Zoom In: Cmd++
       if (modifier && (e.key === '+' || e.key === '=')) {
         e.preventDefault();
-        setZoom(prev => Math.min(200, prev + 10));
+        setZoom((prev) => Math.min(200, prev + 10));
         return;
       }
 
       // Zoom Out: Cmd+-
       if (modifier && e.key === '-') {
         e.preventDefault();
-        setZoom(prev => Math.max(50, prev - 10));
+        setZoom((prev) => Math.max(50, prev - 10));
         return;
       }
 
@@ -481,20 +497,20 @@ export function LayoutDesigner({
       // Toggle Grid: Cmd+G
       if (modifier && e.key === 'g' && !e.shiftKey) {
         e.preventDefault();
-        setShowGrid(prev => !prev);
+        setShowGrid((prev) => !prev);
         return;
       }
 
       // Toggle Snap Guides: Cmd+Shift+G
       if (modifier && e.shiftKey && e.key === 'g') {
         e.preventDefault();
-        setSnapEnabled(prev => !prev);
+        setSnapEnabled((prev) => !prev);
         return;
       }
 
       // Text Formatting - only if an element is selected
       if (selectedElementId) {
-        const element = template.elements.find(el => el.id === selectedElementId);
+        const element = template.elements.find((el) => el.id === selectedElementId);
         if (!element) return;
 
         // Bold: Cmd+B
@@ -503,8 +519,8 @@ export function LayoutDesigner({
           handleElementUpdate({
             style: {
               ...element.style,
-              fontWeight: element.style.fontWeight === 'bold' ? 'normal' : 'bold'
-            }
+              fontWeight: element.style.fontWeight === 'bold' ? 'normal' : 'bold',
+            },
           });
           return;
         }
@@ -515,8 +531,8 @@ export function LayoutDesigner({
           handleElementUpdate({
             style: {
               ...element.style,
-              fontStyle: element.style.fontStyle === 'italic' ? 'normal' : 'italic'
-            }
+              fontStyle: element.style.fontStyle === 'italic' ? 'normal' : 'italic',
+            },
           });
           return;
         }
@@ -527,8 +543,8 @@ export function LayoutDesigner({
           handleElementUpdate({
             style: {
               ...element.style,
-              textDecoration: element.style.textDecoration === 'underline' ? 'none' : 'underline'
-            }
+              textDecoration: element.style.textDecoration === 'underline' ? 'none' : 'underline',
+            },
           });
           return;
         }
@@ -537,7 +553,7 @@ export function LayoutDesigner({
         if (modifier && e.shiftKey && e.key === 'l') {
           e.preventDefault();
           handleElementUpdate({
-            style: { ...element.style, textAlign: 'left' }
+            style: { ...element.style, textAlign: 'left' },
           });
           return;
         }
@@ -546,7 +562,7 @@ export function LayoutDesigner({
         if (modifier && e.shiftKey && e.key === 'e') {
           e.preventDefault();
           handleElementUpdate({
-            style: { ...element.style, textAlign: 'center' }
+            style: { ...element.style, textAlign: 'center' },
           });
           return;
         }
@@ -555,7 +571,7 @@ export function LayoutDesigner({
         if (modifier && e.shiftKey && e.key === 'r') {
           e.preventDefault();
           handleElementUpdate({
-            style: { ...element.style, textAlign: 'right' }
+            style: { ...element.style, textAlign: 'right' },
           });
           return;
         }
@@ -572,7 +588,7 @@ export function LayoutDesigner({
     handleRedo,
     selectedElementId,
     template,
-    handleElementUpdate
+    handleElementUpdate,
   ]);
 
   // Define commands for command palette
@@ -585,7 +601,7 @@ export function LayoutDesigner({
       category: 'General',
       shortcut: 'Mod+S',
       icon: '💾',
-      action: () => hasChanges && handleSave()
+      action: () => hasChanges && handleSave(),
     },
     {
       id: 'preview',
@@ -594,7 +610,7 @@ export function LayoutDesigner({
       category: 'General',
       shortcut: 'Mod+P',
       icon: '👁️',
-      action: () => setPreviewMode(!previewMode)
+      action: () => setPreviewMode(!previewMode),
     },
     {
       id: 'shortcuts',
@@ -603,7 +619,7 @@ export function LayoutDesigner({
       category: 'General',
       shortcut: 'Mod+/',
       icon: '⌨️',
-      action: () => setShowShortcutsHelp(true)
+      action: () => setShowShortcutsHelp(true),
     },
     {
       id: 'close',
@@ -611,7 +627,7 @@ export function LayoutDesigner({
       description: 'Close the layout designer',
       category: 'General',
       icon: '✖️',
-      action: handleClose
+      action: handleClose,
     },
 
     // Editing commands
@@ -622,7 +638,7 @@ export function LayoutDesigner({
       category: 'Editing',
       shortcut: 'Mod+Z',
       icon: '↶',
-      action: handleUndo
+      action: handleUndo,
     },
     {
       id: 'redo',
@@ -631,7 +647,7 @@ export function LayoutDesigner({
       category: 'Editing',
       shortcut: 'Mod+Shift+Z',
       icon: '↷',
-      action: handleRedo
+      action: handleRedo,
     },
     {
       id: 'duplicate',
@@ -642,27 +658,30 @@ export function LayoutDesigner({
       icon: '📋',
       action: () => {
         if (selectedElementId) {
-          const element = template.elements.find(el => el.id === selectedElementId);
+          const element = template.elements.find((el) => el.id === selectedElementId);
           if (element) {
             const newElement = {
               ...element,
               id: uuidv4(),
-              grid_column: Math.min(element.grid_column + 1, template.grid_columns - element.column_span),
+              grid_column: Math.min(
+                element.grid_column + 1,
+                template.grid_columns - element.column_span,
+              ),
               grid_row: Math.min(element.grid_row + 1, template.grid_rows - element.row_span),
               layer: template.elements.length,
               created_at: Date.now(),
-              updated_at: Date.now()
+              updated_at: Date.now(),
             };
-            setTemplate(prev => ({
+            setTemplate((prev) => ({
               ...prev,
               elements: [...prev.elements, newElement],
-              updated_at: Date.now()
+              updated_at: Date.now(),
             }));
             setSelectedElementId(newElement.id);
             setHasChanges(true);
           }
         }
-      }
+      },
     },
     {
       id: 'delete',
@@ -671,7 +690,7 @@ export function LayoutDesigner({
       category: 'Editing',
       shortcut: 'Delete',
       icon: '🗑️',
-      action: () => selectedElementId && handleElementDelete(selectedElementId)
+      action: () => selectedElementId && handleElementDelete(selectedElementId),
     },
 
     // Canvas commands
@@ -682,7 +701,7 @@ export function LayoutDesigner({
       category: 'Canvas',
       shortcut: 'Mod++',
       icon: '🔍',
-      action: () => setZoom(Math.min(200, zoom + 10))
+      action: () => setZoom(Math.min(200, zoom + 10)),
     },
     {
       id: 'zoom-out',
@@ -691,7 +710,7 @@ export function LayoutDesigner({
       category: 'Canvas',
       shortcut: 'Mod+-',
       icon: '🔍',
-      action: () => setZoom(Math.max(50, zoom - 10))
+      action: () => setZoom(Math.max(50, zoom - 10)),
     },
     {
       id: 'zoom-reset',
@@ -700,7 +719,7 @@ export function LayoutDesigner({
       category: 'Canvas',
       shortcut: 'Mod+0',
       icon: '🔍',
-      action: () => setZoom(100)
+      action: () => setZoom(100),
     },
     {
       id: 'toggle-grid',
@@ -709,7 +728,7 @@ export function LayoutDesigner({
       category: 'Canvas',
       shortcut: 'Mod+G',
       icon: '⊞',
-      action: () => setShowGrid(!showGrid)
+      action: () => setShowGrid(!showGrid),
     },
     {
       id: 'toggle-snap',
@@ -718,7 +737,7 @@ export function LayoutDesigner({
       category: 'Canvas',
       shortcut: 'Mod+Shift+G',
       icon: '📍',
-      action: () => setSnapEnabled(!snapEnabled)
+      action: () => setSnapEnabled(!snapEnabled),
     },
 
     // Zoom presets
@@ -727,36 +746,36 @@ export function LayoutDesigner({
       label: 'Zoom to 50%',
       description: 'Set canvas zoom to 50%',
       category: 'Canvas',
-      action: () => setZoom(50)
+      action: () => setZoom(50),
     },
     {
       id: 'zoom-75',
       label: 'Zoom to 75%',
       description: 'Set canvas zoom to 75%',
       category: 'Canvas',
-      action: () => setZoom(75)
+      action: () => setZoom(75),
     },
     {
       id: 'zoom-100',
       label: 'Zoom to 100%',
       description: 'Set canvas zoom to 100%',
       category: 'Canvas',
-      action: () => setZoom(100)
+      action: () => setZoom(100),
     },
     {
       id: 'zoom-150',
       label: 'Zoom to 150%',
       description: 'Set canvas zoom to 150%',
       category: 'Canvas',
-      action: () => setZoom(150)
+      action: () => setZoom(150),
     },
     {
       id: 'zoom-200',
       label: 'Zoom to 200%',
       description: 'Set canvas zoom to 200%',
       category: 'Canvas',
-      action: () => setZoom(200)
-    }
+      action: () => setZoom(200),
+    },
   ];
 
   return (
@@ -766,7 +785,8 @@ export function LayoutDesigner({
         <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Layout Designer</h2>
           <p className="text-sm text-gray-400 mt-1">
-            Designing: <span className="text-gray-900 dark:text-white font-medium">{pageType}</span> page
+            Designing: <span className="text-gray-900 dark:text-white font-medium">{pageType}</span>{' '}
+            page
             {hasChanges && <span className="text-yellow-500 ml-2">• Unsaved changes</span>}
           </p>
         </div>
@@ -832,8 +852,8 @@ export function LayoutDesigner({
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Toolbar - Fixed position (hidden in preview mode) */}
         {!previewMode && (
-        <div className="bg-gray-800 border-b border-gray-700 px-6 py-3">
-          <div className="flex items-center gap-6">
+          <div className="bg-gray-800 border-b border-gray-700 px-6 py-3">
+            <div className="flex items-center gap-6">
               {/* Command Palette & Help */}
               <div className="flex items-center gap-1 pr-3 border-r border-gray-700">
                 <button
@@ -842,7 +862,12 @@ export function LayoutDesigner({
                   title="Command Palette (Cmd+K)"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
                   </svg>
                 </button>
                 <button
@@ -851,7 +876,12 @@ export function LayoutDesigner({
                   title="Keyboard Shortcuts (Cmd+/)"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                    />
                   </svg>
                 </button>
               </div>
@@ -865,7 +895,12 @@ export function LayoutDesigner({
                   title="Undo (Cmd+Z)"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+                    />
                   </svg>
                 </button>
                 <button
@@ -875,7 +910,12 @@ export function LayoutDesigner({
                   title="Redo (Cmd+Shift+Z)"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"
+                    />
                   </svg>
                 </button>
               </div>
@@ -888,7 +928,12 @@ export function LayoutDesigner({
                   title="Zoom Out"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"
+                    />
                   </svg>
                 </button>
                 <div className="flex items-center gap-1">
@@ -912,7 +957,12 @@ export function LayoutDesigner({
                   title="Zoom In"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
+                    />
                   </svg>
                 </button>
               </div>
@@ -928,7 +978,12 @@ export function LayoutDesigner({
                 title="Toggle Grid (Cmd+G)"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
+                  />
                 </svg>
               </button>
 
@@ -943,7 +998,12 @@ export function LayoutDesigner({
                 title="Toggle Snap Guides (Cmd+Shift+G)"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+                  />
                 </svg>
               </button>
 
@@ -958,14 +1018,26 @@ export function LayoutDesigner({
                 title="Preview Mode (Cmd+P)"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
                 </svg>
               </button>
 
               {/* Background Color Picker */}
               <div className="flex items-center gap-2 pl-3 border-l border-gray-700">
-                <label htmlFor="bg-color" className="text-xs text-gray-400">BG:</label>
+                <label htmlFor="bg-color" className="text-xs text-gray-400">
+                  BG:
+                </label>
                 <input
                   id="bg-color"
                   type="color"
@@ -975,40 +1047,41 @@ export function LayoutDesigner({
                       ...template,
                       config: {
                         ...template.config,
-                        backgroundColor: e.target.value
-                      }
+                        backgroundColor: e.target.value,
+                      },
                     });
                     setHasChanges(true);
                   }}
                   className="w-8 h-8 rounded cursor-pointer border border-gray-600"
                   title="Background Color"
                 />
-                {template.config?.backgroundColor && template.config.backgroundColor !== '#ffffff' && (
-                  <button
-                    onClick={() => {
-                      setTemplate({
-                        ...template,
-                        config: {
-                          ...template.config,
-                          backgroundColor: '#ffffff'
-                        }
-                      });
-                      setHasChanges(true);
-                    }}
-                    className="text-xs text-gray-400 hover:text-white transition-colors"
-                    title="Reset to White"
-                  >
-                    Reset
-                  </button>
-                )}
+                {template.config?.backgroundColor &&
+                  template.config.backgroundColor !== '#ffffff' && (
+                    <button
+                      onClick={() => {
+                        setTemplate({
+                          ...template,
+                          config: {
+                            ...template.config,
+                            backgroundColor: '#ffffff',
+                          },
+                        });
+                        setHasChanges(true);
+                      }}
+                      className="text-xs text-gray-400 hover:text-white transition-colors"
+                      title="Reset to White"
+                    >
+                      Reset
+                    </button>
+                  )}
               </div>
 
-            {/* Element Count */}
-            <div className="pl-3 border-l border-gray-700 text-xs text-gray-400">
-              {template.elements.length} {template.elements.length === 1 ? 'element' : 'elements'}
+              {/* Element Count */}
+              <div className="pl-3 border-l border-gray-700 text-xs text-gray-400">
+                {template.elements.length} {template.elements.length === 1 ? 'element' : 'elements'}
+              </div>
             </div>
           </div>
-        </div>
         )}
 
         {/* Preview Mode Controls - Show when in preview */}
@@ -1018,8 +1091,18 @@ export function LayoutDesigner({
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 text-green-400">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
                   </svg>
                   <span className="font-semibold">Preview Mode</span>
                 </div>
@@ -1032,7 +1115,12 @@ export function LayoutDesigner({
                     title="Zoom Out"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"
+                      />
                     </svg>
                   </button>
                   {[50, 75, 100, 150, 200].map((zoomLevel) => (
@@ -1054,7 +1142,12 @@ export function LayoutDesigner({
                     title="Zoom In"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -1130,20 +1223,30 @@ export function LayoutDesigner({
         <div className="text-sm text-gray-400">
           {previewMode ? (
             <>
-              <span className="font-medium text-green-400">Preview Mode</span> • Press <kbd className="px-2 py-0.5 bg-gray-700 border border-gray-600 rounded text-xs font-mono">{modifierKey}+P</kbd> to exit
+              <span className="font-medium text-green-400">Preview Mode</span> • Press{' '}
+              <kbd className="px-2 py-0.5 bg-gray-700 border border-gray-600 rounded text-xs font-mono">
+                {modifierKey}+P
+              </kbd>{' '}
+              to exit
             </>
           ) : (
             <>
-              <span className="font-medium">Tip:</span> Press <kbd className="px-2 py-0.5 bg-gray-700 border border-gray-600 rounded text-xs font-mono">{modifierKey}+K</kbd> for commands or <kbd className="px-2 py-0.5 bg-gray-700 border border-gray-600 rounded text-xs font-mono">{modifierKey}+/</kbd> for shortcuts
+              <span className="font-medium">Tip:</span> Press{' '}
+              <kbd className="px-2 py-0.5 bg-gray-700 border border-gray-600 rounded text-xs font-mono">
+                {modifierKey}+K
+              </kbd>{' '}
+              for commands or{' '}
+              <kbd className="px-2 py-0.5 bg-gray-700 border border-gray-600 rounded text-xs font-mono">
+                {modifierKey}+/
+              </kbd>{' '}
+              for shortcuts
             </>
           )}
         </div>
         <div className="flex items-center gap-4">
           <div className="text-xs text-gray-500">
-            Grid: {template.grid_columns}×{template.grid_rows} •
-            Page: {template.page_width}×{template.page_height}px •
-            Zoom: {zoom}%
-            {snapEnabled && ' • Snap: ON'}
+            Grid: {template.grid_columns}×{template.grid_rows} • Page: {template.page_width}×
+            {template.page_height}px • Zoom: {zoom}%{snapEnabled && ' • Snap: ON'}
           </div>
           {!previewMode && (
             <div className="flex items-center gap-2">
@@ -1155,7 +1258,7 @@ export function LayoutDesigner({
                     setTemplate({
                       ...template,
                       grid_rows: template.grid_rows - 1,
-                      page_height: Math.round(rowHeight * (template.grid_rows - 1))
+                      page_height: Math.round(rowHeight * (template.grid_rows - 1)),
                     });
                   }
                 }}
@@ -1170,7 +1273,7 @@ export function LayoutDesigner({
                   setTemplate({
                     ...template,
                     grid_rows: template.grid_rows + 1,
-                    page_height: Math.round(rowHeight * (template.grid_rows + 1))
+                    page_height: Math.round(rowHeight * (template.grid_rows + 1)),
                   });
                 }}
                 className="w-6 h-6 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm flex items-center justify-center transition"
@@ -1190,9 +1293,7 @@ export function LayoutDesigner({
             {/* Dialog Header */}
             <div className="px-6 py-4 border-b border-gray-700">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">Load Layout</h3>
-              <p className="text-sm text-gray-400 mt-1">
-                Select a saved page layout to load
-              </p>
+              <p className="text-sm text-gray-400 mt-1">Select a saved page layout to load</p>
             </div>
 
             {/* Layout List */}
@@ -1215,9 +1316,7 @@ export function LayoutDesigner({
                             {tmpl.name}
                           </div>
                           {tmpl.description && (
-                            <div className="text-sm text-gray-400 mt-1">
-                              {tmpl.description}
-                            </div>
+                            <div className="text-sm text-gray-400 mt-1">{tmpl.description}</div>
                           )}
                           <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                             <span>
@@ -1264,20 +1363,20 @@ function createDefaultConfig(paletteElement: any): any {
       return {
         fieldType: paletteElement.subType,
         showLabel: true,
-        label: paletteElement.label
+        label: paletteElement.label,
       } as DataFieldConfig;
 
     case 'text':
       return {
         content: 'Enter your text here...',
-        placeholder: 'Text content'
+        placeholder: 'Text content',
       } as TextConfig;
 
     case 'image':
       return {
         src: '',
         altText: 'Image',
-        objectFit: 'contain'
+        objectFit: 'contain',
       } as ImageConfig;
 
     case 'table':
@@ -1288,15 +1387,15 @@ function createDefaultConfig(paletteElement: any): any {
           { field: 'name', label: 'Name', width: 150 },
           { field: 'company', label: 'Company', width: 150 },
           { field: 'email', label: 'Email', width: 200 },
-          { field: 'phone', label: 'Phone', width: 120 }
-        ]
+          { field: 'phone', label: 'Phone', width: 120 },
+        ],
       } as TableConfig;
 
     case 'shape':
       return {
         shapeType: paletteElement.subType || 'rectangle',
         thickness: 1,
-        color: '#000000'
+        color: '#000000',
       } as ShapeConfig;
 
     default:
@@ -1334,7 +1433,7 @@ function createDefaultStyle(elementType: string): any {
     borderStyle: 'none' as const,
     borderColor: '#000000',
     borderRadius: 0,
-    opacity: 1
+    opacity: 1,
   };
 
   switch (elementType) {
@@ -1352,7 +1451,7 @@ function createDefaultStyle(elementType: string): any {
 // Floating Element Palette Component
 function FloatingElementPalette({
   onDragStart,
-  onDragEnd
+  onDragEnd,
 }: {
   onDragStart: (element: any) => void;
   onDragEnd?: () => void;
@@ -1363,7 +1462,7 @@ function FloatingElementPalette({
     // Palette width is ~320px, add 20px padding from edge
     return {
       x: window.innerWidth - 320 - 20,
-      y: 100 // Align with toolbar area
+      y: 100, // Align with toolbar area
     };
   });
   const [isDragging, setIsDragging] = useState(false);
@@ -1378,18 +1477,21 @@ function FloatingElementPalette({
     setIsDragging(true);
     setDragOffset({
       x: e.clientX - position.x,
-      y: e.clientY - position.y
+      y: e.clientY - position.y,
     });
   };
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (isDragging) {
-      setPosition({
-        x: e.clientX - dragOffset.x,
-        y: e.clientY - dragOffset.y
-      });
-    }
-  }, [isDragging, dragOffset]);
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (isDragging) {
+        setPosition({
+          x: e.clientX - dragOffset.x,
+          y: e.clientY - dragOffset.y,
+        });
+      }
+    },
+    [isDragging, dragOffset],
+  );
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -1413,7 +1515,7 @@ function FloatingElementPalette({
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
-        cursor: isDragging ? 'grabbing' : 'default'
+        cursor: isDragging ? 'grabbing' : 'default',
       }}
     >
       {/* Header - Draggable */}
@@ -1422,8 +1524,18 @@ function FloatingElementPalette({
         className="bg-gray-800 border border-gray-700 rounded-t-lg px-4 py-2 flex items-center justify-between cursor-grab active:cursor-grabbing"
       >
         <div className="flex items-center gap-2">
-          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+          <svg
+            className="w-4 h-4 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 8h16M4 16h16"
+            />
           </svg>
           <span className="text-sm font-semibold text-gray-300">Elements</span>
         </div>
@@ -1446,10 +1558,7 @@ function FloatingElementPalette({
       {/* Palette Content */}
       {!isCollapsed && (
         <div className="palette-content">
-          <ElementPalette
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
-          />
+          <ElementPalette onDragStart={onDragStart} onDragEnd={onDragEnd} />
         </div>
       )}
     </div>

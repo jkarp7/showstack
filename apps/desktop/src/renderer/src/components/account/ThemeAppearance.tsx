@@ -10,7 +10,7 @@ export function ThemeAppearance() {
     setMode,
     setAccentColor,
     setUIDensity,
-    setFontScale
+    setFontScale,
   } = useThemeStore();
 
   const accentColorOptions: Array<{ name: string; value: typeof accentColor }> = [
@@ -18,21 +18,26 @@ export function ThemeAppearance() {
     { name: 'Purple', value: 'purple' },
     { name: 'Green', value: 'green' },
     { name: 'Orange', value: 'orange' },
-    { name: 'Red', value: 'red' }
+    { name: 'Red', value: 'red' },
   ];
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Theme & Appearance</h2>
-        <p className="text-gray-600 dark:text-gray-400">Customize the look and feel of your application</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          Theme & Appearance
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400">
+          Customize the look and feel of your application
+        </p>
       </div>
 
       {/* Info: Changes apply immediately */}
       <div className="bg-blue-50 border border-blue-200 dark:border-blue-500 rounded-lg p-4">
         <p className="text-sm text-blue-800 dark:text-gray-200">
-          ✨ <strong>Changes apply immediately</strong> - no need to save! Your preferences are automatically saved.
+          ✨ <strong>Changes apply immediately</strong> - no need to save! Your preferences are
+          automatically saved.
         </p>
       </div>
 
@@ -53,8 +58,16 @@ export function ThemeAppearance() {
             }`}
           >
             <Sun className="w-8 h-8 mx-auto mb-2 text-amber-500" />
-            <div className={`font-medium ${mode === 'light' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}>Light</div>
-            <div className={`text-xs mt-1 ${mode === 'light' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}>Light color scheme</div>
+            <div
+              className={`font-medium ${mode === 'light' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}
+            >
+              Light
+            </div>
+            <div
+              className={`text-xs mt-1 ${mode === 'light' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}
+            >
+              Light color scheme
+            </div>
           </button>
 
           <button
@@ -66,8 +79,16 @@ export function ThemeAppearance() {
             }`}
           >
             <Moon className="w-8 h-8 mx-auto mb-2 text-indigo-500" />
-            <div className={`font-medium ${mode === 'dark' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}>Dark</div>
-            <div className={`text-xs mt-1 ${mode === 'dark' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}>Dark color scheme</div>
+            <div
+              className={`font-medium ${mode === 'dark' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}
+            >
+              Dark
+            </div>
+            <div
+              className={`text-xs mt-1 ${mode === 'dark' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}
+            >
+              Dark color scheme
+            </div>
           </button>
 
           <button
@@ -79,8 +100,16 @@ export function ThemeAppearance() {
             }`}
           >
             <Monitor className="w-8 h-8 mx-auto mb-2 text-gray-500 dark:text-gray-400" />
-            <div className={`font-medium ${mode === 'system' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}>System</div>
-            <div className={`text-xs mt-1 ${mode === 'system' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}>Follow system theme</div>
+            <div
+              className={`font-medium ${mode === 'system' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}
+            >
+              System
+            </div>
+            <div
+              className={`text-xs mt-1 ${mode === 'system' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}
+            >
+              Follow system theme
+            </div>
           </button>
         </div>
       </div>
@@ -89,7 +118,8 @@ export function ThemeAppearance() {
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Accent Color</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          <strong>Controls:</strong> Color used for buttons, links, highlights, and interactive elements throughout the app.
+          <strong>Controls:</strong> Color used for buttons, links, highlights, and interactive
+          elements throughout the app.
         </p>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -109,7 +139,9 @@ export function ThemeAppearance() {
                   className="w-12 h-12 mx-auto rounded-lg mb-2"
                   style={{ backgroundColor: colors.primary }}
                 />
-                <div className="text-sm font-medium text-gray-900 dark:text-white">{option.name}</div>
+                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                  {option.name}
+                </div>
               </button>
             );
           })}
@@ -120,8 +152,9 @@ export function ThemeAppearance() {
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">UI Density</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          <strong>Controls:</strong> Spacing between UI elements. "Comfortable" adds more padding and spacing for easier clicking.
-          "Compact" reduces spacing to fit more content on screen at once.
+          <strong>Controls:</strong> Spacing between UI elements. "Comfortable" adds more padding
+          and spacing for easier clicking. "Compact" reduces spacing to fit more content on screen
+          at once.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -133,8 +166,16 @@ export function ThemeAppearance() {
                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
           >
-            <div className={`font-medium mb-1 ${uiDensity === 'comfortable' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}>Comfortable</div>
-            <div className={`text-sm ${uiDensity === 'comfortable' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}>More spacing between elements</div>
+            <div
+              className={`font-medium mb-1 ${uiDensity === 'comfortable' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}
+            >
+              Comfortable
+            </div>
+            <div
+              className={`text-sm ${uiDensity === 'comfortable' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}
+            >
+              More spacing between elements
+            </div>
           </button>
 
           <button
@@ -145,8 +186,16 @@ export function ThemeAppearance() {
                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
           >
-            <div className={`font-medium mb-1 ${uiDensity === 'compact' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}>Compact</div>
-            <div className={`text-sm ${uiDensity === 'compact' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}>Denser layout, more content visible</div>
+            <div
+              className={`font-medium mb-1 ${uiDensity === 'compact' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}
+            >
+              Compact
+            </div>
+            <div
+              className={`text-sm ${uiDensity === 'compact' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}
+            >
+              Denser layout, more content visible
+            </div>
           </button>
         </div>
       </div>
@@ -155,17 +204,27 @@ export function ThemeAppearance() {
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Font Scale</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          <strong>Controls:</strong> Size of all text in the application UI (menus, buttons, labels, etc.). Does not affect project content.
-          Increase for better readability or decrease to fit more information on screen.
+          <strong>Controls:</strong> Size of all text in the application UI (menus, buttons, labels,
+          etc.). Does not affect project content. Increase for better readability or decrease to fit
+          more information on screen.
         </p>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="font-medium text-gray-900 dark:text-white">Text Size: {fontScale}%</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Adjust text size for better readability</div>
+              <div className="font-medium text-gray-900 dark:text-white">
+                Text Size: {fontScale}%
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Adjust text size for better readability
+              </div>
             </div>
-            <span className="text-2xl text-gray-900 dark:text-white" style={{ fontSize: `${fontScale}%` }}>Aa</span>
+            <span
+              className="text-2xl text-gray-900 dark:text-white"
+              style={{ fontSize: `${fontScale}%` }}
+            >
+              Aa
+            </span>
           </div>
 
           <input

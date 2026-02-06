@@ -28,6 +28,7 @@ The licensing system provides:
 The licensing system is integrated into the main ShowStack application. To ensure it works properly:
 
 1. **Install dependencies** (requires network access):
+
    ```bash
    npm install lucide-react
    ```
@@ -82,11 +83,7 @@ function EquipmentList() {
 
   return (
     <div>
-      {enabled ? (
-        <BulkOperationsToolbar />
-      ) : (
-        <p>Bulk operations available in Professional plan</p>
-      )}
+      {enabled ? <BulkOperationsToolbar /> : <p>Bulk operations available in Professional plan</p>}
     </div>
   );
 }
@@ -255,11 +252,7 @@ function EquipmentList() {
   return (
     <div>
       <EquipmentTable />
-      {enabled ? (
-        <BulkOperationsToolbar />
-      ) : (
-        <UpgradePrompt feature="Bulk Operations" />
-      )}
+      {enabled ? <BulkOperationsToolbar /> : <UpgradePrompt feature="Bulk Operations" />}
     </div>
   );
 }
@@ -280,9 +273,7 @@ function LogoUpload() {
         className={!enabled ? 'opacity-50 cursor-not-allowed' : ''}
       />
       {!enabled && (
-        <p className="text-sm text-gray-500">
-          Logo integration available in Professional plan
-        </p>
+        <p className="text-sm text-gray-500">Logo integration available in Professional plan</p>
       )}
     </div>
   );
@@ -301,11 +292,10 @@ function ProjectCreation() {
 
   return (
     <div>
-      <h2>Projects ({projectCount}/{maxProjects === -1 ? '∞' : maxProjects})</h2>
-      <button
-        onClick={() => setProjectCount(projectCount + 1)}
-        disabled={!canCreate}
-      >
+      <h2>
+        Projects ({projectCount}/{maxProjects === -1 ? '∞' : maxProjects})
+      </h2>
+      <button onClick={() => setProjectCount(projectCount + 1)} disabled={!canCreate}>
         Create New Project
       </button>
       {!canCreate && <UpgradePrompt feature="Unlimited Projects" />}
@@ -328,12 +318,14 @@ function IntegrationButtons() {
         <button>Import from Vectorworks</button>
       )}
 
-      {features?.productionFeatures?.etcEosIntegration && (
-        <button>Sync with ETC Eos</button>
-      )}
+      {features?.productionFeatures?.etcEosIntegration && <button>Sync with ETC Eos</button>}
 
       {!features?.productionFeatures?.vectorworksIntegration && (
-        <button onClick={() => {/* Show upgrade modal */}}>
+        <button
+          onClick={() => {
+            /* Show upgrade modal */
+          }}
+        >
           🔒 Unlock Vectorworks
         </button>
       )}
@@ -346,33 +338,33 @@ function IntegrationButtons() {
 
 ### Universal Features
 
-| Feature | Professional | Student | Institutional |
-|---------|-------------|---------|---------------|
-| Max Revisions | 5 | 2 | 3 |
-| Multi-Discipline | ✅ | ❌ | ✅ |
-| Advanced Export | ✅ | ❌ | ✅ |
-| Cloud Sync | ✅ | ❌ | ✅ |
-| Priority Support | ✅ | ❌ | ✅ |
+| Feature          | Professional | Student | Institutional |
+| ---------------- | ------------ | ------- | ------------- |
+| Max Revisions    | 5            | 2       | 3             |
+| Multi-Discipline | ✅           | ❌      | ✅            |
+| Advanced Export  | ✅           | ❌      | ✅            |
+| Cloud Sync       | ✅           | ❌      | ✅            |
+| Priority Support | ✅           | ❌      | ✅            |
 
 ### Production Module Features
 
-| Feature | Professional | Student | Institutional |
-|---------|-------------|---------|---------------|
-| Vectorworks Integration | ✅ | ❌ | ✅ |
-| ETC Eos Integration | ✅ | ❌ | ✅ |
-| Paperwork Generation | ✅ | ✅ | ✅ |
-| Label System | ✅ | ✅ | ✅ |
-| Power Management | ✅ | ❌ | ✅ |
+| Feature                 | Professional | Student | Institutional |
+| ----------------------- | ------------ | ------- | ------------- |
+| Vectorworks Integration | ✅           | ❌      | ✅            |
+| ETC Eos Integration     | ✅           | ❌      | ✅            |
+| Paperwork Generation    | ✅           | ✅      | ✅            |
+| Label System            | ✅           | ✅      | ✅            |
+| Power Management        | ✅           | ❌      | ✅            |
 
 ### Manager Module Features
 
-| Feature | Professional | Student | Institutional |
-|---------|-------------|---------|---------------|
-| Plaid Integration | ✅ | ❌ | ❌ |
-| Multi-Show Management | ✅ | ✅ | ✅ |
-| Budget Tracking | ✅ | ✅ | ✅ |
-| Per Diem Calculation | ✅ | ❌ | ✅ |
-| Tour Logistics | ✅ | ❌ | ✅ |
+| Feature               | Professional | Student | Institutional |
+| --------------------- | ------------ | ------- | ------------- |
+| Plaid Integration     | ✅           | ❌      | ❌            |
+| Multi-Show Management | ✅           | ✅      | ✅            |
+| Budget Tracking       | ✅           | ✅      | ✅            |
+| Per Diem Calculation  | ✅           | ❌      | ✅            |
+| Tour Logistics        | ✅           | ❌      | ✅            |
 
 ## Development
 
@@ -405,7 +397,9 @@ The license verification endpoint should return:
     {
       "module": "prep",
       "enabled": true,
-      "features": { /* ... */ }
+      "features": {
+        /* ... */
+      }
     }
   ]
 }

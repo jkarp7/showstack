@@ -34,7 +34,7 @@ export const DEFAULT_HIGHLIGHT_RULES: HighlightRule[] = [
     operator: 'equals',
     value: 'Spare Circuit',
     color: '#FEF3C7', // Light yellow
-    priority: 1
+    priority: 1,
   },
   {
     id: 'practicals',
@@ -44,8 +44,8 @@ export const DEFAULT_HIGHLIGHT_RULES: HighlightRule[] = [
     operator: 'contains',
     value: 'Practical',
     color: '#DBEAFE', // Light blue
-    priority: 1
-  }
+    priority: 1,
+  },
 ];
 
 /**
@@ -86,10 +86,10 @@ export function evaluateHighlightRule(fixture: Fixture, rule: HighlightRule): bo
  */
 export function getHighlightColorForFixture(
   fixture: Fixture,
-  rules: HighlightRule[]
+  rules: HighlightRule[],
 ): string | null {
   const matchingRules = rules
-    .filter(rule => evaluateHighlightRule(fixture, rule))
+    .filter((rule) => evaluateHighlightRule(fixture, rule))
     .sort((a, b) => b.priority - a.priority); // Sort by priority descending
 
   return matchingRules.length > 0 ? matchingRules[0].color : null;
@@ -102,28 +102,28 @@ export const COLOR_FLAG_DEFINITIONS = {
   hot: {
     label: 'Hot Circuit',
     color: '#EF4444', // Red
-    description: 'Circuit is always hot/live'
+    description: 'Circuit is always hot/live',
   },
   spare: {
     label: 'Spare',
     color: '#F59E0B', // Amber
-    description: 'Spare circuit/fixture'
+    description: 'Spare circuit/fixture',
   },
   special: {
     label: 'Special',
     color: '#8B5CF6', // Purple
-    description: 'Special handling required'
+    description: 'Special handling required',
   },
   dimmer_doubles: {
     label: 'Dimmer Doubles',
     color: '#10B981', // Green
-    description: 'Two circuits on one dimmer'
+    description: 'Two circuits on one dimmer',
   },
   two_fer: {
     label: 'Two-Fer',
     color: '#3B82F6', // Blue
-    description: 'Two fixtures on one circuit'
-  }
+    description: 'Two fixtures on one circuit',
+  },
 } as const;
 
 export type ColorFlagType = keyof typeof COLOR_FLAG_DEFINITIONS;

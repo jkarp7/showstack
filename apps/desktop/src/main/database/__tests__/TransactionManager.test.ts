@@ -42,33 +42,57 @@ describe('TransactionManager', () => {
   describe('execute()', () => {
     it('should commit transaction on success', () => {
       txManager.execute(() => {
-        db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('1', 'Item 1', 100);
-        db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('2', 'Item 2', 200);
+        db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+          '1',
+          'Item 1',
+          100,
+        );
+        db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+          '2',
+          'Item 2',
+          200,
+        );
       });
 
-      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as { count: number };
+      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as {
+        count: number;
+      };
       expect(count.count).toBe(2);
     });
 
     it('should rollback transaction on error', () => {
       try {
         txManager.execute(() => {
-          db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('1', 'Item 1', 100);
+          db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+            '1',
+            'Item 1',
+            100,
+          );
           // This will fail - duplicate primary key
-          db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('1', 'Item 2', 200);
+          db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+            '1',
+            'Item 2',
+            200,
+          );
         });
       } catch (error) {
         // Expected to throw
       }
 
       // No rows should be inserted due to rollback
-      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as { count: number };
+      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as {
+        count: number;
+      };
       expect(count.count).toBe(0);
     });
 
     it('should return value from callback', () => {
       const result = txManager.execute(() => {
-        db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('1', 'Item 1', 100);
+        db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+          '1',
+          'Item 1',
+          100,
+        );
         return { success: true, id: '1' };
       });
 
@@ -77,9 +101,17 @@ describe('TransactionManager', () => {
 
     it('should handle multiple operations atomically', () => {
       txManager.execute(() => {
-        db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('1', 'Item 1', 100);
-        db.prepare("UPDATE test_items SET value = ? WHERE id = ?").run(150, '1');
-        db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('2', 'Item 2', 200);
+        db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+          '1',
+          'Item 1',
+          100,
+        );
+        db.prepare('UPDATE test_items SET value = ? WHERE id = ?').run(150, '1');
+        db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+          '2',
+          'Item 2',
+          200,
+        );
       });
 
       const items = db.prepare('SELECT * FROM test_items ORDER BY id').all();
@@ -92,31 +124,51 @@ describe('TransactionManager', () => {
   describe('executeAsync()', () => {
     it('should commit async transaction on success', async () => {
       await txManager.executeAsync(async () => {
-        db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('1', 'Item 1', 100);
+        db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+          '1',
+          'Item 1',
+          100,
+        );
         // Simulate async operation
-        await new Promise(resolve => setTimeout(resolve, 10));
-        db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('2', 'Item 2', 200);
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+          '2',
+          'Item 2',
+          200,
+        );
       });
 
-      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as { count: number };
+      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as {
+        count: number;
+      };
       expect(count.count).toBe(2);
     });
 
     it('should rollback async transaction on error', async () => {
       try {
         await txManager.executeAsync(async () => {
-          db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('1', 'Item 1', 100);
+          db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+            '1',
+            'Item 1',
+            100,
+          );
           // Simulate async operation
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise((resolve) => setTimeout(resolve, 10));
           // This will fail - duplicate primary key
-          db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('1', 'Item 2', 200);
+          db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+            '1',
+            'Item 2',
+            200,
+          );
         });
       } catch (error) {
         // Expected to throw
       }
 
       // No rows should be inserted due to rollback
-      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as { count: number };
+      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as {
+        count: number;
+      };
       expect(count.count).toBe(0);
     });
   });
@@ -124,29 +176,51 @@ describe('TransactionManager', () => {
   describe('executeBatch()', () => {
     it('should execute all operations in transaction', () => {
       const results = txManager.executeBatch([
-        () => db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('1', 'Item 1', 100),
-        () => db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('2', 'Item 2', 200),
-        () => db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('3', 'Item 3', 300)
+        () =>
+          db
+            .prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)')
+            .run('1', 'Item 1', 100),
+        () =>
+          db
+            .prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)')
+            .run('2', 'Item 2', 200),
+        () =>
+          db
+            .prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)')
+            .run('3', 'Item 3', 300),
       ]);
 
       expect(results).toHaveLength(3);
-      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as { count: number };
+      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as {
+        count: number;
+      };
       expect(count.count).toBe(3);
     });
 
     it('should rollback all operations if one fails', () => {
       try {
         txManager.executeBatch([
-          () => db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('1', 'Item 1', 100),
-          () => db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('2', 'Item 2', 200),
-          () => db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('1', 'Item 3', 300) // Duplicate ID
+          () =>
+            db
+              .prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)')
+              .run('1', 'Item 1', 100),
+          () =>
+            db
+              .prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)')
+              .run('2', 'Item 2', 200),
+          () =>
+            db
+              .prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)')
+              .run('1', 'Item 3', 300), // Duplicate ID
         ]);
       } catch (error) {
         // Expected to throw
       }
 
       // No rows should be inserted due to rollback
-      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as { count: number };
+      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as {
+        count: number;
+      };
       expect(count.count).toBe(0);
     });
   });
@@ -154,16 +228,28 @@ describe('TransactionManager', () => {
   describe('savepoints', () => {
     it('should support nested transactions with savepoints', () => {
       txManager.execute(() => {
-        db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('1', 'Item 1', 100);
+        db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+          '1',
+          'Item 1',
+          100,
+        );
 
         // Create savepoint
         txManager.savepoint('sp1');
-        db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('2', 'Item 2', 200);
+        db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+          '2',
+          'Item 2',
+          200,
+        );
 
         // Rollback to savepoint (removes Item 2)
         txManager.rollbackToSavepoint('sp1');
 
-        db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('3', 'Item 3', 300);
+        db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+          '3',
+          'Item 3',
+          300,
+        );
       });
 
       const items = db.prepare('SELECT * FROM test_items ORDER BY id').all();
@@ -174,16 +260,30 @@ describe('TransactionManager', () => {
 
     it('should release savepoints', () => {
       txManager.execute(() => {
-        db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('1', 'Item 1', 100);
+        db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+          '1',
+          'Item 1',
+          100,
+        );
 
         txManager.savepoint('sp1');
-        db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('2', 'Item 2', 200);
+        db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+          '2',
+          'Item 2',
+          200,
+        );
         txManager.releaseSavepoint('sp1');
 
-        db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('3', 'Item 3', 300);
+        db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+          '3',
+          'Item 3',
+          300,
+        );
       });
 
-      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as { count: number };
+      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as {
+        count: number;
+      };
       expect(count.count).toBe(3);
     });
   });
@@ -195,9 +295,17 @@ describe('TransactionManager', () => {
           for (let i = 1; i <= 10; i++) {
             if (i === 10) {
               // Fail on last insert
-              db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('1', 'Duplicate', 999);
+              db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+                '1',
+                'Duplicate',
+                999,
+              );
             } else {
-              db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run(`${i}`, `Item ${i}`, i * 100);
+              db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+                `${i}`,
+                `Item ${i}`,
+                i * 100,
+              );
             }
           }
         });
@@ -206,24 +314,36 @@ describe('TransactionManager', () => {
       }
 
       // No rows should exist - atomicity ensures all-or-nothing
-      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as { count: number };
+      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as {
+        count: number;
+      };
       expect(count.count).toBe(0);
     });
 
     it('should ensure isolation - concurrent transactions', () => {
       // First transaction
       txManager.execute(() => {
-        db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('1', 'Item 1', 100);
+        db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+          '1',
+          'Item 1',
+          100,
+        );
       });
 
       // Second transaction sees committed data
       txManager.execute(() => {
         const item = db.prepare('SELECT * FROM test_items WHERE id = ?').get('1');
         expect(item).toBeDefined();
-        db.prepare("INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)").run('2', 'Item 2', 200);
+        db.prepare('INSERT INTO test_items (id, name, value) VALUES (?, ?, ?)').run(
+          '2',
+          'Item 2',
+          200,
+        );
       });
 
-      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as { count: number };
+      const count = db.prepare('SELECT COUNT(*) as count FROM test_items').get() as {
+        count: number;
+      };
       expect(count.count).toBe(2);
     });
   });

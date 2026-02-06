@@ -18,12 +18,14 @@ ShowStack is a comprehensive suite of tools designed for lighting designers, pro
 
 ### Current Modules
 
-**ShowStack:Manager** - Tour & Venue Management *(coming soon)*
+**ShowStack:Manager** - Tour & Venue Management _(coming soon)_
+
 - Tour scheduling and calendar
 - Venue information database
 - Crew and personnel tracking
 
-**ShowStack:Production** - Equipment & Documentation *(70% complete)*
+**ShowStack:Production** - Equipment & Documentation _(70% complete)_
+
 - Equipment Manager for fixture tracking with power management
 - Shop Order tool with multi-discipline support
 - Professional paperwork generation
@@ -87,6 +89,7 @@ npm run dev
 Opens at `http://localhost:5173` with 1,000 fixtures loaded.
 
 **What to try:**
+
 - Scroll performance (60 FPS with 10k+ fixtures)
 - In-cell editing (click, type, Tab, Enter)
 - Multi-select (Click, Shift+Click, Cmd/Ctrl+Click)
@@ -123,15 +126,16 @@ npm test powerCalculations
 
 ### Coverage Requirements
 
-| File Type | Target | Current |
-|-----------|--------|---------|
-| **Critical Utilities** | 80%+ | **95-100%** ✅ |
-| **Standard Utilities** | 60-70% | **70%+** ✅ |
-| **Components** | 50-60% | **50%+** ✅ |
-| **IPC Handlers** | 70%+ | **70%+** ✅ |
-| **Global** | 50%+ | **~50%** ✅ |
+| File Type              | Target | Current        |
+| ---------------------- | ------ | -------------- |
+| **Critical Utilities** | 80%+   | **95-100%** ✅ |
+| **Standard Utilities** | 60-70% | **70%+** ✅    |
+| **Components**         | 50-60% | **50%+** ✅    |
+| **IPC Handlers**       | 70%+   | **70%+** ✅    |
+| **Global**             | 50%+   | **~50%** ✅    |
 
 **Tested Modules:**
+
 - ✅ Power calculations (98% coverage)
 - ✅ Circuit parsing & rack linking (95% coverage)
 - ✅ Label grid calculations (100% coverage)
@@ -148,6 +152,7 @@ npm test powerCalculations
 ### CI/CD
 
 All tests run automatically on:
+
 - ✅ **Ubuntu Latest** - Primary CI environment
 - ✅ **macOS Latest** - macOS compatibility
 - ✅ **Windows Latest** - Windows compatibility
@@ -165,6 +170,7 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
 ### ✅ Completed Features
 
 **Core Infrastructure:**
+
 - ✅ Electron application with multi-window support
 - ✅ Two-database architecture (app.db + projects.db)
 - ✅ sql.js (SQLite compiled to WebAssembly)
@@ -175,6 +181,7 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
 - ✅ Admin panel for template management
 
 **Modules:**
+
 - ✅ **Manager Module** (placeholder - tour/venue management coming)
 - ✅ **Production Module** (~70% complete)
   - Equipment Manager (fixture CRUD, power management)
@@ -196,6 +203,7 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
   - Phase balance monitoring
 
 **Privacy & Analytics:**
+
 - ✅ Privacy-first telemetry with PostHog SDK integration
 - ✅ User consent dialog with opt-in controls
 - ✅ Anonymous analytics (opt-in only)
@@ -207,6 +215,7 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
 - ✅ Export/delete personal data
 
 **Developer Tools:**
+
 - ✅ Developer mode with DevTools
 - ✅ Feature flags system (13 experimental features)
 - ✅ Debug panels in all modules
@@ -214,6 +223,7 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
 - ✅ Comprehensive documentation
 
 **Testing Infrastructure:**
+
 - ✅ Vitest + React Testing Library setup
 - ✅ 235+ comprehensive tests (95-100% coverage on critical code)
 - ✅ CI/CD with GitHub Actions (Ubuntu, macOS, Windows)
@@ -221,12 +231,14 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
 - ✅ Testing guides and reference documentation
 
 ### 🚧 In Progress
+
 - 🚧 Equipment Manager fixture list UI (~30% remaining)
 - 🚧 Customizable paperwork export headers
 - 🚧 Fixture library with manufacturers
 - 🚧 Auto-complete system for fixture fields
 
 ### ⬜ Planned (Post-Alpha)
+
 - ⬜ Eos integration (OSC)
 - ⬜ Vectorworks import/export
 - ⬜ Label printing (Dymo, Brother, Zebra)
@@ -239,14 +251,14 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
 
 **vs LightWright 6:**
 
-| Feature | LightWright 6 | ShowStack:Production |
-|---------|---------------|----------------------|
-| Price | $845 one-time | $249/year |
-| Updates | $625 every 3-5 years | Continuous (included) |
-| Collaboration | ❌ | ✅ Real-time |
-| Cloud Sync | ❌ | ✅ Optional |
-| Modern UI | ❌ (1990s) | ✅ (2025) |
-| Offline Mode | ✅ | ✅ |
+| Feature       | LightWright 6        | ShowStack:Production  |
+| ------------- | -------------------- | --------------------- |
+| Price         | $845 one-time        | $249/year             |
+| Updates       | $625 every 3-5 years | Continuous (included) |
+| Collaboration | ❌                   | ✅ Real-time          |
+| Cloud Sync    | ❌                   | ✅ Optional           |
+| Modern UI     | ❌ (1990s)           | ✅ (2025)             |
+| Offline Mode  | ✅                   | ✅                    |
 
 **Year 1:** 71% cheaper ($249 vs $845)  
 **3 Years:** 49% cheaper ($747 vs $1,470)
@@ -256,6 +268,7 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
 ## 🛠️ Technology Stack
 
 ### Desktop App (Electron)
+
 - **Runtime:** Node.js 20+
 - **Framework:** Electron 39.2+
 - **Database:** sql.js (SQLite → WebAssembly)
@@ -263,6 +276,7 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
 - **Hardware:** electron-printer, osc-js
 
 ### Frontend (React)
+
 - **Framework:** React 19+
 - **Language:** TypeScript 5.9+
 - **State:** Zustand (9 stores)
@@ -271,6 +285,7 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
 - **Routing:** React Router v6
 
 ### Backend (Optional Cloud Sync)
+
 - **API:** Express.js + PostgreSQL
 - **Auth:** JWT
 - **Realtime:** Socket.io
@@ -281,14 +296,17 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
 ## 📖 Documentation
 
 ### User Documentation
+
 - **[Project Status](PROJECT_STATUS.md)** - Complete feature tracking and development roadmap
 
 ### Developer Documentation
+
 - **[Developer Mode Guide](DEVELOPER_MODE.md)** - Enable debugging, feature flags, and DevTools
 - **[Telemetry Implementation](TELEMETRY_IMPLEMENTATION_SUMMARY.md)** - Privacy-first analytics system
 - **[PostHog Setup](POSTHOG_SETUP.md)** - Analytics configuration and monitoring
 
 ### Project Planning
+
 - **[Technical Specification](docs/technical-spec.md)** - Complete feature specs, database schema, architecture
 - **[Pricing Strategy](docs/pricing.md)** - Market analysis, revenue model, go-to-market plan
 - **[Development Setup](docs/dev-setup.md)** - Environment setup, testing, building
@@ -299,6 +317,7 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
 ## 🗺️ Roadmap
 
 ### Phase 1: Foundation (Months 1-2)
+
 - [x] Proof-of-concept (virtual grid)
 - [ ] Electron app shell
 - [ ] SQLite database
@@ -307,6 +326,7 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
 - [ ] Auto-complete
 
 ### Phase 2: Power & Control (Months 3-4)
+
 - [ ] Dimmer rack configuration
 - [ ] Circuit management
 - [ ] DMX map visualization
@@ -322,6 +342,7 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
 This is currently a private project in early development. Contributions will be welcomed once we reach beta.
 
 ### Development Workflow
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
@@ -350,12 +371,14 @@ License TBD - Currently proprietary during development.
 ## 🎯 Success Metrics
 
 ### Month 3 Target
+
 - ✅ Core spreadsheet interface complete
 - ✅ 10 beta testers
 - ✅ 60 FPS performance
 - ✅ Positive UX feedback
 
 ### Month 12 Target (Launch)
+
 - 100+ paying customers
 - $10k+ MRR
 - NPS >50

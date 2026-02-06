@@ -34,13 +34,13 @@ ShowStack uses **Vitest** + **React Testing Library** for comprehensive test cov
 
 ### Core Libraries
 
-| Library | Version | Purpose |
-|---------|---------|---------|
-| **Vitest** | 3.2.4 | Test framework with V8 coverage |
-| **@testing-library/react** | 16.1.0 | Component testing |
-| **@testing-library/jest-dom** | 6.6.3 | DOM matchers |
-| **@testing-library/user-event** | 14.5.2 | User interaction simulation |
-| **jsdom** | 26.0.0 | DOM environment for tests |
+| Library                         | Version | Purpose                         |
+| ------------------------------- | ------- | ------------------------------- |
+| **Vitest**                      | 3.2.4   | Test framework with V8 coverage |
+| **@testing-library/react**      | 16.1.0  | Component testing               |
+| **@testing-library/jest-dom**   | 6.6.3   | DOM matchers                    |
+| **@testing-library/user-event** | 14.5.2  | User interaction simulation     |
+| **jsdom**                       | 26.0.0  | DOM environment for tests       |
 
 ### Configuration
 
@@ -184,6 +184,7 @@ describe('Power Conversion Utilities', () => {
 ```
 
 **Key Points:**
+
 - Test the happy path first
 - Test edge cases (zero, negative, boundary values)
 - Test error handling
@@ -229,6 +230,7 @@ describe('Button Component', () => {
 ```
 
 **Key Points:**
+
 - Test user interactions, not implementation details
 - Use `screen` queries instead of `container` queries
 - Simulate user events with `@testing-library/user-event`
@@ -252,27 +254,23 @@ describe('getLabelDataForFixtures', () => {
   it('should fetch and map selected fixtures by IDs', async () => {
     const mockFixtures = [
       { id: 'fixture-1', position: '1st Electric' },
-      { id: 'fixture-2', position: '2nd Electric' }
+      { id: 'fixture-2', position: '2nd Electric' },
     ];
 
-    vi.spyOn(window.api.fixtures, 'getByProject')
-      .mockResolvedValue(mockFixtures);
+    vi.spyOn(window.api.fixtures, 'getByProject').mockResolvedValue(mockFixtures);
 
-    const result = await getLabelDataForFixtures(
-      ['fixture-1'],
-      'project-1'
-    );
+    const result = await getLabelDataForFixtures(['fixture-1'], 'project-1');
 
     expect(result).toHaveLength(1);
     expect(result[0].position).toBe('1st Electric');
   });
 
   it('should handle database errors gracefully', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error')
-      .mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    vi.spyOn(window.api.fixtures, 'getByProject')
-      .mockRejectedValue(new Error('Database connection failed'));
+    vi.spyOn(window.api.fixtures, 'getByProject').mockRejectedValue(
+      new Error('Database connection failed'),
+    );
 
     const result = await getLabelDataForFixtures(['fixture-1'], 'project-1');
 
@@ -285,6 +283,7 @@ describe('getLabelDataForFixtures', () => {
 ```
 
 **Key Points:**
+
 - Mock external dependencies (API calls, database)
 - Test both success and error cases
 - Use `mockResolvedValue` for successful promises
@@ -344,6 +343,7 @@ describe('file:readImageAsDataUrl security validation', () => {
 ```
 
 **Key Points:**
+
 - Mock Node.js modules (fs, path, electron)
 - Test security validations thoroughly
 - Verify error handling and edge cases
@@ -371,22 +371,24 @@ coverage: {
 
 ### Per-File Targets
 
-| File Type | Coverage Target | Example |
-|-----------|----------------|---------|
-| **Critical Utilities** | 80%+ | powerCalculations.ts, circuitParser.ts |
-| **Standard Utilities** | 60-70% | helpers.ts, formatters.ts |
-| **Components** | 50-60% | Button.tsx, Modal.tsx |
-| **IPC Handlers** | 70%+ | files.ts, projects.ts |
+| File Type              | Coverage Target | Example                                |
+| ---------------------- | --------------- | -------------------------------------- |
+| **Critical Utilities** | 80%+            | powerCalculations.ts, circuitParser.ts |
+| **Standard Utilities** | 60-70%          | helpers.ts, formatters.ts              |
+| **Components**         | 50-60%          | Button.tsx, Modal.tsx                  |
+| **IPC Handlers**       | 70%+            | files.ts, projects.ts                  |
 
 ### What Counts as "Tested"
 
 ✅ **Good Coverage:**
+
 - All code paths executed
 - Edge cases covered
 - Error handling verified
 - Integration scenarios tested
 
 ❌ **False Coverage:**
+
 - Tests that don't assert anything
 - Tests that only call functions without validation
 - Overly mocked tests that don't test real behavior
@@ -420,6 +422,7 @@ npm test -- --grep="should calculate"
 ### Coverage Reports
 
 After running `npm run test:coverage`:
+
 - **Terminal:** Summary table in console
 - **HTML Report:** `coverage/index.html`
 - **LCOV:** `coverage/lcov.info` (for CI/CD)
@@ -482,7 +485,7 @@ describe('Phase Balance Calculations', () => {
     const fixtures = [
       { phase: 'A', wattage: 4160 }, // 20A
       { phase: 'B', wattage: 2080 }, // 10A
-      { phase: 'C', wattage: 2080 }  // 10A
+      { phase: 'C', wattage: 2080 }, // 10A
     ];
 
     const balance = calculatePhaseBalance(fixtures, 208);
@@ -542,11 +545,13 @@ describe('Modal Component', () => {
 ### Issue: Tests Pass Locally but Fail in CI
 
 **Causes:**
+
 - Timing issues (async operations)
 - File system differences
 - Environment variables not set
 
 **Solutions:**
+
 - Use `waitFor()` for async assertions
 - Mock file system operations
 - Set env vars in CI config
@@ -554,53 +559,58 @@ describe('Modal Component', () => {
 ### Issue: Windows-Specific Test Failures
 
 **Path Separators:**
+
 - Windows uses `\` while Unix uses `/`
 - Use `path.join()` instead of string concatenation
 - Use `path.normalize()` for cross-platform paths
 
 ```typescript
 // ❌ Don't do this:
-const filePath = '/Users/test/file.png';  // Fails on Windows
+const filePath = '/Users/test/file.png'; // Fails on Windows
 
 // ✅ Do this:
 const filePath = path.join('Users', 'test', 'file.png');
 ```
 
 **Line Endings:**
+
 - Windows uses CRLF (`\r\n`)
 - Unix/Mac use LF (`\n`)
 - Configure git: `git config core.autocrlf true` (Windows) or `false` (Unix/Mac)
 - Use `.gitattributes` for consistency
 
 **Case Sensitivity:**
+
 - Windows file system is case-insensitive
 - Unix/Mac file systems are case-sensitive
 - Always use consistent casing in import paths
 - Test on Windows if you develop on Mac/Linux
 
 **Path Length Limits:**
+
 - Windows has 260-character path limit (older versions)
 - Use shorter test file names
 - Enable long paths: `git config core.longpaths true`
 
 **Example Test Setup:**
+
 ```typescript
 import * as path from 'path';
 import * as os from 'os';
 
 const isWindows = os.platform() === 'win32';
-const testPath = isWindows
-  ? 'C:\\Users\\test\\file.png'
-  : '/Users/test/file.png';
+const testPath = isWindows ? 'C:\\Users\\test\\file.png' : '/Users/test/file.png';
 ```
 
 ### Issue: "Cannot find module" in Tests
 
 **Causes:**
+
 - Missing mock in setup.ts
 - Import path issues
 
 **Solutions:**
+
 - Add mock to `src/renderer/test/setup.ts`
 - Check import paths are correct
 - Ensure `vitest.config.ts` has correct aliases
@@ -608,10 +618,12 @@ const testPath = isWindows
 ### Issue: Coverage Not Updating
 
 **Causes:**
+
 - Cached coverage data
 - File not being imported
 
 **Solutions:**
+
 ```bash
 rm -rf coverage/ .vitest/
 npm run test:coverage
@@ -620,10 +632,12 @@ npm run test:coverage
 ### Issue: React Testing Library Warnings
 
 **Common Warnings:**
+
 - "not wrapped in act()"
 - "Can't perform state update on unmounted component"
 
 **Solutions:**
+
 - Use `waitFor()` for async state updates
 - Clean up subscriptions in component cleanup
 - Use `cleanup()` from `@testing-library/react`
@@ -672,6 +686,7 @@ Before committing new tests, ensure:
 ## Future Enhancements
 
 ### Performance Benchmarks
+
 Consider adding Vitest's `bench` API for performance-critical functions:
 
 ```typescript
@@ -687,12 +702,15 @@ describe('Power Calculation Performance', () => {
 Run benchmarks: `npm run test -- --bench`
 
 ### Visual Regression Testing
+
 For UI components, consider adding visual regression testing:
+
 - **Playwright** - E2E testing with screenshot comparison
 - **Chromatic** - Visual testing for Storybook components
 - **Percy** - Visual testing for React components
 
 ### Enhanced Coverage Metrics
+
 - **Mutation Testing** - Test the quality of tests (Stryker)
 - **Branch Coverage Analysis** - Identify untested code paths
 - **Integration Coverage** - Cross-module testing metrics
@@ -702,6 +720,7 @@ For UI components, consider adding visual regression testing:
 ## Updating This Guide
 
 This guide should be updated when:
+
 - New testing patterns emerge
 - Testing tools are upgraded
 - Coverage requirements change

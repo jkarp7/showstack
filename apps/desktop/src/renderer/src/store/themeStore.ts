@@ -61,8 +61,8 @@ export const useThemeStore = create<ThemeState>()(
     }),
     {
       name: 'showstack-theme',
-    }
-  )
+    },
+  ),
 );
 
 // Listen for system theme changes
@@ -76,7 +76,10 @@ if (typeof window !== 'undefined' && window.matchMedia) {
 }
 
 // Accent color palettes
-export const accentColors: Record<AccentColor, { primary: string; hover: string; light: string; dark: string }> = {
+export const accentColors: Record<
+  AccentColor,
+  { primary: string; hover: string; light: string; dark: string }
+> = {
   blue: {
     primary: '#3B82F6',
     hover: '#2563EB',

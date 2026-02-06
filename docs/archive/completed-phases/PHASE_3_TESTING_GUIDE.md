@@ -19,12 +19,14 @@
 ## ✅ Completed (Days 1-7)
 
 ### Database Infrastructure
+
 - [x] `paperwork_templates` table created in app database
 - [x] Full CRUD query operations implemented
 - [x] IPC handlers registered for template management
 - [x] System template seeding (12 templates) working on first launch
 
 ### Renderer Components
+
 - [x] Type definitions (`paperworkTemplate.ts`)
 - [x] Column configuration panel with drag-and-drop
 - [x] Grouping & sorting controls
@@ -36,6 +38,7 @@
 - [x] Refactored Paperwork.tsx (2353 → 409 lines, 82% reduction)
 
 ### Default Configurations
+
 - [x] Column defaults for all 12 report types
 - [x] System templates with descriptions
 
@@ -48,6 +51,7 @@
 **Fixtures:** 84 items (sufficient for all fixture reports)
 
 **Infrastructure:** 13 items across 5 categories:
+
 - Network: 4 switches (Cisco, Netgear, Ubiquiti)
 - DMX: 3 nodes (ETC Response Gateway, Pathway Pathport)
 - Control: 2 lighting consoles (ETC Eos Ti, Eos RPU)
@@ -59,11 +63,13 @@
 #### 1. Template System Verification
 
 **Navigate to Paperwork Module:**
+
 1. [x] Launch app (already running at `http://localhost:5173/`)
 2. [x] Open default project
 3. [x] Navigate to Paperwork module
 
 **Verify System Templates:**
+
 1. [x] Check template library sidebar shows 13 system templates
 2. [x] Verify each template has:
    - Correct name
@@ -72,6 +78,7 @@
    - Lock icon (cannot delete system templates)
 
 **Expected System Templates:**
+
 - Channel Hookup
 - Dimmer Schedule
 - Circuit List
@@ -91,6 +98,7 @@
 For each fixture report type, verify:
 
 **Channel Hookup:**
+
 - [x] Template loads correctly
 - [x] All 84 fixtures display
 - [x] Columns: channel, dimmer, position, unit, type, wattage, purpose, color, notes
@@ -98,37 +106,44 @@ For each fixture report type, verify:
 - [x] Data displays correctly (no "undefined" or null values)
 
 **Dimmer Schedule:**
+
 - [x] Template loads
 - [x] Sort by dimmer works
 - [x] Columns show: dimmer, channel, position, unit, type, wattage, color
 
 **Circuit List:**
+
 - [x] Template loads
 - [x] Sort by circuit works
 - [x] Circuit numbers display correctly
 
 **DMX Addresses:**
+
 - [x] Template loads
 - [x] Universe and DMX address columns populated
 - [x] Sort by universe/address works
 
 **Power Summary:**
+
 - [x] Aggregates by fixture type
 - [x] Shows quantity counts
 - [x] Calculates total wattage and amperage
 - [x] Formatting: "1,234W" and "10.5A"
 
 **Color Schedule:**
+
 - [x] Groups by color
 - [x] Shows quantity per color
 - [x] Lists fixtures using each color
 
 **Gobo Schedule:**
+
 - [x] Groups by gobo pattern
 - [x] Shows quantity per gobo
 - [x] Lists fixtures using each gobo
 
 **Color Cut Report:**
+
 - [x] Template loads correctly
 - [x] Shows gel codes with color swatches
 - [x] Columns: gel_code, manufacturer, frame_size, cuts_needed, cuts_per_sheet, sheets_needed
@@ -143,26 +158,31 @@ For each fixture report type, verify:
 #### 3. Infrastructure Reports Testing (5 reports)
 
 **Infrastructure List:**
+
 - [x] Shows all 13 infrastructure items
 - [x] Columns: name, type, manufacturer, model, location, status, notes
 - [x] All categories visible (network, dmx, control, media, power)
 
 **Network Summary:**
+
 - [x] Shows 4 network switches
 - [x] IP addresses display correctly (192.168.1.x)
 - [x] MAC addresses formatted properly
 - [x] Hostnames visible
 
 **Port Assignments:**
+
 - [x] Port counts display for switches (28, 24, 24 ports)
 - [x] Port information shows correctly
 
 **Infrastructure Power:**
+
 - [x] Voltage displays (120V, 208V)
 - [x] Wattage and amperage calculations correct
 - [x] Circuit assignments visible
 
 **Infrastructure Location:**
+
 - [x] Groups by location
 - [x] All locations visible (FOH Rack, Stage Right, etc.)
 - [x] Equipment listed under correct locations
@@ -170,6 +190,7 @@ For each fixture report type, verify:
 #### 4. Column Configuration Testing
 
 For any report:
+
 - [x] Open column configuration panel
 - [x] Drag columns to reorder - verify order changes
 - [x] Adjust column width slider - verify width changes in preview
@@ -179,6 +200,7 @@ For any report:
 #### 5. Grouping & Sorting Testing
 
 **Grouping:**
+
 - [x] Select "Group By" dropdown
 - [x] Choose a groupable field (e.g., "Position" for Channel Hookup)
 - [x] Verify data groups correctly
@@ -187,6 +209,7 @@ For any report:
 - [x] Toggle "Page Break Between Groups" - verify visual separation
 
 **Sorting:**
+
 - [x] Select "Sort By" dropdown
 - [x] Choose different fields
 - [x] Toggle Ascending/Descending
@@ -197,12 +220,14 @@ For any report:
 #### 6. Template Operations Testing
 
 **Save Template:**
+
 - [x] Make changes to columns/organization
 - [x] Click "Save" button
 - [x] Verify "Unsaved changes" indicator disappears
 - [x] Reload template - changes persist
 
 **Save As New Template:**
+
 - [x] Load system template
 - [x] Make customizations
 - [x] Click "Save As..."
@@ -211,12 +236,14 @@ For any report:
 - [x] Verify it's marked as custom (not system)
 
 **Duplicate Template:**
+
 - [x] Right-click/select any template
 - [x] Choose "Duplicate"
 - [x] Verify copy created with "(Copy)" suffix
 - [x] Verify duplicate is editable
 
 **Delete Custom Template:**
+
 - [x] Select a custom template
 - [x] Click delete
 - [x] Verify confirmation dialog
@@ -225,6 +252,7 @@ For any report:
 - [x] Try to delete system template - verify error/prevention
 
 **Load Template:**
+
 - [x] Click different templates in library
 - [x] Verify editor updates immediately
 - [x] Verify preview updates with template data
@@ -253,6 +281,7 @@ For any report:
 #### 8.5. Header/Footer System (Completed)
 
 **Header Rendering:**
+
 - [x] Compact 3-row grid layout displays correctly
 - [x] Row 0: Show Name (left), Report Title (center), Date (right)
 - [x] Row 1: Empty spacing row
@@ -263,6 +292,7 @@ For any report:
 - [x] Proper spacing between header rows
 
 **Footer Rendering:**
+
 - [x] Footer appears at bottom of each page
 - [x] Page numbers display correctly (Puppeteer displayHeaderFooter)
 - [x] Footer shows: Username • ShowStack on left
@@ -270,6 +300,7 @@ For any report:
 - [x] Footer font matches header style
 
 **Template Migration:**
+
 - [x] Automatic detection of old header layouts
 - [x] Re-seeding on app startup when old layout detected
 - [x] No duplicate elements after migration
@@ -299,6 +330,7 @@ For any report:
 #### 11. Performance Testing
 
 **With 84 Fixtures:**
+
 - [x] Template loads in < 500ms
 - [x] Preview updates in < 300ms
 - [x] Column reorder feels instant
@@ -306,6 +338,7 @@ For any report:
 - [x] No UI lag or freezing
 
 **Stress Test (if time permits):**
+
 - N/A - Performance acceptable with current test data
 
 #### 12. Edge Cases & Error Handling
@@ -334,18 +367,22 @@ For any report:
 
 ## 🐛 Known Issues / To Fix
 
-*Document any issues found during testing here*
+_Document any issues found during testing here_
 
 ### Critical
+
 - [ ] None yet
 
 ### Major
+
 - [ ] None yet
 
 ### Minor
+
 - [ ] None yet
 
 ### Nice to Have
+
 - [ ] None yet
 
 ---
@@ -353,6 +390,7 @@ For any report:
 ## 📊 Test Results Summary
 
 **Fixture Reports (8):**
+
 - [x] Channel Hookup
 - [x] Dimmer Schedule
 - [x] Circuit List
@@ -363,6 +401,7 @@ For any report:
 - [x] Color Cut Report
 
 **Infrastructure Reports (5):**
+
 - [x] Infrastructure List
 - [x] Network Summary
 - [x] Port Assignments
@@ -370,6 +409,7 @@ For any report:
 - [x] Infrastructure Location
 
 **Template Operations:**
+
 - [x] Load
 - [x] Save
 - [x] Save As
@@ -377,6 +417,7 @@ For any report:
 - [x] Delete
 
 **UI Features:**
+
 - [x] Column Configuration
 - [x] Grouping
 - [x] Sorting
@@ -401,4 +442,4 @@ For any report:
 
 ## 📝 Notes
 
-*Add testing observations here*
+_Add testing observations here_

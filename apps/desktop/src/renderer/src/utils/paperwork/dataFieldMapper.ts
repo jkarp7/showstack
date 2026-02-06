@@ -108,11 +108,11 @@ function calculateFixtureSummaries(fixtures: Fixture[]) {
   const totalAmperage = fixtures.reduce((sum, f) => sum + (f.amperage || 0), 0);
 
   // Count unique DMX universes
-  const universes = new Set(fixtures.map(f => f.universe).filter(Boolean));
+  const universes = new Set(fixtures.map((f) => f.universe).filter(Boolean));
   const universeCount = universes.size;
 
   // Count unique fixture types
-  const fixtureTypes = new Set(fixtures.map(f => f.type).filter(Boolean));
+  const fixtureTypes = new Set(fixtures.map((f) => f.type).filter(Boolean));
   const fixtureTypeCount = fixtureTypes.size;
 
   return {
@@ -120,7 +120,7 @@ function calculateFixtureSummaries(fixtures: Fixture[]) {
     total_wattage: totalWattage,
     total_amperage: totalAmperage,
     universe_count: universeCount,
-    fixture_type_count: fixtureTypeCount
+    fixture_type_count: fixtureTypeCount,
   };
 }
 
@@ -131,10 +131,12 @@ function calculateInfrastructureSummaries(infrastructure: InfrastructureEquipmen
   const totalInfrastructure = infrastructure.length;
 
   // Count by category
-  const networkEquipmentCount = infrastructure.filter(eq => eq.category === 'network').length;
-  const audioEquipmentCount = infrastructure.filter(eq => eq.category === 'audio').length;
-  const videoEquipmentCount = infrastructure.filter(eq => eq.category === 'video').length;
-  const dataDistributionCount = infrastructure.filter(eq => eq.category === 'data_distribution').length;
+  const networkEquipmentCount = infrastructure.filter((eq) => eq.category === 'network').length;
+  const audioEquipmentCount = infrastructure.filter((eq) => eq.category === 'audio').length;
+  const videoEquipmentCount = infrastructure.filter((eq) => eq.category === 'video').length;
+  const dataDistributionCount = infrastructure.filter(
+    (eq) => eq.category === 'data_distribution',
+  ).length;
 
   // Count total ports
   const totalPorts = infrastructure.reduce((sum, eq) => {
@@ -145,8 +147,10 @@ function calculateInfrastructureSummaries(infrastructure: InfrastructureEquipmen
   }, 0);
 
   // Count active vs inactive
-  const activeInfrastructure = infrastructure.filter(eq => eq.status === 'active').length;
-  const inactiveInfrastructure = infrastructure.filter(eq => eq.status === 'inactive' || eq.status === 'decommissioned').length;
+  const activeInfrastructure = infrastructure.filter((eq) => eq.status === 'active').length;
+  const inactiveInfrastructure = infrastructure.filter(
+    (eq) => eq.status === 'inactive' || eq.status === 'decommissioned',
+  ).length;
 
   return {
     total_infrastructure: totalInfrastructure,
@@ -156,7 +160,7 @@ function calculateInfrastructureSummaries(infrastructure: InfrastructureEquipmen
     data_distribution_count: dataDistributionCount,
     total_ports: totalPorts,
     active_infrastructure: activeInfrastructure,
-    inactive_infrastructure: inactiveInfrastructure
+    inactive_infrastructure: inactiveInfrastructure,
   };
 }
 
@@ -169,14 +173,18 @@ function formatDate(timestamp?: number): string | undefined {
   return new Date(timestamp).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   });
 }
 
 /**
  * Get report title based on report type and project name
  */
-function getReportTitle(reportType: ReportType, projectName?: string, customTitle?: string): string {
+function getReportTitle(
+  reportType: ReportType,
+  projectName?: string,
+  customTitle?: string,
+): string {
   if (customTitle) {
     return customTitle;
   }
@@ -193,7 +201,7 @@ function getReportTitle(reportType: ReportType, projectName?: string, customTitl
     'network-summary': 'Network Summary',
     'port-assignments': 'Port Assignments',
     'infrastructure-power': 'Infrastructure Power',
-    'infrastructure-location': 'Infrastructure by Location'
+    'infrastructure-location': 'Infrastructure by Location',
   };
 
   const reportName = reportNames[reportType] || 'Report';
@@ -213,7 +221,7 @@ export function mapPaperworkToTemplateData(
   fixtures: Fixture[],
   infrastructure: InfrastructureEquipment[],
   reportType: ReportType,
-  customTitle?: string
+  customTitle?: string,
 ): PrepTemplateData {
   const fixtureSummaries = calculateFixtureSummaries(fixtures);
   const infrastructureSummaries = calculateInfrastructureSummaries(infrastructure);
@@ -255,7 +263,7 @@ export function mapPaperworkToTemplateData(
     ...fixtureSummaries,
 
     // Infrastructure summaries
-    ...infrastructureSummaries
+    ...infrastructureSummaries,
   };
 }
 
@@ -265,7 +273,7 @@ export function mapPaperworkToTemplateData(
  */
 export function getDataFieldValue(
   fieldType: string,
-  templateData: PrepTemplateData
+  templateData: PrepTemplateData,
 ): string | number | undefined {
   return (templateData as any)[fieldType];
 }

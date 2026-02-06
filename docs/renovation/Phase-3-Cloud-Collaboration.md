@@ -27,6 +27,7 @@ Before starting Phase 3 implementation, address these outstanding issues from th
 **Impact:** Hidden type errors, reduced code safety, harder debugging
 
 **Files Affected:**
+
 - `apps/desktop/src/main/database/queries/shop-order.ts` (has `@ts-nocheck`)
 - `apps/desktop/src/main/database/queries/layoutTemplates.ts`
 - `apps/desktop/src/main/database/queries/paperworkTemplates.ts`
@@ -34,6 +35,7 @@ Before starting Phase 3 implementation, address these outstanding issues from th
 - `apps/desktop/src/main/database/queries/settings.ts`
 
 **Tasks:**
+
 - [ ] Remove `@ts-nocheck` from `shop-order.ts` and fix type errors
 - [ ] Replace `any[]` with proper types: `(string | number | null)[]`
 - [ ] Create typed row-to-object mappers for query results
@@ -49,17 +51,20 @@ Before starting Phase 3 implementation, address these outstanding issues from th
 **Risk:** Potential SQL injection if whitelist validation bypassed
 
 **Files Affected:**
+
 - `apps/desktop/src/main/database/queries/projects.ts:150`
 - `apps/desktop/src/main/database/queries/layoutTemplates.ts:246`
 - `apps/desktop/src/main/database/queries/license.ts:163`
 - `apps/desktop/src/main/database/queries/paperworkTemplates.ts:265`
 
 **Current Code:**
+
 ```typescript
-const setClause = fields.map(f => `${f} = ?`).join(', ');
+const setClause = fields.map((f) => `${f} = ?`).join(', ');
 ```
 
 **Fix:**
+
 ```typescript
 const ALLOWED_FIELDS = Object.freeze(['name', 'description', ...]) as const;
 type AllowedField = typeof ALLOWED_FIELDS[number];
@@ -72,6 +77,7 @@ const fields = Object.keys(updates).filter(validateFieldName);
 ```
 
 **Tasks:**
+
 - [ ] Harden field whitelists with `Object.freeze()` in all affected files
 - [ ] Add type guards for field name validation
 - [ ] Add unit tests for whitelist validation
@@ -86,11 +92,13 @@ const fields = Object.keys(updates).filter(validateFieldName);
 **Impact:** Difficult debugging, potential data loss goes unnoticed
 
 **Files Affected:**
+
 - `apps/desktop/src/main/database/queries/projects.ts:27-30`
 - `apps/desktop/src/main/database/queries/paperworkTemplates.ts`
 - `apps/desktop/src/main/database/queries/layoutTemplates.ts`
 
 **Current Code:**
+
 ```typescript
 try {
   project[field] = JSON.parse(project[field]);
@@ -100,19 +108,21 @@ try {
 ```
 
 **Fix:**
+
 ```typescript
 try {
   project[field] = JSON.parse(project[field]);
 } catch (error) {
   logger.warn(`Failed to parse JSON field '${field}' for project ${project.id}`, {
     error,
-    rawValue: project[field]?.substring(0, 100) // Truncate for logging
+    rawValue: project[field]?.substring(0, 100), // Truncate for logging
   });
   // Keep original value
 }
 ```
 
 **Tasks:**
+
 - [ ] Add error logging to all JSON.parse catch blocks
 - [ ] Consider adding data validation/repair utility
 
@@ -126,6 +136,7 @@ try {
 **Target:** 80% coverage for service classes
 
 **Files Needing Tests:**
+
 - `apps/desktop/src/main/services/BaseService.ts`
 - `apps/desktop/src/main/services/FixtureService.ts`
 - `apps/desktop/src/main/services/ProjectService.ts`
@@ -137,6 +148,7 @@ try {
 - `apps/desktop/src/main/services/InfrastructureService.ts`
 
 **Tasks:**
+
 - [ ] Create test file for BaseService (validation helpers, retry logic)
 - [ ] Create test files for each service class
 - [ ] Test error handling and validation
@@ -153,9 +165,11 @@ try {
 **Impact:** Partial updates possible on failure
 
 **Files Affected:**
+
 - `apps/desktop/src/main/database/queries/layoutTemplates.ts:252`
 
 **Current Code:**
+
 ```typescript
 // Delete existing elements
 db.prepare('DELETE FROM page_layout_elements WHERE template_id = ?').run(id);
@@ -167,6 +181,7 @@ for (const element of elements) {
 ```
 
 **Tasks:**
+
 - [ ] Wrap delete + insert operations in transactions
 - [ ] Audit other multi-step operations for transaction safety
 - [ ] Add transaction wrapper utility if needed
@@ -187,6 +202,7 @@ for (const element of elements) {
 **File:** `apps/desktop/src/main/database/core/DatabaseManager.ts`
 
 **Implementation:**
+
 ```typescript
 private walCheckpointInterval?: NodeJS.Timeout;
 
@@ -225,6 +241,7 @@ forceCheckpoint(): void {
 ```
 
 **Tasks:**
+
 - [ ] Add WAL checkpointing methods to DatabaseManager
 - [ ] Call `startPeriodicCheckpointing()` in database initialization
 - [ ] Call `stopPeriodicCheckpointing()` in database close
@@ -240,6 +257,7 @@ forceCheckpoint(): void {
 **Issue:** Methods like `getAllFixtures()` return all rows; problematic with large datasets
 
 **Files Affected:**
+
 - `apps/desktop/src/main/database/queries/fixtures.ts`
 - `apps/desktop/src/main/database/queries/shop-order.ts`
 - `apps/desktop/src/main/database/queries/infrastructure.ts`
@@ -247,6 +265,7 @@ forceCheckpoint(): void {
 **Implementation:**
 
 Create pagination utility:
+
 ```typescript
 // apps/desktop/src/main/database/utils/pagination.ts
 export interface PaginationOptions {
@@ -267,21 +286,23 @@ export interface PaginatedResult<T> {
 export function buildPaginatedQuery(
   baseQuery: string,
   options: PaginationOptions,
-  allowedSortFields: readonly string[]
+  allowedSortFields: readonly string[],
 ): { query: string; countQuery: string } {
-  const sortField = options.sortBy && allowedSortFields.includes(options.sortBy)
-    ? options.sortBy
-    : allowedSortFields[0];
+  const sortField =
+    options.sortBy && allowedSortFields.includes(options.sortBy)
+      ? options.sortBy
+      : allowedSortFields[0];
   const sortOrder = options.sortOrder === 'DESC' ? 'DESC' : 'ASC';
 
   return {
     query: `${baseQuery} ORDER BY ${sortField} ${sortOrder} LIMIT ? OFFSET ?`,
-    countQuery: baseQuery.replace('SELECT *', 'SELECT COUNT(*) as total')
+    countQuery: baseQuery.replace('SELECT *', 'SELECT COUNT(*) as total'),
   };
 }
 ```
 
 **Tasks:**
+
 - [ ] Create `pagination.ts` utility module
 - [ ] Add `getFixturesPaginated()` to fixtures.ts
 - [ ] Add `getShopOrderItemsPaginated()` to shop-order.ts
@@ -300,6 +321,7 @@ export function buildPaginatedQuery(
 **Note:** better-sqlite3 already caches statements internally. Only implement if profiling shows benefit.
 
 **Tasks:**
+
 - [ ] Profile query performance with large datasets (10k+ rows)
 - [ ] If profiling shows benefit: Create StatementCache class
 - [ ] If profiling shows benefit: Integrate with hot-path queries
@@ -315,6 +337,7 @@ export function buildPaginatedQuery(
 **New File:** `apps/desktop/src/main/database/monitoring/DatabaseMonitor.ts`
 
 **Implementation:**
+
 ```typescript
 interface QueryMetrics {
   count: number;
@@ -329,7 +352,10 @@ export class DatabaseMonitor {
 
   recordQuery(operation: string, durationMs: number, error?: Error): void {
     const existing = this.metrics.get(operation) || {
-      count: 0, totalTime: 0, maxTime: 0, errors: 0
+      count: 0,
+      totalTime: 0,
+      maxTime: 0,
+      errors: 0,
     };
 
     existing.count++;
@@ -349,7 +375,7 @@ export class DatabaseMonitor {
     for (const [op, metrics] of this.metrics) {
       summary[op] = {
         ...metrics,
-        avgTime: metrics.count > 0 ? metrics.totalTime / metrics.count : 0
+        avgTime: metrics.count > 0 ? metrics.totalTime / metrics.count : 0,
       };
     }
     return summary;
@@ -359,9 +385,9 @@ export class DatabaseMonitor {
     return Array.from(this.metrics.entries())
       .map(([operation, m]) => ({
         operation,
-        avgTime: m.totalTime / m.count
+        avgTime: m.totalTime / m.count,
       }))
-      .filter(q => q.avgTime > this.slowQueryThresholdMs)
+      .filter((q) => q.avgTime > this.slowQueryThresholdMs)
       .sort((a, b) => b.avgTime - a.avgTime);
   }
 
@@ -374,6 +400,7 @@ export const databaseMonitor = new DatabaseMonitor();
 ```
 
 **Tasks:**
+
 - [ ] Create DatabaseMonitor class
 - [ ] Integrate with BaseService query execution
 - [ ] Add IPC handler to retrieve metrics
@@ -390,6 +417,7 @@ export const databaseMonitor = new DatabaseMonitor();
 ### 3.1.1 Project Setup
 
 **Tasks:**
+
 - [x] Verify Supabase project configuration files ready
 - [ ] Create Supabase project in dashboard (user action required)
 - [ ] Note project URL and anon key
@@ -400,6 +428,7 @@ export const databaseMonitor = new DatabaseMonitor();
 **Files:** `supabase/migrations/`
 
 **Tasks:**
+
 - [x] Migration files created and verified
 - [ ] Deploy `001_initial_schema.sql` via Supabase SQL Editor (user action)
 - [ ] Deploy `002_indexes.sql` (user action)
@@ -412,6 +441,7 @@ export const databaseMonitor = new DatabaseMonitor();
 **Files:** `supabase/powersync/sync-rules.yaml`
 
 **Tasks:**
+
 - [x] Sync rules YAML created and verified
 - [ ] Provision PowerSync instance (user action)
 - [ ] Connect to Supabase database (user action)
@@ -421,12 +451,14 @@ export const databaseMonitor = new DatabaseMonitor();
 ### 3.1.4 Environment Configuration
 
 **Files:**
+
 - `.env.example` - Template with all required variables
 - `apps/desktop/src/main/config/env.ts` - Environment loader module
 - `scripts/test-supabase.ts` - Supabase connection test
 - `scripts/test-powersync.ts` - PowerSync connection test
 
 **Tasks:**
+
 - [x] Create `.env.example` template
 - [x] Add env loading to Electron main process (`loadEnv()` in index.ts)
 - [x] Create `config/env.ts` module with typed configuration
@@ -435,6 +467,7 @@ export const databaseMonitor = new DatabaseMonitor();
 - [x] Document env setup in SUPABASE_SETUP_GUIDE.md
 
 **Usage:**
+
 ```bash
 # Copy environment template
 cp .env.example .env
@@ -454,12 +487,14 @@ npm run test:powersync
 ### 3.2.1 SDK Installation & Setup
 
 **Tasks:**
+
 - [x] Install packages: `npm install @powersync/web @supabase/supabase-js`
 - [x] Create PowerSync schema definition matching Supabase
 - [x] Create Supabase connector for auth tokens
 - [x] Initialize PowerSync in main process
 
 **Implemented Files:**
+
 - `apps/desktop/src/main/services/sync/powerSyncSchema.ts` - Schema for all 17 tables
 - `apps/desktop/src/main/services/sync/SupabaseConnector.ts` - Auth & CRUD upload
 - `apps/desktop/src/main/services/sync/PowerSyncService.ts` - Main sync service
@@ -469,6 +504,7 @@ npm run test:powersync
 ### 3.2.2 PowerSyncService Implementation
 
 **Implemented Features:**
+
 - [x] PowerSyncService class with singleton pattern
 - [x] Connection management (connect/disconnect)
 - [x] Sync status tracking with listener pattern
@@ -478,6 +514,7 @@ npm run test:powersync
 - [x] IPC handlers for all sync operations
 
 **API Surface:**
+
 ```typescript
 // Main process
 const service = getPowerSyncService();
@@ -496,12 +533,12 @@ const status = await window.api.sync.getStatus();
 Service migration deferred to Phase 3.4+ after Auth UI is complete.
 Current services continue using local SQLite; PowerSync provides sync layer.
 
-| Service | Priority | Status |
-|---------|----------|--------|
-| FixtureService (pilot) | 1 | Pending Phase 3.4 |
-| ProjectService | 2 | Pending |
-| ShopOrderProjectService | 3 | Pending |
-| Others | 4-10 | Pending |
+| Service                 | Priority | Status            |
+| ----------------------- | -------- | ----------------- |
+| FixtureService (pilot)  | 1        | Pending Phase 3.4 |
+| ProjectService          | 2        | Pending           |
+| ShopOrderProjectService | 3        | Pending           |
+| Others                  | 4-10     | Pending           |
 
 **Note:** Service migration requires authenticated users (Phase 3.3)
 
@@ -517,6 +554,7 @@ Current services continue using local SQLite; PowerSync provides sync layer.
 **Implemented File:** `apps/desktop/src/renderer/src/store/authStore.ts`
 
 **Completed:**
+
 - [x] Zustand store for auth state management
 - [x] `signIn(email, password)` - calls IPC and updates state
 - [x] `signUp(email, password)` - calls IPC and updates state
@@ -531,6 +569,7 @@ Current services continue using local SQLite; PowerSync provides sync layer.
 **Location:** `apps/desktop/src/main/ipc/sync.ts` (combined with sync handlers)
 
 **Completed:**
+
 - [x] Auth IPC handlers integrated with SupabaseConnector
 - [x] `auth:signIn`, `auth:signUp`, `auth:signOut`, `auth:resetPassword`
 - [x] Session management via SupabaseConnector
@@ -539,6 +578,7 @@ Current services continue using local SQLite; PowerSync provides sync layer.
 ### 3.3.3 Auth UI Components
 
 **Implemented Files:**
+
 - `apps/desktop/src/renderer/src/components/auth/LoginForm.tsx`
 - `apps/desktop/src/renderer/src/components/auth/SignUpForm.tsx`
 - `apps/desktop/src/renderer/src/components/auth/PasswordResetForm.tsx`
@@ -546,6 +586,7 @@ Current services continue using local SQLite; PowerSync provides sync layer.
 - `apps/desktop/src/renderer/src/components/auth/index.ts`
 
 **Completed:**
+
 - [x] LoginForm - email/password with "remember me" option
 - [x] SignUpForm - registration with password requirements display
 - [x] PasswordResetForm - email input with success confirmation
@@ -556,10 +597,12 @@ Current services continue using local SQLite; PowerSync provides sync layer.
 ### 3.3.4 Sync Status UI
 
 **Implemented Files:**
+
 - `apps/desktop/src/renderer/src/components/sync/SyncStatusIndicator.tsx`
 - `apps/desktop/src/renderer/src/components/sync/index.ts`
 
 **Completed:**
+
 - [x] SyncStatusIndicator component for header
 - [x] Shows auth status (Sign In button when not authenticated)
 - [x] Shows sync status with icons (connected, syncing, error, offline)
@@ -570,11 +613,13 @@ Current services continue using local SQLite; PowerSync provides sync layer.
 ### 3.3.5 App Integration
 
 **Modified Files:**
+
 - `apps/desktop/src/renderer/src/App.tsx`
 - `apps/desktop/src/renderer/src/pages/LandingPage.tsx`
 - `apps/desktop/src/renderer/src/pages/ProjectPage.tsx`
 
 **Completed:**
+
 - [x] AuthModal rendered at app root level
 - [x] Sync initialization on app startup
 - [x] SyncStatusIndicator added to LandingPage header
@@ -590,11 +635,13 @@ Current services continue using local SQLite; PowerSync provides sync layer.
 ### 3.4.1 Sync Status Components
 
 **Implemented Files:**
+
 - `apps/desktop/src/renderer/src/components/sync/SyncStatusIndicator.tsx`
 - `apps/desktop/src/renderer/src/components/sync/OfflineBanner.tsx`
 - `apps/desktop/src/renderer/src/components/sync/index.ts`
 
 **Completed:**
+
 - [x] SyncStatusIndicator (icon + dropdown) - shows sync state in headers
 - [x] Integrated into app headers (LandingPage, ProjectPage)
 - [x] Pending changes indicator (built into SyncStatusIndicator)
@@ -606,6 +653,7 @@ Current services continue using local SQLite; PowerSync provides sync layer.
 **Implemented File:** `apps/desktop/src/renderer/src/components/sync/ConflictResolutionDialog.tsx`
 
 **Completed:**
+
 - [x] ConflictResolutionDialog component built
 - [x] Shows local vs remote values side-by-side
 - [x] Click to choose winner (local or remote)
@@ -618,6 +666,7 @@ Current services continue using local SQLite; PowerSync provides sync layer.
 **Status:** Deferred - requires Supabase Realtime integration and live multi-user testing
 
 **Tasks (Future Enhancement):**
+
 - [ ] Implement real-time presence via Supabase Realtime
 - [ ] Show active collaborators on project
 - [ ] Show cursor/selection for active users (stretch goal)
@@ -629,12 +678,14 @@ Current services continue using local SQLite; PowerSync provides sync layer.
 ## Success Criteria
 
 ### Performance (Phase 3.0)
+
 - [ ] WAL checkpoint monitoring active
 - [ ] Pagination available for large datasets
 - [ ] Database metrics visible in dev tools
 - [ ] No slow query warnings in normal use
 
 ### Cloud Sync (Phase 3.1-3.2)
+
 - [x] Supabase schema deployed and accessible
 - [x] PowerSync SDK integrated with schema
 - [x] Sync service with IPC handlers implemented
@@ -643,12 +694,14 @@ Current services continue using local SQLite; PowerSync provides sync layer.
 - [ ] Sync latency < 2 seconds on reconnection (requires auth)
 
 ### Authentication (Phase 3.3)
+
 - [x] Users can sign up/sign in (UI complete, requires Supabase auth enabled)
 - [ ] Sessions persist across app restarts (pending testing)
 - [x] Password reset flow works (UI complete)
 - [x] Auth errors displayed clearly
 
 ### Collaboration (Phase 3.4)
+
 - [x] Sync status visible at all times (SyncStatusIndicator in headers)
 - [x] Offline state clearly indicated (OfflineBanner + icon changes)
 - [x] Conflicts can be resolved manually (ConflictResolutionDialog)
@@ -673,28 +726,28 @@ Phase 3.1 (Supabase)  ────┘          │
 
 ## Risk Mitigation
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| PowerSync learning curve | Medium | Follow docs, start with single service |
-| Sync conflicts | High | Use last-write-wins for MVP, add manual resolution |
-| Offline queue growing | Medium | Limit queue size, show warning |
-| Supabase free tier limits | Low | Monitor usage, plan upgrade path |
-| Type safety regression | High | Address PR #68 issues first |
+| Risk                      | Impact | Mitigation                                         |
+| ------------------------- | ------ | -------------------------------------------------- |
+| PowerSync learning curve  | Medium | Follow docs, start with single service             |
+| Sync conflicts            | High   | Use last-write-wins for MVP, add manual resolution |
+| Offline queue growing     | Medium | Limit queue size, show warning                     |
+| Supabase free tier limits | Low    | Monitor usage, plan upgrade path                   |
+| Type safety regression    | High   | Address PR #68 issues first                        |
 
 ---
 
 ## Phase 1 Issues Addressed
 
-| Issue | Status | Phase |
-|-------|--------|-------|
-| WAL Checkpoint Monitoring | 🔄 Phase 3.0.1 | 3.0 |
-| Add Pagination | 🔄 Phase 3.0.2 | 3.0 |
-| Statement Caching | ⏸️ Profile first | 3.0 |
-| Database Monitoring | 🔄 Phase 3.0.4 | 3.0 |
+| Issue                     | Status           | Phase    |
+| ------------------------- | ---------------- | -------- |
+| WAL Checkpoint Monitoring | 🔄 Phase 3.0.1   | 3.0      |
+| Add Pagination            | 🔄 Phase 3.0.2   | 3.0      |
+| Statement Caching         | ⏸️ Profile first | 3.0      |
+| Database Monitoring       | 🔄 Phase 3.0.4   | 3.0      |
 | Type Safety (@ts-nocheck) | 🔄 Pre-Work PW-1 | Pre-Work |
-| Field Whitelist Security | 🔄 Pre-Work PW-2 | Pre-Work |
-| JSON.parse Logging | 🔄 Pre-Work PW-3 | Pre-Work |
-| Service Layer Tests | 🔄 Pre-Work PW-4 | Pre-Work |
+| Field Whitelist Security  | 🔄 Pre-Work PW-2 | Pre-Work |
+| JSON.parse Logging        | 🔄 Pre-Work PW-3 | Pre-Work |
+| Service Layer Tests       | 🔄 Pre-Work PW-4 | Pre-Work |
 
 ---
 

@@ -5,7 +5,7 @@ export interface Fixture {
 
   // Position & Identification (LightWright: Position, Unit #, Instrument Type, Mark)
   position: string;
-  unit?: number;           // Alias for unit_number
+  unit?: number; // Alias for unit_number
   unit_number?: number;
   type: string;
   manufacturer?: string;
@@ -22,10 +22,10 @@ export interface Fixture {
 
   // Power (LightWright: Dimmer, Circuit Name, Circuit #, Load, Dimmer Phase)
   dimmer?: string;
-  circuit?: string;        // Circuit name
+  circuit?: string; // Circuit name
   circuit_number?: string; // Circuit #
   phase?: string;
-  wattage?: number;        // Load
+  wattage?: number; // Load
   amperage?: number;
 
   // Color & Accessories (LightWright: Color, Gobo, Gobo Size, Accessory, Color Frame)

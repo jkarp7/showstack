@@ -43,9 +43,9 @@ export const FILE_EXTENSION = 'ss';
 
 // Legacy file extensions (for backward compatibility)
 export const LEGACY_EXTENSIONS = {
-  PRODUCTION: 'ssp',    // ShowStack:Lighting (legacy)
-  MANAGER: 'ssm',       // ShowStack:Manager (legacy)
-  DESIGN: 'ssd'         // ShowStack:Design (legacy)
+  PRODUCTION: 'ssp', // ShowStack:Lighting (legacy)
+  MANAGER: 'ssm', // ShowStack:Manager (legacy)
+  DESIGN: 'ssd', // ShowStack:Design (legacy)
 } as const;
 
 export type ModuleType = keyof typeof LEGACY_EXTENSIONS;
@@ -79,9 +79,9 @@ class FileService {
       title: 'Open ShowStack Project',
       filters: [
         { name: 'ShowStack Projects', extensions },
-        { name: 'All Files', extensions: ['*'] }
+        { name: 'All Files', extensions: ['*'] },
       ],
-      properties: ['openFile']
+      properties: ['openFile'],
     });
 
     if (result.canceled || result.filePaths.length === 0) {
@@ -97,7 +97,10 @@ class FileService {
    * @param module Module type (for legacy compatibility, no longer used)
    * @returns File path or null if canceled
    */
-  async showSaveDialog(defaultName?: string, module: ModuleType = 'PRODUCTION'): Promise<string | null> {
+  async showSaveDialog(
+    defaultName?: string,
+    module: ModuleType = 'PRODUCTION',
+  ): Promise<string | null> {
     const extensions = this.getAllExtensions();
 
     const result = await dialog.showSaveDialog({
@@ -105,8 +108,8 @@ class FileService {
       defaultPath: defaultName || 'Untitled Project',
       filters: [
         { name: 'ShowStack Project', extensions: [FILE_EXTENSION] },
-        { name: 'All Files', extensions: ['*'] }
-      ]
+        { name: 'All Files', extensions: ['*'] },
+      ],
     });
 
     if (result.canceled || !result.filePath) {
@@ -115,7 +118,7 @@ class FileService {
 
     // Ensure correct extension
     let filePath = result.filePath;
-    const hasValidExtension = extensions.some(ext => filePath.endsWith(`.${ext}`));
+    const hasValidExtension = extensions.some((ext) => filePath.endsWith(`.${ext}`));
 
     if (!hasValidExtension) {
       filePath += `.${FILE_EXTENSION}`;
@@ -142,13 +145,13 @@ class FileService {
           // Update prep_projects table
           db.run('UPDATE prep_projects SET updated_at = ? WHERE id = ?', [
             Date.now(),
-            isPrepProject
+            isPrepProject,
           ]);
         } else {
           // Update projects table
           db.run('UPDATE projects SET updated_at = ? WHERE id = ?', [
             Date.now(),
-            'default-project'
+            'default-project',
           ]);
         }
       } catch (error) {
@@ -167,7 +170,9 @@ class FileService {
       console.log('✅ Project exported successfully (app data preserved separately)');
     } catch (error) {
       console.error('Error exporting project:', error);
-      throw new Error(`Failed to export project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to export project: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -183,7 +188,7 @@ class FileService {
       if (!existsSync(filePath)) {
         return {
           success: false,
-          error: `File not found: ${filePath}`
+          error: `File not found: ${filePath}`,
         };
       }
 
@@ -192,7 +197,7 @@ class FileService {
       if (!validation.valid) {
         return {
           success: false,
-          error: validation.error
+          error: validation.error,
         };
       }
 
@@ -210,17 +215,21 @@ class FileService {
 
       try {
         // First try prep_projects table (for Prep module files)
-        const prepResult = importedDb.exec('SELECT id, production_name, updated_at FROM prep_projects LIMIT 1');
+        const prepResult = importedDb.exec(
+          'SELECT id, production_name, updated_at FROM prep_projects LIMIT 1',
+        );
         if (prepResult[0]?.values[0]?.[0]) {
           projectId = prepResult[0].values[0][0] as string;
-          projectName = prepResult[0].values[0][1] as string || 'Untitled Project';
-          importedUpdatedAt = prepResult[0].values[0][2] as number || Date.now();
+          projectName = (prepResult[0].values[0][1] as string) || 'Untitled Project';
+          importedUpdatedAt = (prepResult[0].values[0][2] as number) || Date.now();
         } else {
           // Fall back to projects table (for Production/Manager files)
-          const projectResult = importedDb.exec('SELECT id, name, updated_at FROM projects LIMIT 1');
-          projectId = projectResult[0]?.values[0]?.[0] as string || 'default-project';
-          projectName = projectResult[0]?.values[0]?.[1] as string || 'Untitled Project';
-          importedUpdatedAt = projectResult[0]?.values[0]?.[2] as number || Date.now();
+          const projectResult = importedDb.exec(
+            'SELECT id, name, updated_at FROM projects LIMIT 1',
+          );
+          projectId = (projectResult[0]?.values[0]?.[0] as string) || 'default-project';
+          projectName = (projectResult[0]?.values[0]?.[1] as string) || 'Untitled Project';
+          importedUpdatedAt = (projectResult[0]?.values[0]?.[2] as number) || Date.now();
         }
       } catch (error) {
         // Use defaults if we can't get project info
@@ -235,21 +244,27 @@ class FileService {
 
       try {
         // Check projects table first
-        const existingResult = currentDb.exec('SELECT id, name, updated_at FROM projects WHERE id = ?', [projectId]);
+        const existingResult = currentDb.exec(
+          'SELECT id, name, updated_at FROM projects WHERE id = ?',
+          [projectId],
+        );
         if (existingResult[0]?.values[0]) {
           existingProject = {
             id: existingResult[0].values[0][0] as string,
             name: existingResult[0].values[0][1] as string,
-            updated_at: existingResult[0].values[0][2] as number
+            updated_at: existingResult[0].values[0][2] as number,
           };
         } else {
           // Check prep_projects table
-          const existingPrepResult = currentDb.exec('SELECT id, production_name, updated_at FROM prep_projects WHERE id = ?', [projectId]);
+          const existingPrepResult = currentDb.exec(
+            'SELECT id, production_name, updated_at FROM prep_projects WHERE id = ?',
+            [projectId],
+          );
           if (existingPrepResult[0]?.values[0]) {
             existingProject = {
               id: existingPrepResult[0].values[0][0] as string,
               name: existingPrepResult[0].values[0][1] as string,
-              updated_at: existingPrepResult[0].values[0][2] as number
+              updated_at: existingPrepResult[0].values[0][2] as number,
             };
           }
         }
@@ -268,9 +283,9 @@ class FileService {
             importedProject: {
               id: projectId,
               name: projectName,
-              updated_at: importedUpdatedAt
-            }
-          }
+              updated_at: importedUpdatedAt,
+            },
+          },
         };
       }
 
@@ -282,7 +297,7 @@ class FileService {
       console.error('❌ Error importing project:', error);
       return {
         success: false,
-        error: `Failed to import project: ${error instanceof Error ? error.message : 'Unknown error'}`
+        error: `Failed to import project: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }
@@ -293,11 +308,14 @@ class FileService {
    * @param resolution How to resolve (replace, keep-both, cancel)
    * @returns Import result
    */
-  async resolveImportConflict(filePath: string, resolution: ProjectConflictResolution): Promise<ProjectImportResult> {
+  async resolveImportConflict(
+    filePath: string,
+    resolution: ProjectConflictResolution,
+  ): Promise<ProjectImportResult> {
     if (resolution.action === 'cancel') {
       return {
         success: false,
-        error: 'Import cancelled by user'
+        error: 'Import cancelled by user',
       };
     }
 
@@ -308,16 +326,21 @@ class FileService {
       const importedDb = new SQL.Database(buffer);
 
       // Get project info
-      let projectId = resolution.projectId;
+      const projectId = resolution.projectId;
       let projectName = 'Untitled Project';
 
       try {
-        const prepResult = importedDb.exec('SELECT production_name FROM prep_projects WHERE id = ?', [projectId]);
+        const prepResult = importedDb.exec(
+          'SELECT production_name FROM prep_projects WHERE id = ?',
+          [projectId],
+        );
         if (prepResult[0]?.values[0]?.[0]) {
           projectName = prepResult[0].values[0][0] as string;
         } else {
-          const projectResult = importedDb.exec('SELECT name FROM projects WHERE id = ?', [projectId]);
-          projectName = projectResult[0]?.values[0]?.[0] as string || 'Untitled Project';
+          const projectResult = importedDb.exec('SELECT name FROM projects WHERE id = ?', [
+            projectId,
+          ]);
+          projectName = (projectResult[0]?.values[0]?.[0] as string) || 'Untitled Project';
         }
       } catch (error) {
         // Use default
@@ -341,13 +364,13 @@ class FileService {
 
       return {
         success: false,
-        error: 'Invalid resolution action'
+        error: 'Invalid resolution action',
       };
     } catch (error) {
       console.error('❌ Error resolving import conflict:', error);
       return {
         success: false,
-        error: `Failed to resolve conflict: ${error instanceof Error ? error.message : 'Unknown error'}`
+        error: `Failed to resolve conflict: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }
@@ -360,7 +383,8 @@ class FileService {
     const db = getDatabase();
 
     // Check if it's a prep project or regular project
-    const isPrepProject = db.exec('SELECT id FROM prep_projects WHERE id = ?', [projectId])[0]?.values.length > 0;
+    const isPrepProject =
+      db.exec('SELECT id FROM prep_projects WHERE id = ?', [projectId])[0]?.values.length > 0;
 
     if (isPrepProject) {
       // Delete prep project (foreign keys will cascade)
@@ -385,7 +409,7 @@ class FileService {
     buffer: Uint8Array,
     targetProjectId: string,
     targetProjectName: string,
-    originalProjectId?: string
+    originalProjectId?: string,
   ): Promise<ProjectImportResult> {
     try {
       const SQL = await initSqlJs();
@@ -396,14 +420,29 @@ class FileService {
       const needsIdRemapping = sourceProjectId !== targetProjectId;
 
       // Check if this is a prep project or regular project
-      const isPrepProject = importedDb.exec('SELECT id FROM prep_projects LIMIT 1')[0]?.values.length > 0;
+      const isPrepProject =
+        importedDb.exec('SELECT id FROM prep_projects LIMIT 1')[0]?.values.length > 0;
 
       if (isPrepProject) {
         // Import prep project
-        await this.importPrepProject(importedDb, currentDb, sourceProjectId, targetProjectId, targetProjectName, needsIdRemapping);
+        await this.importPrepProject(
+          importedDb,
+          currentDb,
+          sourceProjectId,
+          targetProjectId,
+          targetProjectName,
+          needsIdRemapping,
+        );
       } else {
         // Import regular project
-        await this.importRegularProject(importedDb, currentDb, sourceProjectId, targetProjectId, targetProjectName, needsIdRemapping);
+        await this.importRegularProject(
+          importedDb,
+          currentDb,
+          sourceProjectId,
+          targetProjectId,
+          targetProjectName,
+          needsIdRemapping,
+        );
       }
 
       importedDb.close();
@@ -413,7 +452,7 @@ class FileService {
       return {
         success: true,
         projectId: targetProjectId,
-        projectName: targetProjectName
+        projectName: targetProjectName,
       };
     } catch (error) {
       console.error('❌ Error merging project:', error);
@@ -430,10 +469,12 @@ class FileService {
     sourceProjectId: string,
     targetProjectId: string,
     targetProjectName: string,
-    needsIdRemapping: boolean
+    needsIdRemapping: boolean,
   ): Promise<void> {
     // Get prep project data
-    const projectResult = importedDb.exec('SELECT * FROM prep_projects WHERE id = ?', [sourceProjectId]);
+    const projectResult = importedDb.exec('SELECT * FROM prep_projects WHERE id = ?', [
+      sourceProjectId,
+    ]);
     if (!projectResult[0] || projectResult[0].values.length === 0) {
       throw new Error('Prep project not found in imported file');
     }
@@ -452,7 +493,9 @@ class FileService {
 
     // Insert prep project
     const cols = Object.keys(projectData).join(', ');
-    const placeholders = Object.keys(projectData).map(() => '?').join(', ');
+    const placeholders = Object.keys(projectData)
+      .map(() => '?')
+      .join(', ');
     const vals = Object.values(projectData);
     currentDb.run(`INSERT INTO prep_projects (${cols}) VALUES (${placeholders})`, vals);
 
@@ -470,7 +513,7 @@ class FileService {
     sourceProjectId: string,
     targetProjectId: string,
     targetProjectName: string,
-    needsIdRemapping: boolean
+    needsIdRemapping: boolean,
   ): Promise<void> {
     // Get project data
     const projectResult = importedDb.exec('SELECT * FROM projects WHERE id = ?', [sourceProjectId]);
@@ -492,12 +535,16 @@ class FileService {
 
     // Insert project
     const cols = Object.keys(projectData).join(', ');
-    const placeholders = Object.keys(projectData).map(() => '?').join(', ');
+    const placeholders = Object.keys(projectData)
+      .map(() => '?')
+      .join(', ');
     const vals = Object.values(projectData);
     currentDb.run(`INSERT INTO projects (${cols}) VALUES (${placeholders})`, vals);
 
     // Import fixtures
-    const fixturesResult = importedDb.exec('SELECT * FROM fixtures WHERE project_id = ?', [sourceProjectId]);
+    const fixturesResult = importedDb.exec('SELECT * FROM fixtures WHERE project_id = ?', [
+      sourceProjectId,
+    ]);
     if (fixturesResult[0] && fixturesResult[0].values.length > 0) {
       const fixtureCols = fixturesResult[0].columns;
       for (const fixtureValues of fixturesResult[0].values) {
@@ -510,14 +557,18 @@ class FileService {
         fixtureData.project_id = targetProjectId;
 
         const cols = Object.keys(fixtureData).join(', ');
-        const placeholders = Object.keys(fixtureData).map(() => '?').join(', ');
+        const placeholders = Object.keys(fixtureData)
+          .map(() => '?')
+          .join(', ');
         const vals = Object.values(fixtureData);
         currentDb.run(`INSERT INTO fixtures (${cols}) VALUES (${placeholders})`, vals);
       }
     }
 
     // Import user preferences
-    const prefsResult = importedDb.exec('SELECT * FROM user_preferences WHERE project_id = ?', [sourceProjectId]);
+    const prefsResult = importedDb.exec('SELECT * FROM user_preferences WHERE project_id = ?', [
+      sourceProjectId,
+    ]);
     if (prefsResult[0] && prefsResult[0].values.length > 0) {
       const prefCols = prefsResult[0].columns;
       for (const prefValues of prefsResult[0].values) {
@@ -530,7 +581,9 @@ class FileService {
         prefData.project_id = targetProjectId;
 
         const cols = Object.keys(prefData).join(', ');
-        const placeholders = Object.keys(prefData).map(() => '?').join(', ');
+        const placeholders = Object.keys(prefData)
+          .map(() => '?')
+          .join(', ');
         const vals = Object.values(prefData);
         currentDb.run(`INSERT INTO user_preferences (${cols}) VALUES (${placeholders})`, vals);
       }
@@ -565,10 +618,12 @@ class FileService {
 
       // Create new default project
       const projectId = 'default-project';
-      db.run(
-        'INSERT INTO projects (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)',
-        [projectId, 'Untitled Project', Date.now(), Date.now()]
-      );
+      db.run('INSERT INTO projects (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)', [
+        projectId,
+        'Untitled Project',
+        Date.now(),
+        Date.now(),
+      ]);
 
       // Save to disk
       saveDatabase();
@@ -578,7 +633,9 @@ class FileService {
       return projectId;
     } catch (error) {
       console.error('Error creating new project:', error);
-      throw new Error(`Failed to create new project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to create new project: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -593,7 +650,7 @@ class FileService {
       if (!existsSync(filePath)) {
         return {
           valid: false,
-          error: 'File not found'
+          error: 'File not found',
         };
       }
 
@@ -609,20 +666,20 @@ class FileService {
       } catch (error) {
         return {
           valid: false,
-          error: 'Invalid file format. This does not appear to be a ShowStack project file.'
+          error: 'Invalid file format. This does not appear to be a ShowStack project file.',
         };
       }
 
       // Check if it has the required tables
       const tables = db.exec(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('projects', 'fixtures', 'user_preferences')"
+        "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('projects', 'fixtures', 'user_preferences')",
       );
 
       if (!tables[0] || tables[0].values.length < 3) {
         db.close();
         return {
           valid: false,
-          error: 'Invalid ShowStack file. Required tables are missing.'
+          error: 'Invalid ShowStack file. Required tables are missing.',
         };
       }
 
@@ -636,7 +693,7 @@ class FileService {
         } else {
           // Fall back to projects table (for Production/Manager files)
           const projectResult = db.exec('SELECT name FROM projects LIMIT 1');
-          projectName = projectResult[0]?.values[0]?.[0] as string || 'Unknown Project';
+          projectName = (projectResult[0]?.values[0]?.[0] as string) || 'Unknown Project';
         }
       } catch (error) {
         // Ignore if we can't get project name
@@ -647,12 +704,12 @@ class FileService {
       return {
         valid: true,
         version: this.SHOWSTACK_VERSION,
-        projectName
+        projectName,
       };
     } catch (error) {
       return {
         valid: false,
-        error: `File validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        error: `File validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }

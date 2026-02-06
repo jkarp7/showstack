@@ -1,4 +1,5 @@
 # ShowStack:Production - Pricing Strategy
+
 ## Competitive Analysis & Revenue Model
 
 **Last Updated:** November 16, 2025
@@ -8,6 +9,7 @@
 ## 🎯 Competitive Landscape
 
 ### LightWright 6 Current Pricing (2025)
+
 ```
 New License:        $845
 Upgrade from v5:    $625
@@ -17,6 +19,7 @@ Institutional:      $2,595 for 6 seats ($433/seat)
 ```
 
 **LightWright 6 Market Position:**
+
 - Industry standard since 1995 (30 years)
 - Perpetual licensing model (pay once, own forever)
 - Upgrades every 3-5 years at $625-695
@@ -27,6 +30,7 @@ Institutional:      $2,595 for 6 seats ($433/seat)
 - Dated UI/UX
 
 **LightWright 6 Weaknesses (Our Opportunities):**
+
 1. High upfront cost ($845)
 2. Upgrade treadmill every few years
 3. No modern collaboration features
@@ -42,9 +46,11 @@ Institutional:      $2,595 for 6 seats ($433/seat)
 ### Consumer Tiers
 
 #### **Free Tier** - $0/month
+
 **Purpose:** Lead generation, student learning, hobbyists
 
 **Features:**
+
 - Up to 100 fixtures per project
 - 3 basic report templates (Instrument Schedule, Channel Hookup, Equipment Count)
 - Local storage only (no cloud sync)
@@ -53,6 +59,7 @@ Institutional:      $2,595 for 6 seats ($433/seat)
 - Community support (Discord, forums)
 
 **Limitations:**
+
 - No Eos integration
 - No Vectorworks sync
 - No label designer
@@ -62,6 +69,7 @@ Institutional:      $2,595 for 6 seats ($433/seat)
 - "Powered by ShowStack" watermark on exports
 
 **Conversion Strategy:**
+
 - Show upgrade prompts at 80 fixtures
 - Highlight premium features in UI (grayed out with "Pro" badge)
 - Free users become advocates, drive word-of-mouth
@@ -69,9 +77,11 @@ Institutional:      $2,595 for 6 seats ($433/seat)
 ---
 
 #### **Professional** - $29/month or $249/year (save $99)
+
 **Target:** Individual lighting designers, freelancers, small design firms
 
 **Features (Everything):**
+
 - ✅ Unlimited fixtures
 - ✅ All 8+ standard report templates
 - ✅ Custom report designer
@@ -88,6 +98,7 @@ Institutional:      $2,595 for 6 seats ($433/seat)
 - ✅ Desktop apps (Windows, macOS, Linux future)
 
 **Value Proposition vs LightWright 6:**
+
 ```
 LightWright 6 New:     $845 one-time
 ShowStack Year 1:      $249 (71% savings)
@@ -104,6 +115,7 @@ Break-even: ~3 years, but ShowStack includes:
 ```
 
 **Conversion Strategy:**
+
 - 14-day free trial of Pro features (no credit card required)
 - Annual discount ($99 savings) to encourage yearly commitment
 - Educational discounts available (see Student tier)
@@ -111,9 +123,11 @@ Break-even: ~3 years, but ShowStack includes:
 ---
 
 #### **Team** - $79/month or $699/year for 5 users ($14/mo per user)
+
 **Target:** Regional theaters, production companies, design firms with assistants
 
 **Features (Professional +):**
+
 - ✅ Everything in Professional tier
 - ✅ Real-time collaboration (multiple users, same project)
 - ✅ Team project sharing & permissions
@@ -128,6 +142,7 @@ Break-even: ~3 years, but ShowStack includes:
 **Additional Users:** $15/month or $140/year per user
 
 **Value Proposition vs LightWright 6 Institutional:**
+
 ```
 LightWright 6 Institutional: $2,595 for 6 seats = $433/seat one-time
 ShowStack Team (5 users):    $699/year = $140/user/year
@@ -143,6 +158,7 @@ Plus ShowStack includes:
 ```
 
 **Conversion Strategy:**
+
 - Start with Professional, offer Team upgrade when hitting limits
 - "Invite team member" prompt surfaces Team features
 - Free trial: 2 weeks with up to 5 team members
@@ -150,9 +166,11 @@ Plus ShowStack includes:
 ---
 
 #### **Enterprise** - Custom Pricing (starts ~$2,500/year)
+
 **Target:** Broadway/West End, large regional theaters, touring companies, universities
 
 **Features (Team +):**
+
 - ✅ Everything in Team tier
 - ✅ Unlimited users
 - ✅ Custom integrations (API access, webhooks)
@@ -168,12 +186,14 @@ Plus ShowStack includes:
 - ✅ Unlimited cloud storage
 
 **Value Proposition:**
+
 - Custom tailored to organization's needs
 - Dedicated support team
 - Input into product roadmap
 - Can scale to hundreds of users
 
 **Conversion Strategy:**
+
 - Inbound sales team for enterprise inquiries
 - Custom demos and pilots
 - References from existing customers
@@ -183,14 +203,17 @@ Plus ShowStack includes:
 ### Educational Tiers
 
 #### **Student** - $60/year or $6/month
+
 **Target:** Individual students in theater/entertainment programs
 
 **Eligibility:**
+
 - Currently enrolled in accredited institution
 - Valid .edu email address OR instructor verification
 - Renewed annually with proof of enrollment
 
 **Features:**
+
 - ✅ Everything in Professional tier
 - ✅ No fixture limits
 - ✅ Full feature access (Eos, Vectorworks, Labels, etc.)
@@ -200,6 +223,7 @@ Plus ShowStack includes:
 - ✅ Graduation transition discount (50% off Pro for 1 year)
 
 **Pricing Comparison:**
+
 ```
 LightWright 6 Student: $135 / 3 years = $45/year
 ShowStack Student:     $60/year
@@ -213,12 +237,14 @@ Premium: $15/year more (33% increase) BUT:
 ```
 
 **Value Proposition:**
+
 - Learn on industry-standard tools
 - Build portfolio with professional output
 - Graduate to Professional tier seamlessly
 - Access to community of other students
 
 **Conversion Strategy:**
+
 - Partner with theater programs (discounted institutional licenses)
 - Student ambassadors at major universities
 - Portfolio export features drive social sharing
@@ -227,9 +253,11 @@ Premium: $15/year more (33% increase) BUT:
 ---
 
 #### **Institutional** - $399/year per seat (minimum 10 seats)
+
 **Target:** University theater departments, training programs, high schools
 
 **Features:**
+
 - ✅ Everything in Professional tier per seat
 - ✅ Centralized license management (admin portal)
 - ✅ Instructor/admin accounts (no seat limit)
@@ -242,6 +270,7 @@ Premium: $15/year more (33% increase) BUT:
 - ✅ Student portfolio exports
 
 **Volume Discounts:**
+
 ```
 10-24 seats:  $399/seat/year
 25-49 seats:  $349/seat/year (12% discount)
@@ -250,6 +279,7 @@ Premium: $15/year more (33% increase) BUT:
 ```
 
 **Pricing Comparison:**
+
 ```
 LightWright 6 Institutional: $2,595 for 6 seats = $433/seat one-time
 
@@ -273,6 +303,7 @@ BUT:
 ```
 
 **Why institutions will pay premium:**
+
 1. **Pedagogical value:** Real-time collaboration teaches industry workflows
 2. **Assessment tools:** Usage analytics help instructors track engagement
 3. **Modern skills:** Students learn current industry tools, not legacy software
@@ -281,6 +312,7 @@ BUT:
 6. **Student outcomes:** Portfolio export helps job placement
 
 **Conversion Strategy:**
+
 - Free pilot program (1 semester, 1 class)
 - Instructor training workshops (at conferences like USITT, LDI)
 - Student testimonials and outcomes data
@@ -293,6 +325,7 @@ BUT:
 ### Year 1 Targets (Months 1-12)
 
 **Assumptions:**
+
 - Launch with Free, Professional, Student tiers
 - Team tier launches Month 4
 - Enterprise sales start Month 6
@@ -300,18 +333,19 @@ BUT:
 
 **Conservative Projections:**
 
-| Month | Free | Pro | Student | Team | Enterprise | MRR |
-|-------|------|-----|---------|------|------------|-----|
-| 1 | 100 | 20 | 10 | - | - | $1,180 |
-| 2 | 250 | 40 | 25 | - | - | $2,310 |
-| 3 | 500 | 75 | 50 | - | - | $4,475 |
-| 4 | 750 | 120 | 80 | 5 | - | $7,555 |
-| 5 | 1000 | 180 | 120 | 10 | - | $11,510 |
-| 6 | 1250 | 250 | 150 | 15 | 1 | $16,735 |
-| 9 | 2000 | 400 | 250 | 30 | 3 | $30,470 |
-| 12 | 3000 | 600 | 400 | 50 | 5 | $49,650 |
+| Month | Free | Pro | Student | Team | Enterprise | MRR     |
+| ----- | ---- | --- | ------- | ---- | ---------- | ------- |
+| 1     | 100  | 20  | 10      | -    | -          | $1,180  |
+| 2     | 250  | 40  | 25      | -    | -          | $2,310  |
+| 3     | 500  | 75  | 50      | -    | -          | $4,475  |
+| 4     | 750  | 120 | 80      | 5    | -          | $7,555  |
+| 5     | 1000 | 180 | 120     | 10   | -          | $11,510 |
+| 6     | 1250 | 250 | 150     | 15   | 1          | $16,735 |
+| 9     | 2000 | 400 | 250     | 30   | 3          | $30,470 |
+| 12    | 3000 | 600 | 400     | 50   | 5          | $49,650 |
 
 **Year 1 End:**
+
 - Free users: 3,000
 - Pro subscribers: 600 ($17,400 MRR)
 - Student subscribers: 400 ($2,400 MRR)
@@ -327,12 +361,14 @@ BUT:
 ### Year 2 Projections
 
 **Assumptions:**
+
 - Word-of-mouth acceleration
 - Feature maturity (all roadmap items complete)
 - Conference presence (USITT, LDI, WFX)
 - Institutional sales ramp up
 
 **Targets:**
+
 - Pro subscribers: 1,500 ($43,500 MRR)
 - Student subscribers: 1,000 ($6,000 MRR)
 - Team subscribers: 150 teams = 750 users ($11,850 MRR)
@@ -346,11 +382,13 @@ BUT:
 ### Year 3 Projections
 
 **Assumptions:**
+
 - Market leadership established
 - LightWright switchers accelerate
 - International expansion begins
 
 **Targets:**
+
 - Pro subscribers: 3,500 ($101,500 MRR)
 - Student subscribers: 2,500 ($15,000 MRR)
 - Team subscribers: 300 teams = 1,500 users ($23,700 MRR)
@@ -364,9 +402,11 @@ BUT:
 ## 🎯 Go-to-Market Strategy
 
 ### Phase 1: Launch (Months 1-3)
+
 **Goal:** 100 paying customers, establish product-market fit
 
 **Tactics:**
+
 1. **Beta program:** 50 Shop Order Builder power users get free Pro for 6 months
 2. **Content marketing:** "Switching from LightWright" guide, video tutorials
 3. **Reddit/Facebook groups:** Engage in lighting design communities
@@ -375,6 +415,7 @@ BUT:
 6. **Free tier:** No credit card required, frictionless onboarding
 
 **Messaging:**
+
 - "The modern LightWright alternative"
 - "Built for 2025, not 1995"
 - "Try it free, upgrade when you love it"
@@ -382,9 +423,11 @@ BUT:
 ---
 
 ### Phase 2: Growth (Months 4-9)
+
 **Goal:** 400 paying customers, Team tier validation
 
 **Tactics:**
+
 1. **Case studies:** 3-5 detailed success stories with name-brand shows
 2. **Webinar series:** Weekly training on advanced features
 3. **Integration launches:** Big announcements for Eos and Vectorworks
@@ -393,6 +436,7 @@ BUT:
 6. **YouTube channel:** Tips, tricks, workflows from pros
 
 **Messaging:**
+
 - "Join 400+ designers who switched"
 - "Real-time collaboration that LightWright can't match"
 - "See why [Broadway Show] uses ShowStack:Production"
@@ -400,9 +444,11 @@ BUT:
 ---
 
 ### Phase 3: Scale (Months 10-12)
+
 **Goal:** 600 paying customers, Enterprise pipeline
 
 **Tactics:**
+
 1. **Sales team:** Hire 2 enterprise sales reps
 2. **Partner program:** Rental houses get co-branded templates
 3. **Conference circuit:** USITT, LDI, WFX, Prolight + Sound
@@ -411,6 +457,7 @@ BUT:
 6. **Customer summit:** Annual user conference for networking
 
 **Messaging:**
+
 - "Industry standard for modern lighting design"
 - "Trusted by [X] Broadway shows and counting"
 - "The last lighting design software you'll ever need"
@@ -419,22 +466,22 @@ BUT:
 
 ## 🔍 Competitive Positioning Matrix
 
-| Feature | LightWright 6 | ShowStack:Production | Advantage |
-|---------|---------------|----------------------|-----------|
-| **Pricing** | $845 new | $249/year | ShowStack cheaper year 1 |
-| **Updates** | Every 3-5 years ($625) | Continuous | ShowStack always current |
-| **Collaboration** | ❌ None | ✅ Real-time | ShowStack only option |
-| **Cloud Sync** | ❌ None | ✅ Optional | ShowStack mobility |
-| **Mobile** | ❌ Desktop only | ✅ Future mobile app | ShowStack on-site advantage |
-| **UI/UX** | 1990s paradigm | Modern 2025 design | ShowStack ease of use |
-| **Eos Integration** | ✅ Yes | ✅ Yes + live control | ShowStack deeper |
-| **Vectorworks** | ✅ Yes | ✅ Yes + reconciliation | ShowStack smarter |
-| **Labels** | ✅ Yes | ✅ Yes + more printers | Parity |
-| **Reports** | ✅ Extensive | ✅ Extensive + custom | Parity |
-| **Error Checking** | ✅ Yes | ✅ Yes + auto-fix | ShowStack smarter |
-| **Offline** | ✅ Yes (desktop) | ✅ Yes (desktop) | Parity |
-| **Market Share** | ~80% (30 years) | 0% (new) | LW6 incumbent |
-| **Support** | Email only | Email + video + community | ShowStack better |
+| Feature             | LightWright 6          | ShowStack:Production      | Advantage                   |
+| ------------------- | ---------------------- | ------------------------- | --------------------------- |
+| **Pricing**         | $845 new               | $249/year                 | ShowStack cheaper year 1    |
+| **Updates**         | Every 3-5 years ($625) | Continuous                | ShowStack always current    |
+| **Collaboration**   | ❌ None                | ✅ Real-time              | ShowStack only option       |
+| **Cloud Sync**      | ❌ None                | ✅ Optional               | ShowStack mobility          |
+| **Mobile**          | ❌ Desktop only        | ✅ Future mobile app      | ShowStack on-site advantage |
+| **UI/UX**           | 1990s paradigm         | Modern 2025 design        | ShowStack ease of use       |
+| **Eos Integration** | ✅ Yes                 | ✅ Yes + live control     | ShowStack deeper            |
+| **Vectorworks**     | ✅ Yes                 | ✅ Yes + reconciliation   | ShowStack smarter           |
+| **Labels**          | ✅ Yes                 | ✅ Yes + more printers    | Parity                      |
+| **Reports**         | ✅ Extensive           | ✅ Extensive + custom     | Parity                      |
+| **Error Checking**  | ✅ Yes                 | ✅ Yes + auto-fix         | ShowStack smarter           |
+| **Offline**         | ✅ Yes (desktop)       | ✅ Yes (desktop)          | Parity                      |
+| **Market Share**    | ~80% (30 years)        | 0% (new)                  | LW6 incumbent               |
+| **Support**         | Email only             | Email + video + community | ShowStack better            |
 
 **Summary:** ShowStack wins on price (year 1), updates, collaboration, UX. LightWright wins on incumbency and perpetual licensing appeal.
 
@@ -443,6 +490,7 @@ BUT:
 ## 💡 Pricing Strategy Insights
 
 ### Why Subscription Works for Us:
+
 1. **Predictable revenue:** MRR enables hiring and R&D investment
 2. **Customer success alignment:** Churn motivates continuous improvement
 3. **Lower barrier to entry:** $249 easier than $845 for freelancers
@@ -450,6 +498,7 @@ BUT:
 5. **Cloud infrastructure:** Sync and collaboration require ongoing costs
 
 ### Why Some Will Prefer LightWright:
+
 1. **"Own it forever" mindset:** Some hate subscriptions
 2. **Offline purists:** Don't want/need cloud features
 3. **Established workflows:** 30 years of muscle memory
@@ -457,6 +506,7 @@ BUT:
 5. **Risk aversion:** "If it ain't broke..."
 
 ### Our Response:
+
 1. **Offline-first:** Works fully without internet (just like LW6)
 2. **Cloud optional:** Don't need sync? Still works great locally
 3. **Import LW6 files:** Smooth transition, low risk
@@ -469,6 +519,7 @@ BUT:
 ## 🎓 Educational Market Strategy
 
 **Why Focus on Students?**
+
 1. **Future professionals:** Train them young, keep them for life
 2. **Viral adoption:** Students talk, share, post on socials
 3. **Institutional foothold:** Land student → upsell institution → capture cohort
@@ -476,6 +527,7 @@ BUT:
 5. **Transition revenue:** Graduation = upgrade to Pro (50% discount = easy yes)
 
 **Institutional Sales Playbook:**
+
 1. **Pilot program:** Free for 1 semester, 1 class
 2. **Instructor training:** 2-hour onboarding webinar
 3. **Curriculum integration:** Provide lesson plans and assignments
@@ -484,6 +536,7 @@ BUT:
 6. **Upsell:** "Add 10 more seats for advanced students?"
 
 **Key Metrics:**
+
 - Student-to-Pro conversion rate (target: 30% within 2 years of graduation)
 - Institutional renewal rate (target: 85%+)
 - Seats per institution (target: 25 average)
@@ -493,22 +546,26 @@ BUT:
 ## 📈 Key Performance Indicators (KPIs)
 
 ### Acquisition Metrics:
+
 - **CAC (Customer Acquisition Cost):** Target <$150 (3-month payback)
 - **Free-to-Paid Conversion:** Target 20% (industry: 10-15%)
 - **Time-to-Activation:** Target <10 minutes (first project created)
 
 ### Revenue Metrics:
+
 - **MRR Growth Rate:** Target 15%+ month-over-month (first year)
 - **ARPU (Average Revenue Per User):** Target $25/month
-- **LTV (Lifetime Value):** Target $900 (3 years * $300/year average)
+- **LTV (Lifetime Value):** Target $900 (3 years \* $300/year average)
 - **LTV:CAC Ratio:** Target 6:1 (healthy SaaS benchmark: 3:1)
 
 ### Retention Metrics:
+
 - **Monthly Churn:** Target <5% (annual churn <40%)
 - **Net Revenue Retention:** Target 110%+ (expansion > churn)
 - **Feature Adoption:** Eos integration 70%, VW sync 50%, Labels 40%
 
 ### Satisfaction Metrics:
+
 - **NPS (Net Promoter Score):** Target >50 (excellent: 50-70)
 - **Support Satisfaction:** Target 95%+ positive ratings
 - **Feature Request Close Rate:** Target 25% implemented within 90 days
@@ -518,6 +575,7 @@ BUT:
 ## 🚀 Pricing Experiments (Year 1)
 
 ### A/B Tests to Run:
+
 1. **Pricing tiers:** $249 vs $299 vs $349 annual
 2. **Free tier limits:** 50 vs 100 vs 200 fixtures
 3. **Trial length:** 7 days vs 14 days vs 30 days
@@ -525,11 +583,13 @@ BUT:
 5. **Discounting:** Annual discount 10% vs 20% vs 30%
 
 ### Bundling Tests:
+
 1. **Design Suite:** ShowStack:Design + ShowStack:Production = $349/year (save $149)
 2. **Full Stack:** All ShowStack modules = $499/year (save $299)
 3. **Loyalty discount:** Year 2+ gets 10% off annually
 
 ### Student Tests:
+
 1. **Pricing:** $60 vs $80 vs $100/year
 2. **Verification:** .edu email vs instructor verification (impact on conversion)
 3. **Graduation offer:** 50% off vs $99 first year vs 3 months free
@@ -539,6 +599,7 @@ BUT:
 ## ✅ Pricing Success Criteria
 
 **Year 1 Success:**
+
 - ✅ 600+ paying customers
 - ✅ $50k+ MRR ($600k+ ARR)
 - ✅ <5% monthly churn
@@ -547,6 +608,7 @@ BUT:
 - ✅ 5+ institutional partnerships
 
 **Year 2 Success:**
+
 - ✅ 1,500+ paying Pro customers
 - ✅ $150k+ MRR ($1.8M+ ARR)
 - ✅ 50+ Team subscriptions
@@ -555,6 +617,7 @@ BUT:
 - ✅ Break-even or profitable
 
 **Year 3 Success:**
+
 - ✅ 3,500+ paying customers
 - ✅ $400k+ MRR ($4.8M+ ARR)
 - ✅ Market leader position (20%+ market share)
@@ -570,6 +633,7 @@ Our pricing strategy balances aggressive customer acquisition with sustainable r
 The educational focus is a long-term play to own the next generation of professionals while the institutional revenue provides stable, high-value contracts. Enterprise sales will be the growth driver in Years 2-3 as we prove market fit.
 
 **Next Steps:**
+
 1. Finalize pricing with beta user feedback
 2. Build pricing calculator for website
 3. Create sales materials (decks, one-pagers, ROI calculators)

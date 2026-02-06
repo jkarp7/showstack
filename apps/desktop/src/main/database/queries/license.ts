@@ -4,7 +4,7 @@ import type {
   UserLicense,
   ModuleAccess,
   // ShowStackModule,
-  LicenseTier
+  LicenseTier,
 } from '../../../shared/types/license.types';
 
 /**
@@ -13,12 +13,16 @@ import type {
 export function getCurrentLicense(): UserLicense | null {
   const db = getAppDatabase();
 
-  const row = db.prepare(`
+  const row = db
+    .prepare(
+      `
     SELECT * FROM licenses
     WHERE status != 'deleted'
     ORDER BY created_at DESC
     LIMIT 1
-  `).get() as Record<string, unknown> | undefined;
+  `,
+    )
+    .get() as Record<string, unknown> | undefined;
 
   if (!row) {
     return null;
@@ -33,10 +37,14 @@ export function getCurrentLicense(): UserLicense | null {
 export function getLicenseById(id: string): UserLicense | null {
   const db = getAppDatabase();
 
-  const row = db.prepare(`
+  const row = db
+    .prepare(
+      `
     SELECT * FROM licenses
     WHERE id = ? AND status != 'deleted'
-  `).get(id) as Record<string, unknown> | undefined;
+  `,
+    )
+    .get(id) as Record<string, unknown> | undefined;
 
   if (!row) {
     return null;
@@ -51,10 +59,14 @@ export function getLicenseById(id: string): UserLicense | null {
 export function getLicenseByKey(licenseKey: string): UserLicense | null {
   const db = getAppDatabase();
 
-  const row = db.prepare(`
+  const row = db
+    .prepare(
+      `
     SELECT * FROM licenses
     WHERE license_key = ? AND status != 'deleted'
-  `).get(licenseKey) as Record<string, unknown> | undefined;
+  `,
+    )
+    .get(licenseKey) as Record<string, unknown> | undefined;
 
   if (!row) {
     return null;
@@ -78,13 +90,15 @@ export function createLicense(data: {
   const now = Date.now();
   const id = uuidv4();
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO licenses (
       id, email, name, license_key, tier, status, modules,
       expiration_date, last_verified, created_at, updated_at
     )
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
+  `,
+  ).run(
     id,
     data.email,
     data.name || '',
@@ -95,7 +109,7 @@ export function createLicense(data: {
     data.expirationDate,
     now,
     now,
-    now
+    now,
   );
 
   saveAppDatabase();
@@ -116,7 +130,7 @@ export function updateLicense(
     modules: ModuleAccess[];
     expirationDate: number;
     lastVerified: number;
-  }>
+  }>,
 ): UserLicense {
   const db = getAppDatabase();
   const now = Date.now();
@@ -157,11 +171,13 @@ export function updateLicense(
   values.push(now);
   values.push(id);
 
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE licenses
     SET ${fields.join(', ')}
     WHERE id = ?
-  `).run(...values);
+  `,
+  ).run(...values);
 
   saveAppDatabase();
 
@@ -174,11 +190,13 @@ export function updateLicense(
 export function deleteLicense(id: string): void {
   const db = getAppDatabase();
 
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE licenses
     SET status = 'deleted', updated_at = ?
     WHERE id = ?
-  `).run(Date.now(), id);
+  `,
+  ).run(Date.now(), id);
 
   saveAppDatabase();
 }
@@ -198,6 +216,6 @@ function rowObjectToLicense(obj: Record<string, unknown>): UserLicense {
     expirationDate: obj.expiration_date as number,
     lastVerified: obj.last_verified as number,
     createdAt: obj.created_at as number,
-    updatedAt: obj.updated_at as number
+    updatedAt: obj.updated_at as number,
   };
 }

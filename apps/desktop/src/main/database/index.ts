@@ -114,7 +114,7 @@ export {
   bulkUpdate,
   bulkDelete,
   bulkUpsert,
-  executeInTransaction
+  executeInTransaction,
 } from './utils/bulkOperations';
 
 /**

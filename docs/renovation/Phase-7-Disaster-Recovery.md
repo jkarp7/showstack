@@ -10,6 +10,7 @@
 ## Checklist
 
 ### 7.1 Automated Backups (1 week)
+
 - [ ] Create BackupService
 - [ ] Automatic backup every 6 hours
 - [ ] Keep max 10 backups
@@ -17,6 +18,7 @@
 - [ ] Test restore from backup
 
 ### 7.2 Crash Recovery (1 week)
+
 - [ ] Create CrashRecovery class
 - [ ] Detect crash on startup (.running marker file)
 - [ ] Validate database integrity

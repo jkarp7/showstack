@@ -57,9 +57,7 @@ export function DeveloperPanel({ title, data, metrics, children }: DeveloperPane
             {/* Performance Metrics */}
             {metrics && Object.keys(metrics).length > 0 && (
               <div className="mb-4">
-                <h3 className="text-sm font-semibold text-purple-200 mb-2">
-                  Performance Metrics
-                </h3>
+                <h3 className="text-sm font-semibold text-purple-200 mb-2">Performance Metrics</h3>
                 <div className="grid grid-cols-2 gap-2">
                   {Object.entries(metrics).map(([key, value]) => (
                     <div
@@ -79,9 +77,7 @@ export function DeveloperPanel({ title, data, metrics, children }: DeveloperPane
             {/* Data Inspector */}
             {data && Object.keys(data).length > 0 && (
               <div className="mb-4">
-                <h3 className="text-sm font-semibold text-purple-200 mb-2">
-                  State Inspector
-                </h3>
+                <h3 className="text-sm font-semibold text-purple-200 mb-2">State Inspector</h3>
                 <pre className="bg-purple-900/50 p-3 rounded border border-purple-700 text-xs font-mono text-purple-100 overflow-x-auto">
                   {JSON.stringify(data, null, 2)}
                 </pre>

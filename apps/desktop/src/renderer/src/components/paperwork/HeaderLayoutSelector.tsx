@@ -1,4 +1,8 @@
-import { HeaderLayoutConfig, HeaderLayoutPreset, HEADER_PRESET_FIELDS } from '../../types/paperwork';
+import {
+  HeaderLayoutConfig,
+  HeaderLayoutPreset,
+  HEADER_PRESET_FIELDS,
+} from '../../types/paperwork';
 
 interface HeaderLayoutSelectorProps {
   currentLayout: HeaderLayoutConfig;
@@ -9,7 +13,7 @@ export function HeaderLayoutSelector({ currentLayout, onChange }: HeaderLayoutSe
   const handlePresetChange = (preset: HeaderLayoutPreset) => {
     onChange({
       preset,
-      fields: HEADER_PRESET_FIELDS[preset]
+      fields: HEADER_PRESET_FIELDS[preset],
     });
   };
 
@@ -21,8 +25,8 @@ export function HeaderLayoutSelector({ currentLayout, onChange }: HeaderLayoutSe
       preset: 'custom', // Automatically switch to custom when manually toggling
       fields: {
         ...currentLayout.fields,
-        [field]: !currentLayout.fields[field]
-      }
+        [field]: !currentLayout.fields[field],
+      },
     });
   };
 
@@ -31,8 +35,8 @@ export function HeaderLayoutSelector({ currentLayout, onChange }: HeaderLayoutSe
       ...currentLayout,
       fields: {
         ...currentLayout.fields,
-        customTitle: value
-      }
+        customTitle: value,
+      },
     });
   };
 
@@ -54,10 +58,13 @@ export function HeaderLayoutSelector({ currentLayout, onChange }: HeaderLayoutSe
           <option value="custom">Custom</option>
         </select>
         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          {currentLayout.preset === 'standard' && 'Title, project name, venue, designer, and generated date'}
+          {currentLayout.preset === 'standard' &&
+            'Title, project name, venue, designer, and generated date'}
           {currentLayout.preset === 'minimal' && 'Title only - clean and simple'}
-          {currentLayout.preset === 'detailed' && 'All fields including production staff, dates, and revision info'}
-          {currentLayout.preset === 'logo-focused' && 'Large centered logo with title and project name'}
+          {currentLayout.preset === 'detailed' &&
+            'All fields including production staff, dates, and revision info'}
+          {currentLayout.preset === 'logo-focused' &&
+            'Large centered logo with title and project name'}
           {currentLayout.preset === 'custom' && 'Customize which fields to show'}
         </p>
       </div>

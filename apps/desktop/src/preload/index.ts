@@ -23,11 +23,12 @@ contextBridge.exposeInMainWorld('api', {
   // Fixture operations
   fixtures: {
     getAll: (projectId?: string) => ipcRenderer.invoke('fixtures:getAll', projectId),
-    create: (fixture: Partial<Fixture>, projectId?: string) => ipcRenderer.invoke('fixtures:create', fixture, projectId),
+    create: (fixture: Partial<Fixture>, projectId?: string) =>
+      ipcRenderer.invoke('fixtures:create', fixture, projectId),
     update: (id: string, updates: Partial<Fixture>) =>
       ipcRenderer.invoke('fixtures:update', id, updates),
     delete: (id: string) => ipcRenderer.invoke('fixtures:delete', id),
-    deleteMultiple: (ids: string[]) => ipcRenderer.invoke('fixtures:deleteMultiple', ids)
+    deleteMultiple: (ids: string[]) => ipcRenderer.invoke('fixtures:deleteMultiple', ids),
   },
 
   // Project operations
@@ -38,33 +39,37 @@ contextBridge.exposeInMainWorld('api', {
     create: (name: string, description?: string, logoPath?: string, enabledModules?: string[]) =>
       ipcRenderer.invoke('projects:create', name, description, logoPath, enabledModules),
     update: (id: string, updates: any) => ipcRenderer.invoke('projects:update', id, updates),
-    delete: (id: string) => ipcRenderer.invoke('projects:delete', id)
+    delete: (id: string) => ipcRenderer.invoke('projects:delete', id),
   },
 
   // Dialog operations
   dialog: {
     openImage: () => ipcRenderer.invoke('dialog:openImage'),
-    openProject: () => ipcRenderer.invoke('dialog:openProject')
+    openProject: () => ipcRenderer.invoke('dialog:openProject'),
   },
 
   // User preferences
   preferences: {
     get: (projectId: string, key: string) => ipcRenderer.invoke('preferences:get', projectId, key),
-    set: (projectId: string, key: string, value: any) => ipcRenderer.invoke('preferences:set', projectId, key, value),
-    getAll: (projectId: string) => ipcRenderer.invoke('preferences:getAll', projectId)
+    set: (projectId: string, key: string, value: any) =>
+      ipcRenderer.invoke('preferences:set', projectId, key, value),
+    getAll: (projectId: string) => ipcRenderer.invoke('preferences:getAll', projectId),
   },
 
   // File operations
   files: {
     open: () => ipcRenderer.invoke('file:open'),
     openByPath: (filePath: string) => ipcRenderer.invoke('file:openByPath', filePath),
-    resolveConflict: (filePath: string, resolution: any) => ipcRenderer.invoke('file:resolveConflict', filePath, resolution),
+    resolveConflict: (filePath: string, resolution: any) =>
+      ipcRenderer.invoke('file:resolveConflict', filePath, resolution),
     save: (filePath?: string) => ipcRenderer.invoke('file:save', filePath),
-    saveAs: (defaultName?: string, module?: string) => ipcRenderer.invoke('file:saveAs', defaultName, module),
+    saveAs: (defaultName?: string, module?: string) =>
+      ipcRenderer.invoke('file:saveAs', defaultName, module),
     new: () => ipcRenderer.invoke('file:new'),
     validate: (filePath: string) => ipcRenderer.invoke('file:validate', filePath),
     getFileName: (filePath: string) => ipcRenderer.invoke('file:getFileName', filePath),
-    readImageAsDataUrl: (imagePath: string) => ipcRenderer.invoke('file:readImageAsDataUrl', imagePath)
+    readImageAsDataUrl: (imagePath: string) =>
+      ipcRenderer.invoke('file:readImageAsDataUrl', imagePath),
   },
 
   // ShowStack:Prep operations
@@ -74,36 +79,45 @@ contextBridge.exposeInMainWorld('api', {
       getAll: () => ipcRenderer.invoke('shop-order:projects:getAll'),
       getById: (id: string) => ipcRenderer.invoke('shop-order:projects:getById', id),
       create: (data: any) => ipcRenderer.invoke('shop-order:projects:create', data),
-      update: (id: string, updates: any) => ipcRenderer.invoke('shop-order:projects:update', id, updates),
-      delete: (id: string) => ipcRenderer.invoke('shop-order:projects:delete', id)
+      update: (id: string, updates: any) =>
+        ipcRenderer.invoke('shop-order:projects:update', id, updates),
+      delete: (id: string) => ipcRenderer.invoke('shop-order:projects:delete', id),
     },
     // Sections
     sections: {
-      getByProjectId: (projectId: string) => ipcRenderer.invoke('shop-order:sections:getByProjectId', projectId),
+      getByProjectId: (projectId: string) =>
+        ipcRenderer.invoke('shop-order:sections:getByProjectId', projectId),
       create: (data: any) => ipcRenderer.invoke('shop-order:sections:create', data),
-      update: (id: string, updates: any) => ipcRenderer.invoke('shop-order:sections:update', id, updates),
-      delete: (id: string) => ipcRenderer.invoke('shop-order:sections:delete', id)
+      update: (id: string, updates: any) =>
+        ipcRenderer.invoke('shop-order:sections:update', id, updates),
+      delete: (id: string) => ipcRenderer.invoke('shop-order:sections:delete', id),
     },
     // Equipment Items
     items: {
-      getBySectionId: (sectionId: string) => ipcRenderer.invoke('shop-order:items:getBySectionId', sectionId),
-      getByProjectId: (projectId: string) => ipcRenderer.invoke('shop-order:items:getByProjectId', projectId),
+      getBySectionId: (sectionId: string) =>
+        ipcRenderer.invoke('shop-order:items:getBySectionId', sectionId),
+      getByProjectId: (projectId: string) =>
+        ipcRenderer.invoke('shop-order:items:getByProjectId', projectId),
       create: (data: any) => ipcRenderer.invoke('shop-order:items:create', data),
-      update: (id: string, updates: any) => ipcRenderer.invoke('shop-order:items:update', id, updates),
-      delete: (id: string) => ipcRenderer.invoke('shop-order:items:delete', id)
+      update: (id: string, updates: any) =>
+        ipcRenderer.invoke('shop-order:items:update', id, updates),
+      delete: (id: string) => ipcRenderer.invoke('shop-order:items:delete', id),
     },
     // Revisions
     revisions: {
-      getByProjectId: (projectId: string) => ipcRenderer.invoke('shop-order:revisions:getByProjectId', projectId),
+      getByProjectId: (projectId: string) =>
+        ipcRenderer.invoke('shop-order:revisions:getByProjectId', projectId),
       create: (data: any) => ipcRenderer.invoke('shop-order:revisions:create', data),
-      delete: (id: string) => ipcRenderer.invoke('shop-order:revisions:delete', id)
+      delete: (id: string) => ipcRenderer.invoke('shop-order:revisions:delete', id),
     },
     // Notes
     notes: {
-      getByProjectId: (projectId: string, type?: string) => ipcRenderer.invoke('shop-order:notes:getByProjectId', projectId, type),
+      getByProjectId: (projectId: string, type?: string) =>
+        ipcRenderer.invoke('shop-order:notes:getByProjectId', projectId, type),
       create: (data: any) => ipcRenderer.invoke('shop-order:notes:create', data),
-      update: (id: string, updates: { content?: string; format?: string }) => ipcRenderer.invoke('shop-order:notes:update', id, updates),
-      delete: (id: string) => ipcRenderer.invoke('shop-order:notes:delete', id)
+      update: (id: string, updates: { content?: string; format?: string }) =>
+        ipcRenderer.invoke('shop-order:notes:update', id, updates),
+      delete: (id: string) => ipcRenderer.invoke('shop-order:notes:delete', id),
     },
     // Note Templates
     noteTemplates: {
@@ -111,32 +125,43 @@ contextBridge.exposeInMainWorld('api', {
       getById: (id: string) => ipcRenderer.invoke('shop-order:noteTemplates:getById', id),
       getDefault: (type: string) => ipcRenderer.invoke('shop-order:noteTemplates:getDefault', type),
       create: (data: any) => ipcRenderer.invoke('shop-order:noteTemplates:create', data),
-      update: (id: string, updates: any) => ipcRenderer.invoke('shop-order:noteTemplates:update', id, updates),
-      delete: (id: string) => ipcRenderer.invoke('shop-order:noteTemplates:delete', id)
+      update: (id: string, updates: any) =>
+        ipcRenderer.invoke('shop-order:noteTemplates:update', id, updates),
+      delete: (id: string) => ipcRenderer.invoke('shop-order:noteTemplates:delete', id),
     },
     // Layout Templates
     layoutTemplates: {
-      getByProjectId: (projectId: string, pageType?: string) => ipcRenderer.invoke('shop-order:layoutTemplates:getByProjectId', projectId, pageType),
+      getByProjectId: (projectId: string, pageType?: string) =>
+        ipcRenderer.invoke('shop-order:layoutTemplates:getByProjectId', projectId, pageType),
       getById: (id: string) => ipcRenderer.invoke('shop-order:layoutTemplates:getById', id),
-      getElements: (templateId: string) => ipcRenderer.invoke('shop-order:layoutTemplates:getElements', templateId),
-      getDefault: (projectId: string, pageType: string) => ipcRenderer.invoke('shop-order:layoutTemplates:getDefault', projectId, pageType),
-      create: (data: any, elements: any[]) => ipcRenderer.invoke('shop-order:layoutTemplates:create', data, elements),
-      update: (id: string, updates: any, elements?: any[]) => ipcRenderer.invoke('shop-order:layoutTemplates:update', id, updates, elements),
+      getElements: (templateId: string) =>
+        ipcRenderer.invoke('shop-order:layoutTemplates:getElements', templateId),
+      getDefault: (projectId: string, pageType: string) =>
+        ipcRenderer.invoke('shop-order:layoutTemplates:getDefault', projectId, pageType),
+      create: (data: any, elements: any[]) =>
+        ipcRenderer.invoke('shop-order:layoutTemplates:create', data, elements),
+      update: (id: string, updates: any, elements?: any[]) =>
+        ipcRenderer.invoke('shop-order:layoutTemplates:update', id, updates, elements),
       delete: (id: string) => ipcRenderer.invoke('shop-order:layoutTemplates:delete', id),
-      seedDefaults: () => ipcRenderer.invoke('shop-order:layoutTemplates:seedDefaults')
+      seedDefaults: () => ipcRenderer.invoke('shop-order:layoutTemplates:seedDefaults'),
     },
     // File Operations
     file: {
       showOpenDialog: () => ipcRenderer.invoke('shop-order:file:showOpenDialog'),
-      showSaveDialog: (defaultName?: string) => ipcRenderer.invoke('shop-order:file:showSaveDialog', defaultName),
-      export: (projectId: string, filePath: string) => ipcRenderer.invoke('shop-order:file:export', projectId, filePath),
+      showSaveDialog: (defaultName?: string) =>
+        ipcRenderer.invoke('shop-order:file:showSaveDialog', defaultName),
+      export: (projectId: string, filePath: string) =>
+        ipcRenderer.invoke('shop-order:file:export', projectId, filePath),
       import: (filePath: string) => ipcRenderer.invoke('shop-order:file:import', filePath),
-      getFileName: (filePath: string) => ipcRenderer.invoke('shop-order:file:getFileName', filePath)
+      getFileName: (filePath: string) =>
+        ipcRenderer.invoke('shop-order:file:getFileName', filePath),
     },
     // PDF Export
-    exportPDF: (projectId: string, templateData: any) => ipcRenderer.invoke('shop-order:exportPDF', projectId, templateData),
+    exportPDF: (projectId: string, templateData: any) =>
+      ipcRenderer.invoke('shop-order:exportPDF', projectId, templateData),
     // Print
-    print: (projectId: string, templateData: any) => ipcRenderer.invoke('shop-order:print', projectId, templateData)
+    print: (projectId: string, templateData: any) =>
+      ipcRenderer.invoke('shop-order:print', projectId, templateData),
   },
 
   // License operations
@@ -146,10 +171,11 @@ contextBridge.exposeInMainWorld('api', {
     hasModule: (module: string) => ipcRenderer.invoke('license:hasModule', module),
     getModuleFeatures: (module: string) => ipcRenderer.invoke('license:getModuleFeatures', module),
     getAvailableModules: () => ipcRenderer.invoke('license:getAvailableModules'),
-    canUseFeature: (module: string, feature: string) => ipcRenderer.invoke('license:canUseFeature', module, feature),
+    canUseFeature: (module: string, feature: string) =>
+      ipcRenderer.invoke('license:canUseFeature', module, feature),
     activate: (licenseKey: string, email: string, modules: string[]) =>
       ipcRenderer.invoke('license:activate', licenseKey, email, modules),
-    verifyOnline: () => ipcRenderer.invoke('license:verifyOnline')
+    verifyOnline: () => ipcRenderer.invoke('license:verifyOnline'),
   },
 
   // Settings operations
@@ -157,7 +183,7 @@ contextBridge.exposeInMainWorld('api', {
     get: () => ipcRenderer.invoke('settings:get'),
     save: (settings: any) => ipcRenderer.invoke('settings:save', settings),
     update: (updates: any) => ipcRenderer.invoke('settings:update', updates),
-    reset: () => ipcRenderer.invoke('settings:reset')
+    reset: () => ipcRenderer.invoke('settings:reset'),
   },
 
   // Admin operations
@@ -169,19 +195,19 @@ contextBridge.exposeInMainWorld('api', {
     exportAllDefaultLayouts: () => ipcRenderer.invoke('admin:exportAllDefaultLayouts'),
     importLayouts: (filePaths?: string[]) => ipcRenderer.invoke('admin:importLayouts', filePaths),
     resetLayoutsToFactory: () => ipcRenderer.invoke('admin:resetLayoutsToFactory'),
-    getDefaultLayoutFiles: () => ipcRenderer.invoke('admin:getDefaultLayoutFiles')
+    getDefaultLayoutFiles: () => ipcRenderer.invoke('admin:getDefaultLayoutFiles'),
   },
 
   // Window operations
   windows: {
     openProject: (projectId: string) => ipcRenderer.invoke('window:openProject', projectId),
-    getCurrentProjectId: () => ipcRenderer.invoke('window:getCurrentProjectId')
+    getCurrentProjectId: () => ipcRenderer.invoke('window:getCurrentProjectId'),
   },
 
   // Paperwork operations
   paperwork: {
     exportPDF: (htmlContent: string, filename: string, pageSettings: any) =>
-      ipcRenderer.invoke('paperwork:exportPDF', htmlContent, filename, pageSettings)
+      ipcRenderer.invoke('paperwork:exportPDF', htmlContent, filename, pageSettings),
   },
 
   // Paperwork Template operations
@@ -189,9 +215,11 @@ contextBridge.exposeInMainWorld('api', {
     getAll: (reportType?: string) => ipcRenderer.invoke('paperwork-templates:getAll', reportType),
     getById: (id: string) => ipcRenderer.invoke('paperwork-templates:getById', id),
     create: (data: any) => ipcRenderer.invoke('paperwork-templates:create', data),
-    update: (id: string, updates: any) => ipcRenderer.invoke('paperwork-templates:update', id, updates),
+    update: (id: string, updates: any) =>
+      ipcRenderer.invoke('paperwork-templates:update', id, updates),
     delete: (id: string) => ipcRenderer.invoke('paperwork-templates:delete', id),
-    duplicate: (id: string, newName?: string) => ipcRenderer.invoke('paperwork-templates:duplicate', id, newName)
+    duplicate: (id: string, newName?: string) =>
+      ipcRenderer.invoke('paperwork-templates:duplicate', id, newName),
   },
 
   // Menu operations
@@ -204,70 +232,89 @@ contextBridge.exposeInMainWorld('api', {
     },
     off: (channel: string, callback: (...args: any[]) => void) => {
       ipcRenderer.removeListener(channel, callback);
-    }
+    },
   },
 
   // Shell operations
   shell: {
-    openExternal: (url: string) => ipcRenderer.invoke('shell:openExternal', url)
+    openExternal: (url: string) => ipcRenderer.invoke('shell:openExternal', url),
   },
 
   // Dimmer Rack operations
   dimmerRacks: {
     getAll: (projectId?: string) => ipcRenderer.invoke('dimmerRacks:getAll', projectId),
     getById: (id: string) => ipcRenderer.invoke('dimmerRacks:getById', id),
-    create: (rack: any, projectId?: string) => ipcRenderer.invoke('dimmerRacks:create', rack, projectId),
+    create: (rack: any, projectId?: string) =>
+      ipcRenderer.invoke('dimmerRacks:create', rack, projectId),
     update: (id: string, updates: any) => ipcRenderer.invoke('dimmerRacks:update', id, updates),
     delete: (id: string) => ipcRenderer.invoke('dimmerRacks:delete', id),
-    getWithUsage: (projectId?: string) => ipcRenderer.invoke('dimmerRacks:getWithUsage', projectId)
+    getWithUsage: (projectId?: string) => ipcRenderer.invoke('dimmerRacks:getWithUsage', projectId),
   },
 
   // Dimmer Rack Module operations
   dimmerRackModules: {
     getByRackId: (rackId: string) => ipcRenderer.invoke('dimmerRackModules:getByRackId', rackId),
     create: (module: any) => ipcRenderer.invoke('dimmerRackModules:create', module),
-    update: (id: string, updates: any) => ipcRenderer.invoke('dimmerRackModules:update', id, updates),
+    update: (id: string, updates: any) =>
+      ipcRenderer.invoke('dimmerRackModules:update', id, updates),
     delete: (id: string) => ipcRenderer.invoke('dimmerRackModules:delete', id),
-    getTypeForCircuit: (rackId: string, circuit: number) => ipcRenderer.invoke('dimmerRackModules:getTypeForCircuit', rackId, circuit)
+    getTypeForCircuit: (rackId: string, circuit: number) =>
+      ipcRenderer.invoke('dimmerRackModules:getTypeForCircuit', rackId, circuit),
   },
 
   // PD Rack operations
   pdRacks: {
     getAll: (projectId?: string) => ipcRenderer.invoke('pdRacks:getAll', projectId),
     getById: (id: string) => ipcRenderer.invoke('pdRacks:getById', id),
-    create: (rack: any, projectId?: string) => ipcRenderer.invoke('pdRacks:create', rack, projectId),
+    create: (rack: any, projectId?: string) =>
+      ipcRenderer.invoke('pdRacks:create', rack, projectId),
     update: (id: string, updates: any) => ipcRenderer.invoke('pdRacks:update', id, updates),
     delete: (id: string) => ipcRenderer.invoke('pdRacks:delete', id),
-    getWithUsage: (projectId?: string) => ipcRenderer.invoke('pdRacks:getWithUsage', projectId)
+    getWithUsage: (projectId?: string) => ipcRenderer.invoke('pdRacks:getWithUsage', projectId),
   },
 
   // Infrastructure Equipment operations
   infrastructure: {
     getAll: (projectId: string) => ipcRenderer.invoke('infrastructure:getAll', projectId),
-    create: (equipment: any, projectId: string) => ipcRenderer.invoke('infrastructure:create', equipment, projectId),
+    create: (equipment: any, projectId: string) =>
+      ipcRenderer.invoke('infrastructure:create', equipment, projectId),
     update: (id: string, updates: any) => ipcRenderer.invoke('infrastructure:update', id, updates),
     delete: (id: string) => ipcRenderer.invoke('infrastructure:delete', id),
     deleteMultiple: (ids: string[]) => ipcRenderer.invoke('infrastructure:deleteMultiple', ids),
-    getPortLinkages: (equipmentId: string, projectId: string) => ipcRenderer.invoke('infrastructure:getPortLinkages', equipmentId, projectId),
-    getFixtureConnections: (fixtureId: string, projectId: string) => ipcRenderer.invoke('infrastructure:getFixtureConnections', fixtureId, projectId),
-    getEquipmentConnections: (equipmentId: string, projectId: string) => ipcRenderer.invoke('infrastructure:getEquipmentConnections', equipmentId, projectId),
-    validatePortAssignment: (equipmentId: string, portAssignment: any, projectId: string) => ipcRenderer.invoke('infrastructure:validatePortAssignment', equipmentId, portAssignment, projectId),
-    getPortUsageStats: (equipmentId: string) => ipcRenderer.invoke('infrastructure:getPortUsageStats', equipmentId),
-    getAllPortUsageStats: (projectId: string) => ipcRenderer.invoke('infrastructure:getAllPortUsageStats', projectId),
+    getPortLinkages: (equipmentId: string, projectId: string) =>
+      ipcRenderer.invoke('infrastructure:getPortLinkages', equipmentId, projectId),
+    getFixtureConnections: (fixtureId: string, projectId: string) =>
+      ipcRenderer.invoke('infrastructure:getFixtureConnections', fixtureId, projectId),
+    getEquipmentConnections: (equipmentId: string, projectId: string) =>
+      ipcRenderer.invoke('infrastructure:getEquipmentConnections', equipmentId, projectId),
+    validatePortAssignment: (equipmentId: string, portAssignment: any, projectId: string) =>
+      ipcRenderer.invoke(
+        'infrastructure:validatePortAssignment',
+        equipmentId,
+        portAssignment,
+        projectId,
+      ),
+    getPortUsageStats: (equipmentId: string) =>
+      ipcRenderer.invoke('infrastructure:getPortUsageStats', equipmentId),
+    getAllPortUsageStats: (projectId: string) =>
+      ipcRenderer.invoke('infrastructure:getAllPortUsageStats', projectId),
     exportCSV: (projectId: string) => ipcRenderer.invoke('infrastructure:exportCSV', projectId),
-    importCSV: (projectId: string, csvFilePath: string, fieldMapping: any[]) => ipcRenderer.invoke('infrastructure:importCSV', projectId, csvFilePath, fieldMapping),
-    readCSVHeaders: (filePath: string) => ipcRenderer.invoke('infrastructure:readCSVHeaders', filePath),
-    showImportDialog: () => ipcRenderer.invoke('infrastructure:showImportDialog')
+    importCSV: (projectId: string, csvFilePath: string, fieldMapping: any[]) =>
+      ipcRenderer.invoke('infrastructure:importCSV', projectId, csvFilePath, fieldMapping),
+    readCSVHeaders: (filePath: string) =>
+      ipcRenderer.invoke('infrastructure:readCSVHeaders', filePath),
+    showImportDialog: () => ipcRenderer.invoke('infrastructure:showImportDialog'),
   },
 
   // Phase Template operations
   phaseTemplates: {
     getAll: (projectId: string) => ipcRenderer.invoke('phaseTemplates:getAll', projectId),
     getById: (id: string) => ipcRenderer.invoke('phaseTemplates:getById', id),
-    create: (template: any, projectId: string) => ipcRenderer.invoke('phaseTemplates:create', template, projectId),
+    create: (template: any, projectId: string) =>
+      ipcRenderer.invoke('phaseTemplates:create', template, projectId),
     update: (id: string, updates: any) => ipcRenderer.invoke('phaseTemplates:update', id, updates),
     delete: (id: string) => ipcRenderer.invoke('phaseTemplates:delete', id),
-    seed: (projectId: string) => ipcRenderer.invoke('phaseTemplates:seed', projectId)
+    seed: (projectId: string) => ipcRenderer.invoke('phaseTemplates:seed', projectId),
   },
 
   // Sync operations (PowerSync + Supabase)
@@ -287,7 +334,7 @@ contextBridge.exposeInMainWorld('api', {
     },
     offStatusChanged: (callback: (status: any) => void) => {
       ipcRenderer.removeListener('sync:statusChanged', callback);
-    }
+    },
   },
 
   // Authentication operations
@@ -296,8 +343,8 @@ contextBridge.exposeInMainWorld('api', {
     signUp: (email: string, password: string) => ipcRenderer.invoke('auth:signUp', email, password),
     signOut: () => ipcRenderer.invoke('auth:signOut'),
     resetPassword: (email: string) => ipcRenderer.invoke('auth:resetPassword', email),
-    getState: () => ipcRenderer.invoke('auth:getState')
-  }
+    getState: () => ipcRenderer.invoke('auth:getState'),
+  },
 });
 
 // TypeScript declaration
@@ -313,7 +360,12 @@ export interface ElectronAPI {
     getAll: () => Promise<any[]>;
     getCurrent: () => Promise<any>;
     getById: (id: string) => Promise<any>;
-    create: (name: string, description?: string, logoPath?: string, enabledModules?: string[]) => Promise<any>;
+    create: (
+      name: string,
+      description?: string,
+      logoPath?: string,
+      enabledModules?: string[],
+    ) => Promise<any>;
     update: (id: string, updates: any) => Promise<any>;
     delete: (id: string) => Promise<void>;
   };
@@ -394,7 +446,10 @@ export interface ElectronAPI {
       import: (filePath: string) => Promise<any>;
       getFileName: (filePath: string) => Promise<string>;
     };
-    exportPDF: (projectId: string, templateData: any) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
+    exportPDF: (
+      projectId: string,
+      templateData: any,
+    ) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
     print: (projectId: string, templateData: any) => Promise<{ success: boolean }>;
   };
   license: {
@@ -417,9 +472,18 @@ export interface ElectronAPI {
     verifyPassword: (password: string) => Promise<{ success: boolean; firstTime?: boolean }>;
     setPassword: (password: string) => Promise<{ success: boolean }>;
     hasPassword: () => Promise<{ hasPassword: boolean }>;
-    exportLayout: (templateId: string) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
-    exportAllDefaultLayouts: () => Promise<{ success: boolean; count?: number; directory?: string; canceled?: boolean }>;
-    importLayouts: (filePaths?: string[]) => Promise<{ success: boolean; count?: number; errors?: string[]; canceled?: boolean }>;
+    exportLayout: (
+      templateId: string,
+    ) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
+    exportAllDefaultLayouts: () => Promise<{
+      success: boolean;
+      count?: number;
+      directory?: string;
+      canceled?: boolean;
+    }>;
+    importLayouts: (
+      filePaths?: string[],
+    ) => Promise<{ success: boolean; count?: number; errors?: string[]; canceled?: boolean }>;
     resetLayoutsToFactory: () => Promise<{ success: boolean }>;
     getDefaultLayoutFiles: () => Promise<{ success: boolean; files: string[]; directory?: string }>;
   };
@@ -428,7 +492,11 @@ export interface ElectronAPI {
     getCurrentProjectId: () => Promise<string | null>;
   };
   paperwork: {
-    exportPDF: (htmlContent: string, filename: string, pageSettings: any) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
+    exportPDF: (
+      htmlContent: string,
+      filename: string,
+      pageSettings: any,
+    ) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
   };
   paperworkTemplates: {
     getAll: (reportType?: string) => Promise<any[]>;
@@ -480,11 +548,21 @@ export interface ElectronAPI {
     getPortLinkages: (equipmentId: string, projectId: string) => Promise<any[]>;
     getFixtureConnections: (fixtureId: string, projectId: string) => Promise<any[]>;
     getEquipmentConnections: (equipmentId: string, projectId: string) => Promise<any[]>;
-    validatePortAssignment: (equipmentId: string, portAssignment: any, projectId: string) => Promise<{ valid: boolean; error?: string }>;
+    validatePortAssignment: (
+      equipmentId: string,
+      portAssignment: any,
+      projectId: string,
+    ) => Promise<{ valid: boolean; error?: string }>;
     getPortUsageStats: (equipmentId: string) => Promise<any>;
     getAllPortUsageStats: (projectId: string) => Promise<Record<string, any>>;
-    exportCSV: (projectId: string) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
-    importCSV: (projectId: string, csvFilePath: string, fieldMapping: any[]) => Promise<{ success: boolean; imported: number; errors: string[] }>;
+    exportCSV: (
+      projectId: string,
+    ) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
+    importCSV: (
+      projectId: string,
+      csvFilePath: string,
+      fieldMapping: any[],
+    ) => Promise<{ success: boolean; imported: number; errors: string[] }>;
     readCSVHeaders: (filePath: string) => Promise<{ success: boolean; headers: string[] }>;
     showImportDialog: () => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
   };

@@ -7,7 +7,7 @@ import { PaperworkColumnConfig } from '../../types/paperworkTemplate';
 
 function createColumn(
   field: string,
-  overrides: Partial<PaperworkColumnConfig> = {}
+  overrides: Partial<PaperworkColumnConfig> = {},
 ): PaperworkColumnConfig {
   return {
     id: `col-${field}`,
@@ -15,7 +15,7 @@ function createColumn(
     label: field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' '),
     width: 10,
     visible: true,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -56,7 +56,7 @@ const ALL_INFRASTRUCTURE_COLUMNS: PaperworkColumnConfig[] = [
 
   // Status & Notes
   createColumn('status', { shortLabel: 'Stat' }),
-  createColumn('notes', { shortLabel: 'Notes' })
+  createColumn('notes', { shortLabel: 'Notes' }),
 ];
 
 // All available fixture fields
@@ -113,7 +113,7 @@ const ALL_FIXTURE_COLUMNS: PaperworkColumnConfig[] = [
   // Status & Notes
   createColumn('status', { shortLabel: 'Stat' }),
   createColumn('notes', { shortLabel: 'Notes' }),
-  createColumn('work_note_status', { shortLabel: 'Work', label: 'Work Note' })
+  createColumn('work_note_status', { shortLabel: 'Work', label: 'Work Note' }),
 ];
 
 export const COLUMN_DEFAULTS: Record<string, PaperworkColumnConfig[]> = {
@@ -126,7 +126,7 @@ export const COLUMN_DEFAULTS: Record<string, PaperworkColumnConfig[]> = {
     createColumn('wattage', { width: 8, format: 'power', shortLabel: 'Watts', visible: true }),
     createColumn('purpose', { width: 15, shortLabel: 'Purp', visible: true }),
     createColumn('color', { width: 10, shortLabel: 'Clr', visible: true }),
-    createColumn('notes', { width: 18, shortLabel: 'Notes', visible: true })
+    createColumn('notes', { width: 18, shortLabel: 'Notes', visible: true }),
   ],
 
   'dimmer-schedule': [
@@ -137,7 +137,7 @@ export const COLUMN_DEFAULTS: Record<string, PaperworkColumnConfig[]> = {
     createColumn('type', { width: 20, shortLabel: 'Type' }),
     createColumn('wattage', { width: 10, format: 'power', shortLabel: 'Watts' }),
     createColumn('color', { width: 12, shortLabel: 'Clr' }),
-    createColumn('notes', { width: 17, shortLabel: 'Notes' })
+    createColumn('notes', { width: 17, shortLabel: 'Notes' }),
   ],
 
   'circuit-list': [
@@ -148,7 +148,7 @@ export const COLUMN_DEFAULTS: Record<string, PaperworkColumnConfig[]> = {
     createColumn('dimmer', { width: 10, shortLabel: 'Dim' }),
     createColumn('channel', { width: 8, shortLabel: 'Ch' }),
     createColumn('wattage', { width: 10, format: 'power', shortLabel: 'Watts' }),
-    createColumn('notes', { width: 21, shortLabel: 'Notes' })
+    createColumn('notes', { width: 21, shortLabel: 'Notes' }),
   ],
 
   'dmx-addresses': [
@@ -159,7 +159,7 @@ export const COLUMN_DEFAULTS: Record<string, PaperworkColumnConfig[]> = {
     createColumn('unit', { width: 8, shortLabel: 'U#' }),
     createColumn('type', { width: 20, shortLabel: 'Type' }),
     createColumn('manufacturer', { width: 15, shortLabel: 'Mfr' }),
-    createColumn('notes', { width: 14, shortLabel: 'Notes' })
+    createColumn('notes', { width: 14, shortLabel: 'Notes' }),
   ],
 
   'power-summary': [
@@ -167,9 +167,19 @@ export const COLUMN_DEFAULTS: Record<string, PaperworkColumnConfig[]> = {
     createColumn('quantity', { width: 10, format: 'number', shortLabel: 'Qty' }),
     createColumn('wattage', { width: 12, format: 'power', shortLabel: 'Watts' }),
     createColumn('amperage', { width: 12, format: 'amperage', shortLabel: 'Amps' }),
-    createColumn('total_watts', { width: 15, format: 'power', label: 'Total Watts', shortLabel: 'Tot W' }),
-    createColumn('total_amps', { width: 13, format: 'amperage', label: 'Total Amps', shortLabel: 'Tot A' }),
-    createColumn('notes', { width: 13, shortLabel: 'Notes' })
+    createColumn('total_watts', {
+      width: 15,
+      format: 'power',
+      label: 'Total Watts',
+      shortLabel: 'Tot W',
+    }),
+    createColumn('total_amps', {
+      width: 13,
+      format: 'amperage',
+      label: 'Total Amps',
+      shortLabel: 'Tot A',
+    }),
+    createColumn('notes', { width: 13, shortLabel: 'Notes' }),
   ],
 
   'color-schedule': [
@@ -179,7 +189,7 @@ export const COLUMN_DEFAULTS: Record<string, PaperworkColumnConfig[]> = {
     createColumn('unit', { width: 8, shortLabel: 'U#' }),
     createColumn('channel', { width: 8, shortLabel: 'Ch' }),
     createColumn('purpose', { width: 15, shortLabel: 'Purp' }),
-    createColumn('notes', { width: 19, shortLabel: 'Notes' })
+    createColumn('notes', { width: 19, shortLabel: 'Notes' }),
   ],
 
   'gobo-schedule': [
@@ -189,16 +199,31 @@ export const COLUMN_DEFAULTS: Record<string, PaperworkColumnConfig[]> = {
     createColumn('unit', { width: 8, shortLabel: 'U#' }),
     createColumn('channel', { width: 8, shortLabel: 'Ch' }),
     createColumn('purpose', { width: 12, shortLabel: 'Purp' }),
-    createColumn('notes', { width: 17, shortLabel: 'Notes' })
+    createColumn('notes', { width: 17, shortLabel: 'Notes' }),
   ],
 
   'color-cut-report': [
     createColumn('gel_code', { width: 12, label: 'Gel Code', shortLabel: 'Gel' }),
     createColumn('manufacturer', { width: 15, shortLabel: 'Mfr' }),
     createColumn('frame_size', { width: 15, label: 'Frame Size', shortLabel: 'Size' }),
-    createColumn('cuts_needed', { width: 12, format: 'number', label: 'Cuts Needed', shortLabel: 'Cuts' }),
-    createColumn('cuts_per_sheet', { width: 15, format: 'number', label: 'Cuts/Sheet', shortLabel: 'Per Sheet' }),
-    createColumn('sheets_needed', { width: 15, format: 'number', label: 'Sheets Needed', shortLabel: 'Sheets' })
+    createColumn('cuts_needed', {
+      width: 12,
+      format: 'number',
+      label: 'Cuts Needed',
+      shortLabel: 'Cuts',
+    }),
+    createColumn('cuts_per_sheet', {
+      width: 15,
+      format: 'number',
+      label: 'Cuts/Sheet',
+      shortLabel: 'Per Sheet',
+    }),
+    createColumn('sheets_needed', {
+      width: 15,
+      format: 'number',
+      label: 'Sheets Needed',
+      shortLabel: 'Sheets',
+    }),
   ],
 
   'infrastructure-list': [
@@ -208,7 +233,7 @@ export const COLUMN_DEFAULTS: Record<string, PaperworkColumnConfig[]> = {
     createColumn('model', { width: 15, shortLabel: 'Model' }),
     createColumn('location', { width: 15, shortLabel: 'Loc' }),
     createColumn('status', { width: 10, shortLabel: 'Stat' }),
-    createColumn('notes', { width: 10, shortLabel: 'Notes' })
+    createColumn('notes', { width: 10, shortLabel: 'Notes' }),
   ],
 
   'network-summary': [
@@ -218,7 +243,7 @@ export const COLUMN_DEFAULTS: Record<string, PaperworkColumnConfig[]> = {
     createColumn('hostname', { width: 15, shortLabel: 'Host' }),
     createColumn('location', { width: 15, shortLabel: 'Loc' }),
     createColumn('status', { width: 10, shortLabel: 'Stat' }),
-    createColumn('notes', { width: 15, shortLabel: 'Notes' })
+    createColumn('notes', { width: 15, shortLabel: 'Notes' }),
   ],
 
   'port-assignments': [
@@ -227,7 +252,7 @@ export const COLUMN_DEFAULTS: Record<string, PaperworkColumnConfig[]> = {
     createColumn('connected_to', { width: 20, label: 'Connected To', shortLabel: 'Conn To' }),
     createColumn('port_type', { width: 12, label: 'Port Type', shortLabel: 'Type' }),
     createColumn('location', { width: 15, shortLabel: 'Loc' }),
-    createColumn('notes', { width: 23, shortLabel: 'Notes' })
+    createColumn('notes', { width: 23, shortLabel: 'Notes' }),
   ],
 
   'infrastructure-power': [
@@ -237,7 +262,7 @@ export const COLUMN_DEFAULTS: Record<string, PaperworkColumnConfig[]> = {
     createColumn('amperage', { width: 10, format: 'number', shortLabel: 'Amps' }),
     createColumn('wattage', { width: 12, format: 'power', shortLabel: 'Watts' }),
     createColumn('circuit', { width: 12, shortLabel: 'Ckt' }),
-    createColumn('location', { width: 21, shortLabel: 'Loc' })
+    createColumn('location', { width: 21, shortLabel: 'Loc' }),
   ],
 
   'infrastructure-location': [
@@ -246,8 +271,8 @@ export const COLUMN_DEFAULTS: Record<string, PaperworkColumnConfig[]> = {
     createColumn('type', { width: 15, shortLabel: 'Type' }),
     createColumn('manufacturer', { width: 15, shortLabel: 'Mfr' }),
     createColumn('status', { width: 10, shortLabel: 'Stat' }),
-    createColumn('notes', { width: 20, shortLabel: 'Notes' })
-  ]
+    createColumn('notes', { width: 20, shortLabel: 'Notes' }),
+  ],
 };
 
 /**
@@ -259,7 +284,7 @@ export function getAllAvailableColumns(reportType: string): PaperworkColumnConfi
     'network-summary',
     'port-assignments',
     'infrastructure-power',
-    'infrastructure-location'
+    'infrastructure-location',
   ].includes(reportType);
 
   return isInfrastructureReport ? ALL_INFRASTRUCTURE_COLUMNS : ALL_FIXTURE_COLUMNS;

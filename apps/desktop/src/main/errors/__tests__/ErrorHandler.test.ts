@@ -63,34 +63,26 @@ describe('ErrorHandler', () => {
       const queryError = new QueryError('Syntax error', 'SELECT *');
       const operation = vi.fn().mockRejectedValue(queryError);
 
-      await expect(
-        errorHandler.executeWithRetry(operation, 'test-operation', 3)
-      ).rejects.toThrow('test-operation failed after 3 attempts');
+      await expect(errorHandler.executeWithRetry(operation, 'test-operation', 3)).rejects.toThrow(
+        'test-operation failed after 3 attempts',
+      );
 
       // Should only try once since error is not retryable
       expect(operation).toHaveBeenCalledTimes(1);
     });
 
     it('should retry connection errors', async () => {
-      const operation = vi
-        .fn()
-        .mockRejectedValue(new ConnectionError('Network error'));
+      const operation = vi.fn().mockRejectedValue(new ConnectionError('Network error'));
 
-      await expect(
-        errorHandler.executeWithRetry(operation, 'test-operation', 3)
-      ).rejects.toThrow();
+      await expect(errorHandler.executeWithRetry(operation, 'test-operation', 3)).rejects.toThrow();
 
       expect(operation).toHaveBeenCalledTimes(3);
     });
 
     it('should retry transient transaction errors', async () => {
-      const operation = vi
-        .fn()
-        .mockRejectedValue(new TransactionError('Deadlock', true));
+      const operation = vi.fn().mockRejectedValue(new TransactionError('Deadlock', true));
 
-      await expect(
-        errorHandler.executeWithRetry(operation, 'test-operation', 3)
-      ).rejects.toThrow();
+      await expect(errorHandler.executeWithRetry(operation, 'test-operation', 3)).rejects.toThrow();
 
       expect(operation).toHaveBeenCalledTimes(3);
     });
@@ -100,33 +92,23 @@ describe('ErrorHandler', () => {
         .fn()
         .mockRejectedValue(new TransactionError('Constraint violation', false));
 
-      await expect(
-        errorHandler.executeWithRetry(operation, 'test-operation', 3)
-      ).rejects.toThrow();
+      await expect(errorHandler.executeWithRetry(operation, 'test-operation', 3)).rejects.toThrow();
 
       expect(operation).toHaveBeenCalledTimes(1);
     });
 
     it('should retry SQLite lock errors', async () => {
-      const operation = vi
-        .fn()
-        .mockRejectedValue(new Error('SQLITE_BUSY: database is locked'));
+      const operation = vi.fn().mockRejectedValue(new Error('SQLITE_BUSY: database is locked'));
 
-      await expect(
-        errorHandler.executeWithRetry(operation, 'test-operation', 3)
-      ).rejects.toThrow();
+      await expect(errorHandler.executeWithRetry(operation, 'test-operation', 3)).rejects.toThrow();
 
       expect(operation).toHaveBeenCalledTimes(3);
     });
 
     it('should retry network errors', async () => {
-      const operation = vi
-        .fn()
-        .mockRejectedValue(new Error('ECONNREFUSED'));
+      const operation = vi.fn().mockRejectedValue(new Error('ECONNREFUSED'));
 
-      await expect(
-        errorHandler.executeWithRetry(operation, 'test-operation', 3)
-      ).rejects.toThrow();
+      await expect(errorHandler.executeWithRetry(operation, 'test-operation', 3)).rejects.toThrow();
 
       expect(operation).toHaveBeenCalledTimes(3);
     });
@@ -151,25 +133,17 @@ describe('ErrorHandler', () => {
 
   describe('executeWithRetry - Custom Retry Count', () => {
     it('should respect custom maxRetries parameter', async () => {
-      const operation = vi
-        .fn()
-        .mockRejectedValue(new ConnectionError('Timeout'));
+      const operation = vi.fn().mockRejectedValue(new ConnectionError('Timeout'));
 
-      await expect(
-        errorHandler.executeWithRetry(operation, 'test-operation', 5)
-      ).rejects.toThrow();
+      await expect(errorHandler.executeWithRetry(operation, 'test-operation', 5)).rejects.toThrow();
 
       expect(operation).toHaveBeenCalledTimes(5);
     });
 
     it('should use default 3 retries when not specified', async () => {
-      const operation = vi
-        .fn()
-        .mockRejectedValue(new ConnectionError('Timeout'));
+      const operation = vi.fn().mockRejectedValue(new ConnectionError('Timeout'));
 
-      await expect(
-        errorHandler.executeWithRetry(operation, 'test-operation')
-      ).rejects.toThrow();
+      await expect(errorHandler.executeWithRetry(operation, 'test-operation')).rejects.toThrow();
 
       expect(operation).toHaveBeenCalledTimes(3);
     });
@@ -204,9 +178,9 @@ describe('ErrorHandler', () => {
         throw new ConnectionError('Timeout');
       });
 
-      expect(() =>
-        errorHandler.executeWithRetrySync(operation, 'test-operation', 3)
-      ).toThrow('test-operation failed after 3 attempts');
+      expect(() => errorHandler.executeWithRetrySync(operation, 'test-operation', 3)).toThrow(
+        'test-operation failed after 3 attempts',
+      );
 
       expect(operation).toHaveBeenCalledTimes(3);
     });
@@ -260,7 +234,9 @@ describe('ErrorHandler', () => {
 
         try {
           await errorHandler.executeWithRetry(operation, 'test', 2);
-        } catch {}
+        } catch {
+          /* expected error */
+        }
 
         // Should have retried (called twice)
         expect(operation).toHaveBeenCalledTimes(2);
@@ -282,7 +258,9 @@ describe('ErrorHandler', () => {
 
         try {
           await errorHandler.executeWithRetry(operation, 'test', 3);
-        } catch {}
+        } catch {
+          /* expected error */
+        }
 
         // Should not have retried (called once)
         expect(operation).toHaveBeenCalledTimes(1);
@@ -293,20 +271,20 @@ describe('ErrorHandler', () => {
 
   describe('Logging', () => {
     it('should log errors with operation details', async () => {
-      const operation = vi
-        .fn()
-        .mockRejectedValue(new ConnectionError('Timeout'));
+      const operation = vi.fn().mockRejectedValue(new ConnectionError('Timeout'));
 
       try {
         await errorHandler.executeWithRetry(operation, 'test-operation', 2);
-      } catch {}
+      } catch {
+        /* expected error */
+      }
 
       // ErrorHandler now uses logger.warn which calls console.warn
       expect(consoleWarnSpy).toHaveBeenCalled();
       const warnCalls = consoleWarnSpy.mock.calls;
-      expect(warnCalls.some(call =>
-        call[0].includes('test-operation') && call[0].includes('failed')
-      )).toBe(true);
+      expect(
+        warnCalls.some((call) => call[0].includes('test-operation') && call[0].includes('failed')),
+      ).toBe(true);
     });
   });
 });

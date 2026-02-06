@@ -5,7 +5,9 @@ export function IntegrationSettings() {
   const [cloudStorageEnabled, setCloudStorageEnabled] = useState(false);
   const [cloudProvider, setCloudProvider] = useState('');
   const [apiKey, setApiKey] = useState('');
-  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'testing'>('disconnected');
+  const [connectionStatus, setConnectionStatus] = useState<
+    'connected' | 'disconnected' | 'testing'
+  >('disconnected');
 
   const handleTestConnection = async () => {
     setConnectionStatus('testing');
@@ -25,8 +27,12 @@ export function IntegrationSettings() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Integration Settings</h2>
-        <p className="text-gray-600 dark:text-gray-400">Configure external integrations and API connections</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          Integration Settings
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400">
+          Configure external integrations and API connections
+        </p>
       </div>
 
       {/* Cloud Storage Integration */}
@@ -136,7 +142,9 @@ export function IntegrationSettings() {
               </div>
               <div>
                 <div className="font-medium text-gray-900 dark:text-white">JSON Format</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">Default export format for layouts</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Default export format for layouts
+                </div>
               </div>
             </div>
             <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded text-xs font-medium">
@@ -151,7 +159,9 @@ export function IntegrationSettings() {
               </div>
               <div>
                 <div className="font-medium text-gray-900 dark:text-white">XML Format</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">Legacy format support</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Legacy format support
+                </div>
               </div>
             </div>
             <span className="px-3 py-1 bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 rounded text-xs font-medium">
@@ -166,7 +176,9 @@ export function IntegrationSettings() {
               </div>
               <div>
                 <div className="font-medium text-gray-900 dark:text-white">CSV Format</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">Data export for spreadsheets</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Data export for spreadsheets
+                </div>
               </div>
             </div>
             <span className="px-3 py-1 bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 rounded text-xs font-medium">
@@ -190,8 +202,8 @@ export function IntegrationSettings() {
               <div>
                 <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">API Access</h4>
                 <p className="text-sm text-blue-800 dark:text-blue-200">
-                  REST API endpoints for external integrations are currently in development.
-                  Contact support for early access to the API beta program.
+                  REST API endpoints for external integrations are currently in development. Contact
+                  support for early access to the API beta program.
                 </p>
               </div>
             </div>
@@ -204,7 +216,9 @@ export function IntegrationSettings() {
             </div>
             <div className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
               <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Rate Limit</div>
-              <div className="text-lg font-semibold text-gray-900 dark:text-white">1000 req/hour</div>
+              <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                1000 req/hour
+              </div>
             </div>
           </div>
         </div>

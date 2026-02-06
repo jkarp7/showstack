@@ -1,4 +1,5 @@
 # ShowStack: Comprehensive Renovation Plan
+
 **Architecture:** Local-First with PowerSync + Supabase
 **Timeline:** 8.5-11.5 months (solo developer + Claude)
 **Focus:** Stability, Cloud Collaboration, Code Organization, Production Readiness
@@ -12,6 +13,7 @@
 Transform ShowStack from a desktop-only lighting tool to a **local-first, cloud-synced Production Operating System** using **PowerSync + Supabase**, while improving code organization and following best practices throughout.
 
 ### Key Objectives
+
 ✅ **Stability** - Zero data loss, better-sqlite3, error handling, automated backups
 ✅ **Cloud Collaboration** - Real-time multi-user editing via PowerSync + Supabase
 ✅ **Code Organization** - Break up large files, follow SOLID principles, improve maintainability
@@ -20,7 +22,9 @@ Transform ShowStack from a desktop-only lighting tool to a **local-first, cloud-
 ✅ **Clear Naming** - Rename "prep" → "shop-order" throughout codebase
 
 ### Architecture Decision
+
 **PowerSync + Supabase** instead of custom backend:
+
 - ⏱️ **15-20 weeks saved** (6-8 weeks vs 16-20 weeks)
 - 💰 **$0/month MVP cost** (vs $46-76/month)
 - 🛠️ **Zero backend code** to write/maintain
@@ -56,6 +60,7 @@ Transform ShowStack from a desktop-only lighting tool to a **local-first, cloud-
 ❌ Adding `any` types to avoid test failures
 
 **Example from Phase 1:**
+
 - ❌ WRONG: Changed test to accept any error
 - ✅ CORRECT: Moved validation before transaction, kept specific test
 
@@ -66,6 +71,7 @@ See Phase-2-Validation-Services.md for detailed testing workflow.
 ## Current State Assessment
 
 ### Critical Issues
+
 1. ❌ **Data Loss Risk** - Manual `saveDatabase()` after every mutation (line 807 of `database/index.ts`)
 2. ❌ **No Cloud Collaboration** - Offline-only (required for Lightwright parity)
 3. ❌ **Poor File Organization** - 881-line `database/index.ts`, 1337-line `ipc/prep.ts`
@@ -74,13 +80,14 @@ See Phase-2-Validation-Services.md for detailed testing workflow.
 6. ❌ **Testing Gaps** - 50% coverage, no integration tests
 
 ### Large Files to Refactor
-| File | Lines | Status | Action |
-|------|-------|--------|--------|
-| `src/main/database/index.ts` | 881 | Monolithic | Split into modules |
-| `src/main/ipc/prep.ts` | 1337 | Too large | Extract services + rename |
-| `src/main/database/queries/fixtures.ts` | 300+ | Decent | Keep, add validation |
-| `src/renderer/src/pages/modules/EquipmentManager.tsx` | 54KB | Too large | Split into components |
-| `src/renderer/src/pages/modules/Prep.tsx` | 56KB | Too large | Split + rename to ShopOrderBuilder.tsx |
+
+| File                                                  | Lines | Status     | Action                                 |
+| ----------------------------------------------------- | ----- | ---------- | -------------------------------------- |
+| `src/main/database/index.ts`                          | 881   | Monolithic | Split into modules                     |
+| `src/main/ipc/prep.ts`                                | 1337  | Too large  | Extract services + rename              |
+| `src/main/database/queries/fixtures.ts`               | 300+  | Decent     | Keep, add validation                   |
+| `src/renderer/src/pages/modules/EquipmentManager.tsx` | 54KB  | Too large  | Split into components                  |
+| `src/renderer/src/pages/modules/Prep.tsx`             | 56KB  | Too large  | Split + rename to ShopOrderBuilder.tsx |
 
 ---
 
@@ -94,11 +101,13 @@ See Phase-2-Validation-Services.md for detailed testing workflow.
 **Goal:** Prevent silent failures and implement proper error handling
 
 **Files Created:**
+
 - ✅ `src/main/errors/DatabaseError.ts` - Custom error classes
 - ✅ `src/main/errors/ValidationError.ts` - Validation-specific errors
 - ✅ `src/main/errors/ErrorHandler.ts` - Global error handler with retry logic
 
 **Success Criteria:**
+
 - ✅ Zero silent failures
 - ✅ All IPC handlers wrapped with try-catch
 - ✅ 90%+ coverage on error handling
@@ -110,6 +119,7 @@ See Phase-2-Validation-Services.md for detailed testing workflow.
 **Goal:** Break monolithic database file into focused modules following Single Responsibility Principle
 
 **New Structure Created:**
+
 ```
 src/main/database/
   ├── index.ts (50 lines - exports only)
@@ -138,6 +148,7 @@ src/main/database/
 ```
 
 **Success Criteria:**
+
 - ✅ `database/index.ts` reduced from 881 to ~50 lines
 - ✅ Each module <200 lines
 - ✅ Single Responsibility Principle followed
@@ -152,6 +163,7 @@ src/main/database/
 **Problem:** "prep" is ambiguous - it's actually the **Shop Order Builder** tool (part of Lighting module, works alongside Equipment Manager)
 
 **Database Tables Renamed:**
+
 ```sql
 ✅ ALTER TABLE prep_projects RENAME TO shop_order_projects;
 ✅ ALTER TABLE prep_sections RENAME TO shop_order_sections;
@@ -162,6 +174,7 @@ src/main/database/
 ```
 
 **Files Renamed (git mv - history preserved):**
+
 ```bash
 ✅ # Database
    git mv src/main/database/queries/prep.ts → shop-order.ts
@@ -181,6 +194,7 @@ src/main/database/
 ```
 
 **IPC Channel Renames:**
+
 ```typescript
 ✅ // Before: 'prep:projects:getAll'
 ✅ // After:  'shop-order:projects:getAll'
@@ -188,6 +202,7 @@ src/main/database/
 
 **Service Layer Extracted:**
 ✅ Broke 1337-line `ipc/prep.ts` into focused services:
+
 - ✅ `ShopOrderProjectService.ts` - Project CRUD
 - ✅ `ShopOrderSectionService.ts` - Section management
 - ✅ `ShopOrderItemService.ts` - Equipment items
@@ -195,6 +210,7 @@ src/main/database/
 - ✅ `ShopOrderNoteService.ts` - Notes management
 
 **Success Criteria:**
+
 - ✅ All "prep" references renamed
 - ✅ Database migration successful (data preserved)
 - ✅ Service layer extracted (1337-line file broken up)
@@ -209,26 +225,28 @@ src/main/database/
 **Goal:** Track performance and errors from day 1
 
 **File Created:** `src/main/monitoring/PerformanceMonitor.ts`
+
 ```typescript
 export class PerformanceMonitor {
   trackDatabaseQuery(operation: string, duration: number): void {
     posthog.capture('database_query', {
       operation,
       duration_ms: duration,
-      slow_query: duration > 1000
+      slow_query: duration > 1000,
     });
   }
 
   trackMemoryUsage(): void {
     const usage = process.memoryUsage();
     posthog.capture('memory_usage', {
-      heap_used_mb: usage.heapUsed / 1024 / 1024
+      heap_used_mb: usage.heapUsed / 1024 / 1024,
     });
   }
 }
 ```
 
 **Success Criteria:**
+
 - ✅ All database queries tracked
 - ✅ Slow query alerts (>1s)
 - ✅ Memory usage dashboard
@@ -242,6 +260,7 @@ export class PerformanceMonitor {
 **Priority:** HIGH
 
 ### 1.1 Install better-sqlite3
+
 ```bash
 npm install better-sqlite3 @types/better-sqlite3
 ```
@@ -249,6 +268,7 @@ npm install better-sqlite3 @types/better-sqlite3
 ### 1.2 Update DatabaseManager (2 weeks)
 
 **File:** `src/main/database/core/DatabaseManager.ts` (UPDATE)
+
 ```typescript
 import Database from 'better-sqlite3';
 
@@ -270,6 +290,7 @@ export class DatabaseManager {
 ```
 
 **Success Criteria:**
+
 - ✅ 10-20x performance improvement
 - ✅ Zero data loss during migration
 - ✅ Backward compatibility with .ss files
@@ -277,6 +298,7 @@ export class DatabaseManager {
 ### 1.3 Add Transaction Support (1-2 weeks)
 
 **File:** `src/main/database/core/TransactionManager.ts` (NEW)
+
 ```typescript
 export class TransactionManager {
   constructor(private db: Database.Database) {}
@@ -289,6 +311,7 @@ export class TransactionManager {
 ```
 
 **Usage:**
+
 ```typescript
 // Bulk create with transaction
 txManager.execute(() => {
@@ -299,6 +322,7 @@ txManager.execute(() => {
 ```
 
 **Success Criteria:**
+
 - ✅ All bulk operations use transactions
 - ✅ Rollback on error verified
 - ✅ ACID guarantees enforced
@@ -306,6 +330,7 @@ txManager.execute(() => {
 ### 1.4 Performance Optimization (2-3 weeks)
 
 **File:** `src/main/database/indexes/performanceIndexes.ts` (NEW)
+
 ```sql
 CREATE INDEX idx_fixtures_project ON fixtures(project_id);
 CREATE INDEX idx_fixtures_type ON fixtures(type);
@@ -314,6 +339,7 @@ CREATE INDEX idx_shop_order_items_section ON shop_order_items(section_id);
 ```
 
 **Success Criteria:**
+
 - ✅ Query performance improved by 10x
 - ✅ Load time <2s for 10k fixtures
 - ✅ p95 latency <50ms
@@ -325,6 +351,7 @@ CREATE INDEX idx_shop_order_items_section ON shop_order_items(section_id);
 ### 2.1 Monorepo Setup (1 week)
 
 **New Structure:**
+
 ```
 /apps/
   /desktop/          ← Move existing src/ here
@@ -333,6 +360,7 @@ CREATE INDEX idx_shop_order_items_section ON shop_order_items(section_id);
 ```
 
 **Root package.json:**
+
 ```json
 {
   "name": "showstack-monorepo",
@@ -347,11 +375,13 @@ CREATE INDEX idx_shop_order_items_section ON shop_order_items(section_id);
 ### 2.2 Zod Validation Layer (3-4 weeks)
 
 **Install:**
+
 ```bash
 npm install zod --workspace=@showstack/shared
 ```
 
 **File:** `packages/shared/src/validation/fixtureSchema.ts`
+
 ```typescript
 import { z } from 'zod';
 
@@ -363,7 +393,7 @@ export const FixtureSchema = z.object({
   universe: z.number().int().min(1).max(64).optional(),
   dmx_address: z.number().int().min(1).max(512).optional(),
   created_at: z.number().int(),
-  updated_at: z.number().int()
+  updated_at: z.number().int(),
 });
 
 export type Fixture = z.infer<typeof FixtureSchema>;
@@ -371,23 +401,24 @@ export type Fixture = z.infer<typeof FixtureSchema>;
 export const CreateFixtureSchema = FixtureSchema.omit({
   id: true,
   created_at: true,
-  updated_at: true
+  updated_at: true,
 });
 ```
 
 **File:** `packages/shared/src/validation/shopOrderSchema.ts` (renamed from prepSchema.ts)
+
 ```typescript
 export const ShopOrderProjectSchema = z.object({
   id: z.string().uuid(),
   production_name: z.string().min(1),
   disciplines: z.array(z.enum(['lighting', 'audio', 'video'])),
-  current_revision: z.number().int().min(0).max(5)
+  current_revision: z.number().int().min(0).max(5),
 });
 
 export const ShopOrderSectionSchema = z.object({
   id: z.string().uuid(),
   shop_order_project_id: z.string().uuid(),
-  name: z.string().min(1)
+  name: z.string().min(1),
 });
 
 export const ShopOrderItemSchema = z.object({
@@ -395,11 +426,12 @@ export const ShopOrderItemSchema = z.object({
   section_id: z.string().uuid(),
   description: z.string().min(1),
   active_qty: z.number().int().min(0),
-  spare_qty: z.number().int().min(0)
+  spare_qty: z.number().int().min(0),
 });
 ```
 
 **Success Criteria:**
+
 - ✅ All entities have Zod schemas
 - ✅ All IPC handlers validate input
 - ✅ Performance impact <5ms per validation
@@ -407,6 +439,7 @@ export const ShopOrderItemSchema = z.object({
 ### 2.3 Service Layer Extraction (2-3 weeks)
 
 **File Structure:**
+
 ```
 apps/desktop/src/main/services/
   ├── FixtureService.ts
@@ -419,6 +452,7 @@ apps/desktop/src/main/services/
 ```
 
 **Example:** `apps/desktop/src/main/services/FixtureService.ts`
+
 ```typescript
 import { CreateFixtureSchema, Fixture } from '@showstack/shared';
 import { getProjectDatabase } from '../database';
@@ -432,7 +466,7 @@ export class FixtureService {
       ...data,
       id: uuid(),
       created_at: Date.now(),
-      updated_at: Date.now()
+      updated_at: Date.now(),
     };
 
     const db = getProjectDatabase();
@@ -441,7 +475,14 @@ export class FixtureService {
       VALUES (?, ?, ?, ?, ?, ?)
     `);
 
-    stmt.run(fixture.id, fixture.project_id, fixture.type, fixture.quantity, fixture.created_at, fixture.updated_at);
+    stmt.run(
+      fixture.id,
+      fixture.project_id,
+      fixture.type,
+      fixture.quantity,
+      fixture.created_at,
+      fixture.updated_at,
+    );
 
     return fixture;
   }
@@ -457,9 +498,14 @@ export class FixtureService {
 **Update IPC Handlers (thin wrappers):**
 
 **File:** `apps/desktop/src/main/ipc/shop-order.ts` (REFACTOR from prep.ts, 1337 lines → ~150 lines)
+
 ```typescript
 import { ipcMain } from 'electron';
-import { ShopOrderProjectService, ShopOrderSectionService, ShopOrderItemService } from '../services';
+import {
+  ShopOrderProjectService,
+  ShopOrderSectionService,
+  ShopOrderItemService,
+} from '../services';
 
 const projectService = new ShopOrderProjectService();
 const sectionService = new ShopOrderSectionService();
@@ -488,6 +534,7 @@ export function registerShopOrderHandlers(): void {
 ```
 
 **Success Criteria:**
+
 - ✅ All business logic in services
 - ✅ IPC handlers <150 lines each
 - ✅ 80%+ coverage on service layer
@@ -500,17 +547,20 @@ export function registerShopOrderHandlers(): void {
 ### 3.1 Supabase Project Setup (1 week)
 
 **Why PowerSync + Supabase:**
+
 - ✅ Zero backend code to write
 - ✅ **Saves 15-20 weeks** vs custom backend
 - ✅ **$0/month** for MVP
 
 **Setup:**
+
 1. Create Supabase project at https://supabase.com
 2. Note credentials (URL, anon key, service role key)
 
 **Database Schema:**
 
 **File:** `supabase/schema.sql` (NEW)
+
 ```sql
 -- Enable UUID
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -579,6 +629,7 @@ CREATE POLICY "Users can view own projects" ON projects
 ```
 
 **Environment Variables:**
+
 ```bash
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
@@ -589,11 +640,13 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 ### 3.2 PowerSync SDK Integration (3-4 weeks)
 
 **Install:**
+
 ```bash
 npm install @powersync/web @powersync/common
 ```
 
 **File:** `apps/desktop/src/main/services/PowerSyncService.ts` (NEW)
+
 ```typescript
 import { PowerSyncDatabase } from '@powersync/web';
 import { Column, ColumnType, Schema, Table } from '@powersync/common';
@@ -604,8 +657,8 @@ const SCHEMA = new Schema([
     columns: [
       new Column({ name: 'id', type: ColumnType.TEXT }),
       new Column({ name: 'name', type: ColumnType.TEXT }),
-      new Column({ name: 'user_id', type: ColumnType.TEXT })
-    ]
+      new Column({ name: 'user_id', type: ColumnType.TEXT }),
+    ],
   }),
   new Table({
     name: 'fixtures',
@@ -613,16 +666,16 @@ const SCHEMA = new Schema([
       new Column({ name: 'id', type: ColumnType.TEXT }),
       new Column({ name: 'project_id', type: ColumnType.TEXT }),
       new Column({ name: 'type', type: ColumnType.TEXT }),
-      new Column({ name: 'quantity', type: ColumnType.INTEGER })
-    ]
+      new Column({ name: 'quantity', type: ColumnType.INTEGER }),
+    ],
   }),
   new Table({
     name: 'shop_order_projects',
     columns: [
       new Column({ name: 'id', type: ColumnType.TEXT }),
-      new Column({ name: 'production_name', type: ColumnType.TEXT })
-    ]
-  })
+      new Column({ name: 'production_name', type: ColumnType.TEXT }),
+    ],
+  }),
 ]);
 
 export class PowerSyncService {
@@ -631,7 +684,7 @@ export class PowerSyncService {
   async init(): Promise<void> {
     this.db = new PowerSyncDatabase({
       database: { dbFilename: 'showstack-powersync.db' },
-      schema: SCHEMA
+      schema: SCHEMA,
     });
 
     await this.db.init();
@@ -639,28 +692,34 @@ export class PowerSyncService {
     // Connect to Supabase
     await this.db.connect({
       powerSyncUrl: process.env.POWERSYNC_URL!,
-      token: async () => this.getSupabaseToken()
+      token: async () => this.getSupabaseToken(),
     });
   }
 
   private async getSupabaseToken(): Promise<string> {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     return session?.access_token || '';
   }
 }
 ```
 
 **Update Services:**
+
 ```typescript
 export class FixtureService {
   constructor(private powerSync: PowerSyncService) {}
 
   async create(input: unknown): Promise<Fixture> {
     // Insert locally - PowerSync automatically syncs to cloud!
-    await this.powerSync.execute(`
+    await this.powerSync.execute(
+      `
       INSERT INTO fixtures (id, project_id, type, quantity)
       VALUES (?, ?, ?, ?)
-    `, [fixture.id, fixture.project_id, fixture.type, fixture.quantity]);
+    `,
+      [fixture.id, fixture.project_id, fixture.type, fixture.quantity],
+    );
 
     return fixture;
   }
@@ -668,6 +727,7 @@ export class FixtureService {
 ```
 
 **Success Criteria:**
+
 - ✅ PowerSync syncing bidirectionally
 - ✅ Local changes sync to cloud
 - ✅ Cloud changes appear locally in real-time
@@ -678,18 +738,20 @@ export class FixtureService {
 ### 3.3 Supabase Auth Integration (1-2 weeks)
 
 **Install:**
+
 ```bash
 npm install @supabase/supabase-js
 ```
 
 **File:** `apps/desktop/src/main/services/SupabaseAuthService.ts` (NEW)
+
 ```typescript
 import { createClient } from '@supabase/supabase-js';
 
 export class SupabaseAuthService {
   private supabase = createClient(
     process.env.VITE_SUPABASE_URL!,
-    process.env.VITE_SUPABASE_ANON_KEY!
+    process.env.VITE_SUPABASE_ANON_KEY!,
   );
 
   async signUp(email: string, password: string): Promise<void> {
@@ -714,6 +776,7 @@ export class SupabaseAuthService {
 **UI:**
 
 **File:** `apps/desktop/src/renderer/src/pages/Auth/Login.tsx` (NEW)
+
 ```typescript
 export function Login() {
   const [email, setEmail] = useState('');
@@ -742,6 +805,7 @@ export function Login() {
 **Presence Indicator:**
 
 **File:** `apps/desktop/src/renderer/src/components/collaboration/PresenceIndicator.tsx` (NEW)
+
 ```typescript
 export function PresenceIndicator({ projectId }: { projectId: string }) {
   const [users, setUsers] = useState<any[]>([]);
@@ -767,6 +831,7 @@ export function PresenceIndicator({ projectId }: { projectId: string }) {
 **Sync Status:**
 
 **File:** `apps/desktop/src/renderer/src/components/collaboration/SyncStatus.tsx` (NEW)
+
 ```typescript
 export function SyncStatus() {
   const [status, setStatus] = useState<'synced' | 'syncing' | 'offline'>('synced');
@@ -790,6 +855,7 @@ export function SyncStatus() {
 **Goal:** 70% coverage (up from 50%)
 
 **Example:** `apps/desktop/src/main/services/__tests__/FixtureService.test.ts`
+
 ```typescript
 import { describe, it, expect } from 'vitest';
 import { FixtureService } from '../FixtureService';
@@ -800,7 +866,7 @@ describe('FixtureService', () => {
     const fixture = await service.create({
       project_id: 'test',
       type: 'Moving Light',
-      quantity: 10
+      quantity: 10,
     });
 
     expect(fixture.id).toBeDefined();
@@ -815,6 +881,7 @@ describe('FixtureService', () => {
 ```
 
 **Success Criteria:**
+
 - ✅ 70%+ overall coverage
 - ✅ All services tested
 - ✅ All validation schemas tested
@@ -824,6 +891,7 @@ describe('FixtureService', () => {
 **Example:** Full CRUD lifecycle tests for fixtures, shop orders, etc.
 
 **Success Criteria:**
+
 - ✅ 15+ integration tests
 - ✅ All critical workflows tested
 
@@ -834,6 +902,7 @@ describe('FixtureService', () => {
 ### 5.1 Enhanced GitHub Actions (1 week)
 
 **File:** `.github/workflows/test.yml` (UPDATE)
+
 ```yaml
 name: Test Suite
 
@@ -861,12 +930,14 @@ jobs:
 ### 5.2 Pre-commit Hooks (1 week)
 
 **Install:**
+
 ```bash
 npm install --save-dev husky lint-staged
 npx husky install
 ```
 
 **File:** `.husky/pre-commit`
+
 ```bash
 #!/bin/sh
 npx lint-staged
@@ -880,11 +951,13 @@ npm run type-check
 ### 6.1 Sentry Integration (1-2 weeks)
 
 **Install:**
+
 ```bash
 npm install @sentry/electron
 ```
 
 **File:** `apps/desktop/src/main/monitoring/sentry.ts` (NEW)
+
 ```typescript
 import * as Sentry from '@sentry/electron/main';
 
@@ -892,7 +965,7 @@ export function initSentry(): void {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     environment: process.env.NODE_ENV,
-    enabled: process.env.NODE_ENV === 'production'
+    enabled: process.env.NODE_ENV === 'production',
   });
 }
 ```
@@ -900,6 +973,7 @@ export function initSentry(): void {
 ### 6.2 Health Check System (1-2 weeks)
 
 **File:** `apps/desktop/src/main/monitoring/HealthChecker.ts` (NEW)
+
 ```typescript
 export class HealthChecker {
   async checkHealth(): Promise<HealthStatus> {
@@ -907,8 +981,8 @@ export class HealthChecker {
       status: 'healthy',
       checks: {
         database: await this.checkDatabase(),
-        cloudConnection: await this.checkCloudConnection()
-      }
+        cloudConnection: await this.checkCloudConnection(),
+      },
     };
   }
 }
@@ -921,6 +995,7 @@ export class HealthChecker {
 ### 7.1 Automated Backups (1 week)
 
 **File:** `apps/desktop/src/main/services/BackupService.ts` (NEW)
+
 ```typescript
 export class BackupService {
   private readonly MAX_BACKUPS = 10;
@@ -943,6 +1018,7 @@ export class BackupService {
 ### 7.2 Crash Recovery (1 week)
 
 **File:** `apps/desktop/src/main/recovery/CrashRecovery.ts` (NEW)
+
 ```typescript
 export class CrashRecovery {
   async recover(): Promise<void> {
@@ -958,16 +1034,16 @@ export class CrashRecovery {
 
 ## Timeline Summary
 
-| Phase | Duration | Status | Key Deliverables |
-|-------|----------|--------|------------------|
-| **Phase 0: Stabilization** | 7 weeks | ✅ COMPLETED | Error handling, file organization, shop-order rename, monitoring |
-| **Phase 1: Database Migration** | 8 weeks | ✅ COMPLETED | better-sqlite3, WAL mode, transactions, 30+ indexes |
-| **Phase 2: Validation & Services** | 6-8 weeks | ✅ COMPLETED | Zod, service layer, monorepo |
-| **Phase 3: Supabase + PowerSync** | 6-8 weeks | ✅ COMPLETED (PR #74) | Cloud sync, auth, collaboration UI, 47 sync component tests |
-| **Phase 4: Testing** | 4-6 weeks | 🔵 Ready to Start | 70% coverage, integration tests, database monitoring |
-| **Phase 5: CI/CD** | 2-3 weeks | 🟡 Pending | GitHub Actions, pre-commit hooks |
-| **Phase 6: Security & Monitoring** | 3-4 weeks | 🟡 Pending | Sentry, health checks |
-| **Phase 7: Disaster Recovery** | 1-2 weeks | 🟡 Pending | Backups, crash recovery |
+| Phase                              | Duration  | Status                | Key Deliverables                                                 |
+| ---------------------------------- | --------- | --------------------- | ---------------------------------------------------------------- |
+| **Phase 0: Stabilization**         | 7 weeks   | ✅ COMPLETED          | Error handling, file organization, shop-order rename, monitoring |
+| **Phase 1: Database Migration**    | 8 weeks   | ✅ COMPLETED          | better-sqlite3, WAL mode, transactions, 30+ indexes              |
+| **Phase 2: Validation & Services** | 6-8 weeks | ✅ COMPLETED          | Zod, service layer, monorepo                                     |
+| **Phase 3: Supabase + PowerSync**  | 6-8 weeks | ✅ COMPLETED (PR #74) | Cloud sync, auth, collaboration UI, 47 sync component tests      |
+| **Phase 4: Testing**               | 4-6 weeks | 🔵 Ready to Start     | 70% coverage, integration tests, database monitoring             |
+| **Phase 5: CI/CD**                 | 2-3 weeks | 🟡 Pending            | GitHub Actions, pre-commit hooks                                 |
+| **Phase 6: Security & Monitoring** | 3-4 weeks | 🟡 Pending            | Sentry, health checks                                            |
+| **Phase 7: Disaster Recovery**     | 1-2 weeks | 🟡 Pending            | Backups, crash recovery                                          |
 
 **Completed: ~21-23 weeks (Phases 0-3)**
 **Remaining: 14-22 weeks (3-5 months)**
@@ -978,24 +1054,26 @@ export class CrashRecovery {
 
 ## Success Metrics
 
-| Metric | Current | Target |
-|--------|---------|--------|
-| **Test Coverage** | 50% | 70% |
-| **Query Performance (p95)** | Unknown | <50ms |
-| **App Load Time** | Unknown | <2s |
-| **File Organization** | Some 800+ line files | Max 200 lines per file |
-| **Cloud Sync Latency** | N/A | <500ms |
-| **Clear Naming** | "prep" confusion | "shop-order" throughout |
+| Metric                      | Current              | Target                  |
+| --------------------------- | -------------------- | ----------------------- |
+| **Test Coverage**           | 50%                  | 70%                     |
+| **Query Performance (p95)** | Unknown              | <50ms                   |
+| **App Load Time**           | Unknown              | <2s                     |
+| **File Organization**       | Some 800+ line files | Max 200 lines per file  |
+| **Cloud Sync Latency**      | N/A                  | <500ms                  |
+| **Clear Naming**            | "prep" confusion     | "shop-order" throughout |
 
 ---
 
 ## Cost Analysis
 
 **PowerSync + Supabase:**
+
 - **MVP: $0/month** (Free tiers)
 - **Production: $25-150/month**
 
 **Custom Backend (Not Recommended):**
+
 - **MVP: $46-76/month**
 - **Time: 16-20 weeks**
 - **Maintenance: High**
@@ -1015,6 +1093,7 @@ export class CrashRecovery {
    - Database monitoring & observability (from PR #74 review)
 
 **Phase 3 Complete!** ShowStack now has:
+
 - ✅ PowerSync + Supabase cloud sync infrastructure
 - ✅ Authentication UI (login, signup, forgot password)
 - ✅ Sync status indicators and offline banner

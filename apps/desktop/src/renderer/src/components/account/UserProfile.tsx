@@ -69,7 +69,8 @@ export function UserProfile() {
       const digits = cleaned.slice(1);
       if (digits.length <= 3) return cleaned;
       if (digits.length <= 6) return `+${digits.slice(0, 3)} ${digits.slice(3)}`;
-      if (digits.length <= 10) return `+${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
+      if (digits.length <= 10)
+        return `+${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
       return `+${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6, 10)} ${digits.slice(10, 14)}`;
     }
 
@@ -99,12 +100,16 @@ export function UserProfile() {
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">User Profile</h2>
-        <p className="text-gray-600 dark:text-gray-400">Manage your personal information and designer credits</p>
+        <p className="text-gray-600 dark:text-gray-400">
+          Manage your personal information and designer credits
+        </p>
       </div>
 
       {/* Avatar */}
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Profile Picture</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Profile Picture
+        </h3>
         <div className="flex items-center gap-6">
           <div className="relative">
             <div className="w-24 h-24 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center overflow-hidden">
@@ -223,7 +228,9 @@ export function UserProfile() {
 
       {/* Designer Credit */}
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Designer Credit</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Designer Credit
+        </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
           This information will appear on shop orders and exported documents
         </p>

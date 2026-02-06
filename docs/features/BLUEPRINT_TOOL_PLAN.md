@@ -1,4 +1,5 @@
 # Blueprint Tool Implementation Plan
+
 **OmniGraffle Parity for ShowStack:Lighting - Best-in-Class Technical Drawing Module**
 
 ## Executive Summary
@@ -16,6 +17,7 @@ Implement a professional-grade Blueprint tool for creating rack elevation drawin
 ### Foundation: Reuse Existing Infrastructure
 
 **Leverage from Label Designer (~80% reuse)**:
+
 - Grid-based canvas system: `/Users/joshkarp/showstack/src/renderer/src/components/prep/layout/LayoutCanvas.tsx`
 - Zoom/pan controls (50-200%)
 - Snap guides and grid alignment
@@ -25,6 +27,7 @@ Implement a professional-grade Blueprint tool for creating rack elevation drawin
 - Puppeteer-based PDF export pipeline
 
 **New Blueprint-Specific (~20%)**:
+
 - Technical drawing elements (racks, equipment symbols, cables, ports, measurements)
 - Smart connection routing (orthogonal, Bezier, obstacle avoidance)
 - Equipment library with infrastructure integration
@@ -73,6 +76,7 @@ src/renderer/src/components/production/blueprint/
 **New file**: `/Users/joshkarp/showstack/src/renderer/src/types/blueprint.ts`
 
 Key types to define:
+
 - `BlueprintElementType` (rack_elevation, equipment_symbol, cable, connector, measurement_line, callout, equipment_group)
 - `RackElevationConfig` (rackUnits, showRuler, equipment[], mountingType)
 - `EquipmentSymbolConfig` (equipmentId, symbolType, ports[], dimensions)
@@ -81,6 +85,7 @@ Key types to define:
 - `LayerConfig` (name, visible, locked, opacity, zIndex)
 
 **Extend existing**: `/Users/joshkarp/showstack/src/renderer/src/types/prep.ts`
+
 - Add blueprint element types to `LayoutElementType` union
 - Extend element config interfaces
 
@@ -91,6 +96,7 @@ Key types to define:
 ### 1. Rack Elevation Drawings
 
 **Features**:
+
 - ✅ 19" rack component with configurable U-space (1U-56U, typical 42U)
 - ✅ Visual U-space ruler with measurements (1U = 1.75")
 - ✅ Equipment mounting with U-position and U-height
@@ -102,6 +108,7 @@ Key types to define:
 - ✅ Integration with infrastructure_equipment table
 
 **Technical Requirements**:
+
 - U-space calculations: 1U = 1.75" = 44.45mm
 - Precision: Snap to 0.5U increments for fractional mounting
 - Visual feedback: Highlight available U-space, show collisions in red
@@ -110,6 +117,7 @@ Key types to define:
 ### 2. System Drawings
 
 **Features**:
+
 - ✅ Free-form equipment symbol placement
 - ✅ Equipment symbol library (network switches, consoles, processors, dimmers, fixtures, PDUs)
 - ✅ Port-to-port cable routing
@@ -121,14 +129,16 @@ Key types to define:
 - ✅ Text callouts with leader lines
 
 **Cable Routing Algorithms**:
+
 1. **Orthogonal Routing**: Right-angle connections (professional diagrams)
 2. **Bezier Curves**: Smooth curved connections (aesthetic)
 3. **Manual Waypoints**: User-defined routing points
-4. **Obstacle Avoidance**: A* pathfinding around equipment (advanced)
+4. **Obstacle Avoidance**: A\* pathfinding around equipment (advanced)
 
 ### 3. Equipment Symbol Library
 
 **Integration with Infrastructure**:
+
 ```typescript
 // Auto-populate from infrastructure_equipment table
 async function loadEquipmentLibrary(projectId: string) {
@@ -136,11 +146,11 @@ async function loadEquipmentLibrary(projectId: string) {
 
   // Categorize equipment
   const library = {
-    network: equipment.filter(eq => eq.category === 'network'),
-    lighting: equipment.filter(eq => eq.category === 'lighting'),
-    audio: equipment.filter(eq => eq.category === 'audio'),
-    power: equipment.filter(eq => eq.category === 'power'),
-    video: equipment.filter(eq => eq.category === 'video')
+    network: equipment.filter((eq) => eq.category === 'network'),
+    lighting: equipment.filter((eq) => eq.category === 'lighting'),
+    audio: equipment.filter((eq) => eq.category === 'audio'),
+    power: equipment.filter((eq) => eq.category === 'power'),
+    video: equipment.filter((eq) => eq.category === 'video'),
   };
 
   // Generate symbols with port definitions
@@ -149,6 +159,7 @@ async function loadEquipmentLibrary(projectId: string) {
 ```
 
 **Pre-built Symbols** (20+ standard types):
+
 - Network: Switches (8/16/24/48 port), routers, WiFi APs
 - Lighting: Consoles, processors, gateways, fixtures
 - Audio: Consoles, processors, speakers
@@ -162,6 +173,7 @@ async function loadEquipmentLibrary(projectId: string) {
 ### 1. Layer Management System
 
 **Features**:
+
 - ✅ Multiple layers per drawing (unlimited)
 - ✅ Layer visibility toggle (show/hide)
 - ✅ Layer locking (prevent editing)
@@ -171,6 +183,7 @@ async function loadEquipmentLibrary(projectId: string) {
 - ✅ Typical layers: Background, Equipment, Cables, Annotations, Measurements
 
 **UI Component**: `BlueprintLayerPanel.tsx`
+
 - Sidebar panel showing layer list
 - Drag-to-reorder layers
 - Eye icon for visibility
@@ -180,12 +193,14 @@ async function loadEquipmentLibrary(projectId: string) {
 ### 2. Multi-Format Export
 
 **Export Formats**:
+
 1. **PDF** (via Puppeteer) - 300 DPI, vector-preserved, print-ready
 2. **SVG** - Native vector format, fully editable in Illustrator/Inkscape
 3. **PNG** - High-resolution raster (1x, 2x, 3x scaling for presentations)
 4. **DXF** (Phase 2) - CAD integration for AutoCAD/Rhino
 
 **Export Options**:
+
 - Page sizes: Letter, Tabloid, A3, A2, A1, A0 (engineering sizes)
 - Resolution: 72 DPI (screen), 150 DPI (web), 300 DPI (print), 600 DPI (high-quality)
 - Color modes: RGB (screen), CMYK (print), Grayscale
@@ -196,6 +211,7 @@ async function loadEquipmentLibrary(projectId: string) {
 ### 3. Smart Guides and Snapping
 
 **Features**:
+
 - ✅ Grid snapping (configurable grid spacing)
 - ✅ Element snapping (align to other element edges)
 - ✅ Smart guides (show when aligned with other elements)
@@ -205,6 +221,7 @@ async function loadEquipmentLibrary(projectId: string) {
 - ✅ Angle snapping (0°, 45°, 90° for orthogonal lines)
 
 **Visual Feedback**:
+
 - Magenta guide lines when aligned horizontally/vertically
 - Blue snap indicators at connection points
 - Distance measurements while dragging
@@ -212,6 +229,7 @@ async function loadEquipmentLibrary(projectId: string) {
 ### 4. Advanced Styling
 
 **Element-Level Styling**:
+
 - Typography: 50+ fonts, size, weight, style, alignment
 - Colors: Full color picker, hex/RGB/HSL, opacity
 - Borders: Width, style (solid/dashed/dotted), color, radius
@@ -220,6 +238,7 @@ async function loadEquipmentLibrary(projectId: string) {
 - Patterns: Hatching, cross-hatching for fills
 
 **Symbol Customization**:
+
 - Custom colors per symbol instance
 - Scaling without quality loss (vector)
 - Rotation in 1° increments
@@ -227,6 +246,7 @@ async function loadEquipmentLibrary(projectId: string) {
 - Custom port configurations
 
 **Cable Styling**:
+
 - Stroke width (1-10px)
 - Stroke style (solid/dashed/dotted/double)
 - Stroke color with opacity
@@ -236,18 +256,21 @@ async function loadEquipmentLibrary(projectId: string) {
 ### 5. Professional Drawing Tools
 
 **Measurement Tools**:
+
 - Dimension lines with auto-calculated distances
 - Units: pixels, inches, centimeters, U-space
 - Label positioning (above/below/center)
 - Extension lines (standard engineering style)
 
 **Annotation Tools**:
+
 - Text callouts with leader lines
 - Leader styles: straight, elbow (90°), curved (Bezier)
 - Arrow/dot/none termination
 - Auto-positioning to avoid overlaps
 
 **Title Blocks**:
+
 - Standard engineering title block templates
 - Project info integration (name, date, revision)
 - Scale indicator (1:1, 1:2, custom)
@@ -262,6 +285,7 @@ async function loadEquipmentLibrary(projectId: string) {
 **Goal**: Establish blueprint infrastructure and implement rack elevation drawings with TDD
 
 **Tasks**:
+
 1. **Create type definitions** (TDD - write types first)
    - `/Users/joshkarp/showstack/src/renderer/src/types/blueprint.ts`
    - Extend `/Users/joshkarp/showstack/src/renderer/src/types/prep.ts`
@@ -310,6 +334,7 @@ async function loadEquipmentLibrary(projectId: string) {
 **Goal**: Implement equipment symbol library with infrastructure table integration
 
 **Tasks**:
+
 1. **Create symbol library utility** (TDD for data fetching)
    - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/utils/symbolLibrary.ts`
    - Functions: `loadEquipmentFromInfrastructure()`, `categorizeEquipment()`, `generateSymbolFromEquipment()`
@@ -353,6 +378,7 @@ async function loadEquipmentLibrary(projectId: string) {
 **Goal**: Implement smart cable routing with port-to-port connections
 
 **Tasks**:
+
 1. **Implement port mapping utilities** (TDD)
    - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/utils/portMapping.ts`
    - Functions: `findPort()`, `calculatePortPosition()`, `validateConnection()`, `getCompatiblePorts()`
@@ -406,6 +432,7 @@ async function loadEquipmentLibrary(projectId: string) {
 **Goal**: Implement layer management system and advanced styling options
 
 **Tasks**:
+
 1. **Extend types for layers**
    - Add `LayerConfig` to blueprint types
    - Add `layerId` to all element configs
@@ -452,6 +479,7 @@ async function loadEquipmentLibrary(projectId: string) {
 **Goal**: Implement professional measurement and annotation tools
 
 **Tasks**:
+
 1. **Implement MeasurementLine element**
    - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/elements/MeasurementLine.tsx`
    - Dimension line rendering (extension lines, arrows, label)
@@ -493,6 +521,7 @@ async function loadEquipmentLibrary(projectId: string) {
 **Goal**: Implement best-in-class export system and UI polish
 
 **Tasks**:
+
 1. **Implement export format utilities**
    - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/utils/exportFormats.ts`
    - `exportToPDF()` - Leverage existing Puppeteer pipeline
@@ -550,6 +579,7 @@ async function loadEquipmentLibrary(projectId: string) {
 **Goal**: Comprehensive testing and bug fixing per TESTING_GUIDE.md standards
 
 **Testing Structure**:
+
 ```
 src/renderer/src/components/production/blueprint/
 ├── utils/__tests__/
@@ -636,6 +666,7 @@ src/main/ipc/__tests__/
    - Error messaging improvements
 
 **Test Commands**:
+
 ```bash
 # Run all tests
 npm test
@@ -654,6 +685,7 @@ npm run test:ui
 ```
 
 **Coverage Requirements** (per TESTING_GUIDE.md):
+
 - **Critical Utilities**: 80%+ (rackCalculations, cableRouting, portMapping)
 - **Components**: 50-60% (RackElevation, EquipmentSymbol, Cable)
 - **IPC Handlers**: 70%+ (blueprints.ts)
@@ -668,6 +700,7 @@ npm run test:ui
 ### Test-First Development Workflow
 
 **For Utilities (Phase 1, 2, 3)**:
+
 1. **Write test first** - Define expected behavior
 2. **Run test (red)** - Test fails (function doesn't exist yet)
 3. **Implement function** - Write minimal code to pass test
@@ -709,6 +742,7 @@ export function uSpaceToPixels(uSpace: number): number {
 ```
 
 **For Components (Phase 1-6)**:
+
 1. **Implement component** - Build UI and interactions
 2. **Write tests after** - Focus on user interactions, not implementation
 3. **Use React Testing Library** - Test like a user would use the component
@@ -752,6 +786,7 @@ describe('RackElevation', () => {
 ### Testing Best Practices (from TESTING_GUIDE.md)
 
 **DO**:
+
 - ✅ Write tests before fixing bugs
 - ✅ Use descriptive test names (`should detect collision when equipment overlaps`)
 - ✅ Follow AAA pattern (Arrange, Act, Assert)
@@ -762,6 +797,7 @@ describe('RackElevation', () => {
 - ✅ Use real data structures
 
 **DON'T**:
+
 - ❌ Test implementation details
 - ❌ Write flaky tests
 - ❌ Skip error cases
@@ -835,6 +871,7 @@ describe('RackElevation', () => {
 ## Success Criteria
 
 ### MVP Completion (Phase 1-7):
+
 - ✅ Rack elevation drawings with accurate U-space measurements
 - ✅ System diagrams with equipment symbols and cable routing
 - ✅ Equipment library with 20+ symbols and infrastructure integration
@@ -849,6 +886,7 @@ describe('RackElevation', () => {
 - ✅ Responsive performance (<100ms interaction latency with 100+ elements)
 
 ### Best-in-Class Features:
+
 - ✅ Layer management system (exceeds OmniGraffle)
 - ✅ Multi-format export (PDF/SVG/PNG/DXF)
 - ✅ Smart guides and advanced snapping
@@ -858,6 +896,7 @@ describe('RackElevation', () => {
 - ✅ High-performance rendering
 
 ### Quality Gates:
+
 - ✅ 80%+ test coverage for critical utilities (rackCalculations, cableRouting, portMapping)
 - ✅ 50-60% test coverage for components
 - ✅ 70%+ test coverage for IPC handlers
@@ -874,7 +913,7 @@ describe('RackElevation', () => {
 
 1. **Complex Cable Routing Algorithms**
    - **Risk**: Routing algorithms may be computationally expensive
-   - **Mitigation**: Implement in phases (orthogonal first, then Bezier, then A*), use Web Workers for complex calculations, cache routing results
+   - **Mitigation**: Implement in phases (orthogonal first, then Bezier, then A\*), use Web Workers for complex calculations, cache routing results
 
 2. **Performance with Large Drawings**
    - **Risk**: 100+ elements may cause UI lag

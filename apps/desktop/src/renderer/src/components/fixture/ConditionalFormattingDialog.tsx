@@ -81,9 +81,7 @@ export function ConditionalFormattingDialog({
   };
 
   const handleToggleRule = (id: string) => {
-    setLocalRules(
-      localRules.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r))
-    );
+    setLocalRules(localRules.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r)));
   };
 
   const handleMoveUp = (index: number) => {
@@ -123,7 +121,8 @@ export function ConditionalFormattingDialog({
             Conditional Formatting
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Highlight rows based on fixture properties. Rules are evaluated in order (higher priority first).
+            Highlight rows based on fixture properties. Rules are evaluated in order (higher
+            priority first).
           </p>
         </div>
 
@@ -156,7 +155,9 @@ export function ConditionalFormattingDialog({
                           {rule.name}
                         </div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          {rule.field} {rule.operator.replace(/_/g, ' ')} {!['is_empty', 'is_not_empty'].includes(rule.operator) && `"${rule.value}"`}
+                          {rule.field} {rule.operator.replace(/_/g, ' ')}{' '}
+                          {!['is_empty', 'is_not_empty'].includes(rule.operator) &&
+                            `"${rule.value}"`}
                         </div>
                       </div>
                       <div className="flex gap-1">
@@ -214,7 +215,9 @@ export function ConditionalFormattingDialog({
                   </label>
                   <select
                     value={editingRule.field as string}
-                    onChange={(e) => setEditingRule({ ...editingRule, field: e.target.value as keyof Fixture })}
+                    onChange={(e) =>
+                      setEditingRule({ ...editingRule, field: e.target.value as keyof Fixture })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                   >
                     {COMMON_FIELDS.map((field) => (
@@ -231,7 +234,12 @@ export function ConditionalFormattingDialog({
                   </label>
                   <select
                     value={editingRule.operator}
-                    onChange={(e) => setEditingRule({ ...editingRule, operator: e.target.value as HighlightConditionOperator })}
+                    onChange={(e) =>
+                      setEditingRule({
+                        ...editingRule,
+                        operator: e.target.value as HighlightConditionOperator,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                   >
                     {OPERATORS.map((op) => (

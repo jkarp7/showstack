@@ -98,7 +98,9 @@ async function testPowerSyncConnection(): Promise<void> {
     }
 
     console.log('\nTroubleshooting:');
-    console.log('1. Verify POWERSYNC_URL is correct (check PowerSync Dashboard → Settings → Credentials)');
+    console.log(
+      '1. Verify POWERSYNC_URL is correct (check PowerSync Dashboard → Settings → Credentials)',
+    );
     console.log('2. Ensure your PowerSync instance is active');
     console.log('3. Check that PowerSync is connected to your Supabase database');
     console.log('4. Verify sync rules are deployed');

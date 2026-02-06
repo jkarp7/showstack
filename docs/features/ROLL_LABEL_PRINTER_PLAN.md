@@ -1,4 +1,5 @@
 # Roll Label Printer Support Implementation Plan
+
 **Native Driver Support for Dymo, Brother P-Touch, Zebra, and ESC/POS Printers**
 
 ## Executive Summary
@@ -6,6 +7,7 @@
 Add native roll label printer support to ShowStack's existing Avery sheet label system. This implementation maintains 100% backward compatibility while enabling direct printing to Dymo LabelWriter (450/550), Brother P-Touch, Zebra (ZD420/ZD620), and generic ESC/POS thermal printers using native drivers. The unified template system allows one label design to work across both sheet and roll printers with intelligent auto-scaling.
 
 **Key Approach:**
+
 - **Native Drivers**: Use printer-specific libraries (dymo-sdk, node-ptouch, zebra-zpl, escpos) for best quality
 - **Unified Templates**: One template works for both sheet and roll printing with auto-scaling
 - **Full Size Library**: 30+ standard label sizes per printer type
@@ -22,11 +24,13 @@ Add native roll label printer support to ShowStack's existing Avery sheet label 
 ### Label Printing Architecture
 
 **Current System (Avery Sheet Labels)**:
+
 ```
 User Design → Grid-Based Template → HTML Generation → Puppeteer → PDF → System Printer
 ```
 
 **Components**:
+
 - **Designer**: Dual architecture (legacy canvas + modern grid-based at 4 cells/inch)
 - **Storage**: SQLite (page_layout_templates, page_layout_elements tables)
 - **Renderer**: `/Users/joshkarp/showstack/src/main/utils/labelSheetRenderer.ts`
@@ -35,11 +39,12 @@ User Design → Grid-Based Template → HTML Generation → Puppeteer → PDF �
 - **Supported Sheets**: 5 Avery templates (5160, 5163, 5164, 8160, 5167)
 
 **UI Shows (Not Implemented)**:
+
 ```typescript
-'dymo-450'      // Dymo LabelWriter 450 (UI only - not functional)
-'brother-pt'    // Brother P-Touch (UI only)
-'zebra'         // Zebra ZD420 (UI only)
-'avery-sheet'   // Currently the ONLY working option
+'dymo-450'; // Dymo LabelWriter 450 (UI only - not functional)
+'brother-pt'; // Brother P-Touch (UI only)
+'zebra'; // Zebra ZD420 (UI only)
+'avery-sheet'; // Currently the ONLY working option
 ```
 
 ---
@@ -99,7 +104,11 @@ interface IPrinterDriver {
   getSupportedSizes(): LabelSize[];
 
   // Rendering & printing
-  render(template: PageLayoutTemplate, elements: LayoutElement[], data: LabelData[]): Promise<PrintJobData>;
+  render(
+    template: PageLayoutTemplate,
+    elements: LayoutElement[],
+    data: LabelData[],
+  ): Promise<PrintJobData>;
   print(jobData: PrintJobData, options: PrintOptions): Promise<void>;
 
   // Capabilities
@@ -181,6 +190,7 @@ ALTER TABLE page_layout_templates ADD COLUMN auto_scale INTEGER DEFAULT 1;
 ### Standard Label Sizes (Sample)
 
 **Dymo LabelWriter (30+ sizes)**:
+
 - Address (1-1/8" × 3-1/2") - Code 30252
 - Large Address (1-4/10" × 3-1/2") - Code 30321
 - Shipping (2-5/16" × 4") - Code 30256
@@ -194,6 +204,7 @@ ALTER TABLE page_layout_templates ADD COLUMN auto_scale INTEGER DEFAULT 1;
 - (20+ more sizes...)
 
 **Brother P-Touch (30+ sizes)**:
+
 - Standard Address (1-1/7" × 3-1/2") - DK-1201
 - Shipping (2-4/9" × 4") - DK-1202
 - File Folder (2/3" × 3-7/15") - DK-1203
@@ -202,6 +213,7 @@ ALTER TABLE page_layout_templates ADD COLUMN auto_scale INTEGER DEFAULT 1;
 - (25+ more sizes...)
 
 **Zebra (30+ sizes)**:
+
 - Shipping (4" × 6")
 - Address (2" × 4")
 - Product Label (3" × 2")
@@ -210,6 +222,7 @@ ALTER TABLE page_layout_templates ADD COLUMN auto_scale INTEGER DEFAULT 1;
 - (25+ more sizes...)
 
 **ESC/POS Generic (15-20 sizes)**:
+
 - 58mm Receipt (2.283" wide)
 - 80mm Receipt (3.15" wide)
 - Label 2" × 1"
@@ -232,7 +245,7 @@ ALTER TABLE page_layout_templates ADD COLUMN auto_scale INTEGER DEFAULT 1;
 function scaleTemplateToSize(
   template: PageLayoutTemplate,
   elements: LayoutElement[],
-  targetSize: LabelSize
+  targetSize: LabelSize,
 ): { scaledTemplate: PageLayoutTemplate; scaledElements: LayoutElement[] } {
   const scaleX = targetSize.widthPixels / template.page_width;
   const scaleY = targetSize.heightPixels / template.page_height;
@@ -243,17 +256,17 @@ function scaleTemplateToSize(
     page_width: targetSize.widthPixels,
     page_height: targetSize.heightPixels,
     grid_columns: Math.round(template.grid_columns * scaleX),
-    grid_rows: Math.round(template.grid_rows * scaleY)
+    grid_rows: Math.round(template.grid_rows * scaleY),
   };
 
   // Scale elements (grid positions scale proportionally)
-  const scaledElements = elements.map(el => ({
+  const scaledElements = elements.map((el) => ({
     ...el,
     grid_column: Math.round(el.grid_column * scaleX),
     grid_row: Math.round(el.grid_row * scaleY),
     column_span: Math.round(el.column_span * scaleX),
     row_span: Math.round(el.row_span * scaleY),
-    style: scaleStyle(el.style, scaleX, scaleY) // Scale font sizes, etc.
+    style: scaleStyle(el.style, scaleX, scaleY), // Scale font sizes, etc.
   }));
 
   return { scaledTemplate, scaledElements };
@@ -261,6 +274,7 @@ function scaleTemplateToSize(
 ```
 
 **User Experience**:
+
 1. User designs label template using Avery 5160 as base
 2. User marks template as "Compatible with: Dymo, Brother, Zebra"
 3. When printing to Dymo 30252, template auto-scales from 2.625"×1" → 3.5"×1.125"
@@ -279,7 +293,7 @@ function renderTextElement(
   element: LayoutElement,
   cellWidth: number,
   cellHeight: number,
-  printerType: PrinterType
+  printerType: PrinterType,
 ): TextCommand {
   // Calculate absolute position from grid
   const x = element.grid_column * cellWidth;
@@ -299,12 +313,15 @@ function renderTextElement(
 
   return {
     type: 'text',
-    x, y, width, height,
+    x,
+    y,
+    width,
+    height,
     content: element.config.content,
     fontSize: printerFontSize,
     fontFamily,
     bold: fontWeight === 'bold',
-    align: textAlign
+    align: textAlign,
   };
 }
 ```
@@ -313,38 +330,42 @@ function renderTextElement(
 
 ```typescript
 // src/main/printing/generators/zplGenerator.ts
-export function generateZPL(commands: PrintCommand[], labelWidth: number, labelHeight: number): string {
+export function generateZPL(
+  commands: PrintCommand[],
+  labelWidth: number,
+  labelHeight: number,
+): string {
   let zpl = '^XA\n'; // Start label format
 
   // Set label dimensions (203 DPI for ZD420)
-  const widthDots = Math.round(labelWidth * 203 / 72);
-  const heightDots = Math.round(labelHeight * 203 / 72);
+  const widthDots = Math.round((labelWidth * 203) / 72);
+  const heightDots = Math.round((labelHeight * 203) / 72);
   zpl += `^PW${widthDots}\n`; // Print width
   zpl += `^LL${heightDots}\n`; // Label length
 
   for (const cmd of commands) {
     switch (cmd.type) {
       case 'text':
-        const xDots = Math.round(cmd.x * 203 / 72);
-        const yDots = Math.round(cmd.y * 203 / 72);
+        const xDots = Math.round((cmd.x * 203) / 72);
+        const yDots = Math.round((cmd.y * 203) / 72);
         zpl += `^FO${xDots},${yDots}\n`; // Field origin
         zpl += `^A0N,${cmd.fontSize * 2}\n`; // Font
         zpl += `^FD${cmd.content}^FS\n`; // Field data
         break;
 
       case 'rectangle':
-        const x = Math.round(cmd.x * 203 / 72);
-        const y = Math.round(cmd.y * 203 / 72);
-        const w = Math.round(cmd.width * 203 / 72);
-        const h = Math.round(cmd.height * 203 / 72);
+        const x = Math.round((cmd.x * 203) / 72);
+        const y = Math.round((cmd.y * 203) / 72);
+        const w = Math.round((cmd.width * 203) / 72);
+        const h = Math.round((cmd.height * 203) / 72);
         zpl += `^FO${x},${y}\n`;
         zpl += `^GB${w},${h},${cmd.thickness},${cmd.fill ? 'B' : 'W'}^FS\n`;
         break;
 
       case 'barcode':
-        const bx = Math.round(cmd.x * 203 / 72);
-        const by = Math.round(cmd.y * 203 / 72);
-        const bh = Math.round(cmd.height * 203 / 72);
+        const bx = Math.round((cmd.x * 203) / 72);
+        const by = Math.round((cmd.y * 203) / 72);
+        const bh = Math.round((cmd.height * 203) / 72);
         zpl += `^FO${bx},${by}\n`;
         if (cmd.barcodeType === 'code128') {
           zpl += `^BC,${bh},Y,N,N\n`; // Code 128
@@ -371,6 +392,7 @@ export function generateZPL(commands: PrintCommand[], labelWidth: number, labelH
 **Component**: `/Users/joshkarp/showstack/src/renderer/src/components/prep/label/PrinterSelector.tsx`
 
 **Features**:
+
 - Dropdown with printer types (Avery Sheet, Dymo, Brother, Zebra, ESC/POS)
 - Auto-detect available printers when type selected
 - Show printer status (ready/offline/low paper)
@@ -381,6 +403,7 @@ export function generateZPL(commands: PrintCommand[], labelWidth: number, labelH
 **Component**: `/Users/joshkarp/showstack/src/renderer/src/components/prep/label/LabelSizeSelector.tsx`
 
 **Features**:
+
 - Filtered list of sizes based on selected printer type
 - Shows dimensions and manufacturer code
 - Preview of label proportions
@@ -391,6 +414,7 @@ export function generateZPL(commands: PrintCommand[], labelWidth: number, labelH
 **Component**: `/Users/joshkarp/showstack/src/renderer/src/components/prep/label/PrinterSettings.tsx`
 
 **Features**:
+
 - Print darkness (0-30, common to all roll printers)
 - Print speed (slow/medium/fast for Zebra)
 - Print quality (draft/standard/high for Brother)
@@ -402,6 +426,7 @@ export function generateZPL(commands: PrintCommand[], labelWidth: number, labelH
 **Component**: `/Users/joshkarp/showstack/src/renderer/src/components/prep/label/RollLabelPreview.tsx`
 
 **Features**:
+
 - Realistic preview of roll label
 - Shows scaled dimensions
 - Preview with actual fixture data
@@ -412,9 +437,11 @@ export function generateZPL(commands: PrintCommand[], labelWidth: number, labelH
 ## Implementation Phases
 
 ### Phase 1: Foundation (Week 1-2)
+
 **Goal**: Architecture without breaking existing functionality
 
 **Tasks**:
+
 1. Create database migration (005_add_roll_label_support.ts)
 2. Create roll_label_sizes table
 3. Extend page_layout_templates table (printer_compatibility, target_label_size_id, auto_scale)
@@ -428,6 +455,7 @@ export function generateZPL(commands: PrintCommand[], labelWidth: number, labelH
 **Deliverable**: Database schema extended, no breaking changes, tests green
 
 **Critical Files**:
+
 - `/Users/joshkarp/showstack/src/main/database/migrations/005_add_roll_label_support.ts` (NEW)
 - `/Users/joshkarp/showstack/src/main/database/seeds/rollLabelSizes.ts` (NEW)
 - `/Users/joshkarp/showstack/src/main/printing/drivers/IPrinterDriver.ts` (NEW)
@@ -436,9 +464,11 @@ export function generateZPL(commands: PrintCommand[], labelWidth: number, labelH
 ---
 
 ### Phase 2: Dymo Support (Week 3-4)
+
 **Goal**: First working roll printer (most common)
 
 **Tasks**:
+
 1. Install `@dymo/dymo-connect-framework` or `dymo-sdk`
 2. Implement DymoDriver class (detect, connect, render, print)
 3. Implement dymoGenerator.ts (generate Dymo XML)
@@ -454,6 +484,7 @@ export function generateZPL(commands: PrintCommand[], labelWidth: number, labelH
 **Deliverable**: Dymo printing works end-to-end
 
 **Critical Files**:
+
 - `/Users/joshkarp/showstack/src/main/printing/drivers/dymoDriver.ts` (NEW)
 - `/Users/joshkarp/showstack/src/main/printing/generators/dymoGenerator.ts` (NEW)
 - `/Users/joshkarp/showstack/src/main/printing/renderers/rollLabelRenderer.ts` (NEW)
@@ -464,9 +495,11 @@ export function generateZPL(commands: PrintCommand[], labelWidth: number, labelH
 ---
 
 ### Phase 3: Brother P-Touch Support (Week 5)
+
 **Goal**: Second printer type, validate abstraction
 
 **Tasks**:
+
 1. Install `brother-label-printer` or USB library
 2. Implement BrotherDriver class
 3. Implement brotherGenerator.ts
@@ -479,15 +512,18 @@ export function generateZPL(commands: PrintCommand[], labelWidth: number, labelH
 **Deliverable**: Brother printing works
 
 **Critical Files**:
+
 - `/Users/joshkarp/showstack/src/main/printing/drivers/brotherDriver.ts` (NEW)
 - `/Users/joshkarp/showstack/src/main/printing/generators/brotherGenerator.ts` (NEW)
 
 ---
 
 ### Phase 4: Zebra Support (Week 6)
+
 **Goal**: Industrial printer with ZPL, barcode support
 
 **Tasks**:
+
 1. Install Zebra library (`zebra-browser-print-wrapper` or `zpl-printer`)
 2. Implement ZebraDriver class
 3. Implement zplGenerator.ts (ZPL command generation)
@@ -500,6 +536,7 @@ export function generateZPL(commands: PrintCommand[], labelWidth: number, labelH
 **Deliverable**: Zebra printing with barcodes works
 
 **Critical Files**:
+
 - `/Users/joshkarp/showstack/src/main/printing/drivers/zebraDriver.ts` (NEW)
 - `/Users/joshkarp/showstack/src/main/printing/generators/zplGenerator.ts` (NEW)
 - `/Users/joshkarp/showstack/src/main/printing/renderers/barcodeRenderer.ts` (NEW)
@@ -507,9 +544,11 @@ export function generateZPL(commands: PrintCommand[], labelWidth: number, labelH
 ---
 
 ### Phase 5: ESC/POS Support (Week 7)
+
 **Goal**: Generic thermal printer support
 
 **Tasks**:
+
 1. Install `escpos` + `escpos-usb`
 2. Implement EscposDriver class
 3. Implement escposGenerator.ts
@@ -520,15 +559,18 @@ export function generateZPL(commands: PrintCommand[], labelWidth: number, labelH
 **Deliverable**: ESC/POS printing works
 
 **Critical Files**:
+
 - `/Users/joshkarp/showstack/src/main/printing/drivers/escposDriver.ts` (NEW)
 - `/Users/joshkarp/showstack/src/main/printing/generators/escposGenerator.ts` (NEW)
 
 ---
 
 ### Phase 6: Template Auto-Scaling (Week 8)
+
 **Goal**: Unified templates across printers
 
 **Tasks**:
+
 1. Implement labelScaler.ts (proportional scaling)
 2. Add "Compatible Printers" UI to template save dialog
 3. Add "Auto-scale" toggle
@@ -540,15 +582,18 @@ export function generateZPL(commands: PrintCommand[], labelWidth: number, labelH
 **Deliverable**: One template works across multiple printers
 
 **Critical Files**:
+
 - `/Users/joshkarp/showstack/src/main/utils/labelScaler.ts` (NEW)
 - `/Users/joshkarp/showstack/src/renderer/src/components/prep/label/LabelLayoutDesigner.tsx` (MODIFY)
 
 ---
 
 ### Phase 7: Advanced Features (Week 9-10)
+
 **Goal**: Polish and production readiness
 
 **Tasks**:
+
 1. Implement PrinterSettings UI (darkness, speed, quality, rotation)
 2. Add print queue management (queue, retry failed jobs)
 3. Add printer status tracking (online/offline/low paper)
@@ -561,15 +606,18 @@ export function generateZPL(commands: PrintCommand[], labelWidth: number, labelH
 **Deliverable**: Production-ready roll printing
 
 **Critical Files**:
+
 - `/Users/joshkarp/showstack/src/renderer/src/components/prep/label/PrinterSettings.tsx` (NEW)
 - `/Users/joshkarp/showstack/src/renderer/src/components/prep/label/RollLabelPreview.tsx` (NEW)
 
 ---
 
 ### Phase 8: Documentation (Week 11)
+
 **Goal**: User and developer docs
 
 **Tasks**:
+
 1. Update user guide with roll printer setup
 2. Create video tutorials (setup each printer)
 3. Write developer docs (adding new printer types)
@@ -588,6 +636,7 @@ Following TESTING_GUIDE.md patterns (Vitest + React Testing Library).
 ### Unit Tests (Target: 70%+ for new code)
 
 **Test File**: `/Users/joshkarp/showstack/src/main/printing/__tests__/zplGenerator.test.ts`
+
 ```typescript
 describe('ZPL Generator', () => {
   it('should generate ZPL for simple text', () => {
@@ -608,6 +657,7 @@ describe('ZPL Generator', () => {
 ```
 
 **Test File**: `/Users/joshkarp/showstack/src/main/printing/__tests__/labelScaler.test.ts`
+
 ```typescript
 describe('Label Scaler', () => {
   it('should scale Avery 5160 to Dymo 30252', () => {
@@ -623,13 +673,14 @@ describe('Label Scaler', () => {
 ### Mock Printer Tests
 
 **Test File**: `/Users/joshkarp/showstack/src/main/printing/__tests__/dymoDriver.test.ts`
+
 ```typescript
 vi.mock('@dymo/dymo-connect-framework');
 
 describe('Dymo Driver', () => {
   it('should detect connected Dymo printers', async () => {
     vi.mocked(dymo.getPrinters).mockResolvedValue([
-      { name: 'DYMO LabelWriter 450', isConnected: true }
+      { name: 'DYMO LabelWriter 450', isConnected: true },
     ]);
 
     const driver = new DymoDriver();
@@ -644,6 +695,7 @@ describe('Dymo Driver', () => {
 ### Integration Tests
 
 **Test File**: `/Users/joshkarp/showstack/src/main/printing/__tests__/labelPrinter.integration.test.ts`
+
 ```typescript
 describe('Label Printer Integration', () => {
   it('should maintain Avery sheet printing (regression test)', async () => {
@@ -662,6 +714,7 @@ describe('Label Printer Integration', () => {
 ### Manual Test Plan
 
 **For Each Printer Type**:
+
 1. Print single label
 2. Print batch of 10 labels
 3. Verify text readability
@@ -679,6 +732,7 @@ describe('Label Printer Integration', () => {
 **Electron**: v39.2.1 with built-in Node.js v20+
 
 **Driver Libraries**:
+
 - `@dymo/dymo-connect-framework` - Official Dymo SDK (Electron compatible)
 - `brother-label-printer` - Brother support
 - `zebra-browser-print-wrapper` - Zebra ZPL
@@ -686,6 +740,7 @@ describe('Label Printer Integration', () => {
 - `node-usb` - Generic USB device access
 
 **Lazy Loading**:
+
 ```typescript
 // Only load driver when printer type selected
 export async function loadDriver(printerType: PrinterType): Promise<IPrinterDriver | null> {
@@ -712,12 +767,14 @@ export async function loadDriver(printerType: PrinterType): Promise<IPrinterDriv
 ### Driver Installation Requirements
 
 **User Setup**:
+
 - **Dymo**: Install Dymo Label Software (provides USB drivers)
 - **Brother**: Install Brother P-Touch Editor
 - **Zebra**: Install Zebra Designer
 - **ESC/POS**: Generic USB thermal printer (no special drivers)
 
 **Fallback**:
+
 ```typescript
 if (!driver) {
   throw new Error(`
@@ -736,11 +793,13 @@ if (!driver) {
 ### Performance
 
 **Print Speed**:
+
 - Avery sheets: 10-30 seconds (Puppeteer PDF generation)
 - Roll printers: 0.5-2 seconds per label (native commands)
 - Batch: 50-100 labels/minute
 
 **Optimizations**:
+
 - Connection pooling (reuse printer connections)
 - Parallel rendering (generate commands for multiple labels simultaneously)
 - Lazy driver loading
@@ -751,12 +810,14 @@ if (!driver) {
 ## Success Criteria
 
 ### Phase 1 (Foundation):
+
 - ✅ Database migration runs successfully
 - ✅ 100+ label sizes seeded
 - ✅ All existing tests pass
 - ✅ Zero breaking changes to Avery printing
 
 ### Phase 2 (Dymo):
+
 - ✅ Dymo printers auto-detected
 - ✅ Single label prints correctly
 - ✅ Batch of 10 labels prints correctly
@@ -764,26 +825,31 @@ if (!driver) {
 - ✅ Unit test coverage >70% for Dymo code
 
 ### Phases 3-5 (Other Printers):
+
 - ✅ Each printer meets same criteria as Dymo
 - ✅ Cross-printer compatibility verified
 
 ### Phase 6 (Auto-Scaling):
+
 - ✅ Avery template scales correctly to Dymo/Brother/Zebra
 - ✅ Layout proportions preserved
 - ✅ User can mark template as multi-printer compatible
 
 ### Phase 7 (Polish):
+
 - ✅ Error handling comprehensive
 - ✅ Status indicators functional
 - ✅ Settings persist
 - ✅ Performance <2s per label
 
 ### Phase 8 (Documentation):
+
 - ✅ User guide complete
 - ✅ Developer docs complete
 - ✅ Video tutorials published
 
 ### Overall:
+
 - ✅ 4 printer types functional (Dymo, Brother, Zebra, ESC/POS)
 - ✅ 100% backward compatibility with Avery sheets
 - ✅ Test coverage >50% global, >70% for new printer code
@@ -795,6 +861,7 @@ if (!driver) {
 ## Critical Files Summary
 
 ### Must Create (New Files):
+
 1. `/Users/joshkarp/showstack/src/main/database/migrations/005_add_roll_label_support.ts` - Database migration
 2. `/Users/joshkarp/showstack/src/main/database/seeds/rollLabelSizes.ts` - 100+ label sizes
 3. `/Users/joshkarp/showstack/src/main/printing/drivers/IPrinterDriver.ts` - Driver interface
@@ -807,12 +874,14 @@ if (!driver) {
 10. `/Users/joshkarp/showstack/src/renderer/src/components/prep/label/PrinterSettings.tsx` - Printer settings UI
 
 ### Must Modify (Existing Files):
+
 1. `/Users/joshkarp/showstack/src/main/ipc/labelPrinter.ts` - Add routing logic (Avery vs Roll)
 2. `/Users/joshkarp/showstack/src/main/database/schema.ts` - Extend tables
 3. `/Users/joshkarp/showstack/src/renderer/src/components/prep/label/LabelLayoutDesigner.tsx` - Add printer/size selection
 4. `/Users/joshkarp/showstack/package.json` - Add printer driver dependencies
 
 ### Reference (Existing Patterns):
+
 1. `/Users/joshkarp/showstack/src/main/utils/labelSheetRenderer.ts` - Current rendering pattern
 2. `/Users/joshkarp/showstack/src/renderer/src/utils/prep/labelDataMapper.ts` - Data mapping (40+ fields)
 3. `/Users/joshkarp/showstack/docs/testing/TESTING_GUIDE.md` - Testing patterns
@@ -839,6 +908,7 @@ if (!driver) {
 ## Risk Mitigation
 
 **High-Risk Areas**:
+
 1. **Driver Compatibility**: Test early with physical printers, fallback to generic
 2. **Cross-Platform USB**: Clear setup instructions, graceful errors
 3. **Template Scaling Quality**: Extensive preview testing, manual override option
@@ -846,6 +916,7 @@ if (!driver) {
 5. **Performance**: Lazy load drivers, benchmark startup time
 
 **Testing Checkpoints**:
+
 - After each phase: Full regression test suite
 - Before merge: Test on macOS, Windows, Linux
 - Manual testing with actual printers (minimum Dymo + one other)

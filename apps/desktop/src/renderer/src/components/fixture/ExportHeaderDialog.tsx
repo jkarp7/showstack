@@ -23,7 +23,7 @@ export function ExportHeaderDialog({
   onClose,
   onExport,
   defaultFormat,
-  projectName
+  projectName,
 }: ExportHeaderDialogProps) {
   const [options, setOptions] = useState<ExportHeaderOptions>({
     includeShowName: true,
@@ -32,7 +32,7 @@ export function ExportHeaderDialog({
     includeVenue: true,
     includeDate: true,
     customTitle: '',
-    format: defaultFormat
+    format: defaultFormat,
   });
 
   if (!isOpen) return null;
@@ -46,7 +46,7 @@ export function ExportHeaderDialog({
     csv: 'CSV',
     eos: 'ETC Eos',
     grandma2: 'GrandMA2',
-    grandma3: 'GrandMA3'
+    grandma3: 'GrandMA3',
   };
 
   return (
@@ -158,9 +158,7 @@ export function ExportHeaderDialog({
                   onChange={(e) => setOptions({ ...options, includeDate: e.target.checked })}
                   className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-600 focus:ring-2"
                 />
-                <span className="ml-3 text-sm text-gray-900 dark:text-gray-100">
-                  Export Date
-                </span>
+                <span className="ml-3 text-sm text-gray-900 dark:text-gray-100">Export Date</span>
               </label>
             </div>
           </div>
@@ -169,7 +167,8 @@ export function ExportHeaderDialog({
           {defaultFormat === 'csv' && (
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-3">
               <p className="text-sm text-blue-800 dark:text-blue-200">
-                <strong>CSV Format:</strong> Headers will be added as comment lines at the top of the file. Logo display is not supported in CSV format.
+                <strong>CSV Format:</strong> Headers will be added as comment lines at the top of
+                the file. Logo display is not supported in CSV format.
               </p>
             </div>
           )}

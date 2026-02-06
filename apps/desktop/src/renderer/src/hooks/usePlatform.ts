@@ -35,9 +35,11 @@ function detectPlatform(): PlatformFlags {
   const platform = platformString.toUpperCase();
   const userAgent = (navigator.userAgent || '').toUpperCase();
 
-  const isMac = MAC_IDENTIFIERS.some(id => platform.includes(id) || userAgent.includes(id));
-  const isWindows = WINDOWS_IDENTIFIERS.some(id => platform.includes(id) || userAgent.includes(id));
-  const isLinux = LINUX_IDENTIFIERS.some(id => platform.includes(id) || userAgent.includes(id));
+  const isMac = MAC_IDENTIFIERS.some((id) => platform.includes(id) || userAgent.includes(id));
+  const isWindows = WINDOWS_IDENTIFIERS.some(
+    (id) => platform.includes(id) || userAgent.includes(id),
+  );
+  const isLinux = LINUX_IDENTIFIERS.some((id) => platform.includes(id) || userAgent.includes(id));
 
   cachedPlatform = { isMac, isWindows, isLinux };
   return cachedPlatform;
@@ -64,7 +66,7 @@ export function usePlatform(): PlatformInfo {
       isWindows,
       isLinux,
       modifierKey: isMac ? 'Cmd' : 'Ctrl',
-      modifierSymbol: isMac ? '⌘' : 'Ctrl'
+      modifierSymbol: isMac ? '⌘' : 'Ctrl',
     };
   }, []);
 }
@@ -85,9 +87,7 @@ export function formatShortcut(shortcut: string | undefined, useSymbol = false):
   if (!shortcut) return '';
 
   const { isMac } = detectPlatform();
-  const modifier = isMac
-    ? (useSymbol ? '⌘' : 'Cmd')
-    : 'Ctrl';
+  const modifier = isMac ? (useSymbol ? '⌘' : 'Cmd') : 'Ctrl';
 
   // Use case-insensitive regex for robustness
   return shortcut.replace(/Mod/gi, modifier);

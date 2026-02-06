@@ -31,7 +31,7 @@ export function LicenseBanner({ status }: LicenseBannerProps) {
   const bannerStyles = {
     low: 'bg-yellow-50 border-yellow-200 text-yellow-800',
     medium: 'bg-orange-50 border-orange-200 text-orange-800',
-    high: 'bg-red-50 border-red-200 text-red-800'
+    high: 'bg-red-50 border-red-200 text-red-800',
   };
 
   const style = bannerStyles[status.warningLevel || 'medium'];

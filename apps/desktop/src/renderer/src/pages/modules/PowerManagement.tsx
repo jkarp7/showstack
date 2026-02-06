@@ -26,7 +26,7 @@ export function PowerManagement({ embedded = false }: PowerManagementProps) {
   const tabs = [
     { id: 'racks' as PowerTab, name: 'Racks & Distribution', icon: Server },
     { id: 'configuration' as PowerTab, name: 'Services & Templates', icon: Settings },
-    { id: 'summary' as PowerTab, name: 'Power Summary', icon: Zap }
+    { id: 'summary' as PowerTab, name: 'Power Summary', icon: Zap },
   ];
 
   const effectiveProjectId = projectId || currentProject?.id;
@@ -39,7 +39,7 @@ export function PowerManagement({ embedded = false }: PowerManagementProps) {
       try {
         const [dimmers, pds] = await Promise.all([
           window.api.dimmerRacks.getAll(effectiveProjectId),
-          window.api.pdRacks.getAll(effectiveProjectId)
+          window.api.pdRacks.getAll(effectiveProjectId),
         ]);
         setDimmerRacks(dimmers || []);
         setPdRacks(pds || []);
@@ -68,7 +68,7 @@ export function PowerManagement({ embedded = false }: PowerManagementProps) {
       {/* Tab Navigation */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         <div className="flex">
-          {tabs.map(tab => {
+          {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
               <button
@@ -103,11 +103,7 @@ export function PowerManagement({ embedded = false }: PowerManagementProps) {
         )}
         {activeTab === 'summary' && (
           <div className="h-full overflow-y-auto p-6">
-            <PowerSummaryPanel
-              dimmerRacks={dimmerRacks}
-              pdRacks={pdRacks}
-              fixtures={fixtures}
-            />
+            <PowerSummaryPanel dimmerRacks={dimmerRacks} pdRacks={pdRacks} fixtures={fixtures} />
           </div>
         )}
       </div>

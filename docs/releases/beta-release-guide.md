@@ -7,6 +7,7 @@ This guide explains how to set up automated builds for beta releases using GitHu
 ## Overview
 
 When you're ready for beta releases, GitHub Actions can automatically:
+
 1. Build your app for macOS, Windows, and Linux
 2. Create installers for all platforms
 3. Upload to GitHub Releases
@@ -26,7 +27,7 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*'  # Trigger on version tags (v0.1.0-beta, v1.0.0, etc.)
+      - 'v*' # Trigger on version tags (v0.1.0-beta, v1.0.0, etc.)
 
 jobs:
   release:
@@ -180,16 +181,19 @@ This is a beta release of ShowStack:Production. The core functionality is stable
 ## 📥 Installation
 
 ### macOS
+
 1. Download `ShowStack-Production-{version}.dmg`
 2. Open DMG and drag to Applications
 3. **Important:** Right-click → "Open" on first launch (unsigned app)
 
 ### Windows
+
 1. Download `ShowStack-Production-Setup-{version}.exe`
 2. Run installer
 3. May need to click "More info" → "Run anyway" in Windows Defender
 
 ### Linux
+
 1. Download `ShowStack-Production-{version}.AppImage`
 2. Make executable: `chmod +x ShowStack-Production-*.AppImage`
 3. Run: `./ShowStack-Production-*.AppImage`
@@ -201,6 +205,7 @@ This version includes auto-update support. Future releases will be downloaded au
 ## 🐞 Reporting Bugs
 
 Please report bugs on [GitHub Issues](https://github.com/jkarp7/showstack/issues) with:
+
 - Operating system and version
 - Steps to reproduce
 - Expected vs actual behavior
@@ -226,6 +231,7 @@ Thank you to our beta testers for helping make ShowStack:Production better!
 ### macOS Code Signing
 
 **Prerequisites:**
+
 - Apple Developer account ($99/year)
 - Developer ID Application certificate
 
@@ -233,6 +239,7 @@ Thank you to our beta testers for helping make ShowStack:Production better!
 
 1. Export certificate from Xcode/Keychain as `.p12` file
 2. Encode to base64:
+
    ```bash
    base64 -i certificate.p12 -o certificate-base64.txt
    ```
@@ -266,6 +273,7 @@ Thank you to our beta testers for helping make ShowStack:Production better!
 ### Windows Code Signing
 
 **Prerequisites:**
+
 - Code signing certificate from DigiCert, Sectigo, etc. ($100-400/year)
 
 **Setup:**
@@ -298,6 +306,7 @@ Thank you to our beta testers for helping make ShowStack:Production better!
 Users will automatically receive updates if they install from a GitHub release.
 
 **How it works:**
+
 1. App checks GitHub Releases on startup
 2. If newer version exists, downloads in background
 3. Prompts user to restart and install
@@ -326,11 +335,13 @@ setInterval(() => {
 If a release has critical bugs:
 
 ### Option 1: Unpublish Release
+
 1. Go to Releases
 2. Click "Delete" on problematic release
 3. Users on that version won't get auto-updates to it
 
 ### Option 2: Create Hotfix Release
+
 1. Fix the bug
 2. Bump patch version (0.1.1-beta)
 3. Create new tag and release
@@ -358,12 +369,15 @@ If a release has critical bugs:
 ## Monitoring Releases
 
 ### Track Downloads
+
 GitHub provides download stats:
+
 1. Go to Releases
 2. Each asset shows download count
 3. Use GitHub API for detailed analytics
 
 ### Crash Reporting (Recommended)
+
 Integrate [Sentry](https://sentry.io) or [BugSnag](https://www.bugsnag.com):
 
 ```typescript
@@ -385,6 +399,7 @@ Add to GitHub Secrets: `SENTRY_DSN`
 ### Build fails with "No space left on device"
 
 **Solution:** Clean up artifacts in workflow:
+
 ```yaml
 - name: Clean up
   run: npm run clean
@@ -393,6 +408,7 @@ Add to GitHub Secrets: `SENTRY_DSN`
 ### Build fails on Windows with "long path" error
 
 **Solution:** Enable long paths:
+
 ```yaml
 - name: Enable long paths (Windows)
   if: matrix.os == 'windows-latest'

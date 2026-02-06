@@ -23,7 +23,7 @@ export function AuditLogging() {
       level: 'info',
       action: 'Layout Exported',
       user: 'Admin',
-      details: 'Exported "Cover Page - ShowStack Default" to JSON'
+      details: 'Exported "Cover Page - ShowStack Default" to JSON',
     },
     {
       id: '2',
@@ -31,7 +31,7 @@ export function AuditLogging() {
       level: 'info',
       action: 'Settings Changed',
       user: 'Admin',
-      details: 'Updated application settings'
+      details: 'Updated application settings',
     },
     {
       id: '3',
@@ -39,8 +39,8 @@ export function AuditLogging() {
       level: 'warning',
       action: 'Import Warning',
       user: 'Admin',
-      details: 'Layout import had 2 validation warnings'
-    }
+      details: 'Layout import had 2 validation warnings',
+    },
   ]);
 
   const handleExportLogs = async () => {
@@ -57,15 +57,16 @@ export function AuditLogging() {
     console.log('Clearing logs...');
   };
 
-  const filteredLogs = logs.filter(log =>
-    logLevel === 'all' || log.level === logLevel
-  );
+  const filteredLogs = logs.filter((log) => logLevel === 'all' || log.level === logLevel);
 
   const getLevelColor = (level: string) => {
     switch (level) {
-      case 'error': return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20';
-      case 'warning': return 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20';
-      default: return 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20';
+      case 'error':
+        return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20';
+      case 'warning':
+        return 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20';
+      default:
+        return 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20';
     }
   };
 
@@ -78,7 +79,9 @@ export function AuditLogging() {
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Audit & Logging</h2>
-        <p className="text-gray-600 dark:text-gray-400">Track system activities, changes, and access logs</p>
+        <p className="text-gray-600 dark:text-gray-400">
+          Track system activities, changes, and access logs
+        </p>
       </div>
 
       {/* Info Notice */}
@@ -86,10 +89,13 @@ export function AuditLogging() {
         <div className="flex items-start gap-2">
           <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
           <div>
-            <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">Audit Log Retention</h4>
+            <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+              Audit Log Retention
+            </h4>
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              Audit logs are retained for 90 days by default. Export logs regularly if you need longer retention.
-              Clearing logs will permanently remove all entries and cannot be undone.
+              Audit logs are retained for 90 days by default. Export logs regularly if you need
+              longer retention. Clearing logs will permanently remove all entries and cannot be
+              undone.
             </p>
           </div>
         </div>
@@ -169,18 +175,29 @@ export function AuditLogging() {
             </div>
           ) : (
             filteredLogs.map((log) => (
-              <div key={log.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <div
+                key={log.id}
+                className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${getLevelColor(log.level)}`}>
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-medium ${getLevelColor(log.level)}`}
+                      >
                         {log.level.toUpperCase()}
                       </span>
-                      <span className="font-medium text-gray-900 dark:text-white">{log.action}</span>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">by {log.user}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {log.action}
+                      </span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        by {log.user}
+                      </span>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">{log.details}</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500">{formatTimestamp(log.timestamp)}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">
+                      {formatTimestamp(log.timestamp)}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -199,17 +216,27 @@ export function AuditLogging() {
         <div className="space-y-2">
           <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center justify-between">
             <div>
-              <div className="font-medium text-gray-900 dark:text-white">Layout Templates Export</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">December 1, 2024 at 10:30 AM</div>
+              <div className="font-medium text-gray-900 dark:text-white">
+                Layout Templates Export
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                December 1, 2024 at 10:30 AM
+              </div>
             </div>
-            <span className="text-sm text-gray-600 dark:text-gray-300">/exports/layouts_2024-12-01.json</span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">
+              /exports/layouts_2024-12-01.json
+            </span>
           </div>
           <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center justify-between">
             <div>
               <div className="font-medium text-gray-900 dark:text-white">Database Backup</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">November 30, 2024 at 6:00 PM</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                November 30, 2024 at 6:00 PM
+              </div>
             </div>
-            <span className="text-sm text-gray-600 dark:text-gray-300">/backups/app_2024-11-30.db</span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">
+              /backups/app_2024-11-30.db
+            </span>
           </div>
         </div>
       </div>

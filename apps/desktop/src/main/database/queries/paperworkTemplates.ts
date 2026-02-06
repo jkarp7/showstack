@@ -66,7 +66,7 @@ export function getAllPaperworkTemplates(reportType?: string): any[] {
       pageSetup: JSON.parse(template.page_setup as string),
       isSystem: Boolean(template.is_system),
       created_at: template.created_at,
-      updated_at: template.updated_at
+      updated_at: template.updated_at,
     };
   });
 }
@@ -77,9 +77,9 @@ export function getAllPaperworkTemplates(reportType?: string): any[] {
 export function getSystemPaperworkTemplates(): any[] {
   const db = getAppDatabase();
 
-  const rows = db.prepare(
-    `SELECT * FROM paperwork_templates WHERE is_system = 1 ORDER BY report_type, name`
-  ).all() as Record<string, unknown>[];
+  const rows = db
+    .prepare(`SELECT * FROM paperwork_templates WHERE is_system = 1 ORDER BY report_type, name`)
+    .all() as Record<string, unknown>[];
 
   return rows.map((template) => {
     return {
@@ -95,7 +95,7 @@ export function getSystemPaperworkTemplates(): any[] {
       pageSetup: JSON.parse(template.page_setup as string),
       isSystem: Boolean(template.is_system),
       created_at: template.created_at,
-      updated_at: template.updated_at
+      updated_at: template.updated_at,
     };
   });
 }
@@ -105,9 +105,9 @@ export function getSystemPaperworkTemplates(): any[] {
  */
 export function getPaperworkTemplateById(id: string): any | null {
   const db = getAppDatabase();
-  const template = db.prepare(
-    `SELECT * FROM paperwork_templates WHERE id = ?`
-  ).get(id) as Record<string, unknown> | undefined;
+  const template = db.prepare(`SELECT * FROM paperwork_templates WHERE id = ?`).get(id) as
+    | Record<string, unknown>
+    | undefined;
 
   if (!template) {
     return null;
@@ -126,7 +126,7 @@ export function getPaperworkTemplateById(id: string): any | null {
     pageSetup: JSON.parse(template.page_setup as string),
     isSystem: Boolean(template.is_system),
     created_at: template.created_at,
-    updated_at: template.updated_at
+    updated_at: template.updated_at,
   };
 }
 
@@ -146,7 +146,7 @@ export function createPaperworkTemplate(data: PaperworkTemplateInput): any {
       column_config, organization_config, page_setup,
       is_system, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `
+  `,
   ).run(
     id,
     null, // user_id
@@ -160,7 +160,7 @@ export function createPaperworkTemplate(data: PaperworkTemplateInput): any {
     JSON.stringify(data.pageSetup),
     data.isSystem ? 1 : 0,
     now,
-    now
+    now,
   );
 
   saveAppDatabase();
@@ -173,7 +173,7 @@ export function createPaperworkTemplate(data: PaperworkTemplateInput): any {
 export function updatePaperworkTemplate(
   id: string,
   updates: Partial<PaperworkTemplateInput>,
-  allowSystemUpdate: boolean = false
+  allowSystemUpdate: boolean = false,
 ): any {
   const db = getAppDatabase();
   const now = Date.now();
@@ -278,6 +278,6 @@ export function duplicatePaperworkTemplate(id: string, newName?: string): any {
     columns: original.columns,
     organization: original.organization,
     pageSetup: original.pageSetup,
-    isSystem: false // Duplicates are never system templates
+    isSystem: false, // Duplicates are never system templates
   });
 }

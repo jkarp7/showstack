@@ -18,7 +18,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       { text: 'Checking license...', delay: 600 },
       { text: 'Initializing database...', delay: 900 },
       { text: 'Loading modules...', delay: 1200 },
-      { text: 'Ready!', delay: 1500 }
+      { text: 'Ready!', delay: 1500 },
     ];
 
     let currentStep = 0;
@@ -86,9 +86,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
           ShowStack
         </h1>
-        <p className="text-gray-400 text-lg mb-8">
-          Production Management for Live Entertainment
-        </p>
+        <p className="text-gray-400 text-lg mb-8">Production Management for Live Entertainment</p>
 
         {/* Version */}
         <div className="mb-8">
@@ -98,9 +96,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         </div>
 
         {/* License Status */}
-        <div className="mb-8">
-          {getLicenseDisplay()}
-        </div>
+        <div className="mb-8">{getLicenseDisplay()}</div>
 
         {/* Loading Bar */}
         <div className="w-80 mx-auto">

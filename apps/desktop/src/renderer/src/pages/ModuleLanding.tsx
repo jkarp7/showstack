@@ -17,43 +17,44 @@ const MODULE_TOOLS: Record<ModuleType, ToolCard[]> = {
       name: 'Shop Order',
       description: 'Equipment orders and specifications for rental houses',
       route: 'shop-order',
-      isLocked: false
+      isLocked: false,
     },
     {
       name: 'System Docs',
-      description: 'Equipment Manager, Paperwork Generator, and Label Designer - Lightwright parity tool',
+      description:
+        'Equipment Manager, Paperwork Generator, and Label Designer - Lightwright parity tool',
       route: 'system-docs',
-      isLocked: false
+      isLocked: false,
     },
     {
       name: 'Blueprint',
       description: 'System drawings and rack elevations - Omnigraffle parity tool (Coming Soon)',
       route: 'blueprint',
-      isLocked: true
-    }
+      isLocked: true,
+    },
   ],
   manager: [
     {
       name: 'Tour Manager',
       description: 'Manage tour schedules, logistics, and travel',
       route: 'tour',
-      isLocked: true
-    }
+      isLocked: true,
+    },
   ],
   design: [
     {
       name: 'Design Studio',
       description: 'Create lighting designs and visualizations',
       route: 'studio',
-      isLocked: true
-    }
-  ]
+      isLocked: true,
+    },
+  ],
 };
 
 const MODULE_NAMES: Record<ModuleType, string> = {
   production: 'ShowStack:Lighting',
   manager: 'ShowStack:Manager',
-  design: 'ShowStack:Design'
+  design: 'ShowStack:Design',
 };
 
 export function ModuleLanding() {
@@ -75,9 +76,7 @@ export function ModuleLanding() {
   const handleToolClick = (tool: ToolCard) => {
     if (tool.isLocked) return;
 
-    const basePath = projectId
-      ? `/project/${projectId}/module/${module}`
-      : `/module/${module}`;
+    const basePath = projectId ? `/project/${projectId}/module/${module}` : `/module/${module}`;
     navigate(`${basePath}/${tool.route}`);
   };
 
@@ -101,7 +100,9 @@ export function ModuleLanding() {
         <div className="max-w-7xl mx-auto">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{moduleName}</h1>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Choose a tool to get started</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+              Choose a tool to get started
+            </p>
           </div>
         </div>
       </header>
@@ -123,7 +124,9 @@ export function ModuleLanding() {
                       : 'hover:border-blue-500 dark:hover:border-blue-400 cursor-pointer'
                   }`}
                 >
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{tool.name}</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    {tool.name}
+                  </h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm">{tool.description}</p>
                   {tool.isLocked && (
                     <div className="mt-4 text-yellow-600 dark:text-yellow-500 text-sm">

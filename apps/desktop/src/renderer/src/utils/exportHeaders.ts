@@ -31,12 +31,9 @@ export interface ExportHeader {
 /**
  * Build export header from options and project data
  */
-export function buildExportHeader(
-  options: ExportHeaderOptions,
-  project: Project
-): ExportHeader {
+export function buildExportHeader(options: ExportHeaderOptions, project: Project): ExportHeader {
   const header: ExportHeader = {
-    title: options.customTitle || `${project.name} - Equipment List`
+    title: options.customTitle || `${project.name} - Equipment List`,
   };
 
   if (options.includeShowName) {
@@ -47,7 +44,7 @@ export function buildExportHeader(
     header.designer = {
       name: project.lighting_designer,
       email: project.lighting_designer_email,
-      phone: project.lighting_designer_phone
+      phone: project.lighting_designer_phone,
     };
   }
 
@@ -55,7 +52,7 @@ export function buildExportHeader(
     header.venue = {
       name: project.venue,
       city: project.venue_city,
-      state: project.venue_state
+      state: project.venue_state,
     };
   }
 
@@ -63,7 +60,7 @@ export function buildExportHeader(
     header.exportDate = new Date().toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   }
 
@@ -91,11 +88,9 @@ export function formatHeaderForCSV(header: ExportHeader): string {
 
   // Venue
   if (header.venue) {
-    const venueStr = [
-      header.venue.name,
-      header.venue.city,
-      header.venue.state
-    ].filter(Boolean).join(', ');
+    const venueStr = [header.venue.name, header.venue.city, header.venue.state]
+      .filter(Boolean)
+      .join(', ');
     lines.push(`# Venue: ${venueStr}`);
   }
 
@@ -137,11 +132,9 @@ export function formatHeaderForEos(header: ExportHeader): string {
   }
 
   if (header.venue) {
-    const venueStr = [
-      header.venue.name,
-      header.venue.city,
-      header.venue.state
-    ].filter(Boolean).join(', ');
+    const venueStr = [header.venue.name, header.venue.city, header.venue.state]
+      .filter(Boolean)
+      .join(', ');
     lines.push(`! Venue: ${venueStr}`);
   }
 
@@ -183,11 +176,9 @@ export function formatHeaderForGrandMA(header: ExportHeader): string {
   }
 
   if (header.venue) {
-    const venueStr = [
-      header.venue.name,
-      header.venue.city,
-      header.venue.state
-    ].filter(Boolean).join(', ');
+    const venueStr = [header.venue.name, header.venue.city, header.venue.state]
+      .filter(Boolean)
+      .join(', ');
     lines.push(`  Venue: ${venueStr}`);
   }
 

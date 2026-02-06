@@ -1,4 +1,5 @@
 # Sound Features Migration Guide
+
 ## Implementing Minotaur Parity in ShowStack
 
 **Document Version:** 1.0
@@ -13,6 +14,7 @@
 This document provides a comprehensive migration guide for implementing sound design and management features in ShowStack to achieve parity with Minotaur Sound System Database.
 
 **Key Principles:**
+
 - All sound features integrated into unified ShowStack application
 - Sound features activated by Sound Edition license (or higher editions)
 - Shared infrastructure with lighting features (database, UI framework)
@@ -23,13 +25,21 @@ This document provides a comprehensive migration guide for implementing sound de
 ## 📦 Implementation Phases
 
 ### Phase 1: Sound Equipment Foundation (Months 1-2)
+
 ### Phase 2: Cable Management (Months 3-4)
+
 ### Phase 3: Wireless Microphone System (Months 5-6)
+
 ### Phase 4: Audio Patching (Months 7-8)
+
 ### Phase 5: Speaker/Box Management (Months 9-10)
+
 ### Phase 6: Power Management (Month 11)
+
 ### Phase 7: Paperwork & Reports (Month 12)
+
 ### Phase 8: Console Integration (Months 13-14)
+
 ### Phase 9: Polish & Launch (Months 15-16)
 
 ---
@@ -501,8 +511,15 @@ export interface SoundEquipmentType {
   id: string;
   projectId: string;
   name: string;
-  category: 'microphone' | 'speaker' | 'processor' | 'playback' |
-           'amplifier' | 'cable' | 'wireless' | 'other';
+  category:
+    | 'microphone'
+    | 'speaker'
+    | 'processor'
+    | 'playback'
+    | 'amplifier'
+    | 'cable'
+    | 'wireless'
+    | 'other';
   manufacturer?: string;
   model?: string;
   specifications?: Record<string, any>; // JSON object
@@ -526,8 +543,7 @@ export interface SoundEquipment {
   rentalHouse?: string;
   costPerUnit?: number;
   quantity: number;
-  status: 'needed' | 'ordered' | 'in-stock' | 'installed' |
-          'tested' | 'struck' | 'returned';
+  status: 'needed' | 'ordered' | 'in-stock' | 'installed' | 'tested' | 'struck' | 'returned';
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -584,8 +600,17 @@ export interface AudioCable {
   id: string;
   projectId: string;
   cableName: string;
-  cableType: 'snake' | 'fiber' | 'cat6' | 'cat5e' | 'single-xlr' |
-             'single-trs' | 'single-ts' | 'split' | 'mult' | 'other';
+  cableType:
+    | 'snake'
+    | 'fiber'
+    | 'cat6'
+    | 'cat5e'
+    | 'single-xlr'
+    | 'single-trs'
+    | 'single-ts'
+    | 'split'
+    | 'mult'
+    | 'other';
   pairCount?: number;
   lengthFeet?: number;
   connectorA?: string;
@@ -659,8 +684,7 @@ export interface AudioPatch {
   projectId: string;
   inputNumber?: number;
   inputName?: string;
-  inputType?: 'mic' | 'di' | 'line' | 'playback' | 'effects-return' |
-              'intercom' | 'comm' | 'other';
+  inputType?: 'mic' | 'di' | 'line' | 'playback' | 'effects-return' | 'intercom' | 'comm' | 'other';
   micType?: string;
   sourceDevice?: string;
   sourcePerformer?: string;
@@ -688,8 +712,15 @@ export interface AudioPower {
   id: string;
   projectId: string;
   deviceName: string;
-  deviceType: 'amplifier' | 'mixer' | 'processor' | 'playback' |
-              'wireless-receiver' | 'monitor' | 'effects' | 'other';
+  deviceType:
+    | 'amplifier'
+    | 'mixer'
+    | 'processor'
+    | 'playback'
+    | 'wireless-receiver'
+    | 'monitor'
+    | 'effects'
+    | 'other';
   manufacturer?: string;
   model?: string;
   powerWatts?: number;
@@ -771,12 +802,14 @@ export interface SoundStore {
 ### Sound Equipment Views
 
 **File:** `src/components/sound/SoundEquipmentGrid.tsx`
+
 - Reuse existing VirtualDataGrid component
 - Columns: Position, Unit#, Type, Purpose, Location, Source, Cost, Status, Notes
 - Filtering by equipment category (mics, speakers, processors, etc.)
 - Sorting and searching
 
 **File:** `src/components/sound/SoundEquipmentToolbar.tsx`
+
 - Add/Delete equipment buttons
 - Filter by category dropdown
 - Import from CSV
@@ -786,11 +819,13 @@ export interface SoundStore {
 ### Wireless Microphone Views
 
 **File:** `src/components/sound/WirelessMicGrid.tsx`
+
 - Columns: Role, Actor, Mic Type, Transmitter, Receiver, Frequency, Group, Channel, Status
 - Color-coded by frequency conflicts
 - Sort by role, actor, or frequency
 
 **File:** `src/components/sound/FrequencyCoordination.tsx`
+
 - Visual frequency spectrum display
 - Conflict detection visualization
 - IAS import button
@@ -798,6 +833,7 @@ export interface SoundStore {
 - Frequency plot generation
 
 **File:** `src/components/sound/WirelessMicForm.tsx`
+
 - Form for adding/editing wireless mics
 - Frequency validation
 - Conflict warnings
@@ -805,17 +841,20 @@ export interface SoundStore {
 ### Cable Management Views
 
 **File:** `src/components/sound/AudioCableGrid.tsx`
+
 - Columns: Cable Name, Type, Pairs, Length, Connectors, Bundle, Tested, Condition
 - Filter by cable type
 - Testing status indicators
 
 **File:** `src/components/sound/CablePinAssignment.tsx`
+
 - Snake cable pin-to-pin assignment interface
 - Visual representation of snake (left = stage box, right = mix position)
 - Drag-and-drop assignment
 - Bulk assignment tools
 
 **File:** `src/components/sound/CableTestingLog.tsx`
+
 - Cable testing interface
 - Mark channels as pass/fail
 - Test date tracking
@@ -824,12 +863,14 @@ export interface SoundStore {
 ### Audio Patch Views
 
 **File:** `src/components/sound/AudioPatchGrid.tsx`
+
 - Input list view
 - Columns: Input#, Name, Type, Source, Mic, Location, Cable, Pin, Console Channel
 - Filter by input type
 - Sort by input number or console channel
 
 **File:** `src/components/sound/PatchForm.tsx`
+
 - Form for adding/editing patch points
 - Cable/pin selection dropdown
 - Console channel assignment
@@ -837,11 +878,13 @@ export interface SoundStore {
 ### Speaker Management Views
 
 **File:** `src/components/sound/SpeakerGrid.tsx`
+
 - Columns: Position, Model, Qty, Location, Amplifier, Channel, Signal Source, Status
 - Filter by speaker type or location
 - Visual hang plot (optional Phase 2)
 
 **File:** `src/components/sound/SpeakerForm.tsx`
+
 - Form for adding/editing speakers
 - Amplifier assignment
 - Rigging calculation helpers
@@ -849,6 +892,7 @@ export interface SoundStore {
 ### Power Distribution Views
 
 **File:** `src/components/sound/AudioPowerGrid.tsx`
+
 - Columns: Device, Type, Watts, Voltage, Amps, Circuit, Sequencer, UPS, Status
 - Load calculation summary
 - Power distribution visualization
@@ -867,9 +911,7 @@ interface FrequencyRange {
   bandwidthKhz: number;
 }
 
-export function detectConflicts(
-  frequencies: FrequencyRange[]
-): Map<number, number[]> {
+export function detectConflicts(frequencies: FrequencyRange[]): Map<number, number[]> {
   const conflicts = new Map<number, number[]>();
 
   for (let i = 0; i < frequencies.length; i++) {
@@ -892,18 +934,14 @@ export function detectConflicts(
   return conflicts;
 }
 
-export function calculateIntermodulation(
-  freq1: number,
-  freq2: number,
-  freq3: number
-): number[] {
+export function calculateIntermodulation(freq1: number, freq2: number, freq3: number): number[] {
   // Calculate 3rd order intermodulation products
   const im1 = 2 * freq1 - freq2;
   const im2 = 2 * freq2 - freq1;
   const im3 = freq1 + freq2 - freq3;
   const im4 = freq1 - freq2 + freq3;
 
-  return [im1, im2, im3, im4].filter(f => f > 0);
+  return [im1, im2, im3, im4].filter((f) => f > 0);
 }
 ```
 
@@ -925,14 +963,15 @@ export async function importIASFile(file: File): Promise<IASFrequency[]> {
   const frequencies: IASFrequency[] = [];
 
   // Parse IAS CSV format
-  for (let i = 1; i < lines.length; i++) { // Skip header
+  for (let i = 1; i < lines.length; i++) {
+    // Skip header
     const [freq, channel, group, tv] = lines[i].split(',');
     if (freq && channel && group) {
       frequencies.push({
         frequency: parseFloat(freq),
         channel: parseInt(channel),
         group: group.trim(),
-        tvChannel: tv?.trim()
+        tvChannel: tv?.trim(),
       });
     }
   }
@@ -946,16 +985,13 @@ export async function importIASFile(file: File): Promise<IASFrequency[]> {
 **File:** `src/utils/sound/cableCalculations.ts`
 
 ```typescript
-export function calculateCableCapacity(
-  lengthFeet: number,
-  gaugeAWG: number
-): number {
+export function calculateCableCapacity(lengthFeet: number, gaugeAWG: number): number {
   // Simplified calculation - real-world would be more complex
   const resistancePerFoot: Record<number, number> = {
     12: 0.00162,
     14: 0.00258,
     16: 0.00409,
-    18: 0.00651
+    18: 0.00651,
   };
 
   const resistance = resistancePerFoot[gaugeAWG] * lengthFeet;
@@ -974,6 +1010,7 @@ export function calculateCableCapacity(
 **File:** `src/templates/sound/InputList.tsx`
 
 Report: Audio Input List
+
 - Input number
 - Input name
 - Source/performer
@@ -986,6 +1023,7 @@ Report: Audio Input List
 **File:** `src/templates/sound/OutputList.tsx`
 
 Report: Audio Output List
+
 - Output number
 - Output name
 - Destination (speaker position)
@@ -995,6 +1033,7 @@ Report: Audio Output List
 **File:** `src/templates/sound/WirelessFrequencyPlot.tsx`
 
 Report: Wireless Microphone Frequency Plot
+
 - Visual frequency spectrum
 - Color-coded by role/actor
 - TV channel interference markers
@@ -1003,6 +1042,7 @@ Report: Wireless Microphone Frequency Plot
 **File:** `src/templates/sound/CableSchedule.tsx`
 
 Report: Audio Cable Schedule
+
 - Cable name
 - Type and length
 - Connectors
@@ -1012,6 +1052,7 @@ Report: Audio Cable Schedule
 **File:** `src/templates/sound/SpeakerHangPlot.tsx`
 
 Report: Speaker Hang Plot
+
 - Position diagram
 - Speaker models and quantities
 - Amplifier assignments
@@ -1020,6 +1061,7 @@ Report: Speaker Hang Plot
 **File:** `src/templates/sound/EquipmentList.tsx`
 
 Report: Sound Equipment List
+
 - Categorized by type
 - Quantities and sources
 - Cost estimates
@@ -1073,9 +1115,7 @@ export interface ConsolePatch {
   gain: number;
 }
 
-export async function importYamahaPatch(
-  filePath: string
-): Promise<ConsolePatch[]> {
+export async function importYamahaPatch(filePath: string): Promise<ConsolePatch[]> {
   // Parse Yamaha patch file format
   // Format varies by console model (CL/QL series use different formats)
   // Implementation would need to handle multiple formats
@@ -1091,22 +1131,26 @@ export async function importYamahaPatch(
 ### Unit Tests
 
 **File:** `src/__tests__/sound/frequencyConflicts.test.ts`
+
 - Test conflict detection algorithm
 - Test intermodulation calculation
 - Test IAS import parsing
 
 **File:** `src/__tests__/sound/cableAssignments.test.ts`
+
 - Test pin assignment validation
 - Test cable capacity calculations
 
 ### Integration Tests
 
 **File:** `src/__tests__/sound/soundEquipment.test.ts`
+
 - Test CRUD operations for sound equipment
 - Test equipment library loading
 - Test cost calculations
 
 **File:** `src/__tests__/sound/wirelessMics.test.ts`
+
 - Test wireless mic assignment
 - Test frequency coordination
 - Test conflict detection integration
@@ -1114,12 +1158,14 @@ export async function importYamahaPatch(
 ### End-to-End Tests
 
 **File:** `cypress/e2e/sound/wireless-workflow.cy.ts`
+
 - Create wireless mic
 - Assign frequency
 - Detect conflicts
 - Generate frequency plot
 
 **File:** `cypress/e2e/sound/cable-patching.cy.ts`
+
 - Create snake cable
 - Assign pins
 - Generate cable schedule
@@ -1133,6 +1179,7 @@ Create default library with 1,000+ sound equipment items:
 **File:** `src/data/defaultSoundLibrary.json`
 
 Categories to include:
+
 - Microphones (100+ models)
   - Shure SM58, SM57, SM81, Beta 87, KSM9, etc.
   - Sennheiser MD421, e835, e906, etc.
@@ -1180,6 +1227,7 @@ Categories to include:
 ## 🎯 Implementation Priority
 
 ### Phase 1 (Months 1-2): HIGHEST PRIORITY
+
 1. Sound equipment database schema ✅
 2. Sound equipment CRUD operations
 3. Equipment library loading
@@ -1187,12 +1235,14 @@ Categories to include:
 5. Equipment labels
 
 ### Phase 2 (Months 3-4): HIGH PRIORITY
+
 6. Audio cables database schema ✅
 7. Cable management grid
 8. Pin assignment interface
 9. Cable testing log
 
 ### Phase 3 (Months 5-6): HIGH PRIORITY
+
 10. Wireless mics database schema ✅
 11. Wireless mic grid
 12. Frequency coordination algorithm
@@ -1201,35 +1251,41 @@ Categories to include:
 15. Frequency plot generation
 
 ### Phase 4 (Months 7-8): MEDIUM PRIORITY
+
 16. Audio patch database schema ✅
 17. Input list interface
 18. Patch form
 19. Console channel assignment
 
 ### Phase 5 (Months 9-10): MEDIUM PRIORITY
+
 20. Speakers database schema ✅
 21. Speaker grid
 22. Amplifier assignment
 23. Speaker hang report
 
 ### Phase 6 (Month 11): MEDIUM PRIORITY
+
 24. Audio power database schema ✅
 25. Power distribution grid
 26. Load calculations
 27. Power reports
 
 ### Phase 7 (Month 12): MEDIUM PRIORITY
+
 28. All sound report templates
 29. PDF generation for sound reports
 30. Label templates for sound equipment
 
 ### Phase 8 (Months 13-14): LOW PRIORITY
+
 31. QLab integration
 32. Yamaha console import
 33. DiGiCo console import
 34. Allen & Heath console import
 
 ### Phase 9 (Months 15-16): POLISH
+
 35. Performance optimization
 36. Beta testing
 37. Bug fixes
@@ -1278,12 +1334,14 @@ touch src/store/soundStore.ts
 ## 📝 Success Criteria
 
 ### Phase 1 Complete When:
+
 - ✅ Can add, edit, delete sound equipment
 - ✅ Equipment library loaded with 1,000+ items
 - ✅ Basic equipment grid renders smoothly
 - ✅ Equipment labels can be generated
 
 ### Full Minotaur Parity Achieved When:
+
 - ✅ All database schemas implemented
 - ✅ Equipment management complete
 - ✅ Multi-pair cable tracking works
@@ -1305,6 +1363,7 @@ touch src/store/soundStore.ts
 ---
 
 **See Also:**
+
 - `docs/minotaur-parity-analysis.md` - Detailed feature comparison
 - `docs/project-status.md` - Overall project roadmap
 - `docs/unified-vs-modular-analysis.md` - Architecture rationale

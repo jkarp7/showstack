@@ -5,39 +5,39 @@ coverage:
   status:
     project:
       default:
-        target: 50%            # Project must maintain 50% coverage
-        threshold: 2%          # Allow 2% drop before failing
-        if_ci_failed: error    # Fail if CI failed
+        target: 50% # Project must maintain 50% coverage
+        threshold: 2% # Allow 2% drop before failing
+        if_ci_failed: error # Fail if CI failed
 
     patch:
       default:
-        target: 60%            # New code should have 60% coverage
-        threshold: 5%          # Allow 5% deviation
+        target: 60% # New code should have 60% coverage
+        threshold: 5% # Allow 5% deviation
         if_ci_failed: error
 
-  range: 50..100               # Coverage range (red to green)
+  range: 50..100 # Coverage range (red to green)
 
 comment:
-  layout: "header, diff, flags, files"
+  layout: 'header, diff, flags, files'
   behavior: default
-  require_changes: false       # Always comment on PRs
+  require_changes: false # Always comment on PRs
 
 ignore:
-  - "**/*.test.ts"             # Ignore test files
-  - "**/*.test.tsx"
-  - "**/test/**"
-  - "**/tests/**"
-  - "**/__tests__/**"
-  - "**/mockData.ts"
-  - "**/testUtils.tsx"
-  - "scripts/**"               # Ignore build scripts
-  - "html/**"                  # Ignore build output
-  - "dist/**"
-  - "out/**"
+  - '**/*.test.ts' # Ignore test files
+  - '**/*.test.tsx'
+  - '**/test/**'
+  - '**/tests/**'
+  - '**/__tests__/**'
+  - '**/mockData.ts'
+  - '**/testUtils.tsx'
+  - 'scripts/**' # Ignore build scripts
+  - 'html/**' # Ignore build output
+  - 'dist/**'
+  - 'out/**'
 
 flags:
   unittests:
     paths:
       - src/renderer/src/
       - src/main/
-    carryforward: true         # Keep coverage between builds
+    carryforward: true # Keep coverage between builds

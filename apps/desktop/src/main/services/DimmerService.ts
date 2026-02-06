@@ -5,7 +5,7 @@ import {
   updateDimmerRack,
   deleteDimmerRack,
   getDimmerRacksWithUsage,
-  DimmerRack
+  DimmerRack,
 } from '../database/queries/dimmerRacks';
 import { BaseService } from './BaseService';
 
@@ -30,7 +30,7 @@ export class DimmerService extends BaseService {
   async getAll(projectId?: string): Promise<DimmerRack[]> {
     const result = await this.executeWithRetry(
       async () => getAllDimmerRacks(projectId),
-      'dimmerRacks:getAll'
+      'dimmerRacks:getAll',
     );
     return result;
   }
@@ -44,10 +44,7 @@ export class DimmerService extends BaseService {
   async getById(id: string): Promise<DimmerRack | undefined> {
     this.validateId(id, 'Dimmer Rack');
 
-    return await this.executeWithRetry(
-      async () => getDimmerRackById(id),
-      'dimmerRacks:getById'
-    );
+    return await this.executeWithRetry(async () => getDimmerRackById(id), 'dimmerRacks:getById');
   }
 
   /**
@@ -59,7 +56,7 @@ export class DimmerService extends BaseService {
   async getWithUsage(projectId?: string): Promise<any[]> {
     const result = await this.executeWithRetry(
       async () => getDimmerRacksWithUsage(projectId),
-      'dimmerRacks:getWithUsage'
+      'dimmerRacks:getWithUsage',
     );
     return result;
   }
@@ -71,7 +68,10 @@ export class DimmerService extends BaseService {
    * @param projectId Optional project ID
    * @returns Created dimmer rack
    */
-  async create(data: Omit<DimmerRack, 'id' | 'created_at' | 'updated_at'>, projectId?: string): Promise<DimmerRack> {
+  async create(
+    data: Omit<DimmerRack, 'id' | 'created_at' | 'updated_at'>,
+    projectId?: string,
+  ): Promise<DimmerRack> {
     this.validateRequired(data.name, 'name', 'Rack name');
 
     // Validate circuit count
@@ -82,7 +82,7 @@ export class DimmerService extends BaseService {
 
     return await this.executeWithRetry(
       async () => createDimmerRack(data, projectId),
-      'dimmerRacks:create'
+      'dimmerRacks:create',
     );
   }
 
@@ -111,7 +111,7 @@ export class DimmerService extends BaseService {
 
     return await this.executeWithRetry(
       async () => updateDimmerRack(id, updates),
-      'dimmerRacks:update'
+      'dimmerRacks:update',
     );
   }
 
@@ -123,10 +123,7 @@ export class DimmerService extends BaseService {
   async delete(id: string): Promise<void> {
     this.validateId(id, 'Dimmer Rack');
 
-    return await this.executeWithRetry(
-      async () => deleteDimmerRack(id),
-      'dimmerRacks:delete'
-    );
+    return await this.executeWithRetry(async () => deleteDimmerRack(id), 'dimmerRacks:delete');
   }
 
   /**

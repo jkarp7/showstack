@@ -251,7 +251,12 @@ export interface CapacityCheckResult {
 
 export const CIRCUIT_COUNT_OPTIONS = [12, 24, 48, 96] as const;
 export const VOLTAGE_OPTIONS = [120, 208, 230, 240] as const;
-export const MODULE_TYPE_OPTIONS: ModuleType[] = ['dimmer', 'relay', 'constant_current', 'thrupower'];
+export const MODULE_TYPE_OPTIONS: ModuleType[] = [
+  'dimmer',
+  'relay',
+  'constant_current',
+  'thrupower',
+];
 export const PHASE_CONFIG_OPTIONS: PhaseConfig[] = ['single', 'split', 'three'];
 export const PHASE_OPTIONS: Phase[] = ['A', 'B', 'C'];
 
@@ -262,7 +267,7 @@ export const BUILDING_SERVICE_OPTIONS = [
   'Service B',
   'Service C',
   'Service D',
-  'Service E'
+  'Service E',
 ] as const;
 
 // Warning thresholds

@@ -55,14 +55,21 @@ export function calculateDMXAddress(rawAddress: number, addressesPerUniverse: nu
  * @param addressesPerUniverse - Number of addresses per universe (default: 512)
  * @returns The raw DMX address
  */
-export function rawDMXAddress(universe: number, dmx_address: number, addressesPerUniverse: number = 512): number {
+export function rawDMXAddress(
+  universe: number,
+  dmx_address: number,
+  addressesPerUniverse: number = 512,
+): number {
   return (universe - 1) * addressesPerUniverse + dmx_address;
 }
 
 /**
  * Format DMX address as "universe/address" string
  */
-export function formatDMXAddress(universe: number | undefined, dmx_address: number | undefined): string {
+export function formatDMXAddress(
+  universe: number | undefined,
+  dmx_address: number | undefined,
+): string {
   if (!universe || !dmx_address) return '';
   return `${universe}/${dmx_address}`;
 }
@@ -72,7 +79,10 @@ export function formatDMXAddress(universe: number | undefined, dmx_address: numb
  * Supports: "1/1", "1-1", "1.1", or raw number "512"
  * @returns Object with universe and dmx_address, or null if invalid
  */
-export function parseDMXAddress(addressString: string, addressesPerUniverse: number = 512): {
+export function parseDMXAddress(
+  addressString: string,
+  addressesPerUniverse: number = 512,
+): {
   universe: number;
   dmx_address: number;
 } | null {
@@ -107,7 +117,7 @@ export function parseDMXAddress(addressString: string, addressesPerUniverse: num
  */
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout | null = null;
 

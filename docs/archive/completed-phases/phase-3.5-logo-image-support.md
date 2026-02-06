@@ -13,10 +13,12 @@ Phase 3.5 adds comprehensive logo and image support to the unified visual editor
 ### Day 1: Image Upload & Storage
 
 **Files Modified:**
+
 - `src/renderer/src/components/prep/layout/ElementInspector.tsx`
 - `src/renderer/src/components/prep/layout/LayoutCanvas.tsx`
 
 **Features Added:**
+
 1. **File Upload UI**
    - File browser button with image type filtering (PNG, JPG, SVG, GIF)
    - 2MB maximum file size validation
@@ -36,6 +38,7 @@ Phase 3.5 adds comprehensive logo and image support to the unified visual editor
    - Enhanced Object Fit selector with descriptions
 
 **Technical Details:**
+
 - Images stored as base64 data URLs in `ImageConfig.src`
 - FileReader.readAsDataURL() for conversion
 - Hidden file input with programmatic click
@@ -48,9 +51,11 @@ Phase 3.5 adds comprehensive logo and image support to the unified visual editor
 ### Day 2: Project Logo Integration
 
 **Files Modified:**
+
 - `src/renderer/src/components/common/EditProjectDialog.tsx`
 
 **Features Added:**
+
 1. **Base64 Logo Storage**
    - Updated handleLogoUpload to use FileReader instead of file paths
    - Convert project logos to base64 for consistency
@@ -70,6 +75,7 @@ Phase 3.5 adds comprehensive logo and image support to the unified visual editor
    - Works with existing paperwork header templates
 
 **Technical Implementation:**
+
 - Replaced `window.api.dialog.openImage()` with client-side upload
 - Document.createElement('input') for file selection
 - FileReader API for base64 conversion
@@ -82,6 +88,7 @@ Phase 3.5 adds comprehensive logo and image support to the unified visual editor
 ### Day 3: PDF Export Testing & Documentation
 
 **Verification:**
+
 1. **PDF Infrastructure Review**
    - Puppeteer configuration already supports base64 images
    - `waitUntil: 'networkidle0'` ensures images load before PDF generation
@@ -101,6 +108,7 @@ Phase 3.5 adds comprehensive logo and image support to the unified visual editor
    - Users can drag image elements for custom graphics
 
 **File:** `src/main/ipc/paperwork.ts:76-175`
+
 - PDF export handler uses Puppeteer
 - Base64 images work natively in Puppeteer HTML rendering
 - No special configuration needed
@@ -114,6 +122,7 @@ Phase 3.5 adds comprehensive logo and image support to the unified visual editor
 ### For Users
 
 **Uploading Images to Headers/Labels:**
+
 1. Drag "Image" element from Element Library to canvas
 2. Select the image element in the canvas
 3. Click "Choose File" in the Element Inspector
@@ -122,6 +131,7 @@ Phase 3.5 adds comprehensive logo and image support to the unified visual editor
 6. Adjust Object Fit (contain/cover/fill) as needed
 
 **Setting Project Logo:**
+
 1. Open project settings via Edit Project dialog
 2. Click "Upload Logo" under "Show Logo"
 3. Select logo image (max 2MB)
@@ -129,6 +139,7 @@ Phase 3.5 adds comprehensive logo and image support to the unified visual editor
 5. Logo saved with project and available in templates
 
 **Using Project Logo in Templates:**
+
 - Logo dataField automatically populated in default templates
 - Drag "Image" element and manually upload logo if needed
 - Logo appears in all paperwork exports for that project
@@ -136,15 +147,17 @@ Phase 3.5 adds comprehensive logo and image support to the unified visual editor
 ### For Developers
 
 **Image Element Configuration:**
+
 ```typescript
 interface ImageConfig {
-  src?: string;        // Base64 data URL or external URL
-  altText?: string;    // Alt text for accessibility
+  src?: string; // Base64 data URL or external URL
+  altText?: string; // Alt text for accessibility
   objectFit?: 'contain' | 'cover' | 'fill'; // How image fits bounds
 }
 ```
 
 **Logo Data Mapping:**
+
 ```typescript
 // In dataFieldMapper.ts
 {
@@ -157,6 +170,7 @@ interface ImageConfig {
 ```
 
 **PDF Export:**
+
 - Puppeteer automatically handles base64 images
 - No additional configuration required
 - Images embedded in HTML render correctly
@@ -197,6 +211,7 @@ interface ImageConfig {
 ### Base64 vs File Paths
 
 **Why Base64?**
+
 - Eliminates file path portability issues
 - Works across platforms (Windows, Mac, Linux)
 - Simplifies database storage
@@ -204,6 +219,7 @@ interface ImageConfig {
 - No broken links when files move
 
 **Trade-offs:**
+
 - Larger database size (base64 ~33% larger than binary)
 - 2MB file size limit to prevent database bloat
 - Acceptable for logos and small graphics
@@ -211,18 +227,21 @@ interface ImageConfig {
 ### Image Formats
 
 **Supported:**
+
 - PNG: Best for logos and graphics with transparency
 - JPG/JPEG: Best for photographs
 - SVG: Vector graphics (scales perfectly)
 - GIF: Animated graphics (first frame rendered)
 
 **Not Supported:**
+
 - WEBP, AVIF, HEIC (future consideration)
 - BMP, TIFF (too large)
 
 ### Performance
 
 **Optimization:**
+
 - 2MB max file size prevents slow loads
 - Base64 encoded once, reused across templates
 - Puppeteer caching for repeated PDF exports
@@ -233,12 +252,14 @@ interface ImageConfig {
 ## Future Enhancements
 
 **Phase 4: Label Integration**
+
 - Reuse image upload for label designer
 - Background image support for labels
 - QR code/barcode generation
 - Image cropping tools
 
 **Phase 5: Polish & UX**
+
 - Image resize within canvas
 - Inline image editing (crop, rotate, filters)
 - Image library for reusable graphics
@@ -249,6 +270,7 @@ interface ImageConfig {
 ## Related Files
 
 **Core Components:**
+
 - `src/renderer/src/components/prep/layout/ElementInspector.tsx` - Image upload UI
 - `src/renderer/src/components/prep/layout/LayoutCanvas.tsx` - Image rendering
 - `src/renderer/src/components/common/EditProjectDialog.tsx` - Logo upload
@@ -256,11 +278,13 @@ interface ImageConfig {
 - `src/renderer/src/utils/paperwork/dataFieldMapper.ts` - Logo data mapping
 
 **Type Definitions:**
+
 - `src/renderer/src/types/prep.ts:444-448` - ImageConfig interface
 - `src/renderer/src/utils/paperwork/dataFieldMapper.ts:16-45` - PaperworkProjectData
 - `src/renderer/src/utils/paperwork/dataFieldMapper.ts:51-100` - PrepTemplateData
 
 **Database:**
+
 - `src/main/database/projectSchema.ts:14` - projects.logo_path column
 - `src/main/database/projectSchema.ts:368-369` - prep_projects logo fields
 

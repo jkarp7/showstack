@@ -45,7 +45,7 @@ export function Manager() {
             <button
               onClick={handleBackClick}
               className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600 rounded text-sm transition"
-              title={routeProjectId ? "Back to Project" : "Back to Projects"}
+              title={routeProjectId ? 'Back to Project' : 'Back to Projects'}
             >
               ← Back
             </button>

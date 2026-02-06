@@ -1,6 +1,17 @@
 import { useMemo, useState, useEffect } from 'react';
-import { DimmerRack, PDRack, ProjectPowerSummary, RackPowerSummary, ServicePowerSummary } from '../../types/power';
-import { calculateProjectPowerSummary, formatPower, formatAmps, formatPercentage } from '../../utils/powerCalculations';
+import {
+  DimmerRack,
+  PDRack,
+  ProjectPowerSummary,
+  RackPowerSummary,
+  ServicePowerSummary,
+} from '../../types/power';
+import {
+  calculateProjectPowerSummary,
+  formatPower,
+  formatAmps,
+  formatPercentage,
+} from '../../utils/powerCalculations';
 import { DimmerRackModule } from '../../../../main/database/queries/dimmerRackModules';
 
 interface PowerSummaryPanelProps {
@@ -18,7 +29,12 @@ interface PowerSummaryPanelProps {
   className?: string;
 }
 
-export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = '' }: PowerSummaryPanelProps) {
+export function PowerSummaryPanel({
+  dimmerRacks,
+  pdRacks,
+  fixtures,
+  className = '',
+}: PowerSummaryPanelProps) {
   // Load module configurations for dimmer racks
   const [rackModules, setRackModules] = useState<Map<string, DimmerRackModule[]>>(new Map());
   const [viewMode, setViewMode] = useState<'by-service' | 'by-type'>('by-service');
@@ -40,7 +56,7 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
           } catch (error) {
             console.error(`Error loading modules for rack ${rack.id}:`, error);
           }
-        })
+        }),
       );
 
       setRackModules(modulesMap);
@@ -57,7 +73,7 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
   // Helper to render rack summary row
   const renderRackRow = (rack: RackPowerSummary) => {
     const hasWarning = rack.warnings.length > 0;
-    const isCritical = rack.warnings.some(w => w.includes('CRITICAL'));
+    const isCritical = rack.warnings.some((w) => w.includes('CRITICAL'));
 
     return (
       <div
@@ -66,8 +82,8 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
           isCritical
             ? 'bg-red-50 dark:bg-red-900/20'
             : hasWarning
-            ? 'bg-yellow-50 dark:bg-yellow-900/20'
-            : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+              ? 'bg-yellow-50 dark:bg-yellow-900/20'
+              : 'hover:bg-gray-50 dark:hover:bg-gray-800'
         }`}
       >
         <div>
@@ -77,11 +93,15 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
           </div>
         </div>
         <div className="text-right">
-          <div className="text-sm font-medium text-gray-900 dark:text-white">{formatPower(rack.total_load_kw)}</div>
+          <div className="text-sm font-medium text-gray-900 dark:text-white">
+            {formatPower(rack.total_load_kw)}
+          </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">Load</div>
         </div>
         <div className="text-right">
-          <div className="text-sm font-medium text-gray-900 dark:text-white">{formatPower(rack.total_capacity_kw)}</div>
+          <div className="text-sm font-medium text-gray-900 dark:text-white">
+            {formatPower(rack.total_capacity_kw)}
+          </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">Capacity</div>
         </div>
         <div className="text-right">
@@ -96,8 +116,8 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
               rack.utilization_percentage >= 100
                 ? 'text-red-600 dark:text-red-400'
                 : rack.utilization_percentage >= 80
-                ? 'text-yellow-600 dark:text-yellow-400'
-                : 'text-green-600 dark:text-green-400'
+                  ? 'text-yellow-600 dark:text-yellow-400'
+                  : 'text-green-600 dark:text-green-400'
             }`}
           >
             {formatPercentage(rack.utilization_percentage)}
@@ -109,7 +129,9 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
   };
 
   return (
-    <div className={`bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden ${className}`}>
+    <div
+      className={`bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden ${className}`}
+    >
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 flex justify-between items-center">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Power Summary</h3>
@@ -143,11 +165,15 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
       <div className="p-6 border-b border-gray-200 dark:border-gray-700">
         <div className="grid grid-cols-3 gap-6">
           <div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{formatPower(summary.total_load_kw)}</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              {formatPower(summary.total_load_kw)}
+            </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Total Load</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{formatPower(summary.total_capacity_kw)}</div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              {formatPower(summary.total_capacity_kw)}
+            </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">Total Capacity</div>
           </div>
           <div>
@@ -156,8 +182,8 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
                 summary.overall_utilization >= 100
                   ? 'text-red-600 dark:text-red-400'
                   : summary.overall_utilization >= 80
-                  ? 'text-yellow-600 dark:text-yellow-400'
-                  : 'text-green-600 dark:text-green-400'
+                    ? 'text-yellow-600 dark:text-yellow-400'
+                    : 'text-green-600 dark:text-green-400'
               }`}
             >
               {formatPercentage(summary.overall_utilization)}
@@ -170,7 +196,9 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
       {/* Phase Balance (if applicable) */}
       {summary.phase_balance && summary.phase_balance.total_load > 0 && (
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Phase Balance</h4>
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+            Phase Balance
+          </h4>
           <div className="space-y-3">
             {/* Phase A */}
             <div>
@@ -186,9 +214,10 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
                   style={{
                     width: `${
                       summary.phase_balance.total_load > 0
-                        ? (summary.phase_balance.phase_a_load / summary.phase_balance.total_load) * 300
+                        ? (summary.phase_balance.phase_a_load / summary.phase_balance.total_load) *
+                          300
                         : 0
-                    }%`
+                    }%`,
                   }}
                 />
               </div>
@@ -208,9 +237,10 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
                   style={{
                     width: `${
                       summary.phase_balance.total_load > 0
-                        ? (summary.phase_balance.phase_b_load / summary.phase_balance.total_load) * 300
+                        ? (summary.phase_balance.phase_b_load / summary.phase_balance.total_load) *
+                          300
                         : 0
-                    }%`
+                    }%`,
                   }}
                 />
               </div>
@@ -230,9 +260,10 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
                   style={{
                     width: `${
                       summary.phase_balance.total_load > 0
-                        ? (summary.phase_balance.phase_c_load / summary.phase_balance.total_load) * 300
+                        ? (summary.phase_balance.phase_c_load / summary.phase_balance.total_load) *
+                          300
                         : 0
-                    }%`
+                    }%`,
                   }}
                 />
               </div>
@@ -246,16 +277,16 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
                   summary.phase_balance.max_imbalance_percentage >= 25
                     ? 'text-red-600 dark:text-red-400'
                     : summary.phase_balance.max_imbalance_percentage >= 15
-                    ? 'text-yellow-600 dark:text-yellow-400'
-                    : 'text-green-600 dark:text-green-400'
+                      ? 'text-yellow-600 dark:text-yellow-400'
+                      : 'text-green-600 dark:text-green-400'
                 }`}
               >
                 {formatPercentage(summary.phase_balance.max_imbalance_percentage)}
                 {summary.phase_balance.max_imbalance_percentage >= 25
                   ? ' 🚨 CRITICAL'
                   : summary.phase_balance.max_imbalance_percentage >= 15
-                  ? ' ⚠️  WARNING'
-                  : ' ✓ OK'}
+                    ? ' ⚠️  WARNING'
+                    : ' ✓ OK'}
               </span>
             </div>
           </div>
@@ -275,11 +306,15 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
                   <div className="flex gap-4 text-sm">
                     <div>
                       <span className="text-gray-500 dark:text-gray-400">Load: </span>
-                      <span className="font-medium text-gray-900 dark:text-white">{formatPower(service.total_load_kw)}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {formatPower(service.total_load_kw)}
+                      </span>
                     </div>
                     <div>
                       <span className="text-gray-500 dark:text-gray-400">Capacity: </span>
-                      <span className="font-medium text-gray-900 dark:text-white">{formatPower(service.total_capacity_kw)}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {formatPower(service.total_capacity_kw)}
+                      </span>
                     </div>
                     <div>
                       <span className="text-gray-500 dark:text-gray-400">Utilization: </span>
@@ -288,8 +323,8 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
                           service.utilization_percentage >= 100
                             ? 'text-red-600 dark:text-red-400'
                             : service.utilization_percentage >= 80
-                            ? 'text-yellow-600 dark:text-yellow-400'
-                            : 'text-green-600 dark:text-green-400'
+                              ? 'text-yellow-600 dark:text-yellow-400'
+                              : 'text-green-600 dark:text-green-400'
                         }`}
                       >
                         {formatPercentage(service.utilization_percentage)}
@@ -308,7 +343,9 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
           {summary.dimmer_racks.length > 0 && (
             <div>
               <div className="px-6 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
-                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Dimmer Racks ({summary.dimmer_racks.length})</h4>
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  Dimmer Racks ({summary.dimmer_racks.length})
+                </h4>
               </div>
               <div>{summary.dimmer_racks.map(renderRackRow)}</div>
             </div>
@@ -318,7 +355,9 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
           {summary.pd_racks.length > 0 && (
             <div>
               <div className="px-6 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
-                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">PD Racks ({summary.pd_racks.length})</h4>
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  PD Racks ({summary.pd_racks.length})
+                </h4>
               </div>
               <div>{summary.pd_racks.map(renderRackRow)}</div>
             </div>
@@ -332,13 +371,19 @@ export function PowerSummaryPanel({ dimmerRacks, pdRacks, fixtures, className = 
           <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Alerts</h4>
           <div className="space-y-2">
             {summary.critical_warnings.map((warning, idx) => (
-              <div key={`critical-${idx}`} className="flex items-start gap-2 text-sm text-red-600 dark:text-red-400">
+              <div
+                key={`critical-${idx}`}
+                className="flex items-start gap-2 text-sm text-red-600 dark:text-red-400"
+              >
                 <span className="mt-0.5">🚨</span>
                 <span>{warning.message}</span>
               </div>
             ))}
             {summary.warnings.map((warning, idx) => (
-              <div key={`warning-${idx}`} className="flex items-start gap-2 text-sm text-yellow-600 dark:text-yellow-400">
+              <div
+                key={`warning-${idx}`}
+                className="flex items-start gap-2 text-sm text-yellow-600 dark:text-yellow-400"
+              >
                 <span className="mt-0.5">⚠️</span>
                 <span>{warning.message}</span>
               </div>

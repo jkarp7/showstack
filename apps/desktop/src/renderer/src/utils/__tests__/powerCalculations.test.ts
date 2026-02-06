@@ -15,7 +15,7 @@ import {
   checkRackCapacity,
   formatPower,
   formatAmps,
-  formatPercentage
+  formatPercentage,
 } from '../powerCalculations';
 import type { DimmerRack, PDRack, Phase } from '../../types/power';
 
@@ -107,7 +107,7 @@ describe('Dimmer Rack Calculations', () => {
     service_type: '208V 3-Phase',
     notes: '',
     created_at: Date.now(),
-    updated_at: Date.now()
+    updated_at: Date.now(),
   };
 
   describe('calculateDimmerRackCapacity', () => {
@@ -120,7 +120,7 @@ describe('Dimmer Rack Calculations', () => {
     it('should calculate capacity with custom module configurations', () => {
       const modules = [
         { start_circuit: 1, end_circuit: 12, watts_per_circuit: 2400, module_type: 'dimmer' },
-        { start_circuit: 13, end_circuit: 24, watts_per_circuit: 2400, module_type: 'dimmer' }
+        { start_circuit: 13, end_circuit: 24, watts_per_circuit: 2400, module_type: 'dimmer' },
       ];
       // 2 modules * 12 circuits * 2400W = 57.6kW
       const capacity = calculateDimmerRackCapacity(mockDimmerRack, modules);
@@ -130,7 +130,7 @@ describe('Dimmer Rack Calculations', () => {
     it('should exclude thrupower modules from capacity', () => {
       const modules = [
         { start_circuit: 1, end_circuit: 12, watts_per_circuit: 2400, module_type: 'dimmer' },
-        { start_circuit: 13, end_circuit: 24, watts_per_circuit: 0, module_type: 'thrupower' }
+        { start_circuit: 13, end_circuit: 24, watts_per_circuit: 0, module_type: 'thrupower' },
       ];
       // Only first module counts: 12 * 2400 = 28.8kW
       const capacity = calculateDimmerRackCapacity(mockDimmerRack, modules);
@@ -149,7 +149,7 @@ describe('Dimmer Rack Calculations', () => {
       const fixtures = [
         { dimmer_rack_id: 'rack-1', wattage: 1200 },
         { dimmer_rack_id: 'rack-1', wattage: 1200 },
-        { dimmer_rack_id: 'rack-1', wattage: 2400 }
+        { dimmer_rack_id: 'rack-1', wattage: 2400 },
       ];
       // Total: 4800W = 4.8kW
       const load = calculateDimmerRackLoad(mockDimmerRack, fixtures);
@@ -160,7 +160,7 @@ describe('Dimmer Rack Calculations', () => {
       const fixtures = [
         { dimmer_rack_id: 'rack-1', wattage: 1200 },
         { dimmer_rack_id: 'rack-2', wattage: 5000 }, // Different rack
-        { dimmer_rack_id: 'rack-1', wattage: 2400 }
+        { dimmer_rack_id: 'rack-1', wattage: 2400 },
       ];
       // Only rack-1 fixtures: 3600W = 3.6kW
       const load = calculateDimmerRackLoad(mockDimmerRack, fixtures);
@@ -171,7 +171,7 @@ describe('Dimmer Rack Calculations', () => {
       const fixtures = [
         { dimmer_rack_id: 'rack-1', wattage: 1200 },
         { dimmer_rack_id: 'rack-1' }, // No wattage
-        { dimmer_rack_id: 'rack-1', wattage: 0 }
+        { dimmer_rack_id: 'rack-1', wattage: 0 },
       ];
       const load = calculateDimmerRackLoad(mockDimmerRack, fixtures);
       expect(load).toBe(1.2);
@@ -188,7 +188,7 @@ describe('Dimmer Rack Calculations', () => {
       const fixtures = [
         { dimmer_rack_id: 'rack-1', dimmer_channel_number: 1, wattage: 1200 },
         { dimmer_rack_id: 'rack-1', dimmer_channel_number: 2, wattage: 1200 },
-        { dimmer_rack_id: 'rack-1', dimmer_channel_number: 3, wattage: 2400 }
+        { dimmer_rack_id: 'rack-1', dimmer_channel_number: 3, wattage: 2400 },
       ];
       const summary = getDimmerRackSummary(mockDimmerRack, fixtures);
 
@@ -203,7 +203,7 @@ describe('Dimmer Rack Calculations', () => {
 
     it('should calculate utilization percentage', () => {
       const fixtures = [
-        { dimmer_rack_id: 'rack-1', dimmer_channel_number: 1, wattage: 9600 } // 50% of 19.2kW
+        { dimmer_rack_id: 'rack-1', dimmer_channel_number: 1, wattage: 9600 }, // 50% of 19.2kW
       ];
       const summary = getDimmerRackSummary(mockDimmerRack, fixtures);
       expect(summary.utilization_percentage).toBe(50);
@@ -211,9 +211,7 @@ describe('Dimmer Rack Calculations', () => {
 
     it('should generate warning at 80% capacity', () => {
       // 19.2kW capacity * 0.81 = 15.552kW (81%)
-      const fixtures = [
-        { dimmer_rack_id: 'rack-1', dimmer_channel_number: 1, wattage: 15552 }
-      ];
+      const fixtures = [{ dimmer_rack_id: 'rack-1', dimmer_channel_number: 1, wattage: 15552 }];
       const summary = getDimmerRackSummary(mockDimmerRack, fixtures);
       expect(summary.warnings).toHaveLength(1);
       expect(summary.warnings[0]).toContain('WARNING');
@@ -221,9 +219,7 @@ describe('Dimmer Rack Calculations', () => {
 
     it('should generate critical warning at 100% capacity', () => {
       // 19.2kW capacity * 1.0 = 19.2kW (100%)
-      const fixtures = [
-        { dimmer_rack_id: 'rack-1', dimmer_channel_number: 1, wattage: 19200 }
-      ];
+      const fixtures = [{ dimmer_rack_id: 'rack-1', dimmer_channel_number: 1, wattage: 19200 }];
       const summary = getDimmerRackSummary(mockDimmerRack, fixtures);
       expect(summary.warnings).toHaveLength(1);
       expect(summary.warnings[0]).toContain('CRITICAL');
@@ -233,7 +229,7 @@ describe('Dimmer Rack Calculations', () => {
       const fixtures = [
         { dimmer_rack_id: 'rack-1', dimmer_channel_number: 1, wattage: 600 },
         { dimmer_rack_id: 'rack-1', dimmer_channel_number: 1, wattage: 600 }, // Duplicate circuit
-        { dimmer_rack_id: 'rack-1', dimmer_channel_number: 2, wattage: 1200 }
+        { dimmer_rack_id: 'rack-1', dimmer_channel_number: 2, wattage: 1200 },
       ];
       const summary = getDimmerRackSummary(mockDimmerRack, fixtures);
       expect(summary.circuits_used).toBe(2); // Only circuits 1 and 2
@@ -260,7 +256,7 @@ describe('PD Rack Calculations', () => {
     service_type: '208V 3-Phase',
     notes: '',
     created_at: Date.now(),
-    updated_at: Date.now()
+    updated_at: Date.now(),
   };
 
   describe('calculatePDRackCapacity', () => {
@@ -289,7 +285,7 @@ describe('PD Rack Calculations', () => {
     it('should calculate load from wattage', () => {
       const fixtures = [
         { pd_rack_id: 'pd-1', wattage: 2400 },
-        { pd_rack_id: 'pd-1', wattage: 1200 }
+        { pd_rack_id: 'pd-1', wattage: 1200 },
       ];
       const load = calculatePDRackLoad(mockPDRack, fixtures);
       expect(load).toBe(3.6);
@@ -297,16 +293,14 @@ describe('PD Rack Calculations', () => {
 
     it('should calculate load from amperage when wattage missing', () => {
       const fixtures = [
-        { pd_rack_id: 'pd-1', amperage: 10 } // 10A * 208V = 2080W
+        { pd_rack_id: 'pd-1', amperage: 10 }, // 10A * 208V = 2080W
       ];
       const load = calculatePDRackLoad(mockPDRack, fixtures);
       expect(load).toBe(2.08);
     });
 
     it('should prefer wattage over amperage when both present', () => {
-      const fixtures = [
-        { pd_rack_id: 'pd-1', wattage: 3000, amperage: 10 }
-      ];
+      const fixtures = [{ pd_rack_id: 'pd-1', wattage: 3000, amperage: 10 }];
       const load = calculatePDRackLoad(mockPDRack, fixtures);
       expect(load).toBe(3); // Uses wattage, not amperage
     });
@@ -315,7 +309,7 @@ describe('PD Rack Calculations', () => {
       const fixtures = [
         { pd_rack_id: 'pd-1', wattage: 2400 },
         { pd_rack_id: 'pd-2', wattage: 5000 }, // Different rack
-        { pd_rack_id: 'pd-1', wattage: 1200 }
+        { pd_rack_id: 'pd-1', wattage: 1200 },
       ];
       const load = calculatePDRackLoad(mockPDRack, fixtures);
       expect(load).toBe(3.6);
@@ -326,7 +320,7 @@ describe('PD Rack Calculations', () => {
     it('should generate complete PD rack summary', () => {
       const fixtures = [
         { pd_rack_id: 'pd-1', pd_circuit_number: 1, wattage: 2400 },
-        { pd_rack_id: 'pd-1', pd_circuit_number: 2, wattage: 1200 }
+        { pd_rack_id: 'pd-1', pd_circuit_number: 2, wattage: 1200 },
       ];
       const summary = getPDRackSummary(mockPDRack, fixtures);
 
@@ -342,7 +336,7 @@ describe('PD Rack Calculations', () => {
       const fixtures = [
         { pd_rack_id: 'pd-1', pd_circuit_number: 1, wattage: 1200 },
         { pd_rack_id: 'pd-1', pd_circuit_number: 1, wattage: 1200 }, // Duplicate
-        { pd_rack_id: 'pd-1', pd_circuit_number: 2, wattage: 2400 }
+        { pd_rack_id: 'pd-1', pd_circuit_number: 2, wattage: 2400 },
       ];
       const summary = getPDRackSummary(mockPDRack, fixtures);
       expect(summary.circuits_used).toBe(2);
@@ -360,7 +354,7 @@ describe('Phase Balance Calculations', () => {
       const fixtures = [
         { phase: 'A' as Phase, wattage: 2080 }, // 10A at 208V
         { phase: 'B' as Phase, wattage: 2080 },
-        { phase: 'C' as Phase, wattage: 2080 }
+        { phase: 'C' as Phase, wattage: 2080 },
       ];
       const balance = calculatePhaseBalance(fixtures, 208);
 
@@ -377,7 +371,7 @@ describe('Phase Balance Calculations', () => {
       const fixtures = [
         { phase: 'A' as Phase, wattage: 4160 }, // 20A
         { phase: 'B' as Phase, wattage: 2080 }, // 10A
-        { phase: 'C' as Phase, wattage: 2080 }  // 10A
+        { phase: 'C' as Phase, wattage: 2080 }, // 10A
       ];
       const balance = calculatePhaseBalance(fixtures, 208);
 
@@ -393,7 +387,7 @@ describe('Phase Balance Calculations', () => {
       const fixtures = [
         { phase: 'A' as Phase, amperage: 10 },
         { phase: 'B' as Phase, amperage: 10 },
-        { phase: 'C' as Phase, amperage: 10 }
+        { phase: 'C' as Phase, amperage: 10 },
       ];
       const balance = calculatePhaseBalance(fixtures, 208);
 
@@ -406,7 +400,7 @@ describe('Phase Balance Calculations', () => {
       const fixtures = [
         { phase: 'A' as Phase, wattage: 2080 },
         { wattage: 5000 }, // No phase
-        { phase: 'B' as Phase, wattage: 2080 }
+        { phase: 'B' as Phase, wattage: 2080 },
       ];
       const balance = calculatePhaseBalance(fixtures, 208);
 
@@ -420,7 +414,7 @@ describe('Phase Balance Calculations', () => {
       const fixtures = [
         { phase: 'A' as Phase, wattage: 2496 }, // 12A
         { phase: 'B' as Phase, wattage: 2080 }, // 10A
-        { phase: 'C' as Phase, wattage: 2080 }  // 10A
+        { phase: 'C' as Phase, wattage: 2080 }, // 10A
       ];
       const balance = calculatePhaseBalance(fixtures, 208);
 
@@ -433,7 +427,7 @@ describe('Phase Balance Calculations', () => {
       const fixtures = [
         { phase: 'A' as Phase, wattage: 4160 }, // 20A
         { phase: 'B' as Phase, wattage: 2080 }, // 10A
-        { phase: 'C' as Phase, wattage: 2080 }  // 10A
+        { phase: 'C' as Phase, wattage: 2080 }, // 10A
       ];
       const balance = calculatePhaseBalance(fixtures, 208);
 
@@ -470,14 +464,14 @@ describe('Capacity Checking', () => {
     service_type: '208V 3-Phase',
     notes: '',
     created_at: Date.now(),
-    updated_at: Date.now()
+    updated_at: Date.now(),
   };
 
   describe('checkRackCapacity', () => {
     it('should show capacity available when rack not full', () => {
       const fixtures = [
         { dimmer_rack_id: 'rack-1', dimmer_channel_number: 1 },
-        { dimmer_rack_id: 'rack-1', dimmer_channel_number: 2 }
+        { dimmer_rack_id: 'rack-1', dimmer_channel_number: 2 },
       ];
       const result = checkRackCapacity(mockRack, fixtures, true);
 
@@ -490,7 +484,7 @@ describe('Capacity Checking', () => {
     it('should warn at 80% capacity', () => {
       const fixtures = Array.from({ length: 78 }, (_, i) => ({
         dimmer_rack_id: 'rack-1',
-        dimmer_channel_number: i + 1
+        dimmer_channel_number: i + 1,
       }));
       const result = checkRackCapacity(mockRack, fixtures, true);
 
@@ -501,7 +495,7 @@ describe('Capacity Checking', () => {
     it('should show critical at 100% capacity', () => {
       const fixtures = Array.from({ length: 96 }, (_, i) => ({
         dimmer_rack_id: 'rack-1',
-        dimmer_channel_number: i + 1
+        dimmer_channel_number: i + 1,
       }));
       const result = checkRackCapacity(mockRack, fixtures, true);
 
@@ -526,12 +520,12 @@ describe('Capacity Checking', () => {
         service_type: '208V 3-Phase',
         notes: '',
         created_at: Date.now(),
-        updated_at: Date.now()
+        updated_at: Date.now(),
       };
 
       const fixtures = [
         { pd_rack_id: 'pd-1', pd_circuit_number: 1 },
-        { pd_rack_id: 'pd-1', pd_circuit_number: 2 }
+        { pd_rack_id: 'pd-1', pd_circuit_number: 2 },
       ];
       const result = checkRackCapacity(pdRack, fixtures, false);
 
@@ -616,13 +610,13 @@ describe('getPDRackSummary', () => {
     building_service: 'Service A',
     notes: '',
     created_at: Date.now(),
-    updated_at: Date.now()
+    updated_at: Date.now(),
   };
 
   it('should calculate PD rack summary', () => {
     const fixtures = [
       { pd_rack_id: 'pd-1', pd_circuit_number: 1, wattage: 1000 },
-      { pd_rack_id: 'pd-1', pd_circuit_number: 2, wattage: 2000 }
+      { pd_rack_id: 'pd-1', pd_circuit_number: 2, wattage: 2000 },
     ];
 
     const summary = getPDRackSummary(mockPDRack, fixtures);
@@ -635,7 +629,7 @@ describe('getPDRackSummary', () => {
 
   it('should calculate utilization percentage', () => {
     const fixtures = [
-      { pd_rack_id: 'pd-1', pd_circuit_number: 1, wattage: 100000 } // 100kW
+      { pd_rack_id: 'pd-1', pd_circuit_number: 1, wattage: 100000 }, // 100kW
     ];
 
     const summary = getPDRackSummary(mockPDRack, fixtures);
@@ -646,7 +640,7 @@ describe('getPDRackSummary', () => {
 
   it('should generate warnings at capacity thresholds', () => {
     const fixtures = [
-      { pd_rack_id: 'pd-1', pd_circuit_number: 1, wattage: 190000 } // ~95% of 199.68kW
+      { pd_rack_id: 'pd-1', pd_circuit_number: 1, wattage: 190000 }, // ~95% of 199.68kW
     ];
 
     const summary = getPDRackSummary(mockPDRack, fixtures);
@@ -675,7 +669,7 @@ describe('calculateServicePowerSummaries', () => {
     building_service: 'Service A',
     notes: '',
     created_at: Date.now(),
-    updated_at: Date.now()
+    updated_at: Date.now(),
   };
 
   const mockPDRack: PDRack = {
@@ -693,7 +687,7 @@ describe('calculateServicePowerSummaries', () => {
     building_service: 'Service A',
     notes: '',
     created_at: Date.now(),
-    updated_at: Date.now()
+    updated_at: Date.now(),
   };
 
   const mockPDRack2: PDRack = {
@@ -701,19 +695,21 @@ describe('calculateServicePowerSummaries', () => {
     id: 'pd-2',
     name: 'PD Rack 2',
     rack_identifier: 'PD2',
-    building_service: 'Service B'
+    building_service: 'Service B',
   };
 
   it('should group summaries by building service', () => {
-    const dimmerSummaries = [{
-      rack_id: 'dimmer-1',
-      rack_name: 'Dimmer Rack A',
-      total_capacity_kw: 100,
-      total_load_kw: 50,
-      utilization_percentage: 50,
-      circuit_count: 96,
-      warnings: []
-    }];
+    const dimmerSummaries = [
+      {
+        rack_id: 'dimmer-1',
+        rack_name: 'Dimmer Rack A',
+        total_capacity_kw: 100,
+        total_load_kw: 50,
+        utilization_percentage: 50,
+        circuit_count: 96,
+        warnings: [],
+      },
+    ];
 
     const pdSummaries = [
       {
@@ -723,7 +719,7 @@ describe('calculateServicePowerSummaries', () => {
         total_load_kw: 100,
         utilization_percentage: 50,
         circuit_count: 48,
-        warnings: []
+        warnings: [],
       },
       {
         rack_id: 'pd-2',
@@ -732,51 +728,55 @@ describe('calculateServicePowerSummaries', () => {
         total_load_kw: 150,
         utilization_percentage: 75,
         circuit_count: 48,
-        warnings: []
-      }
+        warnings: [],
+      },
     ];
 
     const serviceSummaries = calculateServicePowerSummaries(
       dimmerSummaries,
       pdSummaries,
       [mockDimmerRack],
-      [mockPDRack, mockPDRack2]
+      [mockPDRack, mockPDRack2],
     );
 
     expect(serviceSummaries.length).toBe(2); // Service A and Service B
-    expect(serviceSummaries.find(s => s.service_name === 'Service A')).toBeDefined();
-    expect(serviceSummaries.find(s => s.service_name === 'Service B')).toBeDefined();
+    expect(serviceSummaries.find((s) => s.service_name === 'Service A')).toBeDefined();
+    expect(serviceSummaries.find((s) => s.service_name === 'Service B')).toBeDefined();
   });
 
   it('should aggregate capacity and load by service', () => {
-    const dimmerSummaries = [{
-      rack_id: 'dimmer-1',
-      rack_name: 'Dimmer Rack A',
-      total_capacity_kw: 100,
-      total_load_kw: 50,
-      utilization_percentage: 50,
-      circuit_count: 96,
-      warnings: []
-    }];
+    const dimmerSummaries = [
+      {
+        rack_id: 'dimmer-1',
+        rack_name: 'Dimmer Rack A',
+        total_capacity_kw: 100,
+        total_load_kw: 50,
+        utilization_percentage: 50,
+        circuit_count: 96,
+        warnings: [],
+      },
+    ];
 
-    const pdSummaries = [{
-      rack_id: 'pd-1',
-      rack_name: 'PD Rack 1',
-      total_capacity_kw: 200,
-      total_load_kw: 100,
-      utilization_percentage: 50,
-      circuit_count: 48,
-      warnings: []
-    }];
+    const pdSummaries = [
+      {
+        rack_id: 'pd-1',
+        rack_name: 'PD Rack 1',
+        total_capacity_kw: 200,
+        total_load_kw: 100,
+        utilization_percentage: 50,
+        circuit_count: 48,
+        warnings: [],
+      },
+    ];
 
     const serviceSummaries = calculateServicePowerSummaries(
       dimmerSummaries,
       pdSummaries,
       [mockDimmerRack],
-      [mockPDRack]
+      [mockPDRack],
     );
 
-    const serviceA = serviceSummaries.find(s => s.service_name === 'Service A')!;
+    const serviceA = serviceSummaries.find((s) => s.service_name === 'Service A')!;
     expect(serviceA.total_capacity_kw).toBe(300); // 100 + 200
     expect(serviceA.total_load_kw).toBe(150); // 50 + 100
   });
@@ -785,7 +785,7 @@ describe('calculateServicePowerSummaries', () => {
     const dimmerRackUnassigned: DimmerRack = {
       ...mockDimmerRack,
       id: 'dimmer-2',
-      building_service: undefined
+      building_service: undefined,
     };
 
     const dimmerSummaries = [
@@ -796,7 +796,7 @@ describe('calculateServicePowerSummaries', () => {
         total_load_kw: 50,
         utilization_percentage: 50,
         circuit_count: 96,
-        warnings: []
+        warnings: [],
       },
       {
         rack_id: 'dimmer-2',
@@ -805,41 +805,43 @@ describe('calculateServicePowerSummaries', () => {
         total_load_kw: 50,
         utilization_percentage: 50,
         circuit_count: 96,
-        warnings: []
-      }
+        warnings: [],
+      },
     ];
 
     const serviceSummaries = calculateServicePowerSummaries(
       dimmerSummaries,
       [],
       [mockDimmerRack, dimmerRackUnassigned],
-      []
+      [],
     );
 
     expect(serviceSummaries[serviceSummaries.length - 1].service_name).toBe('Unassigned');
   });
 
   it('should propagate rack warnings to service level', () => {
-    const dimmerSummaries = [{
-      rack_id: 'dimmer-1',
-      rack_name: 'Dimmer Rack A',
-      total_capacity_kw: 100,
-      total_load_kw: 90,
-      utilization_percentage: 90,
-      circuit_count: 96,
-      warnings: ['Rack at 90% capacity']
-    }];
+    const dimmerSummaries = [
+      {
+        rack_id: 'dimmer-1',
+        rack_name: 'Dimmer Rack A',
+        total_capacity_kw: 100,
+        total_load_kw: 90,
+        utilization_percentage: 90,
+        circuit_count: 96,
+        warnings: ['Rack at 90% capacity'],
+      },
+    ];
 
     const serviceSummaries = calculateServicePowerSummaries(
       dimmerSummaries,
       [],
       [mockDimmerRack],
-      []
+      [],
     );
 
-    const serviceA = serviceSummaries.find(s => s.service_name === 'Service A')!;
+    const serviceA = serviceSummaries.find((s) => s.service_name === 'Service A')!;
     expect(serviceA.warnings.length).toBeGreaterThan(0);
-    expect(serviceA.warnings.some(w => w.includes('Dimmer Rack A'))).toBe(true);
+    expect(serviceA.warnings.some((w) => w.includes('Dimmer Rack A'))).toBe(true);
   });
 });
 
@@ -863,7 +865,7 @@ describe('calculateProjectPowerSummary', () => {
     building_service: 'Service A',
     notes: '',
     created_at: Date.now(),
-    updated_at: Date.now()
+    updated_at: Date.now(),
   };
 
   const mockPDRack: PDRack = {
@@ -881,20 +883,16 @@ describe('calculateProjectPowerSummary', () => {
     building_service: 'Service A',
     notes: '',
     created_at: Date.now(),
-    updated_at: Date.now()
+    updated_at: Date.now(),
   };
 
   it('should calculate project-wide power summary', () => {
     const fixtures = [
       { dimmer_rack_id: 'dimmer-1', dimmer_channel_number: 1, wattage: 750, phase: 'A' as Phase },
-      { pd_rack_id: 'pd-1', pd_circuit_number: 1, wattage: 1000, phase: 'B' as Phase }
+      { pd_rack_id: 'pd-1', pd_circuit_number: 1, wattage: 1000, phase: 'B' as Phase },
     ];
 
-    const summary = calculateProjectPowerSummary(
-      [mockDimmerRack],
-      [mockPDRack],
-      fixtures
-    );
+    const summary = calculateProjectPowerSummary([mockDimmerRack], [mockPDRack], fixtures);
 
     expect(summary.total_capacity_kw).toBeGreaterThan(0);
     expect(summary.total_load_kw).toBe(1.75); // 750W + 1000W = 1.75kW
@@ -905,14 +903,10 @@ describe('calculateProjectPowerSummary', () => {
     const fixtures = [
       { dimmer_rack_id: 'dimmer-1', dimmer_channel_number: 1, wattage: 4160, phase: 'A' as Phase }, // 20A
       { dimmer_rack_id: 'dimmer-1', dimmer_channel_number: 2, wattage: 2080, phase: 'B' as Phase }, // 10A
-      { dimmer_rack_id: 'dimmer-1', dimmer_channel_number: 3, wattage: 2080, phase: 'C' as Phase }  // 10A
+      { dimmer_rack_id: 'dimmer-1', dimmer_channel_number: 3, wattage: 2080, phase: 'C' as Phase }, // 10A
     ];
 
-    const summary = calculateProjectPowerSummary(
-      [mockDimmerRack],
-      [mockPDRack],
-      fixtures
-    );
+    const summary = calculateProjectPowerSummary([mockDimmerRack], [mockPDRack], fixtures);
 
     expect(summary.phase_balance).toBeDefined();
     expect(summary.phase_balance.max_imbalance_percentage).toBeGreaterThan(0);
@@ -920,14 +914,10 @@ describe('calculateProjectPowerSummary', () => {
 
   it('should aggregate service summaries', () => {
     const fixtures = [
-      { dimmer_rack_id: 'dimmer-1', dimmer_channel_number: 1, wattage: 750, phase: 'A' as Phase }
+      { dimmer_rack_id: 'dimmer-1', dimmer_channel_number: 1, wattage: 750, phase: 'A' as Phase },
     ];
 
-    const summary = calculateProjectPowerSummary(
-      [mockDimmerRack],
-      [mockPDRack],
-      fixtures
-    );
+    const summary = calculateProjectPowerSummary([mockDimmerRack], [mockPDRack], fixtures);
 
     expect(summary.services).toBeDefined();
     expect(summary.services.length).toBeGreaterThan(0);
@@ -936,15 +926,16 @@ describe('calculateProjectPowerSummary', () => {
   it('should collect all warnings and critical warnings', () => {
     const fixtures = [
       // High load to trigger warnings
-      { dimmer_rack_id: 'dimmer-1', dimmer_channel_number: 1, wattage: 150000, phase: 'A' as Phase },
-      { pd_rack_id: 'pd-1', pd_circuit_number: 1, wattage: 150000, phase: 'B' as Phase }
+      {
+        dimmer_rack_id: 'dimmer-1',
+        dimmer_channel_number: 1,
+        wattage: 150000,
+        phase: 'A' as Phase,
+      },
+      { pd_rack_id: 'pd-1', pd_circuit_number: 1, wattage: 150000, phase: 'B' as Phase },
     ];
 
-    const summary = calculateProjectPowerSummary(
-      [mockDimmerRack],
-      [mockPDRack],
-      fixtures
-    );
+    const summary = calculateProjectPowerSummary([mockDimmerRack], [mockPDRack], fixtures);
 
     // Should have warnings due to high utilization
     expect(summary.warnings.length + summary.critical_warnings.length).toBeGreaterThan(0);

@@ -11,7 +11,7 @@ export default defineConfig({
     // Use node environment for main process tests (native modules like better-sqlite3)
     environmentMatchGlobs: [
       ['apps/desktop/src/main/**', 'node'],
-      ['packages/**', 'node']
+      ['packages/**', 'node'],
     ],
 
     // Setup files
@@ -33,28 +33,28 @@ export default defineConfig({
         '**/__tests__/**',
         '**/*.test.*',
         '**/*.spec.*',
-        'src/preload/**',  // Preload is minimal glue code
+        'src/preload/**', // Preload is minimal glue code
       ],
       // Coverage thresholds (enforced in CI)
       thresholds: {
         global: {
-          lines: 50,      // Alpha.2 minimum
+          lines: 50, // Alpha.2 minimum
           functions: 50,
           branches: 45,
-          statements: 50
+          statements: 50,
         },
         // Per-file thresholds for critical paths
         './src/renderer/src/utils/powerCalculations.ts': {
           lines: 80,
           functions: 80,
-          branches: 75
+          branches: 75,
         },
         './src/renderer/src/utils/circuitParser.ts': {
           lines: 80,
           functions: 80,
-          branches: 75
-        }
-      }
+          branches: 75,
+        },
+      },
     },
 
     // Globals (allows using `describe`, `it`, `expect` without imports)
@@ -65,7 +65,7 @@ export default defineConfig({
       'apps/**/src/**/*.{test,spec}.{ts,tsx}',
       'apps/**/src/**/__tests__/**/*.{ts,tsx}',
       'packages/**/*.{test,spec}.{ts,tsx}',
-      'packages/**/__tests__/**/*.{ts,tsx}'
+      'packages/**/__tests__/**/*.{ts,tsx}',
     ],
 
     // Mocking
@@ -81,12 +81,12 @@ export default defineConfig({
 
     // Resolve aliases (match electron.vite.config.ts)
     alias: {
-      '@': resolve(__dirname, './src/renderer/src')
-    }
+      '@': resolve(__dirname, './src/renderer/src'),
+    },
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src/renderer/src')
-    }
-  }
+      '@': resolve(__dirname, './src/renderer/src'),
+    },
+  },
 });

@@ -15,7 +15,7 @@ interface ColumnConfigurationPanelProps {
 export function ColumnConfigurationPanel({
   columns,
   reportType,
-  onChange
+  onChange,
 }: ColumnConfigurationPanelProps) {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
@@ -39,19 +39,11 @@ export function ColumnConfigurationPanel({
   };
 
   const handleToggleVisible = (id: string) => {
-    onChange(
-      columns.map(col =>
-        col.id === id ? { ...col, visible: !col.visible } : col
-      )
-    );
+    onChange(columns.map((col) => (col.id === id ? { ...col, visible: !col.visible } : col)));
   };
 
   const handleWidthChange = (id: string, width: number) => {
-    onChange(
-      columns.map(col =>
-        col.id === id ? { ...col, width } : col
-      )
-    );
+    onChange(columns.map((col) => (col.id === id ? { ...col, width } : col)));
   };
 
   return (

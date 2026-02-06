@@ -32,7 +32,7 @@ export function hasMigrated(db: Database, projectId: string): boolean {
        WHERE section_id IN (
          SELECT id FROM prep_sections WHERE prep_project_id = ?
        )
-       AND revision_quantities IS NOT NULL`
+       AND revision_quantities IS NOT NULL`,
     )
     .get(projectId) as { count: number };
 
@@ -42,10 +42,7 @@ export function hasMigrated(db: Database, projectId: string): boolean {
 /**
  * Main migration function for a single project
  */
-export function migrateProjectToTableFormat(
-  db: Database,
-  projectId: string
-): MigrationResult {
+export function migrateProjectToTableFormat(db: Database, projectId: string): MigrationResult {
   const errors: string[] = [];
   let itemsMigrated = 0;
 
@@ -53,7 +50,7 @@ export function migrateProjectToTableFormat(
   const tableInfo = db.prepare(`PRAGMA table_info(prep_equipment_items)`).all() as Array<{
     name: string;
   }>;
-  const columnNames = tableInfo.map(col => col.name);
+  const columnNames = tableInfo.map((col) => col.name);
 
   if (!columnNames.includes('revision_quantities')) {
     errors.push('revision_quantities column does not exist. Please update schema first.');
@@ -84,15 +81,15 @@ export function migrateProjectToTableFormat(
         `SELECT ei.*
          FROM prep_equipment_items ei
          INNER JOIN prep_sections ps ON ei.section_id = ps.id
-         WHERE ps.prep_project_id = ?`
+         WHERE ps.prep_project_id = ?`,
       )
       .all(projectId) as Array<{
-        id: string;
-        active_qty: number;
-        added_in_revision: number | null;
-        removed_in_revision: number | null;
-        modified_in_revision: number | null;
-      }>;
+      id: string;
+      active_qty: number;
+      added_in_revision: number | null;
+      removed_in_revision: number | null;
+      modified_in_revision: number | null;
+    }>;
 
     // Begin transaction
     db.prepare('BEGIN TRANSACTION').run();
@@ -105,9 +102,7 @@ export function migrateProjectToTableFormat(
         if (item.added_in_revision !== null) {
           // Item was added in a specific revision
           const startRev = item.added_in_revision;
-          const endRev = item.removed_in_revision
-            ? item.removed_in_revision - 1
-            : currentRevision;
+          const endRev = item.removed_in_revision ? item.removed_in_revision - 1 : currentRevision;
 
           // Populate quantities for all revisions the item exists in
           for (let rev = startRev; rev <= endRev; rev++) {
@@ -115,9 +110,7 @@ export function migrateProjectToTableFormat(
           }
         } else {
           // Item exists from beginning (revision 0)
-          const endRev = item.removed_in_revision
-            ? item.removed_in_revision - 1
-            : currentRevision;
+          const endRev = item.removed_in_revision ? item.removed_in_revision - 1 : currentRevision;
 
           for (let rev = 0; rev <= endRev; rev++) {
             revisionQuantities[rev] = item.active_qty;
@@ -129,12 +122,8 @@ export function migrateProjectToTableFormat(
           `UPDATE prep_equipment_items
            SET revision_quantities = ?,
                deleted_in_revision = ?
-           WHERE id = ?`
-        ).run(
-          JSON.stringify(revisionQuantities),
-          item.removed_in_revision,
-          item.id
-        );
+           WHERE id = ?`,
+        ).run(JSON.stringify(revisionQuantities), item.removed_in_revision, item.id);
 
         itemsMigrated++;
       }
@@ -145,7 +134,7 @@ export function migrateProjectToTableFormat(
       return {
         success: true,
         itemsMigrated,
-        errors: []
+        errors: [],
       };
     } catch (error) {
       // Rollback on error
@@ -153,13 +142,11 @@ export function migrateProjectToTableFormat(
       throw error;
     }
   } catch (error) {
-    errors.push(
-      `Migration failed: ${error instanceof Error ? error.message : String(error)}`
-    );
+    errors.push(`Migration failed: ${error instanceof Error ? error.message : String(error)}`);
     return {
       success: false,
       itemsMigrated: 0,
-      errors
+      errors,
     };
   }
 }
@@ -172,9 +159,7 @@ export function migrateAllProjectsToTableFormat(db: Database): {
   totalItems: number;
   failures: Array<{ projectId: string; error: string }>;
 } {
-  const projects = db
-    .prepare('SELECT id FROM prep_projects')
-    .all() as Array<{ id: string }>;
+  const projects = db.prepare('SELECT id FROM prep_projects').all() as Array<{ id: string }>;
 
   let projectsMigrated = 0;
   let totalItems = 0;
@@ -191,13 +176,11 @@ export function migrateAllProjectsToTableFormat(db: Database): {
     if (result.success) {
       projectsMigrated++;
       totalItems += result.itemsMigrated;
-      console.log(
-        `✓ Migrated project ${project.id}: ${result.itemsMigrated} items`
-      );
+      console.log(`✓ Migrated project ${project.id}: ${result.itemsMigrated} items`);
     } else {
       failures.push({
         projectId: project.id,
-        error: result.errors.join(', ')
+        error: result.errors.join(', '),
       });
       console.error(`✗ Failed to migrate project ${project.id}:`, result.errors);
     }
@@ -206,7 +189,7 @@ export function migrateAllProjectsToTableFormat(db: Database): {
   return {
     projectsMigrated,
     totalItems,
-    failures
+    failures,
   };
 }
 
@@ -224,11 +207,11 @@ export function rollbackMigration(db: Database, projectId: string): MigrationRes
         `SELECT ei.*
          FROM prep_equipment_items ei
          INNER JOIN prep_sections ps ON ei.section_id = ps.id
-         WHERE ps.prep_project_id = ?`
+         WHERE ps.prep_project_id = ?`,
       )
       .all(projectId) as Array<{
-        id: string;
-      }>;
+      id: string;
+    }>;
 
     // Begin transaction
     db.prepare('BEGIN TRANSACTION').run();
@@ -240,7 +223,7 @@ export function rollbackMigration(db: Database, projectId: string): MigrationRes
           `UPDATE prep_equipment_items
            SET revision_quantities = NULL,
                deleted_in_revision = NULL
-           WHERE id = ?`
+           WHERE id = ?`,
         ).run(item.id);
 
         itemsMigrated++;
@@ -252,7 +235,7 @@ export function rollbackMigration(db: Database, projectId: string): MigrationRes
       return {
         success: true,
         itemsMigrated,
-        errors: []
+        errors: [],
       };
     } catch (error) {
       // Rollback on error
@@ -260,13 +243,11 @@ export function rollbackMigration(db: Database, projectId: string): MigrationRes
       throw error;
     }
   } catch (error) {
-    errors.push(
-      `Rollback failed: ${error instanceof Error ? error.message : String(error)}`
-    );
+    errors.push(`Rollback failed: ${error instanceof Error ? error.message : String(error)}`);
     return {
       success: false,
       itemsMigrated: 0,
-      errors
+      errors,
     };
   }
 }

@@ -7,7 +7,7 @@ import {
   CreateDimmerRackSchema,
   UpdateDimmerRackSchema,
   parseWithZod,
-  formatValidationErrors
+  formatValidationErrors,
 } from '@showstack/shared';
 
 export function registerDimmerRackHandlers(): void {
@@ -19,7 +19,7 @@ export function registerDimmerRackHandlers(): void {
       console.error('Failed to get dimmer racks:', {
         operation: 'dimmerRacks:getAll',
         projectId,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -37,7 +37,7 @@ export function registerDimmerRackHandlers(): void {
       console.error('Failed to get dimmer rack:', {
         operation: 'dimmerRacks:getById',
         id,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -48,40 +48,47 @@ export function registerDimmerRackHandlers(): void {
   });
 
   // Create dimmer rack
-  ipcMain.handle('dimmerRacks:create', async (_event, rack: Omit<DimmerRack, 'id' | 'created_at' | 'updated_at'>, projectId?: string) => {
-    try {
-      // Add project_id for validation
-      const rackWithProject = { ...rack, project_id: projectId || rack.project_id };
+  ipcMain.handle(
+    'dimmerRacks:create',
+    async (
+      _event,
+      rack: Omit<DimmerRack, 'id' | 'created_at' | 'updated_at'>,
+      projectId?: string,
+    ) => {
+      try {
+        // Add project_id for validation
+        const rackWithProject = { ...rack, project_id: projectId || rack.project_id };
 
-      // Validate with Zod schema
-      const validation = parseWithZod(CreateDimmerRackSchema, rackWithProject);
+        // Validate with Zod schema
+        const validation = parseWithZod(CreateDimmerRackSchema, rackWithProject);
 
-      if (!validation.success) {
-        const errorMessage = formatValidationErrors(validation.errors);
-        throw new ValidationError(
-          `Invalid dimmer rack data:\n${errorMessage}`,
-          validation.errors[0]?.field || 'unknown',
-          rack
-        );
+        if (!validation.success) {
+          const errorMessage = formatValidationErrors(validation.errors);
+          throw new ValidationError(
+            `Invalid dimmer rack data:\n${errorMessage}`,
+            validation.errors[0]?.field || 'unknown',
+            rack,
+          );
+        }
+
+        return await dimmerService.create(rack, projectId);
+      } catch (error) {
+        console.error('Failed to create dimmer rack:', {
+          operation: 'dimmerRacks:create',
+          rack,
+          error: error instanceof Error ? error.message : error,
+        });
+
+        if (error instanceof ValidationError) {
+          throw new Error(error.toUserMessage());
+        }
+        if (error instanceof DatabaseError) {
+          throw new Error(`Unable to create dimmer rack: ${error.message}`);
+        }
+        throw error;
       }
-
-      return await dimmerService.create(rack, projectId);
-    } catch (error) {
-      console.error('Failed to create dimmer rack:', {
-        operation: 'dimmerRacks:create',
-        rack,
-        error: error instanceof Error ? error.message : error
-      });
-
-      if (error instanceof ValidationError) {
-        throw new Error(error.toUserMessage());
-      }
-      if (error instanceof DatabaseError) {
-        throw new Error(`Unable to create dimmer rack: ${error.message}`);
-      }
-      throw error;
-    }
-  });
+    },
+  );
 
   // Update dimmer rack
   ipcMain.handle('dimmerRacks:update', async (_event, id: string, updates: Partial<DimmerRack>) => {
@@ -94,7 +101,7 @@ export function registerDimmerRackHandlers(): void {
         throw new ValidationError(
           `Invalid dimmer rack update data:\n${errorMessage}`,
           validation.errors[0]?.field || 'unknown',
-          updates
+          updates,
         );
       }
 
@@ -104,7 +111,7 @@ export function registerDimmerRackHandlers(): void {
         operation: 'dimmerRacks:update',
         id,
         updates,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof ValidationError) {
@@ -125,7 +132,7 @@ export function registerDimmerRackHandlers(): void {
       console.error('Failed to delete dimmer rack:', {
         operation: 'dimmerRacks:delete',
         id,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -143,7 +150,7 @@ export function registerDimmerRackHandlers(): void {
       console.error('Failed to get dimmer racks with usage:', {
         operation: 'dimmerRacks:getWithUsage',
         projectId,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {

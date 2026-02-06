@@ -106,9 +106,7 @@ export function OfflineBanner(): JSX.Element | null {
             disabled={isReconnecting}
             className="inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium text-yellow-700 hover:text-yellow-800 hover:bg-yellow-100 rounded transition disabled:opacity-50"
           >
-            <RefreshCw
-              className={`h-3.5 w-3.5 ${isReconnecting ? 'animate-spin' : ''}`}
-            />
+            <RefreshCw className={`h-3.5 w-3.5 ${isReconnecting ? 'animate-spin' : ''}`} />
             {isReconnecting ? 'Reconnecting...' : 'Retry'}
           </button>
           <button

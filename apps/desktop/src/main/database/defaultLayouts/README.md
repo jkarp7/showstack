@@ -8,13 +8,13 @@ When the Production module's Shop Order tool is first launched or when "Reset to
 
 ## Files
 
-| File | Page Type | Description |
-|------|-----------|-------------|
-| `cover_default_layout.json` | cover | Cover page with production info, designer credits, and revision details |
-| `contacts_default_layout.json` | contacts | Contact information and important dates |
-| `equipment-by-section_default_layout.json` | equipment-by-section | Equipment list organized by sections with delta tracking |
-| `notes_default_layout.json` | notes | General conditions, notes, and fixture notes |
-| `revision-summary_default_layout.json` | revision-summary | Revision change log with color-coded changes |
+| File                                       | Page Type            | Description                                                             |
+| ------------------------------------------ | -------------------- | ----------------------------------------------------------------------- |
+| `cover_default_layout.json`                | cover                | Cover page with production info, designer credits, and revision details |
+| `contacts_default_layout.json`             | contacts             | Contact information and important dates                                 |
+| `equipment-by-section_default_layout.json` | equipment-by-section | Equipment list organized by sections with delta tracking                |
+| `notes_default_layout.json`                | notes                | General conditions, notes, and fixture notes                            |
+| `revision-summary_default_layout.json`     | revision-summary     | Revision change log with color-coded changes                            |
 
 ## JSON Structure
 
@@ -39,6 +39,7 @@ Each layout file contains two main sections:
 ```
 
 **Fields:**
+
 - `name`: Display name for the template
 - `description`: Detailed description of the layout's purpose
 - `page_type`: Type identifier (must match PrintSectionType)
@@ -77,6 +78,7 @@ Each layout file contains two main sections:
 ```
 
 **Common Fields:**
+
 - `element_type`: Type of element (see Element Types below)
 - `config`: Type-specific configuration
 - `grid_column`: Starting column (0-indexed)
@@ -89,9 +91,11 @@ Each layout file contains two main sections:
 ## Element Types
 
 ### text
+
 Static or dynamic text content.
 
 **Config:**
+
 ```json
 {
   "content": "SHOP ORDER - REVISION {revision_number}"
@@ -99,6 +103,7 @@ Static or dynamic text content.
 ```
 
 Supports placeholders:
+
 - `{production_name}` - Production name
 - `{venue}` - Venue name
 - `{venue_city}` - Venue city
@@ -107,9 +112,11 @@ Supports placeholders:
 - etc.
 
 ### dataField
+
 Dynamic data field linked to project properties.
 
 **Config:**
+
 ```json
 {
   "fieldType": "ld_name",
@@ -119,15 +126,18 @@ Dynamic data field linked to project properties.
 ```
 
 **Field Types:**
+
 - Contact fields: `ld_name`, `ld_email`, `ld_phone`, `pe_name`, etc.
 - Dates: `order_date`, `load_in_date`, `opening_night_date`, etc.
 - Project info: `production_name`, `venue`, `venue_city`, etc.
 - Revision: `current_revision`, `revision_date`
 
 ### shape
+
 Visual shapes and dividers.
 
 **Config:**
+
 ```json
 {
   "shapeType": "line",
@@ -137,27 +147,33 @@ Visual shapes and dividers.
 ```
 
 **Shape Types:**
+
 - `line` / `divider`: Horizontal line
 - `rectangle`: Filled rectangle
 
 ### equipment_list
+
 Dynamic equipment table (auto-generated from project data).
 
 **Config:**
+
 ```json
 {}
 ```
 
 Displays equipment organized by sections with:
+
 - Delta indicators (new, modified, removed)
 - Quantity columns (Total, Active, Spare)
 - Description
 - Item notes
 
 ### notes_content
+
 Dynamic notes content by type.
 
 **Config:**
+
 ```json
 {
   "noteType": "general_conditions"
@@ -165,19 +181,23 @@ Dynamic notes content by type.
 ```
 
 **Note Types:**
+
 - `general_conditions`
 - `general_notes`
 - `fixture_notes`
 
 ### revision_log
+
 Revision change history (auto-generated).
 
 **Config:**
+
 ```json
 {}
 ```
 
 Displays:
+
 - Current revision with change details
 - Previous revisions list
 - Color-coded change indicators
@@ -209,6 +229,7 @@ All elements support these style properties:
 ## Grid System
 
 The layout uses a 12-column grid system:
+
 - **Columns**: 0-11 (12 total)
 - **Rows**: Typically 20-24 depending on page type
 - **Positioning**: Elements are placed using `grid_column` and `grid_row`
@@ -233,6 +254,7 @@ Right:  grid_column: 8, column_span: 4
 ## Page Dimensions
 
 All layouts use letter size (8.5" × 11") at 96 DPI:
+
 - **Width**: 816 pixels (8.5" × 96 DPI)
 - **Height**: 1056 pixels (11" × 96 DPI)
 
@@ -265,29 +287,37 @@ This ensures consistent PDF export and printing.
 ## Best Practices
 
 ### 1. Backup Before Changes
+
 Always export layouts before modifying them:
+
 ```
 Admin Panel → Export All Default Layouts
 ```
 
 ### 2. Use Version Control
+
 Commit layout changes to Git with descriptive messages:
+
 ```bash
 git add src/main/database/defaultLayouts/
 git commit -m "Update cover page layout: add company logo field"
 ```
 
 ### 3. Validate JSON
+
 Use a JSON validator (like JSONLint) to ensure valid syntax before importing.
 
 ### 4. Test Thoroughly
+
 - Test with sample project data
 - Check all page types
 - Verify PDF exports
 - Test on different screen sizes
 
 ### 5. Document Changes
+
 Add comments in Git commit messages explaining:
+
 - What was changed
 - Why it was changed
 - Any breaking changes
@@ -297,6 +327,7 @@ Add comments in Git commit messages explaining:
 ### Layout Not Loading
 
 **Check:**
+
 1. JSON syntax is valid (use JSONLint.com)
 2. All required fields are present
 3. Element types are spelled correctly
@@ -306,6 +337,7 @@ Add comments in Git commit messages explaining:
 ### Elements Not Displaying
 
 **Check:**
+
 1. `grid_column` + `column_span` ≤ `grid_columns`
 2. `grid_row` + `row_span` ≤ `grid_rows`
 3. Element has valid `style` properties
@@ -314,6 +346,7 @@ Add comments in Git commit messages explaining:
 ### Data Not Showing
 
 **Check:**
+
 1. `fieldType` matches available project properties
 2. Project actually has data for that field
 3. Placeholder syntax is correct: `{field_name}`
@@ -332,6 +365,7 @@ Add comments in Git commit messages explaining:
 ### Fallback Mechanism
 
 The system includes a fallback to hardcoded layouts if JSON loading fails:
+
 - Directory doesn't exist
 - No JSON files found
 - All files have errors
@@ -342,6 +376,7 @@ This ensures the application always has default layouts available.
 ## Support
 
 For more information:
+
 - [Admin Panel User Guide](../../../docs/ADMIN_PANEL_USER_GUIDE.md)
 - [Admin Panel Migration Summary](../../../docs/ADMIN_PANEL_MIGRATION.md)
 - [Phase 1 Development Guide](../../../docs/PHASE_1_DEVELOPMENT_GUIDE.md)

@@ -5,7 +5,7 @@ import {
   getAveryTemplates,
   getAveryTemplate,
   calculateCellDimensions,
-  AVERY_TEMPLATES
+  AVERY_TEMPLATES,
 } from '../labelGridCalculator';
 
 /**
@@ -20,11 +20,11 @@ describe('Label Grid Calculator', () => {
 
       // 4 cells per inch (default)
       expect(grid.columns).toBe(11); // 2.625 * 4 = 10.5, rounded to 11
-      expect(grid.rows).toBe(4);    // 1.0 * 4 = 4
+      expect(grid.rows).toBe(4); // 1.0 * 4 = 4
 
       // 72 DPI standard
-      expect(grid.pageWidth).toBe(189);  // 2.625 * 72 = 189
-      expect(grid.pageHeight).toBe(72);  // 1.0 * 72 = 72
+      expect(grid.pageWidth).toBe(189); // 2.625 * 72 = 189
+      expect(grid.pageHeight).toBe(72); // 1.0 * 72 = 72
 
       expect(grid.gridGap).toBe(2);
     });
@@ -33,8 +33,8 @@ describe('Label Grid Calculator', () => {
       const grid = calculateLabelGrid(4.0, 2.0);
 
       expect(grid.columns).toBe(16); // 4 * 4 = 16
-      expect(grid.rows).toBe(8);     // 2 * 4 = 8
-      expect(grid.pageWidth).toBe(288);  // 4 * 72
+      expect(grid.rows).toBe(8); // 2 * 4 = 8
+      expect(grid.pageWidth).toBe(288); // 4 * 72
       expect(grid.pageHeight).toBe(144); // 2 * 72
     });
 
@@ -42,32 +42,32 @@ describe('Label Grid Calculator', () => {
       const grid = calculateLabelGrid(2.0, 1.0, 8); // 8 cells per inch
 
       expect(grid.columns).toBe(16); // 2 * 8 = 16
-      expect(grid.rows).toBe(8);     // 1 * 8 = 8
+      expect(grid.rows).toBe(8); // 1 * 8 = 8
     });
 
     it('should handle fractional dimensions with rounding', () => {
       const grid = calculateLabelGrid(1.75, 0.5);
 
-      expect(grid.columns).toBe(7);  // 1.75 * 4 = 7 (exact)
-      expect(grid.rows).toBe(2);     // 0.5 * 4 = 2
-      expect(grid.pageWidth).toBe(126);  // 1.75 * 72 = 126
-      expect(grid.pageHeight).toBe(36);  // 0.5 * 72 = 36
+      expect(grid.columns).toBe(7); // 1.75 * 4 = 7 (exact)
+      expect(grid.rows).toBe(2); // 0.5 * 4 = 2
+      expect(grid.pageWidth).toBe(126); // 1.75 * 72 = 126
+      expect(grid.pageHeight).toBe(36); // 0.5 * 72 = 36
     });
 
     it('should handle large labels', () => {
       const grid = calculateLabelGrid(8.5, 11.0); // Full page
 
-      expect(grid.columns).toBe(34);  // 8.5 * 4 = 34
-      expect(grid.rows).toBe(44);     // 11 * 4 = 44
-      expect(grid.pageWidth).toBe(612);  // 8.5 * 72
+      expect(grid.columns).toBe(34); // 8.5 * 4 = 34
+      expect(grid.rows).toBe(44); // 11 * 4 = 44
+      expect(grid.pageWidth).toBe(612); // 8.5 * 72
       expect(grid.pageHeight).toBe(792); // 11 * 72
     });
 
     it('should handle small labels', () => {
       const grid = calculateLabelGrid(0.5, 0.25);
 
-      expect(grid.columns).toBe(2);  // 0.5 * 4 = 2
-      expect(grid.rows).toBe(1);     // 0.25 * 4 = 1
+      expect(grid.columns).toBe(2); // 0.5 * 4 = 2
+      expect(grid.rows).toBe(1); // 0.25 * 4 = 1
     });
   });
 
@@ -78,7 +78,7 @@ describe('Label Grid Calculator', () => {
 
         expect(grid).not.toBeNull();
         expect(grid?.columns).toBe(11); // 2.625 * 4 = 10.5 → 11
-        expect(grid?.rows).toBe(4);     // 1.0 * 4 = 4
+        expect(grid?.rows).toBe(4); // 1.0 * 4 = 4
         expect(grid?.pageWidth).toBe(189);
         expect(grid?.pageHeight).toBe(72);
       });
@@ -88,15 +88,15 @@ describe('Label Grid Calculator', () => {
 
         expect(grid).not.toBeNull();
         expect(grid?.columns).toBe(16); // 4.0 * 4 = 16
-        expect(grid?.rows).toBe(8);     // 2.0 * 4 = 8
+        expect(grid?.rows).toBe(8); // 2.0 * 4 = 8
       });
 
       it('should get grid config for Avery 5167 return address', () => {
         const grid = getAveryGridConfig('5167');
 
         expect(grid).not.toBeNull();
-        expect(grid?.columns).toBe(7);  // 1.75 * 4 = 7
-        expect(grid?.rows).toBe(2);     // 0.5 * 4 = 2
+        expect(grid?.columns).toBe(7); // 1.75 * 4 = 7
+        expect(grid?.rows).toBe(2); // 0.5 * 4 = 2
       });
 
       it('should return null for unknown template code', () => {
@@ -125,7 +125,7 @@ describe('Label Grid Calculator', () => {
 
       it('should include 5160 template', () => {
         const templates = getAveryTemplates();
-        const has5160 = templates.some(t => t.code === '5160');
+        const has5160 = templates.some((t) => t.code === '5160');
         expect(has5160).toBe(true);
       });
 
@@ -180,7 +180,7 @@ describe('Label Grid Calculator', () => {
         rows: 4,
         pageWidth: 200,
         pageHeight: 100,
-        gridGap: 2
+        gridGap: 2,
       };
 
       const { cellWidth, cellHeight } = calculateCellDimensions(grid);
@@ -198,7 +198,7 @@ describe('Label Grid Calculator', () => {
         rows: 5,
         pageWidth: 100,
         pageHeight: 100,
-        gridGap: 0
+        gridGap: 0,
       };
 
       const { cellWidth, cellHeight } = calculateCellDimensions(grid);
@@ -227,7 +227,7 @@ describe('Label Grid Calculator', () => {
         rows: 1,
         pageWidth: 72,
         pageHeight: 72,
-        gridGap: 2
+        gridGap: 2,
       };
 
       const { cellWidth, cellHeight } = calculateCellDimensions(grid);
@@ -243,7 +243,7 @@ describe('Label Grid Calculator', () => {
         rows: 20,
         pageWidth: 400,
         pageHeight: 400,
-        gridGap: 2
+        gridGap: 2,
       };
 
       const { cellWidth, cellHeight } = calculateCellDimensions(grid);
@@ -276,7 +276,7 @@ describe('Label Grid Calculator', () => {
     it('should handle all template codes consistently', () => {
       const templateCodes = Object.keys(AVERY_TEMPLATES);
 
-      templateCodes.forEach(code => {
+      templateCodes.forEach((code) => {
         const grid = getAveryGridConfig(code);
         expect(grid).not.toBeNull();
         expect(grid?.columns).toBeGreaterThan(0);

@@ -1,11 +1,19 @@
 import { useState, useRef } from 'react';
 import { SnapGuides } from './SnapGuides';
-import type { LayoutElement, PageLayoutTemplate, ShopOrderProject, DataFieldType } from '../../../types/shopOrder';
+import type {
+  LayoutElement,
+  PageLayoutTemplate,
+  ShopOrderProject,
+  DataFieldType,
+} from '../../../types/shopOrder';
 
 /**
  * Helper function to get actual data value from ShopOrderProject based on field type
  */
-function getDataFieldValue(project: ShopOrderProject | undefined, fieldType: DataFieldType): string {
+function getDataFieldValue(
+  project: ShopOrderProject | undefined,
+  fieldType: DataFieldType,
+): string {
   if (!project) {
     return `{${fieldType}}`;
   }
@@ -97,7 +105,7 @@ function getDataFieldValue(project: ShopOrderProject | undefined, fieldType: Dat
       return `Revision ${project.current_revision}`;
     case 'disciplines':
       return Array.isArray(project.disciplines)
-        ? project.disciplines.map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ')
+        ? project.disciplines.map((d) => d.charAt(0).toUpperCase() + d.slice(1)).join(', ')
         : 'Not specified';
     case 'logo':
       return project.logo_url || 'No logo';
@@ -132,7 +140,7 @@ export function LayoutCanvas({
   onElementDelete,
   zoom: externalZoom,
   showGrid: externalShowGrid,
-  snapEnabled: externalSnapEnabled
+  snapEnabled: externalSnapEnabled,
 }: LayoutCanvasProps) {
   // Use external zoom/grid/snap if provided, otherwise use defaults
   const zoom = externalZoom ?? 100;
@@ -181,12 +189,15 @@ export function LayoutCanvas({
   };
 
   const getElementAtPosition = (col: number, row: number): LayoutElement | null => {
-    return template.elements.find(el =>
-      col >= el.grid_column &&
-      col < el.grid_column + el.column_span &&
-      row >= el.grid_row &&
-      row < el.grid_row + el.row_span
-    ) || null;
+    return (
+      template.elements.find(
+        (el) =>
+          col >= el.grid_column &&
+          col < el.grid_column + el.column_span &&
+          row >= el.grid_row &&
+          row < el.grid_row + el.row_span,
+      ) || null
+    );
   };
 
   return (
@@ -237,7 +248,7 @@ export function LayoutCanvas({
               height: `${template.page_height * (zoom / 100)}px`,
               backgroundColor: template.config?.backgroundColor || '#ffffff',
               transform: `scale(1)`,
-              transformOrigin: 'center'
+              transformOrigin: 'center',
             }}
           >
             {/* Grid - Enhanced with better visibility */}
@@ -251,7 +262,7 @@ export function LayoutCanvas({
                       linear-gradient(to right, rgba(45, 45, 45, 0.5) 1px, transparent 1px),
                       linear-gradient(to bottom, rgba(45, 45, 45, 0.5) 1px, transparent 1px)
                     `,
-                    backgroundSize: `${cellWidth * (zoom / 100)}px ${cellHeight * (zoom / 100)}px`
+                    backgroundSize: `${cellWidth * (zoom / 100)}px ${cellHeight * (zoom / 100)}px`,
                   }}
                 />
                 {/* Bold grid lines every 4 cells - Theater-optimized */}
@@ -262,7 +273,7 @@ export function LayoutCanvas({
                       linear-gradient(to right, rgba(60, 60, 60, 0.7) 1px, transparent 1px),
                       linear-gradient(to bottom, rgba(60, 60, 60, 0.7) 1px, transparent 1px)
                     `,
-                    backgroundSize: `${cellWidth * 4 * (zoom / 100)}px ${cellHeight * 4 * (zoom / 100)}px`
+                    backgroundSize: `${cellWidth * 4 * (zoom / 100)}px ${cellHeight * 4 * (zoom / 100)}px`,
                   }}
                 />
               </>
@@ -272,7 +283,11 @@ export function LayoutCanvas({
             <SnapGuides
               elements={template.elements}
               draggedElementId={draggedElement}
-              draggedElement={draggedElement ? template.elements.find(el => el.id === draggedElement) || null : null}
+              draggedElement={
+                draggedElement
+                  ? template.elements.find((el) => el.id === draggedElement) || null
+                  : null
+              }
               dragPosition={dragOverCell}
               cellWidth={cellWidth}
               cellHeight={cellHeight}
@@ -281,20 +296,25 @@ export function LayoutCanvas({
             />
 
             {/* Grid Cells (Drop Zones) */}
-            <div className="absolute inset-0 grid"
+            <div
+              className="absolute inset-0 grid"
               style={{
                 gridTemplateColumns: `repeat(${template.grid_columns}, 1fr)`,
-                gridTemplateRows: `repeat(${template.grid_rows}, 1fr)`
+                gridTemplateRows: `repeat(${template.grid_rows}, 1fr)`,
               }}
             >
               {Array.from({ length: template.grid_rows }).map((_, rowIndex) =>
                 Array.from({ length: template.grid_columns }).map((_, colIndex) => {
                   const element = getElementAtPosition(colIndex, rowIndex);
                   const isOccupied = element !== null;
-                  const isDragOver = dragOverCell?.col === colIndex && dragOverCell?.row === rowIndex;
+                  const isDragOver =
+                    dragOverCell?.col === colIndex && dragOverCell?.row === rowIndex;
 
                   // Only render drop zone if this is the top-left corner of an occupied cell or unoccupied
-                  if (isOccupied && (element.grid_column !== colIndex || element.grid_row !== rowIndex)) {
+                  if (
+                    isOccupied &&
+                    (element.grid_column !== colIndex || element.grid_row !== rowIndex)
+                  ) {
                     return null;
                   }
 
@@ -313,18 +333,18 @@ export function LayoutCanvas({
                         isDragOver && !isOccupied
                           ? 'bg-blue-200/60 border-2 border-blue-500 border-dashed shadow-lg animate-pulse'
                           : isDragOver && isOccupied
-                          ? 'bg-red-200/40 border-2 border-red-400 border-dashed'
-                          : draggedElement || dragOverCell
-                          ? !isOccupied
-                            ? 'bg-green-100/30 border border-green-300/50'
-                            : 'bg-red-50/20 border border-red-300/30'
-                          : 'border border-transparent'
+                            ? 'bg-red-200/40 border-2 border-red-400 border-dashed'
+                            : draggedElement || dragOverCell
+                              ? !isOccupied
+                                ? 'bg-green-100/30 border border-green-300/50'
+                                : 'bg-red-50/20 border border-red-300/30'
+                              : 'border border-transparent'
                       }`}
                       style={{
                         gridColumn: isOccupied ? `span ${element.column_span}` : undefined,
                         gridRow: isOccupied ? `span ${element.row_span}` : undefined,
                         cursor: isOccupied ? 'not-allowed' : 'crosshair',
-                        minHeight: isOccupied ? undefined : '20px'
+                        minHeight: isOccupied ? undefined : '20px',
                       }}
                     >
                       {/* Drop Zone Indicator */}
@@ -344,46 +364,48 @@ export function LayoutCanvas({
                       )}
                     </div>
                   );
-                })
+                }),
               )}
             </div>
 
             {/* Ghost Element Preview - Shows where element will drop */}
-            {dragOverCell && draggedElement && (() => {
-              const element = template.elements.find(el => el.id === draggedElement);
-              if (!element) return null;
+            {dragOverCell &&
+              draggedElement &&
+              (() => {
+                const element = template.elements.find((el) => el.id === draggedElement);
+                if (!element) return null;
 
-              // Check if drop location is valid (not occupied)
-              const targetElement = getElementAtPosition(dragOverCell.col, dragOverCell.row);
-              const isValidDrop = !targetElement;
+                // Check if drop location is valid (not occupied)
+                const targetElement = getElementAtPosition(dragOverCell.col, dragOverCell.row);
+                const isValidDrop = !targetElement;
 
-              return (
-                <div
-                  className={`absolute pointer-events-none border-2 rounded ${
-                    isValidDrop
-                      ? 'border-blue-500 bg-blue-100/40 border-dashed'
-                      : 'border-red-500 bg-red-100/40 border-dashed'
-                  }`}
-                  style={{
-                    left: `${dragOverCell.col * cellWidth * (zoom / 100)}px`,
-                    top: `${dragOverCell.row * cellHeight * (zoom / 100)}px`,
-                    width: `${element.column_span * cellWidth * (zoom / 100)}px`,
-                    height: `${element.row_span * cellHeight * (zoom / 100)}px`,
-                    zIndex: 9998
-                  }}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className={`text-xs font-medium px-2 py-1 rounded ${
+                return (
+                  <div
+                    className={`absolute pointer-events-none border-2 rounded ${
                       isValidDrop
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-red-500 text-white'
-                    }`}>
-                      {isValidDrop ? '✓ Drop' : '✗ Occupied'}
+                        ? 'border-blue-500 bg-blue-100/40 border-dashed'
+                        : 'border-red-500 bg-red-100/40 border-dashed'
+                    }`}
+                    style={{
+                      left: `${dragOverCell.col * cellWidth * (zoom / 100)}px`,
+                      top: `${dragOverCell.row * cellHeight * (zoom / 100)}px`,
+                      width: `${element.column_span * cellWidth * (zoom / 100)}px`,
+                      height: `${element.row_span * cellHeight * (zoom / 100)}px`,
+                      zIndex: 9998,
+                    }}
+                  >
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div
+                        className={`text-xs font-medium px-2 py-1 rounded ${
+                          isValidDrop ? 'bg-blue-500 text-white' : 'bg-red-500 text-white'
+                        }`}
+                      >
+                        {isValidDrop ? '✓ Drop' : '✗ Occupied'}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })()}
+                );
+              })()}
 
             {/* Elements */}
             {template.elements
@@ -401,8 +423,8 @@ export function LayoutCanvas({
                     draggedElement === element.id
                       ? 'opacity-40 scale-95 ring-2 ring-blue-400 ring-dashed'
                       : selectedElementId === element.id
-                      ? 'ring-2 ring-blue-500 ring-offset-2 shadow-xl'
-                      : 'hover:ring-2 hover:ring-gray-400 hover:shadow-md'
+                        ? 'ring-2 ring-blue-500 ring-offset-2 shadow-xl'
+                        : 'hover:ring-2 hover:ring-gray-400 hover:shadow-md'
                   }`}
                   style={{
                     left: `${element.grid_column * cellWidth * (zoom / 100)}px`,
@@ -419,16 +441,19 @@ export function LayoutCanvas({
                     textAlign: element.style.textAlign || 'left',
                     textDecoration: element.style.textDecoration || 'none',
                     lineHeight: element.style.lineHeight || 1.5,
-                    letterSpacing: element.style.letterSpacing ? `${element.style.letterSpacing * (zoom / 100)}px` : 'normal',
+                    letterSpacing: element.style.letterSpacing
+                      ? `${element.style.letterSpacing * (zoom / 100)}px`
+                      : 'normal',
                     // Individual padding support - use individual if set, otherwise use unified
-                    padding: element.style.paddingTop !== undefined
-                      ? `${element.style.paddingTop * (zoom / 100)}px ${element.style.paddingRight * (zoom / 100)}px ${element.style.paddingBottom * (zoom / 100)}px ${element.style.paddingLeft * (zoom / 100)}px`
-                      : `${(element.style.padding || 8) * (zoom / 100)}px`,
+                    padding:
+                      element.style.paddingTop !== undefined
+                        ? `${element.style.paddingTop * (zoom / 100)}px ${element.style.paddingRight * (zoom / 100)}px ${element.style.paddingBottom * (zoom / 100)}px ${element.style.paddingLeft * (zoom / 100)}px`
+                        : `${(element.style.padding || 8) * (zoom / 100)}px`,
                     borderWidth: `${(element.style.borderWidth || 0) * (zoom / 100)}px`,
                     borderStyle: element.style.borderStyle || 'none',
                     borderColor: element.style.borderColor || '#000',
                     borderRadius: `${(element.style.borderRadius || 0) * (zoom / 100)}px`,
-                    opacity: element.style.opacity || 1
+                    opacity: element.style.opacity || 1,
                   }}
                 >
                   {/* Element Content Preview */}
@@ -454,7 +479,7 @@ export function LayoutCanvas({
                             alt={(element.config as any).altText || 'Image'}
                             className="w-full h-full"
                             style={{
-                              objectFit: (element.config as any).objectFit || 'contain'
+                              objectFit: (element.config as any).objectFit || 'contain',
                             }}
                           />
                         ) : (
@@ -473,9 +498,12 @@ export function LayoutCanvas({
                       </div>
                     )}
                     {element.element_type === 'shape' && (
-                      <div className="w-full h-full" style={{
-                        backgroundColor: (element.config as any).color || '#000'
-                      }} />
+                      <div
+                        className="w-full h-full"
+                        style={{
+                          backgroundColor: (element.config as any).color || '#000',
+                        }}
+                      />
                     )}
                   </div>
 
@@ -484,9 +512,7 @@ export function LayoutCanvas({
                     <>
                       {/* Element info label */}
                       <div className="absolute -top-6 left-0 bg-blue-500 text-white px-2 py-0.5 rounded text-xs whitespace-nowrap pointer-events-none shadow-lg">
-                        {element.element_type}
-                        {' '}
-                        ({element.column_span}×{element.row_span})
+                        {element.element_type} ({element.column_span}×{element.row_span})
                       </div>
 
                       {/* Resize Handles */}
@@ -541,8 +567,7 @@ export function LayoutCanvas({
           {selectedElementId && ' • 1 selected'}
         </div>
         <div>
-          {template.page_width} × {template.page_height}px
-          {' '}• Page: {template.page_type}
+          {template.page_width} × {template.page_height}px • Page: {template.page_type}
         </div>
       </div>
     </div>

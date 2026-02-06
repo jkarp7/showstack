@@ -7,7 +7,11 @@ interface ColumnVisibilityMenuProps {
   userColumnDefinitions?: Record<string, string>;
 }
 
-export function ColumnVisibilityMenu({ visibility, onVisibilityChange, userColumnDefinitions = {} }: ColumnVisibilityMenuProps) {
+export function ColumnVisibilityMenu({
+  visibility,
+  onVisibilityChange,
+  userColumnDefinitions = {},
+}: ColumnVisibilityMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const menuRef = useRef<HTMLDivElement>(null);
@@ -49,14 +53,17 @@ export function ColumnVisibilityMenu({ visibility, onVisibilityChange, userColum
   };
 
   // Group columns by their group property
-  const groupedColumns = columns.reduce((acc, column) => {
-    const groupKey = column.group || 'ungrouped';
-    if (!acc[groupKey]) {
-      acc[groupKey] = [];
-    }
-    acc[groupKey].push(column);
-    return acc;
-  }, {} as Record<string, typeof COLUMN_CONFIGS>);
+  const groupedColumns = columns.reduce(
+    (acc, column) => {
+      const groupKey = column.group || 'ungrouped';
+      if (!acc[groupKey]) {
+        acc[groupKey] = [];
+      }
+      acc[groupKey].push(column);
+      return acc;
+    },
+    {} as Record<string, typeof COLUMN_CONFIGS>,
+  );
 
   const visibleCount = Object.values(visibility).filter(Boolean).length;
 
@@ -66,14 +73,15 @@ export function ColumnVisibilityMenu({ visibility, onVisibilityChange, userColum
         onClick={() => setIsOpen(!isOpen)}
         className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm font-medium transition flex items-center gap-1"
       >
-        Columns ({visibleCount})
-        <span className="text-xs">{isOpen ? '▲' : '▼'}</span>
+        Columns ({visibleCount})<span className="text-xs">{isOpen ? '▲' : '▼'}</span>
       </button>
 
       {isOpen && (
         <div className="absolute right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg z-50 w-64">
           <div className="p-2 border-b border-gray-200 dark:border-gray-700">
-            <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Show/Hide Columns</div>
+            <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">
+              Show/Hide Columns
+            </div>
           </div>
           <div className="p-2 max-h-96 overflow-y-auto">
             {/* Render ungrouped columns first */}
@@ -104,8 +112,12 @@ export function ColumnVisibilityMenu({ visibility, onVisibilityChange, userColum
                     onClick={() => toggleGroup(groupName)}
                     className="flex items-center gap-2 px-2 py-1.5 w-full rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
                   >
-                    <span className="text-xs text-gray-900 dark:text-white">{expandedGroups.has(groupName) ? '▼' : '▶'}</span>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{groupName}</span>
+                    <span className="text-xs text-gray-900 dark:text-white">
+                      {expandedGroups.has(groupName) ? '▼' : '▶'}
+                    </span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {groupName}
+                    </span>
                   </button>
                   {expandedGroups.has(groupName) && (
                     <div className="ml-4 border-l border-gray-200 dark:border-gray-700 pl-2 mt-1">
@@ -123,7 +135,9 @@ export function ColumnVisibilityMenu({ visibility, onVisibilityChange, userColum
                             disabled={column.isRequired}
                             className="w-4 h-4"
                           />
-                          <span className="text-sm text-gray-900 dark:text-white">{column.label}</span>
+                          <span className="text-sm text-gray-900 dark:text-white">
+                            {column.label}
+                          </span>
                         </label>
                       ))}
                     </div>

@@ -6,10 +6,18 @@
 import { useFixtureStore } from '../../store/fixtureStore';
 import { useInfrastructureStore } from '../../store/infrastructureStore';
 import { ReportDataItem } from './reportOrganizer';
-import { parseFrameSize, calculateCutsPerSheet, calculateSheetsNeeded, formatFrameSize } from './colorCutCalculator';
+import {
+  parseFrameSize,
+  calculateCutsPerSheet,
+  calculateSheetsNeeded,
+  formatFrameSize,
+} from './colorCutCalculator';
 import { splitDualGelCode, getGelManufacturer } from '../gelColors';
 
-export async function getReportData(reportType: string, projectId: string): Promise<ReportDataItem[]> {
+export async function getReportData(
+  reportType: string,
+  projectId: string,
+): Promise<ReportDataItem[]> {
   // Get fixture data for fixture reports
   if (isFixtureReport(reportType)) {
     const fixtureData = getFixtureData(reportType);
@@ -44,7 +52,7 @@ function isFixtureReport(reportType: string): boolean {
     'power-summary',
     'color-schedule',
     'gobo-schedule',
-    'color-cut-report'
+    'color-cut-report',
   ].includes(reportType);
 }
 
@@ -54,14 +62,14 @@ function isInfrastructureReport(reportType: string): boolean {
     'network-summary',
     'port-assignments',
     'infrastructure-power',
-    'infrastructure-location'
+    'infrastructure-location',
   ].includes(reportType);
 }
 
 function getFixtureData(reportType: string): ReportDataItem[] {
   const { fixtures } = useFixtureStore.getState();
 
-  return fixtures.map(fixture => ({
+  return fixtures.map((fixture) => ({
     id: fixture.id,
     channel: fixture.channel,
     dimmer: fixture.dimmer,
@@ -80,14 +88,14 @@ function getFixtureData(reportType: string): ReportDataItem[] {
     universe: fixture.universe,
     dmx_address: fixture.dmx_address,
     notes: fixture.notes,
-    _raw: fixture
+    _raw: fixture,
   }));
 }
 
 function getInfrastructureData(reportType: string): ReportDataItem[] {
   const { equipment } = useInfrastructureStore.getState();
 
-  return equipment.map(item => ({
+  return equipment.map((item) => ({
     id: item.id,
     name: item.name,
     manufacturer: item.manufacturer,
@@ -105,7 +113,7 @@ function getInfrastructureData(reportType: string): ReportDataItem[] {
     circuit: item.circuit,
     status: item.status,
     notes: item.notes,
-    _raw: item
+    _raw: item,
   }));
 }
 
@@ -113,7 +121,7 @@ export function calculateReportStatistics(data: ReportDataItem[]) {
   return {
     totalItems: data.length,
     totalPower: data.reduce((sum, item) => sum + (Number(item.wattage) || 0), 0),
-    totalAmperage: data.reduce((sum, item) => sum + (Number(item.amperage) || 0), 0)
+    totalAmperage: data.reduce((sum, item) => sum + (Number(item.amperage) || 0), 0),
   };
 }
 
@@ -121,7 +129,10 @@ export function calculateReportStatistics(data: ReportDataItem[]) {
  * Aggregate fixtures by type for Power Summary report
  * Calculates amperage using actual rack voltage (208V or 120V)
  */
-async function aggregatePowerSummary(fixtures: ReportDataItem[], projectId: string): Promise<ReportDataItem[]> {
+async function aggregatePowerSummary(
+  fixtures: ReportDataItem[],
+  projectId: string,
+): Promise<ReportDataItem[]> {
   // Load racks to get voltage information
   let dimmerRacks: any[] = [];
   let pdRacks: any[] = [];
@@ -139,12 +150,12 @@ async function aggregatePowerSummary(fixtures: ReportDataItem[], projectId: stri
 
   // Create rack lookup maps (rack_id -> voltage)
   const rackVoltageMap = new Map<string, number>();
-  dimmerRacks.forEach(rack => {
+  dimmerRacks.forEach((rack) => {
     if (rack.id && rack.voltage) {
       rackVoltageMap.set(rack.id, rack.voltage);
     }
   });
-  pdRacks.forEach(rack => {
+  pdRacks.forEach((rack) => {
     if (rack.id && rack.voltage) {
       rackVoltageMap.set(rack.id, rack.voltage);
     }
@@ -153,7 +164,7 @@ async function aggregatePowerSummary(fixtures: ReportDataItem[], projectId: stri
   const grouped = new Map<string, ReportDataItem[]>();
 
   // Group by type
-  fixtures.forEach(fixture => {
+  fixtures.forEach((fixture) => {
     const type = fixture.type || 'Unknown';
     if (!grouped.has(type)) {
       grouped.set(type, []);
@@ -188,7 +199,7 @@ async function aggregatePowerSummary(fixtures: ReportDataItem[], projectId: stri
       amperage,
       total_watts,
       total_amps,
-      notes: ''
+      notes: '',
     });
   });
 
@@ -202,7 +213,7 @@ function aggregateColorSchedule(fixtures: ReportDataItem[]): ReportDataItem[] {
   const grouped = new Map<string, ReportDataItem[]>();
 
   // Group by color
-  fixtures.forEach(fixture => {
+  fixtures.forEach((fixture) => {
     const color = fixture.color || 'Unknown';
     if (!grouped.has(color)) {
       grouped.set(color, []);
@@ -213,7 +224,7 @@ function aggregateColorSchedule(fixtures: ReportDataItem[]): ReportDataItem[] {
   // Convert to aggregated rows
   const aggregated: ReportDataItem[] = [];
   grouped.forEach((items, color) => {
-    items.forEach(item => {
+    items.forEach((item) => {
       aggregated.push({
         color,
         quantity: items.length,
@@ -221,7 +232,7 @@ function aggregateColorSchedule(fixtures: ReportDataItem[]): ReportDataItem[] {
         position: item.position,
         unit: item.unit,
         channel: item.channel,
-        notes: item.notes
+        notes: item.notes,
       });
     });
   });
@@ -236,7 +247,7 @@ function aggregateGoboSchedule(fixtures: ReportDataItem[]): ReportDataItem[] {
   const grouped = new Map<string, ReportDataItem[]>();
 
   // Group by gobo
-  fixtures.forEach(fixture => {
+  fixtures.forEach((fixture) => {
     const gobo = fixture.gobo || 'Unknown';
     if (!grouped.has(gobo)) {
       grouped.set(gobo, []);
@@ -247,14 +258,14 @@ function aggregateGoboSchedule(fixtures: ReportDataItem[]): ReportDataItem[] {
   // Convert to aggregated rows
   const aggregated: ReportDataItem[] = [];
   grouped.forEach((items, gobo) => {
-    items.forEach(item => {
+    items.forEach((item) => {
       aggregated.push({
         gobo,
         quantity: items.length,
         type: item.type,
         position: item.position,
         channel: item.channel,
-        notes: item.notes
+        notes: item.notes,
       });
     });
   });
@@ -275,7 +286,7 @@ function aggregateColorCutReport(fixtures: ReportDataItem[]): ReportDataItem[] {
   const grouped = new Map<string, { count: number; key: ColorCutKey; rawFrameSize: string }>();
 
   // Group fixtures by color + frame size
-  fixtures.forEach(fixture => {
+  fixtures.forEach((fixture) => {
     const color = fixture.color || fixture._raw?.color;
     const colorFrame = fixture._raw?.color_frame;
 
@@ -284,7 +295,7 @@ function aggregateColorCutReport(fixtures: ReportDataItem[]): ReportDataItem[] {
     // Split dual colors (e.g., "L202+R119")
     const gelCodes = splitDualGelCode(color);
 
-    gelCodes.forEach(gelCode => {
+    gelCodes.forEach((gelCode) => {
       const trimmedGelCode = gelCode.trim().toUpperCase();
       const frameSize = colorFrame || 'Unknown';
       const key = `${trimmedGelCode}|${frameSize}`;
@@ -295,7 +306,7 @@ function aggregateColorCutReport(fixtures: ReportDataItem[]): ReportDataItem[] {
         grouped.set(key, {
           count: 1,
           key: { gelCode: trimmedGelCode, frameSize },
-          rawFrameSize: colorFrame || ''
+          rawFrameSize: colorFrame || '',
         });
       }
     });
@@ -315,7 +326,7 @@ function aggregateColorCutReport(fixtures: ReportDataItem[]): ReportDataItem[] {
       frame_size: formattedFrameSize,
       cuts_needed: count,
       cuts_per_sheet: cutsPerSheet,
-      sheets_needed: sheetsNeeded
+      sheets_needed: sheetsNeeded,
     });
   });
 

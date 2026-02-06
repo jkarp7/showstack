@@ -16,12 +16,12 @@ export interface AverySpec {
   name: string;
   labelsPerRow: number;
   labelsPerColumn: number;
-  labelWidth: number;  // points
+  labelWidth: number; // points
   labelHeight: number; // points
-  topMargin: number;   // points
-  leftMargin: number;  // points
+  topMargin: number; // points
+  leftMargin: number; // points
   horizontalGap: number; // points
-  verticalGap: number;   // points
+  verticalGap: number; // points
 }
 
 /**
@@ -34,61 +34,61 @@ export const AVERY_SPECS: Record<string, AverySpec> = {
     name: 'Address Labels',
     labelsPerRow: 3,
     labelsPerColumn: 10,
-    labelWidth: 189,  // 2.625"
-    labelHeight: 72,  // 1"
-    topMargin: 36,    // 0.5"
+    labelWidth: 189, // 2.625"
+    labelHeight: 72, // 1"
+    topMargin: 36, // 0.5"
     leftMargin: 11.25, // ~0.156"
-    horizontalGap: 9,  // ~0.125"
-    verticalGap: 0
+    horizontalGap: 9, // ~0.125"
+    verticalGap: 0,
   },
   '5163': {
     code: '5163',
     name: 'Shipping Labels',
     labelsPerRow: 2,
     labelsPerColumn: 5,
-    labelWidth: 288,  // 4"
+    labelWidth: 288, // 4"
     labelHeight: 144, // 2"
-    topMargin: 36,    // 0.5"
+    topMargin: 36, // 0.5"
     leftMargin: 11.25,
     horizontalGap: 13.5,
-    verticalGap: 0
+    verticalGap: 0,
   },
   '5164': {
     code: '5164',
     name: 'Shipping Labels',
     labelsPerRow: 2,
     labelsPerColumn: 3,
-    labelWidth: 288,  // 4"
+    labelWidth: 288, // 4"
     labelHeight: 239.76, // 3.33"
-    topMargin: 36,    // 0.5"
+    topMargin: 36, // 0.5"
     leftMargin: 11.25,
     horizontalGap: 13.5,
-    verticalGap: 0
+    verticalGap: 0,
   },
   '8160': {
     code: '8160',
     name: 'Address Labels',
     labelsPerRow: 3,
     labelsPerColumn: 10,
-    labelWidth: 189,  // 2.625"
-    labelHeight: 72,  // 1"
-    topMargin: 36,    // 0.5"
+    labelWidth: 189, // 2.625"
+    labelHeight: 72, // 1"
+    topMargin: 36, // 0.5"
     leftMargin: 11.25,
     horizontalGap: 9,
-    verticalGap: 0
+    verticalGap: 0,
   },
   '5167': {
     code: '5167',
     name: 'Return Address Labels',
     labelsPerRow: 4,
     labelsPerColumn: 20,
-    labelWidth: 126,  // 1.75"
-    labelHeight: 36,  // 0.5"
-    topMargin: 36,    // 0.5"
+    labelWidth: 126, // 1.75"
+    labelHeight: 36, // 0.5"
+    topMargin: 36, // 0.5"
     leftMargin: 11.25,
     horizontalGap: 9,
-    verticalGap: 0
-  }
+    verticalGap: 0,
+  },
 };
 
 /**
@@ -130,9 +130,9 @@ function escapeHtml(text: string): string {
     '<': '&lt;',
     '>': '&gt;',
     '"': '&quot;',
-    "'": '&#039;'
+    "'": '&#039;',
   };
-  return text.replace(/[&<>"']/g, m => map[m]);
+  return text.replace(/[&<>"']/g, (m) => map[m]);
 }
 
 /**
@@ -141,10 +141,11 @@ function escapeHtml(text: string): string {
 function renderElement(
   element: LayoutElement,
   template: PageLayoutTemplate,
-  data: LabelData
+  data: LabelData,
 ): string {
   const gap = template.grid_gap;
-  const columnWidth = (template.page_width - (template.grid_columns - 1) * gap) / template.grid_columns;
+  const columnWidth =
+    (template.page_width - (template.grid_columns - 1) * gap) / template.grid_columns;
   const rowHeight = (template.page_height - (template.grid_rows - 1) * gap) / template.grid_rows;
 
   // Calculate position and size
@@ -201,7 +202,7 @@ function renderElement(
       color: ${style.color || '#000000'};
       display: flex;
       align-items: ${isImageOrShape ? 'stretch' : 'center'};
-      justify-content: ${isImageOrShape ? 'stretch' : (style.textAlign === 'center' ? 'center' : style.textAlign === 'right' ? 'flex-end' : 'flex-start')};
+      justify-content: ${isImageOrShape ? 'stretch' : style.textAlign === 'center' ? 'center' : style.textAlign === 'right' ? 'flex-end' : 'flex-start'};
       overflow: hidden;
     ">
       ${content}
@@ -215,9 +216,9 @@ function renderElement(
 function renderSingleLabel(
   template: PageLayoutTemplate,
   elements: LayoutElement[],
-  data: LabelData
+  data: LabelData,
 ): string {
-  const elementsHTML = elements.map(el => renderElement(el, template, data)).join('');
+  const elementsHTML = elements.map((el) => renderElement(el, template, data)).join('');
   const backgroundColor = template.config?.backgroundColor || '#ffffff';
 
   return `
@@ -240,7 +241,7 @@ export function renderLabelSheet(
   template: PageLayoutTemplate,
   elements: LayoutElement[],
   dataArray: LabelData[],
-  averyCode: string
+  averyCode: string,
 ): string {
   const spec = AVERY_SPECS[averyCode];
 

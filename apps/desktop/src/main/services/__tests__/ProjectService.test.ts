@@ -11,7 +11,7 @@ vi.mock('../../database/queries/projects', () => ({
   getProjectById: vi.fn(),
   createProject: vi.fn(),
   updateProject: vi.fn(),
-  deleteProject: vi.fn()
+  deleteProject: vi.fn(),
 }));
 
 vi.mock('../../errors', async () => {
@@ -19,21 +19,21 @@ vi.mock('../../errors', async () => {
   return {
     ...actual,
     errorHandler: {
-      executeWithRetry: vi.fn((fn) => fn())
-    }
+      executeWithRetry: vi.fn((fn) => fn()),
+    },
   };
 });
 
 vi.mock('../../monitoring/PerformanceMonitor', () => ({
   performanceMonitor: {
-    trackDatabaseQuery: vi.fn()
-  }
+    trackDatabaseQuery: vi.fn(),
+  },
 }));
 
 vi.mock('../../database/monitoring/DatabaseMonitor', () => ({
   databaseMonitor: {
-    recordQuery: vi.fn()
-  }
+    recordQuery: vi.fn(),
+  },
 }));
 
 // Import after mocking
@@ -43,7 +43,7 @@ import {
   getProjectById,
   createProject,
   updateProject,
-  deleteProject
+  deleteProject,
 } from '../../database/queries/projects';
 import type { Project } from '../../database/queries/projects';
 
@@ -59,7 +59,7 @@ describe('ProjectService', () => {
     logo_path: '/logos/test.png',
     enabled_modules: '["lighting","audio"]',
     created_at: 1704067200000,
-    updated_at: 1704067200000
+    updated_at: 1704067200000,
   };
 
   const mockProject2: Project = {
@@ -67,7 +67,7 @@ describe('ProjectService', () => {
     name: 'Second Show',
     description: 'Another production',
     created_at: 1704153600000,
-    updated_at: 1704153600000
+    updated_at: 1704153600000,
   };
 
   beforeEach(() => {
@@ -130,18 +130,16 @@ describe('ProjectService', () => {
     it('should call createProject with all parameters', async () => {
       vi.mocked(createProject).mockReturnValue(mockProject);
 
-      const result = await service.create(
-        'Test Show',
-        'A test production',
-        '/logos/test.png',
-        ['lighting', 'audio']
-      );
+      const result = await service.create('Test Show', 'A test production', '/logos/test.png', [
+        'lighting',
+        'audio',
+      ]);
 
       expect(createProject).toHaveBeenCalledWith(
         'Test Show',
         'A test production',
         '/logos/test.png',
-        ['lighting', 'audio']
+        ['lighting', 'audio'],
       );
       expect(result).toEqual(mockProject);
     });
@@ -151,12 +149,7 @@ describe('ProjectService', () => {
 
       const result = await service.create('Second Show');
 
-      expect(createProject).toHaveBeenCalledWith(
-        'Second Show',
-        undefined,
-        undefined,
-        undefined
-      );
+      expect(createProject).toHaveBeenCalledWith('Second Show', undefined, undefined, undefined);
       expect(result).toEqual(mockProject2);
     });
 
@@ -203,30 +196,22 @@ describe('ProjectService', () => {
     });
 
     it('should throw ValidationError for empty ID', async () => {
-      await expect(service.update('', { name: 'Test' })).rejects.toThrow(
-        ValidationError
-      );
+      await expect(service.update('', { name: 'Test' })).rejects.toThrow(ValidationError);
       expect(updateProject).not.toHaveBeenCalled();
     });
 
     it('should throw ValidationError for whitespace-only ID', async () => {
-      await expect(service.update('   ', { name: 'Test' })).rejects.toThrow(
-        ValidationError
-      );
+      await expect(service.update('   ', { name: 'Test' })).rejects.toThrow(ValidationError);
       expect(updateProject).not.toHaveBeenCalled();
     });
 
     it('should throw ValidationError when name is updated to empty string', async () => {
-      await expect(
-        service.update('project-1', { name: '' })
-      ).rejects.toThrow(ValidationError);
+      await expect(service.update('project-1', { name: '' })).rejects.toThrow(ValidationError);
       expect(updateProject).not.toHaveBeenCalled();
     });
 
     it('should throw ValidationError when name is updated to whitespace only', async () => {
-      await expect(
-        service.update('project-1', { name: '   ' })
-      ).rejects.toThrow(ValidationError);
+      await expect(service.update('project-1', { name: '   ' })).rejects.toThrow(ValidationError);
       expect(updateProject).not.toHaveBeenCalled();
     });
 
@@ -265,7 +250,7 @@ describe('ProjectService', () => {
     it('should parse a valid JSON array of modules', () => {
       const project: Project = {
         ...mockProject,
-        enabled_modules: '["lighting","audio"]'
+        enabled_modules: '["lighting","audio"]',
       };
 
       const result = service.getEnabledModules(project);
@@ -276,7 +261,7 @@ describe('ProjectService', () => {
     it('should return an empty array when enabled_modules is null', () => {
       const project: Project = {
         ...mockProject,
-        enabled_modules: undefined
+        enabled_modules: undefined,
       };
 
       const result = service.getEnabledModules(project);
@@ -289,7 +274,7 @@ describe('ProjectService', () => {
         id: 'project-3',
         name: 'No Modules',
         created_at: 1704067200000,
-        updated_at: 1704067200000
+        updated_at: 1704067200000,
       };
 
       const result = service.getEnabledModules(project);
@@ -300,7 +285,7 @@ describe('ProjectService', () => {
     it('should return an empty array when enabled_modules is an empty string', () => {
       const project: Project = {
         ...mockProject,
-        enabled_modules: ''
+        enabled_modules: '',
       };
 
       const result = service.getEnabledModules(project);
@@ -312,7 +297,7 @@ describe('ProjectService', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const project: Project = {
         ...mockProject,
-        enabled_modules: 'not-valid-json'
+        enabled_modules: 'not-valid-json',
       };
 
       const result = service.getEnabledModules(project);
@@ -325,7 +310,7 @@ describe('ProjectService', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const project: Project = {
         ...mockProject,
-        enabled_modules: '["lighting",'
+        enabled_modules: '["lighting",',
       };
 
       const result = service.getEnabledModules(project);
@@ -337,7 +322,7 @@ describe('ProjectService', () => {
     it('should handle a single-element JSON array', () => {
       const project: Project = {
         ...mockProject,
-        enabled_modules: '["video"]'
+        enabled_modules: '["video"]',
       };
 
       const result = service.getEnabledModules(project);
@@ -348,7 +333,7 @@ describe('ProjectService', () => {
     it('should handle an empty JSON array', () => {
       const project: Project = {
         ...mockProject,
-        enabled_modules: '[]'
+        enabled_modules: '[]',
       };
 
       const result = service.getEnabledModules(project);
@@ -361,7 +346,7 @@ describe('ProjectService', () => {
     it('should return true when the module is in the enabled list', () => {
       const project: Project = {
         ...mockProject,
-        enabled_modules: '["lighting","audio","video"]'
+        enabled_modules: '["lighting","audio","video"]',
       };
 
       expect(service.isModuleEnabled(project, 'lighting')).toBe(true);
@@ -372,7 +357,7 @@ describe('ProjectService', () => {
     it('should return false when the module is not in the enabled list', () => {
       const project: Project = {
         ...mockProject,
-        enabled_modules: '["lighting","audio"]'
+        enabled_modules: '["lighting","audio"]',
       };
 
       expect(service.isModuleEnabled(project, 'video')).toBe(false);
@@ -382,7 +367,7 @@ describe('ProjectService', () => {
     it('should return false when enabled_modules is undefined', () => {
       const project: Project = {
         ...mockProject,
-        enabled_modules: undefined
+        enabled_modules: undefined,
       };
 
       expect(service.isModuleEnabled(project, 'lighting')).toBe(false);
@@ -391,7 +376,7 @@ describe('ProjectService', () => {
     it('should return false when enabled_modules is an empty array', () => {
       const project: Project = {
         ...mockProject,
-        enabled_modules: '[]'
+        enabled_modules: '[]',
       };
 
       expect(service.isModuleEnabled(project, 'lighting')).toBe(false);
@@ -401,7 +386,7 @@ describe('ProjectService', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const project: Project = {
         ...mockProject,
-        enabled_modules: 'bad-json'
+        enabled_modules: 'bad-json',
       };
 
       expect(service.isModuleEnabled(project, 'lighting')).toBe(false);
@@ -411,7 +396,7 @@ describe('ProjectService', () => {
     it('should be case-sensitive when checking module names', () => {
       const project: Project = {
         ...mockProject,
-        enabled_modules: '["lighting"]'
+        enabled_modules: '["lighting"]',
       };
 
       expect(service.isModuleEnabled(project, 'lighting')).toBe(true);

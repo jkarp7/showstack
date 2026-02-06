@@ -24,17 +24,21 @@ function getStorageKey(moduleType?: ModuleType): string {
 /**
  * Add a file to the recent files list for a specific module
  */
-export async function addRecentFile(filePath: string, projectName: string, moduleType?: ModuleType): Promise<void> {
+export async function addRecentFile(
+  filePath: string,
+  projectName: string,
+  moduleType?: ModuleType,
+): Promise<void> {
   try {
     // Get current recent files for this module
     const recentFiles = await getRecentFiles(moduleType);
 
     // Check if this file already exists
-    const existingFile = recentFiles.find(f => f.filePath === filePath);
+    const existingFile = recentFiles.find((f) => f.filePath === filePath);
     const created = existingFile?.created || Date.now();
 
     // Remove this file if it already exists
-    const filtered = recentFiles.filter(f => f.filePath !== filePath);
+    const filtered = recentFiles.filter((f) => f.filePath !== filePath);
 
     // Add to the beginning
     const updated: RecentFile[] = [
@@ -43,9 +47,9 @@ export async function addRecentFile(filePath: string, projectName: string, modul
         projectName,
         lastOpened: Date.now(),
         created, // Keep original creation date if it existed
-        moduleType
+        moduleType,
       },
-      ...filtered
+      ...filtered,
     ];
 
     // Keep only the most recent MAX_RECENT_FILES
@@ -80,7 +84,7 @@ export async function getRecentFiles(moduleType?: ModuleType): Promise<RecentFil
 export async function removeRecentFile(filePath: string, moduleType?: ModuleType): Promise<void> {
   try {
     const recentFiles = await getRecentFiles(moduleType);
-    const filtered = recentFiles.filter(f => f.filePath !== filePath);
+    const filtered = recentFiles.filter((f) => f.filePath !== filePath);
     const storageKey = getStorageKey(moduleType);
     localStorage.setItem(storageKey, JSON.stringify(filtered));
   } catch (error) {

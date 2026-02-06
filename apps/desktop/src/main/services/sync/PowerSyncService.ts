@@ -8,11 +8,7 @@
  * This is the main entry point for cloud sync functionality.
  */
 
-import {
-  PowerSyncDatabase,
-  SyncStatus,
-  SyncStatusOptions,
-} from '@powersync/web';
+import { PowerSyncDatabase, SyncStatus, SyncStatusOptions } from '@powersync/web';
 import { AppSchema } from './powerSyncSchema';
 import { SupabaseConnector, getSupabaseConnector } from './SupabaseConnector';
 import { getConfig } from '../../config/env';
@@ -112,8 +108,7 @@ export class PowerSyncService {
       }
     } catch (error) {
       console.error('[PowerSyncService] Initialization failed:', error);
-      this.currentError =
-        error instanceof Error ? error.message : 'Initialization failed';
+      this.currentError = error instanceof Error ? error.message : 'Initialization failed';
       this.notifyStatusListeners();
       throw error;
     }
@@ -167,8 +162,7 @@ export class PowerSyncService {
       this.currentError = null;
       await this.db.connect(this.connector);
     } catch (error) {
-      this.currentError =
-        error instanceof Error ? error.message : 'Connection failed';
+      this.currentError = error instanceof Error ? error.message : 'Connection failed';
       this.notifyStatusListeners();
       throw error;
     }
@@ -259,8 +253,8 @@ export class PowerSyncService {
     return {
       state,
       connected: status?.connected ?? false,
-      hasPendingChanges: (status?.dataFlowStatus?.uploading ?? false) ||
-                         (status?.hasSynced === false),
+      hasPendingChanges:
+        (status?.dataFlowStatus?.uploading ?? false) || status?.hasSynced === false,
       pendingUploadCount: 0, // PowerSync doesn't expose this directly
       lastSyncedAt: this.lastSyncedAt,
       error: this.currentError,
@@ -340,7 +334,7 @@ export class PowerSyncService {
    * Execute multiple operations in a transaction
    */
   async transaction<T>(
-    callback: (tx: { execute: (sql: string, params?: unknown[]) => Promise<void> }) => Promise<T>
+    callback: (tx: { execute: (sql: string, params?: unknown[]) => Promise<void> }) => Promise<T>,
   ): Promise<T> {
     if (!this.db) {
       throw new Error('PowerSync not initialized');
@@ -359,11 +353,7 @@ export class PowerSyncService {
    * Watch a query for changes
    * Returns unsubscribe function
    */
-  watch<T>(
-    sql: string,
-    params: unknown[],
-    callback: (results: T[]) => void
-  ): () => void {
+  watch<T>(sql: string, params: unknown[], callback: (results: T[]) => void): () => void {
     if (!this.db) {
       throw new Error('PowerSync not initialized');
     }

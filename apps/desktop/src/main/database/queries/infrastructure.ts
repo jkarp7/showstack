@@ -6,7 +6,7 @@ import {
   PaginatedResult,
   normalizePaginationOptions,
   buildOrderByClause,
-  buildPaginatedResult
+  buildPaginatedResult,
 } from '../utils/pagination';
 
 export interface PortAssignment {
@@ -80,11 +80,15 @@ export interface InfrastructureEquipment {
 export function getAllInfrastructure(projectId: string): InfrastructureEquipment[] {
   const db = getDatabase();
 
-  const equipment = db.prepare(`
+  const equipment = db
+    .prepare(
+      `
     SELECT * FROM infrastructure_equipment
     WHERE project_id = ?
     ORDER BY category, name
-  `).all(projectId);
+  `,
+    )
+    .all(projectId);
 
   return equipment.map((eq: any) => {
     // Parse JSON fields
@@ -94,7 +98,7 @@ export function getAllInfrastructure(projectId: string): InfrastructureEquipment
       } catch (error) {
         logger.warn(`Failed to parse port_assignments for equipment ${eq.id}`, {
           error: error instanceof Error ? error.message : String(error),
-          rawValue: String(eq.port_assignments).substring(0, 100)
+          rawValue: String(eq.port_assignments).substring(0, 100),
         });
         eq.port_assignments = [];
       }
@@ -119,7 +123,7 @@ const INFRASTRUCTURE_SORT_FIELDS = Object.freeze([
   'location',
   'status',
   'created_at',
-  'updated_at'
+  'updated_at',
 ] as const);
 
 /**
@@ -132,24 +136,32 @@ const INFRASTRUCTURE_SORT_FIELDS = Object.freeze([
  */
 export function getInfrastructurePaginated(
   projectId: string,
-  options: Partial<PaginationOptions> = {}
+  options: Partial<PaginationOptions> = {},
 ): PaginatedResult<InfrastructureEquipment> {
   const db = getDatabase();
   const normalized = normalizePaginationOptions(options, INFRASTRUCTURE_SORT_FIELDS);
-  const orderBy = buildOrderByClause(normalized.sortBy, normalized.sortOrder, INFRASTRUCTURE_SORT_FIELDS);
+  const orderBy = buildOrderByClause(
+    normalized.sortBy,
+    normalized.sortOrder,
+    INFRASTRUCTURE_SORT_FIELDS,
+  );
 
   // Get total count
-  const countResult = db.prepare(
-    'SELECT COUNT(*) as count FROM infrastructure_equipment WHERE project_id = ?'
-  ).get(projectId) as { count: number };
+  const countResult = db
+    .prepare('SELECT COUNT(*) as count FROM infrastructure_equipment WHERE project_id = ?')
+    .get(projectId) as { count: number };
 
   // Get paginated data
-  const equipment = db.prepare(`
+  const equipment = db
+    .prepare(
+      `
     SELECT * FROM infrastructure_equipment
     WHERE project_id = ?
     ORDER BY ${orderBy}
     LIMIT ? OFFSET ?
-  `).all(projectId, normalized.limit, normalized.offset);
+  `,
+    )
+    .all(projectId, normalized.limit, normalized.offset);
 
   // Transform equipment (parse JSON fields)
   const transformedEquipment = equipment.map((eq: any) => {
@@ -159,7 +171,7 @@ export function getInfrastructurePaginated(
       } catch (error) {
         logger.warn(`Failed to parse port_assignments for equipment ${eq.id}`, {
           error: error instanceof Error ? error.message : String(error),
-          rawValue: String(eq.port_assignments).substring(0, 100)
+          rawValue: String(eq.port_assignments).substring(0, 100),
         });
         eq.port_assignments = [];
       }
@@ -174,7 +186,7 @@ export function getInfrastructurePaginated(
 
 export function createInfrastructure(
   equipment: Partial<InfrastructureEquipment>,
-  projectId: string
+  projectId: string,
 ): InfrastructureEquipment {
   const db = getDatabase();
   const id = uuidv4();
@@ -185,7 +197,8 @@ export function createInfrastructure(
     ? JSON.stringify(equipment.port_assignments)
     : null;
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO infrastructure_equipment (
       id, project_id, name, manufacturer, model, quantity, category,
       ip_address, mac_address, subnet_mask, gateway, vlan_id, hostname,
@@ -194,7 +207,8 @@ export function createInfrastructure(
       circuit, circuit_number, location, position_x, position_y, position_z,
       notes, status, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
+  `,
+  ).run(
     id,
     projectId,
     equipment.name || '',
@@ -228,7 +242,7 @@ export function createInfrastructure(
     equipment.notes || null,
     equipment.status || 'Active',
     now,
-    now
+    now,
   );
 
   saveDatabase();
@@ -240,15 +254,39 @@ export function createInfrastructure(
  * Frozen to prevent runtime modification (security hardening).
  */
 const INFRASTRUCTURE_ALLOWED_FIELDS = Object.freeze([
-  'name', 'manufacturer', 'model', 'quantity', 'category',
-  'ip_address', 'mac_address', 'subnet_mask', 'gateway', 'vlan_id', 'hostname',
-  'port_assignments', 'port_count', 'voltage', 'amperage', 'wattage', 'phase',
-  'dimmer_rack_id', 'dimmer_channel_number', 'pd_rack_id', 'pd_circuit_number', 'pd_breaker_number',
-  'circuit', 'circuit_number', 'location', 'position_x', 'position_y', 'position_z',
-  'notes', 'status'
+  'name',
+  'manufacturer',
+  'model',
+  'quantity',
+  'category',
+  'ip_address',
+  'mac_address',
+  'subnet_mask',
+  'gateway',
+  'vlan_id',
+  'hostname',
+  'port_assignments',
+  'port_count',
+  'voltage',
+  'amperage',
+  'wattage',
+  'phase',
+  'dimmer_rack_id',
+  'dimmer_channel_number',
+  'pd_rack_id',
+  'pd_circuit_number',
+  'pd_breaker_number',
+  'circuit',
+  'circuit_number',
+  'location',
+  'position_x',
+  'position_y',
+  'position_z',
+  'notes',
+  'status',
 ] as const);
 
-type InfrastructureAllowedField = typeof INFRASTRUCTURE_ALLOWED_FIELDS[number];
+type InfrastructureAllowedField = (typeof INFRASTRUCTURE_ALLOWED_FIELDS)[number];
 
 function isInfrastructureAllowedField(field: string): field is InfrastructureAllowedField {
   return INFRASTRUCTURE_ALLOWED_FIELDS.includes(field as InfrastructureAllowedField);
@@ -256,7 +294,7 @@ function isInfrastructureAllowedField(field: string): field is InfrastructureAll
 
 export function updateInfrastructure(
   id: string,
-  updates: Partial<InfrastructureEquipment>
+  updates: Partial<InfrastructureEquipment>,
 ): InfrastructureEquipment {
   const db = getDatabase();
   const now = Date.now();
@@ -273,15 +311,17 @@ export function updateInfrastructure(
     mappedUpdates.port_assignments = JSON.stringify(mappedUpdates.port_assignments) as any;
   }
 
-  const setClause = fields.map(f => `${f} = ?`).join(', ');
+  const setClause = fields.map((f) => `${f} = ?`).join(', ');
   // Convert undefined to null for SQL.js compatibility
-  const values = fields.map(f => mappedUpdates[f] === undefined ? null : mappedUpdates[f]);
+  const values = fields.map((f) => (mappedUpdates[f] === undefined ? null : mappedUpdates[f]));
 
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE infrastructure_equipment
     SET ${setClause}, updated_at = ?
     WHERE id = ?
-  `).run(...values, now, id);
+  `,
+  ).run(...values, now, id);
 
   saveDatabase();
   return getInfrastructureById(id);
@@ -317,7 +357,7 @@ function getInfrastructureById(id: string): InfrastructureEquipment {
     } catch (error) {
       logger.warn(`Failed to parse port_assignments for equipment ${id}`, {
         error: error instanceof Error ? error.message : String(error),
-        rawValue: String((equipment as any).port_assignments).substring(0, 100)
+        rawValue: String((equipment as any).port_assignments).substring(0, 100),
       });
       (equipment as any).port_assignments = [];
     }
@@ -357,29 +397,35 @@ export function getPortLinkages(equipmentId: string, projectId: string): PortLin
   }
 
   return equipment.port_assignments
-    .filter(pa => pa.linked_fixture_id || pa.linked_equipment_id || pa.connected_to)
-    .map(pa => {
+    .filter((pa) => pa.linked_fixture_id || pa.linked_equipment_id || pa.connected_to)
+    .map((pa) => {
       const linkage: PortLinkage = {
         equipment_id: equipment.id,
         equipment_name: equipment.name,
         port: pa.port,
-        linked_to_type: pa.linked_fixture_id ? 'fixture' : pa.linked_equipment_id ? 'equipment' : 'text',
+        linked_to_type: pa.linked_fixture_id
+          ? 'fixture'
+          : pa.linked_equipment_id
+            ? 'equipment'
+            : 'text',
         linked_to_id: pa.linked_fixture_id || pa.linked_equipment_id,
         linked_port: pa.linked_port,
         connection_type: pa.type,
-        status: pa.status
+        status: pa.status,
       };
 
       // Get linked equipment name if applicable
       if (pa.linked_equipment_id) {
-        const linkedEquipment = allEquipment.find(e => e.id === pa.linked_equipment_id);
+        const linkedEquipment = allEquipment.find((e) => e.id === pa.linked_equipment_id);
         linkage.linked_to_name = linkedEquipment?.name;
       }
 
       // Get linked fixture name if applicable
       if (pa.linked_fixture_id) {
         try {
-          const fixture = db.prepare('SELECT position FROM fixtures WHERE id = ?').get(pa.linked_fixture_id);
+          const fixture = db
+            .prepare('SELECT position FROM fixtures WHERE id = ?')
+            .get(pa.linked_fixture_id);
           if (fixture) {
             linkage.linked_to_name = (fixture as any).position;
           }
@@ -400,26 +446,32 @@ export function getPortLinkages(equipmentId: string, projectId: string): PortLin
 /**
  * Find all infrastructure equipment connected to a specific fixture
  */
-export function getFixtureConnections(fixtureId: string, projectId: string): InfrastructureEquipment[] {
+export function getFixtureConnections(
+  fixtureId: string,
+  projectId: string,
+): InfrastructureEquipment[] {
   const allEquipment = getAllInfrastructure(projectId);
 
-  return allEquipment.filter(equipment => {
+  return allEquipment.filter((equipment) => {
     if (!equipment.port_assignments) return false;
 
-    return equipment.port_assignments.some(pa => pa.linked_fixture_id === fixtureId);
+    return equipment.port_assignments.some((pa) => pa.linked_fixture_id === fixtureId);
   });
 }
 
 /**
  * Find all equipment connected to a specific equipment
  */
-export function getEquipmentConnections(equipmentId: string, projectId: string): InfrastructureEquipment[] {
+export function getEquipmentConnections(
+  equipmentId: string,
+  projectId: string,
+): InfrastructureEquipment[] {
   const allEquipment = getAllInfrastructure(projectId);
 
-  return allEquipment.filter(equipment => {
+  return allEquipment.filter((equipment) => {
     if (!equipment.port_assignments) return false;
 
-    return equipment.port_assignments.some(pa => pa.linked_equipment_id === equipmentId);
+    return equipment.port_assignments.some((pa) => pa.linked_equipment_id === equipmentId);
   });
 }
 
@@ -429,7 +481,7 @@ export function getEquipmentConnections(equipmentId: string, projectId: string):
 export function validatePortAssignment(
   equipmentId: string,
   portAssignment: PortAssignment,
-  projectId: string
+  projectId: string,
 ): { valid: boolean; error?: string } {
   // Can't link to itself
   if (portAssignment.linked_equipment_id === equipmentId) {
@@ -455,7 +507,7 @@ export function validatePortAssignment(
 
       try {
         const equipment = getInfrastructureById(currentId);
-        const nextLink = equipment.port_assignments?.find(pa => pa.linked_equipment_id);
+        const nextLink = equipment.port_assignments?.find((pa) => pa.linked_equipment_id);
         currentId = nextLink?.linked_equipment_id || '';
       } catch {
         break;
@@ -498,8 +550,8 @@ export function getPortUsageStats(equipmentId: string): PortUsageStats {
       active: 0,
       inactive: 0,
       error: 0,
-      unassigned: 0
-    }
+      unassigned: 0,
+    },
   };
 
   if (!equipment.port_assignments || equipment.port_assignments.length === 0) {
@@ -508,9 +560,12 @@ export function getPortUsageStats(equipmentId: string): PortUsageStats {
     return stats;
   }
 
-  equipment.port_assignments.forEach(pa => {
+  equipment.port_assignments.forEach((pa) => {
     // Count as "used" if it has any link or connection
-    const isUsed = pa.linked_fixture_id || pa.linked_equipment_id || (pa.connected_to && pa.connected_to.trim() !== '');
+    const isUsed =
+      pa.linked_fixture_id ||
+      pa.linked_equipment_id ||
+      (pa.connected_to && pa.connected_to.trim() !== '');
 
     if (isUsed) {
       stats.used_ports++;
@@ -529,9 +584,8 @@ export function getPortUsageStats(equipmentId: string): PortUsageStats {
   });
 
   stats.available_ports = stats.total_ports - stats.used_ports;
-  stats.usage_percentage = stats.total_ports > 0
-    ? Math.round((stats.used_ports / stats.total_ports) * 100)
-    : 0;
+  stats.usage_percentage =
+    stats.total_ports > 0 ? Math.round((stats.used_ports / stats.total_ports) * 100) : 0;
 
   return stats;
 }
@@ -543,7 +597,7 @@ export function getAllPortUsageStats(projectId: string): Record<string, PortUsag
   const allEquipment = getAllInfrastructure(projectId);
   const stats: Record<string, PortUsageStats> = {};
 
-  allEquipment.forEach(equipment => {
+  allEquipment.forEach((equipment) => {
     if (equipment.port_count && equipment.port_count > 0) {
       stats[equipment.id] = getPortUsageStats(equipment.id);
     }
@@ -566,22 +620,37 @@ export interface CSVFieldMapping {
  */
 export function exportInfrastructureToCSV(
   projectId: string,
-  includePortAssignments: boolean = false
+  includePortAssignments: boolean = false,
 ): string {
   const equipment = getAllInfrastructure(projectId);
 
   // CSV Headers
   const headers = [
-    'Name', 'Manufacturer', 'Model', 'Category', 'Quantity',
-    'IP Address', 'MAC Address', 'Hostname', 'VLAN',
-    'Port Count', 'Location', 'Voltage', 'Amperage', 'Wattage',
-    'Dimmer Rack', 'Dimmer Channel', 'PD Rack', 'PD Circuit',
-    'Status', 'Notes'
+    'Name',
+    'Manufacturer',
+    'Model',
+    'Category',
+    'Quantity',
+    'IP Address',
+    'MAC Address',
+    'Hostname',
+    'VLAN',
+    'Port Count',
+    'Location',
+    'Voltage',
+    'Amperage',
+    'Wattage',
+    'Dimmer Rack',
+    'Dimmer Channel',
+    'PD Rack',
+    'PD Circuit',
+    'Status',
+    'Notes',
   ];
 
   const rows: string[][] = [headers];
 
-  equipment.forEach(eq => {
+  equipment.forEach((eq) => {
     const row = [
       escapeCsvValue(eq.name),
       escapeCsvValue(eq.manufacturer || ''),
@@ -602,13 +671,13 @@ export function exportInfrastructureToCSV(
       escapeCsvValue(eq.pd_rack_id || ''),
       eq.pd_circuit_number ? eq.pd_circuit_number.toString() : '',
       escapeCsvValue(eq.status),
-      escapeCsvValue(eq.notes || '')
+      escapeCsvValue(eq.notes || ''),
     ];
 
     rows.push(row);
   });
 
-  return rows.map(row => row.join(',')).join('\n');
+  return rows.map((row) => row.join(',')).join('\n');
 }
 
 /**
@@ -617,9 +686,9 @@ export function exportInfrastructureToCSV(
 export function importInfrastructureFromCSV(
   projectId: string,
   csvContent: string,
-  fieldMapping: CSVFieldMapping[]
+  fieldMapping: CSVFieldMapping[],
 ): { success: boolean; imported: number; errors: string[] } {
-  const lines = csvContent.split('\n').filter(line => line.trim() !== '');
+  const lines = csvContent.split('\n').filter((line) => line.trim() !== '');
 
   if (lines.length < 2) {
     return { success: false, imported: 0, errors: ['CSV file is empty or has no data rows'] };
@@ -631,7 +700,7 @@ export function importInfrastructureFromCSV(
 
   // Create mapping index for quick lookup
   const mappingIndex = new Map<string, keyof InfrastructureEquipment>();
-  fieldMapping.forEach(mapping => {
+  fieldMapping.forEach((mapping) => {
     if (mapping.infrastructure_field) {
       mappingIndex.set(mapping.csv_column, mapping.infrastructure_field);
     }
@@ -642,7 +711,7 @@ export function importInfrastructureFromCSV(
     try {
       const values = parseCsvLine(lines[i]);
       const equipmentData: Partial<InfrastructureEquipment> = {
-        status: 'Active'
+        status: 'Active',
       };
 
       // Map CSV columns to infrastructure fields
@@ -652,9 +721,16 @@ export function importInfrastructureFromCSV(
           const value = values[idx];
 
           // Type conversion based on field
-          if (field === 'quantity' || field === 'vlan_id' || field === 'port_count' ||
-              field === 'voltage' || field === 'amperage' || field === 'wattage' ||
-              field === 'dimmer_channel_number' || field === 'pd_circuit_number') {
+          if (
+            field === 'quantity' ||
+            field === 'vlan_id' ||
+            field === 'port_count' ||
+            field === 'voltage' ||
+            field === 'amperage' ||
+            field === 'wattage' ||
+            field === 'dimmer_channel_number' ||
+            field === 'pd_circuit_number'
+          ) {
             (equipmentData as any)[field] = parseFloat(value);
           } else {
             (equipmentData as any)[field] = value;
@@ -679,7 +755,7 @@ export function importInfrastructureFromCSV(
   return {
     success: errors.length === 0,
     imported,
-    errors
+    errors,
   };
 }
 

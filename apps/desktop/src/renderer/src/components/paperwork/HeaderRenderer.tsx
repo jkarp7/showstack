@@ -13,37 +13,42 @@ export function HeaderRenderer({
   reportType,
   reportTemplates,
   projectData,
-  projectName
+  projectName,
 }: HeaderRendererProps) {
   if (!projectData) return null;
 
   const { preset, fields } = layout;
 
   // Determine title to display
-  const reportTitle = fields.customTitle ||
-    `${reportTemplates.find(t => t.id === reportType)?.name || 'Report'} - ${projectName}`;
+  const reportTitle =
+    fields.customTitle ||
+    `${reportTemplates.find((t) => t.id === reportType)?.name || 'Report'} - ${projectName}`;
 
   // Build venue string
-  const venueStr = [
-    projectData.venue,
-    projectData.venue_city,
-    projectData.venue_state
-  ].filter(Boolean).join(', ');
+  const venueStr = [projectData.venue, projectData.venue_city, projectData.venue_state]
+    .filter(Boolean)
+    .join(', ');
 
   // Build production staff list
   const productionStaff = [
-    projectData.production_electrician && `Production Electrician: ${projectData.production_electrician}`,
+    projectData.production_electrician &&
+      `Production Electrician: ${projectData.production_electrician}`,
     projectData.production_manager && `Production Manager: ${projectData.production_manager}`,
-    projectData.general_manager && `General Manager: ${projectData.general_manager}`
+    projectData.general_manager && `General Manager: ${projectData.general_manager}`,
   ].filter(Boolean);
 
   // Build dates string
   const datesStr = [
-    projectData.load_in_date && `Load-in: ${new Date(projectData.load_in_date).toLocaleDateString()}`,
+    projectData.load_in_date &&
+      `Load-in: ${new Date(projectData.load_in_date).toLocaleDateString()}`,
     projectData.tech_date && `Tech: ${new Date(projectData.tech_date).toLocaleDateString()}`,
-    projectData.opening_date && `Opening: ${new Date(projectData.opening_date).toLocaleDateString()}`,
-    projectData.closing_date && `Closing: ${new Date(projectData.closing_date).toLocaleDateString()}`
-  ].filter(Boolean).join(' | ');
+    projectData.opening_date &&
+      `Opening: ${new Date(projectData.opening_date).toLocaleDateString()}`,
+    projectData.closing_date &&
+      `Closing: ${new Date(projectData.closing_date).toLocaleDateString()}`,
+  ]
+    .filter(Boolean)
+    .join(' | ');
 
   // Render based on preset
   switch (preset) {
@@ -67,7 +72,9 @@ export function HeaderRenderer({
                   src={`file://${projectData.logo_path}`}
                   alt="Company Logo"
                   className="max-h-32 max-w-64 object-contain print:max-h-28"
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
               </div>
             )}
@@ -89,10 +96,11 @@ export function HeaderRenderer({
             {/* Generated Date */}
             {fields.showGeneratedDate && (
               <p className="text-sm text-gray-600 dark:text-gray-400 print:text-gray-700">
-                Generated: {new Date().toLocaleDateString('en-US', {
+                Generated:{' '}
+                {new Date().toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
-                  day: 'numeric'
+                  day: 'numeric',
                 })}
               </p>
             )}
@@ -125,7 +133,9 @@ export function HeaderRenderer({
                   src={`file://${projectData.logo_path}`}
                   alt="Company Logo"
                   className="max-h-24 max-w-48 object-contain print:max-h-20"
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
               </div>
             )}
@@ -136,16 +146,24 @@ export function HeaderRenderer({
             {/* Venue Information */}
             {fields.showVenue && venueStr && (
               <div>
-                <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Venue:</span>
-                <span className="ml-2 text-gray-900 dark:text-white print:text-black">{venueStr}</span>
+                <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">
+                  Venue:
+                </span>
+                <span className="ml-2 text-gray-900 dark:text-white print:text-black">
+                  {venueStr}
+                </span>
               </div>
             )}
 
             {/* Lighting Designer */}
             {fields.showDesigner && projectData.lighting_designer && (
               <div>
-                <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Lighting Designer:</span>
-                <span className="ml-2 text-gray-900 dark:text-white print:text-black">{projectData.lighting_designer}</span>
+                <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">
+                  Lighting Designer:
+                </span>
+                <span className="ml-2 text-gray-900 dark:text-white print:text-black">
+                  {projectData.lighting_designer}
+                </span>
                 {projectData.lighting_designer_email && (
                   <div className="ml-2 text-xs text-gray-600 dark:text-gray-400 print:text-gray-700">
                     {projectData.lighting_designer_email}
@@ -162,7 +180,9 @@ export function HeaderRenderer({
             {/* Production Staff */}
             {fields.showProductionStaff && productionStaff.length > 0 && (
               <div className="col-span-2">
-                <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Production Staff:</span>
+                <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">
+                  Production Staff:
+                </span>
                 <div className="ml-2 text-gray-900 dark:text-white print:text-black">
                   {productionStaff.map((staff, idx) => (
                     <div key={idx}>{staff}</div>
@@ -174,18 +194,25 @@ export function HeaderRenderer({
             {/* Dates */}
             {fields.showDates && datesStr && (
               <div className="col-span-2">
-                <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Schedule:</span>
-                <span className="ml-2 text-gray-900 dark:text-white print:text-black">{datesStr}</span>
+                <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">
+                  Schedule:
+                </span>
+                <span className="ml-2 text-gray-900 dark:text-white print:text-black">
+                  {datesStr}
+                </span>
               </div>
             )}
 
             {/* Revision Info */}
             {fields.showRevision && (projectData.revision_number || projectData.revision_date) && (
               <div>
-                <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Revision:</span>
+                <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">
+                  Revision:
+                </span>
                 <span className="ml-2 text-gray-900 dark:text-white print:text-black">
                   {projectData.revision_number || 'N/A'}
-                  {projectData.revision_date && ` (${new Date(projectData.revision_date).toLocaleDateString()})`}
+                  {projectData.revision_date &&
+                    ` (${new Date(projectData.revision_date).toLocaleDateString()})`}
                 </span>
               </div>
             )}
@@ -193,12 +220,14 @@ export function HeaderRenderer({
             {/* Generated Date */}
             {fields.showGeneratedDate && (
               <div>
-                <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Generated:</span>
+                <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">
+                  Generated:
+                </span>
                 <span className="ml-2 text-gray-900 dark:text-white print:text-black">
                   {new Date().toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
-                    day: 'numeric'
+                    day: 'numeric',
                   })}
                 </span>
               </div>
@@ -235,29 +264,43 @@ export function HeaderRenderer({
                   src={`file://${projectData.logo_path}`}
                   alt="Company Logo"
                   className="max-h-24 max-w-48 object-contain print:max-h-20"
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
               </div>
             )}
           </div>
 
           {/* Metadata Grid - Only show if any fields are enabled */}
-          {(fields.showVenue || fields.showDesigner || fields.showProductionStaff ||
-            fields.showDates || fields.showRevision || fields.showGeneratedDate) && (
+          {(fields.showVenue ||
+            fields.showDesigner ||
+            fields.showProductionStaff ||
+            fields.showDates ||
+            fields.showRevision ||
+            fields.showGeneratedDate) && (
             <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm border-t border-gray-200 dark:border-gray-700 pt-4 print:border-gray-400">
               {/* Venue Information */}
               {fields.showVenue && venueStr && (
                 <div>
-                  <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Venue:</span>
-                  <span className="ml-2 text-gray-900 dark:text-white print:text-black">{venueStr}</span>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">
+                    Venue:
+                  </span>
+                  <span className="ml-2 text-gray-900 dark:text-white print:text-black">
+                    {venueStr}
+                  </span>
                 </div>
               )}
 
               {/* Lighting Designer */}
               {fields.showDesigner && projectData.lighting_designer && (
                 <div>
-                  <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Lighting Designer:</span>
-                  <span className="ml-2 text-gray-900 dark:text-white print:text-black">{projectData.lighting_designer}</span>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">
+                    Lighting Designer:
+                  </span>
+                  <span className="ml-2 text-gray-900 dark:text-white print:text-black">
+                    {projectData.lighting_designer}
+                  </span>
                   {projectData.lighting_designer_email && (
                     <div className="ml-2 text-xs text-gray-600 dark:text-gray-400 print:text-gray-700">
                       {projectData.lighting_designer_email}
@@ -274,7 +317,9 @@ export function HeaderRenderer({
               {/* Production Staff */}
               {fields.showProductionStaff && productionStaff.length > 0 && (
                 <div className="col-span-2">
-                  <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Production Staff:</span>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">
+                    Production Staff:
+                  </span>
                   <div className="ml-2 text-gray-900 dark:text-white print:text-black">
                     {productionStaff.map((staff, idx) => (
                       <div key={idx}>{staff}</div>
@@ -286,31 +331,41 @@ export function HeaderRenderer({
               {/* Dates */}
               {fields.showDates && datesStr && (
                 <div className="col-span-2">
-                  <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Schedule:</span>
-                  <span className="ml-2 text-gray-900 dark:text-white print:text-black">{datesStr}</span>
-                </div>
-              )}
-
-              {/* Revision Info */}
-              {fields.showRevision && (projectData.revision_number || projectData.revision_date) && (
-                <div>
-                  <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Revision:</span>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">
+                    Schedule:
+                  </span>
                   <span className="ml-2 text-gray-900 dark:text-white print:text-black">
-                    {projectData.revision_number || 'N/A'}
-                    {projectData.revision_date && ` (${new Date(projectData.revision_date).toLocaleDateString()})`}
+                    {datesStr}
                   </span>
                 </div>
               )}
 
+              {/* Revision Info */}
+              {fields.showRevision &&
+                (projectData.revision_number || projectData.revision_date) && (
+                  <div>
+                    <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">
+                      Revision:
+                    </span>
+                    <span className="ml-2 text-gray-900 dark:text-white print:text-black">
+                      {projectData.revision_number || 'N/A'}
+                      {projectData.revision_date &&
+                        ` (${new Date(projectData.revision_date).toLocaleDateString()})`}
+                    </span>
+                  </div>
+                )}
+
               {/* Generated Date */}
               {fields.showGeneratedDate && (
                 <div>
-                  <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">Generated:</span>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300 print:text-black">
+                    Generated:
+                  </span>
                   <span className="ml-2 text-gray-900 dark:text-white print:text-black">
                     {new Date().toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
-                      day: 'numeric'
+                      day: 'numeric',
                     })}
                   </span>
                 </div>

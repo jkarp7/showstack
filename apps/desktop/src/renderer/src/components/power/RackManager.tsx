@@ -8,7 +8,7 @@ import {
   VOLTAGE_OPTIONS,
   MODULE_TYPE_OPTIONS,
   PHASE_CONFIG_OPTIONS,
-  BUILDING_SERVICE_OPTIONS
+  BUILDING_SERVICE_OPTIONS,
 } from '../../types/power';
 import { ModuleConfigDialog } from './ModuleConfigDialog';
 
@@ -24,7 +24,10 @@ export function RackManager({ projectId = 'default-project', onRacksChange }: Ra
   const [pdRacks, setPDRacks] = useState<PDRack[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [rackTypeToAdd, setRackTypeToAdd] = useState<RackType>('dimmer');
-  const [editingRack, setEditingRack] = useState<{ type: RackType; rack: DimmerRack | PDRack } | null>(null);
+  const [editingRack, setEditingRack] = useState<{
+    type: RackType;
+    rack: DimmerRack | PDRack;
+  } | null>(null);
   const [configuringModulesRack, setConfiguringModulesRack] = useState<DimmerRack | null>(null);
 
   // Load racks
@@ -38,7 +41,7 @@ export function RackManager({ projectId = 'default-project', onRacksChange }: Ra
     try {
       const [dimmer, pd] = await Promise.all([
         window.api.dimmerRacks.getAll(projectId),
-        window.api.pdRacks.getAll(projectId)
+        window.api.pdRacks.getAll(projectId),
       ]);
       setDimmerRacks(dimmer);
       setPDRacks(pd);
@@ -109,8 +112,11 @@ export function RackManager({ projectId = 'default-project', onRacksChange }: Ra
 
         {dimmerRacks.length > 0 ? (
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {dimmerRacks.map(rack => (
-              <div key={rack.id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+            {dimmerRacks.map((rack) => (
+              <div
+                key={rack.id}
+                className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+              >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <h4 className="font-medium text-gray-900 dark:text-white">{rack.name}</h4>
@@ -171,8 +177,11 @@ export function RackManager({ projectId = 'default-project', onRacksChange }: Ra
 
         {pdRacks.length > 0 ? (
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {pdRacks.map(rack => (
-              <div key={rack.id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+            {pdRacks.map((rack) => (
+              <div
+                key={rack.id}
+                className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+              >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <h4 className="font-medium text-gray-900 dark:text-white">{rack.name}</h4>
@@ -180,7 +189,9 @@ export function RackManager({ projectId = 'default-project', onRacksChange }: Ra
                       {rack.rack_identifier && <div>Identifier: {rack.rack_identifier}</div>}
                       <div>
                         Voltage: {rack.voltage}V
-                        {rack.is_dual_voltage && rack.secondary_voltage && ` + ${rack.secondary_voltage}V`}
+                        {rack.is_dual_voltage &&
+                          rack.secondary_voltage &&
+                          ` + ${rack.secondary_voltage}V`}
                       </div>
                       <div>Circuits: {rack.circuit_count}</div>
                       {rack.phase_config && <div>Phase: {rack.phase_config}</div>}
@@ -227,10 +238,7 @@ export function RackManager({ projectId = 'default-project', onRacksChange }: Ra
 
       {/* Module Configuration Dialog */}
       {configuringModulesRack && (
-        <ModuleConfigDialog
-          rack={configuringModulesRack}
-          onClose={handleCloseModulesDialog}
-        />
+        <ModuleConfigDialog rack={configuringModulesRack} onClose={handleCloseModulesDialog} />
       )}
     </div>
   );
@@ -264,7 +272,7 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
         watts_per_module: dimmerRack?.watts_per_module || 2400,
         location: dimmerRack?.location || '',
         notes: dimmerRack?.notes || '',
-        building_service: dimmerRack?.building_service || ''
+        building_service: dimmerRack?.building_service || '',
       } as DimmerRackFormData;
     } else {
       const pdRack = rack as PDRack | undefined;
@@ -279,7 +287,7 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
         amps_per_breaker: pdRack?.amps_per_breaker || 20,
         location: pdRack?.location || '',
         notes: pdRack?.notes || '',
-        building_service: pdRack?.building_service || ''
+        building_service: pdRack?.building_service || '',
       } as PDRackFormData;
     }
   });
@@ -342,7 +350,7 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
               <input
                 type="text"
                 value={formData.name}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -357,7 +365,9 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
               <input
                 type="text"
                 value={formData.rack_identifier || ''}
-                onChange={e => setFormData({ ...formData, rack_identifier: e.target.value.toUpperCase() })}
+                onChange={(e) =>
+                  setFormData({ ...formData, rack_identifier: e.target.value.toUpperCase() })
+                }
                 className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder={isDimmer ? 'A, B, FOH...' : 'Z, Y, PD...'}
               />
@@ -375,7 +385,7 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
                   <input
                     type="text"
                     value={(formData as DimmerRackFormData).manufacturer || ''}
-                    onChange={e => setFormData({ ...formData, manufacturer: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, manufacturer: e.target.value })}
                     className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -386,7 +396,7 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
                   <input
                     type="text"
                     value={(formData as DimmerRackFormData).model || ''}
-                    onChange={e => setFormData({ ...formData, model: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, model: e.target.value })}
                     className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -398,10 +408,15 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
                 </label>
                 <select
                   value={(formData as DimmerRackFormData).circuit_count}
-                  onChange={e => setFormData({ ...formData, circuit_count: Number(e.target.value) as 12 | 24 | 48 | 96 })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      circuit_count: Number(e.target.value) as 12 | 24 | 48 | 96,
+                    })
+                  }
                   className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  {CIRCUIT_COUNT_OPTIONS.map(count => (
+                  {CIRCUIT_COUNT_OPTIONS.map((count) => (
                     <option key={count} value={count}>
                       {count} circuits
                     </option>
@@ -416,10 +431,12 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
                   </label>
                   <select
                     value={(formData as DimmerRackFormData).module_type}
-                    onChange={e => setFormData({ ...formData, module_type: e.target.value as any })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, module_type: e.target.value as any })
+                    }
                     className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {MODULE_TYPE_OPTIONS.map(type => (
+                    {MODULE_TYPE_OPTIONS.map((type) => (
                       <option key={type} value={type}>
                         {type}
                       </option>
@@ -433,7 +450,9 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
                   <input
                     type="number"
                     value={(formData as DimmerRackFormData).channels_per_module || 12}
-                    onChange={e => setFormData({ ...formData, channels_per_module: Number(e.target.value) })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, channels_per_module: Number(e.target.value) })
+                    }
                     className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -444,7 +463,9 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
                   <input
                     type="number"
                     value={(formData as DimmerRackFormData).watts_per_module || 2400}
-                    onChange={e => setFormData({ ...formData, watts_per_module: Number(e.target.value) })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, watts_per_module: Number(e.target.value) })
+                    }
                     className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -460,10 +481,15 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
                   </label>
                   <select
                     value={(formData as PDRackFormData).voltage}
-                    onChange={e => setFormData({ ...formData, voltage: Number(e.target.value) as 120 | 208 | 230 | 240 })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        voltage: Number(e.target.value) as 120 | 208 | 230 | 240,
+                      })
+                    }
                     className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {VOLTAGE_OPTIONS.map(voltage => (
+                    {VOLTAGE_OPTIONS.map((voltage) => (
                       <option key={voltage} value={voltage}>
                         {voltage}V
                       </option>
@@ -476,10 +502,15 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
                   </label>
                   <select
                     value={(formData as PDRackFormData).circuit_count}
-                    onChange={e => setFormData({ ...formData, circuit_count: Number(e.target.value) as 12 | 24 | 48 | 96 })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        circuit_count: Number(e.target.value) as 12 | 24 | 48 | 96,
+                      })
+                    }
                     className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {CIRCUIT_COUNT_OPTIONS.map(count => (
+                    {CIRCUIT_COUNT_OPTIONS.map((count) => (
                       <option key={count} value={count}>
                         {count} circuits
                       </option>
@@ -494,7 +525,9 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
                   <input
                     type="checkbox"
                     checked={(formData as PDRackFormData).is_dual_voltage || false}
-                    onChange={e => setFormData({ ...formData, is_dual_voltage: e.target.checked })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, is_dual_voltage: e.target.checked })
+                    }
                     className="w-4 h-4 text-blue-600 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500"
                   />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -513,15 +546,19 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
                   </label>
                   <select
                     value={(formData as PDRackFormData).secondary_voltage || ''}
-                    onChange={e => setFormData({ ...formData, secondary_voltage: Number(e.target.value) })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, secondary_voltage: Number(e.target.value) })
+                    }
                     className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select voltage...</option>
-                    {VOLTAGE_OPTIONS.filter(v => v !== (formData as PDRackFormData).voltage).map(voltage => (
-                      <option key={voltage} value={voltage}>
-                        {voltage}V
-                      </option>
-                    ))}
+                    {VOLTAGE_OPTIONS.filter((v) => v !== (formData as PDRackFormData).voltage).map(
+                      (voltage) => (
+                        <option key={voltage} value={voltage}>
+                          {voltage}V
+                        </option>
+                      ),
+                    )}
                   </select>
                 </div>
               )}
@@ -533,10 +570,12 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
                   </label>
                   <select
                     value={(formData as PDRackFormData).phase_config}
-                    onChange={e => setFormData({ ...formData, phase_config: e.target.value as any })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phase_config: e.target.value as any })
+                    }
                     className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {PHASE_CONFIG_OPTIONS.map(config => (
+                    {PHASE_CONFIG_OPTIONS.map((config) => (
                       <option key={config} value={config}>
                         {config}
                       </option>
@@ -550,7 +589,9 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
                   <input
                     type="number"
                     value={(formData as PDRackFormData).amps_per_breaker || 20}
-                    onChange={e => setFormData({ ...formData, amps_per_breaker: Number(e.target.value) })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, amps_per_breaker: Number(e.target.value) })
+                    }
                     className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -567,7 +608,7 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
               <input
                 type="text"
                 value={formData.location || ''}
-                onChange={e => setFormData({ ...formData, location: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="e.g., Stage Right, FOH, etc."
               />
@@ -581,10 +622,15 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
               </label>
               <select
                 value={formData.building_service || 'None'}
-                onChange={e => setFormData({ ...formData, building_service: e.target.value === 'None' ? '' : e.target.value })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    building_service: e.target.value === 'None' ? '' : e.target.value,
+                  })
+                }
                 className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                {BUILDING_SERVICE_OPTIONS.map(service => (
+                {BUILDING_SERVICE_OPTIONS.map((service) => (
                   <option key={service} value={service}>
                     {service}
                   </option>
@@ -599,7 +645,7 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
             </label>
             <textarea
               value={formData.notes || ''}
-              onChange={e => setFormData({ ...formData, notes: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
               className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />

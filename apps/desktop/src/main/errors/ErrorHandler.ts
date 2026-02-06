@@ -19,7 +19,7 @@ export class ErrorHandler {
   async executeWithRetry<T>(
     operation: () => Promise<T>,
     operationName: string,
-    maxRetries = 3
+    maxRetries = 3,
   ): Promise<T> {
     let lastError: Error;
 
@@ -33,7 +33,7 @@ export class ErrorHandler {
           error: lastError.message,
           attempt,
           maxRetries,
-          retryable: this.isRetryable(lastError)
+          retryable: this.isRetryable(lastError),
         });
 
         // Only retry if error is recoverable and we haven't exhausted attempts
@@ -48,7 +48,7 @@ export class ErrorHandler {
           logger.info(`Retrying ${operationName} in ${delay}ms`, {
             attempt,
             baseDelay,
-            jitter: Math.round(jitter)
+            jitter: Math.round(jitter),
           });
           await this.delay(delay);
         } else {
@@ -63,7 +63,7 @@ export class ErrorHandler {
       `${operationName} failed after ${maxRetries} attempts: ${lastError!.message}`,
       operationName,
       false,
-      lastError!
+      lastError!,
     );
   }
 
@@ -75,11 +75,7 @@ export class ErrorHandler {
    * @param maxRetries - Maximum number of retry attempts
    * @returns Result of the operation
    */
-  executeWithRetrySync<T>(
-    operation: () => T,
-    operationName: string,
-    maxRetries = 3
-  ): T {
+  executeWithRetrySync<T>(operation: () => T, operationName: string, maxRetries = 3): T {
     let lastError: Error;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -90,7 +86,7 @@ export class ErrorHandler {
 
         logger.warn(`${operationName} failed (attempt ${attempt}/${maxRetries})`, {
           error: lastError.message,
-          attempt
+          attempt,
         });
 
         // Only retry if error is recoverable and we haven't exhausted attempts
@@ -115,7 +111,7 @@ export class ErrorHandler {
       `${operationName} failed after ${maxRetries} attempts: ${lastError!.message}`,
       operationName,
       false,
-      lastError!
+      lastError!,
     );
   }
 
@@ -136,24 +132,27 @@ export class ErrorHandler {
     const errorMessage = error.message.toLowerCase();
 
     // SQLite lock errors (database is busy/locked)
-    if (errorMessage.includes('sqlite_busy') ||
-        errorMessage.includes('sqlite_locked') ||
-        errorMessage.includes('database is locked')) {
+    if (
+      errorMessage.includes('sqlite_busy') ||
+      errorMessage.includes('sqlite_locked') ||
+      errorMessage.includes('database is locked')
+    ) {
       return true;
     }
 
     // Network errors
-    if (errorMessage.includes('econnrefused') ||
-        errorMessage.includes('etimedout') ||
-        errorMessage.includes('enotfound') ||
-        errorMessage.includes('network error') ||
-        errorMessage.includes('fetch failed')) {
+    if (
+      errorMessage.includes('econnrefused') ||
+      errorMessage.includes('etimedout') ||
+      errorMessage.includes('enotfound') ||
+      errorMessage.includes('network error') ||
+      errorMessage.includes('fetch failed')
+    ) {
       return true;
     }
 
     // File system temporary errors
-    if (errorMessage.includes('ebusy') ||
-        errorMessage.includes('eagain')) {
+    if (errorMessage.includes('ebusy') || errorMessage.includes('eagain')) {
       return true;
     }
 
@@ -165,7 +164,7 @@ export class ErrorHandler {
    * Async delay helper
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -174,13 +173,10 @@ export class ErrorHandler {
    */
   wrap<TArgs extends any[], TReturn>(
     fn: (...args: TArgs) => Promise<TReturn>,
-    operationName: string
+    operationName: string,
   ): (...args: TArgs) => Promise<TReturn> {
     return async (...args: TArgs): Promise<TReturn> => {
-      return this.executeWithRetry(
-        () => fn(...args),
-        operationName
-      );
+      return this.executeWithRetry(() => fn(...args), operationName);
     };
   }
 }

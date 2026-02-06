@@ -16,6 +16,7 @@ Before migrating databases or adding cloud features, we must stabilize the found
 ## 0.1 Error Handling & Resilience (2 weeks)
 
 ### Current Issues
+
 - Database writes can fail silently
 - No retry logic for failed operations
 - Limited error boundaries in React components
@@ -26,13 +27,14 @@ Before migrating databases or adding cloud features, we must stabilize the found
 #### Step 1: Create Custom Error Classes
 
 **File:** `src/main/errors/DatabaseError.ts` (NEW)
+
 ```typescript
 export class DatabaseError extends Error {
   constructor(
     message: string,
     public readonly operation: string,
     public readonly recoverable: boolean,
-    public readonly originalError?: Error
+    public readonly originalError?: Error,
   ) {
     super(message);
     this.name = 'DatabaseError';
@@ -57,7 +59,7 @@ export class ValidationError extends Error {
   constructor(
     message: string,
     public readonly field: string,
-    public readonly value: any
+    public readonly value: any,
   ) {
     super(message);
     this.name = 'ValidationError';
@@ -68,6 +70,7 @@ export class ValidationError extends Error {
 #### Step 2: Create Error Handler with Retry Logic
 
 **File:** `src/main/errors/ErrorHandler.ts` (NEW)
+
 ```typescript
 import { DatabaseError, ConnectionError } from './DatabaseError';
 import * as Sentry from '@sentry/electron/main';
@@ -79,7 +82,7 @@ export class ErrorHandler {
   async executeWithRetry<T>(
     operation: () => Promise<T>,
     operationName: string,
-    maxRetries = 3
+    maxRetries = 3,
   ): Promise<T> {
     let lastError: Error;
 
@@ -92,7 +95,7 @@ export class ErrorHandler {
         console.error(`${operationName} failed (attempt ${attempt}/${maxRetries})`, {
           error: lastError.message,
           attempt,
-          maxRetries
+          maxRetries,
         });
 
         // Only retry if error is recoverable
@@ -109,15 +112,15 @@ export class ErrorHandler {
     Sentry.captureException(lastError!, {
       tags: {
         operation: operationName,
-        attempts: maxRetries
-      }
+        attempts: maxRetries,
+      },
     });
 
     throw new DatabaseError(
       `${operationName} failed after ${maxRetries} attempts`,
       operationName,
       false,
-      lastError!
+      lastError!,
     );
   }
 
@@ -131,14 +134,12 @@ export class ErrorHandler {
     }
 
     // Retry on SQLite lock errors
-    if (error.message.includes('SQLITE_BUSY') ||
-        error.message.includes('SQLITE_LOCKED')) {
+    if (error.message.includes('SQLITE_BUSY') || error.message.includes('SQLITE_LOCKED')) {
       return true;
     }
 
     // Retry on network errors
-    if (error.message.includes('ECONNREFUSED') ||
-        error.message.includes('ETIMEDOUT')) {
+    if (error.message.includes('ECONNREFUSED') || error.message.includes('ETIMEDOUT')) {
       return true;
     }
 
@@ -146,7 +147,7 @@ export class ErrorHandler {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
@@ -157,6 +158,7 @@ export const errorHandler = new ErrorHandler();
 #### Step 3: Update IPC Handlers
 
 **Example:** `src/main/ipc/fixtures.ts` (UPDATE)
+
 ```typescript
 import { ipcMain } from 'electron';
 import { errorHandler } from '../errors/ErrorHandler';
@@ -166,24 +168,21 @@ import * as Sentry from '@sentry/electron/main';
 export function registerFixtureHandlers(): void {
   ipcMain.handle('fixtures:create', async (event, input) => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => {
-          // Existing logic
-          return createFixture(input);
-        },
-        'fixtures:create'
-      );
+      return await errorHandler.executeWithRetry(async () => {
+        // Existing logic
+        return createFixture(input);
+      }, 'fixtures:create');
     } catch (error) {
       console.error('Failed to create fixture:', error);
 
       // Send structured error info to Sentry
       Sentry.captureException(error, {
         tags: {
-          ipc_channel: 'fixtures:create'
+          ipc_channel: 'fixtures:create',
         },
         extra: {
-          input: input // Sanitize if needed
-        }
+          input: input, // Sanitize if needed
+        },
       });
 
       // Return user-friendly error
@@ -202,6 +201,7 @@ export function registerFixtureHandlers(): void {
 #### Step 4: Expand React ErrorBoundary
 
 **File:** `src/renderer/src/components/common/ErrorBoundary.tsx` (UPDATE - already exists, expand)
+
 ```typescript
 import { Component, ReactNode } from 'react';
 import * as Sentry from '@sentry/electron/renderer';
@@ -256,16 +256,20 @@ export class ErrorBoundary extends Component<Props, State> {
 ```
 
 **Wrap all major UI sections:**
+
 ```tsx
 // src/renderer/src/App.tsx
 <ErrorBoundary>
   <Routes>
     <Route path="/" element={<LandingPage />} />
-    <Route path="/equipment-manager" element={
-      <ErrorBoundary fallback={<EquipmentManagerError />}>
-        <EquipmentManager />
-      </ErrorBoundary>
-    } />
+    <Route
+      path="/equipment-manager"
+      element={
+        <ErrorBoundary fallback={<EquipmentManagerError />}>
+          <EquipmentManager />
+        </ErrorBoundary>
+      }
+    />
     {/* Wrap all major routes */}
   </Routes>
 </ErrorBoundary>
@@ -337,6 +341,7 @@ src/main/database/
 #### Step 1: Extract DatabaseManager
 
 **File:** `src/main/database/core/DatabaseManager.ts` (NEW)
+
 ```typescript
 import Database from 'better-sqlite3'; // Phase 1
 import { app } from 'electron';
@@ -456,6 +461,7 @@ export const databaseManager = new DatabaseManager();
 #### Step 2: Extract MigrationRunner
 
 **File:** `src/main/database/core/MigrationRunner.ts` (NEW)
+
 ```typescript
 import Database from 'better-sqlite3';
 import { appMigrations } from '../migrations/app';
@@ -474,7 +480,7 @@ interface Migration {
 export class MigrationRunner {
   constructor(
     private db: Database.Database,
-    private type: 'app' | 'project'
+    private type: 'app' | 'project',
   ) {}
 
   /**
@@ -485,9 +491,7 @@ export class MigrationRunner {
 
     const migrations = this.type === 'app' ? appMigrations : projectMigrations;
     const appliedVersions = this.getAppliedMigrations();
-    const pendingMigrations = migrations.filter(
-      m => !appliedVersions.includes(m.version)
-    );
+    const pendingMigrations = migrations.filter((m) => !appliedVersions.includes(m.version));
 
     if (pendingMigrations.length === 0) {
       console.log(`No pending ${this.type} migrations`);
@@ -519,7 +523,7 @@ export class MigrationRunner {
    */
   private getAppliedMigrations(): number[] {
     const rows = this.db.prepare('SELECT version FROM migrations').all() as { version: number }[];
-    return rows.map(r => r.version);
+    return rows.map((r) => r.version);
   }
 
   /**
@@ -531,10 +535,14 @@ export class MigrationRunner {
       migration.up(this.db);
 
       // Record migration
-      this.db.prepare(`
+      this.db
+        .prepare(
+          `
         INSERT INTO migrations (version, name, applied_at)
         VALUES (?, ?, ?)
-      `).run(migration.version, migration.name, Date.now());
+      `,
+        )
+        .run(migration.version, migration.name, Date.now());
 
       console.log(`✓ Applied migration: ${migration.name}`);
     });
@@ -547,6 +555,7 @@ export class MigrationRunner {
 #### Step 3: Extract Write Queue
 
 **File:** `src/main/database/persistence/WriteQueue.ts` (NEW)
+
 ```typescript
 /**
  * Debounced write queue to reduce file I/O
@@ -594,7 +603,6 @@ export class WriteQueue {
         this.lastWrite = Date.now();
 
         console.log(`Processed ${operations.length} operations`);
-
       } catch (error) {
         console.error('Write queue failed:', error);
         // TODO: Implement recovery logic
@@ -605,7 +613,7 @@ export class WriteQueue {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
@@ -615,6 +623,7 @@ export const writeQueue = new WriteQueue();
 #### Step 4: Update Main Index
 
 **File:** `src/main/database/index.ts` (REFACTOR: 881 → ~50 lines)
+
 ```typescript
 // Re-export clean API
 export { databaseManager } from './core/DatabaseManager';
@@ -675,6 +684,7 @@ export * from './queries/paperwork';
 ### Scope
 
 Rename all "prep" references to "shop-order" or "shopOrder" throughout:
+
 - Database tables (6 tables)
 - Files (~12 files)
 - IPC channels (~30 channels)
@@ -686,6 +696,7 @@ Rename all "prep" references to "shop-order" or "shopOrder" throughout:
 ### Database Migration
 
 **File:** `src/main/database/migrations/003-rename-prep-to-shop-order.sql` (NEW)
+
 ```sql
 -- Migration 003: Rename prep to shop_order
 -- Preserves all data, just changes table names
@@ -746,6 +757,7 @@ git mv src/renderer/src/utils/prep \
 ### IPC Channel Renames
 
 **File:** `src/main/ipc/shop-order.ts` (UPDATE from prep.ts)
+
 ```typescript
 // Before
 export function registerPrepHandlers(): void {
@@ -781,6 +793,7 @@ export function registerShopOrderHandlers(): void {
 ### Store Renames
 
 **File:** `src/renderer/src/store/shopOrderStore.ts` (UPDATE from prepStore.ts)
+
 ```typescript
 // Before
 export const usePrepStore = create<PrepStore>((set, get) => ({
@@ -800,6 +813,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
 ### Validation Schema Renames
 
 **File:** `packages/shared/src/validation/shopOrderSchema.ts` (NEW from prepSchema.ts)
+
 ```typescript
 import { z } from 'zod';
 
@@ -809,7 +823,7 @@ export const ShopOrderProjectSchema = z.object({
   production_name: z.string().min(1),
   order_date: z.number(),
   disciplines: z.array(z.enum(['lighting', 'audio', 'video'])),
-  current_revision: z.number().int().min(0).max(5)
+  current_revision: z.number().int().min(0).max(5),
 });
 
 export type ShopOrderProject = z.infer<typeof ShopOrderProjectSchema>;
@@ -818,7 +832,7 @@ export const ShopOrderSectionSchema = z.object({
   id: z.string().uuid(),
   shop_order_project_id: z.string().uuid(),
   name: z.string().min(1),
-  sort_order: z.number().int()
+  sort_order: z.number().int(),
 });
 
 export type ShopOrderSection = z.infer<typeof ShopOrderSectionSchema>;
@@ -829,7 +843,7 @@ export const ShopOrderItemSchema = z.object({
   description: z.string().min(1),
   active_qty: z.number().int().min(0),
   spare_qty: z.number().int().min(0),
-  venue_qty: z.number().int().min(0)
+  venue_qty: z.number().int().min(0),
 });
 
 export type ShopOrderItem = z.infer<typeof ShopOrderItemSchema>;
@@ -849,6 +863,7 @@ src/main/services/
 ```
 
 **File:** `src/main/services/ShopOrderProjectService.ts` (NEW)
+
 ```typescript
 import { ShopOrderProjectSchema, ShopOrderProject } from '@showstack/shared';
 import { getProjectDatabase } from '../database';
@@ -862,7 +877,7 @@ export class ShopOrderProjectService {
       ...data,
       id: uuid(),
       created_at: Date.now(),
-      updated_at: Date.now()
+      updated_at: Date.now(),
     };
 
     const db = getProjectDatabase();
@@ -876,7 +891,7 @@ export class ShopOrderProjectService {
       project.production_name,
       JSON.stringify(project.disciplines),
       project.created_at,
-      project.updated_at
+      project.updated_at,
     );
 
     return project;
@@ -887,10 +902,12 @@ export class ShopOrderProjectService {
     const stmt = db.prepare('SELECT * FROM shop_order_projects ORDER BY created_at DESC');
     const rows = stmt.all();
 
-    return rows.map(row => ShopOrderProjectSchema.parse({
-      ...row,
-      disciplines: JSON.parse(row.disciplines)
-    }));
+    return rows.map((row) =>
+      ShopOrderProjectSchema.parse({
+        ...row,
+        disciplines: JSON.parse(row.disciplines),
+      }),
+    );
   }
 
   // ... other methods
@@ -939,6 +956,7 @@ Track performance and errors from day 1. Essential for identifying issues early 
 #### Performance Monitor
 
 **File:** `src/main/monitoring/PerformanceMonitor.ts` (UPDATE existing or create)
+
 ```typescript
 import { posthog } from './telemetry';
 
@@ -946,16 +964,12 @@ export class PerformanceMonitor {
   /**
    * Track database query performance
    */
-  trackDatabaseQuery(
-    operation: string,
-    duration: number,
-    rowCount?: number
-  ): void {
+  trackDatabaseQuery(operation: string, duration: number, rowCount?: number): void {
     posthog.capture('database_query', {
       operation,
       duration_ms: duration,
       row_count: rowCount,
-      slow_query: duration > 1000
+      slow_query: duration > 1000,
     });
 
     // Warn about slow queries
@@ -972,11 +986,12 @@ export class PerformanceMonitor {
     posthog.capture('memory_usage', {
       heap_used_mb: usage.heapUsed / 1024 / 1024,
       heap_total_mb: usage.heapTotal / 1024 / 1024,
-      rss_mb: usage.rss / 1024 / 1024
+      rss_mb: usage.rss / 1024 / 1024,
     });
 
     // Warn if memory usage is high
-    if (usage.heapUsed > 1024 * 1024 * 1024) { // 1GB
+    if (usage.heapUsed > 1024 * 1024 * 1024) {
+      // 1GB
       console.warn('⚠️ High memory usage:', usage.heapUsed / 1024 / 1024, 'MB');
     }
   }
@@ -988,7 +1003,7 @@ export class PerformanceMonitor {
     posthog.capture('ipc_handler', {
       channel,
       duration_ms: duration,
-      slow: duration > 100
+      slow: duration > 100,
     });
   }
 
@@ -999,7 +1014,7 @@ export class PerformanceMonitor {
     posthog.capture('component_render', {
       component: componentName,
       duration_ms: duration,
-      slow: duration > 16 // 60 FPS = 16ms per frame
+      slow: duration > 16, // 60 FPS = 16ms per frame
     });
   }
 }
@@ -1010,6 +1025,7 @@ export const performanceMonitor = new PerformanceMonitor();
 #### Wrap Database Queries
 
 **Example:** `src/main/database/queries/fixtures.ts` (UPDATE)
+
 ```typescript
 import { performanceMonitor } from '../../monitoring/PerformanceMonitor';
 
@@ -1030,6 +1046,7 @@ export async function getAllFixtures(projectId: string): Promise<Fixture[]> {
 #### Periodic Memory Monitoring
 
 **File:** `src/main/index.ts` (UPDATE)
+
 ```typescript
 import { performanceMonitor } from './monitoring/PerformanceMonitor';
 
@@ -1037,9 +1054,12 @@ app.on('ready', async () => {
   await initDatabase();
 
   // Monitor memory usage every 5 minutes
-  setInterval(() => {
-    performanceMonitor.trackMemoryUsage();
-  }, 5 * 60 * 1000);
+  setInterval(
+    () => {
+      performanceMonitor.trackMemoryUsage();
+    },
+    5 * 60 * 1000,
+  );
 });
 ```
 
@@ -1071,7 +1091,7 @@ app.on('ready', async () => {
 
 **Phase 0.4 Status:** ✅ **CORE INFRASTRUCTURE COMPLETE**
 
-*Note: Full monitoring rollout and PostHog integration can be completed incrementally during future phases.*
+_Note: Full monitoring rollout and PostHog integration can be completed incrementally during future phases._
 
 ---
 
@@ -1091,6 +1111,7 @@ app.on('ready', async () => {
 **All Phase 0 Subphases Complete!** 🎉 Database stabilization, modular architecture, comprehensive naming refactor, and performance monitoring infrastructure finished.
 
 **What's Done:**
+
 - ✅ Error handling infrastructure with retry logic
 - ✅ Custom error classes (DatabaseError, ValidationError, etc.)
 - ✅ All IPC handlers updated with error handling
@@ -1103,6 +1124,7 @@ app.on('ready', async () => {
 - ✅ Build successful, tests passing
 
 **What's Next:**
+
 - Full monitoring rollout can continue incrementally during Phase 1
 - PostHog dashboard integration (TODO comments in place)
 

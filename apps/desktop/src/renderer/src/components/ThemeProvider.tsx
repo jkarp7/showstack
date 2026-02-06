@@ -6,7 +6,8 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const { effectiveTheme, accentColor, fontScale, uiDensity, updateEffectiveTheme } = useThemeStore();
+  const { effectiveTheme, accentColor, fontScale, uiDensity, updateEffectiveTheme } =
+    useThemeStore();
 
   useEffect(() => {
     // Update effective theme on mount

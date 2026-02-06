@@ -73,13 +73,22 @@ function createFixtureIndexes(db: Database.Database): void {
   safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_fixtures_type ON fixtures(project_id, type)');
 
   // Sort by updated_at for recent fixtures
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_fixtures_updated ON fixtures(project_id, updated_at DESC)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_fixtures_updated ON fixtures(project_id, updated_at DESC)',
+  );
 
   // Filter by manufacturer/model for equipment searches
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_fixtures_manufacturer ON fixtures(project_id, manufacturer)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_fixtures_manufacturer ON fixtures(project_id, manufacturer)',
+  );
 
   // DMX addressing queries
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_fixtures_dmx ON fixtures(project_id, universe, dmx_address)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_fixtures_dmx ON fixtures(project_id, universe, dmx_address)',
+  );
 }
 
 /**
@@ -88,28 +97,64 @@ function createFixtureIndexes(db: Database.Database): void {
  */
 function createShopOrderIndexes(db: Database.Database): void {
   // Shop Order Projects
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_shop_order_projects_parent ON shop_order_projects(parent_project_id)');
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_shop_order_projects_updated ON shop_order_projects(updated_at DESC)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_shop_order_projects_parent ON shop_order_projects(parent_project_id)',
+  );
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_shop_order_projects_updated ON shop_order_projects(updated_at DESC)',
+  );
 
   // Shop Order Sections - navigation by project
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_shop_order_sections_project ON shop_order_sections(prep_project_id)');
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_shop_order_sections_order ON shop_order_sections(prep_project_id, sort_order)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_shop_order_sections_project ON shop_order_sections(prep_project_id)',
+  );
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_shop_order_sections_order ON shop_order_sections(prep_project_id, sort_order)',
+  );
 
   // Shop Order Items - navigation by section
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_shop_order_items_section ON shop_order_items(section_id)');
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_shop_order_items_order ON shop_order_items(section_id, sort_order)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_shop_order_items_section ON shop_order_items(section_id)',
+  );
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_shop_order_items_order ON shop_order_items(section_id, sort_order)',
+  );
 
   // Shop Order Revisions - history tracking
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_shop_order_revisions_project ON shop_order_revisions(prep_project_id)');
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_shop_order_revisions_created ON shop_order_revisions(prep_project_id, created_at DESC)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_shop_order_revisions_project ON shop_order_revisions(prep_project_id)',
+  );
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_shop_order_revisions_created ON shop_order_revisions(prep_project_id, created_at DESC)',
+  );
 
   // Shop Order Notes - filtering by type and project
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_shop_order_notes_project ON shop_order_notes(prep_project_id)');
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_shop_order_notes_type ON shop_order_notes(prep_project_id, type)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_shop_order_notes_project ON shop_order_notes(prep_project_id)',
+  );
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_shop_order_notes_type ON shop_order_notes(prep_project_id, type)',
+  );
 
   // Shop Order Note Templates - filtering by type
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_shop_order_note_templates_type ON shop_order_note_templates(type)');
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_shop_order_note_templates_default ON shop_order_note_templates(type, is_default)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_shop_order_note_templates_type ON shop_order_note_templates(type)',
+  );
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_shop_order_note_templates_default ON shop_order_note_templates(type, is_default)',
+  );
 }
 
 /**
@@ -118,16 +163,28 @@ function createShopOrderIndexes(db: Database.Database): void {
  */
 function createInfrastructureIndexes(db: Database.Database): void {
   // Primary access pattern: get all infrastructure for a project
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_infrastructure_project ON infrastructure_equipment(project_id)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_infrastructure_project ON infrastructure_equipment(project_id)',
+  );
 
   // Filter by category (e.g., "Network Switch", "Dimmer", "Power")
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_infrastructure_category ON infrastructure_equipment(project_id, category)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_infrastructure_category ON infrastructure_equipment(project_id, category)',
+  );
 
   // Filter by location (e.g., "FOH", "Stage Left")
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_infrastructure_location ON infrastructure_equipment(project_id, location)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_infrastructure_location ON infrastructure_equipment(project_id, location)',
+  );
 
   // Status filtering (Active, Inactive, etc.)
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_infrastructure_status ON infrastructure_equipment(project_id, status)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_infrastructure_status ON infrastructure_equipment(project_id, status)',
+  );
 }
 
 /**
@@ -139,7 +196,10 @@ function createPowerDistributionIndexes(db: Database.Database): void {
   safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_pd_racks_project ON pd_racks(project_id)');
 
   // PD Racks - by location
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_pd_racks_location ON pd_racks(project_id, location)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_pd_racks_location ON pd_racks(project_id, location)',
+  );
 }
 
 /**
@@ -148,16 +208,28 @@ function createPowerDistributionIndexes(db: Database.Database): void {
  */
 function createDimmerRackIndexes(db: Database.Database): void {
   // Dimmer Racks - by project
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_dimmer_racks_project ON dimmer_racks(project_id)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_dimmer_racks_project ON dimmer_racks(project_id)',
+  );
 
   // Dimmer Racks - by location
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_dimmer_racks_location ON dimmer_racks(project_id, location)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_dimmer_racks_location ON dimmer_racks(project_id, location)',
+  );
 
   // Dimmer Rack Modules - by rack
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_dimmer_modules_rack ON dimmer_rack_modules(rack_id)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_dimmer_modules_rack ON dimmer_rack_modules(rack_id)',
+  );
 
   // Dimmer Rack Modules - by start_circuit for sorted display
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_dimmer_modules_start_circuit ON dimmer_rack_modules(rack_id, start_circuit)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_dimmer_modules_start_circuit ON dimmer_rack_modules(rack_id, start_circuit)',
+  );
 }
 
 /**
@@ -166,13 +238,22 @@ function createDimmerRackIndexes(db: Database.Database): void {
  */
 function createProjectIndexes(db: Database.Database): void {
   // Sort by most recently updated
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_projects_updated ON projects(updated_at DESC)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_projects_updated ON projects(updated_at DESC)',
+  );
 
   // Sort by creation date
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_projects_created ON projects(created_at DESC)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_projects_created ON projects(created_at DESC)',
+  );
 
   // Search by name (for autocomplete/search features)
-  safeCreateIndex(db, 'CREATE INDEX IF NOT EXISTS idx_projects_name ON projects(name COLLATE NOCASE)');
+  safeCreateIndex(
+    db,
+    'CREATE INDEX IF NOT EXISTS idx_projects_name ON projects(name COLLATE NOCASE)',
+  );
 }
 
 /**
@@ -225,7 +306,7 @@ export function dropPerformanceIndexes(db: Database.Database): void {
     // Projects
     'idx_projects_updated',
     'idx_projects_created',
-    'idx_projects_name'
+    'idx_projects_name',
   ];
 
   for (const index of indexes) {
@@ -247,21 +328,34 @@ export function analyzeQueryPerformance(db: Database.Database): {
   tableStats: Array<{ table: string; rowCount: number }>;
 } {
   // Count indexes
-  const indexResult = db.prepare(`
+  const indexResult = db
+    .prepare(
+      `
     SELECT COUNT(*) as count
     FROM sqlite_master
     WHERE type = 'index'
     AND name LIKE 'idx_%'
-  `).get() as { count: number };
+  `,
+    )
+    .get() as { count: number };
 
   // Get table statistics
-  const tables = ['fixtures', 'shop_order_projects', 'shop_order_sections',
-                  'shop_order_items', 'infrastructure_equipment', 'pd_racks',
-                  'dimmer_racks', 'projects'];
+  const tables = [
+    'fixtures',
+    'shop_order_projects',
+    'shop_order_sections',
+    'shop_order_items',
+    'infrastructure_equipment',
+    'pd_racks',
+    'dimmer_racks',
+    'projects',
+  ];
 
-  const tableStats = tables.map(table => {
+  const tableStats = tables.map((table) => {
     try {
-      const result = db.prepare(`SELECT COUNT(*) as count FROM ${table}`).get() as { count: number };
+      const result = db.prepare(`SELECT COUNT(*) as count FROM ${table}`).get() as {
+        count: number;
+      };
       return { table, rowCount: result?.count || 0 };
     } catch (error) {
       return { table, rowCount: 0 };
@@ -270,6 +364,6 @@ export function analyzeQueryPerformance(db: Database.Database): {
 
   return {
     indexCount: indexResult.count,
-    tableStats
+    tableStats,
   };
 }

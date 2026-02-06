@@ -23,7 +23,7 @@ const SEPARATOR_OPTIONS = [
   { value: ', ', label: 'Comma (,)' },
   { value: ' | ', label: 'Pipe (|)' },
   { value: '\n', label: 'New Line' },
-  { value: 'custom', label: 'Custom...' }
+  { value: 'custom', label: 'Custom...' },
 ];
 
 export function ColumnMergeDialog({
@@ -31,11 +31,11 @@ export function ColumnMergeDialog({
   availableColumns,
   previewData = [],
   onConfirm,
-  onCancel
+  onCancel,
 }: ColumnMergeDialogProps) {
   // Initialize with existing merge data if editing an existing merge
   const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>(
-    primaryColumn.combinedWith || []
+    primaryColumn.combinedWith || [],
   );
   const [separator, setSeparator] = useState(primaryColumn.separator || ' • ');
   const [customSeparator, setCustomSeparator] = useState('');
@@ -45,9 +45,9 @@ export function ColumnMergeDialog({
 
   // Handle column selection toggle
   const toggleColumnSelection = (columnId: string) => {
-    setSelectedColumnIds(prev => {
+    setSelectedColumnIds((prev) => {
       if (prev.includes(columnId)) {
-        return prev.filter(id => id !== columnId);
+        return prev.filter((id) => id !== columnId);
       }
       return [...prev, columnId];
     });
@@ -68,18 +68,26 @@ export function ColumnMergeDialog({
   const previewValues = useMemo(() => {
     if (previewData.length === 0) return [];
 
-    return previewData.slice(0, 5).map(item => {
+    return previewData.slice(0, 5).map((item) => {
       const values = [item[primaryColumn.field]];
-      selectedColumnIds.forEach(colId => {
-        const col = availableColumns.find(c => c.id === colId);
+      selectedColumnIds.forEach((colId) => {
+        const col = availableColumns.find((c) => c.id === colId);
         if (col) {
           values.push(item[col.field]);
         }
       });
       const finalSeparator = showCustomInput ? customSeparator : separator;
-      return values.filter(v => v != null && v !== '').join(finalSeparator);
+      return values.filter((v) => v != null && v !== '').join(finalSeparator);
     });
-  }, [primaryColumn, selectedColumnIds, availableColumns, separator, customSeparator, showCustomInput, previewData]);
+  }, [
+    primaryColumn,
+    selectedColumnIds,
+    availableColumns,
+    separator,
+    customSeparator,
+    showCustomInput,
+    previewData,
+  ]);
 
   // Handle confirm
   const handleConfirm = () => {
@@ -88,7 +96,10 @@ export function ColumnMergeDialog({
   };
 
   return createPortal(
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-8" style={{ zIndex: 10000 }}>
+    <div
+      className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-8"
+      style={{ zIndex: 10000 }}
+    >
       <div className="bg-gray-800 rounded-lg w-full max-w-2xl shadow-xl text-white">
         {/* Header */}
         <div className="p-6 border-b border-gray-700">
@@ -117,7 +128,7 @@ export function ColumnMergeDialog({
               )}
             </div>
             <div className="space-y-2">
-              {availableColumns.map(col => (
+              {availableColumns.map((col) => (
                 <label
                   key={col.id}
                   className={`flex items-center gap-3 p-3 rounded cursor-pointer transition ${
@@ -144,15 +155,13 @@ export function ColumnMergeDialog({
           {/* Separator Selection */}
           {selectedColumnIds.length > 0 && (
             <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-300 mb-3">
-                Separator:
-              </label>
+              <label className="block text-sm font-semibold text-gray-300 mb-3">Separator:</label>
               <select
                 value={showCustomInput ? 'custom' : separator}
                 onChange={(e) => handleSeparatorChange(e.target.value)}
                 className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                {SEPARATOR_OPTIONS.map(opt => (
+                {SEPARATOR_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>
@@ -213,12 +222,12 @@ export function ColumnMergeDialog({
             {selectedColumnIds.length === 0
               ? 'Select columns to merge'
               : selectedColumnIds.length === 1
-              ? 'Merge 2 columns'
-              : `Merge ${selectedColumnIds.length + 1} columns`}
+                ? 'Merge 2 columns'
+                : `Merge ${selectedColumnIds.length + 1} columns`}
           </button>
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

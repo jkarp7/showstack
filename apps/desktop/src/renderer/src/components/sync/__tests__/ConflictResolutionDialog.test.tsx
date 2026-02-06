@@ -50,7 +50,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -64,7 +64,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={false}
-        />
+        />,
       );
 
       expect(container.firstChild).toBeNull();
@@ -77,7 +77,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       expect(container.firstChild).toBeNull();
@@ -94,7 +94,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       expect(screen.getByText(/3 conflicts found/)).toBeInTheDocument();
@@ -107,7 +107,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       expect(screen.getByText(/1 conflict found/)).toBeInTheDocument();
@@ -122,7 +122,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       const dialog = screen.getByRole('dialog');
@@ -137,7 +137,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       expect(screen.getByLabelText('Close dialog')).toBeInTheDocument();
@@ -152,7 +152,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Click on the conflict header to expand
@@ -171,7 +171,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Expand
@@ -193,7 +193,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Expand the conflict
@@ -215,7 +215,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Expand the conflict
@@ -240,7 +240,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       expect(screen.getByText('0 of 2 resolved')).toBeInTheDocument();
@@ -266,7 +266,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Click "Keep Local" button
@@ -287,7 +287,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Click "Keep Remote" button
@@ -308,7 +308,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Apply to all first
@@ -334,7 +334,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       const submitButton = screen.getByRole('button', { name: 'Apply Resolutions' });
@@ -348,7 +348,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Resolve the conflict
@@ -367,7 +367,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Resolve the conflict
@@ -395,7 +395,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
@@ -409,7 +409,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       fireEvent.click(screen.getByLabelText('Close dialog'));
@@ -423,7 +423,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Click on backdrop (the element with aria-hidden="true")
@@ -444,7 +444,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Expand and resolve only the first conflict (not all)
@@ -475,7 +475,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Resolve only first conflict
@@ -498,7 +498,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       fireEvent.keyDown(document, { key: 'Escape' });
@@ -515,7 +515,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Resolve only first
@@ -537,7 +537,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Expand the conflict
@@ -555,7 +555,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Expand the conflict
@@ -572,7 +572,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Expand the conflict
@@ -591,7 +591,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Resolve the conflict
@@ -608,7 +608,7 @@ describe('ConflictResolutionDialog', () => {
           onResolve={mockOnResolve}
           onClose={mockOnClose}
           isOpen={true}
-        />
+        />,
       );
 
       // Resolutions should be reset

@@ -15,9 +15,11 @@ This session completed the ShowStack:Prep module's print preview functionality w
 ## Completed Work
 
 ### 1. Print Preview Component
+
 **File**: `src/renderer/src/components/prep/PrintPreview.tsx`
 
 **Features**:
+
 - Side-by-side layout: preview on left, settings panel on right
 - Page navigation controls (Previous/Next)
 - Real-time page rendering with actual project data
@@ -26,9 +28,11 @@ This session completed the ShowStack:Prep module's print preview functionality w
 - Export PDF and Print buttons (fully functional)
 
 ### 2. Page Renderer Component
+
 **File**: `src/renderer/src/components/prep/PageRenderer.tsx`
 
 **Features**:
+
 - Loads page layout templates for each section type
 - Renders layout elements (dataField, text, shape)
 - Automatic scaling to fit viewport (90% of available space)
@@ -40,9 +44,11 @@ This session completed the ShowStack:Prep module's print preview functionality w
 - Page number display
 
 ### 3. PDF Export & Print
+
 **File**: `src/main/ipc/prep.ts`
 
 **PDF Export**:
+
 - IPC handler: `prep:exportPDF`
 - Creates hidden BrowserWindow for PDF generation
 - Uses Electron's `printToPDF` API
@@ -51,23 +57,28 @@ This session completed the ShowStack:Prep module's print preview functionality w
 - Currently generates placeholder content (Phase 2 will render actual layouts)
 
 **Direct Print**:
+
 - IPC handler: `prep:print`
 - Opens native OS print dialog
 - Same HTML generation as PDF export
 - Configurable page settings
 
 **Margin Handling**:
+
 - Uses `marginsType: 1` (none) in Electron API
 - Applies custom margins via CSS padding in HTML
 - Avoids "margins must be less than or equal to pageSize" error
 
 ### 4. Preload API
+
 **File**: `src/preload/index.ts`
 
 **Added Methods**:
+
 ```typescript
 prep: {
-  exportPDF: (projectId: string, templateData: any) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
+  exportPDF: (projectId: string, templateData: any) =>
+    Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
   print: (projectId: string, templateData: any) => Promise<{ success: boolean }>;
 }
 ```
@@ -77,16 +88,19 @@ prep: {
 ## Key Improvements Made
 
 ### Scaling Improvements
+
 - **Initial**: Pages rendered at full size (816x1056px), causing overflow
 - **Fixed**: Dynamic scaling to 90% of available viewport space
 - **Result**: Pages fit completely on 13" MacBook Air with minimal scrolling
 
 ### Text Rendering Improvements
+
 - **Initial**: "[No Text]" placeholders cluttering layout
 - **Fixed**: Skip empty text elements, show em dash (—) for empty data fields
 - **Result**: Clean display showing only actual content
 
 ### Text Alignment Fixes
+
 - **Initial**: Flexbox overriding textAlign, all text appearing left-aligned
 - **Fixed**: Map textAlign to flexbox justify-content (center → center, right → flex-end)
 - **Result**: Centered and right-aligned text displaying correctly
@@ -96,6 +110,7 @@ prep: {
 ## Current Database Schema
 
 ### Page Layout Templates (App-level)
+
 **Table**: `page_layout_templates` in app database
 
 ```sql
@@ -135,9 +150,11 @@ CREATE TABLE page_layout_elements (
 ```
 
 ### Default Layouts Seeding
+
 **File**: `src/main/database/seedDefaultLayouts.ts`
 
 **Current Implementation**:
+
 - Hardcoded TypeScript arrays defining layout elements
 - Creates default layouts for: cover, contacts, notes
 - Called via IPC: `prep:layoutTemplates:seedDefaults`
@@ -150,18 +167,23 @@ CREATE TABLE page_layout_elements (
 ## Admin Panel Requirements
 
 ### Purpose
+
 Create a centralized admin panel for managing system-wide configurations that should not be accessible to regular users.
 
 ### Access Control
+
 **Dual Protection**:
+
 1. **Password Protection**: Set in application settings
 2. **Keyboard Shortcut**: Hidden access (e.g., Cmd/Ctrl+Shift+A)
 
 ### Proposed Features
 
 #### 1. Layout Template Management (Priority 1)
+
 **Problem**: Currently default layouts are hardcoded in TypeScript
 **Solution**:
+
 - Export all page layouts to JSON files
 - Import JSON files to replace default layouts
 - Store JSON files in `/src/main/database/defaultLayouts/` directory
@@ -169,6 +191,7 @@ Create a centralized admin panel for managing system-wide configurations that sh
 - Easy to update without code changes
 
 **Workflow**:
+
 1. Designer opens admin panel
 2. Designs layouts using Layout Designer UI
 3. Exports each page type: `cover_default_layout.json`, `contacts_default_layout.json`, etc.
@@ -178,6 +201,7 @@ Create a centralized admin panel for managing system-wide configurations that sh
 7. Next build includes updated default layouts
 
 **JSON Structure** (proposed):
+
 ```json
 {
   "template": {
@@ -219,6 +243,7 @@ Create a centralized admin panel for managing system-wide configurations that sh
 ```
 
 #### 2. Future Admin Tools (Lower Priority)
+
 - **Fixture Library Management**: Export/import default fixture libraries
 - **Note Template Management**: System-wide note templates
 - **Database Tools**: Backup, restore, migrations
@@ -228,6 +253,7 @@ Create a centralized admin panel for managing system-wide configurations that sh
 ### UI Design
 
 **Settings Menu Integration**:
+
 ```
 Settings → (hidden) Admin Panel
   ├── Password prompt (if not in dev mode)
@@ -242,6 +268,7 @@ Settings → (hidden) Admin Panel
 ```
 
 **Access Methods**:
+
 1. Settings menu → "Admin Panel" (hidden unless Cmd+Shift+A pressed recently?)
 2. Keyboard shortcut: Cmd+Shift+A (Ctrl+Shift+A on Windows/Linux)
 3. Development mode: Always visible in settings
@@ -251,9 +278,11 @@ Settings → (hidden) Admin Panel
 ## Implementation Plan
 
 ### Phase 1: Admin Panel Framework
+
 **Goal**: Create basic admin panel infrastructure with access control
 
 **Tasks**:
+
 1. Create admin panel route/page
 2. Implement password protection dialog
 3. Add keyboard shortcut listener (Cmd/Ctrl+Shift+A)
@@ -262,9 +291,11 @@ Settings → (hidden) Admin Panel
 6. Add "Layout Templates" section UI
 
 ### Phase 2: Layout Export/Import
+
 **Goal**: Enable exporting layouts to JSON and importing them
 
 **Tasks**:
+
 1. Add "Export Layout to JSON" button in Layout Designer
 2. Implement JSON generation from layout template + elements
 3. Add file save dialog for JSON export
@@ -274,9 +305,11 @@ Settings → (hidden) Admin Panel
 7. Add "Import & Replace Defaults" feature
 
 ### Phase 3: Seed from JSON Files
+
 **Goal**: Update seeding to read from JSON files instead of hardcoded data
 
 **Tasks**:
+
 1. Create `/src/main/database/defaultLayouts/` directory
 2. Export current default layouts to JSON files
 3. Update `seedDefaultLayouts.ts` to read JSON files
@@ -285,9 +318,11 @@ Settings → (hidden) Admin Panel
 6. Remove hardcoded layout arrays
 
 ### Phase 4: Testing & Documentation
+
 **Goal**: Ensure system works end-to-end
 
 **Tasks**:
+
 1. Test export workflow: Design → Export → JSON file
 2. Test import workflow: JSON file → Import → Database
 3. Test seed workflow: JSON files → Seed → Database
@@ -300,6 +335,7 @@ Settings → (hidden) Admin Panel
 ## File Structure
 
 ### New Files to Create
+
 ```
 src/renderer/src/pages/AdminPanel.tsx           # Main admin panel page
 src/renderer/src/components/admin/              # Admin components folder
@@ -314,6 +350,7 @@ src/main/database/layoutIO.ts                    # Export/import logic
 ```
 
 ### Files to Modify
+
 ```
 src/main/database/seedDefaultLayouts.ts          # Read from JSON files
 src/renderer/src/components/prep/layout/LayoutDesigner.tsx  # Add export button
@@ -327,12 +364,14 @@ src/renderer/src/App.tsx                         # Add admin panel route
 ## IPC Handlers Needed
 
 ### Admin Panel Access
+
 ```typescript
 'admin:verifyPassword': (password: string) => Promise<boolean>
 'admin:setPassword': (password: string) => Promise<void>
 ```
 
 ### Layout Export/Import
+
 ```typescript
 'admin:exportLayout': (templateId: string) => Promise<{ success: boolean; filePath?: string }>
 'admin:exportAllDefaultLayouts': () => Promise<{ success: boolean; filePath?: string }>
@@ -345,6 +384,7 @@ src/renderer/src/App.tsx                         # Add admin panel route
 ## Security Considerations
 
 ### Password Storage
+
 - **Don't**: Store plain text password
 - **Do**: Use bcrypt or similar hashing (e.g., `crypto.pbkdf2`)
 - Store hash in app settings database
@@ -352,6 +392,7 @@ src/renderer/src/App.tsx                         # Add admin panel route
 - User sets password on first admin panel access
 
 ### JSON File Validation
+
 - Validate JSON structure before import
 - Check required fields exist
 - Verify data types (numbers, strings, booleans)
@@ -359,6 +400,7 @@ src/renderer/src/App.tsx                         # Add admin panel route
 - Add schema validation (e.g., using Zod)
 
 ### Access Logging (Optional)
+
 - Log admin panel access attempts
 - Log layout import/export operations
 - Store in separate audit log file
@@ -368,12 +410,14 @@ src/renderer/src/App.tsx                         # Add admin panel route
 ## Dependencies Needed
 
 ### For Password Hashing
+
 ```bash
 npm install bcryptjs
 npm install -D @types/bcryptjs
 ```
 
 ### For JSON Schema Validation (Optional)
+
 ```bash
 npm install zod
 ```
@@ -383,6 +427,7 @@ npm install zod
 ## Current State Summary
 
 ### What Works
+
 ✅ Print preview with live page rendering
 ✅ Page navigation (Previous/Next)
 ✅ PDF export with save dialog
@@ -394,6 +439,7 @@ npm install zod
 ✅ Default layout seeding (hardcoded)
 
 ### What's Missing (Admin Panel)
+
 ❌ Admin panel UI
 ❌ Password protection
 ❌ Keyboard shortcut access
@@ -407,6 +453,7 @@ npm install zod
 ## Testing Checklist for Admin Panel
 
 ### Access Control
+
 - [ ] Password prompt appears on first admin panel access
 - [ ] Password is hashed before storage
 - [ ] Correct password grants access
@@ -416,6 +463,7 @@ npm install zod
 - [ ] Development mode shows admin panel in settings
 
 ### Layout Export
+
 - [ ] "Export Layout" button appears in Layout Designer
 - [ ] Export generates valid JSON file
 - [ ] JSON contains all template data
@@ -424,6 +472,7 @@ npm install zod
 - [ ] Exported file can be opened and read
 
 ### Layout Import
+
 - [ ] "Import Layouts" button in admin panel
 - [ ] File open dialog accepts .json files
 - [ ] Valid JSON imports successfully
@@ -432,6 +481,7 @@ npm install zod
 - [ ] Imported layouts marked as default if specified
 
 ### Seed from JSON
+
 - [ ] JSON files exist in defaultLayouts directory
 - [ ] Seed function reads JSON files
 - [ ] Seed function creates layouts in database
@@ -440,6 +490,7 @@ npm install zod
 - [ ] Invalid JSON files show error
 
 ### End-to-End Workflow
+
 - [ ] Design layout in UI
 - [ ] Export to JSON
 - [ ] JSON file in correct format

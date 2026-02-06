@@ -86,7 +86,7 @@ export interface DatabaseMonitorConfig {
 const DEFAULT_CONFIG: DatabaseMonitorConfig = {
   slowQueryThresholdMs: 100,
   logSlowQueries: true,
-  maxTrackedOperations: 1000
+  maxTrackedOperations: 1000,
 };
 
 /**
@@ -163,7 +163,7 @@ export class DatabaseMonitor {
         maxTime: durationMs,
         minTime: durationMs,
         errors: error ? 1 : 0,
-        lastExecuted: now
+        lastExecuted: now,
       });
     }
 
@@ -172,7 +172,7 @@ export class DatabaseMonitor {
       logger.warn('Slow database query detected', {
         operation,
         durationMs,
-        threshold: this.config.slowQueryThresholdMs
+        threshold: this.config.slowQueryThresholdMs,
       });
     }
 
@@ -181,7 +181,7 @@ export class DatabaseMonitor {
       logger.error('Database query error', {
         operation,
         durationMs,
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -201,9 +201,9 @@ export class DatabaseMonitor {
         avgTime: m.count > 0 ? m.totalTime / m.count : 0,
         maxTime: m.maxTime,
         count: m.count,
-        lastExecuted: m.lastExecuted
+        lastExecuted: m.lastExecuted,
       }))
-      .filter(q => q.avgTime > threshold)
+      .filter((q) => q.avgTime > threshold)
       .sort((a, b) => b.avgTime - a.avgTime);
   }
 
@@ -212,14 +212,19 @@ export class DatabaseMonitor {
    *
    * @returns Array of operations that have encountered errors
    */
-  getErrorOperations(): Array<{ operation: string; errorCount: number; totalCount: number; errorRate: number }> {
+  getErrorOperations(): Array<{
+    operation: string;
+    errorCount: number;
+    totalCount: number;
+    errorRate: number;
+  }> {
     return Array.from(this.metrics.entries())
       .filter(([, m]) => m.errors > 0)
       .map(([operation, m]) => ({
         operation,
         errorCount: m.errors,
         totalCount: m.count,
-        errorRate: m.count > 0 ? m.errors / m.count : 0
+        errorRate: m.count > 0 ? m.errors / m.count : 0,
       }))
       .sort((a, b) => b.errorRate - a.errorRate);
   }
@@ -236,7 +241,7 @@ export class DatabaseMonitor {
 
     return {
       ...m,
-      avgTime: m.count > 0 ? m.totalTime / m.count : 0
+      avgTime: m.count > 0 ? m.totalTime / m.count : 0,
     };
   }
 
@@ -257,7 +262,7 @@ export class DatabaseMonitor {
       totalErrors += m.errors;
       operations[operation] = {
         ...m,
-        avgTime: m.count > 0 ? m.totalTime / m.count : 0
+        avgTime: m.count > 0 ? m.totalTime / m.count : 0,
       };
     }
 
@@ -267,7 +272,7 @@ export class DatabaseMonitor {
       totalErrors,
       uniqueOperations: this.metrics.size,
       monitoringStarted: this.monitoringStarted,
-      operations
+      operations,
     };
   }
 
@@ -284,7 +289,7 @@ export class DatabaseMonitor {
         avgTime: m.count > 0 ? m.totalTime / m.count : 0,
         maxTime: m.maxTime,
         count: m.count,
-        lastExecuted: m.lastExecuted
+        lastExecuted: m.lastExecuted,
       }))
       .sort((a, b) => b.avgTime - a.avgTime)
       .slice(0, n);
@@ -296,12 +301,14 @@ export class DatabaseMonitor {
    * @param n - Number of operations to return (default: 10)
    * @returns Array of most called operations
    */
-  getTopCalledOperations(n: number = 10): Array<{ operation: string; count: number; avgTime: number }> {
+  getTopCalledOperations(
+    n: number = 10,
+  ): Array<{ operation: string; count: number; avgTime: number }> {
     return Array.from(this.metrics.entries())
       .map(([operation, m]) => ({
         operation,
         count: m.count,
-        avgTime: m.count > 0 ? m.totalTime / m.count : 0
+        avgTime: m.count > 0 ? m.totalTime / m.count : 0,
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, n);
@@ -362,7 +369,11 @@ export function monitoredQuery<T>(operation: string, fn: () => T): T {
     databaseMonitor.recordQuery(operation, Date.now() - start);
     return result;
   } catch (error) {
-    databaseMonitor.recordQuery(operation, Date.now() - start, error instanceof Error ? error : new Error(String(error)));
+    databaseMonitor.recordQuery(
+      operation,
+      Date.now() - start,
+      error instanceof Error ? error : new Error(String(error)),
+    );
     throw error;
   }
 }
@@ -381,7 +392,11 @@ export async function monitoredQueryAsync<T>(operation: string, fn: () => Promis
     databaseMonitor.recordQuery(operation, Date.now() - start);
     return result;
   } catch (error) {
-    databaseMonitor.recordQuery(operation, Date.now() - start, error instanceof Error ? error : new Error(String(error)));
+    databaseMonitor.recordQuery(
+      operation,
+      Date.now() - start,
+      error instanceof Error ? error : new Error(String(error)),
+    );
     throw error;
   }
 }

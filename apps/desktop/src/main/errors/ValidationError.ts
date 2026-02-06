@@ -8,7 +8,7 @@ export class ValidationError extends Error {
     message: string,
     public readonly field: string,
     public readonly value: any,
-    public readonly constraint?: string
+    public readonly constraint?: string,
   ) {
     super(message);
     this.name = 'ValidationError';
@@ -33,9 +33,7 @@ export class ValidationError extends Error {
  * Multiple validation errors for batch validation
  */
 export class ValidationErrors extends Error {
-  constructor(
-    public readonly errors: ValidationError[]
-  ) {
+  constructor(public readonly errors: ValidationError[]) {
     super(`Validation failed with ${errors.length} error(s)`);
     this.name = 'ValidationErrors';
 
@@ -48,20 +46,20 @@ export class ValidationErrors extends Error {
    * Get all field names with errors
    */
   getFields(): string[] {
-    return this.errors.map(e => e.field);
+    return this.errors.map((e) => e.field);
   }
 
   /**
    * Get error for specific field
    */
   getFieldError(field: string): ValidationError | undefined {
-    return this.errors.find(e => e.field === field);
+    return this.errors.find((e) => e.field === field);
   }
 
   /**
    * Convert to user-friendly error messages
    */
   toUserMessages(): string[] {
-    return this.errors.map(e => e.toUserMessage());
+    return this.errors.map((e) => e.toUserMessage());
   }
 }

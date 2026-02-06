@@ -10,7 +10,7 @@ vi.mock('../../database/queries/shop-order', () => ({
   getSectionsByProjectId: vi.fn(),
   createShopOrderSection: vi.fn(),
   updateShopOrderSection: vi.fn(),
-  deleteShopOrderSection: vi.fn()
+  deleteShopOrderSection: vi.fn(),
 }));
 
 vi.mock('../../errors', async () => {
@@ -18,8 +18,8 @@ vi.mock('../../errors', async () => {
   return {
     ...actual,
     errorHandler: {
-      executeWithRetry: vi.fn(async (fn) => fn())
-    }
+      executeWithRetry: vi.fn(async (fn) => fn()),
+    },
   };
 });
 
@@ -28,7 +28,7 @@ import {
   getSectionsByProjectId,
   createShopOrderSection,
   updateShopOrderSection,
-  deleteShopOrderSection
+  deleteShopOrderSection,
 } from '../../database/queries/shop-order';
 
 const mockGetByProjectId = vi.mocked(getSectionsByProjectId);
@@ -47,7 +47,7 @@ describe('ShopOrderSectionService', () => {
     sort_order: 0,
     page_break: 0,
     created_at: Date.now(),
-    updated_at: Date.now()
+    updated_at: Date.now(),
   };
 
   const mockSections = [
@@ -60,8 +60,8 @@ describe('ShopOrderSectionService', () => {
       sort_order: 1,
       page_break: 0,
       created_at: Date.now(),
-      updated_at: Date.now()
-    }
+      updated_at: Date.now(),
+    },
   ];
 
   beforeEach(() => {
@@ -133,11 +133,15 @@ describe('ShopOrderSectionService', () => {
     });
 
     it('should throw ValidationError when prep_project_id is empty string', async () => {
-      await expect(service.create({ prep_project_id: '', name: 'Video' })).rejects.toThrow(ValidationError);
+      await expect(service.create({ prep_project_id: '', name: 'Video' })).rejects.toThrow(
+        ValidationError,
+      );
     });
 
     it('should throw ValidationError when prep_project_id is whitespace only', async () => {
-      await expect(service.create({ prep_project_id: '   ', name: 'Video' })).rejects.toThrow(ValidationError);
+      await expect(service.create({ prep_project_id: '   ', name: 'Video' })).rejects.toThrow(
+        ValidationError,
+      );
     });
 
     it('should throw ValidationError with correct field for prep_project_id', async () => {
@@ -151,15 +155,21 @@ describe('ShopOrderSectionService', () => {
 
     it('should throw ValidationError when name is missing', async () => {
       await expect(service.create({ prep_project_id: 'proj-1' })).rejects.toThrow(ValidationError);
-      await expect(service.create({ prep_project_id: 'proj-1' })).rejects.toThrow('Section name is required');
+      await expect(service.create({ prep_project_id: 'proj-1' })).rejects.toThrow(
+        'Section name is required',
+      );
     });
 
     it('should throw ValidationError when name is empty string', async () => {
-      await expect(service.create({ prep_project_id: 'proj-1', name: '' })).rejects.toThrow(ValidationError);
+      await expect(service.create({ prep_project_id: 'proj-1', name: '' })).rejects.toThrow(
+        ValidationError,
+      );
     });
 
     it('should throw ValidationError when name is whitespace only', async () => {
-      await expect(service.create({ prep_project_id: 'proj-1', name: '   ' })).rejects.toThrow(ValidationError);
+      await expect(service.create({ prep_project_id: 'proj-1', name: '   ' })).rejects.toThrow(
+        ValidationError,
+      );
     });
 
     it('should throw ValidationError with correct field for name', async () => {
@@ -195,7 +205,7 @@ describe('ShopOrderSectionService', () => {
         name: 'Rigging',
         discipline: 'RIG',
         sort_order: 3,
-        notes: 'Important notes'
+        notes: 'Important notes',
       };
       mockCreate.mockResolvedValue({ ...mockSection, ...input } as any);
 
@@ -236,7 +246,9 @@ describe('ShopOrderSectionService', () => {
 
     it('should throw ValidationError when name is explicitly empty string', async () => {
       await expect(service.update('section-1', { name: '' })).rejects.toThrow(ValidationError);
-      await expect(service.update('section-1', { name: '' })).rejects.toThrow('Section name cannot be empty');
+      await expect(service.update('section-1', { name: '' })).rejects.toThrow(
+        'Section name cannot be empty',
+      );
     });
 
     it('should throw ValidationError when name is whitespace only', async () => {

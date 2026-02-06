@@ -9,13 +9,13 @@ on:
 permissions:
   contents: read
   checks: write
-  pull-requests: write  # For Codecov comments
+  pull-requests: write # For Codecov comments
 
 jobs:
   test:
     name: Test on ${{ matrix.os }} - Node ${{ matrix.node-version }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15  # Prevent runaway tests
+    timeout-minutes: 15 # Prevent runaway tests
 
     strategy:
       fail-fast: false # Don't cancel other jobs if one fails
@@ -62,11 +62,11 @@ jobs:
           path: coverage/
           retention-days: 30
 
-  # Lint and type check (optional, runs in parallel)
+  # Lint, format check, and type check (runs in parallel with tests)
   lint:
     name: Lint and Type Check
     runs-on: ubuntu-latest
-    timeout-minutes: 10  # Prevent runaway linting
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
@@ -84,26 +84,54 @@ jobs:
       - name: Run TypeScript type check
         run: npx tsc --noEmit
 
-      - name: Run ESLint (if configured)
-        run: npm run lint --if-present
-        continue-on-error: true # Don't fail if lint script doesn't exist (lint script not yet configured)
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+  # Security audit
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+        continue-on-error: true # Report but don't block on audit findings
 
   # Summary job that all other jobs depend on
   test-summary:
     name: Test Summary
     runs-on: ubuntu-latest
-    needs: [test, lint]
+    needs: [test, lint, security]
     if: always() # Run even if some tests failed
 
     steps:
       - name: Check test results
         run: |
           if [ "${{ needs.test.result }}" != "success" ]; then
-            echo "❌ Tests failed on one or more platforms"
+            echo "Tests failed on one or more platforms"
             exit 1
           fi
           if [ "${{ needs.lint.result }}" != "success" ]; then
-            echo "⚠️  Linting or type check failed"
+            echo "Linting, formatting, or type check failed"
             exit 1
           fi
-          echo "✅ All tests passed on all platforms!"
+          if [ "${{ needs.security.result }}" == "failure" ]; then
+            echo "Security audit found critical vulnerabilities"
+          fi
+          echo "All checks passed!"

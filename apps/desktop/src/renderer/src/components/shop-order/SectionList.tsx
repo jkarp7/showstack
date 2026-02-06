@@ -12,7 +12,12 @@ interface SectionListProps {
   onEditSection: (section: ShopOrderSection) => void;
 }
 
-export function SectionList({ projectId, sections, onAddSection, onEditSection }: SectionListProps) {
+export function SectionList({
+  projectId,
+  sections,
+  onAddSection,
+  onEditSection,
+}: SectionListProps) {
   const { deleteSection, updateSection, items } = useShopOrderStore();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
@@ -28,7 +33,11 @@ export function SectionList({ projectId, sections, onAddSection, onEditSection }
   } | null>(null);
 
   const handleDelete = async (sectionId: string) => {
-    if (window.confirm('Delete this section? All equipment items in this section will also be deleted.')) {
+    if (
+      window.confirm(
+        'Delete this section? All equipment items in this section will also be deleted.',
+      )
+    ) {
       setDeletingId(sectionId);
       await deleteSection(sectionId);
       setDeletingId(null);

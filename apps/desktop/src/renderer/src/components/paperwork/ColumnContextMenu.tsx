@@ -40,7 +40,7 @@ export function ColumnContextMenu({
   onUnmergeColumn,
   organization,
   visibleColumns = [],
-  onOrganizationChange
+  onOrganizationChange,
 }: ColumnContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [adjustedPosition, setAdjustedPosition] = React.useState(position);
@@ -106,7 +106,7 @@ export function ColumnContextMenu({
   // Render column header menu
   if (column) {
     const isMerged = column.combinedWith && column.combinedWith.length > 0;
-    const mergeableColumns = allColumns.filter(c => c.id !== column.id && c.visible);
+    const mergeableColumns = allColumns.filter((c) => c.id !== column.id && c.visible);
 
     return createPortal(
       <div
@@ -115,7 +115,7 @@ export function ColumnContextMenu({
           position: 'fixed',
           top: adjustedPosition.y,
           left: adjustedPosition.x,
-          zIndex: 9999
+          zIndex: 9999,
         }}
         className="bg-gray-800 border border-gray-700 rounded-lg shadow-xl min-w-56 text-white overflow-hidden"
       >
@@ -219,7 +219,7 @@ export function ColumnContextMenu({
           </button>
         </div>
       </div>,
-      document.body
+      document.body,
     );
   }
 
@@ -232,7 +232,7 @@ export function ColumnContextMenu({
           position: 'fixed',
           top: adjustedPosition.y,
           left: adjustedPosition.x,
-          zIndex: 9999
+          zIndex: 9999,
         }}
         className="bg-gray-800 border border-gray-700 rounded-lg shadow-xl min-w-64 py-2 text-white"
       >
@@ -253,7 +253,7 @@ export function ColumnContextMenu({
             className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
           >
             <option value="none">None</option>
-            {visibleColumns.map(col => (
+            {visibleColumns.map((col) => (
               <option key={col.id} value={col.field}>
                 {col.label}
               </option>
@@ -272,7 +272,7 @@ export function ColumnContextMenu({
             className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
           >
             <option value="">None</option>
-            {visibleColumns.map(col => (
+            {visibleColumns.map((col) => (
               <option key={col.id} value={col.field}>
                 {col.label}
               </option>
@@ -288,7 +288,7 @@ export function ColumnContextMenu({
             onChange={(e) => {
               onOrganizationChange({
                 ...organization,
-                sortDirection: e.target.value as 'asc' | 'desc'
+                sortDirection: e.target.value as 'asc' | 'desc',
               });
             }}
             className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-sm text-white focus:outline-none focus:border-blue-500"
@@ -310,7 +310,7 @@ export function ColumnContextMenu({
                 onChange={(e) => {
                   onOrganizationChange({
                     ...organization,
-                    showGroupHeaders: e.target.checked
+                    showGroupHeaders: e.target.checked,
                   });
                 }}
                 className="w-4 h-4"
@@ -325,7 +325,7 @@ export function ColumnContextMenu({
                 onChange={(e) => {
                   onOrganizationChange({
                     ...organization,
-                    groupPageBreaks: e.target.checked
+                    groupPageBreaks: e.target.checked,
                   });
                 }}
                 className="w-4 h-4"
@@ -345,7 +345,7 @@ export function ColumnContextMenu({
               sortBy: visibleColumns[0]?.field,
               sortDirection: 'asc',
               showGroupHeaders: true,
-              groupPageBreaks: false
+              groupPageBreaks: false,
             });
             onClose();
           }}
@@ -355,7 +355,7 @@ export function ColumnContextMenu({
           <span>Reset to Default View</span>
         </button>
       </div>,
-      document.body
+      document.body,
     );
   }
 

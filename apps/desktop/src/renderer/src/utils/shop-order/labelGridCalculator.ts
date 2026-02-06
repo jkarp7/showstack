@@ -46,7 +46,7 @@ export const AVERY_TEMPLATES: Record<string, AveryTemplate> = {
     topMargin: 36,
     leftMargin: 11.25,
     horizontalGap: 9,
-    verticalGap: 0
+    verticalGap: 0,
   },
   '5163': {
     code: '5163',
@@ -58,7 +58,7 @@ export const AVERY_TEMPLATES: Record<string, AveryTemplate> = {
     topMargin: 36,
     leftMargin: 11.25,
     horizontalGap: 13.5,
-    verticalGap: 0
+    verticalGap: 0,
   },
   '5164': {
     code: '5164',
@@ -70,7 +70,7 @@ export const AVERY_TEMPLATES: Record<string, AveryTemplate> = {
     topMargin: 36,
     leftMargin: 11.25,
     horizontalGap: 13.5,
-    verticalGap: 0
+    verticalGap: 0,
   },
   '8160': {
     code: '8160',
@@ -82,7 +82,7 @@ export const AVERY_TEMPLATES: Record<string, AveryTemplate> = {
     topMargin: 36,
     leftMargin: 11.25,
     horizontalGap: 9,
-    verticalGap: 0
+    verticalGap: 0,
   },
   '5167': {
     code: '5167',
@@ -94,8 +94,8 @@ export const AVERY_TEMPLATES: Record<string, AveryTemplate> = {
     topMargin: 36,
     leftMargin: 11.25,
     horizontalGap: 9,
-    verticalGap: 0
-  }
+    verticalGap: 0,
+  },
 };
 
 /**
@@ -109,7 +109,7 @@ export const AVERY_TEMPLATES: Record<string, AveryTemplate> = {
 export function calculateLabelGrid(
   widthInches: number,
   heightInches: number,
-  cellsPerInch: number = 4
+  cellsPerInch: number = 4,
 ): LabelGridConfig {
   // Calculate grid dimensions
   const columns = Math.round(widthInches * cellsPerInch);
@@ -124,7 +124,7 @@ export function calculateLabelGrid(
     rows,
     pageWidth,
     pageHeight,
-    gridGap: 2 // Small gap for visual alignment in designer
+    gridGap: 2, // Small gap for visual alignment in designer
   };
 }
 

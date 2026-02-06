@@ -54,7 +54,9 @@ export function AnalyticsDashboard() {
   };
 
   const handleClear = async () => {
-    if (confirm('Are you sure you want to clear all local telemetry data? This cannot be undone.')) {
+    if (
+      confirm('Are you sure you want to clear all local telemetry data? This cannot be undone.')
+    ) {
       try {
         await telemetry.clearLocalData();
         loadStats();
@@ -68,41 +70,46 @@ export function AnalyticsDashboard() {
   };
 
   // Calculate event type distribution
-  const eventTypeCounts = eventData.reduce((acc, event) => {
-    acc[event.event] = (acc[event.event] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const eventTypeCounts = eventData.reduce(
+    (acc, event) => {
+      acc[event.event] = (acc[event.event] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
   const topEvents = Object.entries(eventTypeCounts)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 10);
 
   // Calculate feature usage
-  const featureEvents = eventData.filter(e => e.event === 'feature_used');
-  const featureCounts = featureEvents.reduce((acc, event) => {
-    const feature = event.properties?.feature || 'Unknown';
-    acc[feature] = (acc[feature] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const featureEvents = eventData.filter((e) => e.event === 'feature_used');
+  const featureCounts = featureEvents.reduce(
+    (acc, event) => {
+      const feature = event.properties?.feature || 'Unknown';
+      acc[feature] = (acc[feature] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
   const topFeatures = Object.entries(featureCounts)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 5);
 
   // Calculate performance metrics
-  const perfEvents = eventData.filter(e => e.event === 'performance_metric');
-  const avgPerformance = perfEvents.length > 0
-    ? perfEvents.reduce((acc, e) => acc + (e.properties?.value || 0), 0) / perfEvents.length
-    : 0;
+  const perfEvents = eventData.filter((e) => e.event === 'performance_metric');
+  const avgPerformance =
+    perfEvents.length > 0
+      ? perfEvents.reduce((acc, e) => acc + (e.properties?.value || 0), 0) / perfEvents.length
+      : 0;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Analytics Dashboard
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analytics Dashboard</h2>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
             View telemetry statistics and usage patterns
           </p>
@@ -132,12 +139,8 @@ export function AnalyticsDashboard() {
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Total Events
-              </p>
-              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
-                {stats.total}
-              </p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Events</p>
+              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
             </div>
             <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
               <Activity className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -148,9 +151,7 @@ export function AnalyticsDashboard() {
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Synced Events
-              </p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Synced Events</p>
               <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
                 {stats.synced}
               </p>
@@ -164,9 +165,7 @@ export function AnalyticsDashboard() {
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Pending Events
-              </p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Events</p>
               <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
                 {stats.unsynced}
               </p>
@@ -180,13 +179,9 @@ export function AnalyticsDashboard() {
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Oldest Event
-              </p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Oldest Event</p>
               <p className="mt-2 text-lg font-bold text-gray-900 dark:text-white">
-                {stats.oldestEvent
-                  ? new Date(stats.oldestEvent).toLocaleDateString()
-                  : 'N/A'}
+                {stats.oldestEvent ? new Date(stats.oldestEvent).toLocaleDateString() : 'N/A'}
               </p>
             </div>
             <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
@@ -198,9 +193,7 @@ export function AnalyticsDashboard() {
 
       {/* Top Events */}
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Top Events
-        </h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Events</h3>
         {topEvents.length > 0 ? (
           <div className="space-y-3">
             {topEvents.map(([event, count]) => (
@@ -230,9 +223,7 @@ export function AnalyticsDashboard() {
       {/* Feature Usage */}
       {topFeatures.length > 0 && (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Top Features
-          </h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Features</h3>
           <div className="space-y-3">
             {topFeatures.map(([feature, count]) => (
               <div key={feature} className="flex items-center justify-between">
@@ -264,9 +255,7 @@ export function AnalyticsDashboard() {
           </h3>
           <div className="space-y-4">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                Average Performance
-              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Average Performance</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {avgPerformance.toFixed(2)} ms
               </p>

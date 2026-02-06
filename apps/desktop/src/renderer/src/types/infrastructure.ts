@@ -71,7 +71,9 @@ export interface InfrastructureStore {
   loading: boolean;
   currentProjectId: string | null;
   loadEquipment: (projectId: string) => Promise<void>;
-  addEquipment: (equipment: Omit<InfrastructureEquipment, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
+  addEquipment: (
+    equipment: Omit<InfrastructureEquipment, 'id' | 'created_at' | 'updated_at'>,
+  ) => Promise<void>;
   updateEquipment: (id: string, updates: Partial<InfrastructureEquipment>) => Promise<void>;
   deleteEquipment: (id: string) => Promise<void>;
   deleteMultiple: (ids: string[]) => Promise<void>;

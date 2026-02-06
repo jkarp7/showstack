@@ -60,9 +60,7 @@ export function EditSectionDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Section Name
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Section Name</label>
             <input
               type="text"
               value={name}
@@ -89,9 +87,7 @@ export function EditSectionDialog({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Sort Order
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Sort Order</label>
             <input
               type="number"
               value={sortOrder}
@@ -99,9 +95,7 @@ export function EditSectionDialog({
               min="0"
               className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
             />
-            <p className="text-xs text-gray-500 mt-1">
-              Lower numbers appear first in the list
-            </p>
+            <p className="text-xs text-gray-500 mt-1">Lower numbers appear first in the list</p>
           </div>
 
           <div className="flex items-center gap-2">

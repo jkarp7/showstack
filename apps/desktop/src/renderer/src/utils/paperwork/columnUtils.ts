@@ -8,7 +8,10 @@ import { PaperworkColumnConfig } from '../../types/paperworkTemplate';
 /**
  * Get the display label for a column based on its displayMode
  */
-export function getColumnDisplayLabel(column: PaperworkColumnConfig, allColumns?: PaperworkColumnConfig[]): string {
+export function getColumnDisplayLabel(
+  column: PaperworkColumnConfig,
+  allColumns?: PaperworkColumnConfig[],
+): string {
   const mode = column.displayMode || 'full';
 
   // If this column is merged with others, show combined label
@@ -16,8 +19,8 @@ export function getColumnDisplayLabel(column: PaperworkColumnConfig, allColumns?
     const labels: string[] = [getBasicLabel(column, mode)];
 
     // Add labels of merged columns
-    column.combinedWith.forEach(columnId => {
-      const mergedCol = allColumns.find(c => c.id === columnId);
+    column.combinedWith.forEach((columnId) => {
+      const mergedCol = allColumns.find((c) => c.id === columnId);
       if (mergedCol) {
         labels.push(getBasicLabel(mergedCol, mode));
       }

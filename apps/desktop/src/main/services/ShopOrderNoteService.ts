@@ -10,7 +10,7 @@ import {
   createNoteTemplate,
   updateNoteTemplate,
   deleteNoteTemplate,
-  ShopOrderNoteTemplate
+  ShopOrderNoteTemplate,
 } from '../database/queries/shop-order';
 import { errorHandler, ValidationError } from '../errors';
 
@@ -33,7 +33,7 @@ export class ShopOrderNoteService {
 
     return await errorHandler.executeWithRetry(
       async () => getNotesByProjectId(projectId),
-      'shop-order:notes:getByProjectId'
+      'shop-order:notes:getByProjectId',
     );
   }
 
@@ -43,11 +43,7 @@ export class ShopOrderNoteService {
   async create(data: Partial<ShopOrderNote>): Promise<ShopOrderNote> {
     // Validate required fields
     if (!data.prep_project_id || data.prep_project_id.trim().length === 0) {
-      throw new ValidationError(
-        'Project ID is required',
-        'prep_project_id',
-        data.prep_project_id
-      );
+      throw new ValidationError('Project ID is required', 'prep_project_id', data.prep_project_id);
     }
 
     if (!data.type) {
@@ -60,7 +56,7 @@ export class ShopOrderNoteService {
 
     return await errorHandler.executeWithRetry(
       async () => createShopOrderNote(data),
-      'shop-order:notes:create'
+      'shop-order:notes:create',
     );
   }
 
@@ -79,7 +75,7 @@ export class ShopOrderNoteService {
 
     return await errorHandler.executeWithRetry(
       async () => updateShopOrderNote(id, updates),
-      'shop-order:notes:update'
+      'shop-order:notes:update',
     );
   }
 
@@ -93,7 +89,7 @@ export class ShopOrderNoteService {
 
     return await errorHandler.executeWithRetry(
       async () => deleteShopOrderNote(id),
-      'shop-order:notes:delete'
+      'shop-order:notes:delete',
     );
   }
 
@@ -107,7 +103,7 @@ export class ShopOrderNoteService {
   async getAllTemplates(): Promise<ShopOrderNoteTemplate[]> {
     return await errorHandler.executeWithRetry(
       async () => getAllNoteTemplates(),
-      'shop-order:note-templates:getAll'
+      'shop-order:note-templates:getAll',
     );
   }
 
@@ -121,7 +117,7 @@ export class ShopOrderNoteService {
 
     return await errorHandler.executeWithRetry(
       async () => getNoteTemplateById(id),
-      'shop-order:note-templates:getById'
+      'shop-order:note-templates:getById',
     );
   }
 
@@ -135,7 +131,7 @@ export class ShopOrderNoteService {
 
     return await errorHandler.executeWithRetry(
       async () => getDefaultNoteTemplate(type),
-      'shop-order:note-templates:getDefault'
+      'shop-order:note-templates:getDefault',
     );
   }
 
@@ -158,7 +154,7 @@ export class ShopOrderNoteService {
 
     return await errorHandler.executeWithRetry(
       async () => createNoteTemplate(data),
-      'shop-order:note-templates:create'
+      'shop-order:note-templates:create',
     );
   }
 
@@ -167,7 +163,7 @@ export class ShopOrderNoteService {
    */
   async updateTemplate(
     id: string,
-    updates: Partial<ShopOrderNoteTemplate>
+    updates: Partial<ShopOrderNoteTemplate>,
   ): Promise<ShopOrderNoteTemplate> {
     if (!id || id.trim().length === 0) {
       throw new ValidationError('Template ID is required', 'id', id);
@@ -185,7 +181,7 @@ export class ShopOrderNoteService {
 
     return await errorHandler.executeWithRetry(
       async () => updateNoteTemplate(id, updates),
-      'shop-order:note-templates:update'
+      'shop-order:note-templates:update',
     );
   }
 
@@ -199,7 +195,7 @@ export class ShopOrderNoteService {
 
     return await errorHandler.executeWithRetry(
       async () => deleteNoteTemplate(id),
-      'shop-order:note-templates:delete'
+      'shop-order:note-templates:delete',
     );
   }
 }

@@ -10,7 +10,7 @@ import {
   FileSizeExceededError,
   FileNotFoundError,
   PathTraversalError,
-  NullByteError
+  NullByteError,
 } from '../../utils/errors';
 
 // Mock dependencies
@@ -35,7 +35,7 @@ vi.mock('../../utils/pathValidation', async (importOriginal) => {
         throw new PathTraversalError(path);
       }
     }),
-    isPathAllowed: vi.fn(() => true)
+    isPathAllowed: vi.fn(() => true),
   };
 });
 
@@ -292,7 +292,7 @@ describe('file:readImageAsDataUrl - IPC Integration', () => {
     });
 
     it('should encode binary data correctly', () => {
-      const binaryData = Buffer.from([0xFF, 0xD8, 0xFF, 0xE0]); // JPEG header
+      const binaryData = Buffer.from([0xff, 0xd8, 0xff, 0xe0]); // JPEG header
       const base64 = binaryData.toString('base64');
 
       expect(base64).toBe('/9j/4A==');
@@ -332,7 +332,7 @@ describe('File Handler - Error Handling', () => {
     it('should format success response correctly', () => {
       const result = {
         success: true,
-        filePath: '/path/to/file.showstack'
+        filePath: '/path/to/file.showstack',
       };
 
       expect(result).toHaveProperty('success');
@@ -343,7 +343,7 @@ describe('File Handler - Error Handling', () => {
     it('should format error response correctly', () => {
       const result = {
         success: false,
-        error: 'File not found'
+        error: 'File not found',
       };
 
       expect(result).toHaveProperty('success');
@@ -405,7 +405,7 @@ describe('File Handler - Module Integration', () => {
     it('should recognize valid module types', () => {
       const validModules = ['PRODUCTION', 'PREP', 'INFRASTRUCTURE', 'PAPERWORK'];
 
-      validModules.forEach(module => {
+      validModules.forEach((module) => {
         expect(validModules).toContain(module);
       });
     });
@@ -460,7 +460,7 @@ describe('file:readImageAsDataUrl - Full Integration with Validation Module', ()
     vi.mocked(fs.readFile).mockResolvedValue(imageBuffer);
     vi.mocked(fileTypeFromBuffer).mockResolvedValue({
       ext: 'png',
-      mime: 'image/png'
+      mime: 'image/png',
     });
 
     // Actually invoke the handler logic
@@ -478,11 +478,10 @@ describe('file:readImageAsDataUrl - Full Integration with Validation Module', ()
     vi.mocked(fs.readFile).mockResolvedValue(Buffer.from('SVG_DATA'));
     vi.mocked(fileTypeFromBuffer).mockResolvedValue({
       ext: 'svg',
-      mime: 'image/svg+xml'
+      mime: 'image/svg+xml',
     });
 
-    await expect(readImageAsDataUrl('/Users/test/image.svg'))
-      .rejects.toThrow(InvalidFileTypeError);
+    await expect(readImageAsDataUrl('/Users/test/image.svg')).rejects.toThrow(InvalidFileTypeError);
   });
 
   it('should reject files over 2MB through validation module', async () => {
@@ -491,20 +490,19 @@ describe('file:readImageAsDataUrl - Full Integration with Validation Module', ()
     vi.mocked(fsSync.existsSync).mockReturnValue(true);
     vi.mocked(fs.readFile).mockResolvedValue(largeBuffer);
 
-    await expect(readImageAsDataUrl('/Users/test/large.png'))
-      .rejects.toThrow(FileSizeExceededError);
+    await expect(readImageAsDataUrl('/Users/test/large.png')).rejects.toThrow(
+      FileSizeExceededError,
+    );
   });
 
   it('should reject path traversal attempts through validation module', async () => {
-    await expect(readImageAsDataUrl('../../etc/passwd'))
-      .rejects.toThrow(PathTraversalError);
+    await expect(readImageAsDataUrl('../../etc/passwd')).rejects.toThrow(PathTraversalError);
 
     expect(validateFilePath).toHaveBeenCalledWith('../../etc/passwd');
   });
 
   it('should reject null byte injection through validation module', async () => {
-    await expect(readImageAsDataUrl('image.png\x00.exe'))
-      .rejects.toThrow(PathTraversalError);
+    await expect(readImageAsDataUrl('image.png\x00.exe')).rejects.toThrow(PathTraversalError);
   });
 
   it('should throw FileNotFoundError for non-existent files', async () => {
@@ -513,18 +511,17 @@ describe('file:readImageAsDataUrl - Full Integration with Validation Module', ()
     error.code = 'ENOENT';
     vi.mocked(fs.readFile).mockRejectedValue(error);
 
-    await expect(readImageAsDataUrl('/nonexistent/file.png'))
-      .rejects.toThrow(FileNotFoundError);
+    await expect(readImageAsDataUrl('/nonexistent/file.png')).rejects.toThrow(FileNotFoundError);
   });
 
   it('should handle JPEG images with correct MIME type', async () => {
-    const jpegBuffer = Buffer.from([0xFF, 0xD8, 0xFF, 0xE0]); // JPEG header
+    const jpegBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0]); // JPEG header
 
     vi.mocked(fsSync.existsSync).mockReturnValue(true);
     vi.mocked(fs.readFile).mockResolvedValue(jpegBuffer);
     vi.mocked(fileTypeFromBuffer).mockResolvedValue({
       ext: 'jpg',
-      mime: 'image/jpeg'
+      mime: 'image/jpeg',
     });
 
     const result = await readImageAsDataUrl('/Users/test/photo.jpg');
@@ -539,7 +536,7 @@ describe('file:readImageAsDataUrl - Full Integration with Validation Module', ()
     vi.mocked(fs.readFile).mockResolvedValue(Buffer.from('data'));
     vi.mocked(fileTypeFromBuffer).mockResolvedValue({
       ext: 'exe',
-      mime: 'application/x-msdownload'
+      mime: 'application/x-msdownload',
     });
 
     try {

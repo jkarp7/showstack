@@ -15,9 +15,15 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
   const [generalNotesId, setGeneralNotesId] = useState<string | null>(null);
   const [fixtureNotesId, setFixtureNotesId] = useState<string | null>(null);
 
-  const [generalConditionsFormat, setGeneralConditionsFormat] = useState<'plain' | 'bullets' | 'numbered'>('plain');
-  const [generalNotesFormat, setGeneralNotesFormat] = useState<'plain' | 'bullets' | 'numbered'>('plain');
-  const [fixtureNotesFormat, setFixtureNotesFormat] = useState<'plain' | 'bullets' | 'numbered'>('plain');
+  const [generalConditionsFormat, setGeneralConditionsFormat] = useState<
+    'plain' | 'bullets' | 'numbered'
+  >('plain');
+  const [generalNotesFormat, setGeneralNotesFormat] = useState<'plain' | 'bullets' | 'numbered'>(
+    'plain',
+  );
+  const [fixtureNotesFormat, setFixtureNotesFormat] = useState<'plain' | 'bullets' | 'numbered'>(
+    'plain',
+  );
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -58,7 +64,7 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
     type: 'general_conditions' | 'general_notes' | 'fixture_notes',
     content: string,
     format: 'plain' | 'bullets' | 'numbered',
-    noteId: string | null
+    noteId: string | null,
   ) => {
     setIsSaving(true);
     try {
@@ -138,7 +144,9 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
       {/* General Conditions */}
       <div className="bg-gray-100 dark:bg-gray-700/50 rounded-lg p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-white">General Conditions</h3>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+            General Conditions
+          </h3>
           <div className="flex items-center gap-2">
             <select
               value={generalConditionsFormat}
@@ -164,7 +172,14 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
         <textarea
           value={generalConditions}
           onChange={(e) => setGeneralConditions(e.target.value)}
-          onBlur={() => handleSave('general_conditions', generalConditions, generalConditionsFormat, generalConditionsId)}
+          onBlur={() =>
+            handleSave(
+              'general_conditions',
+              generalConditions,
+              generalConditionsFormat,
+              generalConditionsId,
+            )
+          }
           placeholder="Add general conditions and terms..."
           className="w-full h-32 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
         />
@@ -199,7 +214,9 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
         <textarea
           value={generalNotes}
           onChange={(e) => setGeneralNotes(e.target.value)}
-          onBlur={() => handleSave('general_notes', generalNotes, generalNotesFormat, generalNotesId)}
+          onBlur={() =>
+            handleSave('general_notes', generalNotes, generalNotesFormat, generalNotesId)
+          }
           placeholder="Add general project notes..."
           className="w-full h-32 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
         />
@@ -234,16 +251,16 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
         <textarea
           value={fixtureNotes}
           onChange={(e) => setFixtureNotes(e.target.value)}
-          onBlur={() => handleSave('fixture_notes', fixtureNotes, fixtureNotesFormat, fixtureNotesId)}
+          onBlur={() =>
+            handleSave('fixture_notes', fixtureNotes, fixtureNotesFormat, fixtureNotesId)
+          }
           placeholder="Add notes about fixtures and equipment..."
           className="w-full h-32 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
         />
       </div>
 
       {isSaving && (
-        <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-          Saving...
-        </div>
+        <div className="text-center text-sm text-gray-600 dark:text-gray-400">Saving...</div>
       )}
     </div>
   );

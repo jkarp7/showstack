@@ -8,6 +8,7 @@
 ## 🎯 Phase 1 Objectives
 
 By end of Phase 1, you should have:
+
 - ✅ Electron desktop app running
 - ✅ POC virtual grid embedded and working
 - ✅ SQLite database with full schema
@@ -73,6 +74,7 @@ showstack-production/
 ### **Task 1.1: Initialize Electron Project**
 
 **Install dependencies:**
+
 ```bash
 npm install --save-dev electron electron-builder electron-vite
 npm install --save better-sqlite3
@@ -80,6 +82,7 @@ npm install --save-dev @types/better-sqlite3
 ```
 
 **Create `electron.vite.config.ts`:**
+
 ```typescript
 import { defineConfig } from 'electron-vite';
 import react from '@vitejs/plugin-react';
@@ -89,29 +92,30 @@ export default defineConfig({
   main: {
     build: {
       rollupOptions: {
-        external: ['better-sqlite3']
-      }
-    }
+        external: ['better-sqlite3'],
+      },
+    },
   },
   preload: {
     build: {
       rollupOptions: {
-        external: ['electron']
-      }
-    }
+        external: ['electron'],
+      },
+    },
   },
   renderer: {
     resolve: {
       alias: {
-        '@': resolve('src/renderer/src')
-      }
+        '@': resolve('src/renderer/src'),
+      },
     },
-    plugins: [react()]
-  }
+    plugins: [react()],
+  },
 });
 ```
 
 **Update root `package.json`:**
+
 ```json
 {
   "name": "showstack-production",
@@ -131,6 +135,7 @@ export default defineConfig({
 ### **Task 1.2: Create Main Process**
 
 **`src/main/index.ts`:**
+
 ```typescript
 import { app, BrowserWindow } from 'electron';
 import { join } from 'path';
@@ -154,7 +159,7 @@ let mainWindow: BrowserWindow | null = null;
 app.on('ready', async () => {
   // Initialize database
   await initDatabase();
-  
+
   // Create main window
   mainWindow = createWindow();
 });
@@ -173,6 +178,7 @@ app.on('activate', () => {
 ```
 
 **`src/main/window.ts`:**
+
 ```typescript
 import { BrowserWindow } from 'electron';
 import { join } from 'path';
@@ -190,8 +196,8 @@ export function createWindow(): BrowserWindow {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
       nodeIntegration: false,
-      contextIsolation: true
-    }
+      contextIsolation: true,
+    },
   });
 
   // Maximize on start
@@ -213,6 +219,7 @@ export function createWindow(): BrowserWindow {
 ### **Task 1.3: Create Preload Script**
 
 **`src/preload/index.ts`:**
+
 ```typescript
 import { contextBridge, ipcRenderer } from 'electron';
 import { Fixture } from '../renderer/src/types';
@@ -223,16 +230,17 @@ contextBridge.exposeInMainWorld('api', {
   fixtures: {
     getAll: () => ipcRenderer.invoke('fixtures:getAll'),
     create: (fixture: Partial<Fixture>) => ipcRenderer.invoke('fixtures:create', fixture),
-    update: (id: string, updates: Partial<Fixture>) => ipcRenderer.invoke('fixtures:update', id, updates),
+    update: (id: string, updates: Partial<Fixture>) =>
+      ipcRenderer.invoke('fixtures:update', id, updates),
     delete: (id: string) => ipcRenderer.invoke('fixtures:delete', id),
     deleteMultiple: (ids: string[]) => ipcRenderer.invoke('fixtures:deleteMultiple', ids),
   },
-  
+
   // Project operations (future)
   projects: {
     getCurrent: () => ipcRenderer.invoke('projects:getCurrent'),
     create: (name: string) => ipcRenderer.invoke('projects:create', name),
-  }
+  },
 });
 
 // TypeScript declaration
@@ -265,6 +273,7 @@ declare global {
 4. Update imports to use IPC instead of mock data (next week)
 
 **Test it works:**
+
 ```bash
 npm run dev
 ```
@@ -278,6 +287,7 @@ Should open Electron window with POC running!
 ### **Task 2.1: Database Schema**
 
 **`src/main/database/schema.ts`:**
+
 ```typescript
 export const SCHEMA = `
   -- Projects table
@@ -356,6 +366,7 @@ export const SCHEMA = `
 ### **Task 2.2: Database Connection**
 
 **`src/main/database/index.ts`:**
+
 ```typescript
 import Database from 'better-sqlite3';
 import { app } from 'electron';
@@ -366,26 +377,30 @@ let db: Database.Database | null = null;
 
 export function initDatabase(): void {
   const dbPath = join(app.getPath('userData'), 'showstack.db');
-  
+
   db = new Database(dbPath, {
-    verbose: console.log // Log SQL in development
+    verbose: console.log, // Log SQL in development
   });
-  
+
   // Enable foreign keys
   db.pragma('foreign_keys = ON');
-  
+
   // Create tables
   db.exec(SCHEMA);
-  
+
   // Create default project if none exists
-  const projectCount = db.prepare('SELECT COUNT(*) as count FROM projects').get() as { count: number };
+  const projectCount = db.prepare('SELECT COUNT(*) as count FROM projects').get() as {
+    count: number;
+  };
   if (projectCount.count === 0) {
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO projects (id, name, created_at, updated_at)
       VALUES (?, ?, ?, ?)
-    `).run('default-project', 'Untitled Project', Date.now(), Date.now());
+    `,
+    ).run('default-project', 'Untitled Project', Date.now(), Date.now());
   }
-  
+
   console.log('✅ Database initialized:', dbPath);
 }
 
@@ -407,6 +422,7 @@ export function closeDatabase(): void {
 ### **Task 2.3: Fixture Queries**
 
 **`src/main/database/queries/fixtures.ts`:**
+
 ```typescript
 import { getDatabase } from '../index';
 import { Fixture } from '../../../renderer/src/types';
@@ -414,28 +430,32 @@ import { v4 as uuidv4 } from 'uuid';
 
 export function getAllFixtures(projectId: string = 'default-project'): Fixture[] {
   const db = getDatabase();
-  
-  const rows = db.prepare(`
+
+  const rows = db
+    .prepare(
+      `
     SELECT * FROM fixtures
     WHERE project_id = ?
     ORDER BY CAST(position AS INTEGER), position
-  `).all(projectId);
-  
-  return rows.map(row => ({
+  `,
+    )
+    .all(projectId);
+
+  return rows.map((row) => ({
     ...row,
     accessories: row.accessories ? JSON.parse(row.accessories) : [],
-    custom_fields: row.custom_fields ? JSON.parse(row.custom_fields) : {}
+    custom_fields: row.custom_fields ? JSON.parse(row.custom_fields) : {},
   })) as Fixture[];
 }
 
 export function createFixture(
   fixture: Partial<Fixture>,
-  projectId: string = 'default-project'
+  projectId: string = 'default-project',
 ): Fixture {
   const db = getDatabase();
   const id = uuidv4();
   const now = Date.now();
-  
+
   const stmt = db.prepare(`
     INSERT INTO fixtures (
       id, project_id, position, unit_number, type, purpose,
@@ -443,7 +463,7 @@ export function createFixture(
       status, notes, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
-  
+
   stmt.run(
     id,
     projectId,
@@ -460,28 +480,28 @@ export function createFixture(
     fixture.status || 'active',
     fixture.notes || '',
     now,
-    now
+    now,
   );
-  
+
   return { id, ...fixture, created_at: now, updated_at: now } as Fixture;
 }
 
 export function updateFixture(id: string, updates: Partial<Fixture>): Fixture {
   const db = getDatabase();
   const now = Date.now();
-  
-  const fields = Object.keys(updates).filter(k => k !== 'id');
-  const setClause = fields.map(f => `${f} = ?`).join(', ');
-  const values = fields.map(f => updates[f]);
-  
+
+  const fields = Object.keys(updates).filter((k) => k !== 'id');
+  const setClause = fields.map((f) => `${f} = ?`).join(', ');
+  const values = fields.map((f) => updates[f]);
+
   const stmt = db.prepare(`
     UPDATE fixtures
     SET ${setClause}, updated_at = ?
     WHERE id = ?
   `);
-  
+
   stmt.run(...values, now, id);
-  
+
   return getFixtureById(id);
 }
 
@@ -505,6 +525,7 @@ function getFixtureById(id: string): Fixture {
 ### **Task 2.4: IPC Handlers**
 
 **`src/main/ipc/fixtures.ts`:**
+
 ```typescript
 import { ipcMain } from 'electron';
 import * as fixtureQueries from '../database/queries/fixtures';
@@ -514,19 +535,19 @@ export function registerFixtureHandlers(): void {
   ipcMain.handle('fixtures:getAll', async () => {
     return fixtureQueries.getAllFixtures();
   });
-  
+
   ipcMain.handle('fixtures:create', async (_, fixture: Partial<Fixture>) => {
     return fixtureQueries.createFixture(fixture);
   });
-  
+
   ipcMain.handle('fixtures:update', async (_, id: string, updates: Partial<Fixture>) => {
     return fixtureQueries.updateFixture(id, updates);
   });
-  
+
   ipcMain.handle('fixtures:delete', async (_, id: string) => {
     fixtureQueries.deleteFixture(id);
   });
-  
+
   ipcMain.handle('fixtures:deleteMultiple', async (_, ids: string[]) => {
     fixtureQueries.deleteMultipleFixtures(ids);
   });
@@ -534,6 +555,7 @@ export function registerFixtureHandlers(): void {
 ```
 
 **Update `src/main/index.ts`:**
+
 ```typescript
 import { registerFixtureHandlers } from './ipc/fixtures';
 
@@ -551,6 +573,7 @@ app.on('ready', async () => {
 ### **Task 3.1: Update Fixture Store**
 
 **`src/renderer/src/stores/fixtureStore.ts`:**
+
 ```typescript
 import { create } from 'zustand';
 import { Fixture } from '../types';
@@ -558,7 +581,7 @@ import { Fixture } from '../types';
 interface FixtureStore {
   fixtures: Fixture[];
   loading: boolean;
-  
+
   // Actions
   loadFixtures: () => Promise<void>;
   addFixture: (fixture: Partial<Fixture>) => Promise<void>;
@@ -570,58 +593,59 @@ interface FixtureStore {
 export const useFixtureStore = create<FixtureStore>((set, get) => ({
   fixtures: [],
   loading: false,
-  
+
   loadFixtures: async () => {
     set({ loading: true });
     const fixtures = await window.api.fixtures.getAll();
     set({ fixtures, loading: false });
   },
-  
+
   addFixture: async (fixture) => {
     const created = await window.api.fixtures.create(fixture);
-    set(state => ({ fixtures: [...state.fixtures, created] }));
+    set((state) => ({ fixtures: [...state.fixtures, created] }));
   },
-  
+
   updateFixture: async (id, updates) => {
     const updated = await window.api.fixtures.update(id, updates);
-    set(state => ({
-      fixtures: state.fixtures.map(f => f.id === id ? updated : f)
+    set((state) => ({
+      fixtures: state.fixtures.map((f) => (f.id === id ? updated : f)),
     }));
   },
-  
+
   deleteFixture: async (id) => {
     await window.api.fixtures.delete(id);
-    set(state => ({ fixtures: state.fixtures.filter(f => f.id !== id) }));
+    set((state) => ({ fixtures: state.fixtures.filter((f) => f.id !== id) }));
   },
-  
+
   deleteMultiple: async (ids) => {
     await window.api.fixtures.deleteMultiple(ids);
-    set(state => ({ fixtures: state.fixtures.filter(f => !ids.includes(f.id)) }));
-  }
+    set((state) => ({ fixtures: state.fixtures.filter((f) => !ids.includes(f.id)) }));
+  },
 }));
 ```
 
 ### **Task 3.2: Load Data on App Start**
 
 **`src/renderer/src/App.tsx`:**
+
 ```typescript
 import { useEffect } from 'react';
 import { useFixtureStore } from './stores/fixtureStore';
 
 export default function App() {
   const { fixtures, loading, loadFixtures } = useFixtureStore();
-  
+
   // Load fixtures on mount
   useEffect(() => {
     loadFixtures();
   }, []);
-  
+
   if (loading) {
     return <div className="flex items-center justify-center h-screen">
       <div className="text-white">Loading fixtures...</div>
     </div>;
   }
-  
+
   return (
     // ... rest of your POC UI
   );
@@ -635,6 +659,7 @@ export default function App() {
 ### **Task 4.1: Test Performance**
 
 Create test data:
+
 ```typescript
 // Add button to generate test fixtures
 async function generateTestFixtures(count: number) {
@@ -699,6 +724,7 @@ When working on this phase:
 ## 🚀 Next: Phase 2 (Weeks 5-8)
 
 After Phase 1 is complete:
+
 - Sorting & filtering
 - Auto-complete
 - Undo/redo

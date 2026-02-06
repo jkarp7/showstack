@@ -5,11 +5,13 @@
 **MAJOR ARCHITECTURAL SHIFT**: Transitioning ShowStack from offline-first to **cloud-native with real-time collaboration** while maintaining offline capability.
 
 This plan combines:
+
 - **Issue #34**: User Authentication (JWT-based, server-managed)
 - **Issue #33**: Real-Time Collaboration (cloud-native, NOT just cloud backup)
 - Hybrid architecture: Cloud primary + local SQLite cache for offline work
 
 **Key Features:**
+
 - Backend server (Express.js + PostgreSQL + Socket.io)
 - JWT authentication with server-side session management
 - Real-time multi-user collaboration using Operational Transform (OT)
@@ -20,6 +22,7 @@ This plan combines:
 ## Strategic Context
 
 **Priority**: Cloud-native is now the PRIMARY architecture
+
 - Lightwright launching January 2026 with cloud collaboration
 - ShowStack must compete with real-time collaboration features
 - Issue #38 (File Merge) becomes obsolete with real-time sync
@@ -89,6 +92,7 @@ This plan combines:
 ## Technology Stack
 
 ### Backend (NEW - To Build)
+
 - **Framework**: Express.js + TypeScript
 - **Database**: PostgreSQL with Prisma ORM
 - **WebSocket**: Socket.io for real-time collaboration
@@ -97,6 +101,7 @@ This plan combines:
 - **Cache**: Redis (optional, for sessions/presence)
 
 ### Desktop App (Updated)
+
 - **Existing**: Electron + React + Zustand + SQLite (sql.js)
 - **New**: Socket.io-client, axios, enhanced IPC handlers
 - **Offline**: Local SQLite cache for 14-day offline work
@@ -104,6 +109,7 @@ This plan combines:
 ## Core Components
 
 ### 1. Backend Server (NEW)
+
 - REST API endpoints for CRUD operations
 - WebSocket server for real-time updates
 - Operational Transform (OT) for conflict-free editing
@@ -111,6 +117,7 @@ This plan combines:
 - PostgreSQL for cloud data storage
 
 ### 2. Desktop App Integration
+
 - AuthService: Manage JWT tokens locally
 - SyncService: Bi-directional sync engine
 - WebSocketClient: Real-time connection to server
@@ -118,6 +125,7 @@ This plan combines:
 - Updated IPC handlers to work with cloud API
 
 ### 3. Real-Time Collaboration
+
 - Socket.io rooms per project
 - Presence detection (who's online, where)
 - Operational Transform for concurrent edits
@@ -125,6 +133,7 @@ This plan combines:
 - Conflict resolution UI
 
 ### 4. Offline Support
+
 - Local SQLite cache (cache.db)
 - Sync queue for offline changes
 - 14-day grace period (matches license system)
@@ -139,6 +148,7 @@ This plan combines:
 ### Cloud Database (PostgreSQL) - Primary Storage
 
 **Users & Authentication:**
+
 ```sql
 CREATE TABLE users (
   id UUID PRIMARY KEY,
@@ -164,6 +174,7 @@ CREATE TABLE sessions (
 ```
 
 **Teams & Workspaces (Schema Only - UI Deferred):**
+
 ```sql
 CREATE TABLE teams (
   id UUID PRIMARY KEY,
@@ -182,6 +193,7 @@ CREATE TABLE team_members (
 ```
 
 **Projects & Data:**
+
 ```sql
 CREATE TABLE projects (
   id UUID PRIMARY KEY,
@@ -220,6 +232,7 @@ CREATE TABLE change_log (
 ### Local Cache Database (SQLite) - Offline Capability
 
 **Cached Data:**
+
 ```sql
 -- cache.db (local Electron SQLite)
 
@@ -435,6 +448,7 @@ CREATE TABLE auth_tokens (
 **Week 7: Operational Transform (OT) Implementation**
 
 1. Define OT operation types (`/backend/src/websocket/ot/operations.ts`)
+
    ```typescript
    type OTOperation = InsertOperation | DeleteOperation | UpdateOperation;
 
@@ -442,7 +456,7 @@ CREATE TABLE auth_tokens (
      type: 'update';
      entityType: 'fixture' | 'infrastructure';
      entityId: string;
-     path: string[];  // Field path e.g. ['channel']
+     path: string[]; // Field path e.g. ['channel']
      oldValue: any;
      newValue: any;
      clientVersion: number;
@@ -736,21 +750,25 @@ CREATE TABLE auth_tokens (
 ## Critical Files: Backend Server (NEW - To Create)
 
 ### Backend Core
+
 1. `/backend/src/index.ts` - Express server entry point + Socket.io setup
 2. `/backend/src/config/database.ts` - Prisma client configuration
 3. `/backend/prisma/schema.prisma` - PostgreSQL database schema (all tables)
 
 ### Authentication
+
 4. `/backend/src/services/auth.service.ts` - JWT token generation, bcrypt hashing
 5. `/backend/src/routes/auth.routes.ts` - POST /api/auth/login, /register, /refresh
 6. `/backend/src/middleware/auth.ts` - JWT authentication middleware
 
 ### Data APIs
+
 7. `/backend/src/routes/projects.routes.ts` - Project CRUD endpoints
 8. `/backend/src/routes/fixtures.routes.ts` - Fixture CRUD endpoints
 9. `/backend/src/routes/sync.routes.ts` - POST /push, GET /pull endpoints
 
 ### WebSocket & OT
+
 10. `/backend/src/websocket/server.ts` - Socket.io server initialization
 11. `/backend/src/websocket/handlers/fixture.handler.ts` - Real-time fixture updates
 12. `/backend/src/websocket/ot/operations.ts` - OT operation type definitions
@@ -758,6 +776,7 @@ CREATE TABLE auth_tokens (
 14. `/backend/src/websocket/ot/apply.ts` - Apply operations to PostgreSQL
 
 ### Sync Engine
+
 15. `/backend/src/services/sync.service.ts` - Conflict detection and resolution
 
 ---
@@ -765,6 +784,7 @@ CREATE TABLE auth_tokens (
 ## Critical Files: Desktop App (Modified/New)
 
 ### Electron Main Process Services
+
 16. `/src/main/services/AuthService.ts` (NEW) - JWT token storage in SQLite
 17. `/src/main/services/ApiClient.ts` (NEW) - Axios wrapper with auth injection
 18. `/src/main/services/WebSocketClient.ts` (NEW) - Socket.io client wrapper
@@ -773,30 +793,36 @@ CREATE TABLE auth_tokens (
 21. `/src/main/services/NetworkMonitor.ts` (NEW) - Online/offline detection
 
 ### Database
+
 22. `/src/main/database/cacheSchema.ts` (NEW) - Local cache database schema
 23. `/src/main/database/cache.ts` (NEW) - Initialize cache.db
 
 ### IPC Handlers (Modified)
+
 24. `/src/main/ipc/auth.ts` (NEW) - Auth IPC handlers
 25. `/src/main/ipc/websocket.ts` (NEW) - WebSocket IPC handlers
 26. `/src/main/ipc/fixtures.ts` (MODIFIED) - Use API + cache + WebSocket
 27. `/src/main/ipc/projects.ts` (MODIFIED) - Use API + cache
 
 ### Frontend Services
+
 28. `/src/renderer/src/services/WebSocketService.ts` (NEW) - WebSocket event emitter
 29. `/src/renderer/src/hooks/useAuth.ts` (NEW) - React auth hook
 
 ### Frontend UI
+
 30. `/src/renderer/src/pages/Login.tsx` (MODIFIED) - Remove "Skip login" button
 31. `/src/renderer/src/pages/Register.tsx` (NEW) - User registration page
 32. `/src/renderer/src/components/AuthGuard.tsx` (NEW) - Route protection
 33. `/src/renderer/src/components/common/ConflictResolverDialog.tsx` (NEW) - Conflict UI
 
 ### Frontend State
+
 34. `/src/renderer/src/store/authStore.ts` (NEW) - Auth Zustand store
 35. `/src/renderer/src/store/fixtureStore.ts` (MODIFIED) - Listen to WebSocket events
 
 ### Types & Config
+
 36. `/src/shared/types/auth.types.ts` (NEW) - Auth type definitions
 37. `/src/shared/types/sync.types.ts` (NEW) - Sync/OT type definitions
 38. `/src/preload/index.ts` (MODIFIED) - Add auth + WebSocket API methods
@@ -858,6 +884,7 @@ CREATE TABLE auth_tokens (
 **Total: 15-16 weeks (3.5-4 months) for MVP**
 
 ### Breakdown by Phase:
+
 - **Backend Foundation** (Weeks 1-3): 3 weeks
   - Backend setup, auth API, data APIs
 
@@ -877,6 +904,7 @@ CREATE TABLE auth_tokens (
   - Data migration, beta testing, production deployment
 
 ### Post-MVP Enhancements (Future):
+
 - OAuth2 social login (Google, GitHub)
 - Email verification and password reset
 - Team management UI (add/remove members, roles)
@@ -889,22 +917,26 @@ CREATE TABLE auth_tokens (
 ## Security Considerations
 
 ### Password Security
+
 - **Hashing**: bcryptjs with 12 rounds (backend server)
 - **Validation**: Min 8 chars, 1 uppercase, 1 lowercase, 1 number
 - **Storage**: Never store plaintext passwords, only password_hash
 
 ### Token Security
+
 - **JWT**: Access token (15 min), Refresh token (30 days)
 - **Storage**: Refresh tokens hashed in database, access tokens in local SQLite
 - **Refresh**: Auto-refresh when access token < 5 min remaining
 - **Revocation**: Refresh tokens can be revoked (logout)
 
 ### Session Management
+
 - **Grace Period**: 14 days offline before forced re-authentication
 - **Logout**: Single device or all devices
 - **Cleanup**: Expired sessions auto-deleted after 30 days
 
 ### Data Security
+
 - **HTTPS**: All API communication over TLS
 - **WSS**: WebSocket over TLS (wss://)
 - **CORS**: Restricted to Electron app origin
@@ -915,9 +947,11 @@ CREATE TABLE auth_tokens (
 ## Design Decisions & Rationale
 
 ### 1. PostgreSQL vs MongoDB
+
 **Chosen:** PostgreSQL with Prisma ORM
 
 **Rationale:**
+
 - ShowStack data is highly structured (fixtures have 50+ defined fields)
 - Relational data (projects → fixtures, teams → members)
 - ACID compliance important for multi-user editing
@@ -926,9 +960,11 @@ CREATE TABLE auth_tokens (
 - Prisma provides type-safe queries and migrations
 
 ### 2. Operational Transform (OT) vs CRDT
+
 **Chosen:** Operational Transform (OT)
 
 **Rationale:**
+
 - Fixtures are discrete entities with clear fields (not free-form text)
 - OT is simpler to implement for this use case
 - Lower bandwidth requirements (only deltas, not full state)
@@ -936,9 +972,11 @@ CREATE TABLE auth_tokens (
 - Last-write-wins strategy for same-field conflicts (based on timestamp)
 
 ### 3. Railway.app vs AWS
+
 **Chosen:** Railway.app (initially)
 
 **Rationale:**
+
 - Faster time to market (zero-config PostgreSQL)
 - Lower operational overhead (managed database, auto-scaling)
 - Cost-effective for early stage (~$20-50/month)
@@ -946,9 +984,11 @@ CREATE TABLE auth_tokens (
 - Built-in SSL/TLS, environment variables, CI/CD
 
 ### 4. Real-Time WebSocket vs Polling
+
 **Chosen:** Real-time WebSocket (Socket.io)
 
 **Rationale:**
+
 - Better UX for collaboration (instant updates)
 - Lower server load than polling (no repeated requests)
 - Presence detection requires WebSocket
@@ -956,9 +996,11 @@ CREATE TABLE auth_tokens (
 - Socket.io handles reconnection and fallback transports
 
 ### 5. Hybrid Architecture (Cloud + Local Cache)
+
 **Chosen:** Cloud primary + local SQLite cache
 
 **Rationale:**
+
 - Maintains offline capability (14-day grace period)
 - Instant UI response (read from cache)
 - No data loss when offline (sync queue)
@@ -966,9 +1008,11 @@ CREATE TABLE auth_tokens (
 - Matches user expectation from current offline-first system
 
 ### 6. JWT Tokens (Short-Lived Access + Long-Lived Refresh)
+
 **Chosen:** Access token (15 min) + Refresh token (30 days)
 
 **Rationale:**
+
 - Access token short-lived reduces risk if compromised
 - Refresh token allows persistent sessions
 - Refresh token stored hashed in database (can be revoked)
@@ -979,8 +1023,10 @@ CREATE TABLE auth_tokens (
 ## Risks & Mitigation
 
 ### Risk 1: Data Loss During Sync
+
 **Impact:** High - Users lose work
 **Mitigation:**
+
 - Comprehensive conflict resolution UI
 - change_log table tracks all modifications
 - Ability to view/revert previous versions
@@ -988,8 +1034,10 @@ CREATE TABLE auth_tokens (
 - User can always choose which version to keep
 
 ### Risk 2: Network Instability
+
 **Impact:** Medium - Poor collaboration experience
 **Mitigation:**
+
 - Robust reconnection logic (Socket.io handles automatically)
 - Queue changes locally when offline
 - Clear UI indicators of online/offline status
@@ -997,8 +1045,10 @@ CREATE TABLE auth_tokens (
 - 14-day grace period before forced logout
 
 ### Risk 3: Scale (1000+ Fixtures, Multiple Users)
+
 **Impact:** Medium - Slow performance, high latency
 **Mitigation:**
+
 - Virtual scrolling for large data grids (already implemented)
 - Incremental sync (only fetch changed data, not full project)
 - Database indexing on common queries (project_id, user_id, version)
@@ -1006,8 +1056,10 @@ CREATE TABLE auth_tokens (
 - Load testing before production launch
 
 ### Risk 4: Backend Costs Exceed Budget
+
 **Impact:** Medium - Unsustainable operating expenses
 **Mitigation:**
+
 - Start with Railway (predictable pricing)
 - Monitor usage and optimize queries
 - Implement rate limiting to prevent abuse
@@ -1015,8 +1067,10 @@ CREATE TABLE auth_tokens (
 - Can migrate to AWS if scale requires
 
 ### Risk 5: User Adoption (Learning Curve)
+
 **Impact:** Medium - Users don't use collaboration features
 **Mitigation:**
+
 - Gradual opt-in rollout (beta testing first)
 - Clear documentation and tutorials
 - In-app onboarding for real-time features
@@ -1024,8 +1078,10 @@ CREATE TABLE auth_tokens (
 - Collect feedback and iterate
 
 ### Risk 6: Conflict Resolution Complexity
+
 **Impact:** Low - Users confused by conflicts
 **Mitigation:**
+
 - Automatic resolution (last-write-wins) for most cases
 - Only show dialog for irreconcilable conflicts
 - Clear UI showing both versions side-by-side
@@ -1037,6 +1093,7 @@ CREATE TABLE auth_tokens (
 ## Success Criteria
 
 ### Backend (Must Have)
+
 - ✅ Backend server deployed to Railway.app with PostgreSQL
 - ✅ User registration and JWT authentication working
 - ✅ All REST API endpoints functional (auth, projects, fixtures, sync)
@@ -1045,6 +1102,7 @@ CREATE TABLE auth_tokens (
 - ✅ Change log tracks all modifications for audit
 
 ### Desktop App (Must Have)
+
 - ✅ Login page removes "Skip login" bypass, connects to backend
 - ✅ JWT tokens stored securely in local SQLite
 - ✅ WebSocket client connects to server and receives real-time updates
@@ -1053,6 +1111,7 @@ CREATE TABLE auth_tokens (
 - ✅ Conflict resolution UI shows and resolves conflicts
 
 ### Real-Time Collaboration (Must Have)
+
 - ✅ Two users can edit same project simultaneously
 - ✅ Changes appear in real-time on both screens (< 1 second latency)
 - ✅ Concurrent edits to same fixture resolve automatically (OT)
@@ -1060,6 +1119,7 @@ CREATE TABLE auth_tokens (
 - ✅ UI indicators show sync status (synced, syncing, offline)
 
 ### Offline Support (Must Have)
+
 - ✅ Users can work offline for 14 days
 - ✅ Changes queue locally when offline
 - ✅ Automatic sync when back online
@@ -1067,12 +1127,14 @@ CREATE TABLE auth_tokens (
 - ✅ Grace period warning banner shows days remaining
 
 ### Performance (Must Have)
+
 - ✅ Initial project sync completes in < 5 seconds (1000 fixtures)
 - ✅ Real-time updates arrive in < 1 second
 - ✅ UI remains responsive during sync
 - ✅ Virtual scrolling handles 1000+ fixtures smoothly
 
 ### Security (Must Have)
+
 - ✅ Passwords hashed with bcryptjs (12 rounds)
 - ✅ JWT tokens expire and auto-refresh
 - ✅ All API communication over HTTPS/WSS
@@ -1103,10 +1165,12 @@ These features are **designed into the schema** but **not implemented in MVP**:
 This plan represents a **major architectural evolution** for ShowStack:
 
 ### From Offline-First → Cloud-Native Hybrid
+
 - **Was**: Local SQLite only, no backend, no real-time features
 - **Now**: Cloud PostgreSQL primary + local cache, real-time collaboration, offline-capable
 
 ### What This Enables
+
 - ✅ **Real-time collaboration**: Multiple users editing same project simultaneously
 - ✅ **Cloud-native**: Compete with Lightwright's cloud platform
 - ✅ **Future-ready**: Foundation for team management, cloud storage, mobile apps
@@ -1114,24 +1178,28 @@ This plan represents a **major architectural evolution** for ShowStack:
 - ✅ **Issue #38 obsolete**: File merge not needed with real-time sync
 
 ### What This Requires
+
 - ✅ **Backend server**: Express.js + PostgreSQL + Socket.io (new infrastructure)
 - ✅ **15-16 weeks implementation**: Significant development effort
 - ✅ **Ongoing costs**: ~$20-50/month for Railway.app hosting
 - ✅ **Data migration**: Move existing users from local SQLite to cloud
 
 ### Strategic Value
+
 - 🎯 **Compete with Lightwright**: Real-time collaboration is their major selling point
 - 🎯 **Modern architecture**: Cloud-native is industry standard
 - 🎯 **Scalable**: Can support growth without rewrite
 - 🎯 **Revenue opportunity**: Team plans, cloud storage, premium features
 
 ### Key Risks
+
 - ⚠️ **Complexity**: Much larger scope than original offline-first auth
 - ⚠️ **Backend costs**: Ongoing operational expenses
 - ⚠️ **User adoption**: Learning curve for collaboration features
 - ⚠️ **Migration**: Moving existing users to cloud
 
 ### Mitigation
+
 - ✅ **Phased rollout**: Beta test with early adopters first
 - ✅ **Offline fallback**: Users can still work offline 14 days
 - ✅ **Cost monitoring**: Start small with Railway, scale as needed
@@ -1142,18 +1210,21 @@ This plan represents a **major architectural evolution** for ShowStack:
 ## Next Steps
 
 **Immediate (This Week):**
+
 1. Review this plan with stakeholders
 2. Confirm scope and timeline (15-16 weeks)
 3. Confirm budget for backend hosting (~$20-50/month)
 4. Decide: Build now or phase differently?
 
 **If Approved (Week 1):**
+
 1. Create backend repository (`showstack-backend`)
 2. Set up Railway.app account and PostgreSQL
 3. Initialize Express + TypeScript project
 4. Start implementing authentication API
 
 **Alternative Approach (If Timeline Too Long):**
+
 1. **Option A**: Implement just authentication (Issues #34) first with local SQLite (original 7-day plan)
 2. Then revisit cloud-native architecture for Issue #33 separately
 3. **Trade-off**: Will require refactoring auth system later
@@ -1171,4 +1242,4 @@ Before proceeding, please confirm:
 
 ---
 
-*This plan represents the comprehensive cloud-native architecture combining Issues #34 (Auth) and #33 (Collaboration) as requested.*
+_This plan represents the comprehensive cloud-native architecture combining Issues #34 (Auth) and #33 (Collaboration) as requested._

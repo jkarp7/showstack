@@ -7,17 +7,21 @@ This directory contains assets needed for building distributable packages.
 Before building your app for distribution, you need to create the following icon files:
 
 ### macOS
+
 - **icon.icns** - 512x512 icon in ICNS format
   - Tools: [Image2Icon](https://img2icnsapp.com/), [IconUtil](https://developer.apple.com/library/archive/documentation/GraphicsAnimation/Conceptual/HighResolutionOSX/Optimizing/Optimizing.html)
 
 ### Windows
+
 - **icon.ico** - Multi-resolution ICO file (16x16, 32x32, 48x48, 256x256)
   - Tools: [IcoFX](https://icofx.ro/), [Convertio](https://convertio.co/png-ico/)
 
 ### Linux
+
 - **icon.png** - 512x512 PNG file
 
 ### Optional
+
 - **dmg-background.png** - 540x400 PNG for macOS installer background
 
 ## Creating Icons

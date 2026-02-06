@@ -34,7 +34,7 @@ export const PortAssignmentSchema = z.object({
   type: PortTypeSchema.optional(),
   vlan: z.number().int().min(1).max(4094).optional(), // Valid VLAN range
   status: PortStatusSchema.optional(),
-  notes: z.string().optional()
+  notes: z.string().optional(),
 });
 
 /**
@@ -44,7 +44,7 @@ export const InfrastructureCategorySchema = z.enum([
   'network',
   'data_distribution',
   'audio',
-  'video'
+  'video',
 ]);
 
 /**
@@ -118,7 +118,7 @@ export const InfrastructureEquipmentSchema = extendBaseEntity({
   position_z: z.number().optional(),
 
   // Notes
-  notes: z.string().optional()
+  notes: z.string().optional(),
 });
 
 /**
@@ -136,15 +136,17 @@ export type InfrastructureEquipment = z.infer<typeof InfrastructureEquipmentSche
 export const CreateInfrastructureEquipmentSchema = InfrastructureEquipmentSchema.omit({
   id: true,
   created_at: true,
-  updated_at: true
+  updated_at: true,
 });
 
 /**
  * Schema for updating infrastructure equipment (all fields optional except id)
  */
-export const UpdateInfrastructureEquipmentSchema = InfrastructureEquipmentSchema.partial().required({
-  id: true
-});
+export const UpdateInfrastructureEquipmentSchema = InfrastructureEquipmentSchema.partial().required(
+  {
+    id: true,
+  },
+);
 
 /**
  * Create infrastructure equipment type

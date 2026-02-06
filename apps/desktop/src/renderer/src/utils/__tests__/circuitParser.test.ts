@@ -5,7 +5,7 @@ import {
   calculateChannelNumber,
   linkToDimmerRack,
   linkToPDRack,
-  autoLinkCircuit
+  autoLinkCircuit,
 } from '../circuitParser';
 import type { DimmerRack, PDRack } from '../../types/power';
 
@@ -30,7 +30,7 @@ const mockDimmerRacks: DimmerRack[] = [
     service_type: '208V 3-Phase',
     notes: '',
     created_at: Date.now(),
-    updated_at: Date.now()
+    updated_at: Date.now(),
   },
   {
     id: 'rack-2',
@@ -46,8 +46,8 @@ const mockDimmerRacks: DimmerRack[] = [
     service_type: '208V 3-Phase',
     notes: '',
     created_at: Date.now(),
-    updated_at: Date.now()
-  }
+    updated_at: Date.now(),
+  },
 ];
 
 const mockPDRacks: PDRack[] = [
@@ -65,7 +65,7 @@ const mockPDRacks: PDRack[] = [
     service_type: '208V 3-Phase',
     notes: '',
     created_at: Date.now(),
-    updated_at: Date.now()
+    updated_at: Date.now(),
   },
   {
     id: 'pd-2',
@@ -81,8 +81,8 @@ const mockPDRacks: PDRack[] = [
     service_type: '208V 3-Phase',
     notes: '',
     created_at: Date.now(),
-    updated_at: Date.now()
-  }
+    updated_at: Date.now(),
+  },
 ];
 
 // ============================================

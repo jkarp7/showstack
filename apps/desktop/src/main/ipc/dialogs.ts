@@ -14,8 +14,8 @@ export function registerDialogHandlers(): void {
         properties: ['openFile'],
         filters: [
           { name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'] },
-          { name: 'All Files', extensions: ['*'] }
-        ]
+          { name: 'All Files', extensions: ['*'] },
+        ],
       });
 
       if (result.canceled || result.filePaths.length === 0) {
@@ -26,10 +26,12 @@ export function registerDialogHandlers(): void {
     } catch (error) {
       console.error('Failed to open image dialog:', {
         operation: 'dialog:openImage',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
-      throw new Error(`Unable to open file dialog: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to open file dialog: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
@@ -46,8 +48,8 @@ export function registerDialogHandlers(): void {
         properties: ['openFile'],
         filters: [
           { name: 'ShowStack Projects', extensions: ['showstack', 'ssp'] },
-          { name: 'All Files', extensions: ['*'] }
-        ]
+          { name: 'All Files', extensions: ['*'] },
+        ],
       });
 
       if (result.canceled || result.filePaths.length === 0) {
@@ -58,10 +60,12 @@ export function registerDialogHandlers(): void {
     } catch (error) {
       console.error('Failed to open project dialog:', {
         operation: 'dialog:openProject',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
-      throw new Error(`Unable to open file dialog: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to open file dialog: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 

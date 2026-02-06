@@ -5,15 +5,7 @@
  * Shows connection state, pending changes, and auth status.
  */
 
-import {
-  Cloud,
-  CloudOff,
-  RefreshCw,
-  AlertCircle,
-  CheckCircle,
-  User,
-  LogOut,
-} from 'lucide-react';
+import { Cloud, CloudOff, RefreshCw, AlertCircle, CheckCircle, User, LogOut } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 
@@ -121,9 +113,7 @@ export function SyncStatusIndicator() {
         className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors ${status.bgColor} hover:opacity-80`}
         title={status.label}
       >
-        <StatusIcon
-          className={`h-4 w-4 ${status.color} ${status.animate ? 'animate-spin' : ''}`}
-        />
+        <StatusIcon className={`h-4 w-4 ${status.color} ${status.animate ? 'animate-spin' : ''}`} />
         {isAuthenticated ? (
           <span className="text-sm text-gray-600 max-w-[120px] truncate hidden sm:inline">
             {email}
@@ -168,9 +158,7 @@ export function SyncStatusIndicator() {
             )}
 
             {syncStatus.hasPendingChanges && (
-              <p className="text-xs text-yellow-600 mt-1">
-                Pending changes will sync when online
-              </p>
+              <p className="text-xs text-yellow-600 mt-1">Pending changes will sync when online</p>
             )}
           </div>
 

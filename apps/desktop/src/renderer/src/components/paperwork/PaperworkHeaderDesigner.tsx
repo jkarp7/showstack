@@ -12,7 +12,10 @@ import { useFixtureStore } from '../../store/fixtureStore';
 import { useInfrastructureStore } from '../../store/infrastructureStore';
 import type { PageLayoutTemplate } from '../../types/shopOrder';
 import type { ReportType } from '../../types/paperwork';
-import { mapPaperworkToTemplateData, type PaperworkProjectData } from '../../utils/paperwork/dataFieldMapper';
+import {
+  mapPaperworkToTemplateData,
+  type PaperworkProjectData,
+} from '../../utils/paperwork/dataFieldMapper';
 
 interface PaperworkHeaderDesignerProps {
   projectId: string;
@@ -36,7 +39,7 @@ export function PaperworkHeaderDesigner({
   reportType,
   headerTemplateId,
   onSave,
-  onCancel
+  onCancel,
 }: PaperworkHeaderDesignerProps) {
   const { fixtures } = useFixtureStore();
   const { equipment: infrastructure } = useInfrastructureStore();
@@ -66,12 +69,12 @@ export function PaperworkHeaderDesigner({
             const parsedElements = elements.map((el: any) => ({
               ...el,
               config: typeof el.config === 'string' ? JSON.parse(el.config) : el.config,
-              style: typeof el.style === 'string' ? JSON.parse(el.style) : el.style
+              style: typeof el.style === 'string' ? JSON.parse(el.style) : el.style,
             }));
 
             setInitialTemplate({
               ...template,
-              elements: parsedElements
+              elements: parsedElements,
             });
           }
         }
@@ -110,14 +113,14 @@ export function PaperworkHeaderDesigner({
     closing_date: projectData?.closing_date,
     revision_number: projectData?.revision_number,
     revision_date: projectData?.revision_date,
-    logo_path: projectData?.logo_path
+    logo_path: projectData?.logo_path,
   };
 
   const templateData = mapPaperworkToTemplateData(
     paperworkProjectData,
     fixtures,
     infrastructure,
-    reportType
+    reportType,
   );
 
   // Convert to PrepProject format for LayoutDesigner
@@ -156,7 +159,7 @@ export function PaperworkHeaderDesigner({
     data_distribution_count: templateData.data_distribution_count,
     total_ports: templateData.total_ports,
     active_infrastructure: templateData.active_infrastructure,
-    inactive_infrastructure: templateData.inactive_infrastructure
+    inactive_infrastructure: templateData.inactive_infrastructure,
   };
 
   if (isLoading) {

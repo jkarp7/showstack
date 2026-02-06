@@ -29,7 +29,7 @@ export const PAPERWORK_DATA_FIELDS: PaperworkDataFieldDefinition[] = [
     description: 'Dynamic report title based on report type',
     icon: '📋',
     category: 'report',
-    formatHint: 'e.g., "Channel Hookup - Sample Production"'
+    formatHint: 'e.g., "Channel Hookup - Sample Production"',
   },
   {
     fieldType: 'revision_date' as DataFieldType,
@@ -37,7 +37,7 @@ export const PAPERWORK_DATA_FIELDS: PaperworkDataFieldDefinition[] = [
     description: 'Date of last revision',
     icon: '📅',
     category: 'report',
-    formatHint: 'Date format'
+    formatHint: 'Date format',
   },
   {
     fieldType: 'generated_date' as DataFieldType,
@@ -45,7 +45,7 @@ export const PAPERWORK_DATA_FIELDS: PaperworkDataFieldDefinition[] = [
     description: 'Date when report was generated',
     icon: '🕒',
     category: 'report',
-    formatHint: 'Auto-populated with current date'
+    formatHint: 'Auto-populated with current date',
   },
 
   // Fixture summary fields
@@ -55,7 +55,7 @@ export const PAPERWORK_DATA_FIELDS: PaperworkDataFieldDefinition[] = [
     description: 'Total count of all fixtures',
     icon: '💡',
     category: 'fixture-summary',
-    formatHint: 'Number'
+    formatHint: 'Number',
   },
   {
     fieldType: 'total_wattage' as DataFieldType,
@@ -63,7 +63,7 @@ export const PAPERWORK_DATA_FIELDS: PaperworkDataFieldDefinition[] = [
     description: 'Sum of all fixture wattages',
     icon: '⚡',
     category: 'fixture-summary',
-    formatHint: 'Watts (W)'
+    formatHint: 'Watts (W)',
   },
   {
     fieldType: 'total_amperage' as DataFieldType,
@@ -71,7 +71,7 @@ export const PAPERWORK_DATA_FIELDS: PaperworkDataFieldDefinition[] = [
     description: 'Sum of all fixture amperage',
     icon: '🔌',
     category: 'fixture-summary',
-    formatHint: 'Amps (A)'
+    formatHint: 'Amps (A)',
   },
   {
     fieldType: 'universe_count' as DataFieldType,
@@ -79,7 +79,7 @@ export const PAPERWORK_DATA_FIELDS: PaperworkDataFieldDefinition[] = [
     description: 'Number of DMX universes in use',
     icon: '🌐',
     category: 'fixture-summary',
-    formatHint: 'Number'
+    formatHint: 'Number',
   },
   {
     fieldType: 'fixture_type_count' as DataFieldType,
@@ -87,7 +87,7 @@ export const PAPERWORK_DATA_FIELDS: PaperworkDataFieldDefinition[] = [
     description: 'Number of unique fixture types',
     icon: '🏷️',
     category: 'fixture-summary',
-    formatHint: 'Number'
+    formatHint: 'Number',
   },
 
   // Infrastructure summary fields
@@ -97,7 +97,7 @@ export const PAPERWORK_DATA_FIELDS: PaperworkDataFieldDefinition[] = [
     description: 'Total count of all infrastructure equipment',
     icon: '🔧',
     category: 'infrastructure-summary',
-    formatHint: 'Number'
+    formatHint: 'Number',
   },
   {
     fieldType: 'network_equipment_count' as DataFieldType,
@@ -105,7 +105,7 @@ export const PAPERWORK_DATA_FIELDS: PaperworkDataFieldDefinition[] = [
     description: 'Count of network equipment (switches, routers)',
     icon: '🌐',
     category: 'infrastructure-summary',
-    formatHint: 'Number'
+    formatHint: 'Number',
   },
   {
     fieldType: 'audio_equipment_count' as DataFieldType,
@@ -113,7 +113,7 @@ export const PAPERWORK_DATA_FIELDS: PaperworkDataFieldDefinition[] = [
     description: 'Count of audio infrastructure',
     icon: '🔊',
     category: 'infrastructure-summary',
-    formatHint: 'Number'
+    formatHint: 'Number',
   },
   {
     fieldType: 'video_equipment_count' as DataFieldType,
@@ -121,7 +121,7 @@ export const PAPERWORK_DATA_FIELDS: PaperworkDataFieldDefinition[] = [
     description: 'Count of video infrastructure',
     icon: '📹',
     category: 'infrastructure-summary',
-    formatHint: 'Number'
+    formatHint: 'Number',
   },
   {
     fieldType: 'data_distribution_count' as DataFieldType,
@@ -129,7 +129,7 @@ export const PAPERWORK_DATA_FIELDS: PaperworkDataFieldDefinition[] = [
     description: 'Count of data distribution equipment',
     icon: '📡',
     category: 'infrastructure-summary',
-    formatHint: 'Number'
+    formatHint: 'Number',
   },
   {
     fieldType: 'total_ports' as DataFieldType,
@@ -137,7 +137,7 @@ export const PAPERWORK_DATA_FIELDS: PaperworkDataFieldDefinition[] = [
     description: 'Total configured ports across all infrastructure',
     icon: '🔌',
     category: 'infrastructure-summary',
-    formatHint: 'Number'
+    formatHint: 'Number',
   },
   {
     fieldType: 'active_infrastructure' as DataFieldType,
@@ -145,7 +145,7 @@ export const PAPERWORK_DATA_FIELDS: PaperworkDataFieldDefinition[] = [
     description: 'Count of active infrastructure equipment',
     icon: '✅',
     category: 'infrastructure-summary',
-    formatHint: 'Number'
+    formatHint: 'Number',
   },
   {
     fieldType: 'inactive_infrastructure' as DataFieldType,
@@ -153,31 +153,31 @@ export const PAPERWORK_DATA_FIELDS: PaperworkDataFieldDefinition[] = [
     description: 'Count of inactive infrastructure equipment',
     icon: '❌',
     category: 'infrastructure-summary',
-    formatHint: 'Number'
-  }
+    formatHint: 'Number',
+  },
 ];
 
 /**
  * Get all data fields for a specific category
  */
 export function getPaperworkDataFieldsByCategory(
-  category: 'report' | 'fixture-summary' | 'infrastructure-summary'
+  category: 'report' | 'fixture-summary' | 'infrastructure-summary',
 ): PaperworkDataFieldDefinition[] {
-  return PAPERWORK_DATA_FIELDS.filter(field => field.category === category);
+  return PAPERWORK_DATA_FIELDS.filter((field) => field.category === category);
 }
 
 /**
  * Get a data field definition by field type
  */
 export function getPaperworkDataField(fieldType: string): PaperworkDataFieldDefinition | undefined {
-  return PAPERWORK_DATA_FIELDS.find(field => field.fieldType === fieldType);
+  return PAPERWORK_DATA_FIELDS.find((field) => field.fieldType === fieldType);
 }
 
 /**
  * Check if a field type is a paperwork-specific field
  */
 export function isPaperworkDataField(fieldType: string): boolean {
-  return PAPERWORK_DATA_FIELDS.some(field => field.fieldType === fieldType);
+  return PAPERWORK_DATA_FIELDS.some((field) => field.fieldType === fieldType);
 }
 
 /**
@@ -185,12 +185,12 @@ export function isPaperworkDataField(fieldType: string): boolean {
  * This should be used in the ElementPalette when designing paperwork headers
  */
 export function getPaperworkPaletteElements() {
-  return PAPERWORK_DATA_FIELDS.map(field => ({
+  return PAPERWORK_DATA_FIELDS.map((field) => ({
     type: 'dataField' as const,
     subType: field.fieldType,
     label: field.label,
     description: field.description,
     icon: field.icon,
-    category: 'data' as const
+    category: 'data' as const,
   }));
 }

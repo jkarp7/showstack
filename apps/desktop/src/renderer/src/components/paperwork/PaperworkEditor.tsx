@@ -31,7 +31,7 @@ export function PaperworkEditor({
   onExport,
   onBatchExport,
   onHeaderDesign,
-  onReportTypeChange
+  onReportTypeChange,
 }: PaperworkEditorProps) {
   // Template management
   const {
@@ -40,7 +40,7 @@ export function PaperworkEditor({
     createTemplate,
     updateTemplate,
     deleteTemplate,
-    duplicateTemplate
+    duplicateTemplate,
   } = usePaperworkTemplates({ reportType, autoLoad: true });
 
   const { activeTemplate, loadTemplate, updateActiveTemplate } = useActiveTemplate();
@@ -57,7 +57,7 @@ export function PaperworkEditor({
   useEffect(() => {
     if (templates.length > 0 && !templatesLoading) {
       // Find the first system template for this report type
-      const defaultTemplate = templates.find(t => t.isSystem);
+      const defaultTemplate = templates.find((t) => t.isSystem);
       if (defaultTemplate && (!activeTemplate || activeTemplate.reportType !== reportType)) {
         handleLoadTemplate(defaultTemplate);
       }
@@ -88,82 +88,95 @@ export function PaperworkEditor({
   const organizedData = useMemo(() => {
     if (!activeTemplate || !reportData.length) return { groups: [], hasGroups: false };
 
-    return organizeReportData(
-      reportData,
-      activeTemplate.organization,
-      activeTemplate.columns
-    );
+    return organizeReportData(reportData, activeTemplate.organization, activeTemplate.columns);
   }, [reportData, activeTemplate]);
 
   // Handle template load
-  const handleLoadTemplate = useCallback((template: PaperworkTemplate) => {
-    loadTemplate(template);
-    setTemplateName(template.name);
-    setHasUnsavedChanges(false);
-  }, [loadTemplate]);
+  const handleLoadTemplate = useCallback(
+    (template: PaperworkTemplate) => {
+      loadTemplate(template);
+      setTemplateName(template.name);
+      setHasUnsavedChanges(false);
+    },
+    [loadTemplate],
+  );
 
   // Handle column changes
-  const handleColumnsChange = useCallback((newColumns: PaperworkColumnConfig[]) => {
-    if (!activeTemplate) return;
+  const handleColumnsChange = useCallback(
+    (newColumns: PaperworkColumnConfig[]) => {
+      if (!activeTemplate) return;
 
-    updateActiveTemplate({ columns: newColumns });
-    setHasUnsavedChanges(true);
-  }, [activeTemplate, updateActiveTemplate]);
+      updateActiveTemplate({ columns: newColumns });
+      setHasUnsavedChanges(true);
+    },
+    [activeTemplate, updateActiveTemplate],
+  );
 
   // Handle organization changes
-  const handleOrganizationChange = useCallback((newOrganization: ReportOrganization) => {
-    if (!activeTemplate) return;
+  const handleOrganizationChange = useCallback(
+    (newOrganization: ReportOrganization) => {
+      if (!activeTemplate) return;
 
-    updateActiveTemplate({ organization: newOrganization });
-    setHasUnsavedChanges(true);
-  }, [activeTemplate, updateActiveTemplate]);
+      updateActiveTemplate({ organization: newOrganization });
+      setHasUnsavedChanges(true);
+    },
+    [activeTemplate, updateActiveTemplate],
+  );
 
   // Handle font style changes
-  const handleFontStyleChange = useCallback((newFontStyle: any) => {
-    if (!activeTemplate) return;
+  const handleFontStyleChange = useCallback(
+    (newFontStyle: any) => {
+      if (!activeTemplate) return;
 
-    updateActiveTemplate({
-      pageSetup: {
-        ...activeTemplate.pageSetup,
-        fontStyle: newFontStyle
-      }
-    });
-    setHasUnsavedChanges(true);
-  }, [activeTemplate, updateActiveTemplate]);
+      updateActiveTemplate({
+        pageSetup: {
+          ...activeTemplate.pageSetup,
+          fontStyle: newFontStyle,
+        },
+      });
+      setHasUnsavedChanges(true);
+    },
+    [activeTemplate, updateActiveTemplate],
+  );
 
   // Save as new template
-  const handleSaveAsNewTemplate = useCallback(async (name: string) => {
-    if (!activeTemplate) {
-      alert('No template to save');
-      return;
-    }
-
-    try {
-      console.log('Creating new template:', name);
-      const result = await createTemplate({
-        name,
-        reportType,
-        columns: activeTemplate.columns,
-        organization: activeTemplate.organization,
-        pageSetup: activeTemplate.pageSetup,
-        isSystem: false
-      });
-
-      if (result) {
-        setHasUnsavedChanges(false);
-        // Load the newly created template
-        loadTemplate(result);
-        setTemplateName(result.name);
-        alert(`Template "${name}" created successfully!`);
-        console.log('Template created:', result);
-      } else {
-        alert('Failed to create template - check console for errors');
+  const handleSaveAsNewTemplate = useCallback(
+    async (name: string) => {
+      if (!activeTemplate) {
+        alert('No template to save');
+        return;
       }
-    } catch (error) {
-      console.error('Failed to create template:', error);
-      alert(`Error creating template: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }, [activeTemplate, reportType, createTemplate, loadTemplate]);
+
+      try {
+        console.log('Creating new template:', name);
+        const result = await createTemplate({
+          name,
+          reportType,
+          columns: activeTemplate.columns,
+          organization: activeTemplate.organization,
+          pageSetup: activeTemplate.pageSetup,
+          isSystem: false,
+        });
+
+        if (result) {
+          setHasUnsavedChanges(false);
+          // Load the newly created template
+          loadTemplate(result);
+          setTemplateName(result.name);
+          alert(`Template "${name}" created successfully!`);
+          console.log('Template created:', result);
+        } else {
+          alert('Failed to create template - check console for errors');
+        }
+      } catch (error) {
+        console.error('Failed to create template:', error);
+        alert(
+          `Error creating template: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
+    },
+    [activeTemplate, reportType, createTemplate, loadTemplate],
+  );
 
   // Save template
   const handleSaveTemplate = useCallback(async () => {
@@ -188,7 +201,7 @@ export function PaperworkEditor({
           name: templateName || activeTemplate.name,
           columns: activeTemplate.columns,
           organization: activeTemplate.organization,
-          pageSetup: activeTemplate.pageSetup
+          pageSetup: activeTemplate.pageSetup,
         });
       } else {
         // Create new template
@@ -199,7 +212,7 @@ export function PaperworkEditor({
           columns: activeTemplate.columns,
           organization: activeTemplate.organization,
           pageSetup: activeTemplate.pageSetup,
-          isSystem: false
+          isSystem: false,
         });
       }
 
@@ -217,54 +230,72 @@ export function PaperworkEditor({
       console.error('Failed to save template:', error);
       alert(`Error saving template: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-  }, [activeTemplate, templateName, reportType, updateTemplate, createTemplate, handleSaveAsNewTemplate, loadTemplate]);
+  }, [
+    activeTemplate,
+    templateName,
+    reportType,
+    updateTemplate,
+    createTemplate,
+    handleSaveAsNewTemplate,
+    loadTemplate,
+  ]);
 
   // Handle template duplication
-  const handleDuplicateTemplate = useCallback(async (template: PaperworkTemplate) => {
-    try {
-      console.log('Duplicating template:', template.id, template.name);
-      const newName = `${template.name} (Copy)`;
-      const result = await duplicateTemplate(template.id, newName);
-      if (result) {
-        // Load the duplicated template
-        handleLoadTemplate(result);
-        alert(`Template "${newName}" created successfully!`);
-        console.log('Template duplicated:', result);
-      } else {
-        alert('Failed to duplicate template - check console for errors');
+  const handleDuplicateTemplate = useCallback(
+    async (template: PaperworkTemplate) => {
+      try {
+        console.log('Duplicating template:', template.id, template.name);
+        const newName = `${template.name} (Copy)`;
+        const result = await duplicateTemplate(template.id, newName);
+        if (result) {
+          // Load the duplicated template
+          handleLoadTemplate(result);
+          alert(`Template "${newName}" created successfully!`);
+          console.log('Template duplicated:', result);
+        } else {
+          alert('Failed to duplicate template - check console for errors');
+        }
+      } catch (error) {
+        console.error('Failed to duplicate template:', error);
+        alert(
+          `Error duplicating template: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
       }
-    } catch (error) {
-      console.error('Failed to duplicate template:', error);
-      alert(`Error duplicating template: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }, [duplicateTemplate, handleLoadTemplate]);
+    },
+    [duplicateTemplate, handleLoadTemplate],
+  );
 
   // Handle template deletion
-  const handleDeleteTemplate = useCallback(async (templateId: string) => {
-    try {
-      console.log('Deleting template:', templateId);
-      const success = await deleteTemplate(templateId);
-      if (success) {
-        // If we deleted the active template, clear it
-        if (activeTemplate?.id === templateId) {
-          // Load the first available template
-          if (templates.length > 1) {
-            const nextTemplate = templates.find(t => t.id !== templateId);
-            if (nextTemplate) {
-              handleLoadTemplate(nextTemplate);
+  const handleDeleteTemplate = useCallback(
+    async (templateId: string) => {
+      try {
+        console.log('Deleting template:', templateId);
+        const success = await deleteTemplate(templateId);
+        if (success) {
+          // If we deleted the active template, clear it
+          if (activeTemplate?.id === templateId) {
+            // Load the first available template
+            if (templates.length > 1) {
+              const nextTemplate = templates.find((t) => t.id !== templateId);
+              if (nextTemplate) {
+                handleLoadTemplate(nextTemplate);
+              }
             }
           }
+          alert('Template deleted successfully!');
+          console.log('Template deleted:', templateId);
+        } else {
+          alert('Failed to delete template - check console for errors');
         }
-        alert('Template deleted successfully!');
-        console.log('Template deleted:', templateId);
-      } else {
-        alert('Failed to delete template - check console for errors');
+      } catch (error) {
+        console.error('Failed to delete template:', error);
+        alert(
+          `Error deleting template: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
       }
-    } catch (error) {
-      console.error('Failed to delete template:', error);
-      alert(`Error deleting template: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }, [deleteTemplate, activeTemplate, templates, handleLoadTemplate]);
+    },
+    [deleteTemplate, activeTemplate, templates, handleLoadTemplate],
+  );
 
   // Handle template creation
   const handleCreateNewTemplate = useCallback(() => {
@@ -370,7 +401,12 @@ export function PaperworkEditor({
               title={showLibrary ? 'Hide Library' : 'Show Library'}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             </button>
 
@@ -447,9 +483,7 @@ export function PaperworkEditor({
             <div className="flex-1 bg-gray-850 overflow-hidden flex flex-col">
               {/* Preview Controls */}
               <div className="bg-gray-800 border-b border-gray-700 px-6 py-3 flex items-center justify-between">
-                <div className="text-sm text-gray-400">
-                  Preview ({reportData.length} items)
-                </div>
+                <div className="text-sm text-gray-400">Preview ({reportData.length} items)</div>
 
                 <div className="flex items-center gap-4">
                   <label className="flex items-center gap-2 text-sm text-gray-400">
@@ -473,7 +507,7 @@ export function PaperworkEditor({
                   style={{
                     transform: `scale(${previewScale / 100})`,
                     transformOrigin: 'top center',
-                    transition: 'transform 0.2s'
+                    transition: 'transform 0.2s',
                   }}
                 >
                   <ReportTableRenderer
@@ -493,8 +527,18 @@ export function PaperworkEditor({
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500">
             <div className="text-center">
-              <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <svg
+                className="w-16 h-16 mx-auto mb-4 opacity-50"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
               </svg>
               <p className="text-lg mb-2">No template selected</p>
               <p className="text-sm">
@@ -509,7 +553,10 @@ export function PaperworkEditor({
 
       {/* Save As Dialog */}
       {showSaveAsDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-8" style={{ zIndex: 10000 }}>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-8"
+          style={{ zIndex: 10000 }}
+        >
           <div className="bg-gray-800 rounded-lg w-full max-w-md shadow-xl text-white">
             <div className="p-6 border-b border-gray-700">
               <h2 className="text-xl font-bold">Save Template As...</h2>

@@ -16,7 +16,9 @@ interface ShopOrderFileStore {
   setSaving: (saving: boolean) => void;
   setOpening: (opening: boolean) => void;
   newFile: (projectName: string) => void;
-  openFile: (onSuccess?: (projectId: string, projectName: string) => Promise<void>) => Promise<boolean>;
+  openFile: (
+    onSuccess?: (projectId: string, projectName: string) => Promise<void>,
+  ) => Promise<boolean>;
   saveFile: (projectId: string, projectName: string) => Promise<boolean>;
   saveFileAs: (projectId: string, projectName: string) => Promise<boolean>;
   getCurrentFileName: () => string;
@@ -74,7 +76,11 @@ export const useShopOrderFileStore = create<ShopOrderFileStore>((set, get) => ({
 
     // Check for unsaved changes
     if (state.isDirty) {
-      if (!confirm('Opening a file will load a new project. Any unsaved changes will be lost. Continue?')) {
+      if (
+        !confirm(
+          'Opening a file will load a new project. Any unsaved changes will be lost. Continue?',
+        )
+      ) {
         return false;
       }
     }
@@ -121,7 +127,7 @@ export const useShopOrderFileStore = create<ShopOrderFileStore>((set, get) => ({
   // Save file (save to current path or prompt for new path)
   saveFile: async (projectId, projectName) => {
     const state = get();
-    let filePath = state.currentFilePath;
+    const filePath = state.currentFilePath;
 
     // If no current file path, prompt for one
     if (!filePath) {

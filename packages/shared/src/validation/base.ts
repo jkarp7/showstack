@@ -13,7 +13,7 @@ import { z } from 'zod';
 export const BaseEntitySchema = z.object({
   id: z.string().min(1, 'ID cannot be empty'),
   created_at: z.number().int().positive('Created timestamp must be positive'),
-  updated_at: z.number().int().positive('Updated timestamp must be positive')
+  updated_at: z.number().int().positive('Updated timestamp must be positive'),
 });
 
 /**

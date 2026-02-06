@@ -13,8 +13,8 @@ interface AveryTemplate {
   labelsPerSheet: number;
   columns: number;
   rows: number;
-  labelWidth: number;    // inches
-  labelHeight: number;   // inches
+  labelWidth: number; // inches
+  labelHeight: number; // inches
   marginTop: number;
   marginLeft: number;
   gapX: number;
@@ -62,32 +62,32 @@ const LABEL_TEMPLATES: LabelTemplate[] = [
     type: 'cable',
     name: 'Cable Labels',
     description: 'Labels for multi-cables and power cables',
-    fields: ['Cable Name', 'Circuit Numbers', 'Destination', 'Notes']
+    fields: ['Cable Name', 'Circuit Numbers', 'Destination', 'Notes'],
   },
   {
     type: 'circuit',
     name: 'Circuit Labels',
     description: 'Labels for circuit breakers and patch panels',
-    fields: ['Circuit Number', 'Dimmer', 'Load', 'Location']
+    fields: ['Circuit Number', 'Dimmer', 'Load', 'Location'],
   },
   {
     type: 'fixture',
     name: 'Fixture Labels',
     description: 'Labels for individual fixtures',
-    fields: ['Position', 'Channel', 'Color', 'Purpose']
+    fields: ['Position', 'Channel', 'Color', 'Purpose'],
   },
   {
     type: 'dimmer',
     name: 'Dimmer Labels',
     description: 'Labels for dimmer racks',
-    fields: ['Dimmer Number', 'Circuit', 'Load', 'Phase']
+    fields: ['Dimmer Number', 'Circuit', 'Load', 'Phase'],
   },
   {
     type: 'custom',
     name: 'Custom Labels',
     description: 'Create your own label format',
-    fields: []
-  }
+    fields: [],
+  },
 ];
 
 // Popular Avery label templates
@@ -103,7 +103,7 @@ const AVERY_TEMPLATES: AveryTemplate[] = [
     marginTop: 0.5,
     marginLeft: 0.1875,
     gapX: 0.125,
-    gapY: 0
+    gapY: 0,
   },
   {
     id: '5163',
@@ -116,7 +116,7 @@ const AVERY_TEMPLATES: AveryTemplate[] = [
     marginTop: 0.5,
     marginLeft: 0.15625,
     gapX: 0.1875,
-    gapY: 0
+    gapY: 0,
   },
   {
     id: '5164',
@@ -129,7 +129,7 @@ const AVERY_TEMPLATES: AveryTemplate[] = [
     marginTop: 0.5,
     marginLeft: 0.15625,
     gapX: 0.1875,
-    gapY: 0
+    gapY: 0,
   },
   {
     id: '8160',
@@ -142,7 +142,7 @@ const AVERY_TEMPLATES: AveryTemplate[] = [
     marginTop: 0.5,
     marginLeft: 0.21875,
     gapX: 0.125,
-    gapY: 0
+    gapY: 0,
   },
   {
     id: '5167',
@@ -155,15 +155,15 @@ const AVERY_TEMPLATES: AveryTemplate[] = [
     marginTop: 0.5,
     marginLeft: 0.3125,
     gapX: 0.1875,
-    gapY: 0
-  }
+    gapY: 0,
+  },
 ];
 
 const PRINTERS = {
   'dymo-450': 'Dymo LabelWriter 450',
   'brother-pt': 'Brother P-Touch',
-  'zebra': 'Zebra ZD420',
-  'avery-sheet': 'Avery Sheet Labels (Standard Printer)'
+  zebra: 'Zebra ZD420',
+  'avery-sheet': 'Avery Sheet Labels (Standard Printer)',
 };
 
 interface LabelDesignerProps {
@@ -203,13 +203,23 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
   const [batchCount, setBatchCount] = useState(10);
 
   // Get current dimensions
-  const currentAveryTemplate = AVERY_TEMPLATES.find(t => t.id === averyTemplate);
-  const labelWidth = printerType === 'avery-sheet' && currentAveryTemplate
-    ? currentAveryTemplate.labelWidth * 96 // Convert inches to pixels (96 DPI)
-    : printerType === 'dymo-450' ? 144 : printerType === 'brother-pt' ? 180 : 144;
-  const labelHeight = printerType === 'avery-sheet' && currentAveryTemplate
-    ? currentAveryTemplate.labelHeight * 96
-    : printerType === 'dymo-450' ? 36 : printerType === 'brother-pt' ? 54 : 36;
+  const currentAveryTemplate = AVERY_TEMPLATES.find((t) => t.id === averyTemplate);
+  const labelWidth =
+    printerType === 'avery-sheet' && currentAveryTemplate
+      ? currentAveryTemplate.labelWidth * 96 // Convert inches to pixels (96 DPI)
+      : printerType === 'dymo-450'
+        ? 144
+        : printerType === 'brother-pt'
+          ? 180
+          : 144;
+  const labelHeight =
+    printerType === 'avery-sheet' && currentAveryTemplate
+      ? currentAveryTemplate.labelHeight * 96
+      : printerType === 'dymo-450'
+        ? 36
+        : printerType === 'brother-pt'
+          ? 54
+          : 36;
 
   // Load fixtures, project info, and custom designs
   useEffect(() => {
@@ -260,16 +270,16 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
   // Initialize canvas with default labels
   useEffect(() => {
     if (selectedTemplate !== 'custom' && graphics.length === 0) {
-      const template = LABEL_TEMPLATES.find(t => t.type === selectedTemplate);
+      const template = LABEL_TEMPLATES.find((t) => t.type === selectedTemplate);
       if (template) {
         const newGraphics: LabelGraphic[] = template.fields.map((field, i) => ({
           id: `text-${Date.now()}-${i}`,
           type: 'text',
           x: labelWidth / 2,
-          y: 20 + (i * 25),
+          y: 20 + i * 25,
           text: field,
           fontSize: 12,
-          fontWeight: 'normal'
+          fontWeight: 'normal',
         }));
         setGraphics(newGraphics);
       }
@@ -292,7 +302,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
     ctx.fillRect(0, 0, labelWidth, labelHeight);
 
     // Draw graphics
-    graphics.forEach(graphic => {
+    graphics.forEach((graphic) => {
       ctx.save();
 
       if (graphic.id === selectedGraphic) {
@@ -326,7 +336,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
         case 'line':
           ctx.beginPath();
           ctx.moveTo(graphic.x, graphic.y);
-          ctx.lineTo((graphic.x + (graphic.width || 50)), (graphic.y + (graphic.height || 0)));
+          ctx.lineTo(graphic.x + (graphic.width || 50), graphic.y + (graphic.height || 0));
           ctx.stroke();
           break;
 
@@ -358,10 +368,13 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
     for (let i = graphics.length - 1; i >= 0; i--) {
       const g = graphics[i];
       const isHit =
-        g.type === 'text' ? Math.abs(g.x - x) < 50 && Math.abs(g.y - y) < 10 :
-        g.type === 'rectangle' ? x >= g.x && x <= (g.x + (g.width || 0)) && y >= g.y && y <= (g.y + (g.height || 0)) :
-        g.type === 'circle' ? Math.sqrt((g.x - x) ** 2 + (g.y - y) ** 2) <= (g.radius || 0) :
-        false;
+        g.type === 'text'
+          ? Math.abs(g.x - x) < 50 && Math.abs(g.y - y) < 10
+          : g.type === 'rectangle'
+            ? x >= g.x && x <= g.x + (g.width || 0) && y >= g.y && y <= g.y + (g.height || 0)
+            : g.type === 'circle'
+              ? Math.sqrt((g.x - x) ** 2 + (g.y - y) ** 2) <= (g.radius || 0)
+              : false;
 
       if (isHit) {
         setSelectedGraphic(g.id);
@@ -378,7 +391,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
         y,
         text: 'Label Text',
         fontSize: 12,
-        fontWeight: 'normal'
+        fontWeight: 'normal',
       };
       setGraphics([...graphics, newGraphic]);
       setSelectedGraphic(newGraphic.id);
@@ -390,7 +403,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
         y,
         radius: 20,
         stroke: true,
-        strokeWidth: 2
+        strokeWidth: 2,
       };
       setGraphics([...graphics, newGraphic]);
       setSelectedGraphic(newGraphic.id);
@@ -453,7 +466,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
         width: Math.abs(width),
         height: Math.abs(height),
         stroke: true,
-        strokeWidth: 2
+        strokeWidth: 2,
       };
       setGraphics([...graphics, newGraphic]);
       setSelectedGraphic(newGraphic.id);
@@ -465,7 +478,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
         y: dragStart.y,
         width: width,
         height: height,
-        strokeWidth: 2
+        strokeWidth: 2,
       };
       setGraphics([...graphics, newGraphic]);
       setSelectedGraphic(newGraphic.id);
@@ -477,17 +490,17 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
 
   const updateSelectedGraphic = (updates: Partial<LabelGraphic>) => {
     if (!selectedGraphic) return;
-    setGraphics(graphics.map(g => g.id === selectedGraphic ? { ...g, ...updates } : g));
+    setGraphics(graphics.map((g) => (g.id === selectedGraphic ? { ...g, ...updates } : g)));
   };
 
   const deleteSelectedGraphic = () => {
     if (!selectedGraphic) return;
-    setGraphics(graphics.filter(g => g.id !== selectedGraphic));
+    setGraphics(graphics.filter((g) => g.id !== selectedGraphic));
     setSelectedGraphic(null);
   };
 
   const handleUseTemplate = (templateType: LabelType) => {
-    const template = LABEL_TEMPLATES.find(t => t.type === templateType);
+    const template = LABEL_TEMPLATES.find((t) => t.type === templateType);
     if (!template) return;
 
     let newGraphics: LabelGraphic[] = [];
@@ -503,7 +516,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
             y: labelHeight * 0.25,
             text: 'CABLE NAME',
             fontSize: 16,
-            fontWeight: 'bold'
+            fontWeight: 'bold',
           },
           {
             id: `line-${Date.now()}-1`,
@@ -512,7 +525,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
             y: labelHeight * 0.45,
             width: labelWidth - 20,
             height: 0,
-            strokeWidth: 2
+            strokeWidth: 2,
           },
           {
             id: `text-${Date.now()}-2`,
@@ -521,7 +534,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
             y: labelHeight * 0.65,
             text: 'Circuits 1-12',
             fontSize: 12,
-            fontWeight: 'normal'
+            fontWeight: 'normal',
           },
           {
             id: `text-${Date.now()}-3`,
@@ -530,8 +543,8 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
             y: labelHeight * 0.85,
             text: 'To: Location',
             fontSize: 10,
-            fontWeight: 'normal'
-          }
+            fontWeight: 'normal',
+          },
         ];
         break;
 
@@ -545,7 +558,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
             width: labelWidth - 10,
             height: labelHeight - 10,
             stroke: true,
-            strokeWidth: 2
+            strokeWidth: 2,
           },
           {
             id: `text-${Date.now()}-1`,
@@ -554,7 +567,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
             y: labelHeight * 0.3,
             text: 'CKT 24',
             fontSize: 18,
-            fontWeight: 'bold'
+            fontWeight: 'bold',
           },
           {
             id: `text-${Date.now()}-2`,
@@ -563,7 +576,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
             y: labelHeight * 0.55,
             text: 'Dimmer 3/6',
             fontSize: 12,
-            fontWeight: 'normal'
+            fontWeight: 'normal',
           },
           {
             id: `text-${Date.now()}-3`,
@@ -572,8 +585,8 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
             y: labelHeight * 0.75,
             text: '1.2kW',
             fontSize: 10,
-            fontWeight: 'normal'
-          }
+            fontWeight: 'normal',
+          },
         ];
         break;
 
@@ -586,7 +599,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
             y: labelHeight * 0.25,
             text: 'POS 12',
             fontSize: 14,
-            fontWeight: 'bold'
+            fontWeight: 'bold',
           },
           {
             id: `text-${Date.now()}-2`,
@@ -595,7 +608,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
             y: labelHeight * 0.5,
             text: 'CH 112',
             fontSize: 14,
-            fontWeight: 'bold'
+            fontWeight: 'bold',
           },
           {
             id: `text-${Date.now()}-3`,
@@ -604,8 +617,8 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
             y: labelHeight * 0.75,
             text: 'R80 • Purpose',
             fontSize: 10,
-            fontWeight: 'normal'
-          }
+            fontWeight: 'normal',
+          },
         ];
         break;
 
@@ -619,7 +632,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
             width: labelWidth - 10,
             height: labelHeight - 10,
             stroke: true,
-            strokeWidth: 3
+            strokeWidth: 3,
           },
           {
             id: `text-${Date.now()}-1`,
@@ -628,7 +641,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
             y: labelHeight * 0.3,
             text: 'DIMMER 3/6',
             fontSize: 16,
-            fontWeight: 'bold'
+            fontWeight: 'bold',
           },
           {
             id: `text-${Date.now()}-2`,
@@ -637,7 +650,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
             y: labelHeight * 0.55,
             text: 'Circuit 24',
             fontSize: 12,
-            fontWeight: 'normal'
+            fontWeight: 'normal',
           },
           {
             id: `text-${Date.now()}-3`,
@@ -646,8 +659,8 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
             y: labelHeight * 0.75,
             text: '1200W • Phase A',
             fontSize: 10,
-            fontWeight: 'normal'
-          }
+            fontWeight: 'normal',
+          },
         ];
         break;
 
@@ -673,15 +686,18 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
       height: labelHeight,
       graphics: graphics,
       created: currentDesign?.created || Date.now(),
-      updated: Date.now()
+      updated: Date.now(),
     };
 
     const updatedDesigns = currentDesign
-      ? customDesigns.map(d => d.id === design.id ? design : d)
+      ? customDesigns.map((d) => (d.id === design.id ? design : d))
       : [...customDesigns, design];
 
     setCustomDesigns(updatedDesigns);
-    localStorage.setItem(`showstack_labelDesigns_${currentProjectId}`, JSON.stringify(updatedDesigns));
+    localStorage.setItem(
+      `showstack_labelDesigns_${currentProjectId}`,
+      JSON.stringify(updatedDesigns),
+    );
 
     setCurrentDesign(design);
     setShowSaveDialog(false);
@@ -700,15 +716,20 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
 
   const handleDeleteDesign = (designId: string) => {
     if (!confirm('Delete this label design?')) return;
-    const updatedDesigns = customDesigns.filter(d => d.id !== designId);
+    const updatedDesigns = customDesigns.filter((d) => d.id !== designId);
     setCustomDesigns(updatedDesigns);
-    localStorage.setItem(`showstack_labelDesigns_${currentProjectId}`, JSON.stringify(updatedDesigns));
+    localStorage.setItem(
+      `showstack_labelDesigns_${currentProjectId}`,
+      JSON.stringify(updatedDesigns),
+    );
     if (currentDesign?.id === designId) setCurrentDesign(null);
   };
 
   const handlePrintLabels = () => {
     if (printerType === 'avery-sheet' && currentAveryTemplate) {
-      alert(`Printing ${currentAveryTemplate.labelsPerSheet} labels per sheet (${currentAveryTemplate.name})...`);
+      alert(
+        `Printing ${currentAveryTemplate.labelsPerSheet} labels per sheet (${currentAveryTemplate.name})...`,
+      );
     } else if (batchMode) {
       alert(`Printing ${batchCount} labels on ${PRINTERS[printerType]}...`);
     } else {
@@ -722,7 +743,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
     // TODO: Implement PDF export
   };
 
-  const selectedGraphicData = graphics.find(g => g.id === selectedGraphic);
+  const selectedGraphicData = graphics.find((g) => g.id === selectedGraphic);
 
   return (
     <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
@@ -789,12 +810,16 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
           <div className="space-y-6">
             {/* Drawing Tools */}
             <div>
-              <h3 className="text-sm font-semibold mb-3 text-gray-600 dark:text-gray-400 uppercase">Drawing Tools</h3>
+              <h3 className="text-sm font-semibold mb-3 text-gray-600 dark:text-gray-400 uppercase">
+                Drawing Tools
+              </h3>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => setSelectedTool('text')}
                   className={`p-3 rounded text-sm transition ${
-                    selectedTool === 'text' ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600'
+                    selectedTool === 'text'
+                      ? 'bg-blue-600'
+                      : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
                   Text
@@ -802,7 +827,9 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                 <button
                   onClick={() => setSelectedTool('rectangle')}
                   className={`p-3 rounded text-sm transition ${
-                    selectedTool === 'rectangle' ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600'
+                    selectedTool === 'rectangle'
+                      ? 'bg-blue-600'
+                      : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
                   Rectangle
@@ -810,7 +837,9 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                 <button
                   onClick={() => setSelectedTool('circle')}
                   className={`p-3 rounded text-sm transition ${
-                    selectedTool === 'circle' ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600'
+                    selectedTool === 'circle'
+                      ? 'bg-blue-600'
+                      : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
                   Circle
@@ -818,7 +847,9 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                 <button
                   onClick={() => setSelectedTool('line')}
                   className={`p-3 rounded text-sm transition ${
-                    selectedTool === 'line' ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600'
+                    selectedTool === 'line'
+                      ? 'bg-blue-600'
+                      : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
                   Line
@@ -856,14 +887,20 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                         min="8"
                         max="48"
                         value={selectedGraphicData.fontSize || 12}
-                        onChange={(e) => updateSelectedGraphic({ fontSize: Number(e.target.value) })}
+                        onChange={(e) =>
+                          updateSelectedGraphic({ fontSize: Number(e.target.value) })
+                        }
                         className="w-20 px-2 py-1 bg-gray-300 dark:bg-gray-600 border border-gray-500 rounded text-sm"
                       />
                       <label className="flex items-center gap-1">
                         <input
                           type="checkbox"
                           checked={selectedGraphicData.fontWeight === 'bold'}
-                          onChange={(e) => updateSelectedGraphic({ fontWeight: e.target.checked ? 'bold' : 'normal' })}
+                          onChange={(e) =>
+                            updateSelectedGraphic({
+                              fontWeight: e.target.checked ? 'bold' : 'normal',
+                            })
+                          }
                         />
                         <span className="text-sm">Bold</span>
                       </label>
@@ -928,7 +965,9 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                       min="1"
                       max="10"
                       value={selectedGraphicData.strokeWidth || 1}
-                      onChange={(e) => updateSelectedGraphic({ strokeWidth: Number(e.target.value) })}
+                      onChange={(e) =>
+                        updateSelectedGraphic({ strokeWidth: Number(e.target.value) })
+                      }
                       className="w-20 px-2 py-1 bg-gray-300 dark:bg-gray-600 border border-gray-500 rounded text-sm"
                     />
                   </div>
@@ -938,9 +977,11 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
 
             {/* Quick Templates */}
             <div>
-              <h3 className="text-sm font-semibold mb-3 text-gray-600 dark:text-gray-400 uppercase">Quick Templates</h3>
+              <h3 className="text-sm font-semibold mb-3 text-gray-600 dark:text-gray-400 uppercase">
+                Quick Templates
+              </h3>
               <div className="space-y-2">
-                {LABEL_TEMPLATES.filter(t => t.type !== 'custom').map(template => (
+                {LABEL_TEMPLATES.filter((t) => t.type !== 'custom').map((template) => (
                   <button
                     key={template.type}
                     onClick={() => handleUseTemplate(template.type)}
@@ -954,7 +995,9 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
 
             {/* Quick Actions */}
             <div>
-              <h3 className="text-sm font-semibold mb-2 text-gray-600 dark:text-gray-400 uppercase">Quick Actions</h3>
+              <h3 className="text-sm font-semibold mb-2 text-gray-600 dark:text-gray-400 uppercase">
+                Quick Actions
+              </h3>
               <button
                 onClick={() => {
                   setGraphics([]);
@@ -975,7 +1018,9 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                 className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
               >
                 {Object.entries(PRINTERS).map(([key, name]) => (
-                  <option key={key} value={key}>{name}</option>
+                  <option key={key} value={key}>
+                    {name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -989,14 +1034,16 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                   onChange={(e) => setAveryTemplate(e.target.value)}
                   className="w-full px-3 py-2 bg-gray-200 dark:bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 >
-                  {AVERY_TEMPLATES.map(template => (
-                    <option key={template.id} value={template.id}>{template.name}</option>
+                  {AVERY_TEMPLATES.map((template) => (
+                    <option key={template.id} value={template.id}>
+                      {template.name}
+                    </option>
                   ))}
                 </select>
                 {currentAveryTemplate && (
                   <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-                    {currentAveryTemplate.labelsPerSheet} labels per sheet
-                    ({currentAveryTemplate.columns} × {currentAveryTemplate.rows})
+                    {currentAveryTemplate.labelsPerSheet} labels per sheet (
+                    {currentAveryTemplate.columns} × {currentAveryTemplate.rows})
                   </div>
                 )}
               </div>
@@ -1013,7 +1060,9 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                     onChange={(e) => setBatchMode(e.target.checked)}
                     className="w-4 h-4"
                   />
-                  <label htmlFor="batch" className="text-sm font-medium">Batch Print</label>
+                  <label htmlFor="batch" className="text-sm font-medium">
+                    Batch Print
+                  </label>
                 </div>
                 {batchMode && (
                   <div className="flex items-center gap-2">
@@ -1051,8 +1100,8 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                   </button>
                 )}
                 <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {Math.round(labelWidth / 96 * 10) / 10}" × {Math.round(labelHeight / 96 * 10) / 10}"
-                  ({labelWidth}px × {labelHeight}px)
+                  {Math.round((labelWidth / 96) * 10) / 10}" ×{' '}
+                  {Math.round((labelHeight / 96) * 10) / 10}" ({labelWidth}px × {labelHeight}px)
                 </div>
               </div>
             </div>
@@ -1068,7 +1117,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                 className="border-2 border-gray-600 cursor-crosshair"
                 style={{
                   maxWidth: '100%',
-                  imageRendering: 'crisp-edges'
+                  imageRendering: 'crisp-edges',
                 }}
               />
             </div>
@@ -1147,7 +1196,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
             ) : (
               <>
                 <div className="space-y-2 max-h-96 overflow-y-auto mb-4">
-                  {customDesigns.map(design => (
+                  {customDesigns.map((design) => (
                     <div
                       key={design.id}
                       className="bg-gray-200 dark:bg-gray-700 rounded-lg p-4 hover:bg-gray-300 dark:bg-gray-600 transition cursor-pointer group"
@@ -1157,7 +1206,9 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
                         <div className="flex-1">
                           <h3 className="font-semibold mb-1">{design.name}</h3>
                           {design.description && (
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{design.description}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                              {design.description}
+                            </p>
                           )}
                           <div className="text-xs text-gray-500">
                             {PRINTERS[design.printerType]}
@@ -1196,7 +1247,9 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
       {/* Footer */}
       <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 flex-shrink-0">
         <div>ShowStack:Lighting - Label Designer</div>
-        <div>{customDesigns.length} saved design{customDesigns.length !== 1 ? 's' : ''}</div>
+        <div>
+          {customDesigns.length} saved design{customDesigns.length !== 1 ? 's' : ''}
+        </div>
       </footer>
     </div>
   );

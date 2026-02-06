@@ -18,7 +18,7 @@ const FONT_FAMILIES = [
   { value: 'Georgia, serif', label: 'Georgia' },
   { value: 'Courier New, monospace', label: 'Courier New' },
   { value: 'Verdana, sans-serif', label: 'Verdana' },
-  { value: 'Tahoma, sans-serif', label: 'Tahoma' }
+  { value: 'Tahoma, sans-serif', label: 'Tahoma' },
 ];
 
 const FONT_SIZES = [6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 24];
@@ -26,10 +26,13 @@ const FONT_SIZES = [6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 24];
 const SPACING_PRESETS = [
   { value: 1.0, label: 'Compact' },
   { value: 1.5, label: 'Cozy' },
-  { value: 2.0, label: 'Roomy' }
+  { value: 2.0, label: 'Roomy' },
 ];
 
-export function FontCustomizationControls({ fontStyle = {}, onChange }: FontCustomizationControlsProps) {
+export function FontCustomizationControls({
+  fontStyle = {},
+  onChange,
+}: FontCustomizationControlsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [customHeaderSize, setCustomHeaderSize] = useState('');
   const [customBodySize, setCustomBodySize] = useState('');
@@ -123,7 +126,7 @@ export function FontCustomizationControls({ fontStyle = {}, onChange }: FontCust
               onChange={(e) => handleFontFamilyChange(e.target.value)}
               className="w-full px-2 py-1.5 text-sm bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
             >
-              {FONT_FAMILIES.map(font => (
+              {FONT_FAMILIES.map((font) => (
                 <option key={font.value} value={font.value}>
                   {font.label}
                 </option>
@@ -140,7 +143,7 @@ export function FontCustomizationControls({ fontStyle = {}, onChange }: FontCust
                 onChange={(e) => handleHeaderFontSizeChange(e.target.value)}
                 className="flex-1 px-2 py-1.5 text-sm bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
               >
-                {FONT_SIZES.map(size => (
+                {FONT_SIZES.map((size) => (
                   <option key={size} value={size}>
                     {size}pt
                   </option>
@@ -171,7 +174,7 @@ export function FontCustomizationControls({ fontStyle = {}, onChange }: FontCust
                 onChange={(e) => handleFontSizeChange(e.target.value)}
                 className="flex-1 px-2 py-1.5 text-sm bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
               >
-                {FONT_SIZES.map(size => (
+                {FONT_SIZES.map((size) => (
                   <option key={size} value={size}>
                     {size}pt
                   </option>
@@ -251,7 +254,7 @@ export function FontCustomizationControls({ fontStyle = {}, onChange }: FontCust
           <div>
             <label className="text-xs text-gray-400 mb-1 block">Spacing</label>
             <div className="flex gap-2">
-              {SPACING_PRESETS.map(preset => (
+              {SPACING_PRESETS.map((preset) => (
                 <button
                   key={preset.value}
                   onClick={() => handleSpacingChange(preset.value)}

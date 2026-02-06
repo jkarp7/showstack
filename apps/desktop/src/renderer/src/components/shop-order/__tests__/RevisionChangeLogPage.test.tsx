@@ -3,7 +3,12 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RevisionChangeLogPage } from '../RevisionChangeLogPage';
 import type { useShopOrderStore } from '../../../store/shopOrderStore';
-import type { ShopOrderProject, ShopOrderSection, ShopOrderItem, ShopOrderRevision } from '../../../types/shopOrder';
+import type {
+  ShopOrderProject,
+  ShopOrderSection,
+  ShopOrderItem,
+  ShopOrderRevision,
+} from '../../../types/shopOrder';
 
 /**
  * RevisionChangeLogPage Component Tests

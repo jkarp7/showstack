@@ -84,7 +84,9 @@ export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
       </div>
 
       {/* Project Info */}
-      <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white truncate">{project.name}</h3>
+      <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white truncate">
+        {project.name}
+      </h3>
 
       {project.description && (
         <p className="text-sm text-gray-400 mb-3 line-clamp-2">{project.description}</p>

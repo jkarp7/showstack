@@ -32,7 +32,7 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
     const query = searchQuery.toLowerCase();
 
     return commands
-      .map(command => {
+      .map((command) => {
         const labelLower = command.label.toLowerCase();
         const descLower = (command.description || '').toLowerCase();
         const categoryLower = command.category.toLowerCase();
@@ -76,14 +76,14 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
   const groupedCommands = useMemo(() => {
     const groups = new Map<string, Command[]>();
 
-    filteredCommands.forEach(command => {
+    filteredCommands.forEach((command) => {
       const existing = groups.get(command.category) || [];
       groups.set(command.category, [...existing, command]);
     });
 
     return Array.from(groups.entries()).map(([category, commands]) => ({
       category,
-      commands
+      commands,
     }));
   }, [filteredCommands]);
 
@@ -111,10 +111,10 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
         onClose();
       } else if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setSelectedIndex(prev => Math.min(prev + 1, filteredCommands.length - 1));
+        setSelectedIndex((prev) => Math.min(prev + 1, filteredCommands.length - 1));
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setSelectedIndex(prev => Math.max(prev - 1, 0));
+        setSelectedIndex((prev) => Math.max(prev - 1, 0));
       } else if (e.key === 'Enter') {
         e.preventDefault();
         const command = filteredCommands[selectedIndex];
@@ -161,8 +161,18 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
         {/* Search Input */}
         <div className="p-4 border-b border-gray-700">
           <div className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="w-5 h-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
             <input
               ref={inputRef}
@@ -175,14 +185,18 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
               aria-controls="command-list"
               className="flex-1 bg-transparent border-none outline-none text-white text-lg placeholder-gray-500"
             />
-            <div className="text-xs text-gray-500">
-              ESC to close
-            </div>
+            <div className="text-xs text-gray-500">ESC to close</div>
           </div>
         </div>
 
         {/* Commands List */}
-        <div ref={listRef} id="command-list" role="listbox" aria-label="Available commands" className="flex-1 overflow-y-auto p-2">
+        <div
+          ref={listRef}
+          id="command-list"
+          role="listbox"
+          aria-label="Available commands"
+          className="flex-1 overflow-y-auto p-2"
+        >
           {filteredCommands.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <div className="text-sm font-medium">No commands found</div>
@@ -224,17 +238,15 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
                           }`}
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
-                            {command.icon && (
-                              <span className="text-lg">{command.icon}</span>
-                            )}
+                            {command.icon && <span className="text-lg">{command.icon}</span>}
                             <div className="flex-1 text-left min-w-0">
-                              <div className="font-medium text-sm truncate">
-                                {command.label}
-                              </div>
+                              <div className="font-medium text-sm truncate">{command.label}</div>
                               {command.description && (
-                                <div className={`text-xs mt-0.5 truncate ${
-                                  isSelected ? 'text-blue-200' : 'text-gray-400'
-                                }`}>
+                                <div
+                                  className={`text-xs mt-0.5 truncate ${
+                                    isSelected ? 'text-blue-200' : 'text-gray-400'
+                                  }`}
+                                >
                                   {command.description}
                                 </div>
                               )}
@@ -242,11 +254,13 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
                           </div>
 
                           {command.shortcut && (
-                            <div className={`text-xs font-mono px-2 py-1 rounded ${
-                              isSelected
-                                ? 'bg-blue-700 text-blue-100'
-                                : 'bg-gray-700 text-gray-400'
-                            }`}>
+                            <div
+                              className={`text-xs font-mono px-2 py-1 rounded ${
+                                isSelected
+                                  ? 'bg-blue-700 text-blue-100'
+                                  : 'bg-gray-700 text-gray-400'
+                              }`}
+                            >
                               {formatShortcut(command.shortcut)}
                             </div>
                           )}

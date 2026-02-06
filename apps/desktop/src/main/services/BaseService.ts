@@ -62,7 +62,7 @@ export abstract class BaseService {
   protected async executeWithRetry<T>(
     operation: () => Promise<T>,
     operationName: string,
-    trackCount?: number
+    trackCount?: number,
   ): Promise<T> {
     const start = Date.now();
     try {
@@ -90,7 +90,7 @@ export abstract class BaseService {
       databaseMonitor.recordQuery(
         operationName,
         duration,
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : new Error(String(error)),
       );
 
       throw error;
@@ -108,14 +108,10 @@ export abstract class BaseService {
   protected validateRequired(
     value: string | undefined | null,
     fieldName: string,
-    displayName?: string
+    displayName?: string,
   ): void {
     if (!value || value.trim().length === 0) {
-      throw new ValidationError(
-        `${displayName || fieldName} is required`,
-        fieldName,
-        value
-      );
+      throw new ValidationError(`${displayName || fieldName} is required`, fieldName, value);
     }
   }
 
@@ -128,11 +124,7 @@ export abstract class BaseService {
    */
   protected validateId(id: string | undefined | null, entityName?: string): void {
     if (!id || id.trim().length === 0) {
-      throw new ValidationError(
-        `${entityName || 'Entity'} ID is required`,
-        'id',
-        id
-      );
+      throw new ValidationError(`${entityName || 'Entity'} ID is required`, 'id', id);
     }
   }
 
@@ -143,16 +135,9 @@ export abstract class BaseService {
    * @param fieldName The field name for error messages
    * @throws ValidationError if value is negative
    */
-  protected validateNonNegative(
-    value: number | undefined | null,
-    fieldName: string
-  ): void {
+  protected validateNonNegative(value: number | undefined | null, fieldName: string): void {
     if (value !== undefined && value !== null && value < 0) {
-      throw new ValidationError(
-        `${fieldName} must be non-negative`,
-        fieldName,
-        value
-      );
+      throw new ValidationError(`${fieldName} must be non-negative`, fieldName, value);
     }
   }
 
@@ -169,14 +154,10 @@ export abstract class BaseService {
     value: number | undefined | null,
     min: number,
     max: number,
-    fieldName: string
+    fieldName: string,
   ): void {
     if (value !== undefined && value !== null && (value < min || value > max)) {
-      throw new ValidationError(
-        `${fieldName} must be between ${min} and ${max}`,
-        fieldName,
-        value
-      );
+      throw new ValidationError(`${fieldName} must be between ${min} and ${max}`, fieldName, value);
     }
   }
 }

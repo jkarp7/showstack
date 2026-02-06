@@ -26,6 +26,7 @@ VITE_APP_VERSION=0.1.0-alpha
 ```
 
 **Files**:
+
 - `.env.local` - Local development (gitignored, contains actual key)
 - `.env.example` - Template for others (checked into git)
 
@@ -53,11 +54,13 @@ VITE_APP_VERSION=0.1.0-alpha
 ### 2. Event Collection
 
 **Local Storage**:
+
 - All events are stored in localStorage first
 - Events include: event name, timestamp, properties, anonymousId, appVersion, platform, sessionId
 - Data persists even if PostHog sync fails
 
 **Batching**:
+
 - Events are batched (50 events or 60 seconds)
 - Automatic flush before app closes
 - Retry on failure (unsynced events remain in localStorage)
@@ -67,6 +70,7 @@ VITE_APP_VERSION=0.1.0-alpha
 **Endpoint**: `https://us.i.posthog.com/batch/`
 
 **Request Format**:
+
 ```json
 {
   "api_key": "phc_YOUR_PROJECT_API_KEY_HERE",
@@ -87,6 +91,7 @@ VITE_APP_VERSION=0.1.0-alpha
 ```
 
 **Special Properties**:
+
 - `$app_version` - App version from environment
 - `$os` - Operating system/platform
 - `$session_id` - Unique per app launch
@@ -97,6 +102,7 @@ VITE_APP_VERSION=0.1.0-alpha
 ## Events Tracked
 
 ### App Lifecycle
+
 ```typescript
 app_opened
 ├── platform: string
@@ -109,6 +115,7 @@ app_closed
 ```
 
 ### Module Usage
+
 ```typescript
 module_opened
 ├── module: 'manager' | 'prep' | 'production'
@@ -120,6 +127,7 @@ module_closed
 ```
 
 ### Future Events (to be implemented)
+
 - Shop order creation and export
 - Fixture management operations
 - Settings changes
@@ -130,6 +138,7 @@ module_closed
 ## Privacy Compliance
 
 ### What We Collect
+
 - ✅ Feature usage
 - ✅ Performance metrics
 - ✅ Error reports
@@ -137,6 +146,7 @@ module_closed
 - ✅ Anonymous user ID (UUID)
 
 ### What We DON'T Collect
+
 - ❌ Names or email addresses
 - ❌ Project content or data
 - ❌ File names or paths
@@ -144,6 +154,7 @@ module_closed
 - ❌ Any PII (personally identifiable information)
 
 ### User Controls
+
 - ✅ Opt-in only (disabled by default)
 - ✅ Easy opt-out in Settings → Advanced → Privacy
 - ✅ Export all collected data
@@ -164,21 +175,25 @@ module_closed
 ### Key Metrics to Watch
 
 **User Engagement**:
+
 - Daily/Weekly/Monthly Active Users
 - Session duration
 - App open/close frequency
 
 **Feature Usage**:
+
 - Most used modules
 - Shop order creation rate
 - Export frequency
 
 **Performance**:
+
 - App load times
 - Rendering performance
 - Error rates
 
 **User Journey**:
+
 - Module navigation paths
 - Feature adoption funnel
 - Drop-off points
@@ -190,21 +205,25 @@ module_closed
 ### Local Testing
 
 1. **Start app in development**:
+
 ```bash
 npm run dev
 ```
 
 2. **Trigger events**:
+
 - Open app (app_opened)
 - Navigate to modules (module_opened)
 - Close app (app_closed)
 
 3. **Check console**:
+
 ```
 [Telemetry] Successfully synced 3 events to PostHog
 ```
 
 4. **Verify in PostHog**:
+
 - Go to PostHog dashboard
 - Navigate to "Events" or "Live Events"
 - Should see events appearing in real-time
@@ -212,13 +231,16 @@ npm run dev
 ### Privacy Testing
 
 1. **Disable telemetry**:
+
 - Go to Settings → Advanced → Privacy
 - Turn off "Enable Telemetry"
 
 2. **Trigger events**:
+
 - Navigate around the app
 
 3. **Verify no sync**:
+
 - Console should not show any PostHog sync messages
 - PostHog dashboard should not receive events
 
@@ -229,6 +251,7 @@ npm run dev
 ### Events Not Appearing in PostHog
 
 **Check**:
+
 1. Is telemetry enabled in settings?
 2. Is VITE_POSTHOG_KEY set in .env.local?
 3. Is the app using the environment variable? (Check browser console)
@@ -236,38 +259,43 @@ npm run dev
 5. Is the PostHog API key correct?
 
 **Debug**:
+
 ```typescript
 // In browser console
-localStorage.getItem('showstack-telemetry-events')
+localStorage.getItem('showstack-telemetry-events');
 // Should show stored events
 
 // Check settings
-localStorage.getItem('showstack-settings')
+localStorage.getItem('showstack-settings');
 // Check privacy.telemetryEnabled
 ```
 
 ### Network Errors
 
 **CORS Issues**:
+
 - PostHog US Cloud (https://us.i.posthog.com) has CORS enabled
 - If using self-hosted PostHog, ensure CORS is configured
 
 **Rate Limiting**:
+
 - Free tier: 1M events/month
 - If hitting limits, events will fail to sync but remain in localStorage
 
 ### Events Syncing but Not Batching
 
 **Check flush interval**:
+
 ```typescript
 // src/renderer/src/services/telemetry.ts
 private readonly FLUSH_INTERVAL = 60000; // 60 seconds
 ```
 
 **Force flush**:
+
 ```typescript
 // In browser console
-window.telemetry?.flush()
+window.telemetry?.flush();
 ```
 
 ---
@@ -275,11 +303,13 @@ window.telemetry?.flush()
 ## Development vs Production
 
 ### Development
+
 - Console logging enabled
 - PostHog key from `.env.local`
 - Events sync immediately for testing
 
 ### Production
+
 - No console logging
 - PostHog key embedded during build
 - Events batch normally (50 events or 60 seconds)
@@ -289,12 +319,14 @@ window.telemetry?.flush()
 ## Data Retention & Cleanup
 
 ### Local Data
+
 - Stored in localStorage
 - Retention policy: 90 days (configurable)
 - Automatic cleanup of old synced events
 - Unsynced events kept regardless of age
 
 ### PostHog Data
+
 - PostHog retention based on plan (default: 7 years on paid plans)
 - Can be configured in PostHog project settings
 - Data can be deleted via PostHog API or dashboard
@@ -304,18 +336,21 @@ window.telemetry?.flush()
 ## Next Steps
 
 ### Immediate
+
 - ✅ PostHog integrated and configured
 - ✅ API key set in .env.local
 - ⬜ Test with actual app usage
 - ⬜ Verify events appearing in dashboard
 
 ### Short-term
+
 - ⬜ Add more event tracking throughout app
 - ⬜ Create custom dashboards in PostHog
 - ⬜ Set up alerts for errors
 - ⬜ Monitor user adoption
 
 ### Long-term
+
 - ⬜ A/B testing with PostHog experiments
 - ⬜ Session replay (if privacy acceptable)
 - ⬜ Custom funnels for feature adoption

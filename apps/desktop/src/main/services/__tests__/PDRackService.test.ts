@@ -12,7 +12,7 @@ vi.mock('../../database/queries/pdRacks', () => ({
   getPDRacksWithUsage: vi.fn(),
   createPDRack: vi.fn(),
   updatePDRack: vi.fn(),
-  deletePDRack: vi.fn()
+  deletePDRack: vi.fn(),
 }));
 
 vi.mock('../../errors', async () => {
@@ -20,21 +20,21 @@ vi.mock('../../errors', async () => {
   return {
     ...actual,
     errorHandler: {
-      executeWithRetry: vi.fn((fn) => fn())
-    }
+      executeWithRetry: vi.fn((fn) => fn()),
+    },
   };
 });
 
 vi.mock('../../monitoring/PerformanceMonitor', () => ({
   performanceMonitor: {
-    trackDatabaseQuery: vi.fn()
-  }
+    trackDatabaseQuery: vi.fn(),
+  },
 }));
 
 vi.mock('../../database/monitoring/DatabaseMonitor', () => ({
   databaseMonitor: {
-    recordQuery: vi.fn()
-  }
+    recordQuery: vi.fn(),
+  },
 }));
 
 // Import after mocking
@@ -45,7 +45,7 @@ import {
   getPDRacksWithUsage,
   createPDRack,
   updatePDRack,
-  deletePDRack
+  deletePDRack,
 } from '../../database/queries/pdRacks';
 import type { PDRack } from '../../database/queries/pdRacks';
 
@@ -60,7 +60,7 @@ describe('PDRackService', () => {
     amps_per_breaker: 20,
     project_id: 'project-1',
     created_at: 1704067200000,
-    updated_at: 1704067200000
+    updated_at: 1704067200000,
   };
 
   const mockPDRack2: PDRack = {
@@ -71,7 +71,7 @@ describe('PDRackService', () => {
     amps_per_breaker: 30,
     project_id: 'project-1',
     created_at: 1704067200000,
-    updated_at: 1704067200000
+    updated_at: 1704067200000,
   };
 
   beforeEach(() => {
@@ -166,13 +166,13 @@ describe('PDRackService', () => {
         circuit_count: 24 as number,
         voltage: 208 as number,
         amps_per_breaker: 20,
-        project_id: 'project-1'
+        project_id: 'project-1',
       };
       vi.mocked(createPDRack).mockResolvedValue({
         ...data,
         id: 'pd-3',
         created_at: 1704067200000,
-        updated_at: 1704067200000
+        updated_at: 1704067200000,
       });
 
       const result = await service.create(data, 'project-1');
@@ -187,13 +187,13 @@ describe('PDRackService', () => {
         circuit_count: 12 as number,
         voltage: 120 as number,
         amps_per_breaker: 20,
-        project_id: 'project-1'
+        project_id: 'project-1',
       };
       vi.mocked(createPDRack).mockResolvedValue({
         ...data,
         id: 'pd-3',
         created_at: 1704067200000,
-        updated_at: 1704067200000
+        updated_at: 1704067200000,
       });
 
       await service.create(data);
@@ -204,8 +204,19 @@ describe('PDRackService', () => {
     it('should accept all valid circuit counts (12, 24, 48, 96)', async () => {
       for (const count of [12, 24, 48, 96]) {
         vi.clearAllMocks();
-        const data = { name: 'Rack', circuit_count: count, voltage: 208 as number, amps_per_breaker: 20, project_id: 'p1' };
-        vi.mocked(createPDRack).mockResolvedValue({ ...data, id: 'id', created_at: 0, updated_at: 0 });
+        const data = {
+          name: 'Rack',
+          circuit_count: count,
+          voltage: 208 as number,
+          amps_per_breaker: 20,
+          project_id: 'p1',
+        };
+        vi.mocked(createPDRack).mockResolvedValue({
+          ...data,
+          id: 'id',
+          created_at: 0,
+          updated_at: 0,
+        });
 
         await expect(service.create(data)).resolves.toBeDefined();
       }
@@ -214,64 +225,123 @@ describe('PDRackService', () => {
     it('should accept all valid voltages (120, 208, 230, 240)', async () => {
       for (const voltage of [120, 208, 230, 240]) {
         vi.clearAllMocks();
-        const data = { name: 'Rack', circuit_count: 24 as number, voltage, amps_per_breaker: 20, project_id: 'p1' };
-        vi.mocked(createPDRack).mockResolvedValue({ ...data, id: 'id', created_at: 0, updated_at: 0 });
+        const data = {
+          name: 'Rack',
+          circuit_count: 24 as number,
+          voltage,
+          amps_per_breaker: 20,
+          project_id: 'p1',
+        };
+        vi.mocked(createPDRack).mockResolvedValue({
+          ...data,
+          id: 'id',
+          created_at: 0,
+          updated_at: 0,
+        });
 
         await expect(service.create(data)).resolves.toBeDefined();
       }
     });
 
     it('should throw ValidationError for empty name', async () => {
-      const data = { name: '', circuit_count: 24 as number, voltage: 208 as number, amps_per_breaker: 20, project_id: 'p1' };
+      const data = {
+        name: '',
+        circuit_count: 24 as number,
+        voltage: 208 as number,
+        amps_per_breaker: 20,
+        project_id: 'p1',
+      };
 
       await expect(service.create(data)).rejects.toThrow(ValidationError);
       expect(createPDRack).not.toHaveBeenCalled();
     });
 
     it('should throw ValidationError for whitespace-only name', async () => {
-      const data = { name: '   ', circuit_count: 24 as number, voltage: 208 as number, amps_per_breaker: 20, project_id: 'p1' };
+      const data = {
+        name: '   ',
+        circuit_count: 24 as number,
+        voltage: 208 as number,
+        amps_per_breaker: 20,
+        project_id: 'p1',
+      };
 
       await expect(service.create(data)).rejects.toThrow(ValidationError);
       expect(createPDRack).not.toHaveBeenCalled();
     });
 
     it('should throw Error for invalid voltage', async () => {
-      const data = { name: 'Rack', circuit_count: 24 as number, voltage: 110 as number, amps_per_breaker: 20, project_id: 'p1' };
+      const data = {
+        name: 'Rack',
+        circuit_count: 24 as number,
+        voltage: 110 as number,
+        amps_per_breaker: 20,
+        project_id: 'p1',
+      };
 
       await expect(service.create(data)).rejects.toThrow('Voltage must be 120, 208, 230, or 240');
       expect(createPDRack).not.toHaveBeenCalled();
     });
 
     it('should throw Error for voltage of 0', async () => {
-      const data = { name: 'Rack', circuit_count: 24 as number, voltage: 0 as number, amps_per_breaker: 20, project_id: 'p1' };
+      const data = {
+        name: 'Rack',
+        circuit_count: 24 as number,
+        voltage: 0 as number,
+        amps_per_breaker: 20,
+        project_id: 'p1',
+      };
 
       await expect(service.create(data)).rejects.toThrow('Voltage must be 120, 208, 230, or 240');
       expect(createPDRack).not.toHaveBeenCalled();
     });
 
     it('should throw Error for invalid circuit_count', async () => {
-      const data = { name: 'Rack', circuit_count: 30 as number, voltage: 208 as number, amps_per_breaker: 20, project_id: 'p1' };
+      const data = {
+        name: 'Rack',
+        circuit_count: 30 as number,
+        voltage: 208 as number,
+        amps_per_breaker: 20,
+        project_id: 'p1',
+      };
 
       await expect(service.create(data)).rejects.toThrow('Circuit count must be 12, 24, 48, or 96');
       expect(createPDRack).not.toHaveBeenCalled();
     });
 
     it('should throw Error for circuit_count of 0', async () => {
-      const data = { name: 'Rack', circuit_count: 0 as number, voltage: 208 as number, amps_per_breaker: 20, project_id: 'p1' };
+      const data = {
+        name: 'Rack',
+        circuit_count: 0 as number,
+        voltage: 208 as number,
+        amps_per_breaker: 20,
+        project_id: 'p1',
+      };
 
       await expect(service.create(data)).rejects.toThrow('Circuit count must be 12, 24, 48, or 96');
       expect(createPDRack).not.toHaveBeenCalled();
     });
 
     it('should throw Error for negative circuit_count', async () => {
-      const data = { name: 'Rack', circuit_count: -12 as number, voltage: 208 as number, amps_per_breaker: 20, project_id: 'p1' };
+      const data = {
+        name: 'Rack',
+        circuit_count: -12 as number,
+        voltage: 208 as number,
+        amps_per_breaker: 20,
+        project_id: 'p1',
+      };
 
       await expect(service.create(data)).rejects.toThrow('Circuit count must be 12, 24, 48, or 96');
       expect(createPDRack).not.toHaveBeenCalled();
     });
 
     it('should validate voltage before circuit_count', async () => {
-      const data = { name: 'Rack', circuit_count: 30 as number, voltage: 110 as number, amps_per_breaker: 20, project_id: 'p1' };
+      const data = {
+        name: 'Rack',
+        circuit_count: 30 as number,
+        voltage: 110 as number,
+        amps_per_breaker: 20,
+        project_id: 'p1',
+      };
 
       // Voltage is checked first in the implementation
       await expect(service.create(data)).rejects.toThrow('Voltage must be 120, 208, 230, or 240');
@@ -342,28 +412,28 @@ describe('PDRackService', () => {
 
     it('should throw Error for invalid voltage when voltage is provided', async () => {
       await expect(service.update('pd-1', { voltage: 110 })).rejects.toThrow(
-        'Voltage must be 120, 208, 230, or 240'
+        'Voltage must be 120, 208, 230, or 240',
       );
       expect(updatePDRack).not.toHaveBeenCalled();
     });
 
     it('should throw Error for voltage of 0 when provided', async () => {
       await expect(service.update('pd-1', { voltage: 0 })).rejects.toThrow(
-        'Voltage must be 120, 208, 230, or 240'
+        'Voltage must be 120, 208, 230, or 240',
       );
       expect(updatePDRack).not.toHaveBeenCalled();
     });
 
     it('should throw Error for invalid circuit_count when circuit_count is provided', async () => {
       await expect(service.update('pd-1', { circuit_count: 50 })).rejects.toThrow(
-        'Circuit count must be 12, 24, 48, or 96'
+        'Circuit count must be 12, 24, 48, or 96',
       );
       expect(updatePDRack).not.toHaveBeenCalled();
     });
 
     it('should throw Error for circuit_count of 0 when provided', async () => {
       await expect(service.update('pd-1', { circuit_count: 0 })).rejects.toThrow(
-        'Circuit count must be 12, 24, 48, or 96'
+        'Circuit count must be 12, 24, 48, or 96',
       );
       expect(updatePDRack).not.toHaveBeenCalled();
     });
@@ -413,7 +483,7 @@ describe('PDRackService', () => {
         amps_per_breaker: undefined as unknown as number,
         project_id: 'project-1',
         created_at: 1704067200000,
-        updated_at: 1704067200000
+        updated_at: 1704067200000,
       };
 
       const result = service.calculatePowerCapacity(rack);
@@ -427,7 +497,7 @@ describe('PDRackService', () => {
         ...mockPDRack,
         circuit_count: 12,
         voltage: 120,
-        amps_per_breaker: 20
+        amps_per_breaker: 20,
       };
 
       const result = service.calculatePowerCapacity(rack);
@@ -441,7 +511,7 @@ describe('PDRackService', () => {
         ...mockPDRack,
         circuit_count: 96,
         voltage: 230,
-        amps_per_breaker: 30
+        amps_per_breaker: 30,
       };
 
       const result = service.calculatePowerCapacity(rack);
@@ -455,7 +525,7 @@ describe('PDRackService', () => {
         ...mockPDRack,
         circuit_count: 48,
         voltage: 240,
-        amps_per_breaker: 20
+        amps_per_breaker: 20,
       };
 
       const result = service.calculatePowerCapacity(rack);
@@ -481,7 +551,7 @@ describe('PDRackService', () => {
     it('should return circuit_count for a 12-circuit rack', () => {
       const rack: PDRack = {
         ...mockPDRack,
-        circuit_count: 12
+        circuit_count: 12,
       };
 
       const result = service.calculateAvailableCircuits(rack);

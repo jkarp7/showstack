@@ -1,14 +1,17 @@
 # Phase 3 Complete: Print View & Reports
 
 ## Summary
+
 Successfully completed Phase 3 of the shop order table migration, adding enhanced print views and report pages with revision tracking, delta indicators, and venue inventory management.
 
 ## ✅ Completed Work
 
 ### Print View Enhancements
+
 **Commits:** `[current work]`
 
 **Updated Equipment List Print View (src/main/ipc/prep.ts):**
+
 - ✅ Migrated to use `revision_quantities` JSON format
 - ✅ Added **DELTA column (Δ)** with change indicators:
   - `+` for additions
@@ -21,6 +24,7 @@ Successfully completed Phase 3 of the shop order table migration, adding enhance
 - ✅ Calculates quantities using `max(all revisions) + spare`
 
 **Print View Features:**
+
 ```typescript
 // Parse revision quantities from JSON
 const revisionQuantities = JSON.parse(item.revision_quantities || '{}');
@@ -36,9 +40,11 @@ const rental = total - venue;
 ---
 
 ### Venue Inventory Page
+
 **Component:** `src/renderer/src/components/prep/VenueInventoryPage.tsx`
 
 **Features:**
+
 - ✅ Lists all items with `venue_qty > 0`
 - ✅ Groups items by section
 - ✅ Shows allocation breakdown:
@@ -52,6 +58,7 @@ const rental = total - venue;
 - ✅ Dark mode support
 
 **Testing:**
+
 - ✅ **10 comprehensive tests (all passing)**
 - ✅ Rendering tests (header, summary, items, sections)
 - ✅ Venue filtering tests (only items with venue_qty > 0)
@@ -62,9 +69,11 @@ const rental = total - venue;
 ---
 
 ### Revision Change Log Page
+
 **Component:** `src/renderer/src/components/prep/RevisionChangeLogPage.tsx`
 
 **Features:**
+
 - ✅ Full change log for any revision
 - ✅ Displays additions, deletions, and modifications
 - ✅ Shows old → new quantity comparisons
@@ -82,6 +91,7 @@ const rental = total - venue;
 - ✅ Dark mode support
 
 **Change Detection:**
+
 ```typescript
 // Detects changes between revisions using revision_quantities JSON
 const changes = detectRevisionChanges(items, prevRevision, currentRevision, spareSnapshot);
@@ -96,6 +106,7 @@ const changes = detectRevisionChanges(items, prevRevision, currentRevision, spar
 ```
 
 **Testing:**
+
 - ✅ **17 comprehensive tests (all passing)**
 - ✅ Rendering tests (header, selectors, summary)
 - ✅ Change detection tests (additions, modifications, deletions)
@@ -108,6 +119,7 @@ const changes = detectRevisionChanges(items, prevRevision, currentRevision, spar
 ---
 
 ## 📊 Test Coverage
+
 - **Total Tests:** 82 (35 utility + 20 ShopOrderTable + 10 VenueInventory + 17 RevisionChangeLog)
 - **Status:** 100% passing ✅
 - **Coverage:** 70%+ target met
@@ -117,6 +129,7 @@ const changes = detectRevisionChanges(items, prevRevision, currentRevision, spar
 ## 🎨 UI/UX Improvements
 
 ### Print View Styling
+
 - **DELTA column:** Compact symbol indicators for quick visual scanning
 - **RENTAL column:** Green background (#dcfce7) for emphasis
 - **TOTAL column:** Blue background (#dbeafe) for prominence
@@ -124,6 +137,7 @@ const changes = detectRevisionChanges(items, prevRevision, currentRevision, spar
 - **Section headers:** Bold, uppercase with page break support
 
 ### Venue Inventory Page
+
 - **Clean layout:** Max-width container for readability
 - **Color coding:** Blue for venue, green for rental
 - **Hover effects:** Subtle row highlighting
@@ -131,6 +145,7 @@ const changes = detectRevisionChanges(items, prevRevision, currentRevision, spar
 - **Responsive tables:** Proper spacing and alignment
 
 ### Revision Change Log Page
+
 - **Interactive filters:** Easy switching between revisions and change types
 - **Visual hierarchy:** Color-coded change badges
 - **Data comparison:** Clear old → new quantity display
@@ -142,12 +157,14 @@ const changes = detectRevisionChanges(items, prevRevision, currentRevision, spar
 ## 📋 Remaining Phases (Not Started)
 
 ### Phase 4: Import/Export
+
 - [ ] Implement paste from clipboard (TSV/CSV)
 - [ ] Add Vectorworks import mapping
 - [ ] Implement export to spreadsheet
 - [ ] Copy/paste individual cells
 
 ### Phase 5: Performance & Polish
+
 - [ ] Add virtual scrolling for large datasets (1000+ items)
 - [ ] Implement debounced saves
 - [ ] Add keyboard shortcuts (Ctrl+C, Ctrl+V, etc.)
@@ -160,6 +177,7 @@ const changes = detectRevisionChanges(items, prevRevision, currentRevision, spar
 ## 🚀 Integration & Next Steps
 
 ### To Access New Features in App:
+
 1. Launch the app: `npm run dev`
 2. Navigate to Prep module
 3. Open or create a prep project
@@ -170,6 +188,7 @@ const changes = detectRevisionChanges(items, prevRevision, currentRevision, spar
    - **Revision Change Log:** New report page (needs routing integration)
 
 ### Required Integration Work:
+
 - [ ] Add routing for `/prep/:projectId/venue-inventory`
 - [ ] Add routing for `/prep/:projectId/revision-log`
 - [ ] Add menu items or buttons to navigate to new pages
@@ -184,15 +203,18 @@ const changes = detectRevisionChanges(items, prevRevision, currentRevision, spar
 ### Files Modified/Created:
 
 **Modified:**
+
 - `src/main/ipc/prep.ts` - Enhanced equipment_list print rendering
 
 **Created:**
+
 - `src/renderer/src/components/prep/VenueInventoryPage.tsx` (206 lines)
 - `src/renderer/src/components/prep/RevisionChangeLogPage.tsx` (328 lines)
 - `src/renderer/src/components/prep/__tests__/VenueInventoryPage.test.tsx` (199 lines)
 - `src/renderer/src/components/prep/__tests__/RevisionChangeLogPage.test.tsx` (323 lines)
 
 ### Key Utility Functions Used:
+
 - `detectRevisionChanges()` - Compare revisions and detect changes
 - `parseRevisionQuantities()` - Parse JSON revision data
 - `calculateTotalQuantity()` - Calculate max(revisions) + spare
@@ -205,6 +227,7 @@ const changes = detectRevisionChanges(items, prevRevision, currentRevision, spar
 
 **Print View Column Order:**
 The new print view uses a logical left-to-right reading order:
+
 1. **Δ (Delta)** - What changed?
 2. **TOTAL** - How many total?
 3. **RENTAL** - How many to rent?
@@ -213,12 +236,14 @@ The new print view uses a logical left-to-right reading order:
 6. **Description** - Item name
 
 **Change Detection:**
+
 - Additions: Item has qty 0 in previous revision, > 0 in current
 - Deletions: Item has qty > 0 in previous revision, 0 in current
 - Modifications: Item qty changed between revisions
 - Spare changes tracked via spare_snapshot in revision records
 
 **Future Enhancements:**
+
 - Add "Show on Print" toggle for venue inventory
 - Export change log to Excel/CSV
 - Add revision notes display in change log
@@ -226,5 +251,5 @@ The new print view uses a logical left-to-right reading order:
 
 ---
 
-*Generated: 2026-01-19*
-*Branch: feature/shop-order-table-migration*
+_Generated: 2026-01-19_
+_Branch: feature/shop-order-table-migration_

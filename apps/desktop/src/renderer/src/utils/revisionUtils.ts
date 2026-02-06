@@ -15,12 +15,12 @@ export interface ProjectSnapshot {
 export function detectChanges(
   previousSnapshot: ProjectSnapshot,
   currentSnapshot: ProjectSnapshot,
-  sectionsMap: Map<string, PrepSection>
+  sectionsMap: Map<string, PrepSection>,
 ): ItemChange[] {
   const changes: ItemChange[] = [];
 
-  const prevItemsMap = new Map(previousSnapshot.items.map(item => [item.id, item]));
-  const currItemsMap = new Map(currentSnapshot.items.map(item => [item.id, item]));
+  const prevItemsMap = new Map(previousSnapshot.items.map((item) => [item.id, item]));
+  const currItemsMap = new Map(currentSnapshot.items.map((item) => [item.id, item]));
 
   // Detect deletions (items in previous but not in current)
   for (const [itemId, prevItem] of prevItemsMap) {
@@ -36,7 +36,7 @@ export function detectChanges(
           active_qty: prevItem.active_qty,
           spare_qty: prevItem.spare_qty,
           venue_qty: prevItem.venue_qty,
-        }
+        },
       });
     }
   }
@@ -58,7 +58,7 @@ export function detectChanges(
           active_qty: currItem.active_qty,
           spare_qty: currItem.spare_qty,
           venue_qty: currItem.venue_qty,
-        }
+        },
       });
     } else {
       // Check for modifications
@@ -73,7 +73,7 @@ export function detectChanges(
         'venue_qty',
         'weight',
         'power',
-        'notes'
+        'notes',
       ];
 
       for (const field of fieldsToCompare) {
@@ -98,7 +98,7 @@ export function detectChanges(
           description: currItem.description,
           section_name: section?.name,
           old_values: oldValues,
-          new_values: modifications
+          new_values: modifications,
         });
       }
     }
@@ -112,12 +112,12 @@ export function detectChanges(
  */
 export function createSnapshot(
   items: PrepEquipmentItem[],
-  sections: PrepSection[]
+  sections: PrepSection[],
 ): ProjectSnapshot {
   return {
-    items: items.map(item => ({ ...item })), // Deep copy
-    sections: sections.map(section => ({ ...section })), // Deep copy
-    timestamp: Date.now()
+    items: items.map((item) => ({ ...item })), // Deep copy
+    sections: sections.map((section) => ({ ...section })), // Deep copy
+    timestamp: Date.now(),
   };
 }
 
@@ -130,9 +130,9 @@ export function getChangeSummary(changes: ItemChange[]): {
   modifications: number;
 } {
   return {
-    additions: changes.filter(c => c.change_type === 'addition').length,
-    deletions: changes.filter(c => c.change_type === 'deletion').length,
-    modifications: changes.filter(c => c.change_type === 'modification').length,
+    additions: changes.filter((c) => c.change_type === 'addition').length,
+    deletions: changes.filter((c) => c.change_type === 'deletion').length,
+    modifications: changes.filter((c) => c.change_type === 'modification').length,
   };
 }
 
@@ -140,8 +140,8 @@ export function getChangeSummary(changes: ItemChange[]): {
  * Format a change for display
  */
 export function formatChange(change: ItemChange): string {
-  const symbol = change.change_type === 'addition' ? '+' :
-                 change.change_type === 'deletion' ? '−' : '~';
+  const symbol =
+    change.change_type === 'addition' ? '+' : change.change_type === 'deletion' ? '−' : '~';
 
   let details = '';
   if (change.change_type === 'addition' && change.new_values) {
@@ -152,7 +152,9 @@ export function formatChange(change: ItemChange): string {
     const mods: string[] = [];
     if (change.old_values && change.new_values) {
       for (const key of Object.keys(change.new_values)) {
-        mods.push(`${key}: ${(change.old_values as any)[key]} → ${(change.new_values as any)[key]}`);
+        mods.push(
+          `${key}: ${(change.old_values as any)[key]} → ${(change.new_values as any)[key]}`,
+        );
       }
     }
     details = mods.length > 0 ? ` (${mods.join(', ')})` : '';
@@ -192,10 +194,7 @@ export function stringifyRevisionQuantities(quantities: RevisionQuantities): str
 /**
  * Get active quantity for a specific revision
  */
-export function getRevisionQuantity(
-  item: PrepEquipmentItem,
-  revisionNumber: number
-): number {
+export function getRevisionQuantity(item: PrepEquipmentItem, revisionNumber: number): number {
   const quantities = parseRevisionQuantities(item.revision_quantities);
   return quantities[revisionNumber] || 0;
 }
@@ -206,13 +205,13 @@ export function getRevisionQuantity(
 export function setRevisionQuantity(
   item: PrepEquipmentItem,
   revisionNumber: number,
-  quantity: number
+  quantity: number,
 ): PrepEquipmentItem {
   const quantities = parseRevisionQuantities(item.revision_quantities);
   quantities[revisionNumber] = quantity;
   return {
     ...item,
-    revision_quantities: stringifyRevisionQuantities(quantities)
+    revision_quantities: stringifyRevisionQuantities(quantities),
   };
 }
 
@@ -221,7 +220,9 @@ export function setRevisionQuantity(
  */
 export function getItemRevisions(item: PrepEquipmentItem): number[] {
   const quantities = parseRevisionQuantities(item.revision_quantities);
-  return Object.keys(quantities).map(Number).sort((a, b) => a - b);
+  return Object.keys(quantities)
+    .map(Number)
+    .sort((a, b) => a - b);
 }
 
 /**
@@ -248,7 +249,7 @@ export function detectRevisionChanges(
   items: PrepEquipmentItem[],
   fromRevision: number,
   toRevision: number,
-  previousSpareSnapshot?: SpareSnapshot
+  previousSpareSnapshot?: SpareSnapshot,
 ): ItemChange[] {
   const changes: ItemChange[] = [];
 
@@ -272,7 +273,7 @@ export function detectRevisionChanges(
           active_qty: currActive,
           spare_qty: currSpare,
           venue_qty: item.venue_qty,
-        }
+        },
       });
     } else if (prevActive > 0 && currActive === 0) {
       // Deletion
@@ -284,7 +285,7 @@ export function detectRevisionChanges(
           active_qty: prevActive,
           spare_qty: prevSpare,
           venue_qty: item.venue_qty,
-        }
+        },
       });
     } else if (prevActive !== currActive || prevSpare !== currSpare) {
       // Modification
@@ -299,7 +300,7 @@ export function detectRevisionChanges(
         new_values: {
           active_qty: currActive,
           spare_qty: currSpare,
-        }
+        },
       });
     }
   }
@@ -337,7 +338,7 @@ export function parseSpareSnapshot(jsonString?: string): SpareSnapshot {
 export function getDeltaIndicator(
   item: PrepEquipmentItem,
   currentRevision: number,
-  previousRevision?: number
+  previousRevision?: number,
 ): string {
   if (previousRevision === undefined || currentRevision === 0) {
     return ''; // No delta for revision 0 or if no previous revision

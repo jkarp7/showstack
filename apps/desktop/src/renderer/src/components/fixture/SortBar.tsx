@@ -26,7 +26,7 @@ export function SortBar({ sortConfigs, onSort, onClearSort }: SortBarProps) {
         Sort by: <span className="text-xs">(Shift+Click for multi-column)</span>
       </span>
       {sortButtons.map(({ field, label }) => {
-        const sortIndex = sortConfigs.findIndex(s => s.field === field);
+        const sortIndex = sortConfigs.findIndex((s) => s.field === field);
         const isActive = sortIndex >= 0;
         const sortConfig = isActive ? sortConfigs[sortIndex] : null;
         const buttonClass = isActive
@@ -48,9 +48,7 @@ export function SortBar({ sortConfigs, onSort, onClearSort }: SortBarProps) {
                     {sortIndex + 1}
                   </span>
                 )}
-                <span className="text-xs">
-                  {sortConfig.direction === 'asc' ? '↑' : '↓'}
-                </span>
+                <span className="text-xs">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
               </>
             )}
           </button>

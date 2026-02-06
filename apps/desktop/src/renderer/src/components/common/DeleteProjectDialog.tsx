@@ -7,7 +7,12 @@ interface DeleteProjectDialogProps {
   onConfirm: () => void;
 }
 
-export function DeleteProjectDialog({ isOpen, project, onClose, onConfirm }: DeleteProjectDialogProps) {
+export function DeleteProjectDialog({
+  isOpen,
+  project,
+  onClose,
+  onConfirm,
+}: DeleteProjectDialogProps) {
   if (!isOpen || !project) return null;
 
   const handleConfirm = () => {
@@ -21,9 +26,7 @@ export function DeleteProjectDialog({ isOpen, project, onClose, onConfirm }: Del
         <h2 className="text-2xl font-bold mb-4">Delete Project</h2>
 
         <div className="mb-6">
-          <p className="text-gray-300 mb-2">
-            Are you sure you want to delete this project?
-          </p>
+          <p className="text-gray-300 mb-2">Are you sure you want to delete this project?</p>
           <div className="bg-gray-700 rounded p-3 mt-4">
             <p className="font-medium text-gray-900 dark:text-white">{project.name}</p>
             {project.description && (

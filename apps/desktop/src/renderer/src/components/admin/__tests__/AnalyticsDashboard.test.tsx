@@ -171,9 +171,33 @@ describe('AnalyticsDashboard', () => {
   describe('Top Events Chart', () => {
     it('should display top events when data is available', () => {
       vi.mocked(telemetry.exportData).mockReturnValue([
-        { event: 'feature_used', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
-        { event: 'feature_used', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
-        { event: 'page_view', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
+        {
+          event: 'feature_used',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
+        {
+          event: 'feature_used',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
+        {
+          event: 'page_view',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
       ]);
 
       render(<AnalyticsDashboard />);
@@ -198,10 +222,42 @@ describe('AnalyticsDashboard', () => {
 
     it('should sort events by frequency descending', () => {
       vi.mocked(telemetry.exportData).mockReturnValue([
-        { event: 'rare_event', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
-        { event: 'common_event', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
-        { event: 'common_event', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
-        { event: 'common_event', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
+        {
+          event: 'rare_event',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
+        {
+          event: 'common_event',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
+        {
+          event: 'common_event',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
+        {
+          event: 'common_event',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
       ]);
 
       render(<AnalyticsDashboard />);
@@ -219,21 +275,141 @@ describe('AnalyticsDashboard', () => {
     it('should limit to top 10 events', () => {
       // Create 15 unique events with different frequencies
       const events = [
-        ...Array.from({ length: 11 }, () => ({ event: 'event_0', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' })),
-        ...Array.from({ length: 10 }, () => ({ event: 'event_1', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' })),
-        ...Array.from({ length: 9 }, () => ({ event: 'event_2', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' })),
-        ...Array.from({ length: 8 }, () => ({ event: 'event_3', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' })),
-        ...Array.from({ length: 7 }, () => ({ event: 'event_4', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' })),
-        ...Array.from({ length: 6 }, () => ({ event: 'event_5', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' })),
-        ...Array.from({ length: 5 }, () => ({ event: 'event_6', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' })),
-        ...Array.from({ length: 4 }, () => ({ event: 'event_7', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' })),
-        ...Array.from({ length: 3 }, () => ({ event: 'event_8', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' })),
-        ...Array.from({ length: 2 }, () => ({ event: 'event_9', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' })),
-        ...Array.from({ length: 1 }, () => ({ event: 'event_10', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' })),
-        ...Array.from({ length: 1 }, () => ({ event: 'event_11', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' })),
-        ...Array.from({ length: 1 }, () => ({ event: 'event_12', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' })),
-        ...Array.from({ length: 1 }, () => ({ event: 'event_13', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' })),
-        ...Array.from({ length: 1 }, () => ({ event: 'event_14', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' })),
+        ...Array.from({ length: 11 }, () => ({
+          event: 'event_0',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        })),
+        ...Array.from({ length: 10 }, () => ({
+          event: 'event_1',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        })),
+        ...Array.from({ length: 9 }, () => ({
+          event: 'event_2',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        })),
+        ...Array.from({ length: 8 }, () => ({
+          event: 'event_3',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        })),
+        ...Array.from({ length: 7 }, () => ({
+          event: 'event_4',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        })),
+        ...Array.from({ length: 6 }, () => ({
+          event: 'event_5',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        })),
+        ...Array.from({ length: 5 }, () => ({
+          event: 'event_6',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        })),
+        ...Array.from({ length: 4 }, () => ({
+          event: 'event_7',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        })),
+        ...Array.from({ length: 3 }, () => ({
+          event: 'event_8',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        })),
+        ...Array.from({ length: 2 }, () => ({
+          event: 'event_9',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        })),
+        ...Array.from({ length: 1 }, () => ({
+          event: 'event_10',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        })),
+        ...Array.from({ length: 1 }, () => ({
+          event: 'event_11',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        })),
+        ...Array.from({ length: 1 }, () => ({
+          event: 'event_12',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        })),
+        ...Array.from({ length: 1 }, () => ({
+          event: 'event_13',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        })),
+        ...Array.from({ length: 1 }, () => ({
+          event: 'event_14',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        })),
       ];
 
       vi.mocked(telemetry.exportData).mockReturnValue(events);
@@ -251,9 +427,33 @@ describe('AnalyticsDashboard', () => {
   describe('Feature Usage Chart', () => {
     it('should display top features when feature_used events exist', () => {
       vi.mocked(telemetry.exportData).mockReturnValue([
-        { event: 'feature_used', properties: { feature: 'grid_render' }, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
-        { event: 'feature_used', properties: { feature: 'grid_render' }, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
-        { event: 'feature_used', properties: { feature: 'pdf_export' }, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
+        {
+          event: 'feature_used',
+          properties: { feature: 'grid_render' },
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
+        {
+          event: 'feature_used',
+          properties: { feature: 'grid_render' },
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
+        {
+          event: 'feature_used',
+          properties: { feature: 'pdf_export' },
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
       ]);
 
       render(<AnalyticsDashboard />);
@@ -265,7 +465,15 @@ describe('AnalyticsDashboard', () => {
 
     it('should not display feature section when no feature events', () => {
       vi.mocked(telemetry.exportData).mockReturnValue([
-        { event: 'other_event', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
+        {
+          event: 'other_event',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
       ]);
 
       render(<AnalyticsDashboard />);
@@ -275,7 +483,15 @@ describe('AnalyticsDashboard', () => {
 
     it('should handle feature_used events without feature property', () => {
       vi.mocked(telemetry.exportData).mockReturnValue([
-        { event: 'feature_used', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
+        {
+          event: 'feature_used',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
       ]);
 
       render(<AnalyticsDashboard />);
@@ -288,8 +504,24 @@ describe('AnalyticsDashboard', () => {
   describe('Performance Metrics', () => {
     it('should display performance metrics when available', () => {
       vi.mocked(telemetry.exportData).mockReturnValue([
-        { event: 'performance_metric', properties: { value: 100 }, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
-        { event: 'performance_metric', properties: { value: 200 }, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
+        {
+          event: 'performance_metric',
+          properties: { value: 100 },
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
+        {
+          event: 'performance_metric',
+          properties: { value: 200 },
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
       ]);
 
       render(<AnalyticsDashboard />);
@@ -306,7 +538,15 @@ describe('AnalyticsDashboard', () => {
 
     it('should not display performance section when no metrics', () => {
       vi.mocked(telemetry.exportData).mockReturnValue([
-        { event: 'other_event', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
+        {
+          event: 'other_event',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
       ]);
 
       render(<AnalyticsDashboard />);
@@ -316,7 +556,15 @@ describe('AnalyticsDashboard', () => {
 
     it('should handle performance events without value property', () => {
       vi.mocked(telemetry.exportData).mockReturnValue([
-        { event: 'performance_metric', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
+        {
+          event: 'performance_metric',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
       ]);
 
       render(<AnalyticsDashboard />);
@@ -330,7 +578,15 @@ describe('AnalyticsDashboard', () => {
     it('should export data as JSON file when Export button clicked', async () => {
       const user = userEvent.setup();
       const mockEvents = [
-        { event: 'test_event', properties: { foo: 'bar' }, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
+        {
+          event: 'test_event',
+          properties: { foo: 'bar' },
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
       ];
       vi.mocked(telemetry.exportData).mockReturnValue(mockEvents);
 
@@ -386,7 +642,10 @@ describe('AnalyticsDashboard', () => {
       const exportButton = screen.getByRole('button', { name: /export telemetry data/i });
       await user.click(exportButton);
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to export telemetry data:', expect.any(Error));
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Failed to export telemetry data:',
+        expect.any(Error),
+      );
       expect(mockAlert).toHaveBeenCalledWith('Failed to export data. Please try again.');
 
       consoleErrorSpy.mockRestore();
@@ -432,7 +691,7 @@ describe('AnalyticsDashboard', () => {
       await user.click(clearButton);
 
       expect(mockConfirm).toHaveBeenCalledWith(
-        'Are you sure you want to clear all local telemetry data? This cannot be undone.'
+        'Are you sure you want to clear all local telemetry data? This cannot be undone.',
       );
     });
 
@@ -508,7 +767,10 @@ describe('AnalyticsDashboard', () => {
       await user.click(clearButton);
 
       await waitFor(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to clear telemetry data:', expect.any(Error));
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Failed to clear telemetry data:',
+          expect.any(Error),
+        );
         expect(mockAlert).toHaveBeenCalledWith('Failed to clear data. Please try again.');
       });
 
@@ -552,8 +814,24 @@ describe('AnalyticsDashboard', () => {
 
     it('should handle events with missing properties', () => {
       vi.mocked(telemetry.exportData).mockReturnValue([
-        { event: 'performance_metric', properties: { value: null }, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' } as any,
-        { event: 'feature_used', properties: { feature: null }, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' } as any,
+        {
+          event: 'performance_metric',
+          properties: { value: null },
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        } as any,
+        {
+          event: 'feature_used',
+          properties: { feature: null },
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        } as any,
       ]);
 
       const { container } = render(<AnalyticsDashboard />);
@@ -564,9 +842,33 @@ describe('AnalyticsDashboard', () => {
 
     it('should handle duplicate event names', () => {
       vi.mocked(telemetry.exportData).mockReturnValue([
-        { event: 'duplicate_event', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
-        { event: 'duplicate_event', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
-        { event: 'duplicate_event', properties: {}, timestamp: Date.now(), anonymousId: 'test', appVersion: '1.0.0', platform: 'test', sessionId: 'session1' },
+        {
+          event: 'duplicate_event',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
+        {
+          event: 'duplicate_event',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
+        {
+          event: 'duplicate_event',
+          properties: {},
+          timestamp: Date.now(),
+          anonymousId: 'test',
+          appVersion: '1.0.0',
+          platform: 'test',
+          sessionId: 'session1',
+        },
       ]);
 
       render(<AnalyticsDashboard />);
@@ -580,8 +882,12 @@ describe('AnalyticsDashboard', () => {
     it('should have proper ARIA labels on buttons', () => {
       render(<AnalyticsDashboard />);
 
-      expect(screen.getByRole('button', { name: /export telemetry data as json file/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /clear all local telemetry data/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /export telemetry data as json file/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /clear all local telemetry data/i }),
+      ).toBeInTheDocument();
     });
 
     it('should have proper heading structure', () => {

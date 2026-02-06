@@ -11,21 +11,21 @@ vi.mock('../../errors', async () => {
   return {
     ...actual,
     errorHandler: {
-      executeWithRetry: vi.fn((fn) => fn())
-    }
+      executeWithRetry: vi.fn((fn) => fn()),
+    },
   };
 });
 
 vi.mock('../../monitoring/PerformanceMonitor', () => ({
   performanceMonitor: {
-    trackDatabaseQuery: vi.fn()
-  }
+    trackDatabaseQuery: vi.fn(),
+  },
 }));
 
 vi.mock('../../database/monitoring/DatabaseMonitor', () => ({
   databaseMonitor: {
-    recordQuery: vi.fn()
-  }
+    recordQuery: vi.fn(),
+  },
 }));
 
 // Import BaseService after mocking
@@ -34,7 +34,11 @@ import { BaseService } from '../BaseService';
 // Create a concrete implementation for testing
 class TestService extends BaseService {
   // Expose protected methods for testing
-  public testValidateRequired(value: string | undefined | null, fieldName: string, displayName?: string): void {
+  public testValidateRequired(
+    value: string | undefined | null,
+    fieldName: string,
+    displayName?: string,
+  ): void {
     this.validateRequired(value, fieldName, displayName);
   }
 
@@ -46,11 +50,19 @@ class TestService extends BaseService {
     this.validateNonNegative(value, fieldName);
   }
 
-  public testValidateRange(value: number | undefined | null, min: number, max: number, fieldName: string): void {
+  public testValidateRange(
+    value: number | undefined | null,
+    min: number,
+    max: number,
+    fieldName: string,
+  ): void {
     this.validateRange(value, min, max, fieldName);
   }
 
-  public async testExecuteWithRetry<T>(operation: () => Promise<T>, operationName: string): Promise<T> {
+  public async testExecuteWithRetry<T>(
+    operation: () => Promise<T>,
+    operationName: string,
+  ): Promise<T> {
     return this.executeWithRetry(operation, operationName);
   }
 }
@@ -69,23 +81,19 @@ describe('BaseService', () => {
     });
 
     it('should throw for empty string', () => {
-      expect(() => service.testValidateRequired('', 'field'))
-        .toThrow(ValidationError);
+      expect(() => service.testValidateRequired('', 'field')).toThrow(ValidationError);
     });
 
     it('should throw for whitespace-only string', () => {
-      expect(() => service.testValidateRequired('   ', 'field'))
-        .toThrow(ValidationError);
+      expect(() => service.testValidateRequired('   ', 'field')).toThrow(ValidationError);
     });
 
     it('should throw for null', () => {
-      expect(() => service.testValidateRequired(null, 'field'))
-        .toThrow(ValidationError);
+      expect(() => service.testValidateRequired(null, 'field')).toThrow(ValidationError);
     });
 
     it('should throw for undefined', () => {
-      expect(() => service.testValidateRequired(undefined, 'field'))
-        .toThrow(ValidationError);
+      expect(() => service.testValidateRequired(undefined, 'field')).toThrow(ValidationError);
     });
 
     it('should use displayName in error message if provided', () => {
@@ -103,13 +111,11 @@ describe('BaseService', () => {
     });
 
     it('should throw for empty ID', () => {
-      expect(() => service.testValidateId(''))
-        .toThrow(ValidationError);
+      expect(() => service.testValidateId('')).toThrow(ValidationError);
     });
 
     it('should throw for null ID', () => {
-      expect(() => service.testValidateId(null))
-        .toThrow(ValidationError);
+      expect(() => service.testValidateId(null)).toThrow(ValidationError);
     });
 
     it('should include entity name in error message', () => {
@@ -139,8 +145,7 @@ describe('BaseService', () => {
     });
 
     it('should throw for negative number', () => {
-      expect(() => service.testValidateNonNegative(-5, 'quantity'))
-        .toThrow(ValidationError);
+      expect(() => service.testValidateNonNegative(-5, 'quantity')).toThrow(ValidationError);
     });
   });
 
@@ -166,13 +171,11 @@ describe('BaseService', () => {
     });
 
     it('should throw for value below min', () => {
-      expect(() => service.testValidateRange(0, 1, 10, 'value'))
-        .toThrow(ValidationError);
+      expect(() => service.testValidateRange(0, 1, 10, 'value')).toThrow(ValidationError);
     });
 
     it('should throw for value above max', () => {
-      expect(() => service.testValidateRange(11, 1, 10, 'value'))
-        .toThrow(ValidationError);
+      expect(() => service.testValidateRange(11, 1, 10, 'value')).toThrow(ValidationError);
     });
 
     it('should include range in error message', () => {
@@ -199,8 +202,9 @@ describe('BaseService', () => {
       const error = new Error('Operation failed');
       const operation = vi.fn().mockRejectedValue(error);
 
-      await expect(service.testExecuteWithRetry(operation, 'test:operation'))
-        .rejects.toThrow('Operation failed');
+      await expect(service.testExecuteWithRetry(operation, 'test:operation')).rejects.toThrow(
+        'Operation failed',
+      );
     });
   });
 });

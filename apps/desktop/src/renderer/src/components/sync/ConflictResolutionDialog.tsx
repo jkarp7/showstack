@@ -54,12 +54,8 @@ export function ConflictResolutionDialog({
   onClose,
   isOpen,
 }: ConflictResolutionDialogProps): JSX.Element | null {
-  const [resolutions, setResolutions] = useState<Map<string, 'local' | 'remote'>>(
-    () => new Map()
-  );
-  const [expandedConflicts, setExpandedConflicts] = useState<Set<string>>(
-    () => new Set()
-  );
+  const [resolutions, setResolutions] = useState<Map<string, 'local' | 'remote'>>(() => new Map());
+  const [expandedConflicts, setExpandedConflicts] = useState<Set<string>>(() => new Set());
   const [applyToAll, setApplyToAll] = useState<'local' | 'remote' | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -83,7 +79,7 @@ export function ConflictResolutionDialog({
     const isAllResolved = conflicts.every((c) => resolutions.has(c.id));
     if (resolutions.size > 0 && !isAllResolved) {
       const confirmed = window.confirm(
-        'You have unresolved conflicts. Are you sure you want to close?'
+        'You have unresolved conflicts. Are you sure you want to close?',
       );
       if (!confirmed) return false;
     }
@@ -178,8 +174,8 @@ export function ConflictResolutionDialog({
               Resolve Sync Conflicts
             </h2>
             <p className="text-sm text-gray-500">
-              {conflicts.length} conflict{conflicts.length !== 1 ? 's' : ''} found.
-              Choose which version to keep.
+              {conflicts.length} conflict{conflicts.length !== 1 ? 's' : ''} found. Choose which
+              version to keep.
             </p>
           </div>
           <button
@@ -234,9 +230,7 @@ export function ConflictResolutionDialog({
                     onClick={() => toggleExpanded(conflict.id)}
                   >
                     <div className="flex-1">
-                      <span className="font-medium text-gray-900">
-                        {conflict.tableName}
-                      </span>
+                      <span className="font-medium text-gray-900">{conflict.tableName}</span>
                       <span className="text-gray-400 mx-2">/</span>
                       <span className="text-gray-600">{conflict.fieldName}</span>
                     </div>
@@ -278,9 +272,7 @@ export function ConflictResolutionDialog({
                             <span className="text-sm font-medium text-gray-700">
                               Local (Your Version)
                             </span>
-                            {resolution === 'local' && (
-                              <Check className="h-4 w-4 text-blue-600" />
-                            )}
+                            {resolution === 'local' && <Check className="h-4 w-4 text-blue-600" />}
                           </div>
                           <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto max-h-24">
                             {formatValue(conflict.localValue)}

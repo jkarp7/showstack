@@ -29,7 +29,7 @@ class WindowManager {
 
     const info: WindowInfo = {
       window,
-      type: 'landing'
+      type: 'landing',
     };
 
     this.windows.set(window.id, info);
@@ -81,7 +81,7 @@ class WindowManager {
     const info: WindowInfo = {
       window,
       projectId,
-      type: 'project'
+      type: 'project',
     };
 
     this.windows.set(window.id, info);
@@ -110,7 +110,7 @@ class WindowManager {
    * Get all open windows
    */
   getAllWindows(): BrowserWindow[] {
-    return Array.from(this.windows.values()).map(info => info.window);
+    return Array.from(this.windows.values()).map((info) => info.window);
   }
 
   /**

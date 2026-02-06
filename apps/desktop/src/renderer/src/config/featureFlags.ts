@@ -105,9 +105,7 @@ export function useFeatureFlag(feature: keyof FeatureFlags): boolean {
  */
 export function getEnabledFeatures(): (keyof FeatureFlags)[] {
   const flags = getFeatureFlags();
-  return (Object.keys(flags) as (keyof FeatureFlags)[]).filter(
-    (key) => flags[key]
-  );
+  return (Object.keys(flags) as (keyof FeatureFlags)[]).filter((key) => flags[key]);
 }
 
 /**

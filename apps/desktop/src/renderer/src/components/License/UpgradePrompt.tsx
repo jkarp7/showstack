@@ -31,12 +31,8 @@ export function UpgradePrompt({ module, feature }: UpgradePromptProps) {
   return (
     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
       <Lock className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-      <h3 className="text-lg font-semibold mb-2">
-        {upgradeText}
-      </h3>
-      <p className="text-gray-600 mb-4">
-        This feature is available in the Professional plan
-      </p>
+      <h3 className="text-lg font-semibold mb-2">{upgradeText}</h3>
+      <p className="text-gray-600 mb-4">This feature is available in the Professional plan</p>
       <button
         onClick={() => {
           // Open upgrade link - TODO: Replace with actual pricing URL

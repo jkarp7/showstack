@@ -24,7 +24,7 @@ const REPORT_TYPE_OPTIONS: ReportTypeOption[] = [
   { id: 'network-summary', name: 'Network Summary' },
   { id: 'port-assignments', name: 'Port Assignments' },
   { id: 'infrastructure-power', name: 'Infrastructure Power' },
-  { id: 'infrastructure-location', name: 'Infrastructure by Location' }
+  { id: 'infrastructure-location', name: 'Infrastructure by Location' },
 ];
 
 interface ReportTypeSelectorProps {
@@ -36,7 +36,7 @@ export function ReportTypeSelector({ value, onChange }: ReportTypeSelectorProps)
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const selectedOption = REPORT_TYPE_OPTIONS.find(opt => opt.id === value);
+  const selectedOption = REPORT_TYPE_OPTIONS.find((opt) => opt.id === value);
 
   // Close dropdown when clicking outside
   useEffect(() => {
