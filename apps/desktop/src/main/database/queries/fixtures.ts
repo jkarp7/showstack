@@ -1,5 +1,12 @@
 import { getDatabase, saveDatabase } from '../index';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  PaginationOptions,
+  PaginatedResult,
+  normalizePaginationOptions,
+  buildOrderByClause,
+  buildPaginatedResult
+} from '../utils/pagination';
 
 // Extended Fixture interface matching database schema with LightWright parity
 export interface Fixture {
@@ -133,6 +140,90 @@ export function getAllFixtures(projectId: string = 'default-project'): Fixture[]
   });
 }
 
+/**
+ * Allowed sort fields for fixture pagination.
+ * These are validated against to prevent SQL injection.
+ * Object.freeze() provides runtime immutability protection.
+ */
+const FIXTURE_SORT_FIELDS = Object.freeze([
+  'position',
+  'unit_number',
+  'channel',
+  'universe',
+  'dmx_address',
+  'type',
+  'purpose',
+  'dimmer',
+  'circuit',
+  'color',
+  'status',
+  'created_at',
+  'updated_at'
+] as const);
+
+/**
+ * Get fixtures with pagination support.
+ * Use this for large datasets to improve performance and memory usage.
+ *
+ * @param projectId - Project ID to filter by
+ * @param options - Pagination options (offset, limit, sortBy, sortOrder)
+ * @returns Paginated result with fixtures and metadata
+ *
+ * @example
+ * ```typescript
+ * // Get first page of 50 fixtures sorted by position
+ * const page1 = getFixturesPaginated('project-id', { offset: 0, limit: 50 });
+ *
+ * // Get second page sorted by channel descending
+ * const page2 = getFixturesPaginated('project-id', {
+ *   offset: 50,
+ *   limit: 50,
+ *   sortBy: 'channel',
+ *   sortOrder: 'DESC'
+ * });
+ * ```
+ */
+export function getFixturesPaginated(
+  projectId: string = 'default-project',
+  options: Partial<PaginationOptions> = {}
+): PaginatedResult<Fixture> {
+  const db = getDatabase();
+  const normalized = normalizePaginationOptions(options, FIXTURE_SORT_FIELDS);
+  const orderBy = buildOrderByClause(normalized.sortBy, normalized.sortOrder, FIXTURE_SORT_FIELDS);
+
+  // Get total count
+  const countResult = db.prepare(
+    'SELECT COUNT(*) as count FROM fixtures WHERE project_id = ?'
+  ).get(projectId) as { count: number };
+
+  // Get paginated data
+  const fixtures = db.prepare(`
+    SELECT * FROM fixtures
+    WHERE project_id = ?
+    ORDER BY ${orderBy}
+    LIMIT ? OFFSET ?
+  `).all(projectId, normalized.limit, normalized.offset);
+
+  // Transform fixtures (same as getAllFixtures)
+  const transformedFixtures = fixtures.map((fixture: any) => {
+    let address: string | undefined;
+    if (fixture.universe && fixture.dmx_address) {
+      address = `${fixture.universe}/${fixture.dmx_address}`;
+    }
+
+    return {
+      ...fixture,
+      unit: fixture.unit_number,
+      address,
+      accessories: fixture.accessories ? JSON.parse(fixture.accessories) : [],
+      custom_fields: fixture.custom_fields ? JSON.parse(fixture.custom_fields) : {},
+      on_light_plot: Boolean(fixture.on_light_plot)
+    } as Fixture;
+  });
+
+  return buildPaginatedResult(transformedFixtures, countResult.count, normalized);
+}
+
 export function createFixture(
   fixture: Partial<Fixture>,
   projectId: string = 'default-project'
@@ -184,23 +275,30 @@ export function createFixture(
   return getFixtureById(id);
 }
 
+/**
+ * Allowed fields for fixture updates.
+ * Frozen to prevent runtime modification (security hardening).
+ */
+const FIXTURE_ALLOWED_FIELDS = Object.freeze([
+  'position', 'unit_number', 'type', 'manufacturer', 'model', 'purpose',
+  'channel', 'universe', 'dmx_address', 'dimmer', 'circuit', 'circuit_number',
+  'color', 'gobo', 'accessories', 'location', 'system', 'wattage',
+  'status', 'notes', 'custom_fields',
+  'dimmer_rack_id', 'dimmer_channel_number', 'pd_rack_id', 'pd_circuit_number',
+  'hidden', 'color_flag'
+] as const);
+
+type FixtureAllowedField = typeof FIXTURE_ALLOWED_FIELDS[number];
+
+function isFixtureAllowedField(field: string): field is FixtureAllowedField {
+  return FIXTURE_ALLOWED_FIELDS.includes(field as FixtureAllowedField) || field === 'unit';
+}
+
 export function updateFixture(id: string, updates: Partial<Fixture>): Fixture {
   const db = getDatabase();
   const now = Date.now();
 
-  // Filter out fields that shouldn't be updated
-  const allowedFields = [
-    'position', 'unit_number', 'type', 'manufacturer', 'model', 'purpose',
-    'channel', 'universe', 'dmx_address', 'dimmer', 'circuit', 'circuit_number',
-    'color', 'gobo', 'accessories', 'location', 'system', 'wattage',
-    'status', 'notes', 'custom_fields',
-    'dimmer_rack_id', 'dimmer_channel_number', 'pd_rack_id', 'pd_circuit_number',
-    'hidden', 'color_flag'
-  ];
-
-  const fields = Object.keys(updates).filter(k =>
-    allowedFields.includes(k) || k === 'unit'
-  );
+  const fields = Object.keys(updates).filter(isFixtureAllowedField);
 
   if (fields.length === 0) {
     return getFixtureById(id);
@@ -221,13 +319,14 @@ export function updateFixture(id: string, updates: Partial<Fixture>): Fixture {
     mappedUpdates.custom_fields = JSON.stringify(mappedUpdates.custom_fields) as any;
   }
 
-  const setClause = fields
-    .filter(f => f !== 'unit')
+  // Filter out 'unit' alias (which maps to unit_number) - cast needed since 'unit' is allowed by isFixtureAllowedField but not in type
+  const filteredFields = fields.filter((f): f is FixtureAllowedField => (f as string) !== 'unit');
+
+  const setClause = filteredFields
     .map(f => f === 'unit_number' ? 'unit_number = ?' : `${f} = ?`)
     .join(', ');
 
-  const values = fields
-    .filter(f => f !== 'unit')
+  const values = filteredFields
     .map(f => f === 'unit_number' ? mappedUpdates.unit_number : mappedUpdates[f]);
 
   db.prepare(`

@@ -1,5 +1,6 @@
 import { getDatabase, saveDatabase } from '../index';
 import { v4 as uuidv4 } from 'uuid';
+import { logger } from '../../utils/logger';
 
 export interface Project {
   id: string;
@@ -25,8 +26,12 @@ export function getAllProjects(): Project[] {
       if (project[field] && typeof project[field] === 'string') {
         try {
           project[field] = JSON.parse(project[field]);
-        } catch {
-          // Keep as is if parsing fails
+        } catch (error) {
+          logger.warn(`Failed to parse JSON field '${field}' for project ${project.id}`, {
+            error: error instanceof Error ? error.message : String(error),
+            rawValue: String(project[field]).substring(0, 100)
+          });
+          // Keep original value
         }
       }
     });
@@ -48,8 +53,12 @@ export function getProjectById(id: string): Project | null {
     if ((project as any)[field] && typeof (project as any)[field] === 'string') {
       try {
         (project as any)[field] = JSON.parse((project as any)[field]);
-      } catch {
-        // Keep as is if parsing fails
+      } catch (error) {
+        logger.warn(`Failed to parse JSON field '${field}' for project ${(project as any).id}`, {
+          error: error instanceof Error ? error.message : String(error),
+          rawValue: String((project as any)[field]).substring(0, 100)
+        });
+        // Keep original value
       }
     }
   });
@@ -89,55 +98,65 @@ export function createProject(
   return project;
 }
 
+/**
+ * Allowed fields for project updates.
+ * Frozen to prevent runtime modification (security hardening).
+ */
+const PROJECT_ALLOWED_FIELDS = Object.freeze([
+  'name',
+  'description',
+  'venue',
+  'venue_city',
+  'venue_state',
+  'designer',
+  'logo_path',
+  'enabled_modules',
+  // Design team
+  'lighting_designer',
+  'lighting_designer_email',
+  'lighting_designer_phone',
+  'lighting_associates',
+  'audio_designer',
+  'audio_designer_email',
+  'audio_designer_phone',
+  'audio_associates',
+  'video_designer',
+  'video_designer_email',
+  'video_designer_phone',
+  'video_associates',
+  // Production staff
+  'electrician',
+  'electrician_email',
+  'electrician_phone',
+  'audio_tech',
+  'audio_tech_email',
+  'audio_tech_phone',
+  'video_tech',
+  'video_tech_email',
+  'video_tech_phone',
+  'production_manager',
+  'production_manager_email',
+  'production_manager_phone',
+  'production_manager_company',
+  'general_manager',
+  'general_manager_email',
+  'general_manager_phone',
+  'general_manager_company',
+  // Show dates
+  'show_dates'
+] as const);
+
+type ProjectAllowedField = typeof PROJECT_ALLOWED_FIELDS[number];
+
+function isProjectAllowedField(field: string): field is ProjectAllowedField {
+  return PROJECT_ALLOWED_FIELDS.includes(field as ProjectAllowedField);
+}
+
 export function updateProject(id: string, updates: Partial<Project>): Project {
   const db = getDatabase();
   const now = Date.now();
 
-  const allowedFields = [
-    'name',
-    'description',
-    'venue',
-    'venue_city',
-    'venue_state',
-    'designer',
-    'logo_path',
-    'enabled_modules',
-    // Design team
-    'lighting_designer',
-    'lighting_designer_email',
-    'lighting_designer_phone',
-    'lighting_associates',
-    'audio_designer',
-    'audio_designer_email',
-    'audio_designer_phone',
-    'audio_associates',
-    'video_designer',
-    'video_designer_email',
-    'video_designer_phone',
-    'video_associates',
-    // Production staff
-    'electrician',
-    'electrician_email',
-    'electrician_phone',
-    'audio_tech',
-    'audio_tech_email',
-    'audio_tech_phone',
-    'video_tech',
-    'video_tech_email',
-    'video_tech_phone',
-    'production_manager',
-    'production_manager_email',
-    'production_manager_phone',
-    'production_manager_company',
-    'general_manager',
-    'general_manager_email',
-    'general_manager_phone',
-    'general_manager_company',
-    // Show dates
-    'show_dates'
-  ];
-
-  const fields = Object.keys(updates).filter(k => allowedFields.includes(k));
+  const fields = Object.keys(updates).filter(isProjectAllowedField);
 
   if (fields.length === 0) {
     const project = getProjectById(id);
@@ -200,8 +219,12 @@ export function getCurrentProject(): Project {
     if ((project as any)[field] && typeof (project as any)[field] === 'string') {
       try {
         (project as any)[field] = JSON.parse((project as any)[field]);
-      } catch {
-        // Keep as is if parsing fails
+      } catch (error) {
+        logger.warn(`Failed to parse JSON field '${field}' for project ${(project as any).id}`, {
+          error: error instanceof Error ? error.message : String(error),
+          rawValue: String((project as any)[field]).substring(0, 100)
+        });
+        // Keep original value
       }
     }
   });

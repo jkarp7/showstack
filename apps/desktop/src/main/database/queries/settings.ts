@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getAppDatabase, saveAppDatabase } from '../index';
 import type { AppSettings } from '../../../shared/types/settings.types';
 
@@ -107,15 +106,15 @@ export function resetSettings(): void {
 export function getSetting(key: string): string | null {
   const db = getAppDatabase();
 
-  const result = db.exec(`
+  const row = db.prepare(`
     SELECT value FROM app_settings_kv WHERE key = ?
-  `, [key]);
+  `).get(key) as { value: string } | undefined;
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!row) {
     return null;
   }
 
-  return result[0].values[0][0] as string;
+  return row.value;
 }
 
 /**
@@ -126,9 +125,9 @@ export function setSetting(key: string, value: string): void {
   const now = Date.now();
 
   // Check if setting exists
-  const existing = db.exec(`SELECT key FROM app_settings_kv WHERE key = ?`, [key]);
+  const existing = db.prepare(`SELECT key FROM app_settings_kv WHERE key = ?`).get(key) as { key: string } | undefined;
 
-  if (existing[0] && existing[0].values.length > 0) {
+  if (existing) {
     // Update existing
     db.prepare(`
       UPDATE app_settings_kv

@@ -1,6 +1,12 @@
-// @ts-nocheck
 import { getDatabase, saveDatabase } from '../index';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  PaginationOptions,
+  PaginatedResult,
+  normalizePaginationOptions,
+  buildOrderByClause,
+  buildPaginatedResult
+} from '../utils/pagination';
 
 /**
  * Database query functions for ShowStack:Prep module
@@ -11,9 +17,22 @@ import { v4 as uuidv4 } from 'uuid';
 // PREP PROJECTS
 // ============================================
 
+/**
+ * Shop Order Project - represents a prep/rental order for a production.
+ * Can optionally be linked to a parent Project entity for cross-referencing.
+ */
 export interface ShopOrderProject {
+  /** Unique identifier for the shop order project */
   id: string;
+  /** User who owns this shop order (for multi-tenant support) */
   user_id?: string;
+  /**
+   * Reference to the main Project entity (from projects table).
+   * Links this shop order to a lighting plot project for cross-referencing
+   * fixtures, infrastructure, and other production data.
+   */
+  parent_project_id?: string;
+  /** Name of the production/show */
   production_name: string;
   venue?: string;
   venue_city?: string;
@@ -147,7 +166,8 @@ export function updateShopOrderProject(id: string, updates: Partial<ShopOrderPro
   const db = getDatabase();
   const now = Date.now();
 
-  const allowedFields = [
+  // Frozen to prevent runtime modification (security hardening)
+  const allowedFields = Object.freeze([
     'parent_project_id',
     'production_name',
     'venue',
@@ -185,7 +205,7 @@ export function updateShopOrderProject(id: string, updates: Partial<ShopOrderPro
     'opening_night_date',
     'closing_date',
     'load_out_date',
-  ];
+  ]);
 
   const fields = Object.keys(updates).filter((k) => allowedFields.includes(k));
 
@@ -225,6 +245,7 @@ export interface ShopOrderSection {
   discipline: string;
   sort_order: number;
   page_break: number;
+  notes?: string;
   created_at: number;
   updated_at: number;
 }
@@ -269,7 +290,8 @@ export function updateShopOrderSection(id: string, updates: Partial<ShopOrderSec
   const db = getDatabase();
   const now = Date.now();
 
-  const allowedFields = ['name', 'discipline', 'sort_order', 'page_break', 'notes'];
+  // Frozen to prevent runtime modification (security hardening)
+  const allowedFields = Object.freeze(['name', 'discipline', 'sort_order', 'page_break', 'notes']);
   const fields = Object.keys(updates).filter((k) => allowedFields.includes(k));
 
   if (fields.length === 0) {
@@ -362,6 +384,89 @@ export function getItemsByProjectId(projectId: string): ShopOrderItem[] {
   return items as ShopOrderItem[];
 }
 
+/**
+ * Allowed sort fields for shop order items pagination.
+ * These are validated against to prevent SQL injection.
+ */
+const SHOP_ORDER_ITEM_SORT_FIELDS = Object.freeze([
+  'description',
+  'active_qty',
+  'spare_qty',
+  'venue_qty',
+  'total_qty',
+  'weight',
+  'power',
+  'sort_order',
+  'created_at',
+  'updated_at'
+] as const);
+
+/**
+ * Get shop order items with pagination support.
+ * Use this for large shop orders with many items.
+ *
+ * @param projectId - Project ID to filter by
+ * @param options - Pagination options (offset, limit, sortBy, sortOrder)
+ * @returns Paginated result with items and metadata
+ */
+export function getItemsByProjectIdPaginated(
+  projectId: string,
+  options: Partial<PaginationOptions> = {}
+): PaginatedResult<ShopOrderItem> {
+  const db = getDatabase();
+  const normalized = normalizePaginationOptions(options, SHOP_ORDER_ITEM_SORT_FIELDS);
+  const orderBy = buildOrderByClause(normalized.sortBy, normalized.sortOrder, SHOP_ORDER_ITEM_SORT_FIELDS);
+
+  // Get total count
+  const countResult = db.prepare(`
+    SELECT COUNT(*) as count FROM shop_order_items i
+    JOIN shop_order_sections s ON i.section_id = s.id
+    WHERE s.prep_project_id = ?
+  `).get(projectId) as { count: number };
+
+  // Get paginated data
+  const items = db.prepare(`
+    SELECT i.* FROM shop_order_items i
+    JOIN shop_order_sections s ON i.section_id = s.id
+    WHERE s.prep_project_id = ?
+    ORDER BY ${orderBy}
+    LIMIT ? OFFSET ?
+  `).all(projectId, normalized.limit, normalized.offset);
+
+  return buildPaginatedResult(items as ShopOrderItem[], countResult.count, normalized);
+}
+
+/**
+ * Get shop order items by section with pagination support.
+ *
+ * @param sectionId - Section ID to filter by
+ * @param options - Pagination options
+ * @returns Paginated result with items and metadata
+ */
+export function getItemsBySectionIdPaginated(
+  sectionId: string,
+  options: Partial<PaginationOptions> = {}
+): PaginatedResult<ShopOrderItem> {
+  const db = getDatabase();
+  const normalized = normalizePaginationOptions(options, SHOP_ORDER_ITEM_SORT_FIELDS);
+  const orderBy = buildOrderByClause(normalized.sortBy, normalized.sortOrder, SHOP_ORDER_ITEM_SORT_FIELDS);
+
+  // Get total count
+  const countResult = db.prepare(
+    'SELECT COUNT(*) as count FROM shop_order_items WHERE section_id = ?'
+  ).get(sectionId) as { count: number };
+
+  // Get paginated data
+  const items = db.prepare(`
+    SELECT * FROM shop_order_items
+    WHERE section_id = ?
+    ORDER BY ${orderBy}
+    LIMIT ? OFFSET ?
+  `).all(sectionId, normalized.limit, normalized.offset);
+
+  return buildPaginatedResult(items as ShopOrderItem[], countResult.count, normalized);
+}
+
 export function createShopOrderItem(data: Partial<ShopOrderItem>): ShopOrderItem {
   const db = getDatabase();
   const id = uuidv4();
@@ -452,7 +557,8 @@ export function updateShopOrderItem(
     }
   }
 
-  const allowedFields = [
+  // Frozen to prevent runtime modification (security hardening)
+  const allowedFields = Object.freeze([
     'description',
     'active_qty',
     'spare_qty',
@@ -464,7 +570,7 @@ export function updateShopOrderItem(
     'added_in_revision',
     'removed_in_revision',
     'modified_in_revision',
-  ];
+  ]);
 
   const fields = Object.keys(updates).filter((k) => allowedFields.includes(k));
 

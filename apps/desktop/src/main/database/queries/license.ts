@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getAppDatabase, saveAppDatabase } from '../index';
 import { v4 as uuidv4 } from 'uuid';
 import type {
@@ -14,18 +13,18 @@ import type {
 export function getCurrentLicense(): UserLicense | null {
   const db = getAppDatabase();
 
-  const result = db.exec(`
+  const row = db.prepare(`
     SELECT * FROM licenses
     WHERE status != 'deleted'
     ORDER BY created_at DESC
     LIMIT 1
-  `);
+  `).get() as Record<string, unknown> | undefined;
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!row) {
     return null;
   }
 
-  return rowToLicense(result[0].columns, result[0].values[0]);
+  return rowObjectToLicense(row);
 }
 
 /**
@@ -34,16 +33,16 @@ export function getCurrentLicense(): UserLicense | null {
 export function getLicenseById(id: string): UserLicense | null {
   const db = getAppDatabase();
 
-  const result = db.exec(`
+  const row = db.prepare(`
     SELECT * FROM licenses
     WHERE id = ? AND status != 'deleted'
-  `, [id]);
+  `).get(id) as Record<string, unknown> | undefined;
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!row) {
     return null;
   }
 
-  return rowToLicense(result[0].columns, result[0].values[0]);
+  return rowObjectToLicense(row);
 }
 
 /**
@@ -52,16 +51,16 @@ export function getLicenseById(id: string): UserLicense | null {
 export function getLicenseByKey(licenseKey: string): UserLicense | null {
   const db = getAppDatabase();
 
-  const result = db.exec(`
+  const row = db.prepare(`
     SELECT * FROM licenses
     WHERE license_key = ? AND status != 'deleted'
-  `, [licenseKey]);
+  `).get(licenseKey) as Record<string, unknown> | undefined;
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!row) {
     return null;
   }
 
-  return rowToLicense(result[0].columns, result[0].values[0]);
+  return rowObjectToLicense(row);
 }
 
 /**
@@ -185,25 +184,20 @@ export function deleteLicense(id: string): void {
 }
 
 /**
- * Helper function to convert database row to UserLicense
+ * Helper function to convert database row object to UserLicense
  */
-function rowToLicense(columns: string[], row: any[]): UserLicense {
-  const obj: any = {};
-  columns.forEach((col, index) => {
-    obj[col] = row[index];
-  });
-
+function rowObjectToLicense(obj: Record<string, unknown>): UserLicense {
   return {
-    id: obj.id,
-    email: obj.email,
-    name: obj.name || '',
-    licenseKey: obj.license_key,
+    id: obj.id as string,
+    email: obj.email as string,
+    name: (obj.name as string) || '',
+    licenseKey: obj.license_key as string,
     tier: obj.tier as LicenseTier,
-    status: obj.status,
-    modules: JSON.parse(obj.modules),
-    expirationDate: obj.expiration_date,
-    lastVerified: obj.last_verified,
-    createdAt: obj.created_at,
-    updatedAt: obj.updated_at
+    status: obj.status as 'active' | 'expired' | 'suspended',
+    modules: JSON.parse(obj.modules as string) as ModuleAccess[],
+    expirationDate: obj.expiration_date as number,
+    lastVerified: obj.last_verified as number,
+    createdAt: obj.created_at as number,
+    updatedAt: obj.updated_at as number
   };
 }
