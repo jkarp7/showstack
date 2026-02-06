@@ -3,3 +3,5 @@
  */
 
 export { SyncStatusIndicator } from './SyncStatusIndicator';
+export { OfflineBanner } from './OfflineBanner';
+export { ConflictResolutionDialog } from './ConflictResolutionDialog';
