@@ -64,6 +64,10 @@ export function normalizePaginationOptions(
   options: Partial<PaginationOptions>,
   allowedSortFields: readonly string[]
 ): Required<PaginationOptions> {
+  if (allowedSortFields.length === 0) {
+    throw new Error('allowedSortFields must not be empty');
+  }
+
   const offset = Math.max(0, Math.floor(options.offset ?? DEFAULT_PAGINATION.offset));
   const limit = Math.min(
     MAX_PAGINATION_LIMIT,
@@ -110,6 +114,10 @@ export function buildOrderByClause(
   sortOrder: 'ASC' | 'DESC',
   allowedSortFields: readonly string[]
 ): string {
+  if (allowedSortFields.length === 0) {
+    throw new Error('allowedSortFields must not be empty');
+  }
+
   // Validate sortBy is in allowed list (critical for SQL injection prevention)
   const validSortBy = isValidSortField(sortBy, allowedSortFields)
     ? sortBy

@@ -29,6 +29,21 @@ export interface WalStatus {
   estimatedWalSizeBytes: number;
 }
 
+/**
+ * WAL checkpoint configuration options
+ */
+export interface WalCheckpointConfig {
+  /** Interval between automatic checkpoints in milliseconds (default: 300000 = 5 minutes) */
+  checkpointIntervalMs: number;
+  /** WAL page count threshold for warning logs (default: 10000 pages) */
+  sizeWarningThreshold: number;
+}
+
+const DEFAULT_WAL_CONFIG: WalCheckpointConfig = {
+  checkpointIntervalMs: 5 * 60 * 1000, // 5 minutes
+  sizeWarningThreshold: 10000 // pages
+};
+
 export class DatabaseManager {
   private appDb: Database.Database | null = null;
   private projectDb: Database.Database | null = null;
@@ -37,8 +52,7 @@ export class DatabaseManager {
   private projectDbPath: string = '';
 
   private walCheckpointInterval?: NodeJS.Timeout;
-  private readonly WAL_CHECKPOINT_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
-  private readonly WAL_SIZE_WARNING_THRESHOLD = 10000; // pages
+  private walConfig: WalCheckpointConfig = { ...DEFAULT_WAL_CONFIG };
 
   /**
    * Initialize both app and project databases
@@ -353,12 +367,12 @@ export class DatabaseManager {
     }
 
     logger.info('Starting periodic WAL checkpointing', {
-      intervalMs: this.WAL_CHECKPOINT_INTERVAL_MS
+      intervalMs: this.walConfig.checkpointIntervalMs
     });
 
     this.walCheckpointInterval = setInterval(() => {
       this.performCheckpoint('PASSIVE');
-    }, this.WAL_CHECKPOINT_INTERVAL_MS);
+    }, this.walConfig.checkpointIntervalMs);
 
     // Don't prevent Node from exiting
     this.walCheckpointInterval.unref();
@@ -386,35 +400,48 @@ export class DatabaseManager {
    *   - TRUNCATE: Like RESTART, but also truncates WAL file to zero bytes
    */
   private performCheckpoint(mode: 'PASSIVE' | 'FULL' | 'RESTART' | 'TRUNCATE' = 'PASSIVE'): void {
-    try {
-      if (this.appDb) {
+    // Checkpoint each database separately to identify failures
+    if (this.appDb) {
+      try {
         const appResult = this.appDb.pragma(`wal_checkpoint(${mode})`) as Array<{ busy: number; log: number; checkpointed: number }>;
-        if (appResult[0]?.log > this.WAL_SIZE_WARNING_THRESHOLD) {
+        if (appResult[0]?.log > this.walConfig.sizeWarningThreshold) {
           logger.warn('App database WAL file growing large', {
             database: 'app',
             logPages: appResult[0].log,
             checkpointedPages: appResult[0].checkpointed,
-            threshold: this.WAL_SIZE_WARNING_THRESHOLD
+            threshold: this.walConfig.sizeWarningThreshold
           });
         }
+      } catch (error) {
+        logger.error('Failed to checkpoint WAL', {
+          database: 'app',
+          mode,
+          error: error instanceof Error ? error.message : String(error)
+        });
       }
+    }
 
-      if (this.projectDb) {
+    if (this.projectDb) {
+      try {
         const projectResult = this.projectDb.pragma(`wal_checkpoint(${mode})`) as Array<{ busy: number; log: number; checkpointed: number }>;
-        if (projectResult[0]?.log > this.WAL_SIZE_WARNING_THRESHOLD) {
+        if (projectResult[0]?.log > this.walConfig.sizeWarningThreshold) {
           logger.warn('Project database WAL file growing large', {
             database: 'project',
             logPages: projectResult[0].log,
             checkpointedPages: projectResult[0].checkpointed,
-            threshold: this.WAL_SIZE_WARNING_THRESHOLD
+            threshold: this.walConfig.sizeWarningThreshold
           });
         }
+      } catch (error) {
+        logger.error('Failed to checkpoint WAL', {
+          database: 'project',
+          mode,
+          error: error instanceof Error ? error.message : String(error)
+        });
       }
-
-      logger.debug('WAL checkpoint completed', { mode });
-    } catch (error) {
-      logger.error('Failed to checkpoint WAL', error instanceof Error ? error : new Error(String(error)));
     }
+
+    logger.debug('WAL checkpoint completed', { mode });
   }
 
   /**
@@ -425,6 +452,24 @@ export class DatabaseManager {
   forceCheckpoint(): void {
     logger.info('Forcing WAL checkpoint (TRUNCATE mode)');
     this.performCheckpoint('TRUNCATE');
+  }
+
+  /**
+   * Configure WAL checkpoint settings.
+   * Call before initialize() or after stopPeriodicCheckpointing() for changes to take effect.
+   *
+   * @param config - Partial configuration to merge with defaults
+   */
+  configureWalCheckpoint(config: Partial<WalCheckpointConfig>): void {
+    this.walConfig = { ...this.walConfig, ...config };
+    logger.info('WAL checkpoint configuration updated', this.walConfig);
+  }
+
+  /**
+   * Get current WAL checkpoint configuration
+   */
+  getWalConfig(): Readonly<WalCheckpointConfig> {
+    return { ...this.walConfig };
   }
 
   /**

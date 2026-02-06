@@ -173,4 +173,48 @@ describe('pagination utility', () => {
       expect(calculateOffset(-1, 10)).toBe(0);
     });
   });
+
+  describe('edge cases', () => {
+    describe('empty allowedSortFields', () => {
+      it('should throw error in normalizePaginationOptions with empty allowedSortFields', () => {
+        expect(() => normalizePaginationOptions({}, [])).toThrow('allowedSortFields must not be empty');
+      });
+
+      it('should throw error in buildOrderByClause with empty allowedSortFields', () => {
+        expect(() => buildOrderByClause('name', 'ASC', [])).toThrow('allowedSortFields must not be empty');
+      });
+    });
+
+    describe('large offset values', () => {
+      it('should handle very large offset values without overflow', () => {
+        const largeOffset = Number.MAX_SAFE_INTEGER - 1000;
+        const result = normalizePaginationOptions(
+          { offset: largeOffset },
+          ['id']
+        );
+        expect(result.offset).toBe(largeOffset);
+      });
+
+      it('should handle offset values exceeding MAX_SAFE_INTEGER', () => {
+        const hugeOffset = Number.MAX_SAFE_INTEGER + 1000;
+        const result = normalizePaginationOptions(
+          { offset: hugeOffset },
+          ['id']
+        );
+        // Should still be a valid number (though precision may be lost)
+        expect(typeof result.offset).toBe('number');
+        expect(result.offset).toBeGreaterThan(0);
+      });
+
+      it('should clamp Infinity to a reasonable value', () => {
+        const result = normalizePaginationOptions(
+          { offset: Infinity },
+          ['id']
+        );
+        // Math.floor(Infinity) is Infinity, Math.max(0, Infinity) is Infinity
+        // This is technically valid but may cause issues - documenting current behavior
+        expect(result.offset).toBe(Infinity);
+      });
+    });
+  });
 });

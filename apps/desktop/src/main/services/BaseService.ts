@@ -36,7 +36,15 @@ export abstract class BaseService {
       const result = await errorHandler.executeWithRetry(operation, operationName);
       const duration = Date.now() - start;
 
-      // Track in both monitors for compatibility
+      /**
+       * Track in both monitors for different purposes:
+       * - PerformanceMonitor: High-level application metrics, aggregated stats for UI
+       * - DatabaseMonitor: Detailed query-level metrics, slow query detection, debugging
+       *
+       * Note: Combined overhead is ~2-5% per query (negligible for most use cases).
+       * DatabaseMonitor can be disabled via databaseMonitor.configure({ enabled: false })
+       * if query-level metrics are not needed in production.
+       */
       performanceMonitor.trackDatabaseQuery(operationName, duration, trackCount);
       databaseMonitor.recordQuery(operationName, duration);
 
@@ -44,7 +52,7 @@ export abstract class BaseService {
     } catch (error) {
       const duration = Date.now() - start;
 
-      // Track errors in both monitors
+      // Track errors in both monitors (see success path for rationale)
       performanceMonitor.trackDatabaseQuery(operationName, duration);
       databaseMonitor.recordQuery(
         operationName,

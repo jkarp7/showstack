@@ -143,8 +143,9 @@ export function getAllFixtures(projectId: string = 'default-project'): Fixture[]
 /**
  * Allowed sort fields for fixture pagination.
  * These are validated against to prevent SQL injection.
+ * Object.freeze() provides runtime immutability protection.
  */
-const FIXTURE_SORT_FIELDS = [
+const FIXTURE_SORT_FIELDS = Object.freeze([
   'position',
   'unit_number',
   'channel',
@@ -158,7 +159,7 @@ const FIXTURE_SORT_FIELDS = [
   'status',
   'created_at',
   'updated_at'
-] as const;
+] as const);
 
 /**
  * Get fixtures with pagination support.
