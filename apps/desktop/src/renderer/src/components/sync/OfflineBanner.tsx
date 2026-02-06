@@ -57,6 +57,10 @@ export function OfflineBanner(): JSX.Element | null {
     setIsReconnecting(true);
     setRetryError(null);
     try {
+      // Type guard: ensure sync API is available
+      if (!window.api?.sync?.initialize) {
+        throw new Error('Sync API not available');
+      }
       await window.api.sync.initialize();
     } catch (error) {
       console.error('[OfflineBanner] Retry failed:', error);

@@ -5,7 +5,7 @@
  * and allowing the user to choose which version to keep.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { AlertTriangle, Check, X, ChevronDown, ChevronUp } from 'lucide-react';
 
 /**
@@ -70,10 +70,6 @@ export function ConflictResolutionDialog({
     setApplyToAll(null);
   }, [conflicts]);
 
-  if (!isOpen || conflicts.length === 0) {
-    return null;
-  }
-
   const allResolved = conflicts.every((c) => resolutions.has(c.id));
 
   /**
@@ -81,9 +77,11 @@ export function ConflictResolutionDialog({
    * partial resolutions that would be lost.
    * @returns true if the dialog was closed, false if the user cancelled
    */
-  const attemptClose = (): boolean => {
+  const attemptClose = useCallback((): boolean => {
     // Show confirmation if user has started resolving but hasn't finished
-    if (resolutions.size > 0 && !allResolved) {
+    // Check allResolved inline to avoid stale closure
+    const isAllResolved = conflicts.every((c) => resolutions.has(c.id));
+    if (resolutions.size > 0 && !isAllResolved) {
       const confirmed = window.confirm(
         'You have unresolved conflicts. Are you sure you want to close?'
       );
@@ -91,10 +89,12 @@ export function ConflictResolutionDialog({
     }
     onClose();
     return true;
-  };
+  }, [resolutions, conflicts, onClose]);
 
   // Focus dialog and handle Escape key when open
   useEffect(() => {
+    if (!isOpen) return;
+
     // Focus the dialog
     dialogRef.current?.focus();
 
@@ -107,7 +107,11 @@ export function ConflictResolutionDialog({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [resolutions, conflicts, onClose]);
+  }, [isOpen, attemptClose]);
+
+  if (!isOpen || conflicts.length === 0) {
+    return null;
+  }
 
   const handleResolutionChange = (conflictId: string, choice: 'local' | 'remote') => {
     setResolutions((prev) => {
