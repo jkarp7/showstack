@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 import { WifiOff, X, RefreshCw } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
-export function OfflineBanner() {
+export function OfflineBanner(): JSX.Element | null {
   const { isAuthenticated, syncStatus, isCloudConfigured } = useAuthStore();
   const [isDismissed, setIsDismissed] = useState(false);
   const [isReconnecting, setIsReconnecting] = useState(false);
@@ -38,14 +38,25 @@ export function OfflineBanner() {
     return null;
   }
 
-  const handleRetry = async () => {
+  const handleRetry = async (): Promise<void> => {
     setIsReconnecting(true);
     setRetryError(null);
     try {
       await window.api.sync.initialize();
     } catch (error) {
       console.error('[OfflineBanner] Retry failed:', error);
-      setRetryError('Connection failed. Please try again.');
+      // Provide specific error messages based on error type
+      if (error instanceof Error) {
+        if (error.message.includes('network') || error.message.includes('fetch')) {
+          setRetryError('Network unavailable. Check your internet connection.');
+        } else if (error.message.includes('auth') || error.message.includes('unauthorized')) {
+          setRetryError('Authentication failed. Please sign in again.');
+        } else {
+          setRetryError(`Connection failed: ${error.message}`);
+        }
+      } else {
+        setRetryError('Connection failed. Please try again.');
+      }
     } finally {
       setIsReconnecting(false);
     }

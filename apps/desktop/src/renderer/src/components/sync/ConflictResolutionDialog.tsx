@@ -5,7 +5,7 @@
  * and allowing the user to choose which version to keep.
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AlertTriangle, Check, X, ChevronDown, ChevronUp } from 'lucide-react';
 
 /**
@@ -53,7 +53,7 @@ export function ConflictResolutionDialog({
   onResolve,
   onClose,
   isOpen,
-}: ConflictResolutionDialogProps) {
+}: ConflictResolutionDialogProps): JSX.Element | null {
   const [resolutions, setResolutions] = useState<Map<string, 'local' | 'remote'>>(
     () => new Map()
   );
@@ -61,6 +61,39 @@ export function ConflictResolutionDialog({
     () => new Set()
   );
   const [applyToAll, setApplyToAll] = useState<'local' | 'remote' | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Reset state when conflicts change
+  useEffect(() => {
+    setResolutions(new Map());
+    setExpandedConflicts(new Set());
+    setApplyToAll(null);
+  }, [conflicts]);
+
+  // Focus dialog and handle Escape key when open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Focus the dialog
+    dialogRef.current?.focus();
+
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        // Use the same close logic with confirmation
+        if (resolutions.size > 0 && !conflicts.every((c) => resolutions.has(c.id))) {
+          const confirmed = window.confirm(
+            'You have unresolved conflicts. Are you sure you want to close?'
+          );
+          if (!confirmed) return;
+        }
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, resolutions, conflicts, onClose]);
 
   if (!isOpen || conflicts.length === 0) {
     return null;
@@ -122,17 +155,25 @@ export function ConflictResolutionDialog({
         className="absolute inset-0 bg-black/50"
         onClick={handleClose}
         role="presentation"
+        aria-hidden="true"
       />
 
       {/* Dialog */}
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="conflict-dialog-title"
+        tabIndex={-1}
+        className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col outline-none"
+      >
         {/* Header */}
         <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200">
           <div className="p-2 bg-yellow-100 rounded-full">
-            <AlertTriangle className="h-5 w-5 text-yellow-600" />
+            <AlertTriangle className="h-5 w-5 text-yellow-600" aria-hidden="true" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 id="conflict-dialog-title" className="text-lg font-semibold text-gray-900">
               Resolve Sync Conflicts
             </h2>
             <p className="text-sm text-gray-500">
@@ -143,8 +184,9 @@ export function ConflictResolutionDialog({
           <button
             onClick={handleClose}
             className="ml-auto p-1 text-gray-400 hover:text-gray-600 rounded"
+            aria-label="Close dialog"
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
 
