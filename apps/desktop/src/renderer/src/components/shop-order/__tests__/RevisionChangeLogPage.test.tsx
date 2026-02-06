@@ -119,7 +119,7 @@ let mockStoreData = {
   revisions: defaultMockRevisions,
 };
 
-vi.mock('../../../store/prepStore', () => ({
+vi.mock('../../../store/shopOrderStore', () => ({
   useShopOrderStore: () => mockStoreData,
 }));
 

@@ -1,107 +1,39 @@
 /**
  * Unit tests for DatabaseWriter
  * Tests database persistence operations
+ *
+ * Note: With better-sqlite3's WAL mode, DatabaseWriter methods are now no-ops.
+ * All writes are automatically persisted to disk by the WAL journal.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DatabaseWriter } from '../persistence/DatabaseWriter';
-import { DatabaseError } from '../../errors';
-import * as fs from 'fs';
 
-// Mock fs module
-vi.mock('fs', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('fs')>();
-  return {
-    ...actual,
-    writeFileSync: vi.fn()
-  };
-});
-
-// Mock sql.js Database
-const createMockDatabase = () => ({
-  export: vi.fn(() => new Uint8Array([1, 2, 3, 4])),
-  close: vi.fn(),
-  run: vi.fn(),
-  exec: vi.fn()
-});
+// Mock the logger
+vi.mock('../../utils/logger', () => ({
+  logger: {
+    info: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    debug: vi.fn()
+  }
+}));
 
 describe('DatabaseWriter', () => {
   let writer: DatabaseWriter;
   let mockDb: any;
-  let consoleLogSpy: ReturnType<typeof vi.spyOn>;
-  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     writer = new DatabaseWriter();
-    mockDb = createMockDatabase();
-    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    vi.clearAllMocks();
-  });
-
-  afterEach(() => {
-    consoleLogSpy.mockRestore();
-    consoleErrorSpy.mockRestore();
-  });
-
-  describe('save', () => {
-    it('should export database data', () => {
-      const dbPath = '/test/path/db.sqlite';
-      const dbName = 'test';
-
-      // We test error handling in subsequent tests
-      // This test just verifies the database export is called
-      try {
-        writer.save(mockDb, dbPath, dbName);
-      } catch {
-        // Expected to fail due to file system access in test environment
-      }
-
-      // Verify database export was called
-      expect(mockDb.export).toHaveBeenCalledOnce();
-    });
-
-    it('should throw DatabaseError on write failure', () => {
-      const dbPath = '/test/path/db.sqlite';
-      const dbName = 'test';
-
-      // Simulate write error
-      vi.mocked(fs.writeFileSync).mockImplementationOnce(() => {
-        throw new Error('Disk full');
-      });
-
-      expect(() => {
-        writer.save(mockDb, dbPath, dbName);
-      }).toThrow(DatabaseError);
-    });
-
-    it('should include database name in error message', () => {
-      const dbPath = '/test/path/db.sqlite';
-      const dbName = 'project';
-
-      vi.mocked(fs.writeFileSync).mockImplementationOnce(() => {
-        throw new Error('Permission denied');
-      });
-
-      expect(() => {
-        writer.save(mockDb, dbPath, dbName);
-      }).toThrow('Failed to save project database');
-    });
-
-    it('should log error before throwing', () => {
-      const dbPath = '/test/path/db.sqlite';
-      const dbName = 'app';
-
-      vi.mocked(fs.writeFileSync).mockImplementationOnce(() => {
-        throw new Error('Write error');
-      });
-
-      try {
-        writer.save(mockDb, dbPath, dbName);
-      } catch {}
-
-      expect(consoleErrorSpy).toHaveBeenCalled();
-    });
+    mockDb = {
+      prepare: vi.fn(() => ({
+        run: vi.fn(),
+        get: vi.fn(),
+        all: vi.fn()
+      })),
+      pragma: vi.fn(),
+      close: vi.fn()
+    };
   });
 
   describe('class structure', () => {
@@ -115,6 +47,36 @@ describe('DatabaseWriter', () => {
 
     it('should have saveWithRetry method', () => {
       expect(typeof writer.saveWithRetry).toBe('function');
+    });
+  });
+
+  describe('save', () => {
+    it('should be a no-op with WAL mode (does not throw)', () => {
+      expect(() => {
+        writer.save(mockDb, '/test/path/db.sqlite', 'test');
+      }).not.toThrow();
+    });
+
+    it('should not attempt to write files (WAL handles persistence)', () => {
+      writer.save(mockDb, '/test/path/db.sqlite', 'test');
+
+      // No file operations should occur - WAL mode auto-persists
+      expect(mockDb.prepare).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('saveWithRetry', () => {
+    it('should be a no-op with WAL mode (does not throw)', async () => {
+      await expect(
+        writer.saveWithRetry(mockDb, '/test/path/db.sqlite', 'test')
+      ).resolves.not.toThrow();
+    });
+
+    it('should resolve immediately without file operations', async () => {
+      await writer.saveWithRetry(mockDb, '/test/path/db.sqlite', 'test');
+
+      // No file operations should occur - WAL mode auto-persists
+      expect(mockDb.prepare).not.toHaveBeenCalled();
     });
   });
 });
