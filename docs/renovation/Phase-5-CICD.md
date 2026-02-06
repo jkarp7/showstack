@@ -52,13 +52,13 @@
 
 ## Results
 
-| Metric              | Value                     |
-| ------------------- | ------------------------- |
-| ESLint errors       | 0 (1,016 warnings)       |
-| Prettier compliance | 100% (423 files formatted)|
-| Type check          | Clean (0 errors)          |
-| Tests               | 1,440 passing (47 files)  |
-| CI jobs             | 5 (3 test + lint + security) |
+| Metric              | Value                             |
+| ------------------- | --------------------------------- |
+| ESLint errors       | 0 (1,016 warnings)                |
+| Prettier compliance | 100% (423 files formatted)        |
+| Type check          | Clean (0 errors)                  |
+| Tests               | 1,440 passing (47 files)          |
+| CI jobs             | 5 (3 test + lint + security)      |
 | Pre-commit hooks    | ESLint + Prettier via lint-staged |
 
 ## Success Criteria
