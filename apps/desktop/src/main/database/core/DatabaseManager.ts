@@ -18,12 +18,27 @@ import { errorHandler } from '../../errors';
 import { DatabaseError } from '../../errors';
 import { logger } from '../../utils/logger';
 
+/**
+ * WAL (Write-Ahead Logging) status information
+ */
+export interface WalStatus {
+  database: string;
+  walPages: number;
+  checkpointedPages: number;
+  isBusy: boolean;
+  estimatedWalSizeBytes: number;
+}
+
 export class DatabaseManager {
   private appDb: Database.Database | null = null;
   private projectDb: Database.Database | null = null;
 
   private appDbPath: string = '';
   private projectDbPath: string = '';
+
+  private walCheckpointInterval?: NodeJS.Timeout;
+  private readonly WAL_CHECKPOINT_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+  private readonly WAL_SIZE_WARNING_THRESHOLD = 10000; // pages
 
   /**
    * Initialize both app and project databases
@@ -37,6 +52,9 @@ export class DatabaseManager {
       // Initialize databases
       await this.initializeAppDatabase();
       await this.initializeProjectDatabase();
+
+      // Start periodic WAL checkpointing
+      this.startPeriodicCheckpointing();
 
       logger.info('Database initialization complete');
     } catch (error) {
@@ -321,9 +339,136 @@ export class DatabaseManager {
   }
 
   /**
-   * Close both databases
+   * Start periodic WAL checkpointing to prevent WAL file growth.
+   * Runs checkpoint every 5 minutes in PASSIVE mode (non-blocking).
+   *
+   * WAL (Write-Ahead Logging) files can grow unbounded without periodic
+   * checkpointing. This ensures disk space is reclaimed and backup
+   * reliability is maintained.
+   */
+  startPeriodicCheckpointing(): void {
+    if (this.walCheckpointInterval) {
+      logger.debug('WAL checkpointing already started');
+      return;
+    }
+
+    logger.info('Starting periodic WAL checkpointing', {
+      intervalMs: this.WAL_CHECKPOINT_INTERVAL_MS
+    });
+
+    this.walCheckpointInterval = setInterval(() => {
+      this.performCheckpoint('PASSIVE');
+    }, this.WAL_CHECKPOINT_INTERVAL_MS);
+
+    // Don't prevent Node from exiting
+    this.walCheckpointInterval.unref();
+  }
+
+  /**
+   * Stop periodic WAL checkpointing.
+   * Called automatically on database close.
+   */
+  stopPeriodicCheckpointing(): void {
+    if (this.walCheckpointInterval) {
+      clearInterval(this.walCheckpointInterval);
+      this.walCheckpointInterval = undefined;
+      logger.info('Stopped periodic WAL checkpointing');
+    }
+  }
+
+  /**
+   * Perform WAL checkpoint on both databases.
+   *
+   * @param mode - Checkpoint mode:
+   *   - PASSIVE: Non-blocking, checkpoints as much as possible
+   *   - FULL: Blocks until complete, checkpoints entire WAL
+   *   - RESTART: Like FULL, but also restarts WAL file
+   *   - TRUNCATE: Like RESTART, but also truncates WAL file to zero bytes
+   */
+  private performCheckpoint(mode: 'PASSIVE' | 'FULL' | 'RESTART' | 'TRUNCATE' = 'PASSIVE'): void {
+    try {
+      if (this.appDb) {
+        const appResult = this.appDb.pragma(`wal_checkpoint(${mode})`) as Array<{ busy: number; log: number; checkpointed: number }>;
+        if (appResult[0]?.log > this.WAL_SIZE_WARNING_THRESHOLD) {
+          logger.warn('App database WAL file growing large', {
+            database: 'app',
+            logPages: appResult[0].log,
+            checkpointedPages: appResult[0].checkpointed,
+            threshold: this.WAL_SIZE_WARNING_THRESHOLD
+          });
+        }
+      }
+
+      if (this.projectDb) {
+        const projectResult = this.projectDb.pragma(`wal_checkpoint(${mode})`) as Array<{ busy: number; log: number; checkpointed: number }>;
+        if (projectResult[0]?.log > this.WAL_SIZE_WARNING_THRESHOLD) {
+          logger.warn('Project database WAL file growing large', {
+            database: 'project',
+            logPages: projectResult[0].log,
+            checkpointedPages: projectResult[0].checkpointed,
+            threshold: this.WAL_SIZE_WARNING_THRESHOLD
+          });
+        }
+      }
+
+      logger.debug('WAL checkpoint completed', { mode });
+    } catch (error) {
+      logger.error('Failed to checkpoint WAL', error instanceof Error ? error : new Error(String(error)));
+    }
+  }
+
+  /**
+   * Force a full WAL checkpoint and truncate WAL files.
+   * Use sparingly - this blocks until complete.
+   * Recommended to call before app quit for clean shutdown.
+   */
+  forceCheckpoint(): void {
+    logger.info('Forcing WAL checkpoint (TRUNCATE mode)');
+    this.performCheckpoint('TRUNCATE');
+  }
+
+  /**
+   * Get current WAL status for both databases.
+   * Useful for monitoring and debugging.
+   */
+  getWalStatus(): { app: WalStatus | null; project: WalStatus | null } {
+    const getStatus = (db: Database.Database | null, name: string): WalStatus | null => {
+      if (!db) return null;
+
+      try {
+        const checkpoint = db.pragma('wal_checkpoint(PASSIVE)') as Array<{ busy: number; log: number; checkpointed: number }>;
+        const pageSize = db.pragma('page_size') as Array<{ page_size: number }>;
+
+        return {
+          database: name,
+          walPages: checkpoint[0]?.log || 0,
+          checkpointedPages: checkpoint[0]?.checkpointed || 0,
+          isBusy: (checkpoint[0]?.busy || 0) > 0,
+          estimatedWalSizeBytes: (checkpoint[0]?.log || 0) * (pageSize[0]?.page_size || 4096)
+        };
+      } catch (error) {
+        logger.error(`Failed to get WAL status for ${name}`, error instanceof Error ? error : new Error(String(error)));
+        return null;
+      }
+    };
+
+    return {
+      app: getStatus(this.appDb, 'app'),
+      project: getStatus(this.projectDb, 'project')
+    };
+  }
+
+  /**
+   * Close both databases.
+   * Performs final checkpoint before closing for clean shutdown.
    */
   close(): void {
+    // Stop periodic checkpointing
+    this.stopPeriodicCheckpointing();
+
+    // Force final checkpoint before closing
+    this.forceCheckpoint();
+
     if (this.appDb) {
       this.appDb.close();
       this.appDb = null;

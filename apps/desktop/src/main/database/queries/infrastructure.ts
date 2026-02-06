@@ -1,5 +1,13 @@
 import { getDatabase, saveDatabase } from '../index';
 import { v4 as uuidv4 } from 'uuid';
+import { logger } from '../../utils/logger';
+import {
+  PaginationOptions,
+  PaginatedResult,
+  normalizePaginationOptions,
+  buildOrderByClause,
+  buildPaginatedResult
+} from '../utils/pagination';
 
 export interface PortAssignment {
   port: number;
@@ -83,7 +91,11 @@ export function getAllInfrastructure(projectId: string): InfrastructureEquipment
     if (eq.port_assignments) {
       try {
         eq.port_assignments = JSON.parse(eq.port_assignments);
-      } catch {
+      } catch (error) {
+        logger.warn(`Failed to parse port_assignments for equipment ${eq.id}`, {
+          error: error instanceof Error ? error.message : String(error),
+          rawValue: String(eq.port_assignments).substring(0, 100)
+        });
         eq.port_assignments = [];
       }
     } else {
@@ -92,6 +104,72 @@ export function getAllInfrastructure(projectId: string): InfrastructureEquipment
 
     return eq as InfrastructureEquipment;
   });
+}
+
+/**
+ * Allowed sort fields for infrastructure pagination.
+ * These are validated against to prevent SQL injection.
+ */
+const INFRASTRUCTURE_SORT_FIELDS = Object.freeze([
+  'name',
+  'manufacturer',
+  'model',
+  'category',
+  'ip_address',
+  'location',
+  'status',
+  'created_at',
+  'updated_at'
+] as const);
+
+/**
+ * Get infrastructure equipment with pagination support.
+ * Use this for projects with many infrastructure devices.
+ *
+ * @param projectId - Project ID to filter by
+ * @param options - Pagination options (offset, limit, sortBy, sortOrder)
+ * @returns Paginated result with equipment and metadata
+ */
+export function getInfrastructurePaginated(
+  projectId: string,
+  options: Partial<PaginationOptions> = {}
+): PaginatedResult<InfrastructureEquipment> {
+  const db = getDatabase();
+  const normalized = normalizePaginationOptions(options, INFRASTRUCTURE_SORT_FIELDS);
+  const orderBy = buildOrderByClause(normalized.sortBy, normalized.sortOrder, INFRASTRUCTURE_SORT_FIELDS);
+
+  // Get total count
+  const countResult = db.prepare(
+    'SELECT COUNT(*) as count FROM infrastructure_equipment WHERE project_id = ?'
+  ).get(projectId) as { count: number };
+
+  // Get paginated data
+  const equipment = db.prepare(`
+    SELECT * FROM infrastructure_equipment
+    WHERE project_id = ?
+    ORDER BY ${orderBy}
+    LIMIT ? OFFSET ?
+  `).all(projectId, normalized.limit, normalized.offset);
+
+  // Transform equipment (parse JSON fields)
+  const transformedEquipment = equipment.map((eq: any) => {
+    if (eq.port_assignments) {
+      try {
+        eq.port_assignments = JSON.parse(eq.port_assignments);
+      } catch (error) {
+        logger.warn(`Failed to parse port_assignments for equipment ${eq.id}`, {
+          error: error instanceof Error ? error.message : String(error),
+          rawValue: String(eq.port_assignments).substring(0, 100)
+        });
+        eq.port_assignments = [];
+      }
+    } else {
+      eq.port_assignments = [];
+    }
+    return eq as InfrastructureEquipment;
+  });
+
+  return buildPaginatedResult(transformedEquipment, countResult.count, normalized);
 }
 
 export function createInfrastructure(
@@ -157,6 +235,25 @@ export function createInfrastructure(
   return getInfrastructureById(id);
 }
 
+/**
+ * Allowed fields for infrastructure updates.
+ * Frozen to prevent runtime modification (security hardening).
+ */
+const INFRASTRUCTURE_ALLOWED_FIELDS = Object.freeze([
+  'name', 'manufacturer', 'model', 'quantity', 'category',
+  'ip_address', 'mac_address', 'subnet_mask', 'gateway', 'vlan_id', 'hostname',
+  'port_assignments', 'port_count', 'voltage', 'amperage', 'wattage', 'phase',
+  'dimmer_rack_id', 'dimmer_channel_number', 'pd_rack_id', 'pd_circuit_number', 'pd_breaker_number',
+  'circuit', 'circuit_number', 'location', 'position_x', 'position_y', 'position_z',
+  'notes', 'status'
+] as const);
+
+type InfrastructureAllowedField = typeof INFRASTRUCTURE_ALLOWED_FIELDS[number];
+
+function isInfrastructureAllowedField(field: string): field is InfrastructureAllowedField {
+  return INFRASTRUCTURE_ALLOWED_FIELDS.includes(field as InfrastructureAllowedField);
+}
+
 export function updateInfrastructure(
   id: string,
   updates: Partial<InfrastructureEquipment>
@@ -164,17 +261,7 @@ export function updateInfrastructure(
   const db = getDatabase();
   const now = Date.now();
 
-  // Filter out fields that shouldn't be updated
-  const allowedFields = [
-    'name', 'manufacturer', 'model', 'quantity', 'category',
-    'ip_address', 'mac_address', 'subnet_mask', 'gateway', 'vlan_id', 'hostname',
-    'port_assignments', 'port_count', 'voltage', 'amperage', 'wattage', 'phase',
-    'dimmer_rack_id', 'dimmer_channel_number', 'pd_rack_id', 'pd_circuit_number', 'pd_breaker_number',
-    'circuit', 'circuit_number', 'location', 'position_x', 'position_y', 'position_z',
-    'notes', 'status'
-  ];
-
-  const fields = Object.keys(updates).filter(k => allowedFields.includes(k));
+  const fields = Object.keys(updates).filter(isInfrastructureAllowedField);
 
   if (fields.length === 0) {
     return getInfrastructureById(id);
@@ -227,7 +314,11 @@ function getInfrastructureById(id: string): InfrastructureEquipment {
   if ((equipment as any).port_assignments) {
     try {
       (equipment as any).port_assignments = JSON.parse((equipment as any).port_assignments);
-    } catch {
+    } catch (error) {
+      logger.warn(`Failed to parse port_assignments for equipment ${id}`, {
+        error: error instanceof Error ? error.message : String(error),
+        rawValue: String((equipment as any).port_assignments).substring(0, 100)
+      });
       (equipment as any).port_assignments = [];
     }
   } else {

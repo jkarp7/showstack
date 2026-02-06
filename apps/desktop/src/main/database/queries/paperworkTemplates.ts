@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getAppDatabase, saveAppDatabase } from '../index';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -42,30 +41,17 @@ export function getAllPaperworkTemplates(reportType?: string): any[] {
   const db = getAppDatabase();
 
   let query = `SELECT * FROM paperwork_templates`;
-  const params: any[] = [];
 
   if (reportType) {
     query += ` WHERE report_type = ?`;
-    params.push(reportType);
   }
 
   query += ` ORDER BY is_system DESC, updated_at DESC`;
 
-  const result = db.exec(query, params);
+  const stmt = db.prepare(query);
+  const rows = (reportType ? stmt.all(reportType) : stmt.all()) as Record<string, unknown>[];
 
-  if (!result[0]) {
-    return [];
-  }
-
-  const columns = result[0].columns;
-  const values = result[0].values;
-
-  return values.map((row) => {
-    const template: any = {};
-    columns.forEach((col, idx) => {
-      template[col] = row[idx];
-    });
-
+  return rows.map((template) => {
     // Parse JSON fields and convert to camelCase for frontend
     return {
       id: template.id,
@@ -75,9 +61,9 @@ export function getAllPaperworkTemplates(reportType?: string): any[] {
       reportType: template.report_type,
       headerTemplateId: template.header_template_id,
       footerTemplateId: template.footer_template_id,
-      columns: JSON.parse(template.column_config),
-      organization: JSON.parse(template.organization_config),
-      pageSetup: JSON.parse(template.page_setup),
+      columns: JSON.parse(template.column_config as string),
+      organization: JSON.parse(template.organization_config as string),
+      pageSetup: JSON.parse(template.page_setup as string),
       isSystem: Boolean(template.is_system),
       created_at: template.created_at,
       updated_at: template.updated_at
@@ -91,22 +77,11 @@ export function getAllPaperworkTemplates(reportType?: string): any[] {
 export function getSystemPaperworkTemplates(): any[] {
   const db = getAppDatabase();
 
-  const query = `SELECT * FROM paperwork_templates WHERE is_system = 1 ORDER BY report_type, name`;
-  const result = db.exec(query);
+  const rows = db.prepare(
+    `SELECT * FROM paperwork_templates WHERE is_system = 1 ORDER BY report_type, name`
+  ).all() as Record<string, unknown>[];
 
-  if (!result[0]) {
-    return [];
-  }
-
-  const columns = result[0].columns;
-  const values = result[0].values;
-
-  return values.map((row) => {
-    const template: any = {};
-    columns.forEach((col, idx) => {
-      template[col] = row[idx];
-    });
-
+  return rows.map((template) => {
     return {
       id: template.id,
       userId: template.user_id,
@@ -115,9 +90,9 @@ export function getSystemPaperworkTemplates(): any[] {
       reportType: template.report_type,
       headerTemplateId: template.header_template_id,
       footerTemplateId: template.footer_template_id,
-      columns: JSON.parse(template.column_config),
-      organization: JSON.parse(template.organization_config),
-      pageSetup: JSON.parse(template.page_setup),
+      columns: JSON.parse(template.column_config as string),
+      organization: JSON.parse(template.organization_config as string),
+      pageSetup: JSON.parse(template.page_setup as string),
       isSystem: Boolean(template.is_system),
       created_at: template.created_at,
       updated_at: template.updated_at
@@ -130,19 +105,13 @@ export function getSystemPaperworkTemplates(): any[] {
  */
 export function getPaperworkTemplateById(id: string): any | null {
   const db = getAppDatabase();
-  const result = db.exec(`SELECT * FROM paperwork_templates WHERE id = ?`, [id]);
+  const template = db.prepare(
+    `SELECT * FROM paperwork_templates WHERE id = ?`
+  ).get(id) as Record<string, unknown> | undefined;
 
-  if (!result[0] || result[0].values.length === 0) {
+  if (!template) {
     return null;
   }
-
-  const columns = result[0].columns;
-  const values = result[0].values[0];
-
-  const template: any = {};
-  columns.forEach((col, idx) => {
-    template[col] = values[idx];
-  });
 
   return {
     id: template.id,
@@ -152,9 +121,9 @@ export function getPaperworkTemplateById(id: string): any | null {
     reportType: template.report_type,
     headerTemplateId: template.header_template_id,
     footerTemplateId: template.footer_template_id,
-    columns: JSON.parse(template.column_config),
-    organization: JSON.parse(template.organization_config),
-    pageSetup: JSON.parse(template.page_setup),
+    columns: JSON.parse(template.column_config as string),
+    organization: JSON.parse(template.organization_config as string),
+    pageSetup: JSON.parse(template.page_setup as string),
     isSystem: Boolean(template.is_system),
     created_at: template.created_at,
     updated_at: template.updated_at

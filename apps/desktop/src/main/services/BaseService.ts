@@ -1,5 +1,6 @@
 import { errorHandler, ValidationError } from '../errors';
 import { performanceMonitor } from '../monitoring/PerformanceMonitor';
+import { databaseMonitor } from '../database/monitoring/DatabaseMonitor';
 
 /**
  * BaseService
@@ -33,14 +34,24 @@ export abstract class BaseService {
     const start = Date.now();
     try {
       const result = await errorHandler.executeWithRetry(operation, operationName);
-      performanceMonitor.trackDatabaseQuery(
-        operationName,
-        Date.now() - start,
-        trackCount
-      );
+      const duration = Date.now() - start;
+
+      // Track in both monitors for compatibility
+      performanceMonitor.trackDatabaseQuery(operationName, duration, trackCount);
+      databaseMonitor.recordQuery(operationName, duration);
+
       return result;
     } catch (error) {
-      performanceMonitor.trackDatabaseQuery(operationName, Date.now() - start);
+      const duration = Date.now() - start;
+
+      // Track errors in both monitors
+      performanceMonitor.trackDatabaseQuery(operationName, duration);
+      databaseMonitor.recordQuery(
+        operationName,
+        duration,
+        error instanceof Error ? error : new Error(String(error))
+      );
+
       throw error;
     }
   }

@@ -1,6 +1,12 @@
-// @ts-nocheck
 import { getDatabase, saveDatabase } from '../index';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  PaginationOptions,
+  PaginatedResult,
+  normalizePaginationOptions,
+  buildOrderByClause,
+  buildPaginatedResult
+} from '../utils/pagination';
 
 /**
  * Database query functions for ShowStack:Prep module
@@ -14,6 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 export interface ShopOrderProject {
   id: string;
   user_id?: string;
+  parent_project_id?: string;
   production_name: string;
   venue?: string;
   venue_city?: string;
@@ -225,6 +232,7 @@ export interface ShopOrderSection {
   discipline: string;
   sort_order: number;
   page_break: number;
+  notes?: string;
   created_at: number;
   updated_at: number;
 }
@@ -360,6 +368,89 @@ export function getItemsByProjectId(projectId: string): ShopOrderItem[] {
   ).all(projectId);
 
   return items as ShopOrderItem[];
+}
+
+/**
+ * Allowed sort fields for shop order items pagination.
+ * These are validated against to prevent SQL injection.
+ */
+const SHOP_ORDER_ITEM_SORT_FIELDS = Object.freeze([
+  'description',
+  'active_qty',
+  'spare_qty',
+  'venue_qty',
+  'total_qty',
+  'weight',
+  'power',
+  'sort_order',
+  'created_at',
+  'updated_at'
+] as const);
+
+/**
+ * Get shop order items with pagination support.
+ * Use this for large shop orders with many items.
+ *
+ * @param projectId - Project ID to filter by
+ * @param options - Pagination options (offset, limit, sortBy, sortOrder)
+ * @returns Paginated result with items and metadata
+ */
+export function getItemsByProjectIdPaginated(
+  projectId: string,
+  options: Partial<PaginationOptions> = {}
+): PaginatedResult<ShopOrderItem> {
+  const db = getDatabase();
+  const normalized = normalizePaginationOptions(options, SHOP_ORDER_ITEM_SORT_FIELDS);
+  const orderBy = buildOrderByClause(normalized.sortBy, normalized.sortOrder, SHOP_ORDER_ITEM_SORT_FIELDS);
+
+  // Get total count
+  const countResult = db.prepare(`
+    SELECT COUNT(*) as count FROM shop_order_items i
+    JOIN shop_order_sections s ON i.section_id = s.id
+    WHERE s.prep_project_id = ?
+  `).get(projectId) as { count: number };
+
+  // Get paginated data
+  const items = db.prepare(`
+    SELECT i.* FROM shop_order_items i
+    JOIN shop_order_sections s ON i.section_id = s.id
+    WHERE s.prep_project_id = ?
+    ORDER BY ${orderBy}
+    LIMIT ? OFFSET ?
+  `).all(projectId, normalized.limit, normalized.offset);
+
+  return buildPaginatedResult(items as ShopOrderItem[], countResult.count, normalized);
+}
+
+/**
+ * Get shop order items by section with pagination support.
+ *
+ * @param sectionId - Section ID to filter by
+ * @param options - Pagination options
+ * @returns Paginated result with items and metadata
+ */
+export function getItemsBySectionIdPaginated(
+  sectionId: string,
+  options: Partial<PaginationOptions> = {}
+): PaginatedResult<ShopOrderItem> {
+  const db = getDatabase();
+  const normalized = normalizePaginationOptions(options, SHOP_ORDER_ITEM_SORT_FIELDS);
+  const orderBy = buildOrderByClause(normalized.sortBy, normalized.sortOrder, SHOP_ORDER_ITEM_SORT_FIELDS);
+
+  // Get total count
+  const countResult = db.prepare(
+    'SELECT COUNT(*) as count FROM shop_order_items WHERE section_id = ?'
+  ).get(sectionId) as { count: number };
+
+  // Get paginated data
+  const items = db.prepare(`
+    SELECT * FROM shop_order_items
+    WHERE section_id = ?
+    ORDER BY ${orderBy}
+    LIMIT ? OFFSET ?
+  `).all(sectionId, normalized.limit, normalized.offset);
+
+  return buildPaginatedResult(items as ShopOrderItem[], countResult.count, normalized);
 }
 
 export function createShopOrderItem(data: Partial<ShopOrderItem>): ShopOrderItem {
