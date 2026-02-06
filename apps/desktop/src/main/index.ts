@@ -1,6 +1,10 @@
 import { app, BrowserWindow } from 'electron';
+import { loadEnv } from './config/env';
 import { initDatabase } from './database';
 import { windowManager } from './services/WindowManager';
+
+// Load environment variables before anything else
+loadEnv();
 import { registerFixtureHandlers } from './ipc/fixtures';
 import { registerProjectHandlers } from './ipc/projects';
 import { registerDialogHandlers } from './ipc/dialogs';
@@ -20,6 +24,7 @@ import { registerDimmerRackModuleHandlers } from './ipc/dimmerRackModules';
 import { registerPDRackHandlers } from './ipc/pdRacks';
 import { registerPhaseTemplateHandlers } from './ipc/phaseTemplates';
 import { registerInfrastructureHandlers } from './ipc/infrastructure';
+import { registerSyncHandlers, initializePowerSync, disposePowerSync } from './ipc/sync';
 import { backgroundVerifier } from './services/BackgroundVerifier';
 import { licenseService } from './services/LicenseService';
 import { performanceMonitor } from './monitoring/PerformanceMonitor';
@@ -63,6 +68,12 @@ app.on('ready', async () => {
   registerPDRackHandlers();
   registerPhaseTemplateHandlers();
   registerInfrastructureHandlers();
+  registerSyncHandlers();
+
+  // Initialize PowerSync (non-blocking, works offline)
+  initializePowerSync().catch(err => {
+    console.log('[Sync] PowerSync initialization deferred:', err.message);
+  });
 
   // Start background license verification (non-blocking)
   backgroundVerifier.start();
@@ -100,7 +111,10 @@ app.on('activate', () => {
   }
 });
 
-app.on('before-quit', () => {
+app.on('before-quit', async () => {
   // Stop background verification
   backgroundVerifier.stop();
+
+  // Cleanup PowerSync
+  await disposePowerSync();
 });

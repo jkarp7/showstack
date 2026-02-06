@@ -268,6 +268,35 @@ contextBridge.exposeInMainWorld('api', {
     update: (id: string, updates: any) => ipcRenderer.invoke('phaseTemplates:update', id, updates),
     delete: (id: string) => ipcRenderer.invoke('phaseTemplates:delete', id),
     seed: (projectId: string) => ipcRenderer.invoke('phaseTemplates:seed', projectId)
+  },
+
+  // Sync operations (PowerSync + Supabase)
+  sync: {
+    initialize: () => ipcRenderer.invoke('sync:initialize'),
+    isConfigured: () => ipcRenderer.invoke('sync:isConfigured'),
+    isReady: () => ipcRenderer.invoke('sync:isReady'),
+    connect: () => ipcRenderer.invoke('sync:connect'),
+    disconnect: () => ipcRenderer.invoke('sync:disconnect'),
+    sync: () => ipcRenderer.invoke('sync:sync'),
+    getStatus: () => ipcRenderer.invoke('sync:getStatus'),
+    hasPendingChanges: () => ipcRenderer.invoke('sync:hasPendingChanges'),
+    subscribeStatus: () => ipcRenderer.invoke('sync:subscribeStatus'),
+    unsubscribeStatus: () => ipcRenderer.invoke('sync:unsubscribeStatus'),
+    onStatusChanged: (callback: (status: any) => void) => {
+      ipcRenderer.on('sync:statusChanged', (_, status) => callback(status));
+    },
+    offStatusChanged: (callback: (status: any) => void) => {
+      ipcRenderer.removeListener('sync:statusChanged', callback);
+    }
+  },
+
+  // Authentication operations
+  auth: {
+    signIn: (email: string, password: string) => ipcRenderer.invoke('auth:signIn', email, password),
+    signUp: (email: string, password: string) => ipcRenderer.invoke('auth:signUp', email, password),
+    signOut: () => ipcRenderer.invoke('auth:signOut'),
+    resetPassword: (email: string) => ipcRenderer.invoke('auth:resetPassword', email),
+    getState: () => ipcRenderer.invoke('auth:getState')
   }
 });
 
@@ -466,6 +495,39 @@ export interface ElectronAPI {
     update: (id: string, updates: any) => Promise<any>;
     delete: (id: string) => Promise<void>;
     seed: (projectId: string) => Promise<void>;
+  };
+  sync: {
+    initialize: () => Promise<{ success: boolean; error?: string }>;
+    isConfigured: () => Promise<boolean>;
+    isReady: () => Promise<boolean>;
+    connect: () => Promise<{ success: boolean; error?: string }>;
+    disconnect: () => Promise<{ success: boolean; error?: string }>;
+    sync: () => Promise<{ success: boolean; error?: string }>;
+    getStatus: () => Promise<{
+      state: 'disconnected' | 'connecting' | 'connected' | 'syncing' | 'error';
+      connected: boolean;
+      hasPendingChanges: boolean;
+      pendingUploadCount: number;
+      lastSyncedAt: Date | null;
+      error: string | null;
+      isAuthenticated: boolean;
+    }>;
+    hasPendingChanges: () => Promise<boolean>;
+    subscribeStatus: () => Promise<{ success: boolean; error?: string }>;
+    unsubscribeStatus: () => Promise<{ success: boolean }>;
+    onStatusChanged: (callback: (status: any) => void) => void;
+    offStatusChanged: (callback: (status: any) => void) => void;
+  };
+  auth: {
+    signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+    signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+    signOut: () => Promise<{ success: boolean; error?: string }>;
+    resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
+    getState: () => Promise<{
+      isAuthenticated: boolean;
+      userId: string | null;
+      email: string | null;
+    }>;
   };
 }
 
