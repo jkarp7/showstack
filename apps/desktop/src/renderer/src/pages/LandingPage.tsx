@@ -4,6 +4,7 @@ import { NewProjectDialog } from '../components/common/NewProjectDialog';
 import { DeleteProjectDialog } from '../components/common/DeleteProjectDialog';
 import { ImportConflictDialog } from '../components/common/ImportConflictDialog';
 import { AccountDialog } from '../components/License/Account/AccountDialog';
+import { SyncStatusIndicator } from '../components/sync';
 import { useProjectStore, Project } from '../store/projectStore';
 import { useFileStore } from '../store/fileStore';
 
@@ -104,6 +105,9 @@ export function LandingPage() {
           <div>
             <h1 className="text-3xl font-bold">ShowStack</h1>
             <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Production Management Suite</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <SyncStatusIndicator />
           </div>
         </div>
       </header>

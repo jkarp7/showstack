@@ -17,9 +17,11 @@ import { ThemeProvider } from './components/ThemeProvider';
 import { ConsentDialog } from './components/common/ConsentDialog';
 import { SettingsDialog } from './components/common/SettingsDialog';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { AuthModal } from './components/auth';
 import { useUser } from './hooks/useUser';
 import { useSettingsStore } from './store/settingsStore';
 import { useUIStore } from './store/uiStore';
+import { useAuthStore } from './store/authStore';
 import { telemetry } from './services/telemetry';
 import { initializeGlobalErrorHandlers } from './services/globalErrorHandler';
 import { useMenuHandlers } from './hooks/useMenuHandlers';
@@ -148,6 +150,18 @@ export default function App() {
     initializeGlobalErrorHandlers();
   }, []);
 
+  // Initialize cloud sync
+  useEffect(() => {
+    const initSync = async () => {
+      try {
+        await useAuthStore.getState().initializeSync();
+      } catch (error) {
+        console.error('[App] Failed to initialize sync:', error);
+      }
+    };
+    initSync();
+  }, []);
+
   // Track app lifecycle with telemetry
   useEffect(() => {
     const appStartTime = Date.now();
@@ -195,6 +209,8 @@ export default function App() {
               <AppContent />
               {/* Show consent dialog on first launch after splash */}
               {showConsent && <ConsentDialog onClose={handleConsentClose} />}
+              {/* Auth Modal for cloud sync login/signup */}
+              <AuthModal />
             </>
           )}
         </Router>

@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ModuleCard } from '../components/common/ModuleCard';
 import { EditProjectDialog } from '../components/common/EditProjectDialog';
 import { Breadcrumbs } from '../components/common/Breadcrumbs';
+import { SyncStatusIndicator } from '../components/sync';
 import { useProjectStore, Project } from '../store/projectStore';
 
 export function ProjectPage() {
@@ -115,7 +116,8 @@ export function ProjectPage() {
       {/* Header */}
       <header className="flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-end mb-4">
+          <div className="flex items-center justify-end gap-4 mb-4">
+            <SyncStatusIndicator />
             <button
               onClick={() => setIsEditDialogOpen(true)}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium transition"
