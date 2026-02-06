@@ -7,3 +7,4 @@ html/
 **/html/assets/
 *.old.ts
 package-lock.json
+.github/workflows/claude*.yml
