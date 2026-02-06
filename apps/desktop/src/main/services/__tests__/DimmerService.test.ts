@@ -58,8 +58,8 @@ describe('DimmerService', () => {
     circuit_count: 48,
     watts_per_module: 2400,
     project_id: 'project-1',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z'
+    created_at: 1704067200000,
+    updated_at: 1704067200000
   };
 
   const mockDimmerRack2: DimmerRack = {
@@ -68,8 +68,8 @@ describe('DimmerService', () => {
     circuit_count: 96,
     watts_per_module: 1200,
     project_id: 'project-1',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z'
+    created_at: 1704067200000,
+    updated_at: 1704067200000
   };
 
   beforeEach(() => {
@@ -138,7 +138,7 @@ describe('DimmerService', () => {
 
   describe('getWithUsage', () => {
     it('should call getDimmerRacksWithUsage with projectId and return results', async () => {
-      const usageData = [{ ...mockDimmerRack, used_circuits: 10 }];
+      const usageData = [{ ...mockDimmerRack, circuits_used: 10 }];
       vi.mocked(getDimmerRacksWithUsage).mockResolvedValue(usageData);
 
       const result = await service.getWithUsage('project-1');
@@ -168,8 +168,8 @@ describe('DimmerService', () => {
       vi.mocked(createDimmerRack).mockResolvedValue({
         ...data,
         id: 'dimmer-3',
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z'
+        created_at: 1704067200000,
+        updated_at: 1704067200000
       });
 
       const result = await service.create(data, 'project-1');
@@ -188,8 +188,8 @@ describe('DimmerService', () => {
       vi.mocked(createDimmerRack).mockResolvedValue({
         ...data,
         id: 'dimmer-3',
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z'
+        created_at: 1704067200000,
+        updated_at: 1704067200000
       });
 
       await service.create(data);
@@ -199,28 +199,28 @@ describe('DimmerService', () => {
 
     it('should accept circuit_count of 12', async () => {
       const data = { name: 'Rack', circuit_count: 12 as number, watts_per_module: 2400, project_id: 'p1' };
-      vi.mocked(createDimmerRack).mockResolvedValue({ ...data, id: 'id', created_at: '', updated_at: '' });
+      vi.mocked(createDimmerRack).mockResolvedValue({ ...data, id: 'id', created_at: 0, updated_at: 0 });
 
       await expect(service.create(data)).resolves.toBeDefined();
     });
 
     it('should accept circuit_count of 24', async () => {
       const data = { name: 'Rack', circuit_count: 24 as number, watts_per_module: 2400, project_id: 'p1' };
-      vi.mocked(createDimmerRack).mockResolvedValue({ ...data, id: 'id', created_at: '', updated_at: '' });
+      vi.mocked(createDimmerRack).mockResolvedValue({ ...data, id: 'id', created_at: 0, updated_at: 0 });
 
       await expect(service.create(data)).resolves.toBeDefined();
     });
 
     it('should accept circuit_count of 48', async () => {
       const data = { name: 'Rack', circuit_count: 48 as number, watts_per_module: 2400, project_id: 'p1' };
-      vi.mocked(createDimmerRack).mockResolvedValue({ ...data, id: 'id', created_at: '', updated_at: '' });
+      vi.mocked(createDimmerRack).mockResolvedValue({ ...data, id: 'id', created_at: 0, updated_at: 0 });
 
       await expect(service.create(data)).resolves.toBeDefined();
     });
 
     it('should accept circuit_count of 96', async () => {
       const data = { name: 'Rack', circuit_count: 96 as number, watts_per_module: 2400, project_id: 'p1' };
-      vi.mocked(createDimmerRack).mockResolvedValue({ ...data, id: 'id', created_at: '', updated_at: '' });
+      vi.mocked(createDimmerRack).mockResolvedValue({ ...data, id: 'id', created_at: 0, updated_at: 0 });
 
       await expect(service.create(data)).resolves.toBeDefined();
     });
@@ -369,8 +369,8 @@ describe('DimmerService', () => {
         circuit_count: 24,
         watts_per_module: undefined as unknown as number,
         project_id: 'project-1',
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z'
+        created_at: 1704067200000,
+        updated_at: 1704067200000
       };
 
       const result = service.calculatePowerCapacity(rack);

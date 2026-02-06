@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Validation Schema Tests
  *
@@ -64,6 +63,15 @@ import {
   formatValidationErrors,
   safeParse
 } from '../index';
+import type { ValidationResult, ValidationError } from '../utils';
+
+/**
+ * Helper to extract errors from a ValidationResult.
+ * Narrows the union type so TS doesn't complain about accessing .errors.
+ */
+function getErrors(result: { success: boolean; errors?: ValidationError[] }): ValidationError[] {
+  return result.errors ?? [];
+}
 
 describe('Base Entity Schema', () => {
   it('should require id, created_at, and updated_at for full entity', () => {
@@ -73,10 +81,10 @@ describe('Base Entity Schema', () => {
     });
 
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors.some((e) => e.field === 'id')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'created_at')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'updated_at')).toBe(true);
+    {
+      expect(getErrors(result).some((e) => e.field === 'id')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'created_at')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'updated_at')).toBe(true);
     }
   });
 
@@ -127,9 +135,9 @@ describe('FixtureSchema', () => {
     });
 
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors.some((e) => e.field === 'position')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'type')).toBe(true);
+    {
+      expect(getErrors(result).some((e) => e.field === 'position')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'type')).toBe(true);
     }
   });
 
@@ -191,8 +199,8 @@ describe('ProjectSchema', () => {
     });
 
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors.some((e) => e.field === 'name')).toBe(true);
+    {
+      expect(getErrors(result).some((e) => e.field === 'name')).toBe(true);
     }
   });
 
@@ -240,11 +248,11 @@ describe('ShopOrderProjectSchema', () => {
     });
 
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors.some((e) => e.field === 'production_name')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'order_date')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'disciplines')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'current_revision')).toBe(true);
+    {
+      expect(getErrors(result).some((e) => e.field === 'production_name')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'order_date')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'disciplines')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'current_revision')).toBe(true);
     }
   });
 
@@ -517,9 +525,9 @@ describe('Validation Utilities', () => {
     });
 
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0].field).toBe('name');
+    {
+      expect(getErrors(result).length).toBeGreaterThan(0);
+      expect(getErrors(result)[0].field).toBe('name');
     }
   });
 
@@ -597,12 +605,12 @@ describe('ShopOrderSectionSchema', () => {
       notes: 'some notes'
     });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors.some((e) => e.field === 'prep_project_id')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'name')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'discipline')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'sort_order')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'page_break')).toBe(true);
+    {
+      expect(getErrors(result).some((e) => e.field === 'prep_project_id')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'name')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'discipline')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'sort_order')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'page_break')).toBe(true);
     }
   });
 
@@ -693,14 +701,14 @@ describe('ShopOrderItemSchema', () => {
       notes: 'optional note'
     });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors.some((e) => e.field === 'section_id')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'description')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'sort_order')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'active_qty')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'spare_qty')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'venue_qty')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'total_qty')).toBe(true);
+    {
+      expect(getErrors(result).some((e) => e.field === 'section_id')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'description')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'sort_order')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'active_qty')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'spare_qty')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'venue_qty')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'total_qty')).toBe(true);
     }
   });
 
@@ -851,9 +859,9 @@ describe('ShopOrderRevisionSchema', () => {
       notes: 'some notes'
     });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors.some((e) => e.field === 'prep_project_id')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'revision_number')).toBe(true);
+    {
+      expect(getErrors(result).some((e) => e.field === 'prep_project_id')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'revision_number')).toBe(true);
     }
   });
 
@@ -970,10 +978,10 @@ describe('ShopOrderNoteSchema', () => {
       format: 'plain'
     });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors.some((e) => e.field === 'prep_project_id')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'type')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'content')).toBe(true);
+    {
+      expect(getErrors(result).some((e) => e.field === 'prep_project_id')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'type')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'content')).toBe(true);
     }
   });
 
@@ -1056,10 +1064,10 @@ describe('ShopOrderNoteTemplateSchema', () => {
       is_default: 0
     });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors.some((e) => e.field === 'type')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'name')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'content')).toBe(true);
+    {
+      expect(getErrors(result).some((e) => e.field === 'type')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'name')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'content')).toBe(true);
     }
   });
 
@@ -1333,9 +1341,9 @@ describe('CreateInfrastructureEquipmentSchema', () => {
       status: 'active'
     });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors.some((e) => e.field === 'project_id')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'name')).toBe(true);
+    {
+      expect(getErrors(result).some((e) => e.field === 'project_id')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'name')).toBe(true);
     }
   });
 
@@ -1349,7 +1357,7 @@ describe('CreateInfrastructureEquipmentSchema', () => {
     });
     // The id field should be stripped (omitted) but not cause failure
     if (result.success) {
-      expect(result.data.id).toBeUndefined();
+      expect((result.data as any).id).toBeUndefined();
     }
   });
 
@@ -1524,10 +1532,10 @@ describe('CreateDimmerRackSchema', () => {
       location: 'Basement'
     });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors.some((e) => e.field === 'project_id')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'name')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'circuit_count')).toBe(true);
+    {
+      expect(getErrors(result).some((e) => e.field === 'project_id')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'name')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'circuit_count')).toBe(true);
     }
   });
 
@@ -1591,11 +1599,11 @@ describe('CreatePDRackSchema', () => {
       location: 'FOH'
     });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors.some((e) => e.field === 'project_id')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'name')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'voltage')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'circuit_count')).toBe(true);
+    {
+      expect(getErrors(result).some((e) => e.field === 'project_id')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'name')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'voltage')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'circuit_count')).toBe(true);
     }
   });
 
@@ -1736,11 +1744,11 @@ describe('DimmerRackModuleSchema', () => {
       notes: 'test'
     });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.errors.some((e) => e.field === 'rack_id')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'start_circuit')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'end_circuit')).toBe(true);
-      expect(result.errors.some((e) => e.field === 'module_type')).toBe(true);
+    {
+      expect(getErrors(result).some((e) => e.field === 'rack_id')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'start_circuit')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'end_circuit')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'module_type')).toBe(true);
     }
   });
 

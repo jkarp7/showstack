@@ -62,8 +62,8 @@ describe('FixtureService', () => {
     wattage: 750,
     status: 'active',
     notes: '',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z'
+    created_at: 1704067200000,
+    updated_at: 1704067200000
   };
 
   const mockFixture2: Fixture = {
@@ -78,8 +78,8 @@ describe('FixtureService', () => {
     wattage: 470,
     status: 'active',
     notes: '',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z'
+    created_at: 1704067200000,
+    updated_at: 1704067200000
   };
 
   beforeEach(() => {
@@ -196,8 +196,8 @@ describe('FixtureService', () => {
     it('should handle fixtures with no wattage', () => {
       const fixtureNoWattage: Fixture = {
         id: 'fixture-3',
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z'
+        created_at: 1704067200000,
+        updated_at: 1704067200000
       };
       const fixtures = [mockFixture, fixtureNoWattage];
 

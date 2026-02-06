@@ -59,8 +59,8 @@ describe('PDRackService', () => {
     voltage: 208,
     amps_per_breaker: 20,
     project_id: 'project-1',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z'
+    created_at: 1704067200000,
+    updated_at: 1704067200000
   };
 
   const mockPDRack2: PDRack = {
@@ -70,8 +70,8 @@ describe('PDRackService', () => {
     voltage: 120,
     amps_per_breaker: 30,
     project_id: 'project-1',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z'
+    created_at: 1704067200000,
+    updated_at: 1704067200000
   };
 
   beforeEach(() => {
@@ -140,7 +140,7 @@ describe('PDRackService', () => {
 
   describe('getWithUsage', () => {
     it('should call getPDRacksWithUsage with projectId and return results', async () => {
-      const usageData = [{ ...mockPDRack, used_circuits: 5 }];
+      const usageData = [{ ...mockPDRack, circuits_used: 5 }];
       vi.mocked(getPDRacksWithUsage).mockResolvedValue(usageData);
 
       const result = await service.getWithUsage('project-1');
@@ -171,8 +171,8 @@ describe('PDRackService', () => {
       vi.mocked(createPDRack).mockResolvedValue({
         ...data,
         id: 'pd-3',
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z'
+        created_at: 1704067200000,
+        updated_at: 1704067200000
       });
 
       const result = await service.create(data, 'project-1');
@@ -192,8 +192,8 @@ describe('PDRackService', () => {
       vi.mocked(createPDRack).mockResolvedValue({
         ...data,
         id: 'pd-3',
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z'
+        created_at: 1704067200000,
+        updated_at: 1704067200000
       });
 
       await service.create(data);
@@ -205,7 +205,7 @@ describe('PDRackService', () => {
       for (const count of [12, 24, 48, 96]) {
         vi.clearAllMocks();
         const data = { name: 'Rack', circuit_count: count, voltage: 208 as number, amps_per_breaker: 20, project_id: 'p1' };
-        vi.mocked(createPDRack).mockResolvedValue({ ...data, id: 'id', created_at: '', updated_at: '' });
+        vi.mocked(createPDRack).mockResolvedValue({ ...data, id: 'id', created_at: 0, updated_at: 0 });
 
         await expect(service.create(data)).resolves.toBeDefined();
       }
@@ -215,7 +215,7 @@ describe('PDRackService', () => {
       for (const voltage of [120, 208, 230, 240]) {
         vi.clearAllMocks();
         const data = { name: 'Rack', circuit_count: 24 as number, voltage, amps_per_breaker: 20, project_id: 'p1' };
-        vi.mocked(createPDRack).mockResolvedValue({ ...data, id: 'id', created_at: '', updated_at: '' });
+        vi.mocked(createPDRack).mockResolvedValue({ ...data, id: 'id', created_at: 0, updated_at: 0 });
 
         await expect(service.create(data)).resolves.toBeDefined();
       }
@@ -412,8 +412,8 @@ describe('PDRackService', () => {
         voltage: 240,
         amps_per_breaker: undefined as unknown as number,
         project_id: 'project-1',
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z'
+        created_at: 1704067200000,
+        updated_at: 1704067200000
       };
 
       const result = service.calculatePowerCapacity(rack);

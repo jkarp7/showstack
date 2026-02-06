@@ -189,7 +189,7 @@ describe('DatabaseManager', () => {
 
     it('should return a copy (not reference) from getWalConfig', () => {
       const config1 = manager.getWalConfig();
-      config1.checkpointIntervalMs = 999;
+      (config1 as any).checkpointIntervalMs = 999;
       const config2 = manager.getWalConfig();
       expect(config2.checkpointIntervalMs).toBe(5 * 60 * 1000);
     });
