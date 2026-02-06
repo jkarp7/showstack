@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getDatabase, saveDatabase } from '../index';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -18,10 +17,22 @@ import {
 // PREP PROJECTS
 // ============================================
 
+/**
+ * Shop Order Project - represents a prep/rental order for a production.
+ * Can optionally be linked to a parent Project entity for cross-referencing.
+ */
 export interface ShopOrderProject {
+  /** Unique identifier for the shop order project */
   id: string;
+  /** User who owns this shop order (for multi-tenant support) */
   user_id?: string;
+  /**
+   * Reference to the main Project entity (from projects table).
+   * Links this shop order to a lighting plot project for cross-referencing
+   * fixtures, infrastructure, and other production data.
+   */
   parent_project_id?: string;
+  /** Name of the production/show */
   production_name: string;
   venue?: string;
   venue_city?: string;
@@ -155,7 +166,8 @@ export function updateShopOrderProject(id: string, updates: Partial<ShopOrderPro
   const db = getDatabase();
   const now = Date.now();
 
-  const allowedFields = [
+  // Frozen to prevent runtime modification (security hardening)
+  const allowedFields = Object.freeze([
     'parent_project_id',
     'production_name',
     'venue',
@@ -193,7 +205,7 @@ export function updateShopOrderProject(id: string, updates: Partial<ShopOrderPro
     'opening_night_date',
     'closing_date',
     'load_out_date',
-  ];
+  ]);
 
   const fields = Object.keys(updates).filter((k) => allowedFields.includes(k));
 
@@ -278,7 +290,8 @@ export function updateShopOrderSection(id: string, updates: Partial<ShopOrderSec
   const db = getDatabase();
   const now = Date.now();
 
-  const allowedFields = ['name', 'discipline', 'sort_order', 'page_break', 'notes'];
+  // Frozen to prevent runtime modification (security hardening)
+  const allowedFields = Object.freeze(['name', 'discipline', 'sort_order', 'page_break', 'notes']);
   const fields = Object.keys(updates).filter((k) => allowedFields.includes(k));
 
   if (fields.length === 0) {
@@ -544,7 +557,8 @@ export function updateShopOrderItem(
     }
   }
 
-  const allowedFields = [
+  // Frozen to prevent runtime modification (security hardening)
+  const allowedFields = Object.freeze([
     'description',
     'active_qty',
     'spare_qty',
@@ -556,7 +570,7 @@ export function updateShopOrderItem(
     'added_in_revision',
     'removed_in_revision',
     'modified_in_revision',
-  ];
+  ]);
 
   const fields = Object.keys(updates).filter((k) => allowedFields.includes(k));
 
