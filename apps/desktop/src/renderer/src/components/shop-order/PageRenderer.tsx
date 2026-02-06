@@ -1,5 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
-import type { PrintSection, ShopOrderProject, PageLayoutTemplate, LayoutElement } from '../../types/shopOrder';
+import type {
+  PrintSection,
+  ShopOrderProject,
+  PageLayoutTemplate,
+  LayoutElement,
+} from '../../types/shopOrder';
 import { formatPhoneNumber } from '../../utils/phoneFormatter';
 
 interface PageRendererProps {
@@ -98,8 +103,8 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       const availableHeight = container.clientHeight - 16;
 
       // Calculate scale with extra margin for better fit on small screens
-      const scaleX = (availableWidth * 0.90) / pageWidth; // 90% for more aggressive scaling
-      const scaleY = (availableHeight * 0.90) / pageHeight;
+      const scaleX = (availableWidth * 0.9) / pageWidth; // 90% for more aggressive scaling
+      const scaleY = (availableHeight * 0.9) / pageHeight;
 
       // Use the smaller scale to ensure the page fits completely
       const newScale = Math.min(scaleX, scaleY, 1); // Cap at 1 (100%)
@@ -125,7 +130,7 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
         // Load the default layout for this section type
         const defaultLayout = await window.api.prep.layoutTemplates.getDefault(
           project.id,
-          section.type
+          section.type,
         );
 
         if (defaultLayout) {
@@ -163,7 +168,9 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       if (!logoPath && (project as any).parent_project_id) {
         console.log('[PageRenderer] No logo in ShopOrderProject, checking parent project...');
         try {
-          const parentProject = await window.api.projects.getById((project as any).parent_project_id);
+          const parentProject = await window.api.projects.getById(
+            (project as any).parent_project_id,
+          );
           if (parentProject?.logo_path) {
             console.log('[PageRenderer] Found logo in parent project:', parentProject.logo_path);
             logoPath = parentProject.logo_path;
@@ -210,7 +217,11 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       if (!timestamp) return 'Not set';
       try {
         const date = new Date(timestamp);
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        });
       } catch {
         return String(timestamp);
       }
@@ -306,10 +317,13 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
     // Map textAlign to justify-content for flexbox
     const getJustifyContent = (textAlign: string) => {
       switch (textAlign) {
-        case 'center': return 'center';
-        case 'right': return 'flex-end';
+        case 'center':
+          return 'center';
+        case 'right':
+          return 'flex-end';
         case 'left':
-        default: return 'flex-start';
+        default:
+          return 'flex-start';
       }
     };
 
@@ -339,7 +353,7 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       // Special handling for logo field - render as image
       if (config.fieldType === 'logo' && logoDataUrl) {
         return (
-          <div key={element.id} style={{...elementStyle, padding: 0}}>
+          <div key={element.id} style={{ ...elementStyle, padding: 0 }}>
             <img
               src={logoDataUrl}
               alt="Project Logo"
@@ -361,7 +375,7 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       return (
         <div key={element.id} style={elementStyle}>
           {label && <span style={{ fontWeight: style.fontWeight || 'normal' }}>{label} </span>}
-          <span style={{ color: value ? (style.color || '#000') : '#999' }}>{displayValue}</span>
+          <span style={{ color: value ? style.color || '#000' : '#999' }}>{displayValue}</span>
         </div>
       );
     }
@@ -408,7 +422,7 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
             style={{
               position: 'absolute',
               left: `${left}px`,
-              top: `${top + height/2}px`,
+              top: `${top + height / 2}px`,
               width: `${width}px`,
               borderBottom: `${thickness}px solid ${color}`,
               height: '0',
@@ -424,7 +438,7 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
       if (!src) return null;
 
       return (
-        <div key={element.id} style={{...elementStyle, padding: 0}}>
+        <div key={element.id} style={{ ...elementStyle, padding: 0 }}>
           <img
             src={src}
             alt={config.altText || 'Image'}
@@ -443,12 +457,30 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
     // Dynamic content: Equipment List
     if (element.element_type === 'equipment_list') {
       return (
-        <div key={element.id} style={{ ...elementStyle, overflow: 'auto', display: 'block', alignItems: 'flex-start', padding: '8px' }}>
-          <div className="text-xs font-semibold mb-2" style={{ color: '#374151', backgroundColor: '#DBEAFE', padding: '6px', textAlign: 'center' }}>
+        <div
+          key={element.id}
+          style={{
+            ...elementStyle,
+            overflow: 'auto',
+            display: 'block',
+            alignItems: 'flex-start',
+            padding: '8px',
+          }}
+        >
+          <div
+            className="text-xs font-semibold mb-2"
+            style={{
+              color: '#374151',
+              backgroundColor: '#DBEAFE',
+              padding: '6px',
+              textAlign: 'center',
+            }}
+          >
             EQUIPMENT LIST
           </div>
           <div className="text-xs text-gray-600 italic">
-            Equipment items grouped by section will appear here<br/>
+            Equipment items grouped by section will appear here
+            <br />
             Full details render in PDF export
           </div>
         </div>
@@ -458,9 +490,19 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
     // Dynamic content: Notes
     if (element.element_type === 'notes_content') {
       return (
-        <div key={element.id} style={{ ...elementStyle, overflow: 'auto', display: 'block', alignItems: 'flex-start', padding: '12px' }}>
+        <div
+          key={element.id}
+          style={{
+            ...elementStyle,
+            overflow: 'auto',
+            display: 'block',
+            alignItems: 'flex-start',
+            padding: '12px',
+          }}
+        >
           <div className="text-xs text-gray-600 italic">
-            Notes content ({config.noteType || 'general_notes'}) will appear here<br/>
+            Notes content ({config.noteType || 'general_notes'}) will appear here
+            <br />
             Full content renders in PDF export
           </div>
         </div>
@@ -470,12 +512,30 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
     // Dynamic content: Revision Log
     if (element.element_type === 'revision_log') {
       return (
-        <div key={element.id} style={{ ...elementStyle, overflow: 'auto', display: 'block', alignItems: 'flex-start', padding: '8px' }}>
-          <div className="text-xs font-semibold mb-2" style={{ color: '#92400E', backgroundColor: '#FEF3C7', padding: '6px', textAlign: 'center' }}>
+        <div
+          key={element.id}
+          style={{
+            ...elementStyle,
+            overflow: 'auto',
+            display: 'block',
+            alignItems: 'flex-start',
+            padding: '8px',
+          }}
+        >
+          <div
+            className="text-xs font-semibold mb-2"
+            style={{
+              color: '#92400E',
+              backgroundColor: '#FEF3C7',
+              padding: '6px',
+              textAlign: 'center',
+            }}
+          >
             REVISION CHANGE LOG
           </div>
           <div className="text-xs text-gray-600 italic">
-            Revision changes will appear here<br/>
+            Revision changes will appear here
+            <br />
             Full changelog renders in PDF export
           </div>
         </div>
@@ -530,9 +590,7 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
           <div className="flex items-center justify-center h-full">
             <div className="text-center text-gray-500">
               <div className="text-lg font-semibold mb-2">No Layout Found</div>
-              <div className="text-sm">
-                No default layout exists for {section.type}
-              </div>
+              <div className="text-sm">No default layout exists for {section.type}</div>
             </div>
           </div>
         </div>
@@ -555,29 +613,29 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
           height: `${pageHeight}px`,
         }}
       >
-      {/* Margin guides (visual only, not printed) */}
-      <div
-        className="absolute border border-dashed border-gray-300 pointer-events-none"
-        style={{
-          top: `${marginTop}px`,
-          left: `${marginLeft}px`,
-          right: `${marginRight}px`,
-          bottom: `${marginBottom}px`,
-        }}
-      />
+        {/* Margin guides (visual only, not printed) */}
+        <div
+          className="absolute border border-dashed border-gray-300 pointer-events-none"
+          style={{
+            top: `${marginTop}px`,
+            left: `${marginLeft}px`,
+            right: `${marginRight}px`,
+            bottom: `${marginBottom}px`,
+          }}
+        />
 
-      {/* Content area */}
-      <div
-        className="absolute"
-        style={{
-          top: `${marginTop}px`,
-          left: `${marginLeft}px`,
-          width: `${contentWidth}px`,
-          height: `${contentHeight}px`,
-        }}
-      >
-        {layout.elements.map((element) => renderElement(element))}
-      </div>
+        {/* Content area */}
+        <div
+          className="absolute"
+          style={{
+            top: `${marginTop}px`,
+            left: `${marginLeft}px`,
+            width: `${contentWidth}px`,
+            height: `${contentHeight}px`,
+          }}
+        >
+          {layout.elements.map((element) => renderElement(element))}
+        </div>
 
         {/* Page number */}
         {pageSettings.showPageNumbers && pageNumber !== undefined && (

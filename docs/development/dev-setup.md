@@ -1,4 +1,5 @@
 # ShowStack:Production - Development Environment Setup
+
 ## Getting Started with the Codebase
 
 **Last Updated:** November 16, 2025
@@ -22,6 +23,7 @@ code --version
 ```
 
 ### Install Node.js (if needed)
+
 ```bash
 # Using nvm (recommended)
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
@@ -103,6 +105,7 @@ npm install
 ```
 
 This will install:
+
 - Electron
 - React 18
 - TypeScript
@@ -119,6 +122,7 @@ cp .env.example .env
 ```
 
 Edit `.env`:
+
 ```env
 # Development
 NODE_ENV=development
@@ -147,6 +151,7 @@ npm run dev
 ```
 
 This starts:
+
 1. Vite dev server for React (hot reload)
 2. Electron app in development mode
 3. TypeScript compiler in watch mode
@@ -311,9 +316,9 @@ describe('DataGrid', () => {
     const fixtures = [
       { position: '1', type: 'Source Four 26°', channel: '101' },
     ];
-    
+
     render(<DataGrid fixtures={fixtures} />);
-    
+
     expect(screen.getByText('Source Four 26°')).toBeInTheDocument();
   });
 });
@@ -330,15 +335,15 @@ import { Database } from '../../src/main/database';
 
 test('create and retrieve fixture', async () => {
   const db = new Database(':memory:');
-  
+
   const fixture = await db.fixtures.create({
     position: '1',
     type: 'Source Four 26°',
     channel: '101',
   });
-  
+
   const retrieved = await db.fixtures.findById(fixture.id);
-  
+
   expect(retrieved.position).toBe('1');
 });
 ```
@@ -351,12 +356,12 @@ import { test, expect } from '@playwright/test';
 
 test('add new fixture', async ({ page }) => {
   await page.goto('app://');
-  
+
   await page.click('text=Add Fixture');
   await page.fill('[name="position"]', '1');
   await page.fill('[name="type"]', 'Source Four 26°');
   await page.click('text=Save');
-  
+
   await expect(page.locator('text=Source Four 26°')).toBeVisible();
 });
 ```
@@ -398,6 +403,7 @@ Create `.vscode/launch.json`:
 Renderer process automatically opens DevTools in development mode.
 
 Main process debugging:
+
 ```bash
 # Start with inspect flag
 npm run dev -- --inspect=5858
@@ -547,21 +553,26 @@ npm run dist:win
 ## 📚 Learning Resources
 
 ### Electron
+
 - [Electron Documentation](https://www.electronjs.org/docs)
 - [Electron Builder](https://www.electron.build/)
 
 ### React & TypeScript
+
 - [React Docs](https://react.dev/)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 
 ### Tailwind CSS
+
 - [Tailwind Docs](https://tailwindcss.com/docs)
 - [Radix UI](https://www.radix-ui.com/)
 
 ### State Management
+
 - [Zustand](https://github.com/pmndrs/zustand)
 
 ### SQLite
+
 - [better-sqlite3](https://github.com/WiseLibs/better-sqlite3)
 - [SQLite Docs](https://www.sqlite.org/docs.html)
 
@@ -572,12 +583,14 @@ npm run dist:win
 ### Common Issues
 
 **Issue:** `better-sqlite3` build fails
+
 ```bash
 # Solution: Rebuild for Electron
 npm rebuild better-sqlite3 --build-from-source
 ```
 
 **Issue:** Hot reload not working
+
 ```bash
 # Solution: Clear Vite cache
 rm -rf node_modules/.vite
@@ -585,6 +598,7 @@ npm run dev
 ```
 
 **Issue:** Database locked
+
 ```bash
 # Solution: Close all connections
 # Check for orphaned processes
@@ -593,6 +607,7 @@ kill -9 <PID>
 ```
 
 **Issue:** App won't launch in production
+
 ```bash
 # Solution: Check console for errors
 # Run from terminal to see output
@@ -649,6 +664,7 @@ chore: Update dependencies
 ### Reporting Bugs
 
 Include:
+
 1. Operating system and version
 2. Electron/Node.js version
 3. Steps to reproduce
@@ -660,6 +676,7 @@ Include:
 ## ✅ Pre-Launch Checklist
 
 Before committing:
+
 - [ ] Code compiles without errors
 - [ ] All tests pass
 - [ ] Linter passes (no warnings)
@@ -668,6 +685,7 @@ Before committing:
 - [ ] Manual testing completed
 
 Before creating PR:
+
 - [ ] Branch is up to date with `develop`
 - [ ] Conflicts resolved
 - [ ] Commit messages follow convention
@@ -675,6 +693,7 @@ Before creating PR:
 - [ ] Reviewers assigned
 
 Before release:
+
 - [ ] Version number bumped
 - [ ] CHANGELOG updated
 - [ ] All features tested on all platforms

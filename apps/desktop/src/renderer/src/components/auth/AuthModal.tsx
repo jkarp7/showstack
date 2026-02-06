@@ -13,13 +13,8 @@ import { SignUpForm } from './SignUpForm';
 import { PasswordResetForm } from './PasswordResetForm';
 
 export function AuthModal() {
-  const {
-    showAuthModal,
-    authModalView,
-    closeAuthModal,
-    setAuthModalView,
-    isLoading,
-  } = useAuthStore();
+  const { showAuthModal, authModalView, closeAuthModal, setAuthModalView, isLoading } =
+    useAuthStore();
 
   // Handle escape key to close modal
   useEffect(() => {

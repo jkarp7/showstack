@@ -52,7 +52,7 @@ export function getAllPhaseLabels(labels?: PhaseLabels): Array<{ value: Phase; l
   return [
     { value: 'A' as Phase, label: getPhaseLabel('A', labels) },
     { value: 'B' as Phase, label: getPhaseLabel('B', labels) },
-    { value: 'C' as Phase, label: getPhaseLabel('C', labels) }
+    { value: 'C' as Phase, label: getPhaseLabel('C', labels) },
   ];
 }
 
@@ -76,6 +76,6 @@ export function getDefaultPhaseLabels(): PhaseLabels {
   return {
     phase_label_a: 'A',
     phase_label_b: 'B',
-    phase_label_c: 'C'
+    phase_label_c: 'C',
   };
 }

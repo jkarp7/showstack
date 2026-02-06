@@ -30,21 +30,24 @@ export function InteractiveTableHeader({
   onReorder,
   onContextMenu,
   isDragging = false,
-  isDropTarget = false
+  isDropTarget = false,
 }: InteractiveTableHeaderProps) {
   const [isResizing, setIsResizing] = useState(false);
   const [resizeStartX, setResizeStartX] = useState(0);
   const [resizeStartWidth, setResizeStartWidth] = useState(0);
 
   // Handle resize start
-  const handleResizeStart = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleResizeStart = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    setIsResizing(true);
-    setResizeStartX(e.clientX);
-    setResizeStartWidth(column.width || 15);
-  }, [column.width]);
+      setIsResizing(true);
+      setResizeStartX(e.clientX);
+      setResizeStartWidth(column.width || 15);
+    },
+    [column.width],
+  );
 
   // Handle resize move
   useEffect(() => {
@@ -75,20 +78,23 @@ export function InteractiveTableHeader({
   }, [isResizing, resizeStartX, resizeStartWidth, column.id, onResize]);
 
   // Handle drag start
-  const handleDragStart = useCallback((e: React.DragEvent) => {
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', columnIndex.toString());
+  const handleDragStart = useCallback(
+    (e: React.DragEvent) => {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', columnIndex.toString());
 
-    // Create a ghost element
-    const ghost = document.createElement('div');
-    ghost.textContent = column.label;
-    ghost.className = 'px-4 py-2 bg-blue-600 text-white rounded shadow-lg';
-    ghost.style.position = 'absolute';
-    ghost.style.top = '-1000px';
-    document.body.appendChild(ghost);
-    e.dataTransfer.setDragImage(ghost, 0, 0);
-    setTimeout(() => document.body.removeChild(ghost), 0);
-  }, [column.label, columnIndex]);
+      // Create a ghost element
+      const ghost = document.createElement('div');
+      ghost.textContent = column.label;
+      ghost.className = 'px-4 py-2 bg-blue-600 text-white rounded shadow-lg';
+      ghost.style.position = 'absolute';
+      ghost.style.top = '-1000px';
+      document.body.appendChild(ghost);
+      e.dataTransfer.setDragImage(ghost, 0, 0);
+      setTimeout(() => document.body.removeChild(ghost), 0);
+    },
+    [column.label, columnIndex],
+  );
 
   // Handle drag over
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -97,24 +103,30 @@ export function InteractiveTableHeader({
   }, []);
 
   // Handle drop
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
-    const toIndex = columnIndex;
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+      const toIndex = columnIndex;
 
-    if (fromIndex !== toIndex && onReorder) {
-      onReorder(fromIndex, toIndex);
-    }
-  }, [columnIndex, onReorder]);
+      if (fromIndex !== toIndex && onReorder) {
+        onReorder(fromIndex, toIndex);
+      }
+    },
+    [columnIndex, onReorder],
+  );
 
   // Handle context menu
-  const handleContextMenuClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation(); // Prevent event from bubbling to table body
-    if (onContextMenu) {
-      onContextMenu(column.id, e);
-    }
-  }, [column.id, column.label, onContextMenu]);
+  const handleContextMenuClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation(); // Prevent event from bubbling to table body
+      if (onContextMenu) {
+        onContextMenu(column.id, e);
+      }
+    },
+    [column.id, column.label, onContextMenu],
+  );
 
   return (
     <th
@@ -127,7 +139,7 @@ export function InteractiveTableHeader({
         width: `${column.width}%`,
         opacity: isDragging ? 0.5 : 1,
         position: 'relative',
-        ...headerStyle
+        ...headerStyle,
       }}
       className={`
         bg-transparent text-black px-2 py-1 text-left font-semibold

@@ -9,6 +9,7 @@ Successfully implemented the **print-ready shop order output** with drag-and-dro
 ## ✅ Requirements Completed
 
 ### 1. Drag-and-Drop Builder Component
+
 **Location**: `src/renderer/src/components/prep/PrintBuilder.tsx` (437 lines)
 
 - **Section Palette**: 11 draggable section types in left sidebar
@@ -17,6 +18,7 @@ Successfully implemented the **print-ready shop order output** with drag-and-dro
 - **Visual Feedback**: Hover states, selected state, enabled/disabled indicators
 
 ### 2. Custom Layouts Saved as Templates
+
 **Implementation**: Full template management in `prepStore.ts`
 
 - **Save Template**: Dialog to name and save current layout
@@ -25,6 +27,7 @@ Successfully implemented the **print-ready shop order output** with drag-and-dro
 - **Default Template**: Auto-created on first use with standard layout
 
 ### 3. Default Page Breaks
+
 **Default Template Includes** (lines 123-133 in PrintBuilder.tsx):
 
 ```typescript
@@ -42,6 +45,7 @@ Successfully implemented the **print-ready shop order output** with drag-and-dro
 ```
 
 ### 4. Revision Summary Conditional Rendering
+
 **Implementation**: `onlyShowIfRevisions` flag
 
 ```typescript
@@ -56,12 +60,13 @@ Successfully implemented the **print-ready shop order output** with drag-and-dro
 ```
 
 Visual indicator in UI (line 292-295):
+
 ```tsx
-{section.type === 'revision-summary' && section.config.onlyShowIfRevisions && (
-  <div className="text-xs text-yellow-500 mt-1">
-    ⚠ Only shown if revisions exist
-  </div>
-)}
+{
+  section.type === 'revision-summary' && section.config.onlyShowIfRevisions && (
+    <div className="text-xs text-yellow-500 mt-1">⚠ Only shown if revisions exist</div>
+  );
+}
 ```
 
 ---
@@ -69,9 +74,11 @@ Visual indicator in UI (line 292-295):
 ## Files Modified
 
 ### 1. Type Definitions
+
 **File**: `src/renderer/src/types/prep.ts`
 
 **Added** (lines 264-361):
+
 - `PrintSectionType` - 11 section types
 - `PrintSection` - Section with order, enabled state, config
 - `PrintSectionConfig` - Configuration options for each section type
@@ -79,9 +86,11 @@ Visual indicator in UI (line 292-295):
 - `PrintPageSettings` - Page size, orientation, margins, headers/footers
 
 ### 2. PrintBuilder Component
+
 **File**: `src/renderer/src/components/prep/PrintBuilder.tsx` (437 lines, NEW)
 
 **Features**:
+
 - Section palette with all available sections
 - Drag-and-drop builder area
 - Section reordering
@@ -92,9 +101,11 @@ Visual indicator in UI (line 292-295):
 - Default template creation
 
 ### 3. Store Integration
+
 **File**: `src/renderer/src/store/prepStore.ts`
 
 **Added**:
+
 - State: `printTemplates: PrintTemplate[]`
 - State: `currentTemplate: PrintTemplate | null`
 - Action: `loadPrintTemplates(projectId)`
@@ -103,9 +114,11 @@ Visual indicator in UI (line 292-295):
 - Action: `deleteTemplate(templateId)`
 
 ### 4. Prep Module Integration
+
 **File**: `src/renderer/src/pages/modules/Prep.tsx`
 
 **Changes**:
+
 - Import `PrintBuilder` component (line 15)
 - Extract `currentTemplate`, `setCurrentTemplate`, `saveTemplate` from store (line 21)
 - Replace placeholder with `<PrintBuilder />` in output tab (lines 1015-1022)
@@ -114,40 +127,45 @@ Visual indicator in UI (line 292-295):
 
 ## Section Types Available
 
-| Type | Label | Description |
-|------|-------|-------------|
-| `cover` | Cover Page | Title, logo, and production info |
-| `project-details` | Project Details | Production name, order date, disciplines |
-| `venue-info` | Venue Information | Venue name, city, state, contact |
-| `schedule` | Schedule | Load-in, tech, show dates |
-| `contacts` | Contacts | GM, PM, LD, ALD contacts |
-| `equipment-by-section` | Equipment by Section | Full equipment list by section |
-| `equipment-summary` | Equipment Summary | Totals and summary statistics |
-| `notes` | Notes | General conditions and notes |
-| `revision-summary` | Revision Summary | Change history (conditional) |
-| `custom-text` | Custom Text | Custom text block |
-| `page-break` | Page Break | Start new page |
+| Type                   | Label                | Description                              |
+| ---------------------- | -------------------- | ---------------------------------------- |
+| `cover`                | Cover Page           | Title, logo, and production info         |
+| `project-details`      | Project Details      | Production name, order date, disciplines |
+| `venue-info`           | Venue Information    | Venue name, city, state, contact         |
+| `schedule`             | Schedule             | Load-in, tech, show dates                |
+| `contacts`             | Contacts             | GM, PM, LD, ALD contacts                 |
+| `equipment-by-section` | Equipment by Section | Full equipment list by section           |
+| `equipment-summary`    | Equipment Summary    | Totals and summary statistics            |
+| `notes`                | Notes                | General conditions and notes             |
+| `revision-summary`     | Revision Summary     | Change history (conditional)             |
+| `custom-text`          | Custom Text          | Custom text block                        |
+| `page-break`           | Page Break           | Start new page                           |
 
 ---
 
 ## Configuration Options by Section Type
 
 ### Cover
+
 - `showLogo` - Display project logo
 - `showDate` - Display order date
 
 ### Project Details
+
 - `includeFields` - Array of field names to include
 
 ### Venue Info
+
 - `includeContact` - Show venue contact information
 - `includeAddress` - Show venue address
 
 ### Schedule
+
 - `dateFormat` - Date format string (e.g., "MM/DD/YYYY")
 - `includeDates` - Array of date fields to show
 
 ### Equipment
+
 - `groupBy` - Group by section/discipline/none
 - `showVenueColumn` - Display venue quantity column
 - `showWeightColumn` - Display weight column
@@ -155,11 +173,13 @@ Visual indicator in UI (line 292-295):
 - `showRevisionMarkers` - Show revision indicators
 
 ### Revision Summary
+
 - `showRevisionDetails` - Include revision metadata
 - `includeChangelog` - Show detailed change log
 - `onlyShowIfRevisions` - **Only render if revisions > 0**
 
 ### Custom Text
+
 - `customText` - Text content
 - `fontSize` - Font size in points
 - `fontWeight` - 'normal' or 'bold'
@@ -194,16 +214,16 @@ Visual indicator in UI (line 292-295):
 
 ## Page Settings
 
-| Setting | Options |
-|---------|---------|
-| **Page Size** | Letter, Legal, A4, Tabloid |
-| **Orientation** | Portrait, Landscape |
-| **Page Numbers** | Show / Hide |
-| **Margins** | Top, Right, Bottom, Left (in inches) |
-| **Header** | Optional header text |
-| **Footer** | Optional footer text |
-| **Font Size** | Base font size for content |
-| **Font Family** | Font family name |
+| Setting          | Options                              |
+| ---------------- | ------------------------------------ |
+| **Page Size**    | Letter, Legal, A4, Tabloid           |
+| **Orientation**  | Portrait, Landscape                  |
+| **Page Numbers** | Show / Hide                          |
+| **Margins**      | Top, Right, Bottom, Left (in inches) |
+| **Header**       | Optional header text                 |
+| **Footer**       | Optional footer text                 |
+| **Font Size**    | Base font size for content           |
+| **Font Family**  | Font family name                     |
 
 ---
 
@@ -212,6 +232,7 @@ Visual indicator in UI (line 292-295):
 ### Template Storage
 
 Templates are stored in:
+
 1. **Database** (when IPC handlers implemented): `prep_print_templates` table
 2. **Local State** (fallback): Zustand store in memory
 
@@ -227,6 +248,7 @@ Templates are stored in:
 ## Future Enhancements
 
 ### Database Schema (Not Yet Implemented)
+
 ```sql
 CREATE TABLE prep_print_templates (
   id TEXT PRIMARY KEY,
@@ -243,6 +265,7 @@ CREATE TABLE prep_print_templates (
 ```
 
 ### IPC Handlers (Not Yet Implemented)
+
 **Location**: `src/main/ipc/prep.ts`
 
 ```typescript
@@ -255,12 +278,14 @@ printTemplates: {
 ```
 
 ### PDF Generation (Future Work)
+
 - Render template to PDF using configured sections
 - Apply page settings (size, orientation, margins)
 - Include headers, footers, page numbers
 - Export to file or print directly
 
 ### Section Configuration Panels (Future Work)
+
 - Dedicated config panel for selected section
 - Live preview of configuration changes
 - Validation for required fields
@@ -323,6 +348,7 @@ These limitations are documented as future work and don't affect the core drag-a
 **Branch**: `claude/prep-module-implementation-01XCiV5mFscuSkzzmo1GmGfe`
 
 **Commits**:
+
 1. `14893ed` - Initial Prep module implementation (before removing POC)
 2. `0ccda1a` - Merge develop branch
 3. `35353c5` - Add implementation summary
@@ -335,12 +361,14 @@ These limitations are documented as future work and don't affect the core drag-a
 ## Summary
 
 ✅ **All requirements met**:
+
 1. ✅ Drag-and-drop builder component
 2. ✅ Custom layouts saved as templates
 3. ✅ Default page breaks (cover, details, notes, revisions)
 4. ✅ Revision summary only shown if revisions exist
 
 **Total Implementation**:
+
 - 4 files modified
 - 626 lines added
 - 1 new component (PrintBuilder.tsx)

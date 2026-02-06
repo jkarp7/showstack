@@ -7,7 +7,7 @@ import {
   CreatePDRackSchema,
   UpdatePDRackSchema,
   parseWithZod,
-  formatValidationErrors
+  formatValidationErrors,
 } from '@showstack/shared';
 
 export function registerPDRackHandlers(): void {
@@ -19,7 +19,7 @@ export function registerPDRackHandlers(): void {
       console.error('Failed to get PD racks:', {
         operation: 'pdRacks:getAll',
         projectId,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -37,7 +37,7 @@ export function registerPDRackHandlers(): void {
       console.error('Failed to get PD rack:', {
         operation: 'pdRacks:getById',
         id,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -48,40 +48,43 @@ export function registerPDRackHandlers(): void {
   });
 
   // Create PD rack
-  ipcMain.handle('pdRacks:create', async (_event, rack: Omit<PDRack, 'id' | 'created_at' | 'updated_at'>, projectId?: string) => {
-    try {
-      // Add project_id for validation
-      const rackWithProject = { ...rack, project_id: projectId || rack.project_id };
+  ipcMain.handle(
+    'pdRacks:create',
+    async (_event, rack: Omit<PDRack, 'id' | 'created_at' | 'updated_at'>, projectId?: string) => {
+      try {
+        // Add project_id for validation
+        const rackWithProject = { ...rack, project_id: projectId || rack.project_id };
 
-      // Validate with Zod schema
-      const validation = parseWithZod(CreatePDRackSchema, rackWithProject);
+        // Validate with Zod schema
+        const validation = parseWithZod(CreatePDRackSchema, rackWithProject);
 
-      if (!validation.success) {
-        const errorMessage = formatValidationErrors(validation.errors);
-        throw new ValidationError(
-          `Invalid PD rack data:\n${errorMessage}`,
-          validation.errors[0]?.field || 'unknown',
-          rack
-        );
+        if (!validation.success) {
+          const errorMessage = formatValidationErrors(validation.errors);
+          throw new ValidationError(
+            `Invalid PD rack data:\n${errorMessage}`,
+            validation.errors[0]?.field || 'unknown',
+            rack,
+          );
+        }
+
+        return await pdRackService.create(rack, projectId);
+      } catch (error) {
+        console.error('Failed to create PD rack:', {
+          operation: 'pdRacks:create',
+          rack,
+          error: error instanceof Error ? error.message : error,
+        });
+
+        if (error instanceof ValidationError) {
+          throw new Error(error.toUserMessage());
+        }
+        if (error instanceof DatabaseError) {
+          throw new Error(`Unable to create PD rack: ${error.message}`);
+        }
+        throw error;
       }
-
-      return await pdRackService.create(rack, projectId);
-    } catch (error) {
-      console.error('Failed to create PD rack:', {
-        operation: 'pdRacks:create',
-        rack,
-        error: error instanceof Error ? error.message : error
-      });
-
-      if (error instanceof ValidationError) {
-        throw new Error(error.toUserMessage());
-      }
-      if (error instanceof DatabaseError) {
-        throw new Error(`Unable to create PD rack: ${error.message}`);
-      }
-      throw error;
-    }
-  });
+    },
+  );
 
   // Update PD rack
   ipcMain.handle('pdRacks:update', async (_event, id: string, updates: Partial<PDRack>) => {
@@ -94,7 +97,7 @@ export function registerPDRackHandlers(): void {
         throw new ValidationError(
           `Invalid PD rack update data:\n${errorMessage}`,
           validation.errors[0]?.field || 'unknown',
-          updates
+          updates,
         );
       }
 
@@ -104,7 +107,7 @@ export function registerPDRackHandlers(): void {
         operation: 'pdRacks:update',
         id,
         updates,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof ValidationError) {
@@ -125,7 +128,7 @@ export function registerPDRackHandlers(): void {
       console.error('Failed to delete PD rack:', {
         operation: 'pdRacks:delete',
         id,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -143,7 +146,7 @@ export function registerPDRackHandlers(): void {
       console.error('Failed to get PD racks with usage:', {
         operation: 'pdRacks:getWithUsage',
         projectId,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {

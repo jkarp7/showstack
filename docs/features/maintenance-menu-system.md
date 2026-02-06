@@ -16,6 +16,7 @@ Lightwright 6 parity feature - custom categorization system for grouping fixture
 ## Core Functionality
 
 ### Menu Bar Integration
+
 - Menu bar "Maintenance" menu with entry for every column (including user-defined)
 - Each menu item opens dialog with 4 tabs:
   - **Notes**: General category notes
@@ -24,12 +25,14 @@ Lightwright 6 parity feature - custom categorization system for grouping fixture
   - **Position**: Location-specific notes
 
 ### Custom Categories/Families
+
 - Create custom categories for grouping fixtures
   - Examples: "ALL Incandescent", "ALL Moving Lights", "FOH Fixtures"
 - Rule-based auto-assignment (e.g., Type contains "MAC" → "Moving Lights")
 - Manual assignment override capability
 
 ### Category Integration
+
 - Show on labels
 - Group on paperwork
 - Drive shop order automation (Equipment Manager → Shop Order)
@@ -41,24 +44,28 @@ Lightwright 6 parity feature - custom categorization system for grouping fixture
 ## Implementation Phases
 
 ### Phase 1: Core System (5-7 days)
+
 - Database schema for categories and rules
 - Category CRUD operations
 - Rule engine for auto-assignment
 - IPC handlers
 
 ### Phase 2: Maintenance Menu UI (3-4 days)
+
 - Menu bar integration
 - 4-tab dialog component
 - Category creation/editing interface
 - Rule builder UI
 
 ### Phase 3: Integration (4-5 days)
+
 - Label integration
 - Paperwork grouping
 - Shop order automation
 - Visual indicators in Equipment Manager
 
 ### Phase 4: Advanced Features (2-3 days)
+
 - Color-coding system
 - Advanced filtering
 - Import/export categories
@@ -126,17 +133,20 @@ CREATE TABLE fixture_category_assignments (
 ## User Interface
 
 ### Maintenance Menu
+
 - Location: Main menu bar
 - Dynamic menu items based on columns
 - Opens category dialog for selected column
 
 ### Category Dialog
+
 - 4 tabs: Notes, Physical, Vectorworks, Position
 - Category list on left sidebar
 - Add/Edit/Delete category buttons
 - Rule builder section
 
 ### Rule Builder
+
 - Field dropdown (all fixture columns)
 - Operator dropdown (contains, equals, starts_with, etc.)
 - Value input
@@ -148,21 +158,25 @@ CREATE TABLE fixture_category_assignments (
 ## Integration Points
 
 ### Equipment Manager
+
 - Color-coded category indicators in grid
 - Filter by category dropdown
 - Bulk assign category action
 
 ### Labels
+
 - Category field available for label design
 - Color indicator on labels
 - Auto-populate from category
 
 ### Paperwork
+
 - Group by category option
 - Category-based sections
 - Color-coded grouping
 
 ### Shop Order Automation
+
 - Auto-generate shop order sections from categories
 - Group equipment by category
 - Quantity rollup by category

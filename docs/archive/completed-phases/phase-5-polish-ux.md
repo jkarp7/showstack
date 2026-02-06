@@ -7,6 +7,7 @@ Enhance the unified visual editor with professional UX improvements, keyboard sh
 ## Goals
 
 Transform the visual editor into a professional, polished tool with:
+
 - **Professional keyboard shortcuts** for power users
 - **Inline editing** for faster text updates
 - **Visual effects** (shadows, advanced borders) for better designs
@@ -18,23 +19,27 @@ Transform the visual editor into a professional, polished tool with:
 ## Current Architecture (from Exploration)
 
 ### LayoutDesigner Component
+
 - **Local undo/redo** (50 entries) - NOT using global undoRedoStore
 - **Minimal keyboard shortcuts** - only Delete key
 - **State:** template, selectedElementId, zoom, showGrid, history/historyIndex
 - **Operations:** handleElementDrop, Move, Resize, Update, Delete
 
 ### ElementInspector
+
 - **Current controls:** Typography, Colors, Fill & Borders, Spacing, Position
 - **Missing:** Shadows, transforms, advanced effects
 - **Pattern:** Collapsible sections with form controls
 
 ### LayoutCanvas
+
 - **Selection feedback:** ring-2 ring-blue-500 (selected), hover:ring-2 ring-gray-400 (hover)
 - **Drag/drop:** Full implementation with ghost preview
 - **Grid rendering:** CSS background-image linear-gradients
 - **Resize handles:** Bottom-right, right edge, bottom edge
 
 ### Patterns to Follow
+
 - Immutable state: `prev => ({ ...prev, ... })`
 - Mark changes: `hasChanges: true`
 - Timestamps: `updated_at: Date.now()`
@@ -53,6 +58,7 @@ Transform the visual editor into a professional, polished tool with:
 #### Features to Implement
 
 **Keyboard Shortcuts:**
+
 - `Cmd/Ctrl+S` - Save template
 - `Cmd/Ctrl+Z` - Undo
 - `Cmd/Ctrl+Shift+Z` - Redo
@@ -64,6 +70,7 @@ Transform the visual editor into a professional, polished tool with:
 - `Cmd/Ctrl+A` - Select all (future: for multi-select)
 
 **Selection Improvements:**
+
 - Thicker selection ring (ring-4 instead of ring-2)
 - Selection color based on element type (blue for text, green for shapes, purple for images)
 - Show element info badge on selection (type, size, position)
@@ -73,6 +80,7 @@ Transform the visual editor into a professional, polished tool with:
 #### Files to Modify
 
 **`src/renderer/src/components/prep/layout/LayoutDesigner.tsx`:**
+
 ```typescript
 // Add useEffect for keyboard listeners
 useEffect(() => {
@@ -117,7 +125,7 @@ useEffect(() => {
 
 // New function: handleDuplicate
 const handleDuplicate = () => {
-  const element = template.elements.find(el => el.id === selectedElementId);
+  const element = template.elements.find((el) => el.id === selectedElementId);
   if (!element) return;
 
   const newElement = {
@@ -126,13 +134,13 @@ const handleDuplicate = () => {
     grid_column: Math.min(element.grid_column + 2, template.grid_columns - element.column_span),
     grid_row: Math.min(element.grid_row + 2, template.grid_rows - element.row_span),
     created_at: Date.now(),
-    updated_at: Date.now()
+    updated_at: Date.now(),
   };
 
-  setTemplate(prev => ({
+  setTemplate((prev) => ({
     ...prev,
     elements: [...prev.elements, newElement],
-    updated_at: Date.now()
+    updated_at: Date.now(),
   }));
 
   setSelectedElementId(newElement.id);
@@ -142,7 +150,7 @@ const handleDuplicate = () => {
 
 // New function: handleNudge
 const handleNudge = (key: string, shift: boolean) => {
-  const element = template.elements.find(el => el.id === selectedElementId);
+  const element = template.elements.find((el) => el.id === selectedElementId);
   if (!element) return;
 
   const step = shift ? 4 : 1;
@@ -150,7 +158,8 @@ const handleNudge = (key: string, shift: boolean) => {
   let newRow = element.grid_row;
 
   if (key === 'ArrowLeft') newCol = Math.max(0, newCol - step);
-  if (key === 'ArrowRight') newCol = Math.min(template.grid_columns - element.column_span, newCol + step);
+  if (key === 'ArrowRight')
+    newCol = Math.min(template.grid_columns - element.column_span, newCol + step);
   if (key === 'ArrowUp') newRow = Math.max(0, newRow - step);
   if (key === 'ArrowDown') newRow = Math.min(template.grid_rows - element.row_span, newRow + step);
 
@@ -161,6 +170,7 @@ const handleNudge = (key: string, shift: boolean) => {
 ```
 
 **`src/renderer/src/components/prep/layout/LayoutCanvas.tsx`:**
+
 ```typescript
 // Update selection ring styles (around line 416)
 const getSelectionStyles = (elementType: string, isSelected: boolean, isHovered: boolean) => {
@@ -194,6 +204,7 @@ const getSelectionStyles = (elementType: string, isSelected: boolean, isHovered:
 ```
 
 #### Testing Checklist
+
 - [ ] All keyboard shortcuts work correctly
 - [ ] Shortcuts don't conflict with browser defaults
 - [ ] Duplicate creates exact copy with offset position
@@ -214,6 +225,7 @@ const getSelectionStyles = (elementType: string, isSelected: boolean, isHovered:
 #### Features to Implement
 
 **Inline Editing:**
+
 - Double-click text/dataField element to edit
 - Inline textarea appears over element with same styling
 - Auto-focus and select all text on edit
@@ -225,6 +237,7 @@ const getSelectionStyles = (elementType: string, isSelected: boolean, isHovered:
 #### Files to Modify
 
 **`src/renderer/src/components/prep/layout/LayoutCanvas.tsx`:**
+
 ```typescript
 // Add state for inline editing
 const [editingElementId, setEditingElementId] = useState<string | null>(null);
@@ -311,6 +324,7 @@ useEffect(() => {
 ```
 
 **Add edit mode indicator:**
+
 ```typescript
 {editingElementId === element.id && (
   <div className="absolute -top-6 right-0 bg-blue-600 text-white text-xs px-2 py-1 rounded shadow-lg">
@@ -320,6 +334,7 @@ useEffect(() => {
 ```
 
 #### Testing Checklist
+
 - [ ] Double-click on text element enters edit mode
 - [ ] Double-click on dataField label enters edit mode
 - [ ] Textarea matches element styling
@@ -340,6 +355,7 @@ useEffect(() => {
 #### Features to Implement
 
 **Shadow Controls (box-shadow):**
+
 - Offset X (px)
 - Offset Y (px)
 - Blur radius (px)
@@ -348,28 +364,31 @@ useEffect(() => {
 - Enable/disable toggle
 
 **Advanced Borders:**
+
 - Individual side widths (top, right, bottom, left)
 - Border radius per corner (top-left, top-right, bottom-right, bottom-left)
 - Border style per side (solid, dashed, dotted, double)
 
 **Text Shadow:**
+
 - Same controls as box shadow but for text elements
 
 #### Files to Modify
 
 **Update type definition in `src/renderer/src/types/prep.ts`:**
+
 ```typescript
 export interface ElementStyle {
   // ... existing properties
 
   // Shadow
   shadowEnabled?: boolean;
-  shadowOffsetX?: number;  // px
-  shadowOffsetY?: number;  // px
-  shadowBlur?: number;     // px
-  shadowSpread?: number;   // px (box-shadow only)
-  shadowColor?: string;    // hex
-  shadowOpacity?: number;  // 0-1
+  shadowOffsetX?: number; // px
+  shadowOffsetY?: number; // px
+  shadowBlur?: number; // px
+  shadowSpread?: number; // px (box-shadow only)
+  shadowColor?: string; // hex
+  shadowOpacity?: number; // 0-1
 
   // Text Shadow
   textShadowEnabled?: boolean;
@@ -621,6 +640,7 @@ const hexToRgba = (hex: string, alpha: number) => {
 Ensure shadows render in PDF exports (Puppeteer should handle CSS automatically, but verify).
 
 #### Testing Checklist
+
 - [ ] Drop shadow controls work for shapes
 - [ ] Text shadow controls work for text elements
 - [ ] Advanced border controls set individual sides
@@ -641,12 +661,14 @@ Ensure shadows render in PDF exports (Puppeteer should handle CSS automatically,
 #### Features to Implement
 
 **Grid Snap Settings:**
+
 - Toggle snap-to-grid (on by default)
 - Snap size selector (1, 2, 4, 8 cells)
 - Visual feedback when snapped
 - Magnetic snap feel (subtle resistance)
 
 **Alignment Guides:**
+
 - Red lines appear when element aligns with other elements
 - Horizontal and vertical guides
 - Show distance measurements
@@ -801,6 +823,7 @@ if (alignmentGuides.horizontal.length > 0) {
 ```
 
 #### Testing Checklist
+
 - [ ] Snap-to-grid toggle works
 - [ ] Snap size selector changes snap behavior
 - [ ] Alignment guides appear when dragging near other elements
@@ -819,6 +842,7 @@ if (alignmentGuides.horizontal.length > 0) {
 #### Features to Implement
 
 **Export Template:**
+
 - Export button in toolbar
 - Save as JSON file with .showstack-template extension
 - Include template metadata (name, description, page_type)
@@ -827,6 +851,7 @@ if (alignmentGuides.horizontal.length > 0) {
 - Include version number for compatibility
 
 **Import Template:**
+
 - Import button in toolbar
 - File picker for .json or .showstack-template files
 - Validate JSON structure
@@ -835,12 +860,14 @@ if (alignmentGuides.horizontal.length > 0) {
 - Preview template before import (future enhancement)
 
 **Duplicate Template:**
+
 - Duplicate button in template library
 - Copy template with "(Copy)" suffix
 - Increment name if duplicate already exists
 - Navigate to duplicated template immediately
 
 **Template Library Improvements:**
+
 - Preview thumbnail for each template
 - Filter by page type
 - Sort by name or date
@@ -891,9 +918,9 @@ export function exportTemplate(template: PageLayoutTemplate): string {
       grid_gap: template.grid_gap,
       page_width: template.page_width,
       page_height: template.page_height,
-      config: template.config
+      config: template.config,
     },
-    elements: template.elements.map(el => ({
+    elements: template.elements.map((el) => ({
       element_type: el.element_type,
       config: typeof el.config === 'string' ? JSON.parse(el.config) : el.config,
       grid_column: el.grid_column,
@@ -901,10 +928,10 @@ export function exportTemplate(template: PageLayoutTemplate): string {
       column_span: el.column_span,
       row_span: el.row_span,
       layer: el.layer,
-      style: typeof el.style === 'string' ? JSON.parse(el.style) : el.style
+      style: typeof el.style === 'string' ? JSON.parse(el.style) : el.style,
     })),
     exported_at: Date.now(),
-    exported_by: 'ShowStack'
+    exported_by: 'ShowStack',
   };
 
   return JSON.stringify(exportData, null, 2);
@@ -952,8 +979,8 @@ export function importTemplate(json: string): PageLayoutTemplate {
       layer: el.layer,
       style: JSON.stringify(el.style),
       created_at: now,
-      updated_at: now
-    }))
+      updated_at: now,
+    })),
   };
 }
 ```
@@ -1047,13 +1074,13 @@ const handleDuplicate = async () => {
       is_default: false,
       created_at: Date.now(),
       updated_at: Date.now(),
-      elements: template.elements.map(el => ({
+      elements: template.elements.map((el) => ({
         ...el,
         id: `${el.element_type}_${Date.now()}_${Math.random()}`,
         template_id: `${template.page_type}_${Date.now()}`,
         created_at: Date.now(),
-        updated_at: Date.now()
-      }))
+        updated_at: Date.now(),
+      })),
     };
 
     const savedId = await window.api.prep.layoutTemplates.create(duplicatedTemplate);
@@ -1083,6 +1110,7 @@ const generateUniqueName = (baseName: string): string => {
 ```
 
 #### Testing Checklist
+
 - [ ] Export creates valid JSON file
 - [ ] Exported file can be re-imported
 - [ ] Import validates JSON structure
@@ -1102,17 +1130,20 @@ const generateUniqueName = (baseName: string): string => {
 #### Features to Implement
 
 **Tooltips:**
+
 - All toolbar buttons have descriptive tooltips
 - Show keyboard shortcut in tooltip if available
 - ElementInspector property labels have help tooltips
 - Palette element types have descriptions
 
 **Help Text:**
+
 - Inline help text for complex controls
 - Expandable "?" icon for detailed explanations
 - Links to documentation (future)
 
 **Validation:**
+
 - Required fields (template name)
 - Min/max value enforcement
 - Prevent invalid configurations
@@ -1122,6 +1153,7 @@ const generateUniqueName = (baseName: string): string => {
 - Warn before closing with unsaved changes
 
 **User Feedback:**
+
 - Success notifications after save
 - Error notifications with recovery options
 - Confirmation dialogs for destructive actions
@@ -1394,6 +1426,7 @@ const handleDelete = () => {
 ```
 
 #### Testing Checklist
+
 - [ ] All toolbar buttons have tooltips
 - [ ] Tooltips show keyboard shortcuts
 - [ ] Help icons provide useful information
@@ -1415,17 +1448,20 @@ const handleDelete = () => {
 #### Features to Implement
 
 **Loading States:**
+
 - Spinner during template save
 - Loading skeleton for template library
 - Disabled state for buttons during operations
 - Progress indicators for long operations
 
 **Empty States:**
+
 - Template library empty state with "Create Template" CTA
 - Element palette guide when no elements
 - Canvas guide for new templates
 
 **Final Polish:**
+
 - Smooth transitions and animations
 - Consistent spacing and alignment
 - Color contrast improvements
@@ -1434,6 +1470,7 @@ const handleDelete = () => {
 - Bug fixes from testing
 
 **Performance Optimizations:**
+
 - Debounce expensive operations (search, filter)
 - Memoize complex calculations
 - Virtual scrolling for large element lists (if needed)
@@ -1624,7 +1661,7 @@ const debouncedSearch = useCallback(
   debounce((query: string) => {
     setSearchResults(performSearch(query));
   }, 300),
-  []
+  [],
 );
 ```
 
@@ -1672,6 +1709,7 @@ class ErrorBoundary extends React.Component {
 ```
 
 #### Testing Checklist
+
 - [ ] Loading spinners appear during async operations
 - [ ] Buttons disable correctly during operations
 - [ ] Empty states are helpful and actionable
@@ -1689,6 +1727,7 @@ class ErrorBoundary extends React.Component {
 ## Summary
 
 ### Total Implementation
+
 - **Duration:** 7 days
 - **Files Created:** 5 (Tooltip, Notification, ConfirmDialog, EmptyState, LoadingSpinner, templateExport)
 - **Files Modified:** 15+ (LayoutDesigner, LayoutCanvas, ElementInspector, and supporting files)
@@ -1698,33 +1737,18 @@ class ErrorBoundary extends React.Component {
 ### Features Delivered
 
 **UX Improvements:**
+
 1. ✅ Comprehensive keyboard shortcuts (Cmd+S, Cmd+Z, Delete, Arrow keys, etc.)
 2. ✅ Undo/redo improvements with keyboard support
 3. ✅ Inline text editing with double-click
 4. ✅ Enhanced element selection with colored rings and info badges
 5. ✅ Tooltips on all interactive elements
 
-**Visual Enhancements:**
-6. ✅ Drop shadows for elements
-7. ✅ Text shadows for text elements
-8. ✅ Advanced border controls (per-side, per-corner)
-9. ✅ Grid snap settings (toggle, size selector)
-10. ✅ Alignment guides (red lines, snap-to-guide)
+**Visual Enhancements:** 6. ✅ Drop shadows for elements 7. ✅ Text shadows for text elements 8. ✅ Advanced border controls (per-side, per-corner) 9. ✅ Grid snap settings (toggle, size selector) 10. ✅ Alignment guides (red lines, snap-to-guide)
 
-**Template Management:**
-11. ✅ Export templates to JSON
-12. ✅ Import templates from JSON
-13. ✅ Duplicate templates
-14. ✅ Template library improvements
+**Template Management:** 11. ✅ Export templates to JSON 12. ✅ Import templates from JSON 13. ✅ Duplicate templates 14. ✅ Template library improvements
 
-**Polish & Validation:**
-15. ✅ Input validation with error messages
-16. ✅ Loading states for async operations
-17. ✅ Success/error notifications
-18. ✅ Confirmation dialogs
-19. ✅ Empty states
-20. ✅ Accessibility improvements
-21. ✅ Performance optimizations
+**Polish & Validation:** 15. ✅ Input validation with error messages 16. ✅ Loading states for async operations 17. ✅ Success/error notifications 18. ✅ Confirmation dialogs 19. ✅ Empty states 20. ✅ Accessibility improvements 21. ✅ Performance optimizations
 
 ### Success Criteria
 
@@ -1740,6 +1764,7 @@ class ErrorBoundary extends React.Component {
 ### Post-Phase 5 Enhancements
 
 **Future Considerations (not in scope):**
+
 - Multi-select with Cmd/Ctrl+click
 - Copy/paste with Cmd+C/V
 - Group/ungroup elements
@@ -1758,12 +1783,14 @@ class ErrorBoundary extends React.Component {
 ## Critical Files Reference
 
 **Core Components:**
+
 - `src/renderer/src/components/prep/layout/LayoutDesigner.tsx` - Main designer with toolbar and state
 - `src/renderer/src/components/prep/layout/LayoutCanvas.tsx` - Canvas rendering and interactions
 - `src/renderer/src/components/prep/layout/ElementInspector.tsx` - Property editing panel
 - `src/renderer/src/components/prep/layout/ElementPalette.tsx` - Element type selection
 
 **New Utilities:**
+
 - `src/renderer/src/utils/prep/templateExport.ts` - Export/import logic
 - `src/renderer/src/components/common/Tooltip.tsx` - Tooltip component
 - `src/renderer/src/components/common/Notification.tsx` - Notification system
@@ -1772,9 +1799,11 @@ class ErrorBoundary extends React.Component {
 - `src/renderer/src/components/common/EmptyState.tsx` - Empty state displays
 
 **Type Definitions:**
+
 - `src/renderer/src/types/prep.ts` - ElementStyle interface updates
 
 **Related Systems:**
+
 - `src/renderer/src/store/undoRedoStore.ts` - Global undo/redo (not used by designer)
 - `src/main/utils/labelSheetRenderer.ts` - PDF export (verify shadow support)
 
@@ -1783,23 +1812,27 @@ class ErrorBoundary extends React.Component {
 ## Implementation Notes
 
 ### Keyboard Shortcut Conflicts
+
 - Use `e.preventDefault()` for all shortcuts
 - Check `e.metaKey || e.ctrlKey` for cross-platform support
 - Don't override browser shortcuts like Cmd+W, Cmd+T, etc.
 
 ### State Management
+
 - Continue using local state in LayoutDesigner
 - Don't integrate with global undoRedoStore (different patterns)
 - Use `prev => ({ ...prev, ... })` for immutable updates
 - Always mark `hasChanges: true` and `updated_at: Date.now()`
 
 ### Performance Considerations
+
 - Debounce expensive operations (alignment guide calculations)
 - Memoize filtered/sorted lists
 - Use CSS transitions instead of JS animations
 - Virtual scrolling only if template library grows large (100+ templates)
 
 ### Testing Strategy
+
 1. Unit test utility functions (templateExport, validation)
 2. Integration test keyboard shortcuts
 3. Manual test all UI interactions

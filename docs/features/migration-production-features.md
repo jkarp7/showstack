@@ -1,4 +1,5 @@
 # ShowStack Production Features Specification
+
 ## Complete Production Management & Tour Logistics
 
 **Created:** December 28, 2024
@@ -12,6 +13,7 @@
 The **Production Edition** ($599/year) combines all design features (Lighting + Sound + Video) with comprehensive production management and tour logistics tools. This document specifies the features needed to compete with Propared while leveraging ShowStack's unique integration advantages.
 
 **Target Users:**
+
 - Technical Directors
 - Production Managers
 - Tour Managers
@@ -20,6 +22,7 @@ The **Production Edition** ($599/year) combines all design features (Lighting + 
 - Festival producers
 
 **Competitive Positioning:**
+
 - **vs. Propared:** 66% cheaper, includes technical design tools, offline-first
 - **vs. Spreadsheets:** Automated workflows, real-time updates, professional output
 - **vs. Separate Tools:** Integrated platform, data flows automatically
@@ -29,12 +32,19 @@ The **Production Edition** ($599/year) combines all design features (Lighting + 
 ## Feature Domains
 
 ### 1. Production Scheduling
+
 ### 2. Budget Tracking & Management
+
 ### 3. Labor & Crew Management
+
 ### 4. Inventory Management (Extended)
+
 ### 5. Vendor Management
+
 ### 6. Production Books & Sharing
+
 ### 7. Tour Logistics
+
 ### 8. Reporting & Analytics
 
 ---
@@ -42,15 +52,18 @@ The **Production Edition** ($599/year) combines all design features (Lighting + 
 ## 1. Production Scheduling
 
 ### Overview
+
 Comprehensive production calendar system for managing rehearsals, performances, load-in/load-out, technical rehearsals, and all production events.
 
 ### Core Features
 
 #### 1.1 Production Calendar
+
 **Component:** `ProductionCalendar.tsx`
 **Database Table:** `production_events`
 
 **Fields:**
+
 - `id` (primary key)
 - `project_id` (foreign key)
 - `event_type` (enum: rehearsal, performance, load_in, load_out, focus, tech_rehearsal, dress_rehearsal, meeting, notes_session, other)
@@ -70,6 +83,7 @@ Comprehensive production calendar system for managing rehearsals, performances, 
 - `updated_at` (datetime)
 
 **View Modes:**
+
 - Year view (annual calendar)
 - Month view (traditional calendar grid)
 - Week view (7-day schedule)
@@ -80,6 +94,7 @@ Comprehensive production calendar system for managing rehearsals, performances, 
 - Venue view (filter by location)
 
 **Key Capabilities:**
+
 - Drag-and-drop event creation and editing
 - Event templates (e.g., "Standard Tech Day")
 - Recurring events (daily, weekly, custom patterns)
@@ -91,6 +106,7 @@ Comprehensive production calendar system for managing rehearsals, performances, 
 - Real-time sync across users (if collaboration enabled)
 
 **Integration Points:**
+
 - **Labor Management:** Crew booking synced with calendar
 - **Budget Tracking:** Labor hours calculated from scheduled events
 - **Inventory:** Equipment allocated to specific events
@@ -99,18 +115,21 @@ Comprehensive production calendar system for managing rehearsals, performances, 
 ---
 
 #### 1.2 Event Templates
+
 **Component:** `EventTemplates.tsx`
 **Database Table:** `event_templates`
 
 **Purpose:** Reusable event structures for common production workflows
 
 **Template Examples:**
+
 - "Tech Day" (10am-10pm, lighting/sound/video focus)
 - "Dress Rehearsal" (call 6pm, curtain 7:30pm, notes after)
 - "Load-In Day" (8am-6pm, full crew)
 - "Performance Day" (call 6pm, curtain 8pm, strike after)
 
 **Template Fields:**
+
 - Template name
 - Default duration
 - Default event types
@@ -119,6 +138,7 @@ Comprehensive production calendar system for managing rehearsals, performances, 
 - Notes template
 
 **Usage:**
+
 - One-click event creation from template
 - Edit template to update all future instances
 - Share templates across projects
@@ -126,15 +146,18 @@ Comprehensive production calendar system for managing rehearsals, performances, 
 ---
 
 #### 1.3 Recurring Events
+
 **Component:** `RecurringEventDialog.tsx`
 
 **Patterns:**
+
 - Daily (every day, weekdays only, custom interval)
 - Weekly (specific days of week)
 - Custom (e.g., "every other Tuesday")
 - Series exceptions (skip specific dates)
 
 **Series Management:**
+
 - Edit single occurrence vs. entire series
 - Delete single occurrence vs. series
 - Add exceptions (holidays, dark days)
@@ -148,6 +171,7 @@ Comprehensive production calendar system for managing rehearsals, performances, 
 **Recurrence:** rrule library
 
 **Database Schema:**
+
 ```sql
 CREATE TABLE production_events (
   id INTEGER PRIMARY KEY,
@@ -190,15 +214,18 @@ CREATE TABLE event_templates (
 ## 2. Budget Tracking & Management
 
 ### Overview
+
 Comprehensive budget system with line-item tracking, real-time cost updates, and integration with labor, equipment, and vendor costs.
 
 ### Core Features
 
 #### 2.1 Budget Builder
+
 **Component:** `BudgetBuilder.tsx`
 **Database Table:** `budgets`, `budget_line_items`
 
 **Budget Structure:**
+
 - Budget name (e.g., "Spring 2025 Production")
 - Budget categories:
   - Labor (crew wages, overtime)
@@ -209,6 +236,7 @@ Comprehensive budget system with line-item tracking, real-time cost updates, and
   - Other (insurance, permits, misc)
 
 **Line Item Fields:**
+
 - `id` (primary key)
 - `budget_id` (foreign key)
 - `category` (enum)
@@ -224,6 +252,7 @@ Comprehensive budget system with line-item tracking, real-time cost updates, and
 - `status` (enum: estimated, confirmed, paid, overdue)
 
 **Key Capabilities:**
+
 - Line-item budget creation
 - Category subtotals and grand totals
 - Estimated vs. actual tracking
@@ -240,26 +269,31 @@ Comprehensive budget system with line-item tracking, real-time cost updates, and
 ---
 
 #### 2.2 Labor Cost Integration
+
 **Component:** `LaborCostCalculator.tsx`
 
 **Automatic Cost Calculation:**
+
 - Crew positions linked to pay rates
 - Hours calculated from production calendar
 - Overtime rules applied automatically
 - Weekly hour limits with warnings
 
 **Formula:**
+
 ```
 Labor Cost = (Regular Hours × Hourly Rate) + (Overtime Hours × OT Rate)
 ```
 
 **Overtime Rules (Configurable):**
+
 - Daily OT: Hours > 8 in a day
 - Weekly OT: Hours > 40 in a week
 - Double-time: Hours > 12 in a day or > 60 in a week
 - OT multipliers: 1.5× (time and a half), 2× (double time)
 
 **Real-Time Updates:**
+
 - Calendar event added → Labor hours increase → Budget updates
 - Crew member booked → Labor cost increases → Budget updates
 - Pay rate changed → All budgets recalculate
@@ -267,15 +301,18 @@ Labor Cost = (Regular Hours × Hourly Rate) + (Overtime Hours × OT Rate)
 ---
 
 #### 2.3 Equipment Cost Integration
+
 **Component:** `EquipmentCostTracker.tsx`
 
 **Integration with Shop Orders:**
+
 - Equipment items from shop orders automatically populate budget
 - Rental costs (daily, weekly, per-show rates)
 - Purchase costs for owned equipment (capital expenses)
 - Shipping/freight costs
 
 **Equipment Budget Line Items:**
+
 - Lighting equipment rental
 - Sound equipment rental
 - Video equipment rental
@@ -285,9 +322,11 @@ Labor Cost = (Regular Hours × Hourly Rate) + (Overtime Hours × OT Rate)
 ---
 
 #### 2.4 Vendor Management Integration
+
 **Component:** `VendorCostTracker.tsx`
 
 **Purchase Orders linked to Budget:**
+
 - PO created → Budget line item created
 - PO confirmed → Estimated cost updated
 - Invoice received → Actual cost entered
@@ -298,6 +337,7 @@ Labor Cost = (Regular Hours × Hourly Rate) + (Overtime Hours × OT Rate)
 ### Technical Implementation
 
 **Database Schema:**
+
 ```sql
 CREATE TABLE budgets (
   id INTEGER PRIMARY KEY,
@@ -339,15 +379,18 @@ CREATE TABLE budget_line_items (
 ## 3. Labor & Crew Management
 
 ### Overview
+
 Comprehensive crew database, position management, booking system, and payroll integration.
 
 ### Core Features
 
 #### 3.1 Crew Database
+
 **Component:** `CrewDatabase.tsx`
 **Database Table:** `crew_members`
 
 **Crew Member Fields:**
+
 - `id` (primary key)
 - `first_name` (string)
 - `last_name` (string)
@@ -368,6 +411,7 @@ Comprehensive crew database, position management, booking system, and payroll in
 - `updated_at` (datetime)
 
 **Key Capabilities:**
+
 - Add, edit, delete crew members
 - Search and filter (by position, department, availability)
 - Tag system for skills (rigging, programming, etc.)
@@ -378,10 +422,12 @@ Comprehensive crew database, position management, booking system, and payroll in
 ---
 
 #### 3.2 Position Management
+
 **Component:** `PositionManager.tsx`
 **Database Table:** `crew_positions`
 
 **Position Fields:**
+
 - `id` (primary key)
 - `title` (string, e.g., "Master Electrician")
 - `department` (enum: lighting, sound, video, production, stage, wardrobe, props)
@@ -393,6 +439,7 @@ Comprehensive crew database, position management, booking system, and payroll in
 **Standard Positions (Pre-populated):**
 
 **Lighting:**
+
 - Lighting Designer
 - Associate Lighting Designer
 - Master Electrician
@@ -402,6 +449,7 @@ Comprehensive crew database, position management, booking system, and payroll in
 - Follow Spot Operator
 
 **Sound:**
+
 - Sound Designer
 - A1 (Audio #1)
 - A2 (Audio #2)
@@ -409,12 +457,14 @@ Comprehensive crew database, position management, booking system, and payroll in
 - Mic Tech
 
 **Video:**
+
 - Projection Designer
 - Video Engineer
 - Media Server Operator
 - Projectionist
 
 **Production:**
+
 - Production Manager
 - Technical Director
 - Stage Manager
@@ -422,6 +472,7 @@ Comprehensive crew database, position management, booking system, and payroll in
 - Production Assistant
 
 **Other:**
+
 - Stagehand
 - Carpenter
 - Scenic Artist
@@ -433,10 +484,12 @@ Comprehensive crew database, position management, booking system, and payroll in
 ---
 
 #### 3.3 Crew Booking System
+
 **Component:** `CrewBooking.tsx`
 **Database Table:** `crew_bookings`
 
 **Booking Fields:**
+
 - `id` (primary key)
 - `project_id` (foreign key)
 - `event_id` (foreign key, links to production_events)
@@ -453,6 +506,7 @@ Comprehensive crew database, position management, booking system, and payroll in
 - `created_at` (datetime)
 
 **Key Capabilities:**
+
 - Book crew from calendar event
 - Drag-and-drop crew assignment
 - Conflict detection (crew double-booked)
@@ -463,6 +517,7 @@ Comprehensive crew database, position management, booking system, and payroll in
 - Overtime warnings when hours exceed limits
 
 **Booking Workflow:**
+
 1. Production manager creates calendar event
 2. Assigns crew positions needed (e.g., "need 1 ME, 2 Electricians")
 3. System suggests available crew based on position and availability
@@ -473,9 +528,11 @@ Comprehensive crew database, position management, booking system, and payroll in
 ---
 
 #### 3.4 Payroll Integration
+
 **Component:** `PayrollExport.tsx`
 
 **Payroll Export Features:**
+
 - CSV export for payroll systems (ADP, Gusto, QuickBooks)
 - Weekly or custom date range
 - Columns: Name, Position, Regular Hours, OT Hours, Double-Time Hours, Total Hours, Pay Rate, Total Earnings
@@ -483,6 +540,7 @@ Comprehensive crew database, position management, booking system, and payroll in
 - Summary totals
 
 **Export Format (CSV):**
+
 ```csv
 Name,Position,Regular Hours,OT Hours,DT Hours,Total Hours,Pay Rate,Total Earnings
 Jane Smith,Master Electrician,40,5,0,45,$35.00,"$1,487.50"
@@ -494,6 +552,7 @@ John Doe,Electrician,32,0,0,32,$25.00,$800.00
 ### Technical Implementation
 
 **Database Schema:**
+
 ```sql
 CREATE TABLE crew_members (
   id INTEGER PRIMARY KEY,
@@ -556,15 +615,18 @@ CREATE TABLE crew_bookings (
 ## 4. Inventory Management (Extended)
 
 ### Overview
+
 Extend existing fixture and infrastructure tracking to include props, costumes, scenery, video equipment, and general production inventory.
 
 ### Core Features
 
 #### 4.1 Multi-Department Inventory
+
 **Component:** `UnifiedInventory.tsx`
 **Database Tables:** Extend existing `fixtures`, `infrastructure_equipment` + new `production_inventory`
 
 **New Inventory Categories:**
+
 - Props
 - Costumes
 - Scenery/Set Pieces
@@ -574,6 +636,7 @@ Extend existing fixture and infrastructure tracking to include props, costumes, 
 - General equipment
 
 **Inventory Item Fields:**
+
 - `id` (primary key)
 - `category` (enum: props, costumes, scenery, wardrobe, tools, consumables, general)
 - `name` (string)
@@ -598,9 +661,11 @@ Extend existing fixture and infrastructure tracking to include props, costumes, 
 ---
 
 #### 4.2 QR Code System
+
 **Component:** `QRCodeManager.tsx`
 
 **QR Code Features:**
+
 - Generate unique QR code for each inventory item
 - Print QR labels (via label designer)
 - Scan QR code to view item details
@@ -608,6 +673,7 @@ Extend existing fixture and infrastructure tracking to include props, costumes, 
 - Mobile scanning support (future mobile app)
 
 **QR Code Contains:**
+
 - Item ID
 - Item name
 - Link to item details (web URL for production books)
@@ -617,9 +683,11 @@ Extend existing fixture and infrastructure tracking to include props, costumes, 
 ---
 
 #### 4.3 Rental & Borrowed Tracking
+
 **Component:** `RentalTracker.tsx`
 
 **Rental Management:**
+
 - Mark items as rented with vendor information
 - Rental period tracking (start date, end date)
 - Automatic cost calculation (days × daily rate OR weeks × weekly rate)
@@ -627,6 +695,7 @@ Extend existing fixture and infrastructure tracking to include props, costumes, 
 - Late fee calculation
 
 **Borrowed Items:**
+
 - Borrowed from (organization or person)
 - Borrowed date
 - Expected return date
@@ -635,15 +704,18 @@ Extend existing fixture and infrastructure tracking to include props, costumes, 
 ---
 
 #### 4.4 Allocation & Conflict Detection
+
 **Component:** `InventoryAllocator.tsx`
 
 **Allocation System:**
+
 - Allocate inventory to specific projects/shows
 - Check availability across date ranges
 - Detect conflicts (item allocated to multiple shows on same dates)
 - Reservation system (hold items for future shows)
 
 **Conflict Detection:**
+
 - Visual warnings when item is double-booked
 - Suggest alternative items from inventory
 - Show conflict details (which shows need the same item)
@@ -653,6 +725,7 @@ Extend existing fixture and infrastructure tracking to include props, costumes, 
 ### Technical Implementation
 
 **Database Schema:**
+
 ```sql
 CREATE TABLE production_inventory (
   id INTEGER PRIMARY KEY,
@@ -699,15 +772,18 @@ CREATE TABLE inventory_allocations (
 ## 5. Vendor Management
 
 ### Overview
+
 Comprehensive vendor database, purchase order system, and invoice tracking.
 
 ### Core Features
 
 #### 5.1 Vendor Database
+
 **Component:** `VendorDatabase.tsx`
 **Database Table:** `vendors`
 
 **Vendor Fields:**
+
 - `id` (primary key)
 - `name` (string)
 - `type` (enum: equipment_rental, consumables, services, fabrication, trucking, other)
@@ -724,6 +800,7 @@ Comprehensive vendor database, purchase order system, and invoice tracking.
 - `updated_at` (datetime)
 
 **Key Capabilities:**
+
 - Add, edit, delete vendors
 - Search and filter
 - Tag system (preferred vendor, local, etc.)
@@ -734,10 +811,12 @@ Comprehensive vendor database, purchase order system, and invoice tracking.
 ---
 
 #### 5.2 Purchase Order System
+
 **Component:** `PurchaseOrders.tsx`
 **Database Table:** `purchase_orders`, `purchase_order_items`
 
 **PO Fields:**
+
 - `id` (primary key)
 - `po_number` (string, auto-generated)
 - `project_id` (foreign key)
@@ -755,6 +834,7 @@ Comprehensive vendor database, purchase order system, and invoice tracking.
 - `updated_at` (datetime)
 
 **PO Line Items:**
+
 - `id` (primary key)
 - `po_id` (foreign key)
 - `description` (string)
@@ -764,6 +844,7 @@ Comprehensive vendor database, purchase order system, and invoice tracking.
 - `notes` (text)
 
 **Key Capabilities:**
+
 - Create PO from shop order items
 - Auto-generate PO numbers (e.g., PO-2025-001)
 - Multi-line item support
@@ -773,6 +854,7 @@ Comprehensive vendor database, purchase order system, and invoice tracking.
 - Link to budget line items
 
 **PO Workflow:**
+
 1. Create PO from shop order or manually
 2. Add line items
 3. Generate PDF
@@ -785,10 +867,12 @@ Comprehensive vendor database, purchase order system, and invoice tracking.
 ---
 
 #### 5.3 Invoice Tracking
+
 **Component:** `InvoiceTracker.tsx`
 **Database Table:** `invoices`
 
 **Invoice Fields:**
+
 - `id` (primary key)
 - `invoice_number` (string)
 - `po_id` (foreign key, optional)
@@ -804,6 +888,7 @@ Comprehensive vendor database, purchase order system, and invoice tracking.
 - `attachment` (file path or base64)
 
 **Key Capabilities:**
+
 - Link invoice to PO
 - Track payment status
 - Overdue warnings
@@ -815,6 +900,7 @@ Comprehensive vendor database, purchase order system, and invoice tracking.
 ### Technical Implementation
 
 **Database Schema:**
+
 ```sql
 CREATE TABLE vendors (
   id INTEGER PRIMARY KEY,
@@ -891,14 +977,17 @@ CREATE TABLE invoices (
 ## 6. Production Books & Sharing
 
 ### Overview
+
 Web-based information sharing portal for production schedules, notes, rosters, and documents.
 
 ### Core Features
 
 #### 6.1 Production Book Builder
+
 **Component:** `ProductionBookBuilder.tsx`
 
 **Production Book Sections:**
+
 - Cover page (show title, dates, contact info)
 - Production schedule
 - Crew roster with contact information
@@ -910,6 +999,7 @@ Web-based information sharing portal for production schedules, notes, rosters, a
 - Emergency contacts
 
 **Customization:**
+
 - Select which sections to include
 - Custom ordering
 - Department filtering (show only lighting info, etc.)
@@ -918,9 +1008,11 @@ Web-based information sharing portal for production schedules, notes, rosters, a
 ---
 
 #### 6.2 Web Sharing Portal
+
 **Component:** `ProductionBookPortal.tsx`
 
 **Portal Features:**
+
 - Public or password-protected sharing
 - No login required for viewers
 - Mobile-responsive design
@@ -931,11 +1023,13 @@ Web-based information sharing portal for production schedules, notes, rosters, a
 - Dark mode support
 
 **URL Structure:**
+
 ```
 https://showstack.app/books/{book_id}/{share_token}
 ```
 
 **Access Control:**
+
 - Public link (anyone with URL can view)
 - Password-protected (require password to view)
 - Expiration dates (link expires after date)
@@ -944,15 +1038,18 @@ https://showstack.app/books/{book_id}/{share_token}
 ---
 
 #### 6.3 Automatic Updates
+
 **Component:** `ProductionBookSync.tsx`
 
 **Real-Time Sync:**
+
 - Schedule changes → Production book updates automatically
 - Crew roster changes → Portal reflects new contact info
 - Equipment list changes → Updated in production book
 - Notes added → Appear in portal immediately
 
 **Update Notifications:**
+
 - Optional email notifications to crew when book is updated
 - Change log showing recent updates
 
@@ -961,11 +1058,13 @@ https://showstack.app/books/{book_id}/{share_token}
 ### Technical Implementation
 
 **Backend Requirements:**
+
 - Web server for hosting production books (Express.js or static hosting)
 - Database for storing book configurations and access control
 - Real-time sync (WebSocket or polling)
 
 **Database Schema:**
+
 ```sql
 CREATE TABLE production_books (
   id INTEGER PRIMARY KEY,
@@ -991,15 +1090,18 @@ CREATE TABLE production_books (
 ## 7. Tour Logistics
 
 ### Overview
+
 Tools for managing touring productions, including tour calendar, venue database, per diem tracking, and equipment manifests.
 
 ### Core Features
 
 #### 7.1 Tour Calendar
+
 **Component:** `TourCalendar.tsx`
 **Database Table:** `tour_dates`
 
 **Tour Date Fields:**
+
 - `id` (primary key)
 - `project_id` (foreign key, tour/show)
 - `venue_id` (foreign key)
@@ -1015,6 +1117,7 @@ Tools for managing touring productions, including tour calendar, venue database,
 - `status` (enum: confirmed, tentative, cancelled)
 
 **Key Capabilities:**
+
 - Visual tour calendar (timeline view)
 - Load-in to load-out tracking
 - Travel days and dark days
@@ -1024,10 +1127,12 @@ Tools for managing touring productions, including tour calendar, venue database,
 ---
 
 #### 7.2 Venue Database
+
 **Component:** `VenueDatabase.tsx`
 **Database Table:** `venues`
 
 **Venue Fields:**
+
 - `id` (primary key)
 - `name` (string)
 - `type` (enum: theater, arena, outdoor, black_box, club, other)
@@ -1052,6 +1157,7 @@ Tools for managing touring productions, including tour calendar, venue database,
 - `updated_at` (datetime)
 
 **Key Capabilities:**
+
 - Add, edit, delete venues
 - Search and filter (by city, state, capacity)
 - Link venues to tour dates
@@ -1062,10 +1168,12 @@ Tools for managing touring productions, including tour calendar, venue database,
 ---
 
 #### 7.3 Per Diem Calculator
+
 **Component:** `PerDiemCalculator.tsx`
 **Database Table:** `per_diem_records`
 
 **Per Diem Tracking:**
+
 - `id` (primary key)
 - `project_id` (foreign key)
 - `crew_member_id` (foreign key)
@@ -1077,6 +1185,7 @@ Tools for managing touring productions, including tour calendar, venue database,
 - `notes` (text)
 
 **Features:**
+
 - Standard per diem rates by city/state
 - Custom per diem rates
 - Track per diem by crew member and date
@@ -1084,6 +1193,7 @@ Tools for managing touring productions, including tour calendar, venue database,
 - Currency conversion (for international tours)
 
 **Per Diem Reports:**
+
 - Weekly per diem summary
 - Crew member total
 - Project total
@@ -1092,9 +1202,11 @@ Tools for managing touring productions, including tour calendar, venue database,
 ---
 
 #### 7.4 Equipment Manifests
+
 **Component:** `TourManifest.tsx`
 
 **Manifest Features:**
+
 - Packing lists (what equipment goes on tour)
 - Truck packing diagrams
 - Equipment tracking (which truck, which case)
@@ -1103,6 +1215,7 @@ Tools for managing touring productions, including tour calendar, venue database,
 - Replacement tracking
 
 **Integration:**
+
 - Pull from existing fixture/equipment inventory
 - Mark items as "on tour"
 - Conflict detection (item needed in two places)
@@ -1112,6 +1225,7 @@ Tools for managing touring productions, including tour calendar, venue database,
 ### Technical Implementation
 
 **Database Schema:**
+
 ```sql
 CREATE TABLE tour_dates (
   id INTEGER PRIMARY KEY,
@@ -1180,11 +1294,13 @@ CREATE TABLE per_diem_records (
 ## 8. Reporting & Analytics
 
 ### Overview
+
 Comprehensive reporting system for budgets, labor, schedules, and production metrics.
 
 ### Core Reports
 
 #### 8.1 Budget Reports
+
 - Budget summary (estimated vs. actual)
 - Variance analysis
 - Department rollup
@@ -1192,6 +1308,7 @@ Comprehensive reporting system for budgets, labor, schedules, and production met
 - Vendor spending report
 
 #### 8.2 Labor Reports
+
 - Crew hours summary
 - Overtime report
 - Payroll export (CSV)
@@ -1199,6 +1316,7 @@ Comprehensive reporting system for budgets, labor, schedules, and production met
 - Weekly hours by crew member
 
 #### 8.3 Schedule Reports
+
 - Production calendar (PDF)
 - Crew call sheet
 - Daily schedule
@@ -1206,6 +1324,7 @@ Comprehensive reporting system for budgets, labor, schedules, and production met
 - Conflict report (double-bookings)
 
 #### 8.4 Inventory Reports
+
 - Equipment allocation
 - Rental costs
 - Inventory by department
@@ -1213,6 +1332,7 @@ Comprehensive reporting system for budgets, labor, schedules, and production met
 - Maintenance schedule
 
 #### 8.5 Tour Reports
+
 - Tour schedule
 - Venue contact list
 - Per diem summary
@@ -1226,21 +1346,25 @@ Comprehensive reporting system for budgets, labor, schedules, and production met
 ### Unique ShowStack Integrations
 
 #### Fixture Plot → Budget
+
 - Fixture count drives labor hours for focus call
 - Equipment rental costs from shop order feed budget automatically
 - Power requirements inform venue selection
 
 #### Shop Order → Purchase Order
+
 - Equipment items from shop order → PO line items
 - Vendor information pre-populated
 - Cost tracking from quote to invoice
 
 #### Calendar → Labor Cost
+
 - Scheduled events calculate crew hours
 - Overtime automatically calculated
 - Budget updates in real-time
 
 #### Inventory → Allocation
+
 - Fixtures allocated to specific shows
 - Conflict detection (same fixture in two shows)
 - Rental period tracking
@@ -1250,6 +1374,7 @@ Comprehensive reporting system for budgets, labor, schedules, and production met
 ## Development Timeline
 
 ### Phase 1: Core Production Features (Year 3, 2027-2028)
+
 **Duration:** 22-28 weeks (5-7 months)
 
 1. **Production Scheduling** (8-10 weeks)
@@ -1261,6 +1386,7 @@ Comprehensive reporting system for budgets, labor, schedules, and production met
 ---
 
 ### Phase 2: Enhanced Features (Year 3-4, 2028)
+
 **Duration:** 16-22 weeks (4-5.5 months)
 
 1. **Inventory Extensions** (6-8 weeks)
@@ -1272,6 +1398,7 @@ Comprehensive reporting system for budgets, labor, schedules, and production met
 ---
 
 ### Phase 3: Advanced Features (Year 4+, 2029+)
+
 **Duration:** 12-20 weeks (3-5 months)
 
 1. **Production Books** (6-8 weeks)
@@ -1285,17 +1412,20 @@ Comprehensive reporting system for budgets, labor, schedules, and production met
 ## Success Metrics
 
 ### User Adoption
+
 - **Year 3:** 200+ Production Edition users
 - **Year 4:** 500+ Production Edition users
 - **Year 5:** 1,000+ Production Edition users
 
 ### Feature Usage
+
 - 80% of users use scheduling features
 - 70% use budget tracking
 - 60% use labor management
 - 40% use tour logistics
 
 ### Competitive Wins
+
 - 50+ users choosing ShowStack over Propared
 - 100+ users consolidating from multiple tools
 
@@ -1306,6 +1436,7 @@ Comprehensive reporting system for budgets, labor, schedules, and production met
 The Production Edition represents a comprehensive production management solution that integrates seamlessly with ShowStack's technical design tools. By offering scheduling, budgeting, labor management, inventory, vendor management, and tour logistics in a unified platform, ShowStack provides unprecedented value to technical directors, production managers, and producing organizations.
 
 **Key Advantages:**
+
 1. **Integration:** Design data flows automatically to production
 2. **Pricing:** $599/year vs. Propared's $1,750/year (66% savings)
 3. **Offline-First:** Works without internet
@@ -1316,6 +1447,7 @@ The Production Edition represents a comprehensive production management solution
 ---
 
 **See Also:**
+
 - `propared-parity-analysis.md` - Competitive analysis vs. Propared
 - `PROJECT_STATUS.md` - Current development status and roadmap
 - `docs/architecture/naming-and-editions.md` - Edition structure and pricing

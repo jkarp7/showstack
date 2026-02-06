@@ -10,7 +10,7 @@ vi.mock('../../database/queries/settings', () => ({
   getSettings: vi.fn(),
   saveSettings: vi.fn(),
   getDefaultSettings: vi.fn(),
-  resetSettings: vi.fn()
+  resetSettings: vi.fn(),
 }));
 
 // Import after mocking
@@ -19,7 +19,7 @@ import {
   getSettings,
   saveSettings as saveSettingsQuery,
   getDefaultSettings,
-  resetSettings as resetSettingsQuery
+  resetSettings as resetSettingsQuery,
 } from '../../database/queries/settings';
 
 /**
@@ -33,13 +33,13 @@ function buildSettings(overrides: Partial<AppSettings> = {}): AppSettings {
       autoSaveInterval: 5,
       defaultFileLocation: '',
       showWelcomeScreen: true,
-      checkUpdatesOnStartup: true
+      checkUpdatesOnStartup: true,
     },
     appearance: {
       theme: 'auto',
       fontSize: 'medium',
       compactMode: false,
-      showRevisionHighlighting: true
+      showRevisionHighlighting: true,
     },
     disciplines: {
       enabledDisciplines: ['lighting'],
@@ -50,22 +50,22 @@ function buildSettings(overrides: Partial<AppSettings> = {}): AppSettings {
         audio: '#4ECDC4',
         video: '#45B7D1',
         scenic: '#96CEB4',
-        props: '#FFEAA7'
-      }
+        props: '#FFEAA7',
+      },
     },
     export: {
       defaultFormat: 'pdf',
       includeLogoInPDF: true,
       pdfPageSize: 'letter',
-      includeChangeTracking: true
+      includeChangeTracking: true,
     },
     advanced: {
       enableDebugMode: false,
       maxRevisions: 5,
       enableExperimentalFeatures: false,
-      cacheSize: 100
+      cacheSize: 100,
     },
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -104,8 +104,8 @@ describe('SettingsService', () => {
           autoSaveInterval: 10,
           defaultFileLocation: '/tmp',
           showWelcomeScreen: false,
-          checkUpdatesOnStartup: false
-        }
+          checkUpdatesOnStartup: false,
+        },
       });
       vi.mocked(getSettings).mockReturnValue(storedSettings);
 
@@ -153,8 +153,8 @@ describe('SettingsService', () => {
           theme: 'dark',
           fontSize: 'large',
           compactMode: true,
-          showRevisionHighlighting: false
-        }
+          showRevisionHighlighting: false,
+        },
       });
 
       service.saveSettings(newSettings);
@@ -168,8 +168,8 @@ describe('SettingsService', () => {
           theme: 'dark',
           fontSize: 'large',
           compactMode: true,
-          showRevisionHighlighting: false
-        }
+          showRevisionHighlighting: false,
+        },
       });
 
       service.saveSettings(newSettings);
@@ -191,8 +191,8 @@ describe('SettingsService', () => {
           enableDebugMode: true,
           maxRevisions: 10,
           enableExperimentalFeatures: true,
-          cacheSize: 200
-        }
+          cacheSize: 200,
+        },
       });
       service.saveSettings(updatedSettings);
 
@@ -215,8 +215,8 @@ describe('SettingsService', () => {
           theme: 'dark',
           fontSize: 'small',
           compactMode: true,
-          showRevisionHighlighting: false
-        }
+          showRevisionHighlighting: false,
+        },
       };
 
       service.updateSettings(updates);
@@ -232,8 +232,8 @@ describe('SettingsService', () => {
           autoSaveInterval: 15,
           defaultFileLocation: '/custom',
           showWelcomeScreen: false,
-          checkUpdatesOnStartup: true
-        }
+          checkUpdatesOnStartup: true,
+        },
       });
       vi.mocked(getSettings).mockReturnValue(storedSettings);
 
@@ -242,8 +242,8 @@ describe('SettingsService', () => {
           enableDebugMode: true,
           maxRevisions: 20,
           enableExperimentalFeatures: false,
-          cacheSize: 500
-        }
+          cacheSize: 500,
+        },
       });
 
       // The saved settings should retain the original general settings
@@ -261,8 +261,8 @@ describe('SettingsService', () => {
           theme: 'light',
           fontSize: 'medium',
           compactMode: false,
-          showRevisionHighlighting: true
-        }
+          showRevisionHighlighting: true,
+        },
       });
 
       // Subsequent getSettings should use cache, not hit the database again
@@ -329,8 +329,8 @@ describe('SettingsService', () => {
           theme: 'dark',
           fontSize: 'large',
           compactMode: true,
-          showRevisionHighlighting: false
-        }
+          showRevisionHighlighting: false,
+        },
       });
 
       // First call seeds cache
@@ -383,8 +383,8 @@ describe('SettingsService', () => {
           theme: 'dark',
           fontSize: 'medium',
           compactMode: false,
-          showRevisionHighlighting: true
-        }
+          showRevisionHighlighting: true,
+        },
       });
 
       // Step 1: Initial load from empty database
@@ -399,8 +399,8 @@ describe('SettingsService', () => {
           enableDebugMode: true,
           maxRevisions: 50,
           enableExperimentalFeatures: true,
-          cacheSize: 1000
-        }
+          cacheSize: 1000,
+        },
       });
       expect(saveSettingsQuery).toHaveBeenCalledTimes(2);
 
@@ -426,8 +426,8 @@ describe('SettingsService', () => {
           autoSaveInterval: 30,
           defaultFileLocation: '/new/path',
           showWelcomeScreen: false,
-          checkUpdatesOnStartup: false
-        }
+          checkUpdatesOnStartup: false,
+        },
       });
       service.saveSettings(newSettings);
 

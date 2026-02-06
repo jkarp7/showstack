@@ -4,7 +4,7 @@ import {
   createProject,
   updateProject,
   deleteProject,
-  Project
+  Project,
 } from '../database/queries/projects';
 import { BaseService } from './BaseService';
 
@@ -26,10 +26,7 @@ export class ProjectService extends BaseService {
    * @returns Array of projects
    */
   async getAll(): Promise<Project[]> {
-    const result = await this.executeWithRetry(
-      async () => getAllProjects(),
-      'projects:getAll'
-    );
+    const result = await this.executeWithRetry(async () => getAllProjects(), 'projects:getAll');
     return result;
   }
 
@@ -42,10 +39,7 @@ export class ProjectService extends BaseService {
   async getById(id: string): Promise<Project | undefined> {
     this.validateId(id, 'Project');
 
-    return await this.executeWithRetry(
-      async () => getProjectById(id),
-      'projects:getById'
-    );
+    return await this.executeWithRetry(async () => getProjectById(id), 'projects:getById');
   }
 
   /**
@@ -61,13 +55,13 @@ export class ProjectService extends BaseService {
     name: string,
     description?: string,
     logoPath?: string,
-    enabledModules?: string[]
+    enabledModules?: string[],
   ): Promise<Project> {
     this.validateRequired(name, 'name', 'Project name');
 
     return await this.executeWithRetry(
       async () => createProject(name, description, logoPath, enabledModules),
-      'projects:create'
+      'projects:create',
     );
   }
 
@@ -86,10 +80,7 @@ export class ProjectService extends BaseService {
       this.validateRequired(updates.name, 'name', 'Project name');
     }
 
-    return await this.executeWithRetry(
-      async () => updateProject(id, updates),
-      'projects:update'
-    );
+    return await this.executeWithRetry(async () => updateProject(id, updates), 'projects:update');
   }
 
   /**
@@ -100,10 +91,7 @@ export class ProjectService extends BaseService {
   async delete(id: string): Promise<void> {
     this.validateId(id, 'Project');
 
-    return await this.executeWithRetry(
-      async () => deleteProject(id),
-      'projects:delete'
-    );
+    return await this.executeWithRetry(async () => deleteProject(id), 'projects:delete');
   }
 
   /**

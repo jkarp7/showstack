@@ -15,7 +15,7 @@ export function updatePaperworkTemplateHeaders(): void {
     db.prepare(
       `UPDATE paperwork_templates
        SET header_template_id = 'default-paperwork-header'
-       WHERE is_system = 1 AND (header_template_id IS NULL OR header_template_id = '')`
+       WHERE is_system = 1 AND (header_template_id IS NULL OR header_template_id = '')`,
     ).run();
 
     saveAppDatabase(db);

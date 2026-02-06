@@ -1,4 +1,5 @@
 # Minotaur Sound System Database Parity Analysis
+
 ## Gap Analysis & Implementation Roadmap for ShowStack:Sound
 
 **Created:** December 29, 2025
@@ -12,6 +13,7 @@
 ShowStack:Production is currently focused on **lighting design and production management** as a LightWright 6 competitor. Minotaur Sound System Database is the industry-leading tool for **theatrical sound system management**. This document evaluates how ShowStack can expand to include sound department capabilities, creating a comprehensive **ShowStack:Sound** module that achieves parity with Minotaur.
 
 ### Key Findings
+
 - ✅ **Strong Foundation:** ShowStack's architecture (virtual data grid, equipment management, cable tracking) is highly compatible with sound system needs
 - 🎯 **Clear Opportunity:** No modern competitor exists in the sound design space with collaboration and cloud features
 - 📈 **Market Expansion:** Adding sound capabilities opens new revenue streams and cross-sells to existing lighting customers
@@ -24,6 +26,7 @@ ShowStack:Production is currently focused on **lighting design and production ma
 ### Core Capabilities
 
 **1. Equipment Management**
+
 - Track all sound equipment from multiple sources in one database
 - Generate equipment lists that track changes
 - Create equipment labels
@@ -32,6 +35,7 @@ ShowStack:Production is currently focused on **lighting design and production ma
 - User-defined equipment types and parameters
 
 **2. Cable Management**
+
 - Track cable name, type, connections, bundle, and multi-pair lines
 - Link similar or split cables together
 - Patch cables and multi-pair lines together
@@ -39,6 +43,7 @@ ShowStack:Production is currently focused on **lighting design and production ma
 - Multi-pair line management
 
 **3. Wireless Microphone Management**
+
 - Track roles and actors
 - Manage transmitters and receivers
 - Frequency coordination and assignment
@@ -47,16 +52,19 @@ ShowStack:Production is currently focused on **lighting design and production ma
 - Frequency conflict detection
 
 **4. Box Management**
+
 - Track speaker systems and enclosures
 - Cable connections and patching
 - Equipment organization
 
 **5. Power Management**
+
 - Power distribution for sound systems
 - Load calculations
 - Power routing
 
 **6. System Features**
+
 - Automatic backups every 30 minutes
 - Standalone Mac or PC application
 - Fully customizable workflows
@@ -70,26 +78,27 @@ ShowStack:Production is currently focused on **lighting design and production ma
 
 ### Current ShowStack:Production Features (Lighting Focus)
 
-| Feature Category | ShowStack Implementation | Minotaur Equivalent |
-|------------------|--------------------------|---------------------|
-| **Equipment Database** | ✅ Fixtures (lighting) | Equipment (sound) |
-| **Virtual Data Grid** | ✅ 10,000+ row performance | Similar spreadsheet |
-| **Cable Tracking** | ✅ Multi-cable (Socapex) | Multi-pair audio cables |
-| **Power Management** | ✅ Dimmer racks, circuits | Power distribution |
-| **Label System** | ✅ Drag-and-drop designer | Equipment labels |
-| **Custom Paperwork** | ✅ Report generation | Paperwork generation |
-| **Import/Export** | ✅ Vectorworks | N/A (different tools) |
-| **Console Integration** | ✅ ETC Eos (lighting) | N/A (different domain) |
-| **Wireless Management** | ❌ Not implemented | ✅ Full wireless mic tracking |
-| **Sound Equipment Types** | ❌ Lighting-specific | ✅ Sound-specific library |
-| **Multi-pair Cable** | ❌ Not implemented | ✅ Comprehensive |
-| **Frequency Coordination** | ❌ Not implemented | ✅ IAS import, conflict detection |
-| **Box/Speaker Management** | ❌ Not implemented | ✅ Implemented |
-| **Audio Patching** | ❌ Not implemented | ✅ Cable patching system |
+| Feature Category           | ShowStack Implementation   | Minotaur Equivalent               |
+| -------------------------- | -------------------------- | --------------------------------- |
+| **Equipment Database**     | ✅ Fixtures (lighting)     | Equipment (sound)                 |
+| **Virtual Data Grid**      | ✅ 10,000+ row performance | Similar spreadsheet               |
+| **Cable Tracking**         | ✅ Multi-cable (Socapex)   | Multi-pair audio cables           |
+| **Power Management**       | ✅ Dimmer racks, circuits  | Power distribution                |
+| **Label System**           | ✅ Drag-and-drop designer  | Equipment labels                  |
+| **Custom Paperwork**       | ✅ Report generation       | Paperwork generation              |
+| **Import/Export**          | ✅ Vectorworks             | N/A (different tools)             |
+| **Console Integration**    | ✅ ETC Eos (lighting)      | N/A (different domain)            |
+| **Wireless Management**    | ❌ Not implemented         | ✅ Full wireless mic tracking     |
+| **Sound Equipment Types**  | ❌ Lighting-specific       | ✅ Sound-specific library         |
+| **Multi-pair Cable**       | ❌ Not implemented         | ✅ Comprehensive                  |
+| **Frequency Coordination** | ❌ Not implemented         | ✅ IAS import, conflict detection |
+| **Box/Speaker Management** | ❌ Not implemented         | ✅ Implemented                    |
+| **Audio Patching**         | ❌ Not implemented         | ✅ Cable patching system          |
 
 ### Missing Capabilities for Minotaur Parity
 
 #### 🔴 Critical Gaps (Must-Have)
+
 1. **Wireless Microphone Management**
    - Role/actor assignment
    - Transmitter/receiver tracking
@@ -123,6 +132,7 @@ ShowStack:Production is currently focused on **lighting design and production ma
    - Network audio (Dante, AVB, etc.)
 
 #### 🟡 Important Gaps (Should-Have)
+
 5. **Box/Speaker Management**
    - Speaker types and models
    - Rigging positions
@@ -151,6 +161,7 @@ ShowStack:Production is currently focused on **lighting design and production ma
    - Amplifier rack assignment
 
 #### 🟢 Nice-to-Have Gaps (Future)
+
 9. **QLab Integration**
    - Import cue lists
    - Track playback files
@@ -470,6 +481,7 @@ export interface AudioPower {
 ## 🗺️ Implementation Roadmap
 
 ### Phase 1: Foundation (Months 1-2)
+
 **Goal:** Establish core sound equipment management
 
 - [ ] Create ShowStack:Sound module structure
@@ -482,11 +494,13 @@ export interface AudioPower {
 - [ ] Equipment source management (rental vs owned)
 
 **Deliverables:**
+
 - Sound equipment spreadsheet interface
 - Default equipment library
 - Basic equipment labels
 
 ### Phase 2: Cable Management (Months 3-4)
+
 **Goal:** Comprehensive audio cable tracking
 
 - [ ] Multi-pair cable database implementation
@@ -499,12 +513,14 @@ export interface AudioPower {
 - [ ] Cable labels and documentation
 
 **Deliverables:**
+
 - Cable management spreadsheet
 - Pin assignment editor
 - Cable schedule reports
 - Cable labels
 
 ### Phase 3: Wireless Microphone System (Months 5-6)
+
 **Goal:** Full wireless mic coordination
 
 - [ ] Wireless mic database tables
@@ -518,12 +534,14 @@ export interface AudioPower {
 - [ ] Wireless mic labels
 
 **Deliverables:**
+
 - Wireless mic management interface
 - Frequency coordination tools
 - Conflict detection system
 - Wireless paperwork templates
 
 ### Phase 4: Audio Patching (Months 7-8)
+
 **Goal:** Input/output management and routing
 
 - [ ] Audio patch database implementation
@@ -536,12 +554,14 @@ export interface AudioPower {
 - [ ] Patch reports (input list, output list)
 
 **Deliverables:**
+
 - Input/output management
 - Patch visualization
 - Console integration prep
 - Patch reports
 
 ### Phase 5: Speaker/Box Management (Months 9-10)
+
 **Goal:** Speaker system tracking
 
 - [ ] Speaker database tables
@@ -553,11 +573,13 @@ export interface AudioPower {
 - [ ] Speaker hang reports
 
 **Deliverables:**
+
 - Speaker management interface
 - Amplifier assignment
 - Speaker paperwork
 
 ### Phase 6: Power Management (Month 11)
+
 **Goal:** Audio-specific power distribution
 
 - [ ] Audio power database
@@ -569,11 +591,13 @@ export interface AudioPower {
 - [ ] Power distribution reports
 
 **Deliverables:**
+
 - Power distribution interface
 - Load calculation tools
 - Power reports
 
 ### Phase 7: Paperwork & Reports (Month 12)
+
 **Goal:** Sound-specific paperwork generation
 
 - [ ] Standard sound report templates:
@@ -590,11 +614,13 @@ export interface AudioPower {
 - [ ] Multi-report combination
 
 **Deliverables:**
+
 - 8+ standard sound reports
 - Custom report designer
 - Professional PDF output
 
 ### Phase 8: Console Integration (Months 13-14)
+
 **Goal:** Audio console connectivity
 
 - [ ] QLab integration (import cues, outputs)
@@ -605,11 +631,13 @@ export interface AudioPower {
 - [ ] Generic CSV/XML import
 
 **Deliverables:**
+
 - QLab integration
 - Console patch import
 - MIDI capabilities
 
 ### Phase 9: Polish & Launch (Months 15-16)
+
 **Goal:** Beta testing and launch
 
 - [ ] Performance optimization
@@ -620,6 +648,7 @@ export interface AudioPower {
 - [ ] Launch announcement
 
 **Deliverables:**
+
 - Production-ready ShowStack:Sound
 - Complete documentation
 - Marketing campaign
@@ -630,7 +659,9 @@ export interface AudioPower {
 ## 💰 Pricing Strategy for ShowStack:Sound
 
 ### Standalone Sound Module
+
 **Professional: $199/year**
+
 - All sound management features
 - Unlimited equipment and cables
 - Wireless coordination
@@ -639,12 +670,15 @@ export interface AudioPower {
 - Priority support
 
 **Team: $499/year (5 users)**
+
 - Real-time collaboration
 - Team project sharing
 - Admin dashboard
 
 ### Bundle Pricing (Lighting + Sound)
+
 **ShowStack:Production + Sound Bundle: $349/year (30% savings)**
+
 - All lighting features
 - All sound features
 - Unified project management
@@ -652,6 +686,7 @@ export interface AudioPower {
 - Best value for multi-discipline designers
 
 ### Market Opportunity
+
 - **Minotaur Pricing:** Per-user subscription or per-project multi-user (pricing not publicly listed)
 - **ShowStack Advantage:** Transparent pricing, modern collaboration features
 - **Cross-sell Opportunity:** 500+ existing Shop Order Builder users
@@ -663,27 +698,28 @@ export interface AudioPower {
 
 ### ShowStack:Sound vs Minotaur
 
-| Feature | Minotaur | ShowStack:Sound (Proposed) |
-|---------|----------|----------------------------|
-| **Equipment Management** | ✅ Comprehensive | ✅ Comprehensive + Default Library |
-| **Cable Tracking** | ✅ Multi-pair | ✅ Multi-pair + Visualization |
-| **Wireless Management** | ✅ Full featured | ✅ Full featured + IAS Import |
-| **Power Management** | ✅ Basic | ✅ Advanced with Load Calc |
-| **Labels** | ✅ Equipment labels | ✅ Equipment + Cable + Wireless |
-| **Platform** | Mac/PC Standalone | Electron (Mac/PC/Linux) |
-| **Collaboration** | ❌ Single user | ✅ Real-time multi-user |
-| **Cloud Sync** | ❌ None | ✅ Optional cloud sync |
-| **Offline Mode** | ✅ Full functionality | ✅ Full functionality |
-| **Modern UI** | ⚠️ Dated interface | ✅ 2025+ modern design |
-| **Automatic Backups** | ✅ Every 30 min | ✅ Continuous + Cloud |
-| **Custom Workflows** | ✅ User-defined | ✅ User-defined |
-| **Pricing** | Not public | $199/yr transparent |
-| **Updates** | Subscription included | Continuous updates |
-| **Mobile Access** | ❌ None | ✅ Future roadmap |
-| **QLab Integration** | ❌ None | ✅ Planned |
-| **Console Integration** | ❌ None | ✅ Yamaha, DiGiCo, etc. |
+| Feature                  | Minotaur              | ShowStack:Sound (Proposed)         |
+| ------------------------ | --------------------- | ---------------------------------- |
+| **Equipment Management** | ✅ Comprehensive      | ✅ Comprehensive + Default Library |
+| **Cable Tracking**       | ✅ Multi-pair         | ✅ Multi-pair + Visualization      |
+| **Wireless Management**  | ✅ Full featured      | ✅ Full featured + IAS Import      |
+| **Power Management**     | ✅ Basic              | ✅ Advanced with Load Calc         |
+| **Labels**               | ✅ Equipment labels   | ✅ Equipment + Cable + Wireless    |
+| **Platform**             | Mac/PC Standalone     | Electron (Mac/PC/Linux)            |
+| **Collaboration**        | ❌ Single user        | ✅ Real-time multi-user            |
+| **Cloud Sync**           | ❌ None               | ✅ Optional cloud sync             |
+| **Offline Mode**         | ✅ Full functionality | ✅ Full functionality              |
+| **Modern UI**            | ⚠️ Dated interface    | ✅ 2025+ modern design             |
+| **Automatic Backups**    | ✅ Every 30 min       | ✅ Continuous + Cloud              |
+| **Custom Workflows**     | ✅ User-defined       | ✅ User-defined                    |
+| **Pricing**              | Not public            | $199/yr transparent                |
+| **Updates**              | Subscription included | Continuous updates                 |
+| **Mobile Access**        | ❌ None               | ✅ Future roadmap                  |
+| **QLab Integration**     | ❌ None               | ✅ Planned                         |
+| **Console Integration**  | ❌ None               | ✅ Yamaha, DiGiCo, etc.            |
 
 ### Competitive Advantages
+
 1. **Real-time Collaboration** - Multiple sound team members can work simultaneously
 2. **Modern UX** - Built for 2025, not legacy interface
 3. **Cloud Sync** - Access projects anywhere (optional)
@@ -698,18 +734,21 @@ export interface AudioPower {
 ## 🎯 Success Metrics
 
 ### Phase 1-3 (Foundation)
+
 - ✅ Core sound equipment interface complete
 - ✅ 10 beta testers from sound design community
 - ✅ 60 FPS performance with 1,000+ equipment items
 - ✅ Wireless coordination working
 
 ### Phase 6 (Feature Complete)
+
 - ✅ All Minotaur parity features implemented
 - ✅ 50 beta testers
 - ✅ Positive feedback from professional sound designers
 - ✅ First paying customers
 
 ### Launch (Month 16)
+
 - 🎯 200+ paying sound designers
 - 🎯 $40k+ ARR from sound module alone
 - 🎯 50+ bundle customers (lighting + sound)
@@ -721,6 +760,7 @@ export interface AudioPower {
 ## 🚀 Go-to-Market Strategy
 
 ### Target Audience
+
 1. **Theatrical Sound Designers** - Broadway, regional theater, touring
 2. **Sound Supervisors** - Multi-show management
 3. **A1 Mixers** - Day-to-day show running
@@ -728,6 +768,7 @@ export interface AudioPower {
 5. **Festival Sound Teams** - Complex temporary installations
 
 ### Marketing Channels
+
 1. **Sound Design Community:**
    - Association of Sound Designers (ASD)
    - USITT Sound Design & Technology Commission
@@ -750,6 +791,7 @@ export interface AudioPower {
    - Case studies from beta testers
 
 ### Launch Strategy
+
 1. **Private Beta (Month 13-14):** 20-30 professional sound designers
 2. **Public Beta (Month 15):** Open to all, gather feedback
 3. **Official Launch (Month 16):** USITT or LDI announcement
@@ -760,6 +802,7 @@ export interface AudioPower {
 ## 💡 Technical Considerations
 
 ### Reusable Components from ShowStack:Production
+
 - ✅ Virtual data grid (proven with 10,000+ rows)
 - ✅ Label designer and printing system
 - ✅ PDF report generation engine
@@ -771,6 +814,7 @@ export interface AudioPower {
 - ✅ Auto-update system
 
 ### New Components Required
+
 - Wireless frequency coordination algorithm
 - IAS frequency import parser
 - Multi-pair cable pin assignment interface
@@ -780,6 +824,7 @@ export interface AudioPower {
 - Audio console protocol handlers
 
 ### Performance Targets
+
 - Load 5,000 equipment items: <2 seconds
 - Grid rendering: 60 FPS
 - Frequency conflict detection: <1 second for 100 wireless mics
@@ -791,6 +836,7 @@ export interface AudioPower {
 ## 🎓 Educational & Institutional Strategy
 
 ### Student Tier: $50/year
+
 - Full sound management features
 - Wireless coordination (limited to 20 channels)
 - Standard reports
@@ -798,6 +844,7 @@ export interface AudioPower {
 - Graduation discount: 50% off Pro for 1 year
 
 ### Institutional Tier: $299/seat/year (minimum 10 seats)
+
 - Unlimited equipment and wireless
 - Team collaboration
 - Shared equipment libraries
@@ -806,6 +853,7 @@ export interface AudioPower {
 - Educational discounts
 
 ### Target Institutions
+
 - Carnegie Mellon School of Drama
 - Yale School of Drama
 - Juilliard
@@ -818,6 +866,7 @@ export interface AudioPower {
 ## 🔮 Future Enhancements (Beyond Parity)
 
 ### Advanced Features (Months 17+)
+
 1. **AI-Powered Suggestions:**
    - Auto-suggest wireless frequencies based on location
    - Recommend cable routing based on project type
@@ -858,18 +907,21 @@ export interface AudioPower {
 ## 📝 Recommendations
 
 ### Immediate Actions
+
 1. ✅ **Validate Market Demand:** Survey existing ShowStack users about sound needs
 2. ✅ **Beta Tester Recruitment:** Identify 10-20 professional sound designers willing to beta test
 3. ✅ **Feature Prioritization:** Confirm which Minotaur features are most critical
 4. ✅ **Technical Prototyping:** Build wireless coordination proof-of-concept
 
 ### Short-term (Next Quarter)
+
 1. 🎯 **Begin Phase 1:** Implement sound equipment foundation
 2. 🎯 **Default Library:** Build comprehensive sound equipment database
 3. 🎯 **Alpha Testing:** Internal testing with simple sound projects
 4. 🎯 **Documentation:** Create user guides for sound features
 
 ### Long-term (Next Year)
+
 1. 🚀 **Complete Phases 1-6:** Achieve Minotaur feature parity
 2. 🚀 **Beta Launch:** Release to beta testers for real-world testing
 3. 🚀 **Marketing Campaign:** Build awareness in sound design community
@@ -894,6 +946,7 @@ export interface AudioPower {
 **Technical Feasibility:** ~70% of the required infrastructure already exists in ShowStack:Production. The remaining 30% consists of sound-specific features (wireless coordination, audio cable management, speaker tracking) that are well-defined and achievable within the 16-month roadmap.
 
 **Revenue Potential:**
+
 - **Year 1:** 200 sound users × $199 = $39,800 ARR
 - **Year 2:** 500 sound users × $199 = $99,500 ARR
 - **Year 3:** 1,000 sound users × $199 = $199,000 ARR
@@ -906,12 +959,14 @@ export interface AudioPower {
 ## 📚 Sources & References
 
 **Minotaur Sound System Database Information:**
+
 - [Minotaur Sound System Database - Daniel Lundberg Sound Design](https://www.lundbergsound.com/?page_id=656)
 - [Minotaur - Theatrical Sound System Data Manager | TSDCA](https://tsdca.org/videos/minotaur-theatrical-sound-system-data-manager/)
 - [Minotaur FAQs and Quick-Start Guidelines](http://www.lundbergsound.com/?p=616)
 - [Association for Sound Design and Production - Paperwork using Minotaur](https://www.associationofsounddesigners.com/event-5229038)
 
 **ShowStack:Production Documentation:**
+
 - `/docs/technical-spec.md` - Technical specification
 - `/docs/summary.md` - Development package summary
 - `/proof-of-concept/` - Working virtual data grid prototype

@@ -22,11 +22,7 @@ export function RevisionChangeLogPage({ projectId }: RevisionChangeLogPageProps)
   const [filter, setFilter] = useState<ChangeFilter>('all');
 
   if (!currentProject) {
-    return (
-      <div className="p-8 text-center text-gray-500">
-        No project loaded
-      </div>
-    );
+    return <div className="p-8 text-center text-gray-500">No project loaded</div>;
   }
 
   const currentRevision = currentProject.current_revision;
@@ -37,13 +33,20 @@ export function RevisionChangeLogPage({ projectId }: RevisionChangeLogPageProps)
 
   // Get the revision record to access spare_snapshot
   const revisionRecord = revisions.find((r) => r.revision_number === activeRevision);
-  const spareSnapshot = revisionRecord ? parseSpareSnapshot(revisionRecord.spare_snapshot) : undefined;
+  const spareSnapshot = revisionRecord
+    ? parseSpareSnapshot(revisionRecord.spare_snapshot)
+    : undefined;
 
   // Detect changes for the selected revision
   // eslint-disable-next-line react-hooks/rules-of-hooks -- TODO: move early return below hooks
   const changes = useMemo(() => {
     if (activeRevision === 0) return [];
-    const allChanges = detectRevisionChanges(items, activeRevision - 1, activeRevision, spareSnapshot);
+    const allChanges = detectRevisionChanges(
+      items,
+      activeRevision - 1,
+      activeRevision,
+      spareSnapshot,
+    );
 
     // Apply filter
     if (filter === 'all') return allChanges;
@@ -250,8 +253,13 @@ export function RevisionChangeLogPage({ projectId }: RevisionChangeLogPageProps)
                           }
 
                           return (
-                            <tr key={change.item_id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                              <td className={`px-4 py-3 text-xs font-medium uppercase ${typeBg} ${typeColor}`}>
+                            <tr
+                              key={change.item_id}
+                              className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                            >
+                              <td
+                                className={`px-4 py-3 text-xs font-medium uppercase ${typeBg} ${typeColor}`}
+                              >
                                 {change.change_type === 'addition' && '+ Add'}
                                 {change.change_type === 'deletion' && '− Del'}
                                 {change.change_type === 'modification' && '~ Mod'}
@@ -263,7 +271,9 @@ export function RevisionChangeLogPage({ projectId }: RevisionChangeLogPageProps)
                                 {change.change_type === 'addition' ? '—' : oldActive}
                               </td>
                               <td className="px-4 py-3 text-center text-gray-400">
-                                {change.change_type !== 'addition' && change.change_type !== 'deletion' && '→'}
+                                {change.change_type !== 'addition' &&
+                                  change.change_type !== 'deletion' &&
+                                  '→'}
                               </td>
                               <td className="px-4 py-3 text-sm text-right text-gray-900 dark:text-white font-medium">
                                 {change.change_type === 'deletion' ? '—' : newActive}
@@ -272,8 +282,15 @@ export function RevisionChangeLogPage({ projectId }: RevisionChangeLogPageProps)
                                 {spareDiff === 0 ? (
                                   <span className="text-gray-400">—</span>
                                 ) : (
-                                  <span className={spareDiff > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
-                                    {spareDiff > 0 ? '+' : ''}{spareDiff}
+                                  <span
+                                    className={
+                                      spareDiff > 0
+                                        ? 'text-green-600 dark:text-green-400'
+                                        : 'text-red-600 dark:text-red-400'
+                                    }
+                                  >
+                                    {spareDiff > 0 ? '+' : ''}
+                                    {spareDiff}
                                   </span>
                                 )}
                               </td>

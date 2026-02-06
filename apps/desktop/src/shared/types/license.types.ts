@@ -6,14 +6,14 @@
  */
 
 export type ShowStackModule =
-  | 'prep'        // ShowStack:Prep (Shop Order Builder - current product)
-  | 'production'  // ShowStack:Lighting (LightWright competitor)
-  | 'manager'     // ShowStack:Manager (Production/Tour management)
-  | 'student';    // ShowStack:Student (Educational version)
+  | 'prep' // ShowStack:Prep (Shop Order Builder - current product)
+  | 'production' // ShowStack:Lighting (LightWright competitor)
+  | 'manager' // ShowStack:Manager (Production/Tour management)
+  | 'student'; // ShowStack:Student (Educational version)
 
 export type LicenseTier =
-  | 'professional'  // Full access, all features
-  | 'student'       // Limited features, educational pricing
+  | 'professional' // Full access, all features
+  | 'student' // Limited features, educational pricing
   | 'institutional'; // Multi-seat, institutional pricing
 
 export interface UserLicense {
@@ -28,16 +28,16 @@ export interface UserLicense {
   modules: ModuleAccess[];
 
   expirationDate: number; // Unix timestamp
-  lastVerified: number;   // Unix timestamp
-  createdAt: number;      // Unix timestamp
-  updatedAt: number;      // Unix timestamp
+  lastVerified: number; // Unix timestamp
+  createdAt: number; // Unix timestamp
+  updatedAt: number; // Unix timestamp
 }
 
 export interface ModuleAccess {
   module: ShowStackModule;
   enabled: boolean;
   features: ModuleFeatures;
-  expirationDate?: number;  // Unix timestamp - can be different per module (e.g., trial)
+  expirationDate?: number; // Unix timestamp - can be different per module (e.g., trial)
 }
 
 export interface ModuleFeatures {
@@ -55,7 +55,7 @@ export interface ModuleFeatures {
 }
 
 export interface PrepModuleFeatures {
-  maxProjects: number;           // -1 for unlimited, 3 for student
+  maxProjects: number; // -1 for unlimited, 3 for student
   logoIntegration: boolean;
   vendorTemplates: boolean;
   equipmentDatabase: boolean;
@@ -71,7 +71,7 @@ export interface ProductionModuleFeatures {
 }
 
 export interface ManagerModuleFeatures {
-  plaidIntegration: boolean;      // Financial tracking
+  plaidIntegration: boolean; // Financial tracking
   multiShowManagement: boolean;
   budgetTracking: boolean;
   perDiemCalculation: boolean;

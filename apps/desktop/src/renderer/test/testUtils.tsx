@@ -5,10 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 /**
  * Custom render function that wraps components with common providers
  */
-export function renderWithRouter(
-  ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
-) {
+export function renderWithRouter(ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <BrowserRouter>{children}</BrowserRouter>
   );

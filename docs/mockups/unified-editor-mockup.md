@@ -284,6 +284,7 @@
 ## Responsive Breakpoints
 
 ### Compact Mode (< 1400px width)
+
 ```
 ┌─────────────────────────────────────────┐
 │ ShowStack > Paperwork > Channel Hookup  │

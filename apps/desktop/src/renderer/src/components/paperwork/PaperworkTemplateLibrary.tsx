@@ -29,7 +29,7 @@ export function PaperworkTemplateLibrary({
   onDuplicateTemplate,
   onDeleteTemplate,
   onCreateNew,
-  className = ''
+  className = '',
 }: PaperworkTemplateLibraryProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterReportType, setFilterReportType] = useState<ReportType | 'all'>('all');
@@ -139,9 +139,7 @@ export function PaperworkTemplateLibrary({
         {/* System Templates */}
         {showSystemTemplates && systemTemplates.length > 0 && (
           <div>
-            <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">
-              System Templates
-            </h4>
+            <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">System Templates</h4>
             <div className="space-y-2">
               {systemTemplates.map((template) => (
                 <TemplateCard
@@ -160,9 +158,7 @@ export function PaperworkTemplateLibrary({
         {/* Custom Templates */}
         {showCustomTemplates && customTemplates.length > 0 && (
           <div>
-            <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">
-              Custom Templates
-            </h4>
+            <h4 className="text-xs font-semibold text-gray-400 uppercase mb-2">Custom Templates</h4>
             <div className="space-y-2">
               {customTemplates.map((template) => (
                 <TemplateCard
@@ -207,42 +203,27 @@ interface TemplateCardProps {
   onDelete?: () => void;
 }
 
-function TemplateCard({
-  template,
-  isActive,
-  onLoad,
-  onDuplicate,
-  onDelete
-}: TemplateCardProps) {
+function TemplateCard({ template, isActive, onLoad, onDuplicate, onDelete }: TemplateCardProps) {
   const [showActions, setShowActions] = useState(false);
 
   return (
     <div
       className={`relative group bg-gray-750 rounded border transition-all ${
-        isActive
-          ? 'border-blue-500 ring-2 ring-blue-400'
-          : 'border-gray-600 hover:border-gray-500'
+        isActive ? 'border-blue-500 ring-2 ring-blue-400' : 'border-gray-600 hover:border-gray-500'
       }`}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
       {/* Card Content */}
-      <button
-        onClick={onLoad}
-        className="w-full text-left px-3 py-2"
-      >
+      <button onClick={onLoad} className="w-full text-left px-3 py-2">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
-            <h5 className="text-sm font-medium text-gray-200 truncate">
-              {template.name}
-            </h5>
+            <h5 className="text-sm font-medium text-gray-200 truncate">{template.name}</h5>
             <p className="text-xs text-gray-400 mt-0.5">
               {formatReportTypeName(template.reportType)}
             </p>
             {template.description && (
-              <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-                {template.description}
-              </p>
+              <p className="text-xs text-gray-500 mt-1 line-clamp-2">{template.description}</p>
             )}
           </div>
           {template.isSystem && (
@@ -254,7 +235,7 @@ function TemplateCard({
 
         {/* Template Info */}
         <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
-          <span>{template.columns.filter(c => c.visible).length} columns</span>
+          <span>{template.columns.filter((c) => c.visible).length} columns</span>
           {template.organization.groupBy && (
             <>
               <span>•</span>
@@ -330,7 +311,7 @@ function formatReportTypeName(reportType: ReportType): string {
     'network-summary': 'Network Summary',
     'port-assignments': 'Port Assignments',
     'infrastructure-power': 'Infrastructure Power',
-    'infrastructure-location': 'Infrastructure Location'
+    'infrastructure-location': 'Infrastructure Location',
   };
 
   return nameMap[reportType] || reportType;

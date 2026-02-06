@@ -7,7 +7,9 @@ interface TemplateManagerDialogProps {
 }
 
 export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialogProps) {
-  const [selectedType, setSelectedType] = useState<'general_conditions' | 'general_notes' | 'fixture_notes'>('general_conditions');
+  const [selectedType, setSelectedType] = useState<
+    'general_conditions' | 'general_notes' | 'fixture_notes'
+  >('general_conditions');
   const [templates, setTemplates] = useState<ShopOrderNoteTemplate[]>([]);
   const [editingTemplate, setEditingTemplate] = useState<ShopOrderNoteTemplate | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -128,9 +130,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
       <div className="bg-gray-800 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="p-6 border-b border-gray-700">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Template Manager</h2>
-          <p className="text-sm text-gray-400 mt-1">
-            Create and manage reusable note templates
-          </p>
+          <p className="text-sm text-gray-400 mt-1">Create and manage reusable note templates</p>
         </div>
 
         <div className="flex-1 overflow-auto p-6">
@@ -186,7 +186,9 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-gray-900 dark:text-white">{template.name}</span>
+                            <span className="font-medium text-gray-900 dark:text-white">
+                              {template.name}
+                            </span>
                             {template.is_default === 1 && (
                               <span className="px-2 py-0.5 bg-green-600/20 text-green-400 text-xs rounded">
                                 Default
@@ -207,7 +209,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
 
             {/* Right: Edit/Create Form */}
             <div>
-              {(isCreating || editingTemplate) ? (
+              {isCreating || editingTemplate ? (
                 <div className="bg-gray-700/50 rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     {editingTemplate ? 'Edit Template' : 'New Template'}
@@ -250,9 +252,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
                           onChange={(e) => setFormIsDefault(e.target.checked)}
                           className="w-4 h-4 bg-gray-800 border-gray-600 rounded focus:ring-blue-500"
                         />
-                        <span className="text-sm text-gray-300">
-                          Set as default template
-                        </span>
+                        <span className="text-sm text-gray-300">Set as default template</span>
                       </label>
                       <p className="text-xs text-gray-500 mt-1 ml-6">
                         Default template will be used when loading templates in projects
@@ -286,9 +286,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
                 </div>
               ) : (
                 <div className="bg-gray-700/50 rounded-lg p-8 text-center">
-                  <p className="text-gray-400">
-                    Select a template to edit or create a new one
-                  </p>
+                  <p className="text-gray-400">Select a template to edit or create a new one</p>
                 </div>
               )}
             </div>

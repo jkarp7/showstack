@@ -11,7 +11,7 @@ vi.mock('../../database/queries/fixtures', () => ({
   createFixture: vi.fn(),
   updateFixture: vi.fn(),
   deleteFixture: vi.fn(),
-  deleteMultipleFixtures: vi.fn()
+  deleteMultipleFixtures: vi.fn(),
 }));
 
 vi.mock('../../errors', async () => {
@@ -19,21 +19,21 @@ vi.mock('../../errors', async () => {
   return {
     ...actual,
     errorHandler: {
-      executeWithRetry: vi.fn((fn) => fn())
-    }
+      executeWithRetry: vi.fn((fn) => fn()),
+    },
   };
 });
 
 vi.mock('../../monitoring/PerformanceMonitor', () => ({
   performanceMonitor: {
-    trackDatabaseQuery: vi.fn()
-  }
+    trackDatabaseQuery: vi.fn(),
+  },
 }));
 
 vi.mock('../../database/monitoring/DatabaseMonitor', () => ({
   databaseMonitor: {
-    recordQuery: vi.fn()
-  }
+    recordQuery: vi.fn(),
+  },
 }));
 
 // Import after mocking
@@ -43,7 +43,7 @@ import {
   createFixture,
   updateFixture,
   deleteFixture,
-  deleteMultipleFixtures
+  deleteMultipleFixtures,
 } from '../../database/queries/fixtures';
 import type { Fixture } from '../../database/queries/fixtures';
 
@@ -63,7 +63,7 @@ describe('FixtureService', () => {
     status: 'active',
     notes: '',
     created_at: 1704067200000,
-    updated_at: 1704067200000
+    updated_at: 1704067200000,
   };
 
   const mockFixture2: Fixture = {
@@ -79,7 +79,7 @@ describe('FixtureService', () => {
     status: 'active',
     notes: '',
     created_at: 1704067200000,
-    updated_at: 1704067200000
+    updated_at: 1704067200000,
   };
 
   beforeEach(() => {
@@ -114,7 +114,7 @@ describe('FixtureService', () => {
         position: 'FOH',
         type: 'LED',
         manufacturer: 'ETC',
-        wattage: 750
+        wattage: 750,
       };
       vi.mocked(createFixture).mockResolvedValue(mockFixture);
 
@@ -137,16 +137,12 @@ describe('FixtureService', () => {
     });
 
     it('should throw ValidationError for empty ID', async () => {
-      await expect(service.update('', { position: 'Test' })).rejects.toThrow(
-        ValidationError
-      );
+      await expect(service.update('', { position: 'Test' })).rejects.toThrow(ValidationError);
       expect(updateFixture).not.toHaveBeenCalled();
     });
 
     it('should throw ValidationError for whitespace-only ID', async () => {
-      await expect(service.update('   ', { position: 'Test' })).rejects.toThrow(
-        ValidationError
-      );
+      await expect(service.update('   ', { position: 'Test' })).rejects.toThrow(ValidationError);
       expect(updateFixture).not.toHaveBeenCalled();
     });
   });
@@ -177,9 +173,7 @@ describe('FixtureService', () => {
     });
 
     it('should throw Error for empty array', async () => {
-      await expect(service.deleteMultiple([])).rejects.toThrow(
-        'No fixture IDs provided'
-      );
+      await expect(service.deleteMultiple([])).rejects.toThrow('No fixture IDs provided');
       expect(deleteMultipleFixtures).not.toHaveBeenCalled();
     });
   });
@@ -197,7 +191,7 @@ describe('FixtureService', () => {
       const fixtureNoWattage: Fixture = {
         id: 'fixture-3',
         created_at: 1704067200000,
-        updated_at: 1704067200000
+        updated_at: 1704067200000,
       };
       const fixtures = [mockFixture, fixtureNoWattage];
 

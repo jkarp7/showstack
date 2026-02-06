@@ -31,7 +31,7 @@ export function registerShellHandlers(): void {
       console.error('Failed to open external URL:', {
         operation: 'shell:openExternal',
         url: url?.substring(0, 50), // Log only first 50 chars
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof ValidationError) {

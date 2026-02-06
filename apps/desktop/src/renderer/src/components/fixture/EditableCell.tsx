@@ -20,7 +20,7 @@ export function EditableCell({
   readOnly = false,
   onNavigate,
   shouldFocus = false,
-  suggestions = []
+  suggestions = [],
 }: EditableCellProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value || '');
@@ -79,7 +79,11 @@ export function EditableCell({
       // Only navigate if cursor is at the beginning
       e.preventDefault();
       commitAndNavigate('left');
-    } else if (e.key === 'ArrowRight' && inputRef.current && inputRef.current.selectionStart === inputRef.current.value.length) {
+    } else if (
+      e.key === 'ArrowRight' &&
+      inputRef.current &&
+      inputRef.current.selectionStart === inputRef.current.value.length
+    ) {
       // Only navigate if cursor is at the end
       e.preventDefault();
       commitAndNavigate('right');
@@ -93,7 +97,11 @@ export function EditableCell({
   const datalistId = `datalist-${Math.random().toString(36).substr(2, 9)}`;
 
   return (
-    <div className={clsx('px-2 text-sm', className)} style={style} onClick={(e) => e.stopPropagation()}>
+    <div
+      className={clsx('px-2 text-sm', className)}
+      style={style}
+      onClick={(e) => e.stopPropagation()}
+    >
       {isEditing ? (
         <>
           <input
@@ -122,7 +130,7 @@ export function EditableCell({
             'rounded px-1 py-0.5 truncate',
             readOnly
               ? 'cursor-default text-gray-500 dark:text-gray-400 italic'
-              : 'cursor-text hover:bg-gray-100 dark:hover:bg-gray-700'
+              : 'cursor-text hover:bg-gray-100 dark:hover:bg-gray-700',
           )}
         >
           {value || <span className="text-gray-400 dark:text-gray-500">—</span>}

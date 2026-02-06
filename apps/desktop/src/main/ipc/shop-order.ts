@@ -41,7 +41,7 @@ import {
   // UpdateShopOrderNoteSchema,
   parseWithZod,
   formatValidationErrors,
-  type ShopOrderProject
+  type ShopOrderProject,
 } from '@showstack/shared';
 
 /**
@@ -73,7 +73,7 @@ export function registerShopOrderHandlers(): void {
       performanceMonitor.trackIPCHandler('shop-order:projects:getAll', Date.now() - start);
       console.error('Failed to get prep projects:', {
         operation: 'shop-order:projects:getAll',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
       if (error instanceof DatabaseError) {
         throw new Error(`Unable to load prep projects: ${error.message}`);
@@ -89,7 +89,7 @@ export function registerShopOrderHandlers(): void {
       console.error('Failed to get prep project:', {
         operation: 'shop-order:projects:getById',
         id,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
       if (error instanceof DatabaseError) {
         throw new Error(`Unable to load prep project: ${error.message}`);
@@ -108,7 +108,7 @@ export function registerShopOrderHandlers(): void {
         throw new ValidationError(
           `Invalid shop order project data:\n${errorMessage}`,
           validation.errors[0]?.field || 'unknown',
-          data
+          data,
         );
       }
 
@@ -117,7 +117,7 @@ export function registerShopOrderHandlers(): void {
       console.error('Failed to create prep project:', {
         operation: 'shop-order:projects:create',
         data,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
       if (error instanceof ValidationError) {
         throw new Error(error.toUserMessage());
@@ -141,7 +141,7 @@ export function registerShopOrderHandlers(): void {
           throw new ValidationError(
             `Invalid shop order project update data:\n${errorMessage}`,
             validation.errors[0]?.field || 'unknown',
-            updates
+            updates,
           );
         }
 
@@ -151,7 +151,7 @@ export function registerShopOrderHandlers(): void {
           operation: 'shop-order:projects:update',
           id,
           updates,
-          error: error instanceof Error ? error.message : error
+          error: error instanceof Error ? error.message : error,
         });
         if (error instanceof ValidationError) {
           throw new Error(error.toUserMessage());
@@ -161,7 +161,7 @@ export function registerShopOrderHandlers(): void {
         }
         throw error;
       }
-    }
+    },
   );
 
   ipcMain.handle('shop-order:projects:delete', async (_event, id: string) => {
@@ -171,7 +171,7 @@ export function registerShopOrderHandlers(): void {
       console.error('Failed to delete prep project:', {
         operation: 'shop-order:projects:delete',
         id,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
       if (error instanceof DatabaseError) {
         throw new Error(`Unable to delete prep project: ${error.message}`);
@@ -211,7 +211,7 @@ export function registerShopOrderHandlers(): void {
         console.error('Error updating prep section:', error);
         throw error;
       }
-    }
+    },
   );
 
   ipcMain.handle('shop-order:sections:delete', async (_event, id: string) => {
@@ -263,7 +263,7 @@ export function registerShopOrderHandlers(): void {
         console.error('Error updating prep item:', error);
         throw error;
       }
-    }
+    },
   );
 
   ipcMain.handle('shop-order:items:delete', async (_event, id: string) => {
@@ -288,14 +288,17 @@ export function registerShopOrderHandlers(): void {
     }
   });
 
-  ipcMain.handle('shop-order:revisions:create', async (_event, data: Partial<ShopOrderRevision>) => {
-    try {
-      return await shopOrderRevisionService.create(data);
-    } catch (error) {
-      console.error('Error creating prep revision:', error);
-      throw error;
-    }
-  });
+  ipcMain.handle(
+    'shop-order:revisions:create',
+    async (_event, data: Partial<ShopOrderRevision>) => {
+      try {
+        return await shopOrderRevisionService.create(data);
+      } catch (error) {
+        console.error('Error creating prep revision:', error);
+        throw error;
+      }
+    },
+  );
 
   ipcMain.handle('shop-order:revisions:delete', async (_event, id: string) => {
     try {
@@ -319,7 +322,7 @@ export function registerShopOrderHandlers(): void {
         console.error('Error getting prep notes:', error);
         throw error;
       }
-    }
+    },
   );
 
   ipcMain.handle('shop-order:notes:create', async (_event, data: Partial<ShopOrderNote>) => {
@@ -331,14 +334,17 @@ export function registerShopOrderHandlers(): void {
     }
   });
 
-  ipcMain.handle('shop-order:notes:update', async (_event, id: string, updates: { content?: string; format?: string }) => {
-    try {
-      return await shopOrderNoteService.update(id, updates);
-    } catch (error) {
-      console.error('Error updating prep note:', error);
-      throw error;
-    }
-  });
+  ipcMain.handle(
+    'shop-order:notes:update',
+    async (_event, id: string, updates: { content?: string; format?: string }) => {
+      try {
+        return await shopOrderNoteService.update(id, updates);
+      } catch (error) {
+        console.error('Error updating prep note:', error);
+        throw error;
+      }
+    },
+  );
 
   ipcMain.handle('shop-order:notes:delete', async (_event, id: string) => {
     try {
@@ -380,23 +386,29 @@ export function registerShopOrderHandlers(): void {
     }
   });
 
-  ipcMain.handle('shop-order:noteTemplates:create', async (_event, data: Partial<ShopOrderNoteTemplate>) => {
-    try {
-      return await shopOrderNoteService.createTemplate(data);
-    } catch (error) {
-      console.error('Error creating note template:', error);
-      throw error;
-    }
-  });
+  ipcMain.handle(
+    'shop-order:noteTemplates:create',
+    async (_event, data: Partial<ShopOrderNoteTemplate>) => {
+      try {
+        return await shopOrderNoteService.createTemplate(data);
+      } catch (error) {
+        console.error('Error creating note template:', error);
+        throw error;
+      }
+    },
+  );
 
-  ipcMain.handle('shop-order:noteTemplates:update', async (_event, id: string, updates: Partial<ShopOrderNoteTemplate>) => {
-    try {
-      return await shopOrderNoteService.updateTemplate(id, updates);
-    } catch (error) {
-      console.error('Error updating note template:', error);
-      throw error;
-    }
-  });
+  ipcMain.handle(
+    'shop-order:noteTemplates:update',
+    async (_event, id: string, updates: Partial<ShopOrderNoteTemplate>) => {
+      try {
+        return await shopOrderNoteService.updateTemplate(id, updates);
+      } catch (error) {
+        console.error('Error updating note template:', error);
+        throw error;
+      }
+    },
+  );
 
   ipcMain.handle('shop-order:noteTemplates:delete', async (_event, id: string) => {
     try {
@@ -466,7 +478,7 @@ export function registerShopOrderHandlers(): void {
         console.error('Error getting layout templates:', error);
         throw error;
       }
-    }
+    },
   );
 
   ipcMain.handle('shop-order:layoutTemplates:getById', async (_event, id: string) => {
@@ -497,7 +509,7 @@ export function registerShopOrderHandlers(): void {
         console.error('Error getting default layout template:', error);
         throw error;
       }
-    }
+    },
   );
 
   ipcMain.handle(
@@ -509,7 +521,7 @@ export function registerShopOrderHandlers(): void {
         console.error('Error creating layout template:', error);
         throw error;
       }
-    }
+    },
   );
 
   ipcMain.handle(
@@ -518,7 +530,7 @@ export function registerShopOrderHandlers(): void {
       _event,
       id: string,
       updates: Partial<PageLayoutTemplate>,
-      elements?: Partial<LayoutElement>[]
+      elements?: Partial<LayoutElement>[],
     ) => {
       try {
         return updateLayoutTemplate(id, updates, elements);
@@ -526,7 +538,7 @@ export function registerShopOrderHandlers(): void {
         console.error('Error updating layout template:', error);
         throw error;
       }
-    }
+    },
   );
 
   ipcMain.handle('shop-order:layoutTemplates:delete', async (_event, id: string) => {
@@ -660,7 +672,7 @@ export function registerShopOrderHandlers(): void {
           }
           // Close the hidden window after printing or canceling
           printWindow.close();
-        }
+        },
       );
 
       return { success: true };
@@ -679,7 +691,12 @@ function generatePDFContent(project: ShopOrderProject, templateData: any): strin
   const enabledSections = sections.filter((s: any) => s.enabled && s.type !== 'page-break');
 
   // Get margin settings (in inches)
-  const margins = templateData.pageSettings?.margins || { top: 0.75, right: 0.75, bottom: 0.75, left: 0.75 };
+  const margins = templateData.pageSettings?.margins || {
+    top: 0.75,
+    right: 0.75,
+    bottom: 0.75,
+    left: 0.75,
+  };
 
   // Page dimensions in pixels (at 96 DPI)
   const pageWidth = 816; // 8.5" at 96 DPI
@@ -694,22 +711,28 @@ function generatePDFContent(project: ShopOrderProject, templateData: any): strin
   // Fetch notes for the project
   const notes = getNotesByProjectId(project.id);
   const notesMap: Record<string, { content: string; format: string }> = {};
-  notes.forEach(note => {
+  notes.forEach((note) => {
     notesMap[note.type] = { content: note.content, format: note.format || 'plain' };
   });
 
   // Generate HTML pages for each section
-  const pagesHTML = enabledSections.map((section: any) => {
-    return renderPageSection(section, project, contentWidth, contentHeight, notesMap);
-  }).filter(html => html).join('');
+  const pagesHTML = enabledSections
+    .map((section: any) => {
+      return renderPageSection(section, project, contentWidth, contentHeight, notesMap);
+    })
+    .filter((html) => html)
+    .join('');
 
   // Grayscale CSS for black & white mode
-  const grayscaleCSS = templateData.pageSettings?.colorMode === 'bw' ? `
+  const grayscaleCSS =
+    templateData.pageSettings?.colorMode === 'bw'
+      ? `
     -webkit-filter: grayscale(100%);
     filter: grayscale(100%);
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-  ` : '';
+  `
+      : '';
 
   return `
     <!DOCTYPE html>
@@ -761,7 +784,7 @@ function renderPageSection(
   project: ShopOrderProject,
   contentWidth: number,
   contentHeight: number,
-  notesMap: Record<string, {content: string; format: string}>
+  notesMap: Record<string, { content: string; format: string }>,
 ): string {
   // Load default layout for this section type
   const layout = getDefaultLayoutTemplate(section.type);
@@ -779,14 +802,17 @@ function renderPageSection(
   }
 
   // Render all elements to HTML
-  const elementsHTML = elements.map(el => {
-    const element = {
-      ...el,
-      config: typeof el.config === 'string' ? JSON.parse(el.config) : el.config,
-      style: typeof el.style === 'string' ? JSON.parse(el.style) : el.style,
-    };
-    return renderLayoutElement(element, project, layout, contentWidth, contentHeight, notesMap);
-  }).filter(html => html).join('');
+  const elementsHTML = elements
+    .map((el) => {
+      const element = {
+        ...el,
+        config: typeof el.config === 'string' ? JSON.parse(el.config) : el.config,
+        style: typeof el.style === 'string' ? JSON.parse(el.style) : el.style,
+      };
+      return renderLayoutElement(element, project, layout, contentWidth, contentHeight, notesMap);
+    })
+    .filter((html) => html)
+    .join('');
 
   return `
     <div class="page">
@@ -804,7 +830,7 @@ function renderLayoutElement(
   layout: any,
   contentWidth: number,
   contentHeight: number,
-  notesMap: Record<string, {content: string; format: string}>
+  notesMap: Record<string, { content: string; format: string }>,
 ): string {
   const { grid_column, grid_row, column_span, row_span, config, style, element_type } = element;
 
@@ -836,7 +862,9 @@ function renderLayoutElement(
     justify-content: ${getJustifyContent(style.textAlign || 'left')};
     ${style.textDecoration ? `text-decoration: ${style.textDecoration};` : ''}
     ${style.fontStyle ? `font-style: ${style.fontStyle};` : ''}
-  `.replace(/\s+/g, ' ').trim();
+  `
+    .replace(/\s+/g, ' ')
+    .trim();
 
   if (element_type === 'dataField') {
     const value = getDataFieldValue(config.fieldType, project);
@@ -884,7 +912,7 @@ function renderLayoutElement(
               '.png': 'image/png',
               '.gif': 'image/gif',
               '.svg': 'image/svg+xml',
-              '.webp': 'image/webp'
+              '.webp': 'image/webp',
             };
             const mimeType = mimeTypes[ext] || 'image/png';
             const base64 = buffer.toString('base64');
@@ -910,7 +938,7 @@ function renderLayoutElement(
 
     return `<div style="${baseStyle}">
       ${label ? `<span style="font-weight: ${style.fontWeight || 'normal'};">${escapeHtml(label)}</span>` : ''}
-      <span style="color: ${value ? (style.color || '#000') : '#999'}; ${label ? 'margin-left: 8px;' : ''}">${escapeHtml(value || '')}</span>
+      <span style="color: ${value ? style.color || '#000' : '#999'}; ${label ? 'margin-left: 8px;' : ''}">${escapeHtml(value || '')}</span>
     </div>`;
   }
 
@@ -933,7 +961,7 @@ function renderLayoutElement(
     const color = config.color || style.backgroundColor || '#000';
 
     if (config.shapeType === 'line' || config.shapeType === 'divider') {
-      return `<div style="position: absolute; left: ${left}px; top: ${top + height/2}px; width: ${width}px; border-bottom: ${thickness}px solid ${color}; height: 0;"></div>`;
+      return `<div style="position: absolute; left: ${left}px; top: ${top + height / 2}px; width: ${width}px; border-bottom: ${thickness}px solid ${color}; height: 0;"></div>`;
     }
     if (config.shapeType === 'rectangle') {
       return `<div style="${baseStyle} background-color: ${color};"></div>`;
@@ -955,7 +983,7 @@ function renderLayoutElement(
     // Get spare snapshot from previous revision
     let previousSpareSnapshot: any = {};
     if (previousRevisionNum !== undefined) {
-      const previousRevision = revisions.find(r => r.revision_number === previousRevisionNum);
+      const previousRevision = revisions.find((r) => r.revision_number === previousRevisionNum);
       if (previousRevision?.spare_snapshot) {
         try {
           previousSpareSnapshot = JSON.parse(previousRevision.spare_snapshot);
@@ -968,7 +996,7 @@ function renderLayoutElement(
     let equipmentHTML = '';
     let currentY = top;
 
-    sections.forEach(section => {
+    sections.forEach((section) => {
       const items = getItemsBySectionId(section.id);
       if (items.length === 0) return;
 
@@ -982,23 +1010,23 @@ function renderLayoutElement(
 
       // Section notes (if present) - formatted as bulleted list
       if (section.notes && section.notes.trim()) {
-        const noteLines = section.notes.split('\n').filter(line => line.trim());
-        const bulletedNotes = noteLines.map(line => `• ${escapeHtml(line.trim())}`).join('<br/>');
+        const noteLines = section.notes.split('\n').filter((line) => line.trim());
+        const bulletedNotes = noteLines.map((line) => `• ${escapeHtml(line.trim())}`).join('<br/>');
         equipmentHTML += `
           <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; padding: 4px 8px; font-size: 8pt; line-height: 1.4;">
             ${bulletedNotes}
           </div>
         `;
-        currentY += (noteLines.length * 12) + 20; // Extra space before equipment table
+        currentY += noteLines.length * 12 + 20; // Extra space before equipment table
       }
 
       // Table headers: Δ | Total | Rental | Active | Spare | Description
-      const deltaWidth = width * 0.04;   // Delta
-      const totalWidth = width * 0.07;   // Total - prominent
-      const rentalWidth = width * 0.07;  // Rental - prominent
-      const activeWidth = width * 0.06;  // Active
-      const spareWidth = width * 0.06;   // Spare
-      const descWidth = width * 0.70;    // Description
+      const deltaWidth = width * 0.04; // Delta
+      const totalWidth = width * 0.07; // Total - prominent
+      const rentalWidth = width * 0.07; // Rental - prominent
+      const activeWidth = width * 0.06; // Active
+      const spareWidth = width * 0.06; // Spare
+      const descWidth = width * 0.7; // Description
 
       equipmentHTML += `
         <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${deltaWidth}px; background-color: #F3F4F6; padding: 4px 2px; font-size: 8pt; font-weight: bold; text-align: center;">Δ</div>
@@ -1011,7 +1039,7 @@ function renderLayoutElement(
       currentY += 20;
 
       // Equipment items
-      items.forEach(item => {
+      items.forEach((item) => {
         // Parse revision quantities
         let revisionQuantities: any = {};
         try {
@@ -1022,9 +1050,11 @@ function renderLayoutElement(
 
         // Get quantities for current and previous revisions
         const currentActive = revisionQuantities[currentRevisionNum] || 0;
-        const previousActive = previousRevisionNum !== undefined ? (revisionQuantities[previousRevisionNum] || 0) : 0;
+        const previousActive =
+          previousRevisionNum !== undefined ? revisionQuantities[previousRevisionNum] || 0 : 0;
         const currentSpare = item.spare_qty || 0;
-        const previousSpare = previousRevisionNum !== undefined ? (previousSpareSnapshot[item.id] || item.spare_qty) : 0;
+        const previousSpare =
+          previousRevisionNum !== undefined ? previousSpareSnapshot[item.id] || item.spare_qty : 0;
 
         // Calculate delta indicator
         let deltaContent = '';
@@ -1060,7 +1090,8 @@ function renderLayoutElement(
 
         // Calculate total and rental using max of all revisions
         const allRevisionValues = Object.values(revisionQuantities);
-        const maxActive = allRevisionValues.length > 0 ? Math.max(...allRevisionValues as number[]) : 0;
+        const maxActive =
+          allRevisionValues.length > 0 ? Math.max(...(allRevisionValues as number[])) : 0;
         const total = maxActive + currentSpare;
         const rental = total - (item.venue_qty || 0);
 
@@ -1102,18 +1133,20 @@ function renderLayoutElement(
 
     const allContent: string[] = [];
 
-    notes.forEach(note => {
+    notes.forEach((note) => {
       const content = note.content || '';
       const format = note.format || 'plain';
 
       // Format content based on format type
       let formattedContent = '';
       if (format === 'bullets') {
-        const lines = content.split('\n').filter(l => l.trim());
-        formattedContent = lines.map(line => `• ${escapeHtml(line.trim())}`).join('<br/>');
+        const lines = content.split('\n').filter((l) => l.trim());
+        formattedContent = lines.map((line) => `• ${escapeHtml(line.trim())}`).join('<br/>');
       } else if (format === 'numbered') {
-        const lines = content.split('\n').filter(l => l.trim());
-        formattedContent = lines.map((line, idx) => `${idx + 1}. ${escapeHtml(line.trim())}`).join('<br/>');
+        const lines = content.split('\n').filter((l) => l.trim());
+        formattedContent = lines
+          .map((line, idx) => `${idx + 1}. ${escapeHtml(line.trim())}`)
+          .join('<br/>');
       } else {
         formattedContent = escapeHtml(content).replace(/\n/g, '<br/>');
       }
@@ -1144,7 +1177,7 @@ function renderLayoutElement(
       return `<div style="${baseStyle}">No revision history</div>`;
     }
 
-    const currentRevision = revisions.find(r => r.revision_number === project.current_revision);
+    const currentRevision = revisions.find((r) => r.revision_number === project.current_revision);
     if (!currentRevision) {
       return `<div style="${baseStyle}">Current revision not found</div>`;
     }
@@ -1164,7 +1197,11 @@ function renderLayoutElement(
       if (!timestamp) return '';
       try {
         const date = new Date(timestamp);
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        });
       } catch {
         return '';
       }
@@ -1204,7 +1241,7 @@ function renderLayoutElement(
 
     // Current revision changes
     if (changeLog.length > 0) {
-      changeLog.forEach(change => {
+      changeLog.forEach((change) => {
         let bgColor = '#FFF';
         let deltaSymbol = '';
 
@@ -1262,7 +1299,9 @@ function renderLayoutElement(
     currentY += 12; // Space before previous revisions
 
     // Previous revisions list
-    const previousRevisions = revisions.filter(r => r.revision_number < project.current_revision).sort((a, b) => b.revision_number - a.revision_number);
+    const previousRevisions = revisions
+      .filter((r) => r.revision_number < project.current_revision)
+      .sort((a, b) => b.revision_number - a.revision_number);
 
     if (previousRevisions.length > 0) {
       revisionHTML += `
@@ -1272,7 +1311,7 @@ function renderLayoutElement(
       `;
       currentY += 20;
 
-      previousRevisions.forEach(rev => {
+      previousRevisions.forEach((rev) => {
         revisionHTML += `
           <div style="position: absolute; left: ${left}px; top: ${currentY}px; width: ${width}px; padding: 3px 8px; font-size: 8pt; color: #374151;">
             Revision ${rev.revision_number} - ${formatRevDate(rev.revision_date)}
@@ -1314,53 +1353,88 @@ function getDataFieldValue(fieldType: string, project: ShopOrderProject): string
 
   const getRevisionDate = (): string => {
     const revisions = getRevisionsByProjectId(project.id);
-    const currentRevision = revisions.find(r => r.revision_number === project.current_revision);
+    const currentRevision = revisions.find((r) => r.revision_number === project.current_revision);
     return currentRevision ? formatDate(currentRevision.revision_date) : '';
   };
 
   switch (fieldType) {
-    case 'production_name': return project.production_name || 'Untitled Production';
-    case 'venue': return project.venue || '';
-    case 'venue_city': return project.venue_city || '';
-    case 'venue_state': return project.venue_state || '';
-    case 'order_date': return formatDate(project.order_date);
-    case 'gm_name': return project.gm_name || '';
-    case 'gm_company': return project.gm_company || '';
-    case 'gm_email': return project.gm_email || '';
-    case 'gm_phone': return formatPhone(project.gm_phone);
-    case 'pm_name': return project.pm_name || '';
-    case 'pm_company': return project.pm_company || '';
-    case 'pm_email': return project.pm_email || '';
-    case 'pm_phone': return formatPhone(project.pm_phone);
-    case 'ld_name': return project.ld_name || '';
-    case 'ld_email': return project.ld_email || '';
-    case 'ld_phone': return formatPhone(project.ld_phone);
-    case 'ald_name': return project.ald_name || '';
-    case 'ald_email': return project.ald_email || '';
-    case 'ald_phone': return formatPhone(project.ald_phone);
-    case 'pe_name': return project.pe_name || '';
-    case 'pe_email': return project.pe_email || '';
-    case 'pe_phone': return formatPhone(project.pe_phone);
-    case 'prep_start_date': return formatDate(project.prep_start_date);
-    case 'prep_end_date': return formatDate(project.prep_end_date);
-    case 'load_in_date': return formatDate(project.load_in_date);
-    case 'first_preview_date': return formatDate(project.first_preview_date);
-    case 'opening_night_date': return formatDate(project.opening_night_date);
-    case 'closing_date': return formatDate(project.closing_date);
-    case 'current_revision': return String(project.current_revision);
-    case 'revision_number': return String(project.current_revision);
-    case 'revision_date': return getRevisionDate();
-    default: return '';
+    case 'production_name':
+      return project.production_name || 'Untitled Production';
+    case 'venue':
+      return project.venue || '';
+    case 'venue_city':
+      return project.venue_city || '';
+    case 'venue_state':
+      return project.venue_state || '';
+    case 'order_date':
+      return formatDate(project.order_date);
+    case 'gm_name':
+      return project.gm_name || '';
+    case 'gm_company':
+      return project.gm_company || '';
+    case 'gm_email':
+      return project.gm_email || '';
+    case 'gm_phone':
+      return formatPhone(project.gm_phone);
+    case 'pm_name':
+      return project.pm_name || '';
+    case 'pm_company':
+      return project.pm_company || '';
+    case 'pm_email':
+      return project.pm_email || '';
+    case 'pm_phone':
+      return formatPhone(project.pm_phone);
+    case 'ld_name':
+      return project.ld_name || '';
+    case 'ld_email':
+      return project.ld_email || '';
+    case 'ld_phone':
+      return formatPhone(project.ld_phone);
+    case 'ald_name':
+      return project.ald_name || '';
+    case 'ald_email':
+      return project.ald_email || '';
+    case 'ald_phone':
+      return formatPhone(project.ald_phone);
+    case 'pe_name':
+      return project.pe_name || '';
+    case 'pe_email':
+      return project.pe_email || '';
+    case 'pe_phone':
+      return formatPhone(project.pe_phone);
+    case 'prep_start_date':
+      return formatDate(project.prep_start_date);
+    case 'prep_end_date':
+      return formatDate(project.prep_end_date);
+    case 'load_in_date':
+      return formatDate(project.load_in_date);
+    case 'first_preview_date':
+      return formatDate(project.first_preview_date);
+    case 'opening_night_date':
+      return formatDate(project.opening_night_date);
+    case 'closing_date':
+      return formatDate(project.closing_date);
+    case 'current_revision':
+      return String(project.current_revision);
+    case 'revision_number':
+      return String(project.current_revision);
+    case 'revision_date':
+      return getRevisionDate();
+    default:
+      return '';
   }
 }
 
 // Helper to get justify-content for text alignment
 function getJustifyContent(textAlign: string): string {
   switch (textAlign) {
-    case 'center': return 'center';
-    case 'right': return 'flex-end';
+    case 'center':
+      return 'center';
+    case 'right':
+      return 'flex-end';
     case 'left':
-    default: return 'flex-start';
+    default:
+      return 'flex-start';
   }
 }
 
@@ -1379,14 +1453,14 @@ function escapeHtml(text: string): string {
 // Helper function to get section label
 function getSectionLabel(type: string): string {
   const labels: Record<string, string> = {
-    'cover': 'Cover Page',
+    cover: 'Cover Page',
     'project-details': 'Project Details',
     'venue-info': 'Venue Information',
-    'schedule': 'Schedule',
-    'contacts': 'Contacts',
+    schedule: 'Schedule',
+    contacts: 'Contacts',
     'equipment-by-section': 'Equipment by Section',
     'equipment-summary': 'Equipment Summary',
-    'notes': 'Notes',
+    notes: 'Notes',
     'revision-summary': 'Revision Summary',
     'custom-text': 'Custom Text',
     'page-break': 'Page Break',
@@ -1397,9 +1471,9 @@ function getSectionLabel(type: string): string {
 // Helper function to get note type label
 function getNoteTypeLabel(noteType: string): string {
   const labels: Record<string, string> = {
-    'general_conditions': 'General Conditions',
-    'general_notes': 'General Notes',
-    'fixture_notes': 'Fixture Notes',
+    general_conditions: 'General Conditions',
+    general_notes: 'General Notes',
+    fixture_notes: 'Fixture Notes',
   };
   return labels[noteType] || noteType;
 }

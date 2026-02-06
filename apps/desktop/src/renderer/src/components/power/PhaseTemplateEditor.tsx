@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
-import { PhaseDistributionTemplate, PhaseDistribution, generatePhaseDistribution, calculateTemplatePhaseBalance } from '../../types/phaseTemplate';
+import {
+  PhaseDistributionTemplate,
+  PhaseDistribution,
+  generatePhaseDistribution,
+  calculateTemplatePhaseBalance,
+} from '../../types/phaseTemplate';
 import { Phase, PhaseConfig } from '../../types/power';
 import { useProjectStore } from '../../store/projectStore';
 import { getPhaseLabel } from '../../utils/phaseLabels';
@@ -8,25 +13,39 @@ import { getPhaseLabel } from '../../utils/phaseLabels';
 interface PhaseTemplateEditorProps {
   template?: PhaseDistributionTemplate;
   projectId: string;
-  onSave: (template: Omit<PhaseDistributionTemplate, 'id' | 'created_at' | 'updated_at' | 'is_system' | 'project_id'>) => void;
+  onSave: (
+    template: Omit<
+      PhaseDistributionTemplate,
+      'id' | 'created_at' | 'updated_at' | 'is_system' | 'project_id'
+    >,
+  ) => void;
   onClose: () => void;
 }
 
-export function PhaseTemplateEditor({ template, projectId, onSave, onClose }: PhaseTemplateEditorProps) {
+export function PhaseTemplateEditor({
+  template,
+  projectId,
+  onSave,
+  onClose,
+}: PhaseTemplateEditorProps) {
   const currentProject = useProjectStore((state) => state.currentProject);
   const [name, setName] = useState(template?.name || '');
   const [description, setDescription] = useState(template?.description || '');
   const [phaseConfig, setPhaseConfig] = useState<PhaseConfig>(template?.phase_config || 'split');
-  const [circuitCount, setCircuitCount] = useState<12 | 24 | 48 | 96>(template?.circuit_count || 24);
+  const [circuitCount, setCircuitCount] = useState<12 | 24 | 48 | 96>(
+    template?.circuit_count || 24,
+  );
   const [phaseDistribution, setPhaseDistribution] = useState<PhaseDistribution>(
-    template?.phase_distribution || generatePhaseDistribution(24, 'ab')
+    template?.phase_distribution || generatePhaseDistribution(24, 'ab'),
   );
 
-  const phaseLabels = currentProject ? {
-    phase_label_a: currentProject.phase_label_a,
-    phase_label_b: currentProject.phase_label_b,
-    phase_label_c: currentProject.phase_label_c
-  } : undefined;
+  const phaseLabels = currentProject
+    ? {
+        phase_label_a: currentProject.phase_label_a,
+        phase_label_b: currentProject.phase_label_b,
+        phase_label_c: currentProject.phase_label_c,
+      }
+    : undefined;
 
   // Update phase distribution when circuit count or phase config changes
   useEffect(() => {
@@ -55,14 +74,14 @@ export function PhaseTemplateEditor({ template, projectId, onSave, onClose }: Ph
       description: description.trim() || undefined,
       phase_config: phaseConfig,
       circuit_count: circuitCount,
-      phase_distribution: phaseDistribution
+      phase_distribution: phaseDistribution,
     });
   };
 
   const handlePhaseChange = (circuit: string, phase: Phase) => {
     setPhaseDistribution({
       ...phaseDistribution,
-      [circuit]: phase
+      [circuit]: phase,
     });
   };
 
@@ -202,7 +221,8 @@ export function PhaseTemplateEditor({ template, projectId, onSave, onClose }: Ph
                   onClick={() => handleQuickPattern('abc')}
                   className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded transition"
                 >
-                  {getPhaseLabel('A', phaseLabels)}/{getPhaseLabel('B', phaseLabels)}/{getPhaseLabel('C', phaseLabels)} Sequential
+                  {getPhaseLabel('A', phaseLabels)}/{getPhaseLabel('B', phaseLabels)}/
+                  {getPhaseLabel('C', phaseLabels)} Sequential
                 </button>
               )}
             </div>
@@ -210,19 +230,33 @@ export function PhaseTemplateEditor({ template, projectId, onSave, onClose }: Ph
 
           {/* Phase Balance */}
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Phase Balance</h4>
+            <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+              Phase Balance
+            </h4>
             <div className="flex gap-6 text-sm">
               <div>
-                <span className="text-gray-600 dark:text-gray-400">{getPhaseLabel('A', phaseLabels)}:</span>{' '}
-                <span className="font-medium text-gray-900 dark:text-white">{balance.A} circuits</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  {getPhaseLabel('A', phaseLabels)}:
+                </span>{' '}
+                <span className="font-medium text-gray-900 dark:text-white">
+                  {balance.A} circuits
+                </span>
               </div>
               <div>
-                <span className="text-gray-600 dark:text-gray-400">{getPhaseLabel('B', phaseLabels)}:</span>{' '}
-                <span className="font-medium text-gray-900 dark:text-white">{balance.B} circuits</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  {getPhaseLabel('B', phaseLabels)}:
+                </span>{' '}
+                <span className="font-medium text-gray-900 dark:text-white">
+                  {balance.B} circuits
+                </span>
               </div>
               <div>
-                <span className="text-gray-600 dark:text-gray-400">{getPhaseLabel('C', phaseLabels)}:</span>{' '}
-                <span className="font-medium text-gray-900 dark:text-white">{balance.C} circuits</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  {getPhaseLabel('C', phaseLabels)}:
+                </span>{' '}
+                <span className="font-medium text-gray-900 dark:text-white">
+                  {balance.C} circuits
+                </span>
               </div>
             </div>
           </div>
@@ -235,9 +269,7 @@ export function PhaseTemplateEditor({ template, projectId, onSave, onClose }: Ph
             <div className="grid grid-cols-12 gap-2">
               {circuits.map((circuit) => (
                 <div key={circuit} className="flex flex-col items-center">
-                  <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                    {circuit}
-                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">{circuit}</span>
                   <select
                     value={phaseDistribution[circuit]}
                     onChange={(e) => handlePhaseChange(circuit, e.target.value as Phase)}

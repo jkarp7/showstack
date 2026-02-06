@@ -49,7 +49,7 @@ describe('Performance Monitor', () => {
           foo: 'bar',
           additional: 'context',
           duration_ms: duration,
-        })
+        }),
       );
     });
 
@@ -62,7 +62,7 @@ describe('Performance Monitor', () => {
         duration,
         expect.objectContaining({
           duration_ms: duration,
-        })
+        }),
       );
     });
   });
@@ -70,7 +70,7 @@ describe('Performance Monitor', () => {
   describe('measureAsync', () => {
     it('should measure async function execution time', async () => {
       const asyncFn = vi.fn(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
         return 'result';
       });
 
@@ -84,7 +84,7 @@ describe('Performance Monitor', () => {
         expect.objectContaining({
           type: 'test',
           success: true,
-        })
+        }),
       );
     });
 
@@ -101,7 +101,7 @@ describe('Performance Monitor', () => {
         expect.objectContaining({
           success: false,
           error: 'Error: Test error',
-        })
+        }),
       );
     });
   });
@@ -126,7 +126,7 @@ describe('Performance Monitor', () => {
         expect.objectContaining({
           type: 'calculation',
           success: true,
-        })
+        }),
       );
     });
 
@@ -143,7 +143,7 @@ describe('Performance Monitor', () => {
         expect.objectContaining({
           success: false,
           error: 'Error: Sync error',
-        })
+        }),
       );
     });
   });
@@ -152,27 +152,19 @@ describe('Performance Monitor', () => {
     it('should track grid render performance', () => {
       trackGridRender(125.5, { rowCount: 100, columnCount: 10 });
 
-      expect(telemetry.trackPerformance).toHaveBeenCalledWith(
-        'virtual_grid_render',
-        125.5,
-        {
-          metric_type: 'render_time',
-          rowCount: 100,
-          columnCount: 10,
-        }
-      );
+      expect(telemetry.trackPerformance).toHaveBeenCalledWith('virtual_grid_render', 125.5, {
+        metric_type: 'render_time',
+        rowCount: 100,
+        columnCount: 10,
+      });
     });
 
     it('should track grid render without context', () => {
       trackGridRender(50);
 
-      expect(telemetry.trackPerformance).toHaveBeenCalledWith(
-        'virtual_grid_render',
-        50,
-        {
-          metric_type: 'render_time',
-        }
-      );
+      expect(telemetry.trackPerformance).toHaveBeenCalledWith('virtual_grid_render', 50, {
+        metric_type: 'render_time',
+      });
     });
   });
 
@@ -180,15 +172,11 @@ describe('Performance Monitor', () => {
     it('should track PDF export performance', () => {
       trackPDFExport(3500, { pageCount: 10, reportType: 'hookup' });
 
-      expect(telemetry.trackPerformance).toHaveBeenCalledWith(
-        'pdf_export',
-        3500,
-        {
-          metric_type: 'export_time',
-          pageCount: 10,
-          reportType: 'hookup',
-        }
-      );
+      expect(telemetry.trackPerformance).toHaveBeenCalledWith('pdf_export', 3500, {
+        metric_type: 'export_time',
+        pageCount: 10,
+        reportType: 'hookup',
+      });
     });
   });
 
@@ -196,15 +184,11 @@ describe('Performance Monitor', () => {
     it('should track database query performance', () => {
       trackDatabaseQuery(45.2, { queryType: 'select', recordCount: 500 });
 
-      expect(telemetry.trackPerformance).toHaveBeenCalledWith(
-        'database_query',
-        45.2,
-        {
-          metric_type: 'query_time',
-          queryType: 'select',
-          recordCount: 500,
-        }
-      );
+      expect(telemetry.trackPerformance).toHaveBeenCalledWith('database_query', 45.2, {
+        metric_type: 'query_time',
+        queryType: 'select',
+        recordCount: 500,
+      });
     });
   });
 
@@ -212,19 +196,14 @@ describe('Performance Monitor', () => {
     it('should track file operations', () => {
       trackFileOperation('save', 250, { fileType: 'project', size: 1024 });
 
-      expect(telemetry.trackPerformance).toHaveBeenCalledWith(
-        'file_save',
-        250,
-        {
-          metric_type: 'file_operation',
-          operation: 'save',
-          fileType: 'project',
-          size: 1024,
-        }
-      );
+      expect(telemetry.trackPerformance).toHaveBeenCalledWith('file_save', 250, {
+        metric_type: 'file_operation',
+        operation: 'save',
+        fileType: 'project',
+        size: 1024,
+      });
     });
   });
-
 
   describe('Edge Cases', () => {
     it('should handle zero duration', () => {
@@ -234,18 +213,16 @@ describe('Performance Monitor', () => {
       expect(telemetry.trackPerformance).toHaveBeenCalledWith(
         'zero_duration',
         expect.any(Number),
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
     it('should handle empty context objects', () => {
       trackGridRender(100, {});
 
-      expect(telemetry.trackPerformance).toHaveBeenCalledWith(
-        'virtual_grid_render',
-        100,
-        { metric_type: 'render_time' }
-      );
+      expect(telemetry.trackPerformance).toHaveBeenCalledWith('virtual_grid_render', 100, {
+        metric_type: 'render_time',
+      });
     });
 
     it('should handle functions that return undefined', () => {

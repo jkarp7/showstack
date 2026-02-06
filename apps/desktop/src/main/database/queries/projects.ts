@@ -21,15 +21,21 @@ export function getAllProjects(): Project[] {
 
   return projects.map((project: any) => {
     // Parse JSON fields
-    const jsonFields = ['enabled_modules', 'show_dates', 'lighting_associates', 'audio_associates', 'video_associates'];
-    jsonFields.forEach(field => {
+    const jsonFields = [
+      'enabled_modules',
+      'show_dates',
+      'lighting_associates',
+      'audio_associates',
+      'video_associates',
+    ];
+    jsonFields.forEach((field) => {
       if (project[field] && typeof project[field] === 'string') {
         try {
           project[field] = JSON.parse(project[field]);
         } catch (error) {
           logger.warn(`Failed to parse JSON field '${field}' for project ${project.id}`, {
             error: error instanceof Error ? error.message : String(error),
-            rawValue: String(project[field]).substring(0, 100)
+            rawValue: String(project[field]).substring(0, 100),
           });
           // Keep original value
         }
@@ -48,15 +54,21 @@ export function getProjectById(id: string): Project | null {
   }
 
   // Parse JSON fields
-  const jsonFields = ['enabled_modules', 'show_dates', 'lighting_associates', 'audio_associates', 'video_associates'];
-  jsonFields.forEach(field => {
+  const jsonFields = [
+    'enabled_modules',
+    'show_dates',
+    'lighting_associates',
+    'audio_associates',
+    'video_associates',
+  ];
+  jsonFields.forEach((field) => {
     if ((project as any)[field] && typeof (project as any)[field] === 'string') {
       try {
         (project as any)[field] = JSON.parse((project as any)[field]);
       } catch (error) {
         logger.warn(`Failed to parse JSON field '${field}' for project ${(project as any).id}`, {
           error: error instanceof Error ? error.message : String(error),
-          rawValue: String((project as any)[field]).substring(0, 100)
+          rawValue: String((project as any)[field]).substring(0, 100),
         });
         // Keep original value
       }
@@ -70,14 +82,14 @@ export function createProject(
   name: string,
   description?: string,
   logoPath?: string,
-  enabledModules?: string[]
+  enabledModules?: string[],
 ): Project {
   const db = getDatabase();
   const id = uuidv4();
   const now = Date.now();
 
   db.prepare(
-    'INSERT INTO projects (id, name, description, logo_path, enabled_modules, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    'INSERT INTO projects (id, name, description, logo_path, enabled_modules, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
   ).run(
     id,
     name,
@@ -85,7 +97,7 @@ export function createProject(
     logoPath || null,
     enabledModules ? JSON.stringify(enabledModules) : null,
     now,
-    now
+    now,
   );
 
   saveDatabase();
@@ -143,10 +155,10 @@ const PROJECT_ALLOWED_FIELDS = Object.freeze([
   'general_manager_phone',
   'general_manager_company',
   // Show dates
-  'show_dates'
+  'show_dates',
 ] as const);
 
-type ProjectAllowedField = typeof PROJECT_ALLOWED_FIELDS[number];
+type ProjectAllowedField = (typeof PROJECT_ALLOWED_FIELDS)[number];
 
 function isProjectAllowedField(field: string): field is ProjectAllowedField {
   return PROJECT_ALLOWED_FIELDS.includes(field as ProjectAllowedField);
@@ -166,25 +178,31 @@ export function updateProject(id: string, updates: Partial<Project>): Project {
     return project;
   }
 
-  const setClause = fields.map(f => `${f} = ?`).join(', ');
-  const values = fields.map(f => {
+  const setClause = fields.map((f) => `${f} = ?`).join(', ');
+  const values = fields.map((f) => {
     const value = updates[f as keyof Project];
     // Convert show_dates object to JSON string
     if (f === 'show_dates' && value && typeof value === 'object') {
       return JSON.stringify(value);
     }
     // Convert arrays to JSON string (enabled_modules and all associates arrays)
-    if ((f === 'enabled_modules' || f === 'lighting_associates' ||
-         f === 'audio_associates' || f === 'video_associates') &&
-        Array.isArray(value)) {
+    if (
+      (f === 'enabled_modules' ||
+        f === 'lighting_associates' ||
+        f === 'audio_associates' ||
+        f === 'video_associates') &&
+      Array.isArray(value)
+    ) {
       return JSON.stringify(value);
     }
     return value;
   });
 
-  db.prepare(
-    `UPDATE projects SET ${setClause}, updated_at = ? WHERE id = ?`
-  ).run(...values, now, id);
+  db.prepare(`UPDATE projects SET ${setClause}, updated_at = ? WHERE id = ?`).run(
+    ...values,
+    now,
+    id,
+  );
 
   saveDatabase();
 
@@ -214,15 +232,21 @@ export function getCurrentProject(): Project {
   }
 
   // Parse JSON fields
-  const jsonFields = ['enabled_modules', 'show_dates', 'lighting_associates', 'audio_associates', 'video_associates'];
-  jsonFields.forEach(field => {
+  const jsonFields = [
+    'enabled_modules',
+    'show_dates',
+    'lighting_associates',
+    'audio_associates',
+    'video_associates',
+  ];
+  jsonFields.forEach((field) => {
     if ((project as any)[field] && typeof (project as any)[field] === 'string') {
       try {
         (project as any)[field] = JSON.parse((project as any)[field]);
       } catch (error) {
         logger.warn(`Failed to parse JSON field '${field}' for project ${(project as any).id}`, {
           error: error instanceof Error ? error.message : String(error),
-          rawValue: String((project as any)[field]).substring(0, 100)
+          rawValue: String((project as any)[field]).substring(0, 100),
         });
         // Keep original value
       }

@@ -22,7 +22,7 @@ export interface OrganizedReportData {
 export function organizeReportData(
   data: ReportDataItem[],
   organization: ReportOrganization,
-  columns: PaperworkColumnConfig[]
+  columns: PaperworkColumnConfig[],
 ): OrganizedReportData {
   // Step 1: Sort
   const sorted = sortItems([...data], organization);
@@ -36,14 +36,11 @@ export function organizeReportData(
   // No grouping - return as single group
   return {
     groups: [{ groupValue: '', items: sorted }],
-    hasGroups: false
+    hasGroups: false,
   };
 }
 
-function sortItems(
-  items: ReportDataItem[],
-  organization: ReportOrganization
-): ReportDataItem[] {
+function sortItems(items: ReportDataItem[], organization: ReportOrganization): ReportDataItem[] {
   const { sortBy, sortDirection = 'asc' } = organization;
 
   if (!sortBy) return items;
@@ -140,6 +137,6 @@ export function calculateGroupSummary(group: ReportGroup): {
     total: group.items.length,
     totalPower: group.items.reduce((sum, item) => {
       return sum + (Number(item.wattage) || 0);
-    }, 0)
+    }, 0),
   };
 }

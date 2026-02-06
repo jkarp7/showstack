@@ -27,7 +27,7 @@ export function HeaderFromTemplate({
   templateId,
   templateData,
   pageSize = 'letter',
-  orientation = 'portrait'
+  orientation = 'portrait',
 }: HeaderFromTemplateProps) {
   const [template, setTemplate] = useState<PageLayoutTemplate | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,15 +49,15 @@ export function HeaderFromTemplate({
         const elements = await window.api.prep.layoutTemplates.getElements(templateId);
 
         // Parse JSON fields
-        const parsedElements = elements.map(el => ({
+        const parsedElements = elements.map((el) => ({
           ...el,
           config: JSON.parse(el.config),
-          style: JSON.parse(el.style)
+          style: JSON.parse(el.style),
         }));
 
         setTemplate({
           ...tmpl,
-          elements: parsedElements
+          elements: parsedElements,
         });
       } catch (err) {
         console.error('Error loading header template:', err);
@@ -124,7 +124,7 @@ export function HeaderFromTemplate({
     data_distribution_count: templateData.data_distribution_count || 0,
     total_ports: templateData.total_ports || 0,
     active_infrastructure: templateData.active_infrastructure || 0,
-    inactive_infrastructure: templateData.inactive_infrastructure || 0
+    inactive_infrastructure: templateData.inactive_infrastructure || 0,
   };
 
   // Create a section object for PageRenderer
@@ -133,7 +133,7 @@ export function HeaderFromTemplate({
     type: 'paperwork-header',
     order: 0,
     enabled: true,
-    layout_template_id: templateId
+    layout_template_id: templateId,
   };
 
   // Page settings for the header
@@ -143,16 +143,12 @@ export function HeaderFromTemplate({
     margins: { top: 0, right: 0, bottom: 0, left: 0 }, // No margins for header
     showPageNumbers: false,
     fontSize: 11,
-    fontFamily: 'Arial'
+    fontFamily: 'Arial',
   };
 
   return (
     <div className="mb-8">
-      <PageRenderer
-        section={section}
-        project={mockProject}
-        pageSettings={pageSettings}
-      />
+      <PageRenderer section={section} project={mockProject} pageSettings={pageSettings} />
     </div>
   );
 }

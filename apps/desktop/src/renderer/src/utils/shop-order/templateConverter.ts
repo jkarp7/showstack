@@ -8,14 +8,14 @@
 import {
   calculateLabelGrid,
   calculateCellDimensions,
-  type LabelGridConfig
+  type LabelGridConfig,
 } from './labelGridCalculator';
 import type {
   LayoutElement,
   TextConfig,
   ShapeConfig,
   DataFieldConfig,
-  ElementStyle
+  ElementStyle,
 } from '../../types/shopOrder';
 
 // Legacy canvas-based label graphic interface
@@ -42,7 +42,7 @@ export interface CustomLabelDesign {
   labelType: 'cable' | 'circuit' | 'fixture' | 'dimmer' | 'custom';
   printerType: 'dymo-450' | 'brother-pt' | 'zebra' | 'avery-sheet';
   averyTemplate?: string;
-  width: number;  // inches
+  width: number; // inches
   height: number; // inches
   graphics: LabelGraphic[];
   created: number;
@@ -75,31 +75,28 @@ function convertGraphicStyle(graphic: LabelGraphic): ElementStyle {
     fontWeight: graphic.fontWeight || 'normal',
     textAlign: 'left',
     color: '#000000',
-    backgroundColor: 'transparent'
+    backgroundColor: 'transparent',
   };
 }
 
 /**
  * Convert legacy graphic config to new element config
  */
-function convertGraphicConfig(
-  graphic: LabelGraphic
-): TextConfig | ShapeConfig {
+function convertGraphicConfig(graphic: LabelGraphic): TextConfig | ShapeConfig {
   if (graphic.type === 'text') {
     // Text element
     const textConfig: TextConfig = {
-      content: graphic.text || ''
+      content: graphic.text || '',
     };
     return textConfig;
   } else {
     // Shape element
     const shapeConfig: ShapeConfig = {
-      shapeType: graphic.type === 'line' ? 'divider' :
-                 graphic.type === 'circle' ? 'circle' :
-                 'rectangle',
+      shapeType:
+        graphic.type === 'line' ? 'divider' : graphic.type === 'circle' ? 'circle' : 'rectangle',
       color: '#000000',
       thickness: graphic.strokeWidth || 1,
-      fill: !graphic.stroke
+      fill: !graphic.stroke,
     };
     return shapeConfig;
   }
@@ -112,11 +109,11 @@ function pixelsToGridPosition(
   pixelX: number,
   pixelY: number,
   cellWidth: number,
-  cellHeight: number
+  cellHeight: number,
 ): { column: number; row: number } {
   return {
     column: Math.floor(pixelX / cellWidth),
-    row: Math.floor(pixelY / cellHeight)
+    row: Math.floor(pixelY / cellHeight),
   };
 }
 
@@ -127,11 +124,11 @@ function pixelsToGridSpan(
   pixelWidth: number,
   pixelHeight: number,
   cellWidth: number,
-  cellHeight: number
+  cellHeight: number,
 ): { columnSpan: number; rowSpan: number } {
   return {
     columnSpan: Math.max(1, Math.ceil(pixelWidth / cellWidth)),
-    rowSpan: Math.max(1, Math.ceil(pixelHeight / cellHeight))
+    rowSpan: Math.max(1, Math.ceil(pixelHeight / cellHeight)),
   };
 }
 
@@ -141,7 +138,7 @@ function pixelsToGridSpan(
 export function convertCanvasToGrid(
   canvasGraphic: LabelGraphic,
   labelWidth: number,
-  labelHeight: number
+  labelHeight: number,
 ): LayoutElement {
   // Calculate grid configuration
   const grid = calculateLabelGrid(labelWidth, labelHeight);
@@ -152,23 +149,16 @@ export function convertCanvasToGrid(
     canvasGraphic.x,
     canvasGraphic.y,
     cellWidth,
-    cellHeight
+    cellHeight,
   );
 
   // Convert dimensions to grid spans
-  const width = canvasGraphic.type === 'circle'
-    ? (canvasGraphic.radius || 10) * 2
-    : canvasGraphic.width || 50;
-  const height = canvasGraphic.type === 'circle'
-    ? (canvasGraphic.radius || 10) * 2
-    : canvasGraphic.height || 20;
+  const width =
+    canvasGraphic.type === 'circle' ? (canvasGraphic.radius || 10) * 2 : canvasGraphic.width || 50;
+  const height =
+    canvasGraphic.type === 'circle' ? (canvasGraphic.radius || 10) * 2 : canvasGraphic.height || 20;
 
-  const { columnSpan, rowSpan } = pixelsToGridSpan(
-    width,
-    height,
-    cellWidth,
-    cellHeight
-  );
+  const { columnSpan, rowSpan } = pixelsToGridSpan(width, height, cellWidth, cellHeight);
 
   // Create layout element
   const element: LayoutElement = {
@@ -183,7 +173,7 @@ export function convertCanvasToGrid(
     layer: 1,
     style: convertGraphicStyle(canvasGraphic),
     created_at: Date.now(),
-    updated_at: Date.now()
+    updated_at: Date.now(),
   };
 
   return element;
@@ -192,9 +182,7 @@ export function convertCanvasToGrid(
 /**
  * Convert an entire label design to grid layout
  */
-export function convertLabelDesignToTemplate(
-  design: CustomLabelDesign
-): {
+export function convertLabelDesignToTemplate(design: CustomLabelDesign): {
   name: string;
   description: string;
   pageType: string;
@@ -202,21 +190,19 @@ export function convertLabelDesignToTemplate(
   elements: LayoutElement[];
 } {
   const grid = calculateLabelGrid(design.width, design.height);
-  const elements = design.graphics.map(graphic =>
-    convertCanvasToGrid(graphic, design.width, design.height)
+  const elements = design.graphics.map((graphic) =>
+    convertCanvasToGrid(graphic, design.width, design.height),
   );
 
   // Determine page type from Avery template if available
-  const pageType = design.averyTemplate
-    ? `label_${design.averyTemplate}`
-    : 'custom_label';
+  const pageType = design.averyTemplate ? `label_${design.averyTemplate}` : 'custom_label';
 
   return {
     name: design.name,
     description: design.description,
     pageType,
     gridConfig: grid,
-    elements
+    elements,
   };
 }
 
@@ -281,7 +267,7 @@ export function getMigrationSummary(projectId: string): {
   const byTemplate: Record<string, number> = {};
   let customDesigns = 0;
 
-  designs.forEach(design => {
+  designs.forEach((design) => {
     if (design.averyTemplate) {
       const key = `Avery ${design.averyTemplate}`;
       byTemplate[key] = (byTemplate[key] || 0) + 1;
@@ -293,6 +279,6 @@ export function getMigrationSummary(projectId: string): {
   return {
     totalDesigns: designs.length,
     byTemplate,
-    customDesigns
+    customDesigns,
   };
 }

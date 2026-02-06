@@ -18,17 +18,21 @@ cd proof-of-concept && npm install && cd ..
 You'll need to create icon files in the `resources/` directory:
 
 **macOS:**
+
 - `resources/icon.icns` - 512x512 icon in .icns format
 - Use a tool like [Image2Icon](https://img2icnsapp.com/) or [IconUtil](https://developer.apple.com/library/archive/documentation/GraphicsAnimation/Conceptual/HighResolutionOSX/Optimizing/Optimizing.html)
 
 **Windows:**
+
 - `resources/icon.ico` - Multi-resolution .ico file (16x16, 32x32, 48x48, 256x256)
 - Use [IcoFX](https://icofx.ro/) or [Convertio](https://convertio.co/png-ico/)
 
 **Linux:**
+
 - `resources/icon.png` - 512x512 PNG file
 
 **Optional DMG Background (macOS):**
+
 - `resources/dmg-background.png` - 540x400 PNG for installer background
 
 ---
@@ -57,6 +61,7 @@ npm run dist:all
 ```
 
 **Note:** Building for all platforms from a single OS has limitations:
+
 - macOS .dmg requires macOS
 - Windows .exe can be built from macOS/Linux (with wine)
 - Linux packages can be built from any OS
@@ -79,16 +84,19 @@ npm run dist:mac
 Before uploading, test the installer:
 
 **macOS:**
+
 ```bash
 open release/ShowStack\ Production-0.1.0-alpha.dmg
 ```
 
 **Windows:**
+
 ```bash
 release/ShowStack-Production-Setup-0.1.0-alpha.exe
 ```
 
 **Linux:**
+
 ```bash
 chmod +x release/ShowStack-Production-0.1.0-alpha.AppImage
 ./release/ShowStack-Production-0.1.0-alpha.AppImage
@@ -114,6 +122,7 @@ git push origin v0.1.0-alpha
    - **Tag:** Select `v0.1.0-alpha` (or create new tag)
    - **Release title:** `ShowStack:Production v0.1.0-alpha`
    - **Description:**
+
      ```markdown
      # ShowStack:Production Alpha Release
 
@@ -142,16 +151,19 @@ git push origin v0.1.0-alpha
      ## Installation
 
      ### macOS
+
      1. Download `ShowStack-Production-0.1.0-alpha.dmg`
      2. Open the DMG and drag to Applications
      3. Right-click the app and select "Open" (required for unsigned apps)
 
      ### Windows
+
      1. Download `ShowStack-Production-Setup-0.1.0-alpha.exe`
      2. Run the installer
      3. Click "More info" → "Run anyway" if Windows Defender warns you
 
      ### Linux
+
      1. Download `ShowStack-Production-0.1.0-alpha.AppImage`
      2. Make executable: `chmod +x ShowStack-Production-*.AppImage`
      3. Run: `./ShowStack-Production-*.AppImage`
@@ -166,6 +178,7 @@ git push origin v0.1.0-alpha
      ## Feedback
 
      Please report bugs and feedback by:
+
      - Opening GitHub issues: https://github.com/jkarp7/showstack/issues
      - Email: [your-email@example.com]
 
@@ -191,6 +204,7 @@ git push origin v0.1.0-alpha
 ### Step 5: Share with Alpha Testers
 
 Copy the release URL and share with testers:
+
 ```
 https://github.com/jkarp7/showstack/releases/tag/v0.1.0-alpha
 ```
@@ -200,12 +214,14 @@ https://github.com/jkarp7/showstack/releases/tag/v0.1.0-alpha
 ## Version Numbering for Alpha Releases
 
 Use semantic versioning with alpha suffix:
+
 - `0.1.0-alpha` - First alpha release
 - `0.1.1-alpha` - Bug fix to alpha
 - `0.2.0-alpha` - Second alpha with new features
 - `0.3.0-beta` - First beta release
 
 Update version in `package.json` before each build:
+
 ```json
 {
   "version": "0.1.1-alpha"
@@ -231,6 +247,7 @@ Update version in `package.json` before each build:
 ### Issue: Build fails with "Cannot find module"
 
 **Solution:**
+
 ```bash
 rm -rf node_modules dist
 npm install
@@ -241,6 +258,7 @@ npm run build
 ### Issue: Electron app shows blank white screen
 
 **Solution:** Check that the renderer build completed successfully:
+
 ```bash
 ls -la dist/renderer/
 # Should show index.html and assets/
@@ -259,12 +277,14 @@ See `docs/beta-release-guide.md` for GitHub Actions workflow setup.
 ## Security Notes for Alpha
 
 **DO NOT include in releases:**
+
 - `.env` files with secrets
 - API keys or credentials
 - Private code signing certificates
 - Development-only tools
 
 **DO include:**
+
 - Compiled app code
 - Public assets (icons, fonts)
 - LICENSE file

@@ -10,7 +10,11 @@
 
 import Database from 'better-sqlite3';
 import { seedDefaultPageLayoutsFromJSON } from '../seedDefaultLayoutsFromJSON';
-import { seedPaperworkTemplates, updateSystemTemplates, reseedMissingTemplates } from '../seedPaperworkTemplates';
+import {
+  seedPaperworkTemplates,
+  updateSystemTemplates,
+  reseedMissingTemplates,
+} from '../seedPaperworkTemplates';
 import { seedPaperworkHeaderTemplate } from '../seedPaperworkHeader';
 import { updatePaperworkTemplateHeaders } from '../updatePaperworkTemplateHeaders';
 import * as fs from 'fs';
@@ -22,7 +26,7 @@ export class MigrationRunner {
   constructor(
     private db: Database.Database,
     private dbType: 'app' | 'project',
-    _dbPath: string
+    _dbPath: string,
   ) {}
 
   /**
@@ -36,7 +40,10 @@ export class MigrationRunner {
         await this.runProjectMigrations();
       }
     } catch (error) {
-      logger.error(`Error running ${this.dbType} migrations`, error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        `Error running ${this.dbType} migrations`,
+        error instanceof Error ? error : new Error(String(error)),
+      );
       // Continue anyway - don't block app startup
       // But log the error for debugging
     }
@@ -50,7 +57,9 @@ export class MigrationRunner {
 
     try {
       // Seed default page layouts if none exist
-      const layoutResult = this.db.prepare('SELECT COUNT(*) as count FROM page_layout_templates').get() as { count: number };
+      const layoutResult = this.db
+        .prepare('SELECT COUNT(*) as count FROM page_layout_templates')
+        .get() as { count: number };
       const layoutCount = layoutResult?.count || 0;
 
       if (layoutCount === 0) {
@@ -59,10 +68,14 @@ export class MigrationRunner {
         logger.info('Default page layouts seeded');
       } else {
         // Migration: Add v2 layouts with dynamic content if they don't exist
-        const dynamicLayoutsResult = this.db.prepare(`
+        const dynamicLayoutsResult = this.db
+          .prepare(
+            `
           SELECT COUNT(*) as count FROM page_layout_elements
           WHERE element_type IN ('equipment_list', 'notes_content', 'revision_log')
-        `).get() as { count: number };
+        `,
+          )
+          .get() as { count: number };
         const hasDynamicLayouts = (dynamicLayoutsResult?.count || 0) > 0;
 
         if (!hasDynamicLayouts) {
@@ -72,12 +85,16 @@ export class MigrationRunner {
           this.db.prepare('UPDATE page_layout_templates SET is_default = 0').run();
 
           // Rename existing default layouts to indicate they're v1
-          this.db.prepare(`
+          this.db
+            .prepare(
+              `
             UPDATE page_layout_templates
             SET name = name || ' (v1)'
             WHERE is_default = 0
             AND name NOT LIKE '%(v1)%'
-          `).run();
+          `,
+            )
+            .run();
 
           // Create new v2 layouts with dynamic content
           seedDefaultPageLayoutsFromJSON();
@@ -86,17 +103,26 @@ export class MigrationRunner {
         }
 
         // Migration: Add paperwork-header layout if it doesn't exist
-        const paperworkHeaderResult = this.db.prepare(`
+        const paperworkHeaderResult = this.db
+          .prepare(
+            `
           SELECT COUNT(*) as count FROM page_layout_templates
           WHERE page_type = 'paperwork-header' AND is_default = 1
-        `).get() as { count: number };
+        `,
+          )
+          .get() as { count: number };
         const hasPaperworkHeader = (paperworkHeaderResult?.count || 0) > 0;
 
         if (!hasPaperworkHeader) {
           logger.info('Adding paperwork-header default layout');
 
           // Load just the paperwork-header layout from JSON
-          const layoutPath = path.join(__dirname, '..', 'defaultLayouts', 'paperwork-header_default_layout.json');
+          const layoutPath = path.join(
+            __dirname,
+            '..',
+            'defaultLayouts',
+            'paperwork-header_default_layout.json',
+          );
 
           if (fs.existsSync(layoutPath)) {
             try {
@@ -107,14 +133,17 @@ export class MigrationRunner {
               createLayoutTemplate(
                 {
                   ...data.template,
-                  is_default: 1
+                  is_default: 1,
                 },
-                data.elements
+                data.elements,
               );
 
               logger.info('Paperwork-header layout added');
             } catch (err) {
-              logger.error('Error loading paperwork-header layout', err instanceof Error ? err : new Error(String(err)));
+              logger.error(
+                'Error loading paperwork-header layout',
+                err instanceof Error ? err : new Error(String(err)),
+              );
             }
           }
         }
@@ -137,7 +166,10 @@ export class MigrationRunner {
 
       logger.info('App database migrations complete');
     } catch (error) {
-      logger.error('Error running app migrations', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Error running app migrations',
+        error instanceof Error ? error : new Error(String(error)),
+      );
       // Continue anyway - don't block app startup
     }
   }
@@ -160,7 +192,10 @@ export class MigrationRunner {
 
       logger.info('Project database migrations complete');
     } catch (error) {
-      logger.error('Error running project migrations', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Error running project migrations',
+        error instanceof Error ? error : new Error(String(error)),
+      );
       // Continue anyway - don't block app startup
     }
   }
@@ -169,8 +204,10 @@ export class MigrationRunner {
    * Migrate projects table schema
    */
   private migrateProjectsTable(): void {
-    const projectsTableInfo = this.db.prepare("PRAGMA table_info(projects)").all() as Array<{ name: string }>;
-    const projectsColumns = projectsTableInfo.map(row => row.name);
+    const projectsTableInfo = this.db.prepare('PRAGMA table_info(projects)').all() as Array<{
+      name: string;
+    }>;
+    const projectsColumns = projectsTableInfo.map((row) => row.name);
 
     // Add logo_path
     if (!projectsColumns.includes('logo_path')) {
@@ -260,16 +297,22 @@ export class MigrationRunner {
    */
   private migrateInfrastructureTable(): void {
     // Check if infrastructure_equipment table exists
-    const tableExists = this.db.prepare(`
+    const tableExists = this.db
+      .prepare(
+        `
       SELECT COUNT(*) as count FROM sqlite_master
       WHERE type='table' AND name='infrastructure_equipment'
-    `).get() as { count: number };
+    `,
+      )
+      .get() as { count: number };
     const exists = (tableExists?.count || 0) > 0;
 
     if (!exists) {
       // Create infrastructure_equipment table
       logger.info('Running migration: Creating infrastructure_equipment table');
-      this.db.prepare(`
+      this.db
+        .prepare(
+          `
         CREATE TABLE IF NOT EXISTS infrastructure_equipment (
           id TEXT PRIMARY KEY,
           project_id TEXT NOT NULL,
@@ -293,18 +336,36 @@ export class MigrationRunner {
           updated_at INTEGER NOT NULL,
           FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
         )
-      `).run();
-      this.db.prepare('CREATE INDEX IF NOT EXISTS idx_infrastructure_project ON infrastructure_equipment(project_id)').run();
-      this.db.prepare('CREATE INDEX IF NOT EXISTS idx_infrastructure_category ON infrastructure_equipment(project_id, category)').run();
-      this.db.prepare('CREATE INDEX IF NOT EXISTS idx_infrastructure_location ON infrastructure_equipment(project_id, location)').run();
+      `,
+        )
+        .run();
+      this.db
+        .prepare(
+          'CREATE INDEX IF NOT EXISTS idx_infrastructure_project ON infrastructure_equipment(project_id)',
+        )
+        .run();
+      this.db
+        .prepare(
+          'CREATE INDEX IF NOT EXISTS idx_infrastructure_category ON infrastructure_equipment(project_id, category)',
+        )
+        .run();
+      this.db
+        .prepare(
+          'CREATE INDEX IF NOT EXISTS idx_infrastructure_location ON infrastructure_equipment(project_id, location)',
+        )
+        .run();
     } else {
       // Table exists, check for missing columns
-      const infrastructureColumns = this.db.prepare("PRAGMA table_info(infrastructure_equipment)").all() as Array<{ name: string }>;
-      const columnNames = infrastructureColumns.map(row => row.name);
+      const infrastructureColumns = this.db
+        .prepare('PRAGMA table_info(infrastructure_equipment)')
+        .all() as Array<{ name: string }>;
+      const columnNames = infrastructureColumns.map((row) => row.name);
 
       if (!columnNames.includes('port_count')) {
         logger.info('Running migration: Adding port_count to infrastructure_equipment');
-        this.db.prepare('ALTER TABLE infrastructure_equipment ADD COLUMN port_count INTEGER DEFAULT 0').run();
+        this.db
+          .prepare('ALTER TABLE infrastructure_equipment ADD COLUMN port_count INTEGER DEFAULT 0')
+          .run();
       }
     }
   }
@@ -315,17 +376,25 @@ export class MigrationRunner {
    */
   private migratePrepToShopOrder(): void {
     // Check if old prep tables exist
-    const prepProjectsExists = this.db.prepare(`
+    const prepProjectsExists = this.db
+      .prepare(
+        `
       SELECT COUNT(*) as count FROM sqlite_master
       WHERE type='table' AND name='prep_projects'
-    `).get() as { count: number };
+    `,
+      )
+      .get() as { count: number };
     const hasOldTables = (prepProjectsExists?.count || 0) > 0;
 
     // Check if new shop_order tables already exist
-    const shopOrderProjectsExists = this.db.prepare(`
+    const shopOrderProjectsExists = this.db
+      .prepare(
+        `
       SELECT COUNT(*) as count FROM sqlite_master
       WHERE type='table' AND name='shop_order_projects'
-    `).get() as { count: number };
+    `,
+      )
+      .get() as { count: number };
     const hasNewTables = (shopOrderProjectsExists?.count || 0) > 0;
 
     // If new tables already exist, migration already done
@@ -359,17 +428,48 @@ export class MigrationRunner {
       this.db.prepare('DROP INDEX IF EXISTS idx_prep_note_templates_default').run();
 
       // Create new indexes with shop_order naming
-      this.db.prepare('CREATE INDEX IF NOT EXISTS idx_shop_order_sections_project ON shop_order_sections(prep_project_id)').run();
-      this.db.prepare('CREATE INDEX IF NOT EXISTS idx_shop_order_items_section ON shop_order_items(section_id)').run();
-      this.db.prepare('CREATE INDEX IF NOT EXISTS idx_shop_order_revisions_project ON shop_order_revisions(prep_project_id)').run();
-      this.db.prepare('CREATE INDEX IF NOT EXISTS idx_shop_order_notes_project ON shop_order_notes(prep_project_id)').run();
-      this.db.prepare('CREATE INDEX IF NOT EXISTS idx_shop_order_notes_type ON shop_order_notes(prep_project_id, type)').run();
-      this.db.prepare('CREATE INDEX IF NOT EXISTS idx_shop_order_note_templates_type ON shop_order_note_templates(type)').run();
-      this.db.prepare('CREATE INDEX IF NOT EXISTS idx_shop_order_note_templates_default ON shop_order_note_templates(type, is_default)').run();
+      this.db
+        .prepare(
+          'CREATE INDEX IF NOT EXISTS idx_shop_order_sections_project ON shop_order_sections(prep_project_id)',
+        )
+        .run();
+      this.db
+        .prepare(
+          'CREATE INDEX IF NOT EXISTS idx_shop_order_items_section ON shop_order_items(section_id)',
+        )
+        .run();
+      this.db
+        .prepare(
+          'CREATE INDEX IF NOT EXISTS idx_shop_order_revisions_project ON shop_order_revisions(prep_project_id)',
+        )
+        .run();
+      this.db
+        .prepare(
+          'CREATE INDEX IF NOT EXISTS idx_shop_order_notes_project ON shop_order_notes(prep_project_id)',
+        )
+        .run();
+      this.db
+        .prepare(
+          'CREATE INDEX IF NOT EXISTS idx_shop_order_notes_type ON shop_order_notes(prep_project_id, type)',
+        )
+        .run();
+      this.db
+        .prepare(
+          'CREATE INDEX IF NOT EXISTS idx_shop_order_note_templates_type ON shop_order_note_templates(type)',
+        )
+        .run();
+      this.db
+        .prepare(
+          'CREATE INDEX IF NOT EXISTS idx_shop_order_note_templates_default ON shop_order_note_templates(type, is_default)',
+        )
+        .run();
 
       logger.info('Successfully renamed prep tables to shop_order');
     } catch (error) {
-      logger.error('Error during prep to shop_order migration', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Error during prep to shop_order migration',
+        error instanceof Error ? error : new Error(String(error)),
+      );
       // Don't throw - allow app to continue
     }
   }

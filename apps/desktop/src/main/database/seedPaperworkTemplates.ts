@@ -2,7 +2,7 @@ import { DEFAULT_PAPERWORK_TEMPLATES } from './defaultPaperworkTemplates';
 import {
   getSystemPaperworkTemplates,
   createPaperworkTemplate,
-  updatePaperworkTemplate
+  updatePaperworkTemplate,
 } from './queries/paperworkTemplates';
 
 /**
@@ -24,7 +24,9 @@ export async function seedPaperworkTemplates(): Promise<void> {
     const existingSystemTemplates = getSystemPaperworkTemplates();
 
     if (existingSystemTemplates.length > 0) {
-      console.log(`✅ System templates already seeded (${existingSystemTemplates.length} templates)`);
+      console.log(
+        `✅ System templates already seeded (${existingSystemTemplates.length} templates)`,
+      );
       return;
     }
 
@@ -78,7 +80,7 @@ export async function reseedMissingTemplates(): Promise<void> {
     console.log('🔄 Re-seeding missing system templates...');
 
     const existingSystemTemplates = getSystemPaperworkTemplates();
-    const existingReportTypes = new Set(existingSystemTemplates.map(t => t.reportType));
+    const existingReportTypes = new Set(existingSystemTemplates.map((t) => t.reportType));
 
     let addedCount = 0;
 
@@ -118,7 +120,7 @@ export async function updateSystemTemplates(): Promise<void> {
     for (const existingTemplate of existingSystemTemplates) {
       // Find matching default template
       const defaultTemplate = DEFAULT_PAPERWORK_TEMPLATES.find(
-        t => t.reportType === existingTemplate.reportType
+        (t) => t.reportType === existingTemplate.reportType,
       );
 
       if (defaultTemplate) {
@@ -128,7 +130,7 @@ export async function updateSystemTemplates(): Promise<void> {
           updatePaperworkTemplate(
             existingTemplate.id,
             { columns: defaultTemplate.columns },
-            true // allowSystemUpdate
+            true, // allowSystemUpdate
           );
           updatedCount++;
         } catch (error) {

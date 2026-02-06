@@ -114,9 +114,7 @@ export function AddItemDialog({ isOpen, onClose, sectionId, sectionName }: AddIt
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-purple-400 mb-2">
-                Venue Qty
-              </label>
+              <label className="block text-sm font-medium text-purple-400 mb-2">Venue Qty</label>
               <input
                 type="number"
                 value={venueQty}
@@ -131,7 +129,9 @@ export function AddItemDialog({ isOpen, onClose, sectionId, sectionName }: AddIt
           <div className="bg-gray-700/50 rounded p-3 grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-gray-400">Total Needed:</span>{' '}
-              <span className="text-gray-900 dark:text-white font-medium">{activeQty + spareQty}</span>
+              <span className="text-gray-900 dark:text-white font-medium">
+                {activeQty + spareQty}
+              </span>
             </div>
             <div>
               <span className="text-gray-400">Rental Qty:</span>{' '}
@@ -144,9 +144,7 @@ export function AddItemDialog({ isOpen, onClose, sectionId, sectionName }: AddIt
           {/* Optional Fields Row */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Weight (lbs)
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Weight (lbs)</label>
               <input
                 type="number"
                 step="0.1"
@@ -158,9 +156,7 @@ export function AddItemDialog({ isOpen, onClose, sectionId, sectionName }: AddIt
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Power (watts)
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Power (watts)</label>
               <input
                 type="number"
                 step="0.1"

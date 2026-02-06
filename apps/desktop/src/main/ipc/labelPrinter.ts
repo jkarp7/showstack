@@ -11,7 +11,10 @@ import puppeteer from 'puppeteer';
 import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { renderLabelSheet, calculatePageCount } from '../utils/labelSheetRenderer';
-import { getLayoutTemplateById, getLayoutElementsByTemplateId } from '../database/queries/layoutTemplates';
+import {
+  getLayoutTemplateById,
+  getLayoutElementsByTemplateId,
+} from '../database/queries/layoutTemplates';
 // import { getAppDatabase } from '../database';
 
 /**
@@ -22,14 +25,14 @@ async function printLabelBatch(
   templateId: string,
   labelDataArray: any[], // LabelData[]
   averyCode: string,
-  colorMode?: 'color' | 'bw' // Optional color mode
+  colorMode?: 'color' | 'bw', // Optional color mode
 ): Promise<string> {
   try {
     console.log(`📄 Batch label print requested:`, {
       templateId,
       labelCount: labelDataArray.length,
       averyCode,
-      pages: calculatePageCount(labelDataArray.length, averyCode)
+      pages: calculatePageCount(labelDataArray.length, averyCode),
     });
 
     // Load template and elements
@@ -42,19 +45,24 @@ async function printLabelBatch(
     const elements = getLayoutElementsByTemplateId(templateId);
 
     // Parse JSON fields
-    const parsedElements = elements.map(el => ({
+    const parsedElements = elements.map((el) => ({
       ...el,
       config: JSON.parse(el.config),
-      style: JSON.parse(el.style)
+      style: JSON.parse(el.style),
     }));
 
     // Render HTML
-    const html = renderLabelSheet(template as any, parsedElements as any, labelDataArray, averyCode);
+    const html = renderLabelSheet(
+      template as any,
+      parsedElements as any,
+      labelDataArray,
+      averyCode,
+    );
 
     // Generate PDF with Puppeteer
     const browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
 
     try {
@@ -71,7 +79,7 @@ async function printLabelBatch(
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
             }
-          `
+          `,
         });
       }
 
@@ -87,7 +95,7 @@ async function printLabelBatch(
         path: pdfPath,
         format: 'letter',
         printBackground: true,
-        margin: { top: 0, right: 0, bottom: 0, left: 0 }
+        margin: { top: 0, right: 0, bottom: 0, left: 0 },
       });
 
       console.log(`✅ Label batch PDF generated: ${pdfPath}`);
@@ -107,7 +115,7 @@ async function printLabelBatch(
 async function printLabelPreview(
   event: IpcMainInvokeEvent,
   templateId: string,
-  sampleData: any
+  sampleData: any,
 ): Promise<string> {
   try {
     console.log(`📄 Label preview requested:`, { templateId });

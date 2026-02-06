@@ -16,7 +16,7 @@ interface ColumnVisibilityControlsProps {
 export function ColumnVisibilityControls({
   reportType,
   columns,
-  onChange
+  onChange,
 }: ColumnVisibilityControlsProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -24,32 +24,31 @@ export function ColumnVisibilityControls({
   const availableColumns = getAllAvailableColumns(reportType);
 
   // Get current column visibility map
-  const visibilityMap = new Map(columns.map(col => [col.field, col.visible]));
+  const visibilityMap = new Map(columns.map((col) => [col.field, col.visible]));
 
   // Handle toggle visibility
   const handleToggleColumn = (field: string) => {
-    const existingFields = new Set(columns.map(c => c.field));
-    const defaultColumn = availableColumns.find(c => c.field === field);
+    const existingFields = new Set(columns.map((c) => c.field));
+    const defaultColumn = availableColumns.find((c) => c.field === field);
 
     if (!defaultColumn) return;
 
     if (existingFields.has(field)) {
       // Toggle existing column
-      const updatedColumns = columns.map(col =>
-        col.field === field ? { ...col, visible: !col.visible } : col
+      const updatedColumns = columns.map((col) =>
+        col.field === field ? { ...col, visible: !col.visible } : col,
       );
       onChange(updatedColumns);
     } else {
       // Add new column from defaults, preserving displayMode from existing columns
-      const currentDisplayMode = columns.length > 0 && columns[0].displayMode
-        ? columns[0].displayMode
-        : 'full';
+      const currentDisplayMode =
+        columns.length > 0 && columns[0].displayMode ? columns[0].displayMode : 'full';
       onChange([...columns, { ...defaultColumn, visible: true, displayMode: currentDisplayMode }]);
     }
   };
 
   // Count visible columns
-  const visibleCount = columns.filter(c => c.visible).length;
+  const visibleCount = columns.filter((c) => c.visible).length;
 
   return (
     <div className="border-b border-gray-700">
@@ -68,7 +67,7 @@ export function ColumnVisibilityControls({
         <div className="bg-gray-850 max-h-64 overflow-y-auto">
           <div className="p-3 space-y-1">
             {availableColumns.map((defaultCol) => {
-              const templateCol = columns.find(c => c.field === defaultCol.field);
+              const templateCol = columns.find((c) => c.field === defaultCol.field);
               const isVisible = templateCol?.visible ?? false;
 
               return (
@@ -93,9 +92,9 @@ export function ColumnVisibilityControls({
             <button
               onClick={() => {
                 // Show all available columns
-                const existingFields = new Set(columns.map(c => c.field));
-                const allColumns = availableColumns.map(defCol => {
-                  const existing = columns.find(c => c.field === defCol.field);
+                const existingFields = new Set(columns.map((c) => c.field));
+                const allColumns = availableColumns.map((defCol) => {
+                  const existing = columns.find((c) => c.field === defCol.field);
                   return existing ? { ...existing, visible: true } : { ...defCol, visible: true };
                 });
                 onChange(allColumns);
@@ -106,7 +105,7 @@ export function ColumnVisibilityControls({
             </button>
             <button
               onClick={() => {
-                const allHidden = columns.map(col => ({ ...col, visible: false }));
+                const allHidden = columns.map((col) => ({ ...col, visible: false }));
                 onChange(allHidden);
               }}
               className="flex-1 px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-white rounded transition"

@@ -54,7 +54,7 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
       page_height: 120, // Compact header height
       is_default: 1,
       created_at: now,
-      updated_at: now
+      updated_at: now,
     },
     elements: [
       // Report Name - Top Center, Bold, 18pt
@@ -65,7 +65,7 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
         config: JSON.stringify({
           fieldType: 'report_title',
           label: 'Report Title',
-          fallbackText: 'Report'
+          fallbackText: 'Report',
         }),
         grid_column: 4,
         grid_row: 0,
@@ -77,10 +77,10 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
           fontSize: 18,
           fontWeight: 'bold',
           textAlign: 'center',
-          color: '#1f2937'
+          color: '#1f2937',
         }),
         created_at: now,
-        updated_at: now
+        updated_at: now,
       },
 
       // Show Name - Top Left, 14pt
@@ -91,7 +91,7 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
         config: JSON.stringify({
           fieldType: 'production_name',
           label: 'Show Name',
-          fallbackText: 'Production'
+          fallbackText: 'Production',
         }),
         grid_column: 0,
         grid_row: 0,
@@ -103,10 +103,10 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
           fontSize: 14,
           fontWeight: 'normal',
           textAlign: 'left',
-          color: '#374151'
+          color: '#374151',
         }),
         created_at: now,
-        updated_at: now
+        updated_at: now,
       },
 
       // Date - Top Right, 12pt
@@ -117,7 +117,7 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
         config: JSON.stringify({
           fieldType: 'generated_date',
           label: 'Date',
-          fallbackText: new Date().toLocaleDateString()
+          fallbackText: new Date().toLocaleDateString(),
         }),
         grid_column: 9,
         grid_row: 0,
@@ -129,10 +129,10 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
           fontSize: 12,
           fontWeight: 'normal',
           textAlign: 'right',
-          color: '#6b7280'
+          color: '#6b7280',
         }),
         created_at: now,
-        updated_at: now
+        updated_at: now,
       },
 
       // LD Name - Row 3, Left aligned, 10pt
@@ -144,7 +144,7 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
           fieldType: 'ld_name',
           label: 'Lighting Designer',
           fallbackText: '',
-          prefix: 'LD: '
+          prefix: 'LD: ',
         }),
         grid_column: 0,
         grid_row: 2,
@@ -156,10 +156,10 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
           fontSize: 10,
           fontWeight: 'normal',
           textAlign: 'left',
-          color: '#374151'
+          color: '#374151',
         }),
         created_at: now,
-        updated_at: now
+        updated_at: now,
       },
 
       // Venue - Row 3, Right aligned, 10pt
@@ -170,7 +170,7 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
         config: JSON.stringify({
           fieldType: 'venue',
           label: 'Venue',
-          fallbackText: ''
+          fallbackText: '',
         }),
         grid_column: 6,
         grid_row: 2,
@@ -182,11 +182,11 @@ export function getDefaultPaperworkHeader(): DefaultHeaderLayout {
           fontSize: 10,
           fontWeight: 'normal',
           textAlign: 'right',
-          color: '#374151'
+          color: '#374151',
         }),
         created_at: now,
-        updated_at: now
-      }
-    ]
+        updated_at: now,
+      },
+    ],
   };
 }

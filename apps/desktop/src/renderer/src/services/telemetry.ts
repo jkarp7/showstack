@@ -77,10 +77,11 @@ function sanitizeStackTrace(stack: string | undefined): string {
   const lines = stack.split('\n');
   const sanitized = lines
     .slice(0, 20) // Truncate to first 20 lines
-    .map(line => {
+    .map((line) => {
       // Replace absolute paths with relative paths
-      return line.replace(/\/[^:]+\/(src\/[^:]+)/g, '$1')
-                 .replace(/\/[^:]+\/(node_modules\/[^:]+)/g, '$1');
+      return line
+        .replace(/\/[^:]+\/(src\/[^:]+)/g, '$1')
+        .replace(/\/[^:]+\/(node_modules\/[^:]+)/g, '$1');
     });
 
   return sanitized.join('\n');
@@ -155,8 +156,16 @@ class TelemetryService {
 
     // Only initialize if API key is configured and telemetry is enabled
     // Check for undefined, null, or empty string
-    if (!posthogKey || posthogKey === 'undefined' || posthogKey.trim() === '' || !settings.telemetryEnabled) {
-      if (import.meta.env.DEV && (!posthogKey || posthogKey === 'undefined' || posthogKey.trim() === '')) {
+    if (
+      !posthogKey ||
+      posthogKey === 'undefined' ||
+      posthogKey.trim() === '' ||
+      !settings.telemetryEnabled
+    ) {
+      if (
+        import.meta.env.DEV &&
+        (!posthogKey || posthogKey === 'undefined' || posthogKey.trim() === '')
+      ) {
         console.log('[Telemetry] PostHog key not configured. Events will be stored locally only.');
       }
       return;
@@ -236,7 +245,7 @@ class TelemetryService {
     await this.storeLocal(telemetryEvent);
 
     // Auto-flush if batch size reached
-    if (this.localEvents.filter(e => !e.synced).length >= this.BATCH_SIZE) {
+    if (this.localEvents.filter((e) => !e.synced).length >= this.BATCH_SIZE) {
       // Wait for PostHog initialization to complete before flushing
       if (this.posthogInitPromise) {
         await this.posthogInitPromise;
@@ -287,13 +296,14 @@ class TelemetryService {
       }
     }
 
-    const errorData = typeof error === 'string'
-      ? { message: error }
-      : {
-          message: error.message,
-          stack: sanitizeStackTrace(error.stack),
-          name: error.name,
-        };
+    const errorData =
+      typeof error === 'string'
+        ? { message: error }
+        : {
+            message: error.message,
+            stack: sanitizeStackTrace(error.stack),
+            name: error.name,
+          };
 
     await this.track('error_occurred', {
       ...errorData,
@@ -320,7 +330,7 @@ class TelemetryService {
   async trackPerformance(
     metric: string,
     value: number,
-    context: EventProperties = {}
+    context: EventProperties = {},
   ): Promise<void> {
     await this.track('performance_metric', {
       metric,
@@ -348,7 +358,7 @@ class TelemetryService {
       return;
     }
 
-    const unsyncedEvents = this.localEvents.filter(e => !e.synced);
+    const unsyncedEvents = this.localEvents.filter((e) => !e.synced);
 
     if (unsyncedEvents.length === 0) {
       return;
@@ -360,7 +370,7 @@ class TelemetryService {
       await this.syncToCloud(unsyncedEvents);
 
       // Mark events as synced
-      unsyncedEvents.forEach(event => {
+      unsyncedEvents.forEach((event) => {
         event.synced = true;
       });
 
@@ -388,23 +398,26 @@ class TelemetryService {
    * Export local telemetry data
    */
   exportData(): TelemetryEvent[] {
-    return this.localEvents.map(e => e.event);
+    return this.localEvents.map((e) => e.event);
   }
 
   /**
    * Get statistics about local telemetry data
    */
   getStats() {
-    const synced = this.localEvents.filter(e => e.synced).length;
-    const unsynced = this.localEvents.filter(e => !e.synced).length;
+    const synced = this.localEvents.filter((e) => e.synced).length;
+    const unsynced = this.localEvents.filter((e) => !e.synced).length;
 
     // Use reduce instead of spread to avoid call stack issues with large arrays
-    const oldest = this.localEvents.length > 0
-      ? new Date(this.localEvents.reduce((min, e) =>
-          e.event.timestamp < min ? e.event.timestamp : min,
-          this.localEvents[0].event.timestamp
-        ))
-      : null;
+    const oldest =
+      this.localEvents.length > 0
+        ? new Date(
+            this.localEvents.reduce(
+              (min, e) => (e.event.timestamp < min ? e.event.timestamp : min),
+              this.localEvents[0].event.timestamp,
+            ),
+          )
+        : null;
 
     return {
       total: this.localEvents.length,
@@ -429,7 +442,7 @@ class TelemetryService {
     // Enforce maximum local events limit
     if (this.localEvents.length > this.MAX_LOCAL_EVENTS) {
       // Remove oldest synced event first (more efficient)
-      const syncedIndex = this.localEvents.findIndex(e => e.synced);
+      const syncedIndex = this.localEvents.findIndex((e) => e.synced);
       if (syncedIndex > -1) {
         this.localEvents.splice(syncedIndex, 1);
       } else {
@@ -465,7 +478,9 @@ class TelemetryService {
     // If PostHog is not initialized, skip cloud sync (events remain local)
     if (!this.posthogInitialized) {
       if (import.meta.env.DEV) {
-        console.log(`[Telemetry] PostHog not initialized. ${events.length} events stored locally only.`);
+        console.log(
+          `[Telemetry] PostHog not initialized. ${events.length} events stored locally only.`,
+        );
       }
       return Promise.resolve();
     }
@@ -508,7 +523,7 @@ class TelemetryService {
     const cutoffTime = Date.now() - retentionMs;
 
     // Remove old synced events
-    this.localEvents = this.localEvents.filter(event => {
+    this.localEvents = this.localEvents.filter((event) => {
       // Keep unsynced events regardless of age
       if (!event.synced) return true;
 
@@ -553,7 +568,7 @@ class TelemetryService {
     this.stopAutoFlush();
 
     this.flushTimer = window.setInterval(() => {
-      this.flush().catch(err => {
+      this.flush().catch((err) => {
         console.error('Auto-flush failed:', err);
       });
     }, this.FLUSH_INTERVAL);
@@ -622,7 +637,7 @@ export const telemetry = new TelemetryService();
 // Cleanup on app close
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeunload', () => {
-    telemetry.shutdown().catch(err => {
+    telemetry.shutdown().catch((err) => {
       console.error('Failed to shutdown telemetry:', err);
     });
   });

@@ -41,11 +41,13 @@ describe('Power Conversion Utilities', () => {
 ```
 
 **When to Use:**
+
 - ✅ Pure functions (no side effects)
 - ✅ Independent test cases
 - ✅ CPU-bound calculations
 
 **When NOT to Use:**
+
 - ❌ Tests with shared state
 - ❌ Database operations
 - ❌ File system operations
@@ -93,8 +95,7 @@ it('should handle click', async () => {
 
 ```typescript
 it('should fetch data', async () => {
-  vi.spyOn(window.api, 'getData')
-    .mockResolvedValue({ data: 'test' });
+  vi.spyOn(window.api, 'getData').mockResolvedValue({ data: 'test' });
 
   const result = await fetchData();
 
@@ -106,11 +107,9 @@ it('should fetch data', async () => {
 
 ```typescript
 it('should handle errors', async () => {
-  const spy = vi.spyOn(console, 'error')
-    .mockImplementation(() => {});
+  const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-  vi.spyOn(window.api, 'getData')
-    .mockRejectedValue(new Error('Failed'));
+  vi.spyOn(window.api, 'getData').mockRejectedValue(new Error('Failed'));
 
   const result = await fetchData();
 
@@ -126,45 +125,45 @@ it('should handle errors', async () => {
 
 ```typescript
 // Equality
-expect(value).toBe(5)                    // ===
-expect(value).toEqual({ a: 1 })          // Deep equality
-expect(value).toStrictEqual({ a: 1 })    // Strict deep equality
+expect(value).toBe(5); // ===
+expect(value).toEqual({ a: 1 }); // Deep equality
+expect(value).toStrictEqual({ a: 1 }); // Strict deep equality
 
 // Truthiness
-expect(value).toBeTruthy()
-expect(value).toBeFalsy()
-expect(value).toBeDefined()
-expect(value).toBeNull()
-expect(value).toBeUndefined()
+expect(value).toBeTruthy();
+expect(value).toBeFalsy();
+expect(value).toBeDefined();
+expect(value).toBeNull();
+expect(value).toBeUndefined();
 
 // Numbers
-expect(value).toBeGreaterThan(3)
-expect(value).toBeGreaterThanOrEqual(3)
-expect(value).toBeLessThan(5)
-expect(value).toBeCloseTo(0.3, 5)        // Floating point
+expect(value).toBeGreaterThan(3);
+expect(value).toBeGreaterThanOrEqual(3);
+expect(value).toBeLessThan(5);
+expect(value).toBeCloseTo(0.3, 5); // Floating point
 
 // Strings
-expect(string).toMatch(/pattern/)
-expect(string).toContain('substring')
+expect(string).toMatch(/pattern/);
+expect(string).toContain('substring');
 
 // Arrays
-expect(array).toHaveLength(3)
-expect(array).toContain(item)
+expect(array).toHaveLength(3);
+expect(array).toContain(item);
 
 // Objects
-expect(obj).toHaveProperty('key')
-expect(obj).toHaveProperty('key', 'value')
+expect(obj).toHaveProperty('key');
+expect(obj).toHaveProperty('key', 'value');
 
 // Functions
-expect(fn).toHaveBeenCalled()
-expect(fn).toHaveBeenCalledTimes(2)
-expect(fn).toHaveBeenCalledWith('arg')
+expect(fn).toHaveBeenCalled();
+expect(fn).toHaveBeenCalledTimes(2);
+expect(fn).toHaveBeenCalledWith('arg');
 
 // DOM (jest-dom)
-expect(element).toBeInTheDocument()
-expect(element).toBeVisible()
-expect(element).toBeDisabled()
-expect(element).toHaveTextContent('text')
+expect(element).toBeInTheDocument();
+expect(element).toBeVisible();
+expect(element).toBeDisabled();
+expect(element).toHaveTextContent('text');
 ```
 
 ---
@@ -174,11 +173,11 @@ expect(element).toHaveTextContent('text')
 ### Mock Function
 
 ```typescript
-const mockFn = vi.fn();                  // Create mock
-mockFn.mockReturnValue('value');         // Return value
-mockFn.mockResolvedValue('value');       // Return promise
-mockFn.mockRejectedValue(new Error());   // Reject promise
-mockFn.mockImplementation(() => 'value');// Custom implementation
+const mockFn = vi.fn(); // Create mock
+mockFn.mockReturnValue('value'); // Return value
+mockFn.mockResolvedValue('value'); // Return promise
+mockFn.mockRejectedValue(new Error()); // Reject promise
+mockFn.mockImplementation(() => 'value'); // Custom implementation
 ```
 
 ### Mock Module
@@ -186,7 +185,7 @@ mockFn.mockImplementation(() => 'value');// Custom implementation
 ```typescript
 vi.mock('fs', () => ({
   readFileSync: vi.fn(() => 'content'),
-  existsSync: vi.fn(() => true)
+  existsSync: vi.fn(() => true),
 }));
 ```
 
@@ -196,19 +195,19 @@ vi.mock('fs', () => ({
 const spy = vi.spyOn(obj, 'method');
 spy.mockReturnValue('value');
 // ... test ...
-spy.mockRestore();                       // Clean up!
+spy.mockRestore(); // Clean up!
 ```
 
 ---
 
 ## Coverage Targets
 
-| File Type | Target | Critical? |
-|-----------|--------|-----------|
-| Critical Utilities | 80%+ | ✅ Yes |
+| File Type          | Target | Critical?    |
+| ------------------ | ------ | ------------ |
+| Critical Utilities | 80%+   | ✅ Yes       |
 | Standard Utilities | 60-70% | ⚠️ Important |
-| Components | 50-60% | 📊 Standard |
-| IPC Handlers | 70%+ | ✅ Yes |
+| Components         | 50-60% | 📊 Standard  |
+| IPC Handlers       | 70%+   | ✅ Yes       |
 
 ---
 
@@ -237,12 +236,12 @@ it('should do something', () => {
 ```typescript
 // Async without await
 it('test', () => {
-  myAsyncFunction();  // Won't wait!
+  myAsyncFunction(); // Won't wait!
 });
 
 // No assertions
 it('test', () => {
-  myFunction();  // What are we testing?
+  myFunction(); // What are we testing?
 });
 
 // Testing implementation
@@ -279,15 +278,15 @@ it('test', () => {
 ```typescript
 // See what's rendered
 import { screen } from '@testing-library/react';
-screen.debug();                          // Print DOM
-screen.logTestingPlaygroundURL();        // Get selector hints
+screen.debug(); // Print DOM
+screen.logTestingPlaygroundURL(); // Get selector hints
 
 // See mock calls
-console.log(mockFn.mock.calls);          // All calls
-console.log(mockFn.mock.calls[0]);       // First call arguments
+console.log(mockFn.mock.calls); // All calls
+console.log(mockFn.mock.calls[0]); // First call arguments
 
 // Pause execution
-await new Promise(r => setTimeout(r, 5000)); // Wait 5s to inspect
+await new Promise((r) => setTimeout(r, 5000)); // Wait 5s to inspect
 ```
 
 ---

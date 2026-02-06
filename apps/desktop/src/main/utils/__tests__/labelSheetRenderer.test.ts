@@ -4,7 +4,7 @@ import {
   renderLabelSheet,
   getAverySpec,
   calculatePageCount,
-  AVERY_SPECS
+  AVERY_SPECS,
 } from '../labelSheetRenderer';
 import type { LabelData } from '../../../renderer/src/utils/prep/labelDataMapper';
 
@@ -24,7 +24,7 @@ const mockLabelData: LabelData = {
   circuit: 'C-145',
   color: 'R02',
   wattage: '750',
-  purpose: 'DS Special'
+  purpose: 'DS Special',
 };
 
 // Mock template
@@ -36,10 +36,10 @@ const mockTemplate = {
   grid_rows: 3,
   grid_gap: 5,
   page_width: 189, // Avery 5160 label width
-  page_height: 72,  // Avery 5160 label height
+  page_height: 72, // Avery 5160 label height
   config: {
-    backgroundColor: '#ffffff'
-  }
+    backgroundColor: '#ffffff',
+  },
 };
 
 // Mock layout elements
@@ -49,7 +49,7 @@ const mockElements = [
     config: {
       fieldType: 'position',
       prefix: 'Pos: ',
-      suffix: ''
+      suffix: '',
     },
     grid_column: 0,
     grid_row: 0,
@@ -60,22 +60,22 @@ const mockElements = [
       fontSize: 12,
       fontWeight: 'bold',
       textAlign: 'left',
-      color: '#000000'
-    }
+      color: '#000000',
+    },
   },
   {
     element_type: 'text',
     config: {
-      content: 'Static Label'
+      content: 'Static Label',
     },
     grid_column: 0,
     grid_row: 1,
     column_span: 1,
     row_span: 1,
     style: {
-      fontSize: 10
-    }
-  }
+      fontSize: 10,
+    },
+  },
 ];
 
 describe('Label Sheet Renderer - XSS Protection', () => {
@@ -83,7 +83,7 @@ describe('Label Sheet Renderer - XSS Protection', () => {
     it('should escape ampersands in dataField content', () => {
       const xssData: LabelData = {
         ...mockLabelData,
-        position: 'Smith & Jones'
+        position: 'Smith & Jones',
       };
 
       const result = renderLabelSheet(mockTemplate, mockElements, [xssData], '5160');
@@ -95,7 +95,7 @@ describe('Label Sheet Renderer - XSS Protection', () => {
     it('should escape less-than symbols in dataField content', () => {
       const xssData: LabelData = {
         ...mockLabelData,
-        position: 'Position < 5'
+        position: 'Position < 5',
       };
 
       const result = renderLabelSheet(mockTemplate, mockElements, [xssData], '5160');
@@ -107,7 +107,7 @@ describe('Label Sheet Renderer - XSS Protection', () => {
     it('should escape greater-than symbols in dataField content', () => {
       const xssData: LabelData = {
         ...mockLabelData,
-        position: 'Position > 10'
+        position: 'Position > 10',
       };
 
       const result = renderLabelSheet(mockTemplate, mockElements, [xssData], '5160');
@@ -119,7 +119,7 @@ describe('Label Sheet Renderer - XSS Protection', () => {
     it('should escape double quotes in dataField content', () => {
       const xssData: LabelData = {
         ...mockLabelData,
-        position: 'Position "Special"'
+        position: 'Position "Special"',
       };
 
       const result = renderLabelSheet(mockTemplate, mockElements, [xssData], '5160');
@@ -131,7 +131,7 @@ describe('Label Sheet Renderer - XSS Protection', () => {
     it('should escape single quotes in dataField content', () => {
       const xssData: LabelData = {
         ...mockLabelData,
-        position: "Position 'Special'"
+        position: "Position 'Special'",
       };
 
       const result = renderLabelSheet(mockTemplate, mockElements, [xssData], '5160');
@@ -145,7 +145,7 @@ describe('Label Sheet Renderer - XSS Protection', () => {
     it('should prevent script tag injection in dataField', () => {
       const xssData: LabelData = {
         ...mockLabelData,
-        position: '<script>alert("XSS")</script>'
+        position: '<script>alert("XSS")</script>',
       };
 
       const result = renderLabelSheet(mockTemplate, mockElements, [xssData], '5160');
@@ -158,7 +158,7 @@ describe('Label Sheet Renderer - XSS Protection', () => {
     it('should prevent img tag injection in dataField', () => {
       const xssData: LabelData = {
         ...mockLabelData,
-        position: '<img src=x onerror="alert(1)">'
+        position: '<img src=x onerror="alert(1)">',
       };
 
       const result = renderLabelSheet(mockTemplate, mockElements, [xssData], '5160');
@@ -170,7 +170,7 @@ describe('Label Sheet Renderer - XSS Protection', () => {
     it('should prevent iframe injection in dataField', () => {
       const xssData: LabelData = {
         ...mockLabelData,
-        position: '<iframe src="javascript:alert(1)"></iframe>'
+        position: '<iframe src="javascript:alert(1)"></iframe>',
       };
 
       const result = renderLabelSheet(mockTemplate, mockElements, [xssData], '5160');
@@ -183,7 +183,7 @@ describe('Label Sheet Renderer - XSS Protection', () => {
     it('should prevent event handler injection in dataField', () => {
       const xssData: LabelData = {
         ...mockLabelData,
-        position: '<div onload="alert(1)">Test</div>'
+        position: '<div onload="alert(1)">Test</div>',
       };
 
       const result = renderLabelSheet(mockTemplate, mockElements, [xssData], '5160');
@@ -195,7 +195,7 @@ describe('Label Sheet Renderer - XSS Protection', () => {
     it('should prevent javascript: protocol injection', () => {
       const xssData: LabelData = {
         ...mockLabelData,
-        position: '<a href="javascript:alert(1)">Click</a>'
+        position: '<a href="javascript:alert(1)">Click</a>',
       };
 
       const result = renderLabelSheet(mockTemplate, mockElements, [xssData], '5160');
@@ -207,7 +207,7 @@ describe('Label Sheet Renderer - XSS Protection', () => {
     it('should prevent data: protocol injection', () => {
       const xssData: LabelData = {
         ...mockLabelData,
-        position: '<object data="data:text/html,<script>alert(1)</script>"></object>'
+        position: '<object data="data:text/html,<script>alert(1)</script>"></object>',
       };
 
       const result = renderLabelSheet(mockTemplate, mockElements, [xssData], '5160');
@@ -221,13 +221,13 @@ describe('Label Sheet Renderer - XSS Protection', () => {
       const textElement = {
         element_type: 'text',
         config: {
-          content: '<script>alert("XSS")</script>'
+          content: '<script>alert("XSS")</script>',
         },
         grid_column: 0,
         grid_row: 0,
         column_span: 1,
         row_span: 1,
-        style: {}
+        style: {},
       };
 
       const result = renderLabelSheet(mockTemplate, [textElement], [mockLabelData], '5160');
@@ -242,13 +242,13 @@ describe('Label Sheet Renderer - XSS Protection', () => {
         config: {
           fieldType: 'position',
           prefix: '<script>',
-          suffix: '</script>'
+          suffix: '</script>',
         },
         grid_column: 0,
         grid_row: 0,
         column_span: 1,
         row_span: 1,
-        style: {}
+        style: {},
       };
 
       const result = renderLabelSheet(mockTemplate, [xssElement], [mockLabelData], '5160');
@@ -262,7 +262,7 @@ describe('Label Sheet Renderer - XSS Protection', () => {
     it('should handle encoded HTML entities', () => {
       const xssData: LabelData = {
         ...mockLabelData,
-        position: '&lt;script&gt;alert(1)&lt;/script&gt;'
+        position: '&lt;script&gt;alert(1)&lt;/script&gt;',
       };
 
       const result = renderLabelSheet(mockTemplate, mockElements, [xssData], '5160');
@@ -274,7 +274,7 @@ describe('Label Sheet Renderer - XSS Protection', () => {
     it('should handle mixed special characters', () => {
       const xssData: LabelData = {
         ...mockLabelData,
-        position: '<div class="test" onclick=\'alert("XSS")\'>&nbsp;</div>'
+        position: '<div class="test" onclick=\'alert("XSS")\'>&nbsp;</div>',
       };
 
       const result = renderLabelSheet(mockTemplate, mockElements, [xssData], '5160');
@@ -287,7 +287,7 @@ describe('Label Sheet Renderer - XSS Protection', () => {
     it('should handle Unicode characters safely', () => {
       const xssData: LabelData = {
         ...mockLabelData,
-        position: '测试<script>alert(1)</script>'
+        position: '测试<script>alert(1)</script>',
       };
 
       const result = renderLabelSheet(mockTemplate, mockElements, [xssData], '5160');
@@ -303,16 +303,64 @@ describe('Label Sheet Renderer - XSS Protection', () => {
         type: '<iframe>',
         manufacturer: '<div onclick="x">',
         purpose: '<a href="javascript:">',
-        notes: '<object data="x">'
+        notes: '<object data="x">',
       };
 
       const allFieldsElements = [
-        { element_type: 'dataField', config: { fieldType: 'position' }, grid_column: 0, grid_row: 0, column_span: 1, row_span: 1, style: {} },
-        { element_type: 'dataField', config: { fieldType: 'unitNumber' }, grid_column: 1, grid_row: 0, column_span: 1, row_span: 1, style: {} },
-        { element_type: 'dataField', config: { fieldType: 'type' }, grid_column: 0, grid_row: 1, column_span: 1, row_span: 1, style: {} },
-        { element_type: 'dataField', config: { fieldType: 'manufacturer' }, grid_column: 1, grid_row: 1, column_span: 1, row_span: 1, style: {} },
-        { element_type: 'dataField', config: { fieldType: 'purpose' }, grid_column: 0, grid_row: 2, column_span: 1, row_span: 1, style: {} },
-        { element_type: 'dataField', config: { fieldType: 'notes' }, grid_column: 1, grid_row: 2, column_span: 1, row_span: 1, style: {} }
+        {
+          element_type: 'dataField',
+          config: { fieldType: 'position' },
+          grid_column: 0,
+          grid_row: 0,
+          column_span: 1,
+          row_span: 1,
+          style: {},
+        },
+        {
+          element_type: 'dataField',
+          config: { fieldType: 'unitNumber' },
+          grid_column: 1,
+          grid_row: 0,
+          column_span: 1,
+          row_span: 1,
+          style: {},
+        },
+        {
+          element_type: 'dataField',
+          config: { fieldType: 'type' },
+          grid_column: 0,
+          grid_row: 1,
+          column_span: 1,
+          row_span: 1,
+          style: {},
+        },
+        {
+          element_type: 'dataField',
+          config: { fieldType: 'manufacturer' },
+          grid_column: 1,
+          grid_row: 1,
+          column_span: 1,
+          row_span: 1,
+          style: {},
+        },
+        {
+          element_type: 'dataField',
+          config: { fieldType: 'purpose' },
+          grid_column: 0,
+          grid_row: 2,
+          column_span: 1,
+          row_span: 1,
+          style: {},
+        },
+        {
+          element_type: 'dataField',
+          config: { fieldType: 'notes' },
+          grid_column: 1,
+          grid_row: 2,
+          column_span: 1,
+          row_span: 1,
+          style: {},
+        },
       ];
 
       const result = renderLabelSheet(mockTemplate, allFieldsElements, [xssData], '5160');
@@ -366,8 +414,12 @@ describe('Label Sheet Renderer - HTML Generation', () => {
       const result = renderLabelSheet(mockTemplate, mockElements, [mockLabelData], '5160');
       const spec = AVERY_SPECS['5160'];
 
-      expect(result).toContain(`grid-template-columns: repeat(${spec.labelsPerRow}, ${spec.labelWidth}px)`);
-      expect(result).toContain(`grid-template-rows: repeat(${spec.labelsPerColumn}, ${spec.labelHeight}px)`);
+      expect(result).toContain(
+        `grid-template-columns: repeat(${spec.labelsPerRow}, ${spec.labelWidth}px)`,
+      );
+      expect(result).toContain(
+        `grid-template-rows: repeat(${spec.labelsPerColumn}, ${spec.labelHeight}px)`,
+      );
       expect(result).toContain(`gap: ${spec.verticalGap}px ${spec.horizontalGap}px`);
     });
 
@@ -382,16 +434,24 @@ describe('Label Sheet Renderer - HTML Generation', () => {
       const result = renderLabelSheet(mockTemplate, mockElements, [mockLabelData], '5163');
       const spec = AVERY_SPECS['5163'];
 
-      expect(result).toContain(`grid-template-columns: repeat(${spec.labelsPerRow}, ${spec.labelWidth}px)`);
-      expect(result).toContain(`grid-template-rows: repeat(${spec.labelsPerColumn}, ${spec.labelHeight}px)`);
+      expect(result).toContain(
+        `grid-template-columns: repeat(${spec.labelsPerRow}, ${spec.labelWidth}px)`,
+      );
+      expect(result).toContain(
+        `grid-template-rows: repeat(${spec.labelsPerColumn}, ${spec.labelHeight}px)`,
+      );
     });
 
     it('should handle Avery 5164 (2x3 shipping labels)', () => {
       const result = renderLabelSheet(mockTemplate, mockElements, [mockLabelData], '5164');
       const spec = AVERY_SPECS['5164'];
 
-      expect(result).toContain(`grid-template-columns: repeat(${spec.labelsPerRow}, ${spec.labelWidth}px)`);
-      expect(result).toContain(`grid-template-rows: repeat(${spec.labelsPerColumn}, ${spec.labelHeight}px)`);
+      expect(result).toContain(
+        `grid-template-columns: repeat(${spec.labelsPerRow}, ${spec.labelWidth}px)`,
+      );
+      expect(result).toContain(
+        `grid-template-rows: repeat(${spec.labelsPerColumn}, ${spec.labelHeight}px)`,
+      );
     });
   });
 
@@ -418,13 +478,13 @@ describe('Label Sheet Renderer - HTML Generation', () => {
         config: {
           src: 'data:image/png;base64,iVBORw0KG...',
           altText: 'Logo',
-          objectFit: 'contain'
+          objectFit: 'contain',
         },
         grid_column: 0,
         grid_row: 0,
         column_span: 1,
         row_span: 1,
-        style: {}
+        style: {},
       };
 
       const result = renderLabelSheet(mockTemplate, [imageElement], [mockLabelData], '5160');
@@ -440,13 +500,13 @@ describe('Label Sheet Renderer - HTML Generation', () => {
         config: {
           shapeType: 'rectangle',
           color: '#000000',
-          thickness: 2
+          thickness: 2,
         },
         grid_column: 0,
         grid_row: 0,
         column_span: 1,
         row_span: 1,
-        style: {}
+        style: {},
       };
 
       const result = renderLabelSheet(mockTemplate, [shapeElement], [mockLabelData], '5160');
@@ -460,13 +520,13 @@ describe('Label Sheet Renderer - HTML Generation', () => {
         config: {
           shapeType: 'line',
           color: '#cccccc',
-          thickness: 1
+          thickness: 1,
         },
         grid_column: 0,
         grid_row: 0,
         column_span: 1,
         row_span: 1,
-        style: {}
+        style: {},
       };
 
       const result = renderLabelSheet(mockTemplate, [lineElement], [mockLabelData], '5160');
@@ -520,7 +580,7 @@ describe('Label Sheet Renderer - Edge Cases', () => {
     const emptyData: LabelData = {
       position: '',
       unitNumber: '',
-      type: ''
+      type: '',
     };
 
     const result = renderLabelSheet(mockTemplate, mockElements, [emptyData], '5160');
@@ -530,7 +590,7 @@ describe('Label Sheet Renderer - Edge Cases', () => {
 
   it('should handle undefined field values gracefully', () => {
     const sparseData: Partial<LabelData> = {
-      position: '1st Electric'
+      position: '1st Electric',
     };
 
     const result = renderLabelSheet(mockTemplate, mockElements, [sparseData as LabelData], '5160');
@@ -548,7 +608,7 @@ describe('Label Sheet Renderer - Edge Cases', () => {
     const longText = 'A'.repeat(1000);
     const longData: LabelData = {
       ...mockLabelData,
-      position: longText
+      position: longText,
     };
 
     const result = renderLabelSheet(mockTemplate, mockElements, [longData], '5160');
@@ -561,8 +621,8 @@ describe('Label Sheet Renderer - Edge Cases', () => {
     const colorTemplate = {
       ...mockTemplate,
       config: {
-        backgroundColor: '#f0f0f0'
-      }
+        backgroundColor: '#f0f0f0',
+      },
     };
 
     const result = renderLabelSheet(colorTemplate, mockElements, [mockLabelData], '5160');
@@ -573,7 +633,7 @@ describe('Label Sheet Renderer - Edge Cases', () => {
   it('should handle missing config.backgroundColor', () => {
     const noColorTemplate = {
       ...mockTemplate,
-      config: undefined
+      config: undefined,
     };
 
     const result = renderLabelSheet(noColorTemplate, mockElements, [mockLabelData], '5160');
@@ -659,7 +719,7 @@ describe('Avery Spec Utilities', () => {
     });
 
     it('should have consistent dimension units (points)', () => {
-      Object.values(AVERY_SPECS).forEach(spec => {
+      Object.values(AVERY_SPECS).forEach((spec) => {
         expect(spec.labelWidth).toBeGreaterThan(0);
         expect(spec.labelHeight).toBeGreaterThan(0);
         expect(spec.topMargin).toBeGreaterThanOrEqual(0);
@@ -668,7 +728,7 @@ describe('Avery Spec Utilities', () => {
     });
 
     it('should have valid label counts', () => {
-      Object.values(AVERY_SPECS).forEach(spec => {
+      Object.values(AVERY_SPECS).forEach((spec) => {
         expect(spec.labelsPerRow).toBeGreaterThan(0);
         expect(spec.labelsPerColumn).toBeGreaterThan(0);
         const totalLabels = spec.labelsPerRow * spec.labelsPerColumn;
@@ -681,16 +741,61 @@ describe('Avery Spec Utilities', () => {
 describe('Label Sheet Renderer - Integration Scenarios', () => {
   it('should render complete label sheet with real-world fixture data', () => {
     const realWorldData: LabelData[] = [
-      { position: '1st Electric', unitNumber: '12', type: 'Source Four 19°', channel: '145', dimmer: 'R23', color: 'R02' },
-      { position: '1st Electric', unitNumber: '13', type: 'Source Four 26°', channel: '146', dimmer: 'R24', color: 'R54' },
-      { position: '2nd Electric', unitNumber: '1', type: 'PAR64', channel: '201', dimmer: 'R31', color: 'R80' }
+      {
+        position: '1st Electric',
+        unitNumber: '12',
+        type: 'Source Four 19°',
+        channel: '145',
+        dimmer: 'R23',
+        color: 'R02',
+      },
+      {
+        position: '1st Electric',
+        unitNumber: '13',
+        type: 'Source Four 26°',
+        channel: '146',
+        dimmer: 'R24',
+        color: 'R54',
+      },
+      {
+        position: '2nd Electric',
+        unitNumber: '1',
+        type: 'PAR64',
+        channel: '201',
+        dimmer: 'R31',
+        color: 'R80',
+      },
     ];
 
     // Create elements that render multiple fields
     const fullElements = [
-      { element_type: 'dataField', config: { fieldType: 'position' }, grid_column: 0, grid_row: 0, column_span: 2, row_span: 1, style: {} },
-      { element_type: 'dataField', config: { fieldType: 'type' }, grid_column: 0, grid_row: 1, column_span: 2, row_span: 1, style: {} },
-      { element_type: 'dataField', config: { fieldType: 'unitNumber' }, grid_column: 2, grid_row: 0, column_span: 1, row_span: 1, style: {} }
+      {
+        element_type: 'dataField',
+        config: { fieldType: 'position' },
+        grid_column: 0,
+        grid_row: 0,
+        column_span: 2,
+        row_span: 1,
+        style: {},
+      },
+      {
+        element_type: 'dataField',
+        config: { fieldType: 'type' },
+        grid_column: 0,
+        grid_row: 1,
+        column_span: 2,
+        row_span: 1,
+        style: {},
+      },
+      {
+        element_type: 'dataField',
+        config: { fieldType: 'unitNumber' },
+        grid_column: 2,
+        grid_row: 0,
+        column_span: 1,
+        row_span: 1,
+        style: {},
+      },
     ];
 
     const result = renderLabelSheet(mockTemplate, fullElements, realWorldData, '5160');
@@ -702,16 +807,26 @@ describe('Label Sheet Renderer - Integration Scenarios', () => {
   });
 
   it('should handle complete workflow: fixtures → labels → HTML', () => {
-    const fixtureData: LabelData[] = Array(35).fill(null).map((_, i) => ({
-      position: `Electric ${i + 1}`,
-      unitNumber: (i + 1).toString(),
-      type: 'Source Four 19°',
-      channel: (100 + i).toString()
-    }));
+    const fixtureData: LabelData[] = Array(35)
+      .fill(null)
+      .map((_, i) => ({
+        position: `Electric ${i + 1}`,
+        unitNumber: (i + 1).toString(),
+        type: 'Source Four 19°',
+        channel: (100 + i).toString(),
+      }));
 
     // Create elements that render position field
     const positionElement = [
-      { element_type: 'dataField', config: { fieldType: 'position' }, grid_column: 0, grid_row: 0, column_span: 1, row_span: 1, style: {} }
+      {
+        element_type: 'dataField',
+        config: { fieldType: 'position' },
+        grid_column: 0,
+        grid_row: 0,
+        column_span: 1,
+        row_span: 1,
+        style: {},
+      },
     ];
 
     const result = renderLabelSheet(mockTemplate, positionElement, fixtureData, '5160');

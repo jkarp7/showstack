@@ -69,7 +69,7 @@ export function parseCircuitName(circuit: string): ParsedCircuit | null {
       rackIdentifier,
       socapexLetter,
       circuitNumber: 0, // Will be set from circuit_number field
-      actualChannelNumber: 0 // Will be calculated
+      actualChannelNumber: 0, // Will be calculated
     };
   }
 
@@ -84,7 +84,7 @@ export function parseCircuitName(circuit: string): ParsedCircuit | null {
       rackIdentifier,
       socapexLetter,
       circuitNumber: 0,
-      actualChannelNumber: 0
+      actualChannelNumber: 0,
     };
   }
 
@@ -98,10 +98,7 @@ export function parseCircuitName(circuit: string): ParsedCircuit | null {
  * - Socapex B (index 1) = circuits 7-12
  * - etc.
  */
-export function calculateChannelNumber(
-  socapexLetter: string,
-  circuitNumber: number
-): number {
+export function calculateChannelNumber(socapexLetter: string, circuitNumber: number): number {
   // Convert socapex letter to index (A=0, B=1, C=2, etc.)
   const socapexIndex = socapexLetter.charCodeAt(0) - 'A'.charCodeAt(0);
 
@@ -113,7 +110,7 @@ export function calculateChannelNumber(
   }
 
   // Otherwise, calculate from socapex: (socapex_index * 6) + circuit_number
-  return (socapexIndex * 6) + circuitNumber;
+  return socapexIndex * 6 + circuitNumber;
 }
 
 /**
@@ -122,7 +119,7 @@ export function calculateChannelNumber(
 export function linkToDimmerRack(
   circuit: string,
   circuitNumber: number,
-  dimmerRacks: DimmerRack[]
+  dimmerRacks: DimmerRack[],
 ): CircuitLinkResult {
   const parsed = parseCircuitName(circuit);
 
@@ -131,21 +128,19 @@ export function linkToDimmerRack(
       rackId: null,
       rackName: null,
       channelNumber: null,
-      error: 'Invalid circuit format'
+      error: 'Invalid circuit format',
     };
   }
 
   // Find rack with matching identifier
-  const rack = dimmerRacks.find(
-    r => r.rack_identifier?.toUpperCase() === parsed.rackIdentifier
-  );
+  const rack = dimmerRacks.find((r) => r.rack_identifier?.toUpperCase() === parsed.rackIdentifier);
 
   if (!rack) {
     return {
       rackId: null,
       rackName: null,
       channelNumber: null,
-      error: `No dimmer rack found with identifier "${parsed.rackIdentifier}"`
+      error: `No dimmer rack found with identifier "${parsed.rackIdentifier}"`,
     };
   }
 
@@ -158,7 +153,7 @@ export function linkToDimmerRack(
       rackId: null,
       rackName: null,
       channelNumber: null,
-      error: `Channel ${actualChannel} exceeds rack capacity of ${rack.circuit_count}`
+      error: `Channel ${actualChannel} exceeds rack capacity of ${rack.circuit_count}`,
     };
   }
 
@@ -175,7 +170,7 @@ export function linkToDimmerRack(
 export function linkToPDRack(
   circuit: string,
   circuitNumber: number,
-  pdRacks: PDRack[]
+  pdRacks: PDRack[],
 ): CircuitLinkResult {
   const parsed = parseCircuitName(circuit);
 
@@ -184,21 +179,19 @@ export function linkToPDRack(
       rackId: null,
       rackName: null,
       channelNumber: null,
-      error: 'Invalid circuit format'
+      error: 'Invalid circuit format',
     };
   }
 
   // Find rack with matching identifier
-  const rack = pdRacks.find(
-    r => r.rack_identifier?.toUpperCase() === parsed.rackIdentifier
-  );
+  const rack = pdRacks.find((r) => r.rack_identifier?.toUpperCase() === parsed.rackIdentifier);
 
   if (!rack) {
     return {
       rackId: null,
       rackName: null,
       channelNumber: null,
-      error: `No PD rack found with identifier "${parsed.rackIdentifier}"`
+      error: `No PD rack found with identifier "${parsed.rackIdentifier}"`,
     };
   }
 
@@ -211,7 +204,7 @@ export function linkToPDRack(
       rackId: null,
       rackName: null,
       channelNumber: null,
-      error: `Circuit ${actualCircuit} exceeds rack capacity of ${rack.circuit_count}`
+      error: `Circuit ${actualCircuit} exceeds rack capacity of ${rack.circuit_count}`,
     };
   }
 
@@ -231,7 +224,7 @@ export function autoLinkCircuit(
   circuit: string,
   circuitNumber: number | string,
   dimmerRacks: DimmerRack[],
-  pdRacks: PDRack[]
+  pdRacks: PDRack[],
 ): {
   dimmer_rack_id?: string;
   dimmer_channel_number?: number;
@@ -266,6 +259,6 @@ export function autoLinkCircuit(
 
   // No match found
   return {
-    error: dimmerResult.error || pdResult.error || 'No matching rack found'
+    error: dimmerResult.error || pdResult.error || 'No matching rack found',
   };
 }

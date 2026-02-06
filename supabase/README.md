@@ -20,6 +20,7 @@ supabase/
 ## Files Overview
 
 ### `migrations/001_initial_schema.sql`
+
 - Creates all ShowStack tables in PostgreSQL
 - Converts SQLite schema to PostgreSQL (BIGINT timestamps, BOOLEAN flags, JSONB)
 - Adds `user_id` columns for Row-Level Security
@@ -27,12 +28,14 @@ supabase/
 - **Run this first** in Supabase SQL Editor
 
 ### `migrations/002_indexes.sql`
+
 - Creates 40+ performance indexes
 - Optimized for common query patterns
 - Includes composite indexes for filtering
 - **Run this second** in Supabase SQL Editor
 
 ### `migrations/003_rls_policies.sql`
+
 - Enables Row-Level Security on all tables
 - Users can only access their own data
 - Service role bypasses RLS for admin operations
@@ -40,6 +43,7 @@ supabase/
 - **Run this third** in Supabase SQL Editor
 
 ### `powersync/sync-rules.yaml`
+
 - Defines 3 sync buckets:
   1. **user_projects** - ShowStack projects and related data (fixtures, racks, infrastructure)
   2. **shop_orders** - Shop order projects and items
@@ -56,12 +60,14 @@ Follow the complete setup guide in the root directory:
 ## Quick Reference
 
 ### Supabase Dashboard Locations
+
 - **SQL Editor**: Run migrations here
 - **Table Editor**: View/verify schema
 - **Database → Replication**: Enable realtime for PowerSync
 - **Settings → API**: Get API keys
 
 ### PowerSync Dashboard Locations
+
 - **Settings → Database Connection**: Connect to Supabase
 - **Sync Rules**: Upload sync-rules.yaml
 - **Settings → Credentials**: Get PowerSync URL and token
@@ -96,6 +102,7 @@ POWERSYNC_TOKEN=eyJhbGc...
 **17 Tables Total:**
 
 **Production Tables (13):**
+
 - `projects` - Main project records
 - `fixtures` - Lighting fixtures (100+ columns)
 - `dimmer_racks` - Dimmer power distribution
@@ -111,6 +118,7 @@ POWERSYNC_TOKEN=eyJhbGc...
 - `shop_order_notes` - 3-tier notes system
 
 **Template Tables (4):**
+
 - `shop_order_note_templates` - Reusable note templates
 - `page_layout_templates` - Visual page designer
 - `page_layout_elements` - Layout components
@@ -134,16 +142,19 @@ POWERSYNC_TOKEN=eyJhbGc...
 ## Troubleshooting
 
 ### Migration Fails
+
 - Run migrations in order (001, 002, 003)
 - Check for syntax errors
 - Verify Supabase project is fully initialized
 
 ### RLS Blocks Access
+
 - Verify user is authenticated
 - Check `user_id` matches in policies
 - Use service_role key for admin access (bypasses RLS)
 
 ### PowerSync Connection Fails
+
 - Verify Supabase connection configured first
 - Check token expiration
 - Ensure sync rules are deployed

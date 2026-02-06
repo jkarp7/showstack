@@ -19,6 +19,7 @@ This is the **first alpha release** of ShowStack for external testing and feedba
 ### Unified Visual Editor System (90% Complete)
 
 #### Phase 3: Paperwork Template System ✅
+
 - **13 Report Types** with customizable templates
   - Fixture Reports (8): Channel hookup, dimmer schedule, circuit list, DMX addresses, power summary, color schedule, gobo schedule, color cut report
   - Infrastructure Reports (5): Equipment list, network summary, port assignments, power consumption, location map
@@ -30,6 +31,7 @@ This is the **first alpha release** of ShowStack for external testing and feedba
 - **Automatic Sheet Calculations** for gel cutting lists
 
 #### Phase 3.5: Logo & Image Support ✅
+
 - **Image Upload** with file browser (PNG, JPG, SVG, GIF support)
 - **Base64 Storage** for logos and graphics (2MB max per image)
 - **Project Logo Integration** in paperwork headers
@@ -37,6 +39,7 @@ This is the **first alpha release** of ShowStack for external testing and feedba
 - **PDF Export Support** with Puppeteer rendering
 
 #### Phase 4: Label Integration ✅
+
 - **Grid-Based Visual Designer** for label layouts (4 cells per inch precision)
 - **5 Avery Templates** supported:
   - **5160**: Address labels (3×10 grid, 2.625" × 1")
@@ -53,12 +56,14 @@ This is the **first alpha release** of ShowStack for external testing and feedba
 ### Power Management & Infrastructure (Sprints 1-4)
 
 #### Sprint 1: Power Foundation ✅
+
 - **Building Service Assignment** - Designate racks to Service A/B/C for load planning
 - **Custom Phase Labels** - Rename phases from A/B/C to 1/2/3 or custom names project-wide
 - **Service Configuration Panel** - Set capacity (amps) for each building service
 - **Persistent Settings** - Service configurations stored in settingsStore
 
 #### Sprint 2: Phase Distribution Templates ✅
+
 - **Template System** for saving and loading phase configurations
 - **Built-in Templates**:
   - AB Phasing (Alternating): A, B, A, B, ...
@@ -68,6 +73,7 @@ This is the **first alpha release** of ShowStack for external testing and feedba
 - **Apply Templates** to racks with one click
 
 #### Sprint 3: Infrastructure Enhancements ✅
+
 - **Port Linking** - Link infrastructure ports to:
   - Fixtures (by ID)
   - Other equipment (with port number)
@@ -77,12 +83,14 @@ This is the **first alpha release** of ShowStack for external testing and feedba
 - **Enhanced Port Editor** with link type persistence
 
 #### Sprint 4: PDF Export Polish ✅
+
 - **Color Mode Toggle** for all PDF exports (Color vs Grayscale)
 - **Default: Color** printing enabled (user-configurable)
 - **Grayscale Filter** applied via CSS for B&W mode
 - **Consistent Across All Exports** - Paperwork, Shop Orders, Labels
 
 ### UI/UX Improvements ✅
+
 - **Settings Dialog Modal** - Click-outside-to-close, no navigation disruption
 - **Power Management Page** - Standalone page with tabs (Racks, Configuration, Summary)
 - **Equipment Manager "Power" Tab** - Rack listing table with color-coded badges
@@ -96,6 +104,7 @@ This is the **first alpha release** of ShowStack for external testing and feedba
 We're looking for feedback on:
 
 ### Critical Functionality
+
 1. **Label Designer**
    - Create labels using the visual grid editor
    - Test all 5 Avery templates (5160, 5163, 5164, 8160, 5167)
@@ -120,6 +129,7 @@ We're looking for feedback on:
    - Test Color Cut Report with gel database
 
 ### General Testing
+
 - Overall app stability and performance
 - UI responsiveness and clarity
 - Feature discoverability
@@ -131,9 +141,11 @@ We're looking for feedback on:
 ## 📥 Installation Instructions (macOS)
 
 ### Download
+
 1. Download **ShowStack-0.1.0-alpha-arm64.dmg** from the Assets section below
 
 ### Install
+
 2. **Open the DMG file** - Double-click the downloaded DMG
 3. **Drag to Applications** - Drag "ShowStack" to the Applications folder icon
 
@@ -146,13 +158,16 @@ If macOS shows: `"ShowStack" is damaged and can't be opened. You should move it 
 **DO NOT move it to trash!** This is Gatekeeper blocking unsigned apps. Use one of these methods:
 
 #### Method 1: Right-Click to Open (Recommended)
+
 1. Open **Finder** → **Applications**
 2. **Right-click** (or Control+click) on "ShowStack"
 3. Select **"Open"** from the context menu
 4. Click **"Open"** in the security dialog that appears
 
 #### Method 2: Remove Quarantine (Alternative)
+
 Open Terminal and run:
+
 ```bash
 xattr -cr /Applications/ShowStack.app
 ```
@@ -160,6 +175,7 @@ xattr -cr /Applications/ShowStack.app
 Then launch the app normally.
 
 ### Why This Step?
+
 This alpha build is **not code-signed** with an Apple Developer certificate ($99/year). macOS Gatekeeper blocks unsigned apps by default to protect users. The "damaged" message is misleading - the app is fine, just unsigned.
 
 **Only needed once** - After the first launch, the app works normally (double-click).
@@ -171,6 +187,7 @@ This alpha build is **not code-signed** with an Apple Developer certificate ($99
 This is an **alpha release** - please expect:
 
 ### Not Yet Implemented
+
 - ❌ Auto-updates (manual download required for future versions)
 - ❌ Phase 5: Polish & UX features (keyboard shortcuts, inline editing, shadows)
 - ❌ Code signing (requires Apple Developer certificate)
@@ -179,12 +196,14 @@ This is an **alpha release** - please expect:
 - ❌ Console integration (ETC Eos, grandMA - planned for beta)
 
 ### Expected Rough Edges
+
 - Some UI polish items remain (Phase 5 scope)
 - Error messages may not be comprehensive
 - Performance optimizations pending
 - Documentation is developer-focused (user manual coming later)
 
 ### Platform Limitations
+
 - **Multi-platform support:** macOS (ARM64), Windows (x64), Linux (x64)
 - macOS tested on 12.0+ (Monterey and later)
 - Windows/Linux builds are unsigned (similar Gatekeeper-style warnings may appear)
@@ -219,6 +238,7 @@ ls -la ~/Library/Application\ Support/ | grep -i showstack
 We'd love to hear from you! Please report:
 
 ### Bug Reports
+
 - File issues at: https://github.com/jkarp7/showstack/issues
 - Include:
   - Steps to reproduce
@@ -228,10 +248,12 @@ We'd love to hear from you! Please report:
   - Any error messages
 
 ### Feature Requests & Suggestions
+
 - Use GitHub Discussions: https://github.com/jkarp7/showstack/discussions
 - Or contact directly: [your email/contact method]
 
 ### What We're Looking For
+
 - ✅ Critical bugs or crashes
 - ✅ UX friction points
 - ✅ Missing features that block workflows
@@ -244,6 +266,7 @@ We'd love to hear from you! Please report:
 ## 📊 Technical Details
 
 ### Build Information
+
 - **Version:** 0.1.0-alpha
 - **Build Date:** January 3, 2026
 - **Branch:** `develop`
@@ -253,6 +276,7 @@ We'd love to hear from you! Please report:
 - **Node.js:** 20.0.0+
 
 ### Database
+
 - **Architecture:** Two-database system (SQLite via sql.js)
   - App Database: `showstack-app.db` (licenses, settings, templates)
   - Project Database: `showstack-projects.db` (all project data)
@@ -260,6 +284,7 @@ We'd love to hear from you! Please report:
 - **Migrations:** Automatic on startup
 
 ### File Sizes
+
 - **DMG:** ~180 MB (recommended for distribution)
 - **ZIP:** ~180 MB (alternative format)
 - **Installed Size:** ~250 MB
@@ -269,6 +294,7 @@ We'd love to hear from you! Please report:
 ## 🚀 What's Next
 
 ### Phase 5: Polish & UX (Upcoming)
+
 - Keyboard shortcuts (Cmd+S, Cmd+Z, Cmd+D, arrow keys)
 - Inline editing for text elements
 - Visual effects (shadows, gradients, advanced borders)
@@ -278,6 +304,7 @@ We'd love to hear from you! Please report:
 - **Timeline:** 1 week development + testing
 
 ### Future Releases
+
 - **v0.1.0-alpha-2:** Phase 5 completion + tester feedback fixes
 - **v0.1.0-beta:** Lightwright parity features (MVR export, console integration)
 - **v1.0.0:** Public release with full feature set
@@ -304,4 +331,4 @@ This alpha release represents **thousands of hours** of development focused on c
 
 **Questions?** Open an issue or start a discussion on GitHub!
 
-🤖 *Built with [Claude Code](https://claude.com/claude-code)*
+🤖 _Built with [Claude Code](https://claude.com/claude-code)_

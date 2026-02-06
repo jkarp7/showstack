@@ -21,14 +21,16 @@ export function registerLicenseHandlers(): void {
     try {
       return await errorHandler.executeWithRetry(
         async () => licenseService.getLicenseStatus(),
-        'license:getStatus'
+        'license:getStatus',
       );
     } catch (error) {
       console.error('Failed to get license status:', {
         operation: 'license:getStatus',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
-      throw new Error(`Unable to load license status: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to load license status: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
@@ -39,14 +41,16 @@ export function registerLicenseHandlers(): void {
     try {
       return await errorHandler.executeWithRetry(
         async () => licenseService.getCurrentLicense(),
-        'license:getCurrent'
+        'license:getCurrent',
       );
     } catch (error) {
       console.error('Failed to get current license:', {
         operation: 'license:getCurrent',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
-      throw new Error(`Unable to load license: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to load license: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
@@ -57,15 +61,17 @@ export function registerLicenseHandlers(): void {
     try {
       return await errorHandler.executeWithRetry(
         async () => licenseService.hasModuleAccess(module),
-        'license:hasModule'
+        'license:hasModule',
       );
     } catch (error) {
       console.error('Failed to check module access:', {
         operation: 'license:hasModule',
         module,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
-      throw new Error(`Unable to check module access: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to check module access: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
@@ -76,15 +82,17 @@ export function registerLicenseHandlers(): void {
     try {
       return await errorHandler.executeWithRetry(
         async () => licenseService.getModuleFeatures(module),
-        'license:getModuleFeatures'
+        'license:getModuleFeatures',
       );
     } catch (error) {
       console.error('Failed to get module features:', {
         operation: 'license:getModuleFeatures',
         module,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
-      throw new Error(`Unable to load module features: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to load module features: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
@@ -95,14 +103,16 @@ export function registerLicenseHandlers(): void {
     try {
       return await errorHandler.executeWithRetry(
         async () => licenseService.getAvailableModules(),
-        'license:getAvailableModules'
+        'license:getAvailableModules',
       );
     } catch (error) {
       console.error('Failed to get available modules:', {
         operation: 'license:getAvailableModules',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
-      throw new Error(`Unable to load available modules: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to load available modules: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
@@ -113,69 +123,75 @@ export function registerLicenseHandlers(): void {
     try {
       return await errorHandler.executeWithRetry(
         async () => licenseService.canUseFeature(module, feature),
-        'license:canUseFeature'
+        'license:canUseFeature',
       );
     } catch (error) {
       console.error('Failed to check feature access:', {
         operation: 'license:canUseFeature',
         module,
         feature,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
-      throw new Error(`Unable to check feature access: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to check feature access: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
   /**
    * Activate a new license
    */
-  ipcMain.handle('license:activate', async (_, licenseKey: string, email: string, modules: ShowStackModule[]) => {
-    try {
-      // Validation
-      if (!licenseKey || licenseKey.trim().length === 0) {
-        throw new ValidationError('License key is required', 'licenseKey', licenseKey);
-      }
-      if (!email || email.trim().length === 0) {
-        throw new ValidationError('Email is required', 'email', email);
-      }
+  ipcMain.handle(
+    'license:activate',
+    async (_, licenseKey: string, email: string, modules: ShowStackModule[]) => {
+      try {
+        // Validation
+        if (!licenseKey || licenseKey.trim().length === 0) {
+          throw new ValidationError('License key is required', 'licenseKey', licenseKey);
+        }
+        if (!email || email.trim().length === 0) {
+          throw new ValidationError('Email is required', 'email', email);
+        }
 
-      return await errorHandler.executeWithRetry(
-        async () => licenseService.activateLicense(licenseKey, email, modules),
-        'license:activate'
-      );
-    } catch (error) {
-      console.error('Failed to activate license:', {
-        operation: 'license:activate',
-        email,
-        error: error instanceof Error ? error.message : error
-      });
+        return await errorHandler.executeWithRetry(
+          async () => licenseService.activateLicense(licenseKey, email, modules),
+          'license:activate',
+        );
+      } catch (error) {
+        console.error('Failed to activate license:', {
+          operation: 'license:activate',
+          email,
+          error: error instanceof Error ? error.message : error,
+        });
 
-      if (error instanceof ValidationError) {
-        throw new Error(error.toUserMessage());
+        if (error instanceof ValidationError) {
+          throw new Error(error.toUserMessage());
+        }
+        throw new Error(
+          `Unable to activate license: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
       }
-      throw new Error(`Unable to activate license: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  });
+    },
+  );
 
   /**
    * Verify license online (manual trigger)
    */
   ipcMain.handle('license:verifyOnline', async () => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => {
-          const license = licenseService.getCurrentLicense();
-          if (!license) return false;
-          return await licenseService.verifyLicenseOnline(license.licenseKey);
-        },
-        'license:verifyOnline'
-      );
+      return await errorHandler.executeWithRetry(async () => {
+        const license = licenseService.getCurrentLicense();
+        if (!license) return false;
+        return await licenseService.verifyLicenseOnline(license.licenseKey);
+      }, 'license:verifyOnline');
     } catch (error) {
       console.error('Failed to verify license online:', {
         operation: 'license:verifyOnline',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
-      throw new Error(`Unable to verify license: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to verify license: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
@@ -190,14 +206,16 @@ export function registerLicenseHandlers(): void {
     try {
       return await errorHandler.executeWithRetry(
         async () => settingsService.getSettings(),
-        'settings:get'
+        'settings:get',
       );
     } catch (error) {
       console.error('Failed to get settings:', {
         operation: 'settings:get',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
-      throw new Error(`Unable to load settings: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to load settings: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
@@ -208,15 +226,17 @@ export function registerLicenseHandlers(): void {
     try {
       await errorHandler.executeWithRetry(
         async () => settingsService.saveSettings(settings),
-        'settings:save'
+        'settings:save',
       );
       return { success: true };
     } catch (error) {
       console.error('Failed to save settings:', {
         operation: 'settings:save',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
-      throw new Error(`Unable to save settings: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to save settings: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
@@ -227,15 +247,17 @@ export function registerLicenseHandlers(): void {
     try {
       await errorHandler.executeWithRetry(
         async () => settingsService.updateSettings(updates),
-        'settings:update'
+        'settings:update',
       );
       return { success: true };
     } catch (error) {
       console.error('Failed to update settings:', {
         operation: 'settings:update',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
-      throw new Error(`Unable to update settings: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to update settings: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
@@ -246,15 +268,17 @@ export function registerLicenseHandlers(): void {
     try {
       await errorHandler.executeWithRetry(
         async () => settingsService.resetSettings(),
-        'settings:reset'
+        'settings:reset',
       );
       return { success: true };
     } catch (error) {
       console.error('Failed to reset settings:', {
         operation: 'settings:reset',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
-      throw new Error(`Unable to reset settings: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to reset settings: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 }

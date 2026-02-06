@@ -40,9 +40,9 @@ class ShopOrderFileService {
       title: 'Open Shop Order',
       filters: [
         { name: 'ShowStack Files', extensions: ['ss', 'ssd'] },
-        { name: 'All Files', extensions: ['*'] }
+        { name: 'All Files', extensions: ['*'] },
       ],
-      properties: ['openFile']
+      properties: ['openFile'],
     });
 
     if (result.canceled || result.filePaths.length === 0) {
@@ -61,8 +61,8 @@ class ShopOrderFileService {
       defaultPath: defaultName || 'Shop Order',
       filters: [
         { name: 'ShowStack Files', extensions: ['ss'] },
-        { name: 'All Files', extensions: ['*'] }
-      ]
+        { name: 'All Files', extensions: ['*'] },
+      ],
     });
 
     if (result.canceled || !result.filePath) {
@@ -109,7 +109,9 @@ class ShopOrderFileService {
       writeFileSync(filePath, jsonData, 'utf-8');
     } catch (error) {
       console.error('Error exporting prep project:', error);
-      throw new Error(`Failed to export project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to export project: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -126,12 +128,17 @@ class ShopOrderFileService {
       if (!data.project || !data.version) {
         return {
           success: false,
-          error: 'Invalid file format'
+          error: 'Invalid file format',
         };
       }
 
       // Create new project (with new ID)
-      const { id: _oldId, created_at: _created, updated_at: _updated, ...projectData } = data.project;
+      const {
+        id: _oldId,
+        created_at: _created,
+        updated_at: _updated,
+        ...projectData
+      } = data.project;
       const newProject = createShopOrderProject({
         ...projectData,
         production_name: projectData.production_name + ' (Imported)',
@@ -209,7 +216,7 @@ class ShopOrderFileService {
       console.error('Error importing prep project:', error);
       return {
         success: false,
-        error: `Failed to import project: ${error instanceof Error ? error.message : 'Unknown error'}`
+        error: `Failed to import project: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }

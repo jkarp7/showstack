@@ -14,8 +14,8 @@ export function createWindow(routePath: string = '/'): BrowserWindow {
       preload: join(__dirname, '../preload/index.mjs'),
       sandbox: false,
       nodeIntegration: false,
-      contextIsolation: true
-    }
+      contextIsolation: true,
+    },
   });
 
   // Initialize menu for this window
@@ -47,7 +47,7 @@ export function createWindow(routePath: string = '/'): BrowserWindow {
     // Get isDirty state from renderer via executeJavaScript
     try {
       const isDirty = await window.webContents.executeJavaScript(
-        'window.api && window.__fileStore ? window.__fileStore.isDirty : false'
+        'window.api && window.__fileStore ? window.__fileStore.isDirty : false',
       );
 
       if (isDirty) {
@@ -60,13 +60,13 @@ export function createWindow(routePath: string = '/'): BrowserWindow {
           cancelId: 2,
           title: 'Unsaved Changes',
           message: 'Do you want to save changes before closing?',
-          detail: 'Your changes will be lost if you don\'t save them.'
+          detail: "Your changes will be lost if you don't save them.",
         });
 
         if (response.response === 0) {
           // Save
           const saved = await window.webContents.executeJavaScript(
-            'window.api && window.__fileStore ? window.__fileStore.saveFile() : false'
+            'window.api && window.__fileStore ? window.__fileStore.saveFile() : false',
           );
           if (saved) {
             window.destroy();

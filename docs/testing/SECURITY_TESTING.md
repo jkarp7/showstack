@@ -20,6 +20,7 @@ This guide covers testing security-critical code in ShowStack, including file va
 Security testing verifies that defensive mechanisms work correctly and cannot be bypassed. This is critical for Electron apps where the main process has system-level access.
 
 **Key Areas:**
+
 - File upload validation (MIME types, size limits, path traversal)
 - Error message sanitization (preventing information disclosure)
 - IPC boundary validation (main ↔ renderer)
@@ -88,6 +89,7 @@ return { fileName: 'secret.png', data: base64 };
 ### Test Structure
 
 Security tests should cover:
+
 1. **Valid inputs** - Ensure legitimate use cases work
 2. **Boundary conditions** - Test limits (size, length, etc.)
 3. **Attack scenarios** - Verify malicious inputs are rejected
@@ -111,13 +113,11 @@ describe('Image Upload Security', () => {
 
   describe('Attack Scenarios', () => {
     it('should reject path traversal attempts', async () => {
-      await expect(readImage('../../etc/passwd'))
-        .rejects.toThrow();
+      await expect(readImage('../../etc/passwd')).rejects.toThrow();
     });
 
     it('should reject null byte injection', async () => {
-      await expect(readImage('image.png\x00.exe'))
-        .rejects.toThrow();
+      await expect(readImage('image.png\x00.exe')).rejects.toThrow();
     });
   });
 
@@ -143,15 +143,16 @@ describe('Image Upload Security', () => {
 **Attack:** `../../etc/passwd`
 
 **Test Pattern:**
+
 ```typescript
 it('should reject path traversal attempts', async () => {
-  await expect(readImageAsDataUrl('../../etc/passwd'))
-    .rejects.toThrow(InvalidPathError);
+  await expect(readImageAsDataUrl('../../etc/passwd')).rejects.toThrow(InvalidPathError);
 });
 
 it('should reject encoded path traversal', async () => {
-  await expect(readImageAsDataUrl('%2e%2e%2f%2e%2e%2fetc%2fpasswd'))
-    .rejects.toThrow(InvalidPathError);
+  await expect(readImageAsDataUrl('%2e%2e%2f%2e%2e%2fetc%2fpasswd')).rejects.toThrow(
+    InvalidPathError,
+  );
 });
 ```
 
@@ -160,10 +161,10 @@ it('should reject encoded path traversal', async () => {
 **Attack:** `image.png\x00.exe` (tricks extension checks)
 
 **Test Pattern:**
+
 ```typescript
 it('should reject null byte injection', async () => {
-  await expect(readImageAsDataUrl('image.png\x00.exe'))
-    .rejects.toThrow(NullByteError);
+  await expect(readImageAsDataUrl('image.png\x00.exe')).rejects.toThrow(NullByteError);
 });
 ```
 
@@ -172,17 +173,17 @@ it('should reject null byte injection', async () => {
 **Attack:** Rename `virus.exe` to `image.png`
 
 **Test Pattern:**
+
 ```typescript
 it('should detect MIME type by content, not extension', async () => {
-  const exeData = Buffer.from([0x4D, 0x5A]); // MZ header
+  const exeData = Buffer.from([0x4d, 0x5a]); // MZ header
   vi.mocked(fs.readFile).mockResolvedValue(exeData);
   vi.mocked(fileTypeFromBuffer).mockResolvedValue({
     ext: 'exe',
-    mime: 'application/x-msdownload'
+    mime: 'application/x-msdownload',
   });
 
-  await expect(readImageAsDataUrl('/fake/image.png'))
-    .rejects.toThrow(InvalidFileTypeError);
+  await expect(readImageAsDataUrl('/fake/image.png')).rejects.toThrow(InvalidFileTypeError);
 });
 ```
 
@@ -191,13 +192,13 @@ it('should detect MIME type by content, not extension', async () => {
 **Attack:** Upload 10GB file to exhaust memory/disk
 
 **Test Pattern:**
+
 ```typescript
 it('should reject files over size limit', async () => {
   const largeBuffer = Buffer.alloc(10 * 1024 * 1024); // 10MB
   vi.mocked(fs.readFile).mockResolvedValue(largeBuffer);
 
-  await expect(readImageAsDataUrl('/large/file.png'))
-    .rejects.toThrow(FileSizeExceededError);
+  await expect(readImageAsDataUrl('/large/file.png')).rejects.toThrow(FileSizeExceededError);
 });
 ```
 
@@ -206,6 +207,7 @@ it('should reject files over size limit', async () => {
 **Attack:** Replace file with symlink after validation
 
 **Test Pattern:**
+
 ```typescript
 it('should reject symlink to sensitive file', async () => {
   // Simulate symlink to /etc/passwd
@@ -213,8 +215,7 @@ it('should reject symlink to sensitive file', async () => {
   vi.mocked(fs.readFile).mockResolvedValue(passwdContent);
   vi.mocked(fileTypeFromBuffer).mockResolvedValue(undefined);
 
-  await expect(readImageAsDataUrl('/malicious/symlink.png'))
-    .rejects.toThrow(InvalidFileTypeError);
+  await expect(readImageAsDataUrl('/malicious/symlink.png')).rejects.toThrow(InvalidFileTypeError);
 });
 ```
 
@@ -222,13 +223,14 @@ it('should reject symlink to sensitive file', async () => {
 
 ```typescript
 // ❌ BAD: TOCTOU vulnerability
-if (fs.existsSync(path)) {  // Check
-  const data = fs.readFile(path);  // Use (file could change here!)
+if (fs.existsSync(path)) {
+  // Check
+  const data = fs.readFile(path); // Use (file could change here!)
 }
 
 // ✅ GOOD: Atomic operation
 try {
-  const data = await fs.readFile(path);  // Check + Use in one operation
+  const data = await fs.readFile(path); // Check + Use in one operation
 } catch (error) {
   if (error.code === 'ENOENT') {
     throw new FileNotFoundError(path);
@@ -241,17 +243,17 @@ try {
 **Attack:** SVG files can contain JavaScript
 
 **Test Pattern:**
+
 ```typescript
 it('should reject SVG files (XSS prevention)', async () => {
   const svgData = Buffer.from('<svg><script>alert("XSS")</script></svg>');
   vi.mocked(fs.readFile).mockResolvedValue(svgData);
   vi.mocked(fileTypeFromBuffer).mockResolvedValue({
     ext: 'svg',
-    mime: 'image/svg+xml'
+    mime: 'image/svg+xml',
   });
 
-  await expect(readImageAsDataUrl('/malicious/xss.svg'))
-    .rejects.toThrow(InvalidFileTypeError);
+  await expect(readImageAsDataUrl('/malicious/xss.svg')).rejects.toThrow(InvalidFileTypeError);
 });
 ```
 
@@ -260,6 +262,7 @@ it('should reject SVG files (XSS prevention)', async () => {
 **Attack:** Trigger errors that expose system paths
 
 **Test Pattern:**
+
 ```typescript
 it('should not expose system paths in errors', async () => {
   const error = new Error('Failed to read /Users/admin/.ssh/id_rsa');
@@ -284,10 +287,11 @@ it('should sanitize Windows system paths', async () => {
 **Attack:** Race condition between validation and use
 
 **Test Pattern:**
+
 ```typescript
 it('should handle concurrent file reads safely', async () => {
   const promises = Array.from({ length: 10 }, (_, i) =>
-    readImageAsDataUrl(`/path/to/image${i}.png`)
+    readImageAsDataUrl(`/path/to/image${i}.png`),
   );
 
   await expect(Promise.all(promises)).resolves.toBeDefined();
@@ -309,18 +313,14 @@ describe('Attack Payload Testing', () => {
       '../../etc/passwd',
       '..\\..\\Windows\\System32\\config\\sam',
       '....//....//etc/passwd',
-      '%2e%2e%2f%2e%2e%2fetc%2fpasswd'
+      '%2e%2e%2f%2e%2e%2fetc%2fpasswd',
     ],
-    nullByte: [
-      'image.png\x00.exe',
-      'file\x00.sh',
-      'doc.pdf\x00.js'
-    ],
+    nullByte: ['image.png\x00.exe', 'file\x00.sh', 'doc.pdf\x00.js'],
     xss: [
       '<svg><script>alert("XSS")</script></svg>',
       '<img src=x onerror=alert(1)>',
-      'javascript:alert(1)'
-    ]
+      'javascript:alert(1)',
+    ],
   };
 
   it('should reject all path traversal variants', async () => {
@@ -384,7 +384,7 @@ describe('Error Message Security', () => {
     /C:\\Users\\/,
     /\.ssh/,
     /ENOENT/,
-    /stack trace/i
+    /stack trace/i,
   ];
 
   it('should not contain sensitive patterns', async () => {
@@ -434,18 +434,21 @@ ipcMain.handle('file:readImageAsDataUrl', async (_, imagePath: string) => {
 **File:** `src/main/utils/imageValidation.ts:45-71`
 
 **Before (Vulnerable):**
+
 ```typescript
-if (!fs.existsSync(imagePath)) {  // TOCTOU: File could change here
+if (!fs.existsSync(imagePath)) {
+  // TOCTOU: File could change here
   throw new FileNotFoundError(imagePath);
 }
 const buffer = fs.readFileSync(imagePath);
 ```
 
 **After (Secure):**
+
 ```typescript
 let buffer: Buffer;
 try {
-  buffer = await fs.readFile(imagePath);  // Atomic read
+  buffer = await fs.readFile(imagePath); // Atomic read
 } catch (error) {
   if (error.code === 'ENOENT') {
     throw new FileNotFoundError(imagePath);
@@ -463,6 +466,7 @@ try {
 ### Pitfall 1: Testing Happy Path Only
 
 ❌ **BAD:**
+
 ```typescript
 it('should process images', async () => {
   const result = await readImage('/valid/image.png');
@@ -471,18 +475,28 @@ it('should process images', async () => {
 ```
 
 ✅ **GOOD:**
+
 ```typescript
 describe('Image Processing', () => {
-  it('should process valid images', async () => { /* ... */ });
-  it('should reject invalid MIME types', async () => { /* ... */ });
-  it('should reject oversized files', async () => { /* ... */ });
-  it('should reject path traversal', async () => { /* ... */ });
+  it('should process valid images', async () => {
+    /* ... */
+  });
+  it('should reject invalid MIME types', async () => {
+    /* ... */
+  });
+  it('should reject oversized files', async () => {
+    /* ... */
+  });
+  it('should reject path traversal', async () => {
+    /* ... */
+  });
 });
 ```
 
 ### Pitfall 2: Insufficient Error Testing
 
 ❌ **BAD:**
+
 ```typescript
 it('should throw error', async () => {
   await expect(readImage('/invalid')).rejects.toThrow();
@@ -490,6 +504,7 @@ it('should throw error', async () => {
 ```
 
 ✅ **GOOD:**
+
 ```typescript
 it('should throw error without exposing paths', async () => {
   try {
@@ -505,14 +520,16 @@ it('should throw error without exposing paths', async () => {
 ### Pitfall 3: Mocking Security Mechanisms
 
 ❌ **BAD:**
+
 ```typescript
 // Mocking validation defeats the purpose
 vi.mock('../validation', () => ({
-  validatePath: vi.fn(() => true)  // Always passes!
+  validatePath: vi.fn(() => true), // Always passes!
 }));
 ```
 
 ✅ **GOOD:**
+
 ```typescript
 // Test real validation logic
 import { validatePath } from '../validation';
@@ -525,6 +542,7 @@ it('should reject invalid paths', async () => {
 ### Pitfall 4: Not Testing Error Boundaries
 
 ❌ **BAD:**
+
 ```typescript
 // Test stops at function boundary
 it('should validate file', async () => {
@@ -533,6 +551,7 @@ it('should validate file', async () => {
 ```
 
 ✅ **GOOD:**
+
 ```typescript
 // Test full IPC flow
 it('should validate file through IPC boundary', async () => {
@@ -548,6 +567,7 @@ it('should validate file through IPC boundary', async () => {
 Use this checklist when testing security-critical code:
 
 ### File Upload Validation
+
 - [ ] Valid file types accepted (PNG, JPEG, GIF, WebP)
 - [ ] Invalid file types rejected (SVG, EXE, TIFF)
 - [ ] MIME type validated via magic numbers, not extension
@@ -558,6 +578,7 @@ Use this checklist when testing security-critical code:
 - [ ] Broken symlinks handled gracefully
 
 ### Error Handling
+
 - [ ] Errors don't expose file paths
 - [ ] Errors don't expose system details
 - [ ] Stack traces removed before sending to renderer
@@ -568,6 +589,7 @@ Use this checklist when testing security-critical code:
 - [ ] Unix paths sanitized
 
 ### IPC Security
+
 - [ ] All inputs from renderer validated
 - [ ] Errors sanitized at IPC boundary
 - [ ] Sensitive data not sent to renderer
@@ -575,12 +597,14 @@ Use this checklist when testing security-critical code:
 - [ ] Only necessary data exposed
 
 ### Race Conditions
+
 - [ ] No TOCTOU vulnerabilities (check-then-use)
 - [ ] File operations are atomic
 - [ ] Concurrent operations handled safely
 - [ ] No shared mutable state
 
 ### Performance & DoS Prevention
+
 - [ ] File size limits prevent memory exhaustion
 - [ ] Large datasets tested (performance tests)
 - [ ] Concurrent operations tested
@@ -613,6 +637,7 @@ Use this checklist when testing security-critical code:
 ## Maintenance
 
 This document should be updated when:
+
 - New security vulnerabilities are discovered
 - New attack vectors are identified
 - Security mechanisms are added or modified

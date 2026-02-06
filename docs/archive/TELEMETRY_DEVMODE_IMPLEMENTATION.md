@@ -9,6 +9,7 @@
 ## Overview
 
 This document outlines the implementation plan for two key features:
+
 1. Developer Mode - Advanced debugging and development tools
 2. Telemetry System - Usage analytics and error tracking
 
@@ -17,9 +18,11 @@ This document outlines the implementation plan for two key features:
 ## 1. Developer Mode Implementation
 
 ### Goal
+
 Provide developers and advanced users with debugging tools and experimental features.
 
 ### Current State
+
 - ✅ Toggle exists in Settings > Advanced > Developer Mode
 - ✅ Stored in `settingsStore.advanced.developerMode`
 - ⚠️ No features currently gated behind this flag
@@ -28,7 +31,9 @@ Provide developers and advanced users with debugging tools and experimental feat
 ### Implementation Tasks
 
 #### Task 1.1: Create useDeveloperMode Hook
+
 **File:** `src/renderer/src/hooks/useDeveloperMode.ts`
+
 ```typescript
 import { useSettingsStore } from '../store/settingsStore';
 
@@ -38,7 +43,9 @@ export function useDeveloperMode() {
 ```
 
 #### Task 1.2: Connect Electron DevTools
+
 **File:** `src/main/index.ts`
+
 - Listen for developer mode changes via IPC
 - Open/close DevTools based on setting
 - Add keyboard shortcut (F12) when enabled
@@ -46,12 +53,14 @@ export function useDeveloperMode() {
 #### Task 1.3: Add Developer Features
 
 **Component-level features:**
+
 - State inspector panels
 - Performance metrics display
 - Debug logging panels
 - Feature flag toggles
 
 **Locations to add developer tools:**
+
 1. **Equipment Manager** (`src/renderer/src/pages/modules/Manager.tsx`)
    - Show render performance metrics
    - Display current fixture data structure
@@ -68,6 +77,7 @@ export function useDeveloperMode() {
    - Settings store viewer
 
 **Example Implementation:**
+
 ```tsx
 import { useDeveloperMode } from '../hooks/useDeveloperMode';
 
@@ -93,9 +103,11 @@ function EquipmentManager() {
 ```
 
 #### Task 1.4: Feature Flags System
+
 Create a feature flags system for testing unreleased features:
 
 **File:** `src/renderer/src/config/featureFlags.ts`
+
 ```typescript
 export const featureFlags = {
   collaboration: false,
@@ -105,7 +117,7 @@ export const featureFlags = {
   enableAll: () => {
     const isDev = useSettingsStore.getState().advanced.developerMode;
     return isDev;
-  }
+  },
 };
 ```
 
@@ -114,9 +126,11 @@ export const featureFlags = {
 ## 2. Telemetry System Implementation
 
 ### Goal
+
 Collect anonymous usage data to inform product decisions and identify bugs.
 
 ### Privacy-First Approach
+
 - ✅ Opt-in only (not enabled by default)
 - ✅ Anonymous (no personal data)
 - ✅ Transparent about what's collected
@@ -126,9 +140,11 @@ Collect anonymous usage data to inform product decisions and identify bugs.
 ### Implementation Tasks
 
 #### Task 2.1: Add Privacy Settings
+
 **File:** `src/renderer/src/store/settingsStore.ts`
 
 Add new privacy section:
+
 ```typescript
 export interface PrivacySettings {
   telemetryEnabled: boolean;
@@ -147,6 +163,7 @@ privacy: {
 ```
 
 #### Task 2.2: Create Telemetry Service
+
 **File:** `src/renderer/src/services/telemetry.ts`
 
 ```typescript
@@ -164,11 +181,11 @@ class TelemetryService {
   private batchSize = 50;
   private flushInterval = 60000; // 1 minute
 
-  async track(event: string, properties?: Record<string, any>): Promise<void>
-  async identify(traits: Record<string, any>): Promise<void>
-  async flush(): Promise<void>
-  private storeLocal(event: TelemetryEvent): Promise<void>
-  private syncToCloud(): Promise<void>
+  async track(event: string, properties?: Record<string, any>): Promise<void>;
+  async identify(traits: Record<string, any>): Promise<void>;
+  async flush(): Promise<void>;
+  private storeLocal(event: TelemetryEvent): Promise<void>;
+  private syncToCloud(): Promise<void>;
 }
 
 export const telemetry = new TelemetryService();
@@ -177,6 +194,7 @@ export const telemetry = new TelemetryService();
 #### Task 2.3: Choose Backend Solution
 
 **Option A: PostHog (Recommended)**
+
 - Free tier: 1M events/month
 - Self-hostable via Docker
 - Built-in dashboards and analytics
@@ -184,27 +202,31 @@ export const telemetry = new TelemetryService();
 - Effort: ~2 hours to integrate
 
 **Option B: Custom Backend**
+
 - Node.js + PostgreSQL
 - Full control over data
 - Requires maintenance
 - Effort: ~1-2 days to build
 
 **Option C: Hybrid**
+
 - Local SQLite storage
 - Optional cloud sync to PostHog
 - Best of both worlds
 - Effort: ~3-4 hours
 
 #### Task 2.4: Add Consent Dialog
+
 **File:** `src/renderer/src/components/ConsentDialog.tsx`
 
 Show on first launch:
+
 ```tsx
 <ConsentDialog>
   <h3>Help Improve ShowStack</h3>
   <p>
-    We'd like to collect anonymous usage data to understand which features
-    are most valuable and identify bugs.
+    We'd like to collect anonymous usage data to understand which features are most valuable and
+    identify bugs.
   </p>
 
   <h4>What we collect:</h4>
@@ -247,12 +269,12 @@ telemetry.track('module_closed', { module: 'production', duration: 1200 });
 // Feature usage
 telemetry.track('feature_used', {
   feature: 'bulk_edit',
-  itemCount: 50
+  itemCount: 50,
 });
 telemetry.track('export_completed', {
   format: 'pdf',
   pageCount: 10,
-  duration: 2300
+  duration: 2300,
 });
 
 // Errors
@@ -260,29 +282,30 @@ telemetry.track('error_occurred', {
   type: 'validation',
   message: 'Invalid channel number',
   component: 'FixtureEditor',
-  severity: 'warning'
+  severity: 'warning',
 });
 
 // Performance
 telemetry.track('performance_metric', {
   metric: 'project_load_time',
   duration: 1200,
-  fixtureCount: 500
+  fixtureCount: 500,
 });
 
 // User flows
 telemetry.track('project_created', {
   template: 'touring_show',
-  source: 'new_project_dialog'
+  source: 'new_project_dialog',
 });
 telemetry.track('settings_changed', {
   category: 'workspace',
   setting: 'units',
-  value: 'metric'
+  value: 'metric',
 });
 ```
 
 **Locations to add tracking:**
+
 1. App.tsx - App lifecycle events
 2. Module pages - Module usage
 3. Feature components - Feature usage
@@ -290,9 +313,11 @@ telemetry.track('settings_changed', {
 5. Settings - Configuration changes
 
 #### Task 2.6: Create Analytics Dashboard (Admin Panel)
+
 **File:** `src/renderer/src/pages/admin/Analytics.tsx`
 
 Dashboard sections:
+
 - Daily Active Users (line chart)
 - Most Used Features (bar chart)
 - Error Rate by Module (table)
@@ -301,9 +326,11 @@ Dashboard sections:
 - Export Data (CSV/JSON download)
 
 #### Task 2.7: Add Privacy Settings UI
+
 **File:** `src/renderer/src/components/settings/Privacy.tsx`
 
 Settings panel:
+
 - Telemetry toggle
 - Crash reports toggle
 - View anonymous ID
@@ -316,6 +343,7 @@ Settings panel:
 ## Implementation Order
 
 ### Phase 1: Foundation (Session 1)
+
 1. Create `useDeveloperMode` hook
 2. Add Privacy section to settings store
 3. Create Telemetry service with local storage only
@@ -323,6 +351,7 @@ Settings panel:
 5. Implement basic events (app lifecycle, module usage)
 
 ### Phase 2: Integration (Session 2)
+
 6. Connect Electron DevTools to developer mode
 7. Add developer panels to key components
 8. Set up PostHog (or custom backend)
@@ -330,6 +359,7 @@ Settings panel:
 10. Test end-to-end flow
 
 ### Phase 3: Analytics (Session 3)
+
 11. Build analytics dashboard in admin panel
 12. Add advanced events (performance, user flows)
 13. Create feature flags system
@@ -341,12 +371,14 @@ Settings panel:
 ## Technical Decisions Needed
 
 ### Before Starting:
+
 1. **Backend Choice:** PostHog Cloud, Self-hosted PostHog, or Custom?
 2. **Storage:** SQLite for local events, or IndexedDB?
 3. **Batch Size:** How many events before flushing to server?
 4. **Retention:** How long to keep local telemetry data?
 
 ### During Implementation:
+
 5. **Error Tracking:** Also integrate Sentry for crashes?
 6. **Feature Flags:** Simple boolean or advanced percentage rollouts?
 7. **Performance:** Track all renders or sample?
@@ -387,12 +419,14 @@ Settings panel:
 ## Success Metrics
 
 **Developer Mode:**
+
 - [ ] At least 3 developer features implemented
 - [ ] DevTools integration working
 - [ ] Feature flags system operational
 - [ ] No performance impact when disabled
 
 **Telemetry:**
+
 - [ ] Opt-in rate > 30% (if prompted well)
 - [ ] Event collection working reliably
 - [ ] Dashboard showing actionable insights

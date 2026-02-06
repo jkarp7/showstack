@@ -43,7 +43,10 @@ interface ShopOrderStore {
   }) => Promise<ShopOrderProject | undefined>;
   updateProject: (id: string, updates: Partial<ShopOrderProject>) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
-  syncFromParent: (projectId: string, parentProjectId: string) => Promise<{
+  syncFromParent: (
+    projectId: string,
+    parentProjectId: string,
+  ) => Promise<{
     success: boolean;
     syncedFields?: string[];
     message?: string;
@@ -237,7 +240,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       console.log('📦 API returned updated project:', updated);
 
       // Check specific fields that were updated
-      Object.keys(updates).forEach(key => {
+      Object.keys(updates).forEach((key) => {
         console.log(`🔍 Field ${key}: sent="${updates[key]}" received="${updated[key]}"`);
       });
 
@@ -372,9 +375,10 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       // Associate Lighting Designer - sync first associate to ald_name/ald_email/ald_phone
       if (parentProject.lighting_associates) {
         try {
-          const lightingAssociates = typeof parentProject.lighting_associates === 'string'
-            ? JSON.parse(parentProject.lighting_associates)
-            : parentProject.lighting_associates;
+          const lightingAssociates =
+            typeof parentProject.lighting_associates === 'string'
+              ? JSON.parse(parentProject.lighting_associates)
+              : parentProject.lighting_associates;
 
           if (Array.isArray(lightingAssociates) && lightingAssociates.length > 0) {
             const firstAssociate = lightingAssociates[0];
@@ -402,9 +406,10 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       // Lighting Associates
       if (parentProject.lighting_associates) {
         try {
-          const lightingAssociates = typeof parentProject.lighting_associates === 'string'
-            ? JSON.parse(parentProject.lighting_associates)
-            : parentProject.lighting_associates;
+          const lightingAssociates =
+            typeof parentProject.lighting_associates === 'string'
+              ? JSON.parse(parentProject.lighting_associates)
+              : parentProject.lighting_associates;
 
           if (Array.isArray(lightingAssociates)) {
             lightingAssociates.forEach((assoc: any) => {
@@ -413,7 +418,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
                 discipline: 'lighting',
                 name: assoc.name || assoc,
                 email: assoc.email || '',
-                phone: assoc.phone || ''
+                phone: assoc.phone || '',
               });
             });
           }
@@ -425,9 +430,10 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       // Audio Associates
       if (parentProject.audio_associates) {
         try {
-          const audioAssociates = typeof parentProject.audio_associates === 'string'
-            ? JSON.parse(parentProject.audio_associates)
-            : parentProject.audio_associates;
+          const audioAssociates =
+            typeof parentProject.audio_associates === 'string'
+              ? JSON.parse(parentProject.audio_associates)
+              : parentProject.audio_associates;
 
           if (Array.isArray(audioAssociates)) {
             audioAssociates.forEach((assoc: any) => {
@@ -436,7 +442,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
                 discipline: 'audio',
                 name: assoc.name || assoc,
                 email: assoc.email || '',
-                phone: assoc.phone || ''
+                phone: assoc.phone || '',
               });
             });
           }
@@ -448,9 +454,10 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       // Video Associates
       if (parentProject.video_associates) {
         try {
-          const videoAssociates = typeof parentProject.video_associates === 'string'
-            ? JSON.parse(parentProject.video_associates)
-            : parentProject.video_associates;
+          const videoAssociates =
+            typeof parentProject.video_associates === 'string'
+              ? JSON.parse(parentProject.video_associates)
+              : parentProject.video_associates;
 
           if (Array.isArray(videoAssociates)) {
             videoAssociates.forEach((assoc: any) => {
@@ -459,7 +466,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
                 discipline: 'video',
                 name: assoc.name || assoc,
                 email: assoc.email || '',
-                phone: assoc.phone || ''
+                phone: assoc.phone || '',
               });
             });
           }
@@ -483,19 +490,19 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         return {
           success: true,
           syncedFields,
-          message: `Synced ${syncedFields.length} fields from parent project`
+          message: `Synced ${syncedFields.length} fields from parent project`,
         };
       } else {
         return {
           success: false,
-          error: 'No matching fields found to sync'
+          error: 'No matching fields found to sync',
         };
       }
     } catch (error) {
       console.error('Failed to sync from parent:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to sync from parent'
+        error: error instanceof Error ? error.message : 'Failed to sync from parent',
       };
     }
   },
@@ -697,10 +704,10 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
 
     try {
       // Create sections map for change detection
-      const sectionsMap = new Map(sections.map(s => [s.id, s]));
+      const sectionsMap = new Map(sections.map((s) => [s.id, s]));
 
       // Create baseline snapshot - all current items are "additions" at Revision 0
-      const changes = items.map(item => ({
+      const changes = items.map((item) => ({
         item_id: item.id,
         change_type: 'addition',
         description: item.description,
@@ -710,7 +717,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
           active_qty: item.active_qty,
           spare_qty: item.spare_qty,
           venue_qty: item.venue_qty,
-        }
+        },
       }));
 
       // Create Revision 0
@@ -763,16 +770,16 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       const newRevisionNumber = currentProject.current_revision + 1;
 
       // Create sections map for change detection
-      const sectionsMap = new Map(sections.map(s => [s.id, s]));
+      const sectionsMap = new Map(sections.map((s) => [s.id, s]));
 
       let changes: any[] = [];
 
       // Check if Revision 0 exists (baseline has been set)
-      const hasRevisionZero = revisions.some(r => r.revision_number === 0);
+      const hasRevisionZero = revisions.some((r) => r.revision_number === 0);
 
       if (currentProject.current_revision === 0 && !hasRevisionZero) {
         // No baseline set - mark all current items as additions
-        changes = items.map(item => ({
+        changes = items.map((item) => ({
           item_id: item.id,
           change_type: 'addition',
           description: item.description,
@@ -782,7 +789,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
             active_qty: item.active_qty,
             spare_qty: item.spare_qty,
             venue_qty: item.venue_qty,
-          }
+          },
         }));
       } else {
         // Subsequent revisions - detect changes from last revision
@@ -790,36 +797,35 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         const lastRevisionNumber = currentProject.current_revision;
 
         // Get items that existed at last revision
-        const itemsAtLastRevision = items.filter(item => {
+        const itemsAtLastRevision = items.filter((item) => {
           const addedBy = item.added_in_revision || 0;
           const removedBy = item.removed_in_revision || Infinity;
           return addedBy <= lastRevisionNumber && removedBy > lastRevisionNumber;
         });
 
         // Get the last revision's change log to reconstruct state
-        const lastRevision = revisions.find(r => r.revision_number === lastRevisionNumber);
+        const lastRevision = revisions.find((r) => r.revision_number === lastRevisionNumber);
         const lastChangeLog = lastRevision
-          ? (typeof lastRevision.change_log === 'string'
-              ? JSON.parse(lastRevision.change_log)
-              : lastRevision.change_log)
+          ? typeof lastRevision.change_log === 'string'
+            ? JSON.parse(lastRevision.change_log)
+            : lastRevision.change_log
           : [];
 
         // Create a map of items with their state at last revision
-        const previousItemsMap = new Map(itemsAtLastRevision.map(item => [item.id, { ...item }]));
+        const previousItemsMap = new Map(itemsAtLastRevision.map((item) => [item.id, { ...item }]));
 
         // Restore the state at the last revision
         // We need to find the last known state for each item by looking through all revisions
         // up to and including the last revision
         const sortedRevisions = revisions
-          .filter(r => r.revision_number <= lastRevisionNumber)
+          .filter((r) => r.revision_number <= lastRevisionNumber)
           .sort((a, b) => a.revision_number - b.revision_number);
 
         // Build a map of item_id -> last known state
         const lastKnownStates = new Map();
         for (const rev of sortedRevisions) {
-          const changeLog = typeof rev.change_log === 'string'
-            ? JSON.parse(rev.change_log)
-            : rev.change_log;
+          const changeLog =
+            typeof rev.change_log === 'string' ? JSON.parse(rev.change_log) : rev.change_log;
 
           for (const change of changeLog) {
             if (change.new_values) {
@@ -873,7 +879,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
               removed_in_revision: newRevisionNumber,
             });
           }
-        })
+        }),
       );
 
       // Reload project data once after all updates
@@ -898,7 +904,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
     }
 
     try {
-      const revisionToDelete = revisions.find(r => r.id === revisionId);
+      const revisionToDelete = revisions.find((r) => r.id === revisionId);
       if (!revisionToDelete) {
         throw new Error('Revision not found');
       }
@@ -909,9 +915,10 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       }
 
       // Remove revision tracking from items
-      const changeLog = typeof revisionToDelete.change_log === 'string'
-        ? JSON.parse(revisionToDelete.change_log)
-        : revisionToDelete.change_log;
+      const changeLog =
+        typeof revisionToDelete.change_log === 'string'
+          ? JSON.parse(revisionToDelete.change_log)
+          : revisionToDelete.change_log;
 
       await Promise.all(
         changeLog.map(async (change: any) => {
@@ -933,7 +940,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
             // Item might not exist anymore, skip it
             console.warn(`Could not update item ${change.item_id}:`, error);
           }
-        })
+        }),
       );
 
       // Delete the revision
@@ -1049,7 +1056,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       const saved = await window.api.prep.printTemplates?.save(template);
       if (saved) {
         set((state) => ({
-          printTemplates: [...state.printTemplates.filter(t => t.id !== saved.id), saved],
+          printTemplates: [...state.printTemplates.filter((t) => t.id !== saved.id), saved],
           currentTemplate: saved,
         }));
       }
@@ -1062,7 +1069,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
     if (!hasAPI()) {
       console.warn('API not available');
       set((state) => ({
-        printTemplates: state.printTemplates.filter(t => t.id !== templateId),
+        printTemplates: state.printTemplates.filter((t) => t.id !== templateId),
         currentTemplate: state.currentTemplate?.id === templateId ? null : state.currentTemplate,
       }));
       return;
@@ -1071,7 +1078,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
     try {
       await window.api.prep.printTemplates?.delete(templateId);
       set((state) => ({
-        printTemplates: state.printTemplates.filter(t => t.id !== templateId),
+        printTemplates: state.printTemplates.filter((t) => t.id !== templateId),
         currentTemplate: state.currentTemplate?.id === templateId ? null : state.currentTemplate,
       }));
     } catch (error) {

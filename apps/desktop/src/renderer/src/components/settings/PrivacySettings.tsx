@@ -29,7 +29,9 @@ export function PrivacySettings() {
   };
 
   const handleClearData = async () => {
-    if (confirm('Are you sure you want to clear all local telemetry data? This cannot be undone.')) {
+    if (
+      confirm('Are you sure you want to clear all local telemetry data? This cannot be undone.')
+    ) {
       await telemetry.clearLocalData();
       setStats(telemetry.getStats());
     }
@@ -55,9 +57,7 @@ export function PrivacySettings() {
           {/* Telemetry Toggle */}
           <div className="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
             <div className="flex-1">
-              <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-                Enable Telemetry
-              </h4>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-2">Enable Telemetry</h4>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                 Help us improve ShowStack by sending anonymous usage data
               </p>
@@ -79,9 +79,7 @@ export function PrivacySettings() {
           {/* Crash Reports Toggle */}
           <div className="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
             <div className="flex-1">
-              <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-                Send Crash Reports
-              </h4>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-2">Send Crash Reports</h4>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                 Automatically send crash reports to help us fix bugs faster
               </p>
@@ -112,9 +110,7 @@ export function PrivacySettings() {
         <div className="space-y-4">
           {/* Anonymous ID */}
           <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-            <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-              Anonymous ID
-            </h4>
+            <h4 className="font-medium text-gray-900 dark:text-white mb-2">Anonymous ID</h4>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
               This unique identifier is used to track your usage without revealing your identity
             </p>
@@ -157,9 +153,7 @@ export function PrivacySettings() {
 
           {/* Data Retention */}
           <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-            <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-              Data Retention
-            </h4>
+            <h4 className="font-medium text-gray-900 dark:text-white mb-2">Data Retention</h4>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
               Local telemetry data is automatically deleted after
             </p>
@@ -194,17 +188,13 @@ export function PrivacySettings() {
             <div className="flex items-center gap-3">
               <Download className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <div className="text-left">
-                <div className="font-medium text-gray-900 dark:text-white">
-                  Export Your Data
-                </div>
+                <div className="font-medium text-gray-900 dark:text-white">Export Your Data</div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">
                   Download all telemetry data as JSON
                 </div>
               </div>
             </div>
-            <span className="text-blue-600 dark:text-blue-400 text-sm font-medium">
-              Download
-            </span>
+            <span className="text-blue-600 dark:text-blue-400 text-sm font-medium">Download</span>
           </button>
 
           {/* Clear Data */}
@@ -215,17 +205,13 @@ export function PrivacySettings() {
             <div className="flex items-center gap-3">
               <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
               <div className="text-left">
-                <div className="font-medium text-red-900 dark:text-red-100">
-                  Clear All Data
-                </div>
+                <div className="font-medium text-red-900 dark:text-red-100">Clear All Data</div>
                 <div className="text-sm text-red-700 dark:text-red-300">
                   Permanently delete all local telemetry data
                 </div>
               </div>
             </div>
-            <span className="text-red-600 dark:text-red-400 text-sm font-medium">
-              Delete
-            </span>
+            <span className="text-red-600 dark:text-red-400 text-sm font-medium">Delete</span>
           </button>
         </div>
       </div>
@@ -239,8 +225,8 @@ export function PrivacySettings() {
               Your Privacy Matters
             </h4>
             <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
-              We take your privacy seriously. All telemetry is anonymous and never includes
-              personal information or project content.
+              We take your privacy seriously. All telemetry is anonymous and never includes personal
+              information or project content.
             </p>
             <a
               href="https://showstack.app/privacy"

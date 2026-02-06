@@ -45,7 +45,7 @@ export interface PaginatedResult<T> {
 export const DEFAULT_PAGINATION = {
   offset: 0,
   limit: 50,
-  sortOrder: 'ASC' as const
+  sortOrder: 'ASC' as const,
 } as const;
 
 /**
@@ -62,7 +62,7 @@ export const MAX_PAGINATION_LIMIT = 1000;
  */
 export function normalizePaginationOptions(
   options: Partial<PaginationOptions>,
-  allowedSortFields: readonly string[]
+  allowedSortFields: readonly string[],
 ): Required<PaginationOptions> {
   if (allowedSortFields.length === 0) {
     throw new Error('allowedSortFields must not be empty');
@@ -72,14 +72,13 @@ export function normalizePaginationOptions(
   const rawOffset = options.offset ?? DEFAULT_PAGINATION.offset;
   const rawLimit = options.limit ?? DEFAULT_PAGINATION.limit;
 
-  const offset = Math.max(0, Math.floor(
-    Number.isFinite(rawOffset) ? rawOffset : DEFAULT_PAGINATION.offset
-  ));
+  const offset = Math.max(
+    0,
+    Math.floor(Number.isFinite(rawOffset) ? rawOffset : DEFAULT_PAGINATION.offset),
+  );
   const limit = Math.min(
     MAX_PAGINATION_LIMIT,
-    Math.max(1, Math.floor(
-      Number.isFinite(rawLimit) ? rawLimit : DEFAULT_PAGINATION.limit
-    ))
+    Math.max(1, Math.floor(Number.isFinite(rawLimit) ? rawLimit : DEFAULT_PAGINATION.limit)),
   );
 
   // Validate sortBy against allowed fields
@@ -101,10 +100,7 @@ export function normalizePaginationOptions(
  * @param allowedFields - List of valid field names
  * @returns true if the field is in the allow list
  */
-export function isValidSortField(
-  field: string,
-  allowedFields: readonly string[]
-): boolean {
+export function isValidSortField(field: string, allowedFields: readonly string[]): boolean {
   return allowedFields.includes(field);
 }
 
@@ -120,16 +116,14 @@ export function isValidSortField(
 export function buildOrderByClause(
   sortBy: string,
   sortOrder: 'ASC' | 'DESC',
-  allowedSortFields: readonly string[]
+  allowedSortFields: readonly string[],
 ): string {
   if (allowedSortFields.length === 0) {
     throw new Error('allowedSortFields must not be empty');
   }
 
   // Validate sortBy is in allowed list (critical for SQL injection prevention)
-  const validSortBy = isValidSortField(sortBy, allowedSortFields)
-    ? sortBy
-    : allowedSortFields[0];
+  const validSortBy = isValidSortField(sortBy, allowedSortFields) ? sortBy : allowedSortFields[0];
 
   const validSortOrder = sortOrder === 'DESC' ? 'DESC' : 'ASC';
 
@@ -147,7 +141,7 @@ export function buildOrderByClause(
 export function buildPaginatedResult<T>(
   data: T[],
   total: number,
-  options: Required<PaginationOptions>
+  options: Required<PaginationOptions>,
 ): PaginatedResult<T> {
   const totalPages = Math.ceil(total / options.limit);
   const currentPage = Math.floor(options.offset / options.limit) + 1;
@@ -160,7 +154,7 @@ export function buildPaginatedResult<T>(
     limit: options.limit,
     hasMore,
     totalPages,
-    currentPage
+    currentPage,
   };
 }
 

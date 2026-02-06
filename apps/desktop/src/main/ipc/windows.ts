@@ -21,13 +21,15 @@ export function registerWindowHandlers(): void {
       console.error('Failed to open project window:', {
         operation: 'window:openProject',
         projectId,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof ValidationError) {
         throw new Error(error.toUserMessage());
       }
-      throw new Error(`Unable to open project window: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to open project window: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
@@ -43,7 +45,7 @@ export function registerWindowHandlers(): void {
     } catch (error) {
       console.error('Failed to get current project ID:', {
         operation: 'window:getCurrentProjectId',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
       return null;
     }

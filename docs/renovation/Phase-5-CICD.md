@@ -10,6 +10,7 @@
 ## Checklist
 
 ### 5.1 Enhanced GitHub Actions (1 week)
+
 - [ ] Update test.yml workflow
 - [ ] Add lint, type-check, test, coverage steps
 - [ ] Test on Ubuntu, macOS, Windows
@@ -17,6 +18,7 @@
 - [ ] Add security scanning
 
 ### 5.2 Pre-commit Hooks (1 week)
+
 - [ ] Install Husky and lint-staged
 - [ ] Configure pre-commit (lint + type-check)
 - [ ] Configure pre-push (tests)

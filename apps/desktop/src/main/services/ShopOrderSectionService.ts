@@ -3,7 +3,7 @@ import {
   createShopOrderSection,
   updateShopOrderSection,
   deleteShopOrderSection,
-  ShopOrderSection
+  ShopOrderSection,
 } from '../database/queries/shop-order';
 import { errorHandler, ValidationError } from '../errors';
 
@@ -22,7 +22,7 @@ export class ShopOrderSectionService {
 
     return await errorHandler.executeWithRetry(
       async () => getSectionsByProjectId(projectId),
-      'shop-order:sections:getByProjectId'
+      'shop-order:sections:getByProjectId',
     );
   }
 
@@ -32,11 +32,7 @@ export class ShopOrderSectionService {
   async create(data: Partial<ShopOrderSection>): Promise<ShopOrderSection> {
     // Validate required fields
     if (!data.prep_project_id || data.prep_project_id.trim().length === 0) {
-      throw new ValidationError(
-        'Project ID is required',
-        'prep_project_id',
-        data.prep_project_id
-      );
+      throw new ValidationError('Project ID is required', 'prep_project_id', data.prep_project_id);
     }
 
     if (!data.name || data.name.trim().length === 0) {
@@ -45,7 +41,7 @@ export class ShopOrderSectionService {
 
     return await errorHandler.executeWithRetry(
       async () => createShopOrderSection(data),
-      'shop-order:sections:create'
+      'shop-order:sections:create',
     );
   }
 
@@ -64,7 +60,7 @@ export class ShopOrderSectionService {
 
     return await errorHandler.executeWithRetry(
       async () => updateShopOrderSection(id, updates),
-      'shop-order:sections:update'
+      'shop-order:sections:update',
     );
   }
 
@@ -78,7 +74,7 @@ export class ShopOrderSectionService {
 
     return await errorHandler.executeWithRetry(
       async () => deleteShopOrderSection(id),
-      'shop-order:sections:delete'
+      'shop-order:sections:delete',
     );
   }
 }

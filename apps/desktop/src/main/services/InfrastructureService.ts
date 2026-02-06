@@ -3,7 +3,7 @@ import {
   createInfrastructure,
   updateInfrastructure,
   deleteInfrastructure,
-  InfrastructureEquipment
+  InfrastructureEquipment,
 } from '../database/queries/infrastructure';
 import { BaseService } from './BaseService';
 
@@ -30,7 +30,7 @@ export class InfrastructureService extends BaseService {
 
     const result = await this.executeWithRetry(
       async () => getAllInfrastructure(projectId),
-      'infrastructure:getAll'
+      'infrastructure:getAll',
     );
     return result;
   }
@@ -44,14 +44,14 @@ export class InfrastructureService extends BaseService {
    */
   async create(
     data: Partial<InfrastructureEquipment>,
-    projectId: string
+    projectId: string,
   ): Promise<InfrastructureEquipment> {
     this.validateId(projectId, 'Project');
     this.validateRequired(data.name, 'name', 'Equipment name');
 
     return await this.executeWithRetry(
       async () => createInfrastructure(data, projectId),
-      'infrastructure:create'
+      'infrastructure:create',
     );
   }
 
@@ -64,7 +64,7 @@ export class InfrastructureService extends BaseService {
    */
   async update(
     id: string,
-    updates: Partial<InfrastructureEquipment>
+    updates: Partial<InfrastructureEquipment>,
   ): Promise<InfrastructureEquipment> {
     this.validateId(id, 'Infrastructure Equipment');
 
@@ -80,7 +80,7 @@ export class InfrastructureService extends BaseService {
 
     return await this.executeWithRetry(
       async () => updateInfrastructure(id, updates),
-      'infrastructure:update'
+      'infrastructure:update',
     );
   }
 
@@ -94,7 +94,7 @@ export class InfrastructureService extends BaseService {
 
     return await this.executeWithRetry(
       async () => deleteInfrastructure(id),
-      'infrastructure:delete'
+      'infrastructure:delete',
     );
   }
 

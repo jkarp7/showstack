@@ -39,7 +39,7 @@ export function SnapGuides({
   cellWidth,
   cellHeight,
   zoom,
-  snapEnabled = true
+  snapEnabled = true,
 }: SnapGuidesProps) {
   const guides = useMemo(() => {
     if (!draggedElement || !dragPosition || !snapEnabled) {
@@ -48,7 +48,7 @@ export function SnapGuides({
 
     const guides: { vertical: Guide[]; horizontal: Guide[] } = {
       vertical: [],
-      horizontal: []
+      horizontal: [],
     };
 
     // Calculate dragged element boundaries
@@ -62,7 +62,7 @@ export function SnapGuides({
     const SNAP_THRESHOLD = 5; // pixels
 
     // Check alignment with other elements
-    elements.forEach(el => {
+    elements.forEach((el) => {
       if (el.id === draggedElementId) return; // Skip self
 
       const elLeft = el.grid_column * cellWidth;
@@ -105,7 +105,11 @@ export function SnapGuides({
       }
       // Middle alignment
       if (Math.abs(dragCenterY - elCenterY) < SNAP_THRESHOLD) {
-        guides.horizontal.push({ position: elCenterY, type: 'horizontal', alignmentType: 'middle' });
+        guides.horizontal.push({
+          position: elCenterY,
+          type: 'horizontal',
+          alignmentType: 'middle',
+        });
       }
       // Bottom edge to top edge
       if (Math.abs(dragBottom - elTop) < SNAP_THRESHOLD) {
@@ -118,17 +122,21 @@ export function SnapGuides({
     });
 
     // Remove duplicate guides
-    guides.vertical = Array.from(
-      new Map(guides.vertical.map(g => [g.position, g])).values()
-    );
-    guides.horizontal = Array.from(
-      new Map(guides.horizontal.map(g => [g.position, g])).values()
-    );
+    guides.vertical = Array.from(new Map(guides.vertical.map((g) => [g.position, g])).values());
+    guides.horizontal = Array.from(new Map(guides.horizontal.map((g) => [g.position, g])).values());
 
     return guides;
-  }, [elements, draggedElementId, draggedElement, dragPosition, cellWidth, cellHeight, snapEnabled]);
+  }, [
+    elements,
+    draggedElementId,
+    draggedElement,
+    dragPosition,
+    cellWidth,
+    cellHeight,
+    snapEnabled,
+  ]);
 
-  if (!snapEnabled || guides.vertical.length === 0 && guides.horizontal.length === 0) {
+  if (!snapEnabled || (guides.vertical.length === 0 && guides.horizontal.length === 0)) {
     return null;
   }
 
@@ -145,7 +153,7 @@ export function SnapGuides({
             top: 0,
             width: '2px',
             height: '100%',
-            zIndex: 10000
+            zIndex: 10000,
           }}
         >
           {/* Guide label */}
@@ -169,7 +177,7 @@ export function SnapGuides({
             left: 0,
             height: '2px',
             width: '100%',
-            zIndex: 10000
+            zIndex: 10000,
           }}
         >
           {/* Guide label */}

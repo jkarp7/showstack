@@ -23,8 +23,23 @@ import { useShopOrderMenuHandlers } from '../../hooks/useShopOrderMenuHandlers';
 export function ShopOrderBuilder() {
   const navigate = useNavigate();
   const { projectId: parentProjectId } = useParams<{ projectId?: string }>();
-  const { allProjects, currentProject, sections, revisions, currentTemplate, setCurrentTemplate, saveTemplate, loadAllProjects, loadProject, clearCurrentProject, updateProject, setRevisionZero, generateRevision, deleteRevision, syncFromParent } =
-    useShopOrderStore();
+  const {
+    allProjects,
+    currentProject,
+    sections,
+    revisions,
+    currentTemplate,
+    setCurrentTemplate,
+    saveTemplate,
+    loadAllProjects,
+    loadProject,
+    clearCurrentProject,
+    updateProject,
+    setRevisionZero,
+    generateRevision,
+    deleteRevision,
+    syncFromParent,
+  } = useShopOrderStore();
   const { projects, loadProjects } = useProjectStore();
   const [moduleStartTime] = useState(Date.now());
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
@@ -117,23 +132,21 @@ export function ShopOrderBuilder() {
     const autoLoadProjectShopOrder = async () => {
       if (parentProjectId && allProjects.length > 0 && !currentProject) {
         // Find existing shop order for this parent project
-        const existingShopOrder = allProjects.find(
-          p => p.parent_project_id === parentProjectId
-        );
+        const existingShopOrder = allProjects.find((p) => p.parent_project_id === parentProjectId);
 
         if (existingShopOrder) {
           // Load the existing shop order
           await loadProject(existingShopOrder.id);
         } else {
           // No shop order exists - create one automatically
-          const parentProject = projects.find(p => p.id === parentProjectId);
+          const parentProject = projects.find((p) => p.id === parentProjectId);
           if (parentProject) {
             try {
               const newProject = await useShopOrderStore.getState().createProject({
                 production_name: parentProject.name,
                 parent_project_id: parentProjectId,
                 venue: parentProject.venue || undefined,
-                disciplines: ['lighting'] // Default to lighting
+                disciplines: ['lighting'], // Default to lighting
               });
 
               if (newProject) {
@@ -219,7 +232,9 @@ export function ShopOrderBuilder() {
       setShowRevisionZeroNotes(false);
     } catch (error) {
       console.error('Failed to set revision 0:', error);
-      alert(`Failed to set revision 0: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert(
+        `Failed to set revision 0: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     } finally {
       setIsSettingRevisionZero(false);
     }
@@ -264,7 +279,9 @@ export function ShopOrderBuilder() {
   const handleSyncFromParent = async () => {
     if (!currentProject || !currentProject.parent_project_id) return;
 
-    if (!confirm('Sync data from parent project? This will overwrite dates and contact information.')) {
+    if (
+      !confirm('Sync data from parent project? This will overwrite dates and contact information.')
+    ) {
       return;
     }
 
@@ -299,7 +316,9 @@ export function ShopOrderBuilder() {
     if (parts.length === 2) {
       const [month, day] = parts;
       const currentYear = new Date().getFullYear();
-      const parsedDate = new Date(`${currentYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+      const parsedDate = new Date(
+        `${currentYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`,
+      );
       if (!isNaN(parsedDate.getTime())) {
         const m = parsedDate.getMonth() + 1;
         const d = parsedDate.getDate();
@@ -458,32 +477,50 @@ export function ShopOrderBuilder() {
       ? projects.find((p) => p.id === currentProject.parent_project_id)
       : null;
     const isLinked = !!parentProject;
-    const disciplines = JSON.parse(currentProject.disciplines as any || '[]') as Discipline[];
+    const disciplines = JSON.parse((currentProject.disciplines as any) || '[]') as Discipline[];
 
     // Helper to get field value (from parent if linked, otherwise from prep project)
     const getFieldValue = (field: keyof PrepProject): string => {
       if (isLinked && parentProject) {
         // Map prep project fields to parent project fields
         switch (field) {
-          case 'gm_name': return parentProject.general_manager || '';
-          case 'gm_email': return parentProject.general_manager_email || '';
-          case 'gm_phone': return formatPhoneNumber(parentProject.general_manager_phone) || '';
-          case 'gm_company': return parentProject.general_manager_company || '';
-          case 'pm_name': return parentProject.production_manager || '';
-          case 'pm_email': return parentProject.production_manager_email || '';
-          case 'pm_phone': return formatPhoneNumber(parentProject.production_manager_phone) || '';
-          case 'pm_company': return parentProject.production_manager_company || '';
-          case 'ld_name': return parentProject.lighting_designer || '';
-          case 'ld_email': return parentProject.lighting_designer_email || '';
-          case 'ld_phone': return formatPhoneNumber(parentProject.lighting_designer_phone) || '';
-          case 'pe_name': return parentProject.electrician || '';
-          case 'pe_email': return parentProject.electrician_email || '';
-          case 'pe_phone': return formatPhoneNumber(parentProject.electrician_phone) || '';
-          case 'venue': return parentProject.venue || '';
-          case 'venue_city': return parentProject.venue_city || '';
-          case 'venue_state': return parentProject.venue_state || '';
+          case 'gm_name':
+            return parentProject.general_manager || '';
+          case 'gm_email':
+            return parentProject.general_manager_email || '';
+          case 'gm_phone':
+            return formatPhoneNumber(parentProject.general_manager_phone) || '';
+          case 'gm_company':
+            return parentProject.general_manager_company || '';
+          case 'pm_name':
+            return parentProject.production_manager || '';
+          case 'pm_email':
+            return parentProject.production_manager_email || '';
+          case 'pm_phone':
+            return formatPhoneNumber(parentProject.production_manager_phone) || '';
+          case 'pm_company':
+            return parentProject.production_manager_company || '';
+          case 'ld_name':
+            return parentProject.lighting_designer || '';
+          case 'ld_email':
+            return parentProject.lighting_designer_email || '';
+          case 'ld_phone':
+            return formatPhoneNumber(parentProject.lighting_designer_phone) || '';
+          case 'pe_name':
+            return parentProject.electrician || '';
+          case 'pe_email':
+            return parentProject.electrician_email || '';
+          case 'pe_phone':
+            return formatPhoneNumber(parentProject.electrician_phone) || '';
+          case 'venue':
+            return parentProject.venue || '';
+          case 'venue_city':
+            return parentProject.venue_city || '';
+          case 'venue_state':
+            return parentProject.venue_state || '';
           // For fields not in parent project, fall through to get from currentProject
-          default: break;
+          default:
+            break;
         }
       }
       // Always get from currentProject if not linked or field not in parent
@@ -501,12 +538,26 @@ export function ShopOrderBuilder() {
 
       // These fields are read-only when linked (fields that pull from parent)
       const parentFields: (keyof PrepProject)[] = [
-        'gm_name', 'gm_email', 'gm_phone', 'gm_company',
-        'pm_name', 'pm_email', 'pm_phone', 'pm_company',
-        'ld_name', 'ld_email', 'ld_phone',
-        'ald_name', 'ald_email', 'ald_phone',
-        'pe_name', 'pe_email', 'pe_phone',
-        'venue', 'venue_city', 'venue_state'
+        'gm_name',
+        'gm_email',
+        'gm_phone',
+        'gm_company',
+        'pm_name',
+        'pm_email',
+        'pm_phone',
+        'pm_company',
+        'ld_name',
+        'ld_email',
+        'ld_phone',
+        'ald_name',
+        'ald_email',
+        'ald_phone',
+        'pe_name',
+        'pe_email',
+        'pe_phone',
+        'venue',
+        'venue_city',
+        'venue_state',
       ];
 
       return parentFields.includes(field);
@@ -656,9 +707,12 @@ export function ShopOrderBuilder() {
     };
 
     // Get latest revision date
-    const latestRevision = revisions.length > 0
-      ? revisions.reduce((latest, rev) => rev.revision_date > latest.revision_date ? rev : latest)
-      : null;
+    const latestRevision =
+      revisions.length > 0
+        ? revisions.reduce((latest, rev) =>
+            rev.revision_date > latest.revision_date ? rev : latest,
+          )
+        : null;
 
     return (
       <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
@@ -732,18 +786,24 @@ export function ShopOrderBuilder() {
                     className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                   >
                     <div className="flex items-center gap-4">
-                      <span className="text-gray-600 dark:text-gray-400 text-lg">{projectDetailsExpanded ? '▼' : '▶'}</span>
+                      <span className="text-gray-600 dark:text-gray-400 text-lg">
+                        {projectDetailsExpanded ? '▼' : '▶'}
+                      </span>
                       <h2 className="text-xl font-bold">Project Details</h2>
                       {!projectDetailsExpanded && (
                         <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400 ml-4">
                           <div>
                             <span className="text-gray-500">Show:</span>{' '}
-                            <span className="text-gray-700 dark:text-gray-300">{currentProject.production_name}</span>
+                            <span className="text-gray-700 dark:text-gray-300">
+                              {currentProject.production_name}
+                            </span>
                           </div>
                           {getFieldValue('venue') && (
                             <div>
                               <span className="text-gray-500">Venue:</span>{' '}
-                              <span className="text-gray-700 dark:text-gray-300">{getFieldValue('venue')}</span>
+                              <span className="text-gray-700 dark:text-gray-300">
+                                {getFieldValue('venue')}
+                              </span>
                             </div>
                           )}
                           <div>
@@ -758,240 +818,280 @@ export function ShopOrderBuilder() {
                     <div className="text-xs text-gray-600 dark:text-gray-400">
                       Created: {new Date(currentProject.created_at).toLocaleDateString()}
                       {latestRevision && (
-                        <> | Last Revised: {new Date(latestRevision.revision_date).toLocaleDateString()}</>
+                        <>
+                          {' '}
+                          | Last Revised:{' '}
+                          {new Date(latestRevision.revision_date).toLocaleDateString()}
+                        </>
                       )}
                     </div>
                   </button>
 
                   {projectDetailsExpanded && (
                     <div className="p-6 pt-0">
-
-              <div className="space-y-4">
-                {/* Production Info - 1 Row */}
-                <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center gap-8">
-                    <div>
-                      <span className="text-gray-500 text-sm">Show:</span>{' '}
-                      <span className="text-gray-700 dark:text-gray-300 font-medium text-base">{currentProject.production_name}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500 text-sm">Venue:</span>{' '}
-                      <span className="text-base">
-                        {renderInlineField('venue', '+ Venue Name', 'inline-block min-w-[120px]')}
-                      </span>
-                      {getFieldValue('venue') && (
-                        <>
-                          <span className="text-base">
-                            {renderInlineField('venue_city', '+ City', 'inline-block min-w-[80px]')}
-                          </span>
-                          <span className="text-base">
-                            {renderInlineField('venue_state', '+ ST', 'inline-block min-w-[40px]')}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
-                    <span className="text-gray-500">Disciplines:</span>{' '}
-                    {disciplines.map((d) => d.charAt(0).toUpperCase()).join('/')}
-                  </div>
-                </div>
-
-                {/* Parent Project Link */}
-                <div className="pb-3 border-b border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center gap-4">
-                    <span className="text-gray-500 text-sm">Parent Project:</span>
-                    {currentProject.parent_project_id ? (
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-700 dark:text-gray-300">
-                          {projects.find(p => p.id === currentProject.parent_project_id)?.name || 'Unknown Project'}
-                        </span>
-                        <button
-                          onClick={handleUnlinkFromParent}
-                          className="text-xs px-2 py-1 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded transition"
-                          title="Unlink from parent project"
-                        >
-                          Unlink
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <select
-                          value=""
-                          onChange={(e) => {
-                            if (e.target.value) {
-                              handleLinkToParent(e.target.value);
-                            }
-                          }}
-                          className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-600 transition"
-                        >
-                          <option value="">+ Link to Project</option>
-                          {projects
-                            .filter(p => p.id !== currentProject.id) // Don't show current project
-                            .map(project => (
-                              <option key={project.id} value={project.id}>
-                                {project.production_name}
-                              </option>
-                            ))}
-                        </select>
-                        <span className="text-xs text-gray-500">
-                          Link to parent to sync dates and contacts
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Management - Each Person in a Row */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase mb-2">Management</h3>
-                  <div className="space-y-2">
-                    {/* GM Row */}
-                    <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
-                      <span className="text-gray-500">General Manager</span>
-                      <div>{renderInlineField('gm_name', '+ Name')}</div>
-                      {getFieldValue('gm_name') ? (
-                        <>
-                          <div>{renderInlineField('gm_company', '+ Company')}</div>
-                          <div>{renderInlineField('gm_email', '+ Email')}</div>
-                          <div>{renderInlineField('gm_phone', '+ Phone')}</div>
-                        </>
-                      ) : (
-                        <>
-                          <div></div>
-                          <div></div>
-                          <div></div>
-                        </>
-                      )}
-                    </div>
-                    {/* PM Row */}
-                    <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
-                      <span className="text-gray-500">Production Manager</span>
-                      <div>{renderInlineField('pm_name', '+ Name')}</div>
-                      {getFieldValue('pm_name') ? (
-                        <>
-                          <div>{renderInlineField('pm_company', '+ Company')}</div>
-                          <div>{renderInlineField('pm_email', '+ Email')}</div>
-                          <div>{renderInlineField('pm_phone', '+ Phone')}</div>
-                        </>
-                      ) : (
-                        <>
-                          <div></div>
-                          <div></div>
-                          <div></div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Design Team - Each Person in a Row */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase mb-2">Design Team</h3>
-                  <div className="space-y-2">
-                    {disciplines.includes('lighting') && (
-                      <>
-                        {/* LD Row - no company field for designers */}
-                        <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
-                          <span className="text-gray-500">Lighting Designer</span>
-                          <div>{renderInlineField('ld_name', '+ Name')}</div>
-                          {getFieldValue('ld_name') ? (
-                            <>
-                              <div></div>
-                              <div>{renderInlineField('ld_email', '+ Email')}</div>
-                              <div>{renderInlineField('ld_phone', '+ Phone')}</div>
-                            </>
-                          ) : (
-                            <>
-                              <div></div>
-                              <div></div>
-                              <div></div>
-                            </>
-                          )}
+                      <div className="space-y-4">
+                        {/* Production Info - 1 Row */}
+                        <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center gap-8">
+                            <div>
+                              <span className="text-gray-500 text-sm">Show:</span>{' '}
+                              <span className="text-gray-700 dark:text-gray-300 font-medium text-base">
+                                {currentProject.production_name}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-gray-500 text-sm">Venue:</span>{' '}
+                              <span className="text-base">
+                                {renderInlineField(
+                                  'venue',
+                                  '+ Venue Name',
+                                  'inline-block min-w-[120px]',
+                                )}
+                              </span>
+                              {getFieldValue('venue') && (
+                                <>
+                                  <span className="text-base">
+                                    {renderInlineField(
+                                      'venue_city',
+                                      '+ City',
+                                      'inline-block min-w-[80px]',
+                                    )}
+                                  </span>
+                                  <span className="text-base">
+                                    {renderInlineField(
+                                      'venue_state',
+                                      '+ ST',
+                                      'inline-block min-w-[40px]',
+                                    )}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">
+                            <span className="text-gray-500">Disciplines:</span>{' '}
+                            {disciplines.map((d) => d.charAt(0).toUpperCase()).join('/')}
+                          </div>
                         </div>
-                        {/* ALD Row */}
-                        <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
-                          <span className="text-gray-500">Associate LD</span>
-                          <div>{renderInlineField('ald_name', '+ Name')}</div>
-                          {getFieldValue('ald_name') ? (
-                            <>
-                              <div></div>
-                              <div>{renderInlineField('ald_email', '+ Email')}</div>
-                              <div>{renderInlineField('ald_phone', '+ Phone')}</div>
-                            </>
-                          ) : (
-                            <>
-                              <div></div>
-                              <div></div>
-                              <div></div>
-                            </>
-                          )}
-                        </div>
-                        {/* PE Row */}
-                        <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
-                          <span className="text-gray-500">Production Elec.</span>
-                          <div>{renderInlineField('pe_name', '+ Name')}</div>
-                          {getFieldValue('pe_name') ? (
-                            <>
-                              <div></div>
-                              <div>{renderInlineField('pe_email', '+ Email')}</div>
-                              <div>{renderInlineField('pe_phone', '+ Phone')}</div>
-                            </>
-                          ) : (
-                            <>
-                              <div></div>
-                              <div></div>
-                              <div></div>
-                            </>
-                          )}
-                        </div>
-                      </>
-                    )}
-                    {disciplines.includes('audio') && isLinked && parentProject?.audio_designer && (
-                      <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
-                        <span className="text-gray-500">Audio Designer</span>
-                        <div className="text-gray-600 dark:text-gray-400">{parentProject.audio_designer}</div>
-                        <div></div>
-                        <div className="text-gray-600 dark:text-gray-400">{parentProject.audio_designer_email || ''}</div>
-                        <div className="text-gray-600 dark:text-gray-400">{formatPhoneNumber(parentProject.audio_designer_phone) || ''}</div>
-                      </div>
-                    )}
-                    {disciplines.includes('video') && isLinked && parentProject?.video_designer && (
-                      <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
-                        <span className="text-gray-500">Video Designer</span>
-                        <div className="text-gray-600 dark:text-gray-400">{parentProject.video_designer}</div>
-                        <div></div>
-                        <div className="text-gray-600 dark:text-gray-400">{parentProject.video_designer_email || ''}</div>
-                        <div className="text-gray-600 dark:text-gray-400">{formatPhoneNumber(parentProject.video_designer_phone) || ''}</div>
-                      </div>
-                    )}
-                  </div>
-                </div>
 
-                {/* Show Dates - 2 Rows: Header and Values */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase mb-2">Show Dates</h3>
-                  <div className="grid grid-cols-7 gap-2 text-xs">
-                    {/* Header Row */}
-                    <div className="text-gray-500 font-medium">Prep Start</div>
-                    <div className="text-gray-500 font-medium">Prep End</div>
-                    <div className="text-gray-500 font-medium">Load In</div>
-                    <div className="text-gray-500 font-medium">First Preview</div>
-                    <div className="text-gray-500 font-medium">Opening</div>
-                    <div className="text-gray-500 font-medium">Closing</div>
-                    <div className="text-gray-500 font-medium">Load Out</div>
+                        {/* Parent Project Link */}
+                        <div className="pb-3 border-b border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center gap-4">
+                            <span className="text-gray-500 text-sm">Parent Project:</span>
+                            {currentProject.parent_project_id ? (
+                              <div className="flex items-center gap-2">
+                                <span className="text-gray-700 dark:text-gray-300">
+                                  {projects.find((p) => p.id === currentProject.parent_project_id)
+                                    ?.name || 'Unknown Project'}
+                                </span>
+                                <button
+                                  onClick={handleUnlinkFromParent}
+                                  className="text-xs px-2 py-1 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded transition"
+                                  title="Unlink from parent project"
+                                >
+                                  Unlink
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <select
+                                  value=""
+                                  onChange={(e) => {
+                                    if (e.target.value) {
+                                      handleLinkToParent(e.target.value);
+                                    }
+                                  }}
+                                  className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-600 transition"
+                                >
+                                  <option value="">+ Link to Project</option>
+                                  {projects
+                                    .filter((p) => p.id !== currentProject.id) // Don't show current project
+                                    .map((project) => (
+                                      <option key={project.id} value={project.id}>
+                                        {project.production_name}
+                                      </option>
+                                    ))}
+                                </select>
+                                <span className="text-xs text-gray-500">
+                                  Link to parent to sync dates and contacts
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
 
-                    {/* Values Row */}
-                    {renderDateField('prep_start_date', '—')}
-                    {renderDateField('prep_end_date', '—')}
-                    {renderDateField('load_in_date', '—')}
-                    {renderDateField('first_preview_date', '—')}
-                    {renderDateField('opening_night_date', '—')}
-                    {renderDateField('closing_date', '—')}
-                    {renderDateField('load_out_date', '—')}
-                  </div>
-                </div>
-              </div>
+                        {/* Management - Each Person in a Row */}
+                        <div>
+                          <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase mb-2">
+                            Management
+                          </h3>
+                          <div className="space-y-2">
+                            {/* GM Row */}
+                            <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
+                              <span className="text-gray-500">General Manager</span>
+                              <div>{renderInlineField('gm_name', '+ Name')}</div>
+                              {getFieldValue('gm_name') ? (
+                                <>
+                                  <div>{renderInlineField('gm_company', '+ Company')}</div>
+                                  <div>{renderInlineField('gm_email', '+ Email')}</div>
+                                  <div>{renderInlineField('gm_phone', '+ Phone')}</div>
+                                </>
+                              ) : (
+                                <>
+                                  <div></div>
+                                  <div></div>
+                                  <div></div>
+                                </>
+                              )}
+                            </div>
+                            {/* PM Row */}
+                            <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
+                              <span className="text-gray-500">Production Manager</span>
+                              <div>{renderInlineField('pm_name', '+ Name')}</div>
+                              {getFieldValue('pm_name') ? (
+                                <>
+                                  <div>{renderInlineField('pm_company', '+ Company')}</div>
+                                  <div>{renderInlineField('pm_email', '+ Email')}</div>
+                                  <div>{renderInlineField('pm_phone', '+ Phone')}</div>
+                                </>
+                              ) : (
+                                <>
+                                  <div></div>
+                                  <div></div>
+                                  <div></div>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Design Team - Each Person in a Row */}
+                        <div>
+                          <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase mb-2">
+                            Design Team
+                          </h3>
+                          <div className="space-y-2">
+                            {disciplines.includes('lighting') && (
+                              <>
+                                {/* LD Row - no company field for designers */}
+                                <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
+                                  <span className="text-gray-500">Lighting Designer</span>
+                                  <div>{renderInlineField('ld_name', '+ Name')}</div>
+                                  {getFieldValue('ld_name') ? (
+                                    <>
+                                      <div></div>
+                                      <div>{renderInlineField('ld_email', '+ Email')}</div>
+                                      <div>{renderInlineField('ld_phone', '+ Phone')}</div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div></div>
+                                      <div></div>
+                                      <div></div>
+                                    </>
+                                  )}
+                                </div>
+                                {/* ALD Row */}
+                                <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
+                                  <span className="text-gray-500">Associate LD</span>
+                                  <div>{renderInlineField('ald_name', '+ Name')}</div>
+                                  {getFieldValue('ald_name') ? (
+                                    <>
+                                      <div></div>
+                                      <div>{renderInlineField('ald_email', '+ Email')}</div>
+                                      <div>{renderInlineField('ald_phone', '+ Phone')}</div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div></div>
+                                      <div></div>
+                                      <div></div>
+                                    </>
+                                  )}
+                                </div>
+                                {/* PE Row */}
+                                <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
+                                  <span className="text-gray-500">Production Elec.</span>
+                                  <div>{renderInlineField('pe_name', '+ Name')}</div>
+                                  {getFieldValue('pe_name') ? (
+                                    <>
+                                      <div></div>
+                                      <div>{renderInlineField('pe_email', '+ Email')}</div>
+                                      <div>{renderInlineField('pe_phone', '+ Phone')}</div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div></div>
+                                      <div></div>
+                                      <div></div>
+                                    </>
+                                  )}
+                                </div>
+                              </>
+                            )}
+                            {disciplines.includes('audio') &&
+                              isLinked &&
+                              parentProject?.audio_designer && (
+                                <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
+                                  <span className="text-gray-500">Audio Designer</span>
+                                  <div className="text-gray-600 dark:text-gray-400">
+                                    {parentProject.audio_designer}
+                                  </div>
+                                  <div></div>
+                                  <div className="text-gray-600 dark:text-gray-400">
+                                    {parentProject.audio_designer_email || ''}
+                                  </div>
+                                  <div className="text-gray-600 dark:text-gray-400">
+                                    {formatPhoneNumber(parentProject.audio_designer_phone) || ''}
+                                  </div>
+                                </div>
+                              )}
+                            {disciplines.includes('video') &&
+                              isLinked &&
+                              parentProject?.video_designer && (
+                                <div className="grid grid-cols-[140px_minmax(150px,1fr)_minmax(150px,1fr)_minmax(200px,1.5fr)_minmax(140px,1fr)] gap-3 text-sm items-center">
+                                  <span className="text-gray-500">Video Designer</span>
+                                  <div className="text-gray-600 dark:text-gray-400">
+                                    {parentProject.video_designer}
+                                  </div>
+                                  <div></div>
+                                  <div className="text-gray-600 dark:text-gray-400">
+                                    {parentProject.video_designer_email || ''}
+                                  </div>
+                                  <div className="text-gray-600 dark:text-gray-400">
+                                    {formatPhoneNumber(parentProject.video_designer_phone) || ''}
+                                  </div>
+                                </div>
+                              )}
+                          </div>
+                        </div>
+
+                        {/* Show Dates - 2 Rows: Header and Values */}
+                        <div>
+                          <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase mb-2">
+                            Show Dates
+                          </h3>
+                          <div className="grid grid-cols-7 gap-2 text-xs">
+                            {/* Header Row */}
+                            <div className="text-gray-500 font-medium">Prep Start</div>
+                            <div className="text-gray-500 font-medium">Prep End</div>
+                            <div className="text-gray-500 font-medium">Load In</div>
+                            <div className="text-gray-500 font-medium">First Preview</div>
+                            <div className="text-gray-500 font-medium">Opening</div>
+                            <div className="text-gray-500 font-medium">Closing</div>
+                            <div className="text-gray-500 font-medium">Load Out</div>
+
+                            {/* Values Row */}
+                            {renderDateField('prep_start_date', '—')}
+                            {renderDateField('prep_end_date', '—')}
+                            {renderDateField('load_in_date', '—')}
+                            {renderDateField('first_preview_date', '—')}
+                            {renderDateField('opening_night_date', '—')}
+                            {renderDateField('closing_date', '—')}
+                            {renderDateField('load_out_date', '—')}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1002,7 +1102,9 @@ export function ShopOrderBuilder() {
                     onClick={() => setNotesExpanded(!notesExpanded)}
                     className="w-full px-6 py-4 flex items-center gap-4 hover:bg-gray-700 transition"
                   >
-                    <span className="text-gray-600 dark:text-gray-400 text-lg">{notesExpanded ? '▼' : '▶'}</span>
+                    <span className="text-gray-600 dark:text-gray-400 text-lg">
+                      {notesExpanded ? '▼' : '▶'}
+                    </span>
                     <h2 className="text-xl font-bold">Notes</h2>
                   </button>
 
@@ -1023,22 +1125,26 @@ export function ShopOrderBuilder() {
                       onClick={() => setRevisionsExpanded(!revisionsExpanded)}
                       className="flex items-center gap-3 hover:bg-gray-700 rounded px-2 py-1 -ml-2 transition"
                     >
-                      <span className="text-gray-600 dark:text-gray-400 text-lg">{revisionsExpanded ? '▼' : '▶'}</span>
+                      <span className="text-gray-600 dark:text-gray-400 text-lg">
+                        {revisionsExpanded ? '▼' : '▶'}
+                      </span>
                       <h2 className="text-xl font-bold">Revisions</h2>
                       <span className="text-sm text-gray-600 dark:text-gray-400">
-                        Rev {currentProject.current_revision} | {5 - currentProject.current_revision} remaining
+                        Rev {currentProject.current_revision} |{' '}
+                        {5 - currentProject.current_revision} remaining
                       </span>
                     </button>
                     <div className="flex gap-2">
-                      {currentProject.current_revision === 0 && !revisions.find(r => r.revision_number === 0) && (
-                        <button
-                          onClick={() => setShowRevisionZeroNotes(!showRevisionZeroNotes)}
-                          disabled={isSettingRevisionZero}
-                          className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-200 dark:bg-gray-700 disabled:text-gray-500 rounded text-sm font-medium transition"
-                        >
-                          {isSettingRevisionZero ? 'Setting...' : 'Set Revision 0'}
-                        </button>
-                      )}
+                      {currentProject.current_revision === 0 &&
+                        !revisions.find((r) => r.revision_number === 0) && (
+                          <button
+                            onClick={() => setShowRevisionZeroNotes(!showRevisionZeroNotes)}
+                            disabled={isSettingRevisionZero}
+                            className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-200 dark:bg-gray-700 disabled:text-gray-500 rounded text-sm font-medium transition"
+                          >
+                            {isSettingRevisionZero ? 'Setting...' : 'Set Revision 0'}
+                          </button>
+                        )}
                       <button
                         onClick={() => setShowRevisionNotes(!showRevisionNotes)}
                         disabled={isGeneratingRevision || currentProject.current_revision >= 5}
@@ -1056,7 +1162,8 @@ export function ShopOrderBuilder() {
                         Revision 0 Notes (optional)
                       </label>
                       <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
-                        Set the current state as your baseline. Future revisions will show actual changes.
+                        Set the current state as your baseline. Future revisions will show actual
+                        changes.
                       </p>
                       <textarea
                         value={revisionZeroNotes}
@@ -1128,7 +1235,9 @@ export function ShopOrderBuilder() {
                         project={currentProject}
                         revisions={revisions}
                         onGenerateRevision={(notes) => generateRevision(currentProject.id, notes)}
-                        onDeleteRevision={(revisionId) => deleteRevision(currentProject.id, revisionId)}
+                        onDeleteRevision={(revisionId) =>
+                          deleteRevision(currentProject.id, revisionId)
+                        }
                         onCompareRevisions={(rev1, rev2) => {
                           // TODO: Implement revision comparison
                           console.log('Compare revisions:', rev1, rev2);
@@ -1195,12 +1304,14 @@ export function ShopOrderBuilder() {
             <button
               onClick={handleBackClick}
               className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
-              title={parentProjectId ? "Back to Project" : "Back to Projects"}
+              title={parentProjectId ? 'Back to Project' : 'Back to Projects'}
             >
               ← Back
             </button>
             <h1 className="text-2xl font-bold">ShowStack:Prep</h1>
-            <span className="text-sm text-gray-600 dark:text-gray-400">Equipment Orders & Specifications</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              Equipment Orders & Specifications
+            </span>
           </div>
           <div className="flex gap-2">
             <button
@@ -1238,9 +1349,7 @@ export function ShopOrderBuilder() {
             </div>
           ) : (
             <div>
-              <h2 className="text-xl font-semibold mb-4">
-                All Projects ({allProjects.length})
-              </h2>
+              <h2 className="text-xl font-semibold mb-4">All Projects ({allProjects.length})</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {allProjects.map((project) => (
                   <ShopOrderProjectCard

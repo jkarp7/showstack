@@ -18,11 +18,7 @@ export class PerformanceMonitor {
   /**
    * Track database query performance
    */
-  trackDatabaseQuery(
-    operation: string,
-    duration: number,
-    rowCount?: number
-  ): void {
+  trackDatabaseQuery(operation: string, duration: number, rowCount?: number): void {
     const isSlow = duration > this.SLOW_QUERY_THRESHOLD_MS;
 
     // Log to console
@@ -50,7 +46,7 @@ export class PerformanceMonitor {
       heap_used_mb: Math.round((usage.heapUsed / 1024 / 1024) * 100) / 100,
       heap_total_mb: Math.round((usage.heapTotal / 1024 / 1024) * 100) / 100,
       rss_mb: Math.round((usage.rss / 1024 / 1024) * 100) / 100,
-      external_mb: Math.round((usage.external / 1024 / 1024) * 100) / 100
+      external_mb: Math.round((usage.external / 1024 / 1024) * 100) / 100,
     };
 
     // Warn if memory usage is high (>1GB heap)
@@ -92,7 +88,7 @@ export class PerformanceMonitor {
 
     if (isSlow) {
       console.warn(
-        `⚠️ Slow render: ${componentName} took ${duration}ms (target: <${this.SLOW_RENDER_THRESHOLD_MS}ms)`
+        `⚠️ Slow render: ${componentName} took ${duration}ms (target: <${this.SLOW_RENDER_THRESHOLD_MS}ms)`,
       );
     }
 

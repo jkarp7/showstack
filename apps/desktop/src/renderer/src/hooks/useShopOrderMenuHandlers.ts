@@ -12,12 +12,7 @@ interface PrepMenuHandlersProps {
  * Registers handlers when component mounts, unregisters on unmount
  */
 export function useShopOrderMenuHandlers(props: PrepMenuHandlersProps) {
-  const {
-    onNewProject,
-    onAddSection,
-    onPrint,
-    hasProject,
-  } = props;
+  const { onNewProject, onAddSection, onPrint, hasProject } = props;
 
   useEffect(() => {
     if (!window.api?.menu) return;

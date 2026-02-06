@@ -9,7 +9,7 @@ import type {
   TableConfig,
   ShapeConfig,
   DataFieldType,
-  ShapeType
+  ShapeType,
 } from '../../../types/shopOrder';
 import { ColorPicker } from './ColorPicker';
 
@@ -26,7 +26,7 @@ export function ElementInspector({
   onUpdate,
   onDelete,
   maxColumns,
-  maxRows
+  maxRows,
 }: ElementInspectorProps) {
   const [activeSection, setActiveSection] = useState<'config' | 'style' | 'position'>('config');
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
@@ -54,23 +54,25 @@ export function ElementInspector({
 
   const updateConfig = (configUpdates: Partial<ElementConfig>) => {
     onUpdate({
-      config: { ...element.config, ...configUpdates } as ElementConfig
+      config: { ...element.config, ...configUpdates } as ElementConfig,
     });
   };
 
   const updateStyle = (styleUpdates: Partial<ElementStyle>) => {
     onUpdate({
-      style: { ...element.style, ...styleUpdates }
+      style: { ...element.style, ...styleUpdates },
     });
   };
 
-  const updatePosition = (positionUpdates: Partial<{
-    grid_column: number;
-    grid_row: number;
-    column_span: number;
-    row_span: number;
-    layer: number;
-  }>) => {
+  const updatePosition = (
+    positionUpdates: Partial<{
+      grid_column: number;
+      grid_row: number;
+      column_span: number;
+      row_span: number;
+      layer: number;
+    }>,
+  ) => {
     onUpdate(positionUpdates);
   };
 
@@ -89,7 +91,8 @@ export function ElementInspector({
         </div>
 
         <div className="text-xs text-gray-400 mb-3">
-          Type: <span className="text-gray-900 dark:text-white font-mono">{element.element_type}</span>
+          Type:{' '}
+          <span className="text-gray-900 dark:text-white font-mono">{element.element_type}</span>
         </div>
 
         {/* Section Tabs */}
@@ -222,7 +225,12 @@ export function ElementInspector({
                           const file = e.target.files?.[0];
                           if (file) {
                             // SECURITY: Validate MIME type (matches backend whitelist)
-                            const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+                            const ALLOWED_TYPES = [
+                              'image/png',
+                              'image/jpeg',
+                              'image/gif',
+                              'image/webp',
+                            ];
                             if (!ALLOWED_TYPES.includes(file.type)) {
                               alert('Invalid file type. Allowed: PNG, JPG, GIF, WebP');
                               e.target.value = ''; // Reset input
@@ -262,9 +270,7 @@ export function ElementInspector({
                       </button>
                     )}
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    PNG, JPG, GIF, WebP • Max 2MB
-                  </div>
+                  <div className="text-xs text-gray-500 mt-1">PNG, JPG, GIF, WebP • Max 2MB</div>
                 </FormField>
 
                 {/* URL Input (Alternative) */}
@@ -287,11 +293,15 @@ export function ElementInspector({
                           'data:image/png',
                           'data:image/jpeg',
                           'data:image/gif',
-                          'data:image/webp'
+                          'data:image/webp',
                         ];
-                        const hasAllowedType = ALLOWED_DATA_TYPES.some(type => url.startsWith(type));
+                        const hasAllowedType = ALLOWED_DATA_TYPES.some((type) =>
+                          url.startsWith(type),
+                        );
                         if (!hasAllowedType) {
-                          alert('Invalid data URL. Only PNG, JPG, GIF, and WebP data URLs are allowed.');
+                          alert(
+                            'Invalid data URL. Only PNG, JPG, GIF, and WebP data URLs are allowed.',
+                          );
                           return;
                         }
                       }
@@ -435,9 +445,11 @@ export function ElementInspector({
               <div className="grid grid-cols-4 gap-1">
                 {/* Bold Toggle */}
                 <button
-                  onClick={() => updateStyle({
-                    fontWeight: element.style.fontWeight === 'bold' ? 'normal' : 'bold'
-                  })}
+                  onClick={() =>
+                    updateStyle({
+                      fontWeight: element.style.fontWeight === 'bold' ? 'normal' : 'bold',
+                    })
+                  }
                   className={`px-3 py-2 rounded font-bold transition text-sm ${
                     element.style.fontWeight === 'bold'
                       ? 'bg-blue-600 text-white'
@@ -451,9 +463,11 @@ export function ElementInspector({
 
                 {/* Italic Toggle */}
                 <button
-                  onClick={() => updateStyle({
-                    fontStyle: element.style.fontStyle === 'italic' ? 'normal' : 'italic'
-                  })}
+                  onClick={() =>
+                    updateStyle({
+                      fontStyle: element.style.fontStyle === 'italic' ? 'normal' : 'italic',
+                    })
+                  }
                   className={`px-3 py-2 rounded italic transition text-sm ${
                     element.style.fontStyle === 'italic'
                       ? 'bg-blue-600 text-white'
@@ -467,9 +481,12 @@ export function ElementInspector({
 
                 {/* Underline Toggle */}
                 <button
-                  onClick={() => updateStyle({
-                    textDecoration: element.style.textDecoration === 'underline' ? 'none' : 'underline'
-                  })}
+                  onClick={() =>
+                    updateStyle({
+                      textDecoration:
+                        element.style.textDecoration === 'underline' ? 'none' : 'underline',
+                    })
+                  }
                   className={`px-3 py-2 rounded underline transition text-sm ${
                     element.style.textDecoration === 'underline'
                       ? 'bg-blue-600 text-white'
@@ -483,9 +500,12 @@ export function ElementInspector({
 
                 {/* Strikethrough Toggle */}
                 <button
-                  onClick={() => updateStyle({
-                    textDecoration: element.style.textDecoration === 'line-through' ? 'none' : 'line-through'
-                  })}
+                  onClick={() =>
+                    updateStyle({
+                      textDecoration:
+                        element.style.textDecoration === 'line-through' ? 'none' : 'line-through',
+                    })
+                  }
                   className={`px-3 py-2 rounded line-through transition text-sm ${
                     element.style.textDecoration === 'line-through'
                       ? 'bg-blue-600 text-white'
@@ -512,7 +532,12 @@ export function ElementInspector({
                   type="button"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h10M4 18h14" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h10M4 18h14"
+                    />
                   </svg>
                 </button>
 
@@ -528,7 +553,12 @@ export function ElementInspector({
                   type="button"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M7 12h10M5 18h14" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M7 12h10M5 18h14"
+                    />
                   </svg>
                 </button>
 
@@ -544,7 +574,12 @@ export function ElementInspector({
                   type="button"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M10 12h10M6 18h14" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M10 12h10M6 18h14"
+                    />
                   </svg>
                 </button>
 
@@ -560,7 +595,12 @@ export function ElementInspector({
                   type="button"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
                   </svg>
                 </button>
               </div>
@@ -634,9 +674,11 @@ export function ElementInspector({
                       <input
                         type="checkbox"
                         checked={element.style.backgroundColor !== 'transparent'}
-                        onChange={(e) => updateStyle({
-                          backgroundColor: e.target.checked ? '#000000' : 'transparent'
-                        })}
+                        onChange={(e) =>
+                          updateStyle({
+                            backgroundColor: e.target.checked ? '#000000' : 'transparent',
+                          })
+                        }
                         className="w-4 h-4"
                       />
                       <span className="text-sm text-gray-300">Enable fill</span>
@@ -727,7 +769,7 @@ export function ElementInspector({
                           paddingTop: undefined,
                           paddingRight: undefined,
                           paddingBottom: undefined,
-                          paddingLeft: undefined
+                          paddingLeft: undefined,
                         });
                       } else {
                         // Unlink - convert to individual
@@ -737,7 +779,7 @@ export function ElementInspector({
                           paddingTop: current,
                           paddingRight: current,
                           paddingBottom: current,
-                          paddingLeft: current
+                          paddingLeft: current,
                         });
                       }
                     }}
@@ -841,7 +883,14 @@ export function ElementInspector({
                 <input
                   type="number"
                   value={element.grid_column}
-                  onChange={(e) => updatePosition({ grid_column: Math.max(0, Math.min(maxColumns - 1, parseInt(e.target.value) || 0)) })}
+                  onChange={(e) =>
+                    updatePosition({
+                      grid_column: Math.max(
+                        0,
+                        Math.min(maxColumns - 1, parseInt(e.target.value) || 0),
+                      ),
+                    })
+                  }
                   min="0"
                   max={maxColumns - 1}
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
@@ -852,7 +901,11 @@ export function ElementInspector({
                 <input
                   type="number"
                   value={element.grid_row}
-                  onChange={(e) => updatePosition({ grid_row: Math.max(0, Math.min(maxRows - 1, parseInt(e.target.value) || 0)) })}
+                  onChange={(e) =>
+                    updatePosition({
+                      grid_row: Math.max(0, Math.min(maxRows - 1, parseInt(e.target.value) || 0)),
+                    })
+                  }
                   min="0"
                   max={maxRows - 1}
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
@@ -871,7 +924,14 @@ export function ElementInspector({
                 <input
                   type="number"
                   value={element.column_span}
-                  onChange={(e) => updatePosition({ column_span: Math.max(1, Math.min(maxColumns - element.grid_column, parseInt(e.target.value) || 1)) })}
+                  onChange={(e) =>
+                    updatePosition({
+                      column_span: Math.max(
+                        1,
+                        Math.min(maxColumns - element.grid_column, parseInt(e.target.value) || 1),
+                      ),
+                    })
+                  }
                   min="1"
                   max={maxColumns - element.grid_column}
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
@@ -882,7 +942,14 @@ export function ElementInspector({
                 <input
                   type="number"
                   value={element.row_span}
-                  onChange={(e) => updatePosition({ row_span: Math.max(1, Math.min(maxRows - element.grid_row, parseInt(e.target.value) || 1)) })}
+                  onChange={(e) =>
+                    updatePosition({
+                      row_span: Math.max(
+                        1,
+                        Math.min(maxRows - element.grid_row, parseInt(e.target.value) || 1),
+                      ),
+                    })
+                  }
                   min="1"
                   max={maxRows - element.grid_row}
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
@@ -905,9 +972,7 @@ export function ElementInspector({
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                 />
               </FormField>
-              <div className="text-xs text-gray-500">
-                Higher numbers appear on top
-              </div>
+              <div className="text-xs text-gray-500">Higher numbers appear on top</div>
             </CollapsibleSection>
           </>
         )}
@@ -924,7 +989,7 @@ function CollapsibleSection({
   children,
   isCollapsed,
   onToggle,
-  defaultExpanded = true
+  defaultExpanded = true,
 }: {
   id: string;
   title: string;
@@ -945,9 +1010,7 @@ function CollapsibleSection({
           <h4 className="text-xs font-semibold text-gray-300 uppercase">{title}</h4>
         </div>
         <svg
-          className={`w-4 h-4 text-gray-400 transition-transform ${
-            collapsed ? '-rotate-90' : ''
-          }`}
+          className={`w-4 h-4 text-gray-400 transition-transform ${collapsed ? '-rotate-90' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -956,9 +1019,7 @@ function CollapsibleSection({
         </svg>
       </button>
       {!collapsed && (
-        <div className="p-3 pt-0 space-y-3 border-t border-gray-700/50">
-          {children}
-        </div>
+        <div className="p-3 pt-0 space-y-3 border-t border-gray-700/50">{children}</div>
       )}
     </div>
   );
@@ -969,9 +1030,7 @@ function ConfigSection({ title, children }: { title: string; children: React.Rea
   return (
     <div className="border border-gray-700 rounded-lg p-3 bg-gray-750">
       <h4 className="text-xs font-semibold text-gray-300 uppercase mb-3">{title}</h4>
-      <div className="space-y-3">
-        {children}
-      </div>
+      <div className="space-y-3">{children}</div>
     </div>
   );
 }

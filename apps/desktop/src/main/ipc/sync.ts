@@ -60,48 +60,42 @@ export function registerSyncHandlers(): void {
   /**
    * Sign in with email and password
    */
-  ipcMain.handle(
-    'auth:signIn',
-    async (_, email: string, password: string) => {
-      try {
-        const connector = getSupabaseConnector();
-        const result = await connector.signIn(email, password);
+  ipcMain.handle('auth:signIn', async (_, email: string, password: string) => {
+    try {
+      const connector = getSupabaseConnector();
+      const result = await connector.signIn(email, password);
 
-        if (result.success) {
-          // Start syncing after successful sign in
-          const service = getPowerSyncService();
-          if (service.isReady()) {
-            await service.connect();
-          }
+      if (result.success) {
+        // Start syncing after successful sign in
+        const service = getPowerSyncService();
+        if (service.isReady()) {
+          await service.connect();
         }
-
-        return result;
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Sign in failed',
-        };
       }
+
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Sign in failed',
+      };
     }
-  );
+  });
 
   /**
    * Sign up with email and password
    */
-  ipcMain.handle(
-    'auth:signUp',
-    async (_, email: string, password: string) => {
-      try {
-        const connector = getSupabaseConnector();
-        return await connector.signUp(email, password);
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Sign up failed',
-        };
-      }
+  ipcMain.handle('auth:signUp', async (_, email: string, password: string) => {
+    try {
+      const connector = getSupabaseConnector();
+      return await connector.signUp(email, password);
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Sign up failed',
+      };
     }
-  );
+  });
 
   /**
    * Sign out
@@ -311,8 +305,10 @@ export async function initializePowerSync(): Promise<void> {
     }
   } catch (error) {
     // Non-fatal - app works offline without sync
-    console.log('[Sync] PowerSync initialization skipped:',
-      error instanceof Error ? error.message : 'Unknown error');
+    console.log(
+      '[Sync] PowerSync initialization skipped:',
+      error instanceof Error ? error.message : 'Unknown error',
+    );
   }
 }
 

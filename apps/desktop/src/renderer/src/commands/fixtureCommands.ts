@@ -225,7 +225,7 @@ export class BulkUpdateFixturesCommand implements Command {
 
     // Update all fixtures
     const updatedFixtures = await Promise.all(
-      this.fixtureUpdates.map(({ id, newData }) => window.api.fixtures.update(id, newData))
+      this.fixtureUpdates.map(({ id, newData }) => window.api.fixtures.update(id, newData)),
     );
 
     // Update store directly
@@ -237,7 +237,9 @@ export class BulkUpdateFixturesCommand implements Command {
     });
 
     // Track bulk update
-    const allChangedFields = [...new Set(this.fixtureUpdates.flatMap(u => Object.keys(u.newData)))];
+    const allChangedFields = [
+      ...new Set(this.fixtureUpdates.flatMap((u) => Object.keys(u.newData))),
+    ];
     trackFixtureOperation.bulkEdit(this.fixtureUpdates.length, allChangedFields);
 
     // Mark file as dirty
@@ -249,7 +251,7 @@ export class BulkUpdateFixturesCommand implements Command {
 
     // Restore old data for all fixtures
     const restoredFixtures = await Promise.all(
-      this.fixtureUpdates.map(({ id, oldData }) => window.api.fixtures.update(id, oldData))
+      this.fixtureUpdates.map(({ id, oldData }) => window.api.fixtures.update(id, oldData)),
     );
 
     // Update store directly
@@ -316,7 +318,7 @@ export class BulkDeleteFixturesCommand implements Command {
       this.deletedFixtures.map((fixture) => {
         const { id, created_at, updated_at, ...fixtureData } = fixture;
         return window.api.fixtures.create(fixtureData);
-      })
+      }),
     );
 
     useFixtureStore.setState((state) => ({

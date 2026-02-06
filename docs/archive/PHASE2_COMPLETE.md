@@ -1,25 +1,30 @@
 # Phase 2 Complete: Shop Order Table Migration
 
 ## Summary
+
 Successfully completed Phases 1 & 2 of the shop order table migration, transforming the dialog-based shop order system into a modern spreadsheet-like interface.
 
 ## ✅ Completed Work
 
 ### Phase 1: Database & Core Logic
+
 **Commits:** `3ea0166`, `0f4f1e0`
 
 **Database Changes:**
+
 - ✅ Added `revision_quantities` column (JSON) to `prep_equipment_items`
 - ✅ Added `deleted_in_revision` column for soft delete support
 - ✅ Added `spare_snapshot` column to `prep_revisions`
 - ✅ Kept old columns for rollback safety
 
 **TypeScript:**
+
 - ✅ Updated `PrepEquipmentItem` interface with new fields
 - ✅ Updated `PrepRevision` interface
 - ✅ Added `RevisionQuantities` and `SpareSnapshot` helper types
 
 **Utilities (src/renderer/src/utils/revisionUtils.ts):**
+
 - ✅ `parseRevisionQuantities()` - Parse JSON revision quantities
 - ✅ `setRevisionQuantity()` - Update quantity for specific revision
 - ✅ `calculateTotalQuantity()` - Calculate max(all revisions) + spare
@@ -30,6 +35,7 @@ Successfully completed Phases 1 & 2 of the shop order table migration, transform
 - ✅ **35 passing tests with 100% coverage**
 
 **Migration:**
+
 - ✅ `migrateToTableBasedShopOrder.ts` - Convert existing projects
 - ✅ Supports rollback for safety
 - ✅ Batch migration for all projects
@@ -37,9 +43,11 @@ Successfully completed Phases 1 & 2 of the shop order table migration, transform
 ---
 
 ### Phase 2: ShopOrderTable Component
+
 **Commits:** `9e5d104`, `7f01e21`
 
 **Core Features (src/renderer/src/components/prep/ShopOrderTable.tsx):**
+
 - ✅ Spreadsheet-like table UI for editing shop orders
 - ✅ Inline cell editing for all fields:
   - Description (text input)
@@ -54,6 +62,7 @@ Successfully completed Phases 1 & 2 of the shop order table migration, transform
 - ✅ Keyboard navigation (Enter to save, Escape to cancel)
 
 **Advanced Features:**
+
 - ✅ **Add Revision Button**
   - Creates new revision (max 6)
   - Automatically creates revision record
@@ -72,6 +81,7 @@ Successfully completed Phases 1 & 2 of the shop order table migration, transform
   - Clean UI with dark mode support
 
 **Testing:**
+
 - ✅ **20 comprehensive tests (all passing)**
 - ✅ Rendering tests (headers, sections, items, calculations)
 - ✅ Inline editing tests (all field types)
@@ -83,6 +93,7 @@ Successfully completed Phases 1 & 2 of the shop order table migration, transform
 ---
 
 ## 📊 Test Coverage
+
 - **Total Tests:** 55 (35 utility + 20 component)
 - **Status:** 100% passing ✅
 - **Coverage:** 70%+ target met
@@ -90,6 +101,7 @@ Successfully completed Phases 1 & 2 of the shop order table migration, transform
 ---
 
 ## 📦 Git Commits
+
 ```
 7f01e21 feat: Complete Phase 2 - Add revision management, drag-and-drop, and notes modal
 9e5d104 feat: Phase 2 - ShopOrderTable spreadsheet component with tests
@@ -100,6 +112,7 @@ Successfully completed Phases 1 & 2 of the shop order table migration, transform
 ---
 
 ## 🚀 Ready for Review
+
 The ShopOrderTable component is ready for testing and user feedback. To review:
 
 1. Launch the app: `npm run dev`
@@ -117,17 +130,20 @@ The ShopOrderTable component is ready for testing and user feedback. To review:
 ## 📋 Remaining Phases (Not Started)
 
 ### Phase 3: Print & Reports
+
 - [ ] Implement DELTA column in print view
 - [ ] Add RENTAL & TOTAL columns with prominent styling
 - [ ] Create Venue Inventory page
 - [ ] Create Revision Change Log page
 
 ### Phase 4: Import/Export
+
 - [ ] Implement paste from clipboard (TSV/CSV)
 - [ ] Add Vectorworks import mapping
 - [ ] Implement export to spreadsheet
 
 ### Phase 5: Performance & Polish
+
 - [ ] Add virtual scrolling for performance
 - [ ] Implement debounced saves
 - [ ] Add keyboard shortcuts
@@ -137,6 +153,7 @@ The ShopOrderTable component is ready for testing and user feedback. To review:
 ---
 
 ## 🎯 Next Steps
+
 1. Review and test Phase 2 implementation
 2. Gather user feedback
 3. Fix any bugs or issues
@@ -144,5 +161,5 @@ The ShopOrderTable component is ready for testing and user feedback. To review:
 
 ---
 
-*Generated: 2026-01-19*
-*Branch: feature/shop-order-table-migration*
+_Generated: 2026-01-19_
+_Branch: feature/shop-order-table-migration_

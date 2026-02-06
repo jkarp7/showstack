@@ -13,6 +13,7 @@ The ShowStack Electron application uses **Vitest** for unit/integration testing 
 Mock `window.api.*` calls in `src/renderer/test/setup.ts`. The global setup file provides default mocks for all IPC handlers.
 
 **Override mocks per test:**
+
 ```typescript
 import { vi } from 'vitest';
 
@@ -21,6 +22,7 @@ vi.mocked(window.api.fixtures.getAll).mockResolvedValue([mockFixture1, mockFixtu
 ```
 
 **Example:**
+
 ```typescript
 import { render, screen } from '@/test/testUtils';
 import { vi } from 'vitest';
@@ -57,15 +59,14 @@ vi.mock('electron', () => ({
 ```
 
 Test IPC handlers independently by calling them directly:
+
 ```typescript
 import { registerFileHandlers } from '../ipc/files';
 
 test('file:open handler works', async () => {
   registerFileHandlers();
 
-  const handler = vi.mocked(ipcMain.handle).mock.calls.find(
-    call => call[0] === 'file:open'
-  )?.[1];
+  const handler = vi.mocked(ipcMain.handle).mock.calls.find((call) => call[0] === 'file:open')?.[1];
 
   const result = await handler?.({}, '/path/to/file.showstack');
   expect(result).toBeDefined();
@@ -157,6 +158,7 @@ test('addFixture adds fixture to store', () => {
 Mocked globally in `setup.ts` to avoid SVG rendering issues. Returns simple div elements for snapshot testing.
 
 If you need specific icon behavior in a test:
+
 ```typescript
 import { AlertCircle } from 'lucide-react';
 import { vi } from 'vitest';
@@ -178,6 +180,7 @@ test('navigation works', () => {
 ```
 
 Mock `useNavigate()` for navigation testing:
+
 ```typescript
 const mockNavigate = vi.fn();
 
@@ -198,12 +201,14 @@ expect(mockNavigate).toHaveBeenCalledWith(-1);
 Mock external dependencies (Electron, FS, network), but test internal logic with real implementations.
 
 ✅ **Good:**
+
 ```typescript
 vi.mocked(window.api.fixtures.getAll).mockResolvedValue([...]);
 // Test component logic with mocked API
 ```
 
 ❌ **Bad:**
+
 ```typescript
 vi.mock('../utils/powerCalculations'); // Don't mock what you're testing!
 ```
@@ -246,6 +251,7 @@ test('displays fixtures', () => {
 Mock IPC calls, not internal component state:
 
 ✅ **Good:**
+
 ```typescript
 test('saves changes when save button clicked', async () => {
   render(<Editor />);
@@ -259,6 +265,7 @@ test('saves changes when save button clicked', async () => {
 ```
 
 ❌ **Bad:**
+
 ```typescript
 test('isSaving state is true after save', () => {
   const { result } = renderHook(() => useEditor());

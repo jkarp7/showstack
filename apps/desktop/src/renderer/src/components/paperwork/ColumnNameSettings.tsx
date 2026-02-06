@@ -4,7 +4,11 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { PaperworkColumnConfig, ColumnDisplayMode, ReportType } from '../../types/paperworkTemplate';
+import {
+  PaperworkColumnConfig,
+  ColumnDisplayMode,
+  ReportType,
+} from '../../types/paperworkTemplate';
 import { getAllAvailableColumns } from '../../utils/paperwork/columnDefaults';
 
 interface ColumnNameSettingsProps {
@@ -17,9 +21,8 @@ export function ColumnNameSettings({ columns, onChange, reportType }: ColumnName
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Get current display mode from columns
-  const currentDisplayMode = columns.length > 0 && columns[0].displayMode
-    ? columns[0].displayMode
-    : 'full';
+  const currentDisplayMode =
+    columns.length > 0 && columns[0].displayMode ? columns[0].displayMode : 'full';
   const [globalMode, setGlobalMode] = useState<ColumnDisplayMode>(currentDisplayMode);
 
   // Sync globalMode with actual column displayMode when columns change
@@ -33,12 +36,12 @@ export function ColumnNameSettings({ columns, onChange, reportType }: ColumnName
   const allAvailableColumns = getAllAvailableColumns(reportType);
 
   // Merge with current columns to preserve custom labels
-  const columnsWithCustomLabels = allAvailableColumns.map(availableCol => {
-    const currentCol = columns.find(c => c.id === availableCol.id);
+  const columnsWithCustomLabels = allAvailableColumns.map((availableCol) => {
+    const currentCol = columns.find((c) => c.id === availableCol.id);
     return {
       ...availableCol,
       customLabel: currentCol?.customLabel || '',
-      displayMode: currentCol?.displayMode || currentDisplayMode
+      displayMode: currentCol?.displayMode || currentDisplayMode,
     };
   });
 
@@ -47,13 +50,13 @@ export function ColumnNameSettings({ columns, onChange, reportType }: ColumnName
     setGlobalMode(mode);
 
     // Update displayMode and merge in shortLabel from defaults if missing
-    const updatedColumns = columns.map(col => {
-      const defaultCol = allAvailableColumns.find(c => c.id === col.id);
+    const updatedColumns = columns.map((col) => {
+      const defaultCol = allAvailableColumns.find((c) => c.id === col.id);
       return {
         ...col,
         displayMode: mode,
         // Merge in shortLabel from defaults if not present
-        shortLabel: col.shortLabel || defaultCol?.shortLabel
+        shortLabel: col.shortLabel || defaultCol?.shortLabel,
       };
     });
 
@@ -62,8 +65,8 @@ export function ColumnNameSettings({ columns, onChange, reportType }: ColumnName
 
   // Handle custom label change only
   const handleCustomLabelChange = (columnId: string, customLabel: string) => {
-    const updatedColumns = columns.map(col =>
-      col.id === columnId ? { ...col, customLabel } : col
+    const updatedColumns = columns.map((col) =>
+      col.id === columnId ? { ...col, customLabel } : col,
     );
     onChange(updatedColumns);
   };
@@ -128,7 +131,7 @@ export function ColumnNameSettings({ columns, onChange, reportType }: ColumnName
               Custom Column Labels (showing all {columnsWithCustomLabels.length} available columns)
             </label>
             <div className="space-y-2">
-              {columnsWithCustomLabels.map(col => (
+              {columnsWithCustomLabels.map((col) => (
                 <div key={col.id} className="bg-gray-800 p-2 rounded">
                   {/* Column Info - Read Only */}
                   <div className="grid grid-cols-3 gap-2 mb-2 text-xs">
@@ -141,12 +144,14 @@ export function ColumnNameSettings({ columns, onChange, reportType }: ColumnName
                       <span className="ml-1 text-gray-300">{col.shortLabel || '—'}</span>
                     </div>
                     <div className="text-right">
-                      <span className={`text-xs px-1.5 py-0.5 rounded ${
-                        columns.find(c => c.id === col.id)?.visible
-                          ? 'bg-green-600 text-white'
-                          : 'bg-gray-700 text-gray-400'
-                      }`}>
-                        {columns.find(c => c.id === col.id)?.visible ? 'Visible' : 'Hidden'}
+                      <span
+                        className={`text-xs px-1.5 py-0.5 rounded ${
+                          columns.find((c) => c.id === col.id)?.visible
+                            ? 'bg-green-600 text-white'
+                            : 'bg-gray-700 text-gray-400'
+                        }`}
+                      >
+                        {columns.find((c) => c.id === col.id)?.visible ? 'Visible' : 'Hidden'}
                       </span>
                     </div>
                   </div>
@@ -169,9 +174,11 @@ export function ColumnNameSettings({ columns, onChange, reportType }: ColumnName
 
           {/* Info Text */}
           <div className="text-xs text-gray-500 pt-2 border-t border-gray-700">
-            Currently displaying: <span className="text-blue-400 font-semibold">
+            Currently displaying:{' '}
+            <span className="text-blue-400 font-semibold">
               {globalMode === 'full' ? 'Full' : globalMode === 'short' ? 'Short' : 'Custom'}
-            </span> labels (highlighted above)
+            </span>{' '}
+            labels (highlighted above)
           </div>
         </div>
       )}

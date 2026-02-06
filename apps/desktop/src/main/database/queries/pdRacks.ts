@@ -28,11 +28,15 @@ export interface PDRack {
 export function getAllPDRacks(projectId: string = 'default-project'): PDRack[] {
   const db = getDatabase();
 
-  const racks = db.prepare(`
+  const racks = db
+    .prepare(
+      `
     SELECT * FROM pd_racks
     WHERE project_id = ?
     ORDER BY name
-  `).all(projectId);
+  `,
+    )
+    .all(projectId);
 
   return racks as PDRack[];
 }
@@ -43,10 +47,14 @@ export function getAllPDRacks(projectId: string = 'default-project'): PDRack[] {
 export function getPDRackById(id: string): PDRack {
   const db = getDatabase();
 
-  const rack = db.prepare(`
+  const rack = db
+    .prepare(
+      `
     SELECT * FROM pd_racks
     WHERE id = ?
-  `).get(id);
+  `,
+    )
+    .get(id);
 
   if (!rack) {
     throw new Error(`PD rack not found: ${id}`);
@@ -60,19 +68,21 @@ export function getPDRackById(id: string): PDRack {
  */
 export function createPDRack(
   rack: Omit<PDRack, 'id' | 'created_at' | 'updated_at'>,
-  projectId: string = 'default-project'
+  projectId: string = 'default-project',
 ): PDRack {
   const db = getDatabase();
   const id = uuidv4();
   const now = Date.now();
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO pd_racks (
       id, project_id, name, rack_identifier, voltage, is_dual_voltage, secondary_voltage,
       circuit_count, phase_config, amps_per_breaker, location, notes,
       building_service, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
+  `,
+  ).run(
     id,
     projectId,
     rack.name,
@@ -87,7 +97,7 @@ export function createPDRack(
     rack.notes || null,
     (rack as any).building_service || null,
     now,
-    now
+    now,
   );
 
   saveDatabase();
@@ -158,11 +168,13 @@ export function updatePDRack(id: string, updates: Partial<PDRack>): PDRack {
   values.push(now);
   values.push(id);
 
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE pd_racks
     SET ${setClauses.join(', ')}
     WHERE id = ?
-  `).run(...values);
+  `,
+  ).run(...values);
 
   saveDatabase();
   return getPDRackById(id);
@@ -182,10 +194,14 @@ export function deletePDRack(id: string): void {
 /**
  * Get PD racks by project with usage statistics
  */
-export function getPDRacksWithUsage(projectId: string = 'default-project'): (PDRack & { circuits_used: number })[] {
+export function getPDRacksWithUsage(
+  projectId: string = 'default-project',
+): (PDRack & { circuits_used: number })[] {
   const db = getDatabase();
 
-  const racks = db.prepare(`
+  const racks = db
+    .prepare(
+      `
     SELECT
       pr.*,
       COUNT(DISTINCT f.pd_circuit_number) as circuits_used
@@ -194,7 +210,9 @@ export function getPDRacksWithUsage(projectId: string = 'default-project'): (PDR
     WHERE pr.project_id = ?
     GROUP BY pr.id
     ORDER BY pr.name
-  `).all(projectId);
+  `,
+    )
+    .all(projectId);
 
   return racks as (PDRack & { circuits_used: number })[];
 }

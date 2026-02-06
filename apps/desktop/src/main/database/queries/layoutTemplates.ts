@@ -19,10 +19,10 @@ const LAYOUT_TEMPLATE_ALLOWED_FIELDS = Object.freeze([
   'grid_gap',
   'page_width',
   'page_height',
-  'is_default'
+  'is_default',
 ] as const);
 
-type LayoutTemplateAllowedField = typeof LAYOUT_TEMPLATE_ALLOWED_FIELDS[number];
+type LayoutTemplateAllowedField = (typeof LAYOUT_TEMPLATE_ALLOWED_FIELDS)[number];
 
 function isLayoutTemplateAllowedField(field: string): field is LayoutTemplateAllowedField {
   return LAYOUT_TEMPLATE_ALLOWED_FIELDS.includes(field as LayoutTemplateAllowedField);
@@ -84,9 +84,9 @@ export function getAllLayoutTemplates(pageType?: string): PageLayoutTemplate[] {
  */
 export function getLayoutTemplateById(id: string): PageLayoutTemplate | null {
   const db = getAppDatabase();
-  const template = db.prepare(
-    `SELECT * FROM page_layout_templates WHERE id = ?`
-  ).get(id) as PageLayoutTemplate | undefined;
+  const template = db.prepare(`SELECT * FROM page_layout_templates WHERE id = ?`).get(id) as
+    | PageLayoutTemplate
+    | undefined;
 
   return template || null;
 }
@@ -96,9 +96,9 @@ export function getLayoutTemplateById(id: string): PageLayoutTemplate | null {
  */
 export function getLayoutElementsByTemplateId(templateId: string): LayoutElement[] {
   const db = getAppDatabase();
-  const rows = db.prepare(
-    `SELECT * FROM page_layout_elements WHERE template_id = ? ORDER BY layer`
-  ).all(templateId) as LayoutElement[];
+  const rows = db
+    .prepare(`SELECT * FROM page_layout_elements WHERE template_id = ? ORDER BY layer`)
+    .all(templateId) as LayoutElement[];
 
   return rows;
 }
@@ -108,7 +108,7 @@ export function getLayoutElementsByTemplateId(templateId: string): LayoutElement
  */
 export function createLayoutTemplate(
   data: Partial<PageLayoutTemplate>,
-  elements: Partial<LayoutElement>[]
+  elements: Partial<LayoutElement>[],
 ): PageLayoutTemplate {
   const db = getAppDatabase();
   const id = uuidv4();
@@ -116,9 +116,9 @@ export function createLayoutTemplate(
 
   // If setting as default, unset any existing defaults for this page type
   if (data.is_default) {
-    db.prepare(
-      `UPDATE page_layout_templates SET is_default = 0 WHERE page_type = ?`
-    ).run(data.page_type!);
+    db.prepare(`UPDATE page_layout_templates SET is_default = 0 WHERE page_type = ?`).run(
+      data.page_type!,
+    );
   }
 
   // Use transaction to ensure template and elements are created atomically
@@ -131,7 +131,7 @@ export function createLayoutTemplate(
         grid_columns, grid_rows, grid_gap, page_width, page_height,
         is_default, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `
+    `,
     ).run(
       id,
       data.user_id || null,
@@ -145,7 +145,7 @@ export function createLayoutTemplate(
       data.page_height || 1056,
       data.is_default ? 1 : 0,
       now,
-      now
+      now,
     );
 
     // Insert elements
@@ -156,7 +156,7 @@ export function createLayoutTemplate(
         grid_column, grid_row, column_span, row_span,
         layer, style, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `
+    `,
     );
 
     for (const element of elements) {
@@ -173,7 +173,7 @@ export function createLayoutTemplate(
         element.layer || 0,
         element.style || '{}',
         now,
-        now
+        now,
       );
     }
   });
@@ -189,7 +189,7 @@ export function createLayoutTemplate(
 export function updateLayoutTemplate(
   id: string,
   updates: Partial<PageLayoutTemplate>,
-  elements?: Partial<LayoutElement>[]
+  elements?: Partial<LayoutElement>[],
 ): PageLayoutTemplate {
   const db = getAppDatabase();
   const now = Date.now();
@@ -201,9 +201,9 @@ export function updateLayoutTemplate(
 
   // If setting as default, unset any existing defaults for this page type
   if (updates.is_default) {
-    db.prepare(
-      `UPDATE page_layout_templates SET is_default = 0 WHERE page_type = ?`
-    ).run(template.page_type);
+    db.prepare(`UPDATE page_layout_templates SET is_default = 0 WHERE page_type = ?`).run(
+      template.page_type,
+    );
   }
 
   // Update template metadata
@@ -218,9 +218,11 @@ export function updateLayoutTemplate(
       return updates[f];
     });
 
-    db.prepare(
-      `UPDATE page_layout_templates SET ${setClause}, updated_at = ? WHERE id = ?`
-    ).run(...values, now, id);
+    db.prepare(`UPDATE page_layout_templates SET ${setClause}, updated_at = ? WHERE id = ?`).run(
+      ...values,
+      now,
+      id,
+    );
   }
 
   // If elements are provided, replace all elements using a transaction for atomicity
@@ -237,7 +239,7 @@ export function updateLayoutTemplate(
           grid_column, grid_row, column_span, row_span,
           layer, style, created_at, updated_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `
+      `,
       );
 
       for (const element of elements) {
@@ -254,7 +256,7 @@ export function updateLayoutTemplate(
           element.layer || 0,
           element.style || '{}',
           element.created_at || now,
-          now
+          now,
         );
       }
     });
@@ -280,9 +282,9 @@ export function deleteLayoutTemplate(id: string): void {
  */
 export function getDefaultLayoutTemplate(pageType: string): PageLayoutTemplate | null {
   const db = getAppDatabase();
-  const template = db.prepare(
-    `SELECT * FROM page_layout_templates WHERE page_type = ? AND is_default = 1 LIMIT 1`
-  ).get(pageType) as PageLayoutTemplate | undefined;
+  const template = db
+    .prepare(`SELECT * FROM page_layout_templates WHERE page_type = ? AND is_default = 1 LIMIT 1`)
+    .get(pageType) as PageLayoutTemplate | undefined;
 
   return template || null;
 }

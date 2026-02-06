@@ -14,7 +14,7 @@ export function UnsavedChangesDialog({
   action,
   onSave,
   onDiscard,
-  onCancel
+  onCancel,
 }: UnsavedChangesDialogProps) {
   const [isSaving, setIsSaving] = useState(false);
   const currentFileName = useFileStore((state) => state.getCurrentFileName());
@@ -22,7 +22,7 @@ export function UnsavedChangesDialog({
   const actionText = {
     open: 'opening another file',
     new: 'creating a new project',
-    close: 'closing'
+    close: 'closing',
   };
 
   const handleSave = async () => {
@@ -43,7 +43,9 @@ export function UnsavedChangesDialog({
 
         <div className="mb-6">
           <p className="text-gray-300 mb-2">
-            Do you want to save changes to <span className="font-medium text-gray-900 dark:text-white">"{currentFileName}"</span> before {actionText[action]}?
+            Do you want to save changes to{' '}
+            <span className="font-medium text-gray-900 dark:text-white">"{currentFileName}"</span>{' '}
+            before {actionText[action]}?
           </p>
           <p className="text-sm text-gray-400 mt-3">
             Your changes will be lost if you don't save them.
@@ -95,7 +97,7 @@ export function useUnsavedChangesDialog() {
     action: 'close',
     onSave: () => {},
     onDiscard: () => {},
-    onCancel: () => {}
+    onCancel: () => {},
   });
 
   useEffect(() => {
@@ -117,7 +119,7 @@ export function useUnsavedChangesDialog() {
         onCancel: () => {
           onCancel();
           setDialogState((prev) => ({ ...prev, isOpen: false }));
-        }
+        },
       });
     };
 

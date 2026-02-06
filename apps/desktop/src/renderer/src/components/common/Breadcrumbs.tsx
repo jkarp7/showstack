@@ -28,13 +28,16 @@ export function Breadcrumbs() {
     // Fetch project name if we're in a project context
     const projectId = params.projectId;
     if (projectId) {
-      window.api?.projects?.getById(projectId).then(project => {
-        if (project) {
-          setProjectName(project.name);
-        }
-      }).catch(err => {
-        console.error('Failed to fetch project for breadcrumbs:', err);
-      });
+      window.api?.projects
+        ?.getById(projectId)
+        .then((project) => {
+          if (project) {
+            setProjectName(project.name);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to fetch project for breadcrumbs:', err);
+        });
     } else {
       setProjectName('');
     }
@@ -84,7 +87,10 @@ export function Breadcrumbs() {
 /**
  * Generate breadcrumb items from the current pathname
  */
-function generateBreadcrumbs(pathname: string, params: Record<string, string | undefined>): BreadcrumbItem[] {
+function generateBreadcrumbs(
+  pathname: string,
+  params: Record<string, string | undefined>,
+): BreadcrumbItem[] {
   const items: BreadcrumbItem[] = [];
 
   // Skip breadcrumbs for landing page
@@ -93,14 +99,14 @@ function generateBreadcrumbs(pathname: string, params: Record<string, string | u
   }
 
   // Parse the pathname
-  const segments = pathname.split('/').filter(s => s.length > 0);
+  const segments = pathname.split('/').filter((s) => s.length > 0);
 
   // Special handling for different routes
   if (segments[0] === 'project' && params.projectId) {
     // Project context
     items.push({
       label: '{project}',
-      path: `/project/${params.projectId}`
+      path: `/project/${params.projectId}`,
     });
 
     if (segments.length > 2 && segments[2] === 'module') {
@@ -109,7 +115,7 @@ function generateBreadcrumbs(pathname: string, params: Record<string, string | u
       if (moduleType === 'production') {
         items.push({
           label: 'Production',
-          path: `/project/${params.projectId}/module/production`
+          path: `/project/${params.projectId}/module/production`,
         });
 
         // System Docs tool
@@ -117,7 +123,7 @@ function generateBreadcrumbs(pathname: string, params: Record<string, string | u
           items.push({
             label: 'System Docs',
             path: `/project/${params.projectId}/module/production/system-docs`,
-            isLast: true
+            isLast: true,
           });
         }
 
@@ -126,14 +132,14 @@ function generateBreadcrumbs(pathname: string, params: Record<string, string | u
           items.push({
             label: 'Shop Order',
             path: `/project/${params.projectId}/module/production/shop-order`,
-            isLast: true
+            isLast: true,
           });
         }
       } else if (moduleType === 'manager') {
         items.push({
           label: 'Manager',
           path: `/project/${params.projectId}/module/manager`,
-          isLast: true
+          isLast: true,
         });
       }
     }
@@ -144,7 +150,7 @@ function generateBreadcrumbs(pathname: string, params: Record<string, string | u
     if (moduleType === 'production') {
       items.push({
         label: 'Production',
-        path: '/module/production'
+        path: '/module/production',
       });
 
       // System Docs tool
@@ -152,7 +158,7 @@ function generateBreadcrumbs(pathname: string, params: Record<string, string | u
         items.push({
           label: 'System Docs',
           path: '/module/production/system-docs',
-          isLast: true
+          isLast: true,
         });
       }
 
@@ -161,33 +167,33 @@ function generateBreadcrumbs(pathname: string, params: Record<string, string | u
         items.push({
           label: 'Shop Order',
           path: '/module/production/shop-order',
-          isLast: true
+          isLast: true,
         });
       }
     } else if (moduleType === 'manager') {
       items.push({
         label: 'Manager',
         path: '/module/manager',
-        isLast: true
+        isLast: true,
       });
     }
   } else if (segments[0] === 'account') {
     items.push({
       label: 'Account',
       path: '/account',
-      isLast: true
+      isLast: true,
     });
   } else if (segments[0] === 'settings') {
     items.push({
       label: 'Settings',
       path: '/settings',
-      isLast: true
+      isLast: true,
     });
   } else if (segments[0] === 'admin') {
     items.push({
       label: 'Admin Panel',
       path: '/admin',
-      isLast: true
+      isLast: true,
     });
   }
 

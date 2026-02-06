@@ -17,7 +17,7 @@ import {
   bulkUpdate,
   bulkDelete,
   bulkUpsert,
-  executeInTransaction
+  executeInTransaction,
 } from '../utils/bulkOperations';
 
 let testDb: Database.Database;
@@ -25,7 +25,7 @@ let testDb: Database.Database;
 // Mock the getDatabase function
 vi.mock('../index', () => ({
   getDatabase: () => testDb,
-  createTransactionManager: (db: Database.Database) => new TransactionManager(db)
+  createTransactionManager: (db: Database.Database) => new TransactionManager(db),
 }));
 
 // Mock getDatabase to return our test database
@@ -58,9 +58,9 @@ describe('bulkInsert', () => {
       [
         ['1', 'Item 1', 10, 'A'],
         ['2', 'Item 2', 20, 'B'],
-        ['3', 'Item 3', 30, 'A']
+        ['3', 'Item 3', 30, 'A'],
       ],
-      ['id', 'name', 'quantity', 'category']
+      ['id', 'name', 'quantity', 'category'],
     );
 
     expect(count).toBe(3);
@@ -83,7 +83,7 @@ describe('bulkInsert', () => {
       bulkInsert(
         'test_items; DROP TABLE test_items; --',
         [['1', 'Item 1', 10]],
-        ['id', 'name', 'quantity']
+        ['id', 'name', 'quantity'],
       );
     }).toThrow(/Invalid table name/);
   });
@@ -93,18 +93,14 @@ describe('bulkInsert', () => {
       bulkInsert(
         'test_items',
         [['1', 'Item 1', 10]],
-        ['id', 'name; DROP TABLE test_items; --', 'quantity']
+        ['id', 'name; DROP TABLE test_items; --', 'quantity'],
       );
     }).toThrow(/Invalid column name/);
   });
 
   it('should reject SQL keywords as identifiers', () => {
     expect(() => {
-      bulkInsert(
-        'DROP',
-        [['1', 'Item 1', 10]],
-        ['id', 'name', 'quantity']
-      );
+      bulkInsert('DROP', [['1', 'Item 1', 10]], ['id', 'name', 'quantity']);
     }).toThrow(/SQL keyword not allowed/);
   });
 
@@ -114,16 +110,18 @@ describe('bulkInsert', () => {
         'test_items',
         [
           ['1', 'Item 1', 10, 'A'],
-          ['1', 'Item 2', 20, 'B'] // Duplicate primary key - should fail
+          ['1', 'Item 2', 20, 'B'], // Duplicate primary key - should fail
         ],
-        ['id', 'name', 'quantity', 'category']
+        ['id', 'name', 'quantity', 'category'],
       );
     } catch (error) {
       // Expected to throw
     }
 
     // Verify no records were inserted (transaction rolled back)
-    const count = testDb.prepare('SELECT COUNT(*) as count FROM test_items').get() as { count: number };
+    const count = testDb.prepare('SELECT COUNT(*) as count FROM test_items').get() as {
+      count: number;
+    };
     expect(count.count).toBe(0);
   });
 
@@ -140,7 +138,9 @@ describe('bulkInsert', () => {
     expect(count).toBe(1000);
     expect(duration).toBeLessThan(500); // Should be fast with transaction
 
-    const totalCount = testDb.prepare('SELECT COUNT(*) as count FROM test_items').get() as { count: number };
+    const totalCount = testDb.prepare('SELECT COUNT(*) as count FROM test_items').get() as {
+      count: number;
+    };
     expect(totalCount.count).toBe(1000);
   });
 });
@@ -156,7 +156,7 @@ describe('bulkUpdate', () => {
   it('should update multiple records successfully', () => {
     const count = bulkUpdate('test_items', [
       { id: '1', updates: { quantity: 15, category: 'C' } },
-      { id: '2', updates: { quantity: 25 } }
+      { id: '2', updates: { quantity: 25 } },
     ]);
 
     expect(count).toBe(2);
@@ -176,16 +176,14 @@ describe('bulkUpdate', () => {
 
   it('should reject invalid table names', () => {
     expect(() => {
-      bulkUpdate('test_items; DROP TABLE test_items; --', [
-        { id: '1', updates: { quantity: 15 } }
-      ]);
+      bulkUpdate('test_items; DROP TABLE test_items; --', [{ id: '1', updates: { quantity: 15 } }]);
     }).toThrow(/Invalid table name/);
   });
 
   it('should reject invalid column names in updates', () => {
     expect(() => {
       bulkUpdate('test_items', [
-        { id: '1', updates: { 'quantity; DROP TABLE test_items; --': 15 } }
+        { id: '1', updates: { 'quantity; DROP TABLE test_items; --': 15 } },
       ]);
     }).toThrow(/Invalid column name/);
   });
@@ -194,7 +192,7 @@ describe('bulkUpdate', () => {
     try {
       bulkUpdate('test_items', [
         { id: '1', updates: { quantity: 15 } },
-        { id: '2', updates: { name: null } } // NOT NULL constraint - should fail
+        { id: '2', updates: { name: null } }, // NOT NULL constraint - should fail
       ]);
     } catch (error) {
       // Expected to throw
@@ -262,9 +260,9 @@ describe('bulkUpsert', () => {
       'test_items',
       [
         ['1', 'Item 1', 10, 'A'],
-        ['2', 'Item 2', 20, 'B']
+        ['2', 'Item 2', 20, 'B'],
       ],
-      ['id', 'name', 'quantity', 'category']
+      ['id', 'name', 'quantity', 'category'],
     );
 
     expect(count).toBe(2);
@@ -282,9 +280,9 @@ describe('bulkUpsert', () => {
       'test_items',
       [
         ['1', 'Item 1 Updated', 15, 'C'],
-        ['2', 'Item 2', 20, 'B']
+        ['2', 'Item 2', 20, 'B'],
       ],
-      ['id', 'name', 'quantity', 'category']
+      ['id', 'name', 'quantity', 'category'],
     );
 
     expect(count).toBe(2);
@@ -308,7 +306,7 @@ describe('bulkUpsert', () => {
       bulkUpsert(
         'test_items; DROP TABLE test_items; --',
         [['1', 'Item 1', 10]],
-        ['id', 'name', 'quantity']
+        ['id', 'name', 'quantity'],
       );
     }).toThrow(/Invalid table name/);
   });
@@ -321,9 +319,9 @@ describe('bulkUpsert', () => {
         'test_items',
         [
           ['1', 'Item 1 Updated', 15, 'C'],
-          ['2', null, 20, 'B'] // NULL name - should fail
+          ['2', null, 20, 'B'], // NULL name - should fail
         ],
-        ['id', 'name', 'quantity', 'category']
+        ['id', 'name', 'quantity', 'category'],
       );
     } catch (error) {
       // Expected to throw
@@ -334,7 +332,9 @@ describe('bulkUpsert', () => {
     expect(item1.name).toBe('Item 1'); // Original value
     expect(item1.quantity).toBe(10); // Original value
 
-    const count = testDb.prepare('SELECT COUNT(*) as count FROM test_items').get() as { count: number };
+    const count = testDb.prepare('SELECT COUNT(*) as count FROM test_items').get() as {
+      count: number;
+    };
     expect(count.count).toBe(1); // Only original record
   });
 });
@@ -342,9 +342,11 @@ describe('bulkUpsert', () => {
 describe('executeInTransaction', () => {
   it('should execute all operations atomically', () => {
     const results = executeInTransaction([
-      () => testDb.prepare('INSERT INTO test_items VALUES (?, ?, ?, ?)').run('1', 'Item 1', 10, 'A'),
-      () => testDb.prepare('INSERT INTO test_items VALUES (?, ?, ?, ?)').run('2', 'Item 2', 20, 'B'),
-      () => testDb.prepare('SELECT COUNT(*) as count FROM test_items').get()
+      () =>
+        testDb.prepare('INSERT INTO test_items VALUES (?, ?, ?, ?)').run('1', 'Item 1', 10, 'A'),
+      () =>
+        testDb.prepare('INSERT INTO test_items VALUES (?, ?, ?, ?)').run('2', 'Item 2', 20, 'B'),
+      () => testDb.prepare('SELECT COUNT(*) as count FROM test_items').get(),
     ]);
 
     expect(results).toHaveLength(3);
@@ -354,14 +356,18 @@ describe('executeInTransaction', () => {
   it('should rollback all operations on error', () => {
     try {
       executeInTransaction([
-        () => testDb.prepare('INSERT INTO test_items VALUES (?, ?, ?, ?)').run('1', 'Item 1', 10, 'A'),
-        () => testDb.prepare('INSERT INTO test_items VALUES (?, ?, ?, ?)').run('1', 'Item 2', 20, 'B') // Duplicate PK
+        () =>
+          testDb.prepare('INSERT INTO test_items VALUES (?, ?, ?, ?)').run('1', 'Item 1', 10, 'A'),
+        () =>
+          testDb.prepare('INSERT INTO test_items VALUES (?, ?, ?, ?)').run('1', 'Item 2', 20, 'B'), // Duplicate PK
       ]);
     } catch (error) {
       // Expected to throw
     }
 
-    const count = testDb.prepare('SELECT COUNT(*) as count FROM test_items').get() as { count: number };
+    const count = testDb.prepare('SELECT COUNT(*) as count FROM test_items').get() as {
+      count: number;
+    };
     expect(count.count).toBe(0); // All rolled back
   });
 

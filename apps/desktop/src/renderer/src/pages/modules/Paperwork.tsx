@@ -16,7 +16,13 @@ import { PaperworkHeaderDesigner } from '../../components/paperwork/PaperworkHea
 import { ReportTableRenderer } from '../../components/paperwork/ReportTableRenderer';
 import { getReportData } from '../../utils/paperwork/dataConnector';
 import { organizeReportData } from '../../utils/paperwork/reportOrganizer';
-import { renderHeaderHTML, renderFooterHTML, renderHeaderTemplate, renderFooterTemplate, calculateDataRange } from '../../utils/paperwork/headerRenderer';
+import {
+  renderHeaderHTML,
+  renderFooterHTML,
+  renderHeaderTemplate,
+  renderFooterTemplate,
+  calculateDataRange,
+} from '../../utils/paperwork/headerRenderer';
 
 const REPORT_TEMPLATES = [
   { id: 'channel-hookup', name: 'Channel Hookup' },
@@ -31,7 +37,7 @@ const REPORT_TEMPLATES = [
   { id: 'network-summary', name: 'Network Summary' },
   { id: 'port-assignments', name: 'Port Assignments' },
   { id: 'infrastructure-power', name: 'Infrastructure Power' },
-  { id: 'infrastructure-location', name: 'Infrastructure by Location' }
+  { id: 'infrastructure-location', name: 'Infrastructure by Location' },
 ] as const;
 
 interface PaperworkProps {
@@ -59,7 +65,9 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
   const [currentTemplate, setCurrentTemplate] = useState<PaperworkTemplate | null>(null);
 
   // Batch export state
-  const [selectedReportsForBatch, setSelectedReportsForBatch] = useState<Set<ReportType>>(new Set());
+  const [selectedReportsForBatch, setSelectedReportsForBatch] = useState<Set<ReportType>>(
+    new Set(),
+  );
   const [isBatchProcessing, setIsBatchProcessing] = useState(false);
   const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0, reportName: '' });
 
@@ -85,59 +93,64 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
   }, [loadFixtures, loadEquipment, currentProjectId]);
 
   // Handle single PDF export
-  const handleExportPDF = useCallback(async (template: PaperworkTemplate) => {
-    if (!window.api?.paperwork || !template) {
-      alert('PDF export is not available');
-      return;
-    }
-
-    try {
-      console.log('Starting PDF export for template:', template.name);
-
-      // Get report data
-      const reportData = await getReportData(template.reportType, currentProjectId);
-      const organizedData = organizeReportData(reportData, template.organization, template.columns);
-
-      console.log('Report data loaded:', reportData.length, 'items');
-      console.log('Organized data:', organizedData);
-
-      // Render the table to HTML using React server-side rendering
-      const tableHTML = renderToStaticMarkup(
-        <ReportTableRenderer
-          columns={template.columns}
-          data={organizedData}
-          reportType={template.reportType}
-          organization={template.organization}
-          fontStyle={template.pageSetup.fontStyle}
-          editable={false}
-        />
-      );
-
-      console.log('Table HTML rendered, length:', tableHTML.length);
-
-      // Prepare header/footer data
-      const headerData = {
-        reportTitle: template.name,
-        productionName: projectName,
-        ldName: projectData?.lighting_designer || '',
-        venue: projectData?.venue || '',
-        date: new Date().toLocaleDateString(),
-      };
-
-      // Calculate data range for footer
-      const dataRange = calculateDataRange(template.reportType, reportData);
-      const userName = 'User'; // TODO: Get from user preferences/settings
-
-      // Render header and footer HTML with print-friendly grid layout
-      let headerHTML = '';
-      if (template.headerTemplateId) {
-        console.log('Rendering header template:', template.headerTemplateId);
-        headerHTML = await renderHeaderHTML(template.headerTemplateId, headerData) || '';
+  const handleExportPDF = useCallback(
+    async (template: PaperworkTemplate) => {
+      if (!window.api?.paperwork || !template) {
+        alert('PDF export is not available');
+        return;
       }
-      const footerHTML = renderFooterHTML(userName, dataRange);
 
-      // Create HTML document with table-based layout for repeating headers
-      const htmlContent = `
+      try {
+        console.log('Starting PDF export for template:', template.name);
+
+        // Get report data
+        const reportData = await getReportData(template.reportType, currentProjectId);
+        const organizedData = organizeReportData(
+          reportData,
+          template.organization,
+          template.columns,
+        );
+
+        console.log('Report data loaded:', reportData.length, 'items');
+        console.log('Organized data:', organizedData);
+
+        // Render the table to HTML using React server-side rendering
+        const tableHTML = renderToStaticMarkup(
+          <ReportTableRenderer
+            columns={template.columns}
+            data={organizedData}
+            reportType={template.reportType}
+            organization={template.organization}
+            fontStyle={template.pageSetup.fontStyle}
+            editable={false}
+          />,
+        );
+
+        console.log('Table HTML rendered, length:', tableHTML.length);
+
+        // Prepare header/footer data
+        const headerData = {
+          reportTitle: template.name,
+          productionName: projectName,
+          ldName: projectData?.lighting_designer || '',
+          venue: projectData?.venue || '',
+          date: new Date().toLocaleDateString(),
+        };
+
+        // Calculate data range for footer
+        const dataRange = calculateDataRange(template.reportType, reportData);
+        const userName = 'User'; // TODO: Get from user preferences/settings
+
+        // Render header and footer HTML with print-friendly grid layout
+        let headerHTML = '';
+        if (template.headerTemplateId) {
+          console.log('Rendering header template:', template.headerTemplateId);
+          headerHTML = (await renderHeaderHTML(template.headerTemplateId, headerData)) || '';
+        }
+        const footerHTML = renderFooterHTML(userName, dataRange);
+
+        // Create HTML document with table-based layout for repeating headers
+        const htmlContent = `
         <!DOCTYPE html>
         <html>
           <head>
@@ -240,25 +253,28 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
         </html>
       `;
 
-      const filename = `${projectName}_${template.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+        const filename = `${projectName}_${template.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
 
-      console.log('Calling PDF export API with filename:', filename);
+        console.log('Calling PDF export API with filename:', filename);
 
-      const result = await window.api.paperwork.exportPDF(
-        htmlContent,
-        filename,
-        pageSetup,
-        template.pageSetup.fontStyle?.fontFamily || '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif'
-      );
+        const result = await window.api.paperwork.exportPDF(
+          htmlContent,
+          filename,
+          pageSetup,
+          template.pageSetup.fontStyle?.fontFamily ||
+            '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+        );
 
-      if (result.success) {
-        console.log('PDF exported successfully');
+        if (result.success) {
+          console.log('PDF exported successfully');
+        }
+      } catch (error) {
+        console.error('Error exporting PDF:', error);
+        alert('Failed to export PDF');
       }
-    } catch (error) {
-      console.error('Error exporting PDF:', error);
-      alert('Failed to export PDF');
-    }
-  }, [currentProjectId, projectName, pageSetup]);
+    },
+    [currentProjectId, projectName, pageSetup],
+  );
 
   // Handle batch export
   const handleBatchExport = useCallback(async () => {
@@ -289,14 +305,18 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
       for (let i = 0; i < reportsToExport.length; i++) {
         const reportType = reportsToExport[i];
-        const reportTemplate = REPORT_TEMPLATES.find(t => t.id === reportType);
+        const reportTemplate = REPORT_TEMPLATES.find((t) => t.id === reportType);
         const reportName = reportTemplate?.name || 'Report';
 
-        setBatchProgress({ current: i + 1, total: totalReports, reportName: `Preparing ${reportName}...` });
+        setBatchProgress({
+          current: i + 1,
+          total: totalReports,
+          reportName: `Preparing ${reportName}...`,
+        });
 
         try {
           // Find the system template for this report type
-          const template = allTemplates.find(t => t.reportType === reportType && t.isSystem);
+          const template = allTemplates.find((t) => t.reportType === reportType && t.isSystem);
 
           if (!template) {
             console.error(`No template found for report type: ${reportType}`);
@@ -313,7 +333,11 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
           // Get report data
           const reportData = await getReportData(reportType, currentProjectId);
-          const organizedData = organizeReportData(reportData, template.organization, template.columns);
+          const organizedData = organizeReportData(
+            reportData,
+            template.organization,
+            template.columns,
+          );
 
           console.log(`Batch export: ${reportName} has ${reportData.length} items`);
 
@@ -326,19 +350,20 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
               organization={template.organization}
               fontStyle={template.pageSetup.fontStyle}
               editable={false}
-            />
+            />,
           );
 
           // Render header from template if available
           let headerHTML = '';
           if (template.headerTemplateId) {
-            headerHTML = await renderHeaderHTML(template.headerTemplateId, {
-              reportTitle: template.name,
-              productionName: projectName,
-              ldName: projectData?.lighting_designer || '',
-              venue: projectData?.venue || '',
-              date: new Date().toLocaleDateString(),
-            }) || '';
+            headerHTML =
+              (await renderHeaderHTML(template.headerTemplateId, {
+                reportTitle: template.name,
+                productionName: projectName,
+                ldName: projectData?.lighting_designer || '',
+                venue: projectData?.venue || '',
+                date: new Date().toLocaleDateString(),
+              })) || '';
           }
 
           // Calculate data range for footer
@@ -382,7 +407,11 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       }
 
       // Update progress for export
-      setBatchProgress({ current: totalReports, total: totalReports, reportName: 'Generating PDF...' });
+      setBatchProgress({
+        current: totalReports,
+        total: totalReports,
+        reportName: 'Generating PDF...',
+      });
 
       // Combine all sections into a single HTML document
       const htmlContent = `
@@ -534,7 +563,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
   // Toggle batch selection
   const toggleBatchSelection = useCallback((reportType: ReportType) => {
-    setSelectedReportsForBatch(prev => {
+    setSelectedReportsForBatch((prev) => {
       const next = new Set(prev);
       if (next.has(reportType)) {
         next.delete(reportType);
@@ -561,7 +590,8 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
               <div>
                 <h1 className="text-xl font-bold">{projectName}</h1>
                 <p className="text-sm text-gray-400">
-                  Paperwork Generator • {fixtures.length} fixtures • {infrastructure.length} infrastructure
+                  Paperwork Generator • {fixtures.length} fixtures • {infrastructure.length}{' '}
+                  infrastructure
                 </p>
               </div>
             </div>
@@ -614,13 +644,20 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
                 // Only update the paperwork template if it's NOT a system template
                 if (!currentTemplate.isSystem) {
-                  console.log('Updating paperwork template:', currentTemplate.id, 'with header:', headerTemplateId);
+                  console.log(
+                    'Updating paperwork template:',
+                    currentTemplate.id,
+                    'with header:',
+                    headerTemplateId,
+                  );
                   await window.api.paperworkTemplates.update(currentTemplate.id, {
-                    headerTemplateId
+                    headerTemplateId,
                   });
                   console.log('Header template ID saved to paperwork template');
                 } else {
-                  console.log('Skipping paperwork template update (system template) - header changes saved');
+                  console.log(
+                    'Skipping paperwork template update (system template) - header changes saved',
+                  );
                 }
 
                 setShowHeaderDesigner(false);
@@ -636,18 +673,19 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
       {/* Batch Export Dialog */}
       {showBatchExport && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-8" style={{ zIndex: 9999 }}>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-8"
+          style={{ zIndex: 9999 }}
+        >
           <div className="bg-gray-800 rounded-lg w-full max-w-2xl">
             <div className="p-6 border-b border-gray-700">
               <h2 className="text-xl font-bold">Batch Export Reports</h2>
-              <p className="text-sm text-gray-400 mt-1">
-                Select reports to export as PDFs
-              </p>
+              <p className="text-sm text-gray-400 mt-1">Select reports to export as PDFs</p>
             </div>
 
             <div className="p-6 max-h-96 overflow-y-auto">
               <div className="space-y-2">
-                {REPORT_TEMPLATES.map(template => (
+                {REPORT_TEMPLATES.map((template) => (
                   <label
                     key={template.id}
                     className="flex items-center gap-3 p-3 bg-gray-700 rounded hover:bg-gray-600 cursor-pointer transition"
@@ -666,7 +704,8 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
             <div className="p-6 border-t border-gray-700 flex justify-between items-center">
               <div className="text-sm text-gray-400">
-                {selectedReportsForBatch.size} report{selectedReportsForBatch.size !== 1 ? 's' : ''} selected
+                {selectedReportsForBatch.size} report{selectedReportsForBatch.size !== 1 ? 's' : ''}{' '}
+                selected
               </div>
               <div className="flex gap-2">
                 <button
@@ -680,7 +719,8 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                   disabled={selectedReportsForBatch.size === 0}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded transition"
                 >
-                  Export {selectedReportsForBatch.size} Report{selectedReportsForBatch.size !== 1 ? 's' : ''}
+                  Export {selectedReportsForBatch.size} Report
+                  {selectedReportsForBatch.size !== 1 ? 's' : ''}
                 </button>
               </div>
             </div>
@@ -693,9 +733,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
         <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
           <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full text-center">
             <h3 className="text-xl font-bold mb-2">Exporting Reports...</h3>
-            <p className="text-gray-400 mb-4">
-              {batchProgress.reportName}
-            </p>
+            <p className="text-gray-400 mb-4">{batchProgress.reportName}</p>
             <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
               <div
                 className="bg-blue-600 h-2 rounded-full transition-all"

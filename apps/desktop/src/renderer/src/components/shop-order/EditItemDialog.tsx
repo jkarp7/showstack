@@ -62,7 +62,9 @@ export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Edit Equipment Item</h2>
+        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+          Edit Equipment Item
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Description */}
@@ -105,9 +107,7 @@ export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-purple-400 mb-2">
-                Venue Qty
-              </label>
+              <label className="block text-sm font-medium text-purple-400 mb-2">Venue Qty</label>
               <input
                 type="number"
                 value={venueQty}
@@ -123,7 +123,9 @@ export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <span className="text-gray-400">Total Needed:</span>{' '}
-                <span className="text-gray-900 dark:text-white font-medium">{activeQty + spareQty}</span>
+                <span className="text-gray-900 dark:text-white font-medium">
+                  {activeQty + spareQty}
+                </span>
               </div>
               <div>
                 <span className="text-gray-400">Rental Qty:</span>{' '}
@@ -153,9 +155,7 @@ export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
           {/* Optional Fields Row */}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Weight (lbs)
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Weight (lbs)</label>
               <input
                 type="number"
                 step="0.1"
@@ -167,9 +167,7 @@ export function EditItemDialog({ isOpen, onClose, item }: EditItemDialogProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Power (watts)
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Power (watts)</label>
               <input
                 type="number"
                 step="0.1"

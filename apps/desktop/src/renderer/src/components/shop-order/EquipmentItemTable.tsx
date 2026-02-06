@@ -67,7 +67,7 @@ export function EquipmentItemTable({
   const handleQtyClick = (
     itemId: string,
     field: 'active_qty' | 'spare_qty' | 'venue_qty',
-    currentValue: number
+    currentValue: number,
   ) => {
     setEditingQty({ itemId, field, value: currentValue.toString() });
   };
@@ -278,7 +278,7 @@ export function EquipmentItemTable({
 
     // Find groups with duplicates
     const duplicateGroups = Array.from(descriptionGroups.values()).filter(
-      (group) => group.length > 1
+      (group) => group.length > 1,
     );
 
     if (duplicateGroups.length === 0) {
@@ -329,7 +329,9 @@ export function EquipmentItemTable({
   if (sortedItems.length === 0 && !isAddingRow) {
     return (
       <div className="bg-gray-100 dark:bg-gray-700 rounded p-4 text-center">
-        <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">No equipment items in this section</p>
+        <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+          No equipment items in this section
+        </p>
         <button
           onClick={handleStartAddingRow}
           className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm transition"
@@ -454,7 +456,9 @@ export function EquipmentItemTable({
 
                 {/* Total (calculated) */}
                 <td className="px-3 py-2 text-center">
-                  <span className="text-gray-600 dark:text-gray-400 font-medium">{item.total_qty}</span>
+                  <span className="text-gray-600 dark:text-gray-400 font-medium">
+                    {item.total_qty}
+                  </span>
                 </td>
 
                 {/* Venue Qty - Editable */}
@@ -480,7 +484,9 @@ export function EquipmentItemTable({
 
                 {/* Rental (calculated) */}
                 <td className="px-3 py-2 text-center">
-                  <span className="text-blue-600 dark:text-blue-400 font-medium">{calculateRentalQty(item)}</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">
+                    {calculateRentalQty(item)}
+                  </span>
                 </td>
 
                 {/* Actions */}
@@ -545,7 +551,9 @@ export function EquipmentItemTable({
                   />
                 </td>
                 <td className="px-3 py-2 text-center">
-                  <span className="text-gray-600 dark:text-gray-400 font-medium">{calculateNewRowTotals().total}</span>
+                  <span className="text-gray-600 dark:text-gray-400 font-medium">
+                    {calculateNewRowTotals().total}
+                  </span>
                 </td>
                 <td className="px-3 py-2">
                   <input

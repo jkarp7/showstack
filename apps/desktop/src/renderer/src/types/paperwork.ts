@@ -102,7 +102,7 @@ export const HEADER_PRESET_FIELDS: Record<HeaderLayoutPreset, HeaderLayoutFields
     showDates: false,
     showRevision: false,
     showGeneratedDate: true,
-    customTitle: ''
+    customTitle: '',
   },
   minimal: {
     showTitle: true,
@@ -114,7 +114,7 @@ export const HEADER_PRESET_FIELDS: Record<HeaderLayoutPreset, HeaderLayoutFields
     showDates: false,
     showRevision: false,
     showGeneratedDate: false,
-    customTitle: ''
+    customTitle: '',
   },
   detailed: {
     showTitle: true,
@@ -126,7 +126,7 @@ export const HEADER_PRESET_FIELDS: Record<HeaderLayoutPreset, HeaderLayoutFields
     showDates: true,
     showRevision: true,
     showGeneratedDate: true,
-    customTitle: ''
+    customTitle: '',
   },
   'logo-focused': {
     showTitle: true,
@@ -138,7 +138,7 @@ export const HEADER_PRESET_FIELDS: Record<HeaderLayoutPreset, HeaderLayoutFields
     showDates: false,
     showRevision: false,
     showGeneratedDate: true,
-    customTitle: ''
+    customTitle: '',
   },
   custom: {
     showTitle: true,
@@ -150,8 +150,8 @@ export const HEADER_PRESET_FIELDS: Record<HeaderLayoutPreset, HeaderLayoutFields
     showDates: false,
     showRevision: false,
     showGeneratedDate: true,
-    customTitle: ''
-  }
+    customTitle: '',
+  },
 };
 
 // Default Configurations
@@ -162,7 +162,7 @@ export const DEFAULT_PAGE_SETUP: PageSetup = {
   marginTop: 0.5,
   marginBottom: 0.5,
   marginLeft: 0.25,
-  marginRight: 0.25
+  marginRight: 0.25,
 };
 
 export const DEFAULT_METADATA: MetadataOptions = {
@@ -174,12 +174,12 @@ export const DEFAULT_METADATA: MetadataOptions = {
   showPageNumbers: true,
   showGeneratedDate: true,
   showLogo: false,
-  customTitle: ''
+  customTitle: '',
 };
 
 export const DEFAULT_HEADER_LAYOUT: HeaderLayoutConfig = {
   preset: 'standard',
-  fields: HEADER_PRESET_FIELDS.standard
+  fields: HEADER_PRESET_FIELDS.standard,
 };
 
 // Migration Utility
@@ -200,8 +200,8 @@ export function migrateMetadataToHeaderLayout(metadata: MetadataOptions): Header
       showDates: metadata.showDates,
       showRevision: false,
       showGeneratedDate: metadata.showGeneratedDate,
-      customTitle: metadata.customTitle || ''
-    }
+      customTitle: metadata.customTitle || '',
+    },
   };
 }
 

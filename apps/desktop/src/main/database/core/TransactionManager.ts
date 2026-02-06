@@ -48,12 +48,15 @@ export class TransactionManager {
     try {
       return transaction();
     } catch (error) {
-      logger.error('Transaction failed and was rolled back', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Transaction failed and was rolled back',
+        error instanceof Error ? error : new Error(String(error)),
+      );
       throw new DatabaseError(
         'Transaction failed',
         'transaction:execute',
         false,
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : new Error(String(error)),
       );
     }
   }
@@ -78,13 +81,16 @@ export class TransactionManager {
       this.db.prepare('COMMIT').run();
       return result;
     } catch (error) {
-      logger.error('Async transaction failed and was rolled back', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Async transaction failed and was rolled back',
+        error instanceof Error ? error : new Error(String(error)),
+      );
       this.db.prepare('ROLLBACK').run();
       throw new DatabaseError(
         'Async transaction failed',
         'transaction:executeAsync',
         false,
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : new Error(String(error)),
       );
     }
   }
@@ -105,12 +111,15 @@ export class TransactionManager {
     try {
       return transaction();
     } catch (error) {
-      logger.error('Immediate transaction failed and was rolled back', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Immediate transaction failed and was rolled back',
+        error instanceof Error ? error : new Error(String(error)),
+      );
       throw new DatabaseError(
         'Immediate transaction failed',
         'transaction:executeImmediate',
         false,
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : new Error(String(error)),
       );
     }
   }
@@ -131,12 +140,15 @@ export class TransactionManager {
     try {
       return transaction();
     } catch (error) {
-      logger.error('Exclusive transaction failed and was rolled back', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Exclusive transaction failed and was rolled back',
+        error instanceof Error ? error : new Error(String(error)),
+      );
       throw new DatabaseError(
         'Exclusive transaction failed',
         'transaction:executeExclusive',
         false,
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : new Error(String(error)),
       );
     }
   }
@@ -152,7 +164,7 @@ export class TransactionManager {
    */
   executeBatch<T>(operations: Array<() => T>): T[] {
     return this.execute(() => {
-      return operations.map(op => op());
+      return operations.map((op) => op());
     });
   }
 
@@ -169,7 +181,7 @@ export class TransactionManager {
       throw new DatabaseError(
         'Invalid savepoint name: cannot be empty',
         'savepoint:validation',
-        false
+        false,
       );
     }
 
@@ -180,7 +192,7 @@ export class TransactionManager {
       throw new DatabaseError(
         `Invalid savepoint name "${name}": must start with letter or underscore and contain only letters, numbers, and underscores`,
         'savepoint:validation',
-        false
+        false,
       );
     }
   }

@@ -1,6 +1,7 @@
 # Phase 4 & 5 Complete: Import/Export & Performance
 
 ## Summary
+
 Successfully completed Phase 4 (Import/Export) and Phase 5 (Performance & Polish) of the shop order table migration, adding clipboard operations, spreadsheet export, keyboard shortcuts, and performance optimizations.
 
 ## ✅ Completed Work
@@ -8,9 +9,11 @@ Successfully completed Phase 4 (Import/Export) and Phase 5 (Performance & Polish
 ### Phase 4: Import/Export Features
 
 #### 1. Paste from Clipboard (TSV/CSV)
+
 **File:** `src/renderer/src/components/prep/ShopOrderTable.tsx`
 
 **Features:**
+
 - ✅ "Paste Items" button in each section header (green button)
 - ✅ Intelligent TSV/CSV parsing with header detection
 - ✅ Supports multiple data formats:
@@ -24,15 +27,26 @@ Successfully completed Phase 4 (Import/Export) and Phase 5 (Performance & Polish
 - ✅ Adds items to the selected section
 
 **Code Snippet:**
+
 ```typescript
 const parsePasteData = (text: string): Array<Partial<PrepEquipmentItem>> => {
   const lines = text.trim().split('\n');
   const delimiter = lines[0].includes('\t') ? '\t' : ',';
 
   // Check if first row is header
-  const firstRow = rows[0].map(v => v.toLowerCase());
-  const hasHeader = firstRow.some(v =>
-    ['description', 'name', 'item', 'active', 'qty', 'quantity', 'spare', 'venue', 'notes'].includes(v)
+  const firstRow = rows[0].map((v) => v.toLowerCase());
+  const hasHeader = firstRow.some((v) =>
+    [
+      'description',
+      'name',
+      'item',
+      'active',
+      'qty',
+      'quantity',
+      'spare',
+      'venue',
+      'notes',
+    ].includes(v),
   );
 
   // Map columns based on header or position
@@ -41,9 +55,11 @@ const parsePasteData = (text: string): Array<Partial<PrepEquipmentItem>> => {
 ```
 
 #### 2. Export to Spreadsheet
+
 **File:** `src/renderer/src/components/prep/ShopOrderTable.tsx`
 
 **Features:**
+
 - ✅ "Export CSV" button in main header (emerald green button)
 - ✅ Exports complete shop order table to CSV format
 - ✅ Includes all columns: Section, Description, Active, Spare, Total, Rev 1-N, Venue, Notes
@@ -53,6 +69,7 @@ const parsePasteData = (text: string): Array<Partial<PrepEquipmentItem>> => {
 - ✅ Auto-download to user's Downloads folder
 
 **Code Snippet:**
+
 ```typescript
 const handleExportToCSV = () => {
   const csvRows: string[] = [];
@@ -76,9 +93,11 @@ const handleExportToCSV = () => {
 ### Phase 5: Performance & Polish
 
 #### 3. Keyboard Shortcuts
+
 **File:** `src/renderer/src/components/prep/ShopOrderTable.tsx`
 
 **Implemented Shortcuts:**
+
 - ✅ **Ctrl/Cmd + V**: Paste items from clipboard
   - Detects Mac vs Windows/Linux
   - Pastes into current section or first section
@@ -93,6 +112,7 @@ const handleExportToCSV = () => {
   - Visual selection indicator (blue ring + light blue background)
 
 **Code Snippet:**
+
 ```typescript
 useEffect(() => {
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -123,9 +143,11 @@ useEffect(() => {
 ```
 
 #### 4. Debounced Saves
+
 **File:** `src/renderer/src/components/prep/ShopOrderTable.tsx`
 
 **Features:**
+
 - ✅ 500ms debounce delay for all inline edits
 - ✅ Batches multiple edits to the same item
 - ✅ Reduces database writes by ~80% during fast typing
@@ -134,11 +156,13 @@ useEffect(() => {
 - ✅ Clear timeout management to prevent memory leaks
 
 **Performance Impact:**
+
 - Before: Every keystroke = 1 database write
 - After: Continuous typing = 1 database write (500ms after last keystroke)
 - Example: Typing "LED Par 64" (10 chars) = 1 write instead of 10 writes
 
 **Code Snippet:**
+
 ```typescript
 const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 const pendingSavesRef = useRef<Map<string, any>>(new Map());
@@ -179,9 +203,11 @@ useEffect(() => {
 ```
 
 #### 5. Loading States & Error Handling
+
 **File:** `src/renderer/src/components/prep/ShopOrderTable.tsx`
 
 **Features:**
+
 - ✅ Loading spinner on "Add Revision" button during async operations
 - ✅ Button disabled during loading state
 - ✅ Error toast notifications (red background, bottom-right)
@@ -195,6 +221,7 @@ useEffect(() => {
 - ✅ Graceful error recovery
 
 **UI Elements:**
+
 ```typescript
 // Loading state
 const [isLoading, setIsLoading] = useState(false);
@@ -237,10 +264,12 @@ const showError = (message: string) => {
 ### Before & After Metrics
 
 **Database Writes:**
+
 - Before: ~100 writes when typing 10 item descriptions
 - After: ~10 writes (90% reduction)
 
 **User Experience:**
+
 - No UI lag during fast typing
 - Smooth editing experience
 - Immediate visual feedback (optimistic updates in local state)
@@ -252,6 +281,7 @@ const showError = (message: string) => {
 ## 🎨 UI/UX Improvements
 
 ### New Buttons
+
 1. **"Paste Items"** - Green button in section headers
    - Icon: None (text only)
    - Tooltip: "Paste items from clipboard (TSV/CSV)"
@@ -268,12 +298,14 @@ const showError = (message: string) => {
    - Text changes to "Adding..." with spinner icon
 
 ### Cell Selection Visual Feedback
+
 - Selected cells show blue ring (`ring-2 ring-blue-500`)
 - Light blue background (`bg-blue-50 dark:bg-blue-900/20`)
 - Hover effect maintained (`hover:bg-gray-100`)
 - Clear visual distinction between selected and editing states
 
 ### Error Toast
+
 - Fixed position (bottom-right)
 - Red background (`bg-red-500`)
 - White text with shadow
@@ -287,11 +319,13 @@ const showError = (message: string) => {
 ## 📋 Remaining Features (Not Implemented)
 
 ### Phase 4 Remaining:
+
 - [ ] Vectorworks import mapping (requires Vectorworks file format spec)
 - [ ] Copy individual cells to clipboard (partial implementation)
   - Ctrl+C placeholder in place, needs full implementation
 
 ### Phase 5 Remaining:
+
 - [ ] Virtual scrolling for 1000+ items (current performance is acceptable for typical datasets)
 - [ ] Optimistic UI updates (already have local state updates, could enhance further)
 - [ ] Advanced accessibility improvements:
@@ -305,6 +339,7 @@ const showError = (message: string) => {
 ## 🔧 Technical Details
 
 ### Files Modified:
+
 - **`src/renderer/src/components/prep/ShopOrderTable.tsx`** - Main shop order table component
   - Added paste functionality (150+ lines)
   - Added export functionality (80+ lines)
@@ -326,12 +361,14 @@ const showError = (message: string) => {
     - Edge Cases: 2 tests
 
 ### Test Coverage Summary:
+
 - **Total Tests:** 38
 - **Passing:** 38 (100%)
 - **Status:** Exceeds >80% goal ✅
 - **Code Coverage:** ~75% (estimated)
 
 ### Testing Highlights:
+
 - ✅ Clipboard API mocking for paste functionality
 - ✅ CSV export with JSDOM navigation workaround
 - ✅ Keyboard shortcut event simulation
@@ -340,6 +377,7 @@ const showError = (message: string) => {
 - ✅ Edge cases (empty data, user cancellation, no duplicates)
 
 ### Dependencies:
+
 - No new dependencies added
 - Uses built-in browser APIs:
   - `navigator.clipboard.readText()` for paste
@@ -348,6 +386,7 @@ const showError = (message: string) => {
   - `setTimeout`/`clearTimeout` for debouncing
 
 ### Browser Compatibility:
+
 - ✅ Clipboard API requires HTTPS or localhost
 - ✅ Keyboard shortcuts work cross-platform (Mac/Windows/Linux)
 - ✅ CSV download works in all modern browsers
@@ -358,6 +397,7 @@ const showError = (message: string) => {
 ## 🚀 Usage Guide
 
 ### Pasting Items from Spreadsheet:
+
 1. Copy data from Excel/Google Sheets (Ctrl+C)
 2. Open a prep project in ShowStack
 3. Navigate to the section where you want to paste
@@ -366,6 +406,7 @@ const showError = (message: string) => {
 6. Click OK to import
 
 **Supported Formats:**
+
 ```
 Description, Active, Spare, Venue, Notes
 LED Par 64, 10, 2, 5, "Special notes here"
@@ -373,18 +414,21 @@ MAC Aura, 8, 1, 0, ""
 ```
 
 Or without headers:
+
 ```
 LED Par 64, 10, 2, 5, Special notes
 MAC Aura, 8, 1, 0
 ```
 
 ### Exporting to Spreadsheet:
+
 1. Open a prep project
 2. Click the "Export CSV" button in the header
 3. File downloads as `ProjectName_shop_order.csv`
 4. Open in Excel/Google Sheets
 
 ### Keyboard Shortcuts:
+
 - **Ctrl/Cmd + V**: Paste items (after copying spreadsheet data)
 - **Delete**: Clear selected cell
 - **Enter**: Edit selected cell
@@ -392,6 +436,7 @@ MAC Aura, 8, 1, 0
 - **Double-click**: Edit cell
 
 ### Performance Tips:
+
 - Type naturally - saves are automatically batched
 - Changes save 500ms after you stop typing
 - Loading spinner shows during revision operations
@@ -426,16 +471,19 @@ MAC Aura, 8, 1, 0
 ## 📝 Notes
 
 **Why not implement Vectorworks import?**
+
 - Requires detailed spec of Vectorworks export format
 - No sample files available to test against
 - Can be added later when format is documented
 
 **Why not implement virtual scrolling?**
+
 - Current performance is acceptable for typical datasets (< 500 items)
 - Real-world prep projects rarely exceed 200 items
 - Can be added later if needed
 
 **Copy functionality status:**
+
 - Ctrl+C shortcut is registered
 - Currently logs to console
 - Full implementation requires:
@@ -445,7 +493,7 @@ MAC Aura, 8, 1, 0
 
 ---
 
-*Generated: 2026-01-19*
-*Branch: feature/shop-order-table-migration*
-*Phases Complete: 1, 2, 3, 4, 5*
-*Status: Ready for Review*
+_Generated: 2026-01-19_
+_Branch: feature/shop-order-table-migration_
+_Phases Complete: 1, 2, 3, 4, 5_
+_Status: Ready for Review_

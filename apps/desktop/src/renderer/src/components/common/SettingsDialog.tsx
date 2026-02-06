@@ -1,5 +1,16 @@
 import { useState } from 'react';
-import { Settings as SettingsIcon, X, Monitor, Edit3, FolderOpen, Users, Sliders, FileType, Printer, Shield } from 'lucide-react';
+import {
+  Settings as SettingsIcon,
+  X,
+  Monitor,
+  Edit3,
+  FolderOpen,
+  Users,
+  Sliders,
+  FileType,
+  Printer,
+  Shield,
+} from 'lucide-react';
 import { WorkspacePreferences } from '../settings/WorkspacePreferences';
 import { EditorSettings } from '../settings/EditorSettings';
 import { ProjectManagement } from '../settings/ProjectManagement';
@@ -9,7 +20,15 @@ import { ProjectDefaults } from '../settings/ProjectDefaults';
 import { PrintSettings } from '../settings/PrintSettings';
 import { PrivacySettings } from '../settings/PrivacySettings';
 
-type Tab = 'workspace' | 'editor' | 'projects' | 'collaboration' | 'advanced' | 'defaults' | 'print' | 'privacy';
+type Tab =
+  | 'workspace'
+  | 'editor'
+  | 'projects'
+  | 'collaboration'
+  | 'advanced'
+  | 'defaults'
+  | 'print'
+  | 'privacy';
 
 interface SettingsDialogProps {
   isOpen: boolean;
@@ -21,11 +40,12 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
 
   if (!isOpen) return null;
 
-  const tabClass = (isActive: boolean) => `flex items-center gap-2 py-3 px-3 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
-    isActive
-      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-  }`;
+  const tabClass = (isActive: boolean) =>
+    `flex items-center gap-2 py-3 px-3 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
+      isActive
+        ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+    }`;
 
   return (
     <div
@@ -56,35 +76,59 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
         {/* Tabs */}
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 overflow-x-auto">
           <nav className="flex px-6">
-            <button onClick={() => setActiveTab('workspace')} className={tabClass(activeTab === 'workspace')}>
+            <button
+              onClick={() => setActiveTab('workspace')}
+              className={tabClass(activeTab === 'workspace')}
+            >
               <Monitor className="w-4 h-4" />
               <span>Workspace</span>
             </button>
-            <button onClick={() => setActiveTab('editor')} className={tabClass(activeTab === 'editor')}>
+            <button
+              onClick={() => setActiveTab('editor')}
+              className={tabClass(activeTab === 'editor')}
+            >
               <Edit3 className="w-4 h-4" />
               <span>Editor</span>
             </button>
-            <button onClick={() => setActiveTab('defaults')} className={tabClass(activeTab === 'defaults')}>
+            <button
+              onClick={() => setActiveTab('defaults')}
+              className={tabClass(activeTab === 'defaults')}
+            >
               <FileType className="w-4 h-4" />
               <span>Project Defaults</span>
             </button>
-            <button onClick={() => setActiveTab('projects')} className={tabClass(activeTab === 'projects')}>
+            <button
+              onClick={() => setActiveTab('projects')}
+              className={tabClass(activeTab === 'projects')}
+            >
               <FolderOpen className="w-4 h-4" />
               <span>Project Management</span>
             </button>
-            <button onClick={() => setActiveTab('print')} className={tabClass(activeTab === 'print')}>
+            <button
+              onClick={() => setActiveTab('print')}
+              className={tabClass(activeTab === 'print')}
+            >
               <Printer className="w-4 h-4" />
               <span>Print Settings</span>
             </button>
-            <button onClick={() => setActiveTab('collaboration')} className={tabClass(activeTab === 'collaboration')}>
+            <button
+              onClick={() => setActiveTab('collaboration')}
+              className={tabClass(activeTab === 'collaboration')}
+            >
               <Users className="w-4 h-4" />
               <span>Collaboration</span>
             </button>
-            <button onClick={() => setActiveTab('privacy')} className={tabClass(activeTab === 'privacy')}>
+            <button
+              onClick={() => setActiveTab('privacy')}
+              className={tabClass(activeTab === 'privacy')}
+            >
               <Shield className="w-4 h-4" />
               <span>Privacy</span>
             </button>
-            <button onClick={() => setActiveTab('advanced')} className={tabClass(activeTab === 'advanced')}>
+            <button
+              onClick={() => setActiveTab('advanced')}
+              className={tabClass(activeTab === 'advanced')}
+            >
               <Sliders className="w-4 h-4" />
               <span>Advanced</span>
             </button>

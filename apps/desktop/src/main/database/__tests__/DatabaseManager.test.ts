@@ -11,8 +11,8 @@ import { DatabaseError } from '../../errors';
 // Mock electron app
 vi.mock('electron', () => ({
   app: {
-    getPath: vi.fn(() => '/test/user/data')
-  }
+    getPath: vi.fn(() => '/test/user/data'),
+  },
 }));
 
 // Mock the logger
@@ -21,8 +21,8 @@ vi.mock('../../utils/logger', () => ({
     info: vi.fn(),
     error: vi.fn(),
     warn: vi.fn(),
-    debug: vi.fn()
-  }
+    debug: vi.fn(),
+  },
 }));
 
 // Mock better-sqlite3
@@ -32,20 +32,20 @@ const createMockBetterSqlite3Db = () => ({
   prepare: vi.fn().mockReturnValue({
     run: vi.fn(),
     get: vi.fn().mockReturnValue({ count: 1 }),
-    all: vi.fn().mockReturnValue([])
+    all: vi.fn().mockReturnValue([]),
   }),
-  close: vi.fn()
+  close: vi.fn(),
 });
 
 vi.mock('better-sqlite3', () => ({
-  default: vi.fn(() => createMockBetterSqlite3Db())
+  default: vi.fn(() => createMockBetterSqlite3Db()),
 }));
 
 // Mock MigrationRunner
 vi.mock('../core/MigrationRunner', () => ({
   MigrationRunner: vi.fn(() => ({
-    run: vi.fn(() => Promise.resolve())
-  }))
+    run: vi.fn(() => Promise.resolve()),
+  })),
 }));
 
 // Mock errorHandler
@@ -54,14 +54,14 @@ vi.mock('../../errors', async () => {
   return {
     ...actual,
     errorHandler: {
-      executeWithRetry: vi.fn(async (fn: () => Promise<void>) => fn())
-    }
+      executeWithRetry: vi.fn(async (fn: () => Promise<void>) => fn()),
+    },
   };
 });
 
 // Mock performance indexes
 vi.mock('../indexes/performanceIndexes', () => ({
-  createPerformanceIndexes: vi.fn()
+  createPerformanceIndexes: vi.fn(),
 }));
 
 describe('DatabaseManager', () => {
@@ -183,7 +183,7 @@ describe('DatabaseManager', () => {
     it('should update config with all values', () => {
       manager.configureWalCheckpoint({
         checkpointIntervalMs: 120000,
-        sizeWarningThreshold: 5000
+        sizeWarningThreshold: 5000,
       });
       const config = manager.getWalConfig();
       expect(config.checkpointIntervalMs).toBe(120000);
@@ -264,23 +264,21 @@ describe('DatabaseManager', () => {
 
   describe('validateSQLiteDatabase (via replaceProjectDatabase)', () => {
     it('should reject empty data', async () => {
-      await expect(
-        manager.replaceProjectDatabase(new Uint8Array([]))
-      ).rejects.toThrow(DatabaseError);
+      await expect(manager.replaceProjectDatabase(new Uint8Array([]))).rejects.toThrow(
+        DatabaseError,
+      );
     });
 
     it('should reject data too small for SQLite header', async () => {
-      await expect(
-        manager.replaceProjectDatabase(new Uint8Array(50))
-      ).rejects.toThrow(DatabaseError);
+      await expect(manager.replaceProjectDatabase(new Uint8Array(50))).rejects.toThrow(
+        DatabaseError,
+      );
     });
 
     it('should reject data without SQLite magic bytes', async () => {
       const invalidData = new Uint8Array(200);
       invalidData.fill(0);
-      await expect(
-        manager.replaceProjectDatabase(invalidData)
-      ).rejects.toThrow(DatabaseError);
+      await expect(manager.replaceProjectDatabase(invalidData)).rejects.toThrow(DatabaseError);
     });
   });
 });

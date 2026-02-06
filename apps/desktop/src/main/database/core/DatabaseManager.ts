@@ -41,7 +41,7 @@ export interface WalCheckpointConfig {
 
 const DEFAULT_WAL_CONFIG: WalCheckpointConfig = {
   checkpointIntervalMs: 5 * 60 * 1000, // 5 minutes
-  sizeWarningThreshold: 10000 // pages
+  sizeWarningThreshold: 10000, // pages
 };
 
 export class DatabaseManager {
@@ -72,12 +72,15 @@ export class DatabaseManager {
 
       logger.info('Database initialization complete');
     } catch (error) {
-      logger.error('Fatal error during database initialization', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Fatal error during database initialization',
+        error instanceof Error ? error : new Error(String(error)),
+      );
       throw new DatabaseError(
         'Failed to initialize databases',
         'database:initialize',
         false,
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : new Error(String(error)),
       );
     }
   }
@@ -90,25 +93,22 @@ export class DatabaseManager {
       logger.info('Initializing app database');
       logger.debug('App database path', { path: this.appDbPath });
 
-      await errorHandler.executeWithRetry(
-        async () => {
-          // Create or open database
-          this.appDb = new Database(this.appDbPath);
+      await errorHandler.executeWithRetry(async () => {
+        // Create or open database
+        this.appDb = new Database(this.appDbPath);
 
-          // Enable WAL mode for auto-persistence and better concurrency
-          this.appDb.pragma('journal_mode = WAL');
+        // Enable WAL mode for auto-persistence and better concurrency
+        this.appDb.pragma('journal_mode = WAL');
 
-          // Enable foreign keys
-          this.appDb.pragma('foreign_keys = ON');
+        // Enable foreign keys
+        this.appDb.pragma('foreign_keys = ON');
 
-          // Set synchronous mode to NORMAL for better performance
-          this.appDb.pragma('synchronous = NORMAL');
+        // Set synchronous mode to NORMAL for better performance
+        this.appDb.pragma('synchronous = NORMAL');
 
-          // Create tables from schema
-          this.appDb.exec(APP_SCHEMA);
-        },
-        'app-database:initialize'
-      );
+        // Create tables from schema
+        this.appDb.exec(APP_SCHEMA);
+      }, 'app-database:initialize');
 
       // Run migrations
       const migrationRunner = new MigrationRunner(this.appDb!, 'app', this.appDbPath);
@@ -116,12 +116,15 @@ export class DatabaseManager {
 
       logger.info('App database initialized');
     } catch (error) {
-      logger.error('Error initializing app database', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Error initializing app database',
+        error instanceof Error ? error : new Error(String(error)),
+      );
       throw new DatabaseError(
         'Failed to initialize app database',
         'app-database:initialize',
         false,
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : new Error(String(error)),
       );
     }
   }
@@ -134,37 +137,36 @@ export class DatabaseManager {
       logger.info('Initializing project database');
       logger.debug('Project database path', { path: this.projectDbPath });
 
-      await errorHandler.executeWithRetry(
-        async () => {
-          // Create or open database
-          this.projectDb = new Database(this.projectDbPath);
+      await errorHandler.executeWithRetry(async () => {
+        // Create or open database
+        this.projectDb = new Database(this.projectDbPath);
 
-          // Enable WAL mode for auto-persistence and better concurrency
-          this.projectDb.pragma('journal_mode = WAL');
+        // Enable WAL mode for auto-persistence and better concurrency
+        this.projectDb.pragma('journal_mode = WAL');
 
-          // Enable foreign keys
-          this.projectDb.pragma('foreign_keys = ON');
+        // Enable foreign keys
+        this.projectDb.pragma('foreign_keys = ON');
 
-          // Set synchronous mode to NORMAL for better performance
-          this.projectDb.pragma('synchronous = NORMAL');
+        // Set synchronous mode to NORMAL for better performance
+        this.projectDb.pragma('synchronous = NORMAL');
 
-          // Create tables from schema
-          this.projectDb.exec(PROJECT_SCHEMA);
-        },
-        'project-database:initialize'
-      );
+        // Create tables from schema
+        this.projectDb.exec(PROJECT_SCHEMA);
+      }, 'project-database:initialize');
 
       // Run migrations
       const migrationRunner = new MigrationRunner(this.projectDb!, 'project', this.projectDbPath);
       await migrationRunner.run();
 
       // Create default project if none exists
-      const result = this.projectDb!.prepare('SELECT COUNT(*) as count FROM projects').get() as { count: number };
+      const result = this.projectDb!.prepare('SELECT COUNT(*) as count FROM projects').get() as {
+        count: number;
+      };
       const projectCount = result?.count || 0;
 
       if (projectCount === 0) {
         this.projectDb!.prepare(
-          'INSERT INTO projects (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)'
+          'INSERT INTO projects (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)',
         ).run('default-project', 'Untitled Project', Date.now(), Date.now());
       }
 
@@ -174,12 +176,15 @@ export class DatabaseManager {
 
       logger.info('Project database initialized');
     } catch (error) {
-      logger.error('Error initializing project database', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Error initializing project database',
+        error instanceof Error ? error : new Error(String(error)),
+      );
       throw new DatabaseError(
         'Failed to initialize project database',
         'project-database:initialize',
         false,
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : new Error(String(error)),
       );
     }
   }
@@ -192,7 +197,7 @@ export class DatabaseManager {
       throw new DatabaseError(
         'App database not initialized. Call initialize() first.',
         'getAppDatabase',
-        false
+        false,
       );
     }
     return this.appDb;
@@ -206,7 +211,7 @@ export class DatabaseManager {
       throw new DatabaseError(
         'Project database not initialized. Call initialize() first.',
         'getProjectDatabase',
-        false
+        false,
       );
     }
     return this.projectDb;
@@ -218,7 +223,7 @@ export class DatabaseManager {
   getPaths(): { appDbPath: string; projectDbPath: string } {
     return {
       appDbPath: this.appDbPath,
-      projectDbPath: this.projectDbPath
+      projectDbPath: this.projectDbPath,
     };
   }
 
@@ -235,22 +240,19 @@ export class DatabaseManager {
         this.projectDb = null;
       }
 
-      await errorHandler.executeWithRetry(
-        async () => {
-          // Reload from disk (better-sqlite3 automatically reads from file)
-          this.projectDb = new Database(this.projectDbPath);
+      await errorHandler.executeWithRetry(async () => {
+        // Reload from disk (better-sqlite3 automatically reads from file)
+        this.projectDb = new Database(this.projectDbPath);
 
-          // Enable WAL mode
-          this.projectDb.pragma('journal_mode = WAL');
+        // Enable WAL mode
+        this.projectDb.pragma('journal_mode = WAL');
 
-          // Enable foreign keys
-          this.projectDb.pragma('foreign_keys = ON');
+        // Enable foreign keys
+        this.projectDb.pragma('foreign_keys = ON');
 
-          // Set synchronous mode to NORMAL for better performance
-          this.projectDb.pragma('synchronous = NORMAL');
-        },
-        'project-database:reload'
-      );
+        // Set synchronous mode to NORMAL for better performance
+        this.projectDb.pragma('synchronous = NORMAL');
+      }, 'project-database:reload');
 
       // Run migrations to ensure all tables exist
       const migrationRunner = new MigrationRunner(this.projectDb!, 'project', this.projectDbPath);
@@ -258,12 +260,15 @@ export class DatabaseManager {
 
       logger.info('Project database reloaded');
     } catch (error) {
-      logger.error('Error reloading project database', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Error reloading project database',
+        error instanceof Error ? error : new Error(String(error)),
+      );
       throw new DatabaseError(
         'Failed to reload project database',
         'project-database:reload',
         false,
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : new Error(String(error)),
       );
     }
   }
@@ -278,7 +283,7 @@ export class DatabaseManager {
       throw new DatabaseError(
         'Invalid database file: file too small (minimum 100 bytes required)',
         'import:validation',
-        false
+        false,
       );
     }
 
@@ -291,7 +296,7 @@ export class DatabaseManager {
       throw new DatabaseError(
         'Invalid database file: not a valid SQLite format 3 database',
         'import:validation',
-        false
+        false,
       );
     }
   }
@@ -331,23 +336,28 @@ export class DatabaseManager {
       this.projectDb.pragma('synchronous = NORMAL');
 
       // Run integrity check to ensure database is not corrupted
-      const integrityCheck = this.projectDb.pragma('integrity_check') as Array<{ integrity_check: string }>;
+      const integrityCheck = this.projectDb.pragma('integrity_check') as Array<{
+        integrity_check: string;
+      }>;
       if (integrityCheck[0]?.integrity_check !== 'ok') {
         throw new DatabaseError(
           `Database integrity check failed: ${integrityCheck[0]?.integrity_check}`,
           'import:integrity',
-          false
+          false,
         );
       }
 
       logger.info('Project database replaced and validated');
     } catch (error) {
-      logger.error('Error replacing project database', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Error replacing project database',
+        error instanceof Error ? error : new Error(String(error)),
+      );
       throw new DatabaseError(
         'Failed to replace project database',
         'project-database:replace',
         false,
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : new Error(String(error)),
       );
     }
   }
@@ -366,7 +376,7 @@ export class DatabaseManager {
     this.stopPeriodicCheckpointing();
 
     logger.info('Starting periodic WAL checkpointing', {
-      intervalMs: this.walConfig.checkpointIntervalMs
+      intervalMs: this.walConfig.checkpointIntervalMs,
     });
 
     this.walCheckpointInterval = setInterval(() => {
@@ -402,40 +412,48 @@ export class DatabaseManager {
     // Checkpoint each database separately to identify failures
     if (this.appDb) {
       try {
-        const appResult = this.appDb.pragma(`wal_checkpoint(${mode})`) as Array<{ busy: number; log: number; checkpointed: number }>;
+        const appResult = this.appDb.pragma(`wal_checkpoint(${mode})`) as Array<{
+          busy: number;
+          log: number;
+          checkpointed: number;
+        }>;
         if (appResult[0]?.log > this.walConfig.sizeWarningThreshold) {
           logger.warn('App database WAL file growing large', {
             database: 'app',
             logPages: appResult[0].log,
             checkpointedPages: appResult[0].checkpointed,
-            threshold: this.walConfig.sizeWarningThreshold
+            threshold: this.walConfig.sizeWarningThreshold,
           });
         }
       } catch (error) {
         logger.error('Failed to checkpoint WAL', {
           database: 'app',
           mode,
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }
 
     if (this.projectDb) {
       try {
-        const projectResult = this.projectDb.pragma(`wal_checkpoint(${mode})`) as Array<{ busy: number; log: number; checkpointed: number }>;
+        const projectResult = this.projectDb.pragma(`wal_checkpoint(${mode})`) as Array<{
+          busy: number;
+          log: number;
+          checkpointed: number;
+        }>;
         if (projectResult[0]?.log > this.walConfig.sizeWarningThreshold) {
           logger.warn('Project database WAL file growing large', {
             database: 'project',
             logPages: projectResult[0].log,
             checkpointedPages: projectResult[0].checkpointed,
-            threshold: this.walConfig.sizeWarningThreshold
+            threshold: this.walConfig.sizeWarningThreshold,
           });
         }
       } catch (error) {
         logger.error('Failed to checkpoint WAL', {
           database: 'project',
           mode,
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -480,7 +498,11 @@ export class DatabaseManager {
       if (!db) return null;
 
       try {
-        const checkpoint = db.pragma('wal_checkpoint(PASSIVE)') as Array<{ busy: number; log: number; checkpointed: number }>;
+        const checkpoint = db.pragma('wal_checkpoint(PASSIVE)') as Array<{
+          busy: number;
+          log: number;
+          checkpointed: number;
+        }>;
         const pageSize = db.pragma('page_size') as Array<{ page_size: number }>;
 
         return {
@@ -488,17 +510,20 @@ export class DatabaseManager {
           walPages: checkpoint[0]?.log || 0,
           checkpointedPages: checkpoint[0]?.checkpointed || 0,
           isBusy: (checkpoint[0]?.busy || 0) > 0,
-          estimatedWalSizeBytes: (checkpoint[0]?.log || 0) * (pageSize[0]?.page_size || 4096)
+          estimatedWalSizeBytes: (checkpoint[0]?.log || 0) * (pageSize[0]?.page_size || 4096),
         };
       } catch (error) {
-        logger.error(`Failed to get WAL status for ${name}`, error instanceof Error ? error : new Error(String(error)));
+        logger.error(
+          `Failed to get WAL status for ${name}`,
+          error instanceof Error ? error : new Error(String(error)),
+        );
         return null;
       }
     };
 
     return {
       app: getStatus(this.appDb, 'app'),
-      project: getStatus(this.projectDb, 'project')
+      project: getStatus(this.projectDb, 'project'),
     };
   }
 

@@ -5,7 +5,7 @@ import {
   PaginatedResult,
   normalizePaginationOptions,
   buildOrderByClause,
-  buildPaginatedResult
+  buildPaginatedResult,
 } from '../utils/pagination';
 
 /**
@@ -113,7 +113,7 @@ export function createShopOrderProject(data: Partial<ShopOrderProject>): ShopOrd
       additional_contacts, logo_path, logo_url, logo_storage_path,
       disciplines, current_revision, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `
+  `,
   ).run(
     id,
     data.user_id || null,
@@ -155,14 +155,17 @@ export function createShopOrderProject(data: Partial<ShopOrderProject>): ShopOrd
     disciplines,
     data.current_revision || 0,
     now,
-    now
+    now,
   );
 
   saveDatabase();
   return getShopOrderProjectById(id)!;
 }
 
-export function updateShopOrderProject(id: string, updates: Partial<ShopOrderProject>): ShopOrderProject {
+export function updateShopOrderProject(
+  id: string,
+  updates: Partial<ShopOrderProject>,
+): ShopOrderProject {
   const db = getDatabase();
   const now = Date.now();
 
@@ -221,7 +224,7 @@ export function updateShopOrderProject(id: string, updates: Partial<ShopOrderPro
     UPDATE shop_order_projects
     SET ${setClause}, updated_at = ?
     WHERE id = ?
-  `
+  `,
   ).run(...values, now, id);
 
   saveDatabase();
@@ -252,9 +255,9 @@ export interface ShopOrderSection {
 
 export function getSectionsByProjectId(projectId: string): ShopOrderSection[] {
   const db = getDatabase();
-  const sections = db.prepare(
-    `SELECT * FROM shop_order_sections WHERE prep_project_id = ? ORDER BY sort_order`
-  ).all(projectId);
+  const sections = db
+    .prepare(`SELECT * FROM shop_order_sections WHERE prep_project_id = ? ORDER BY sort_order`)
+    .all(projectId);
 
   return sections as ShopOrderSection[];
 }
@@ -269,7 +272,7 @@ export function createShopOrderSection(data: Partial<ShopOrderSection>): ShopOrd
     INSERT INTO shop_order_sections (
       id, prep_project_id, name, discipline, sort_order, page_break, notes, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `
+  `,
   ).run(
     id,
     data.prep_project_id!,
@@ -279,14 +282,17 @@ export function createShopOrderSection(data: Partial<ShopOrderSection>): ShopOrd
     data.page_break ? 1 : 0,
     data.notes || null,
     now,
-    now
+    now,
   );
 
   saveDatabase();
   return getShopOrderSectionById(id)!;
 }
 
-export function updateShopOrderSection(id: string, updates: Partial<ShopOrderSection>): ShopOrderSection {
+export function updateShopOrderSection(
+  id: string,
+  updates: Partial<ShopOrderSection>,
+): ShopOrderSection {
   const db = getDatabase();
   const now = Date.now();
 
@@ -312,7 +318,7 @@ export function updateShopOrderSection(id: string, updates: Partial<ShopOrderSec
     UPDATE shop_order_sections
     SET ${setClause}, updated_at = ?
     WHERE id = ?
-  `
+  `,
   ).run(...values, now, id);
 
   saveDatabase();
@@ -363,23 +369,25 @@ export interface ShopOrderItem {
 
 export function getItemsBySectionId(sectionId: string): ShopOrderItem[] {
   const db = getDatabase();
-  const items = db.prepare(
-    `SELECT * FROM shop_order_items WHERE section_id = ? ORDER BY sort_order`
-  ).all(sectionId);
+  const items = db
+    .prepare(`SELECT * FROM shop_order_items WHERE section_id = ? ORDER BY sort_order`)
+    .all(sectionId);
 
   return items as ShopOrderItem[];
 }
 
 export function getItemsByProjectId(projectId: string): ShopOrderItem[] {
   const db = getDatabase();
-  const items = db.prepare(
-    `
+  const items = db
+    .prepare(
+      `
     SELECT i.* FROM shop_order_items i
     JOIN shop_order_sections s ON i.section_id = s.id
     WHERE s.prep_project_id = ?
     ORDER BY s.sort_order, i.sort_order
-  `
-  ).all(projectId);
+  `,
+    )
+    .all(projectId);
 
   return items as ShopOrderItem[];
 }
@@ -398,7 +406,7 @@ const SHOP_ORDER_ITEM_SORT_FIELDS = Object.freeze([
   'power',
   'sort_order',
   'created_at',
-  'updated_at'
+  'updated_at',
 ] as const);
 
 /**
@@ -411,27 +419,39 @@ const SHOP_ORDER_ITEM_SORT_FIELDS = Object.freeze([
  */
 export function getItemsByProjectIdPaginated(
   projectId: string,
-  options: Partial<PaginationOptions> = {}
+  options: Partial<PaginationOptions> = {},
 ): PaginatedResult<ShopOrderItem> {
   const db = getDatabase();
   const normalized = normalizePaginationOptions(options, SHOP_ORDER_ITEM_SORT_FIELDS);
-  const orderBy = buildOrderByClause(normalized.sortBy, normalized.sortOrder, SHOP_ORDER_ITEM_SORT_FIELDS);
+  const orderBy = buildOrderByClause(
+    normalized.sortBy,
+    normalized.sortOrder,
+    SHOP_ORDER_ITEM_SORT_FIELDS,
+  );
 
   // Get total count
-  const countResult = db.prepare(`
+  const countResult = db
+    .prepare(
+      `
     SELECT COUNT(*) as count FROM shop_order_items i
     JOIN shop_order_sections s ON i.section_id = s.id
     WHERE s.prep_project_id = ?
-  `).get(projectId) as { count: number };
+  `,
+    )
+    .get(projectId) as { count: number };
 
   // Get paginated data
-  const items = db.prepare(`
+  const items = db
+    .prepare(
+      `
     SELECT i.* FROM shop_order_items i
     JOIN shop_order_sections s ON i.section_id = s.id
     WHERE s.prep_project_id = ?
     ORDER BY ${orderBy}
     LIMIT ? OFFSET ?
-  `).all(projectId, normalized.limit, normalized.offset);
+  `,
+    )
+    .all(projectId, normalized.limit, normalized.offset);
 
   return buildPaginatedResult(items as ShopOrderItem[], countResult.count, normalized);
 }
@@ -445,24 +465,32 @@ export function getItemsByProjectIdPaginated(
  */
 export function getItemsBySectionIdPaginated(
   sectionId: string,
-  options: Partial<PaginationOptions> = {}
+  options: Partial<PaginationOptions> = {},
 ): PaginatedResult<ShopOrderItem> {
   const db = getDatabase();
   const normalized = normalizePaginationOptions(options, SHOP_ORDER_ITEM_SORT_FIELDS);
-  const orderBy = buildOrderByClause(normalized.sortBy, normalized.sortOrder, SHOP_ORDER_ITEM_SORT_FIELDS);
+  const orderBy = buildOrderByClause(
+    normalized.sortBy,
+    normalized.sortOrder,
+    SHOP_ORDER_ITEM_SORT_FIELDS,
+  );
 
   // Get total count
-  const countResult = db.prepare(
-    'SELECT COUNT(*) as count FROM shop_order_items WHERE section_id = ?'
-  ).get(sectionId) as { count: number };
+  const countResult = db
+    .prepare('SELECT COUNT(*) as count FROM shop_order_items WHERE section_id = ?')
+    .get(sectionId) as { count: number };
 
   // Get paginated data
-  const items = db.prepare(`
+  const items = db
+    .prepare(
+      `
     SELECT * FROM shop_order_items
     WHERE section_id = ?
     ORDER BY ${orderBy}
     LIMIT ? OFFSET ?
-  `).all(sectionId, normalized.limit, normalized.offset);
+  `,
+    )
+    .all(sectionId, normalized.limit, normalized.offset);
 
   return buildPaginatedResult(items as ShopOrderItem[], countResult.count, normalized);
 }
@@ -499,7 +527,7 @@ export function createShopOrderItem(data: Partial<ShopOrderItem>): ShopOrderItem
       sort_order, added_in_revision, removed_in_revision, modified_in_revision,
       created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `
+  `,
   ).run(
     id,
     data.section_id!,
@@ -518,17 +546,14 @@ export function createShopOrderItem(data: Partial<ShopOrderItem>): ShopOrderItem
     data.removed_in_revision || null,
     data.modified_in_revision || null,
     now,
-    now
+    now,
   );
 
   saveDatabase();
   return getShopOrderItemById(id)!;
 }
 
-export function updateShopOrderItem(
-  id: string,
-  updates: Partial<ShopOrderItem>
-): ShopOrderItem {
+export function updateShopOrderItem(id: string, updates: Partial<ShopOrderItem>): ShopOrderItem {
   const db = getDatabase();
   const now = Date.now();
 
@@ -594,7 +619,7 @@ export function updateShopOrderItem(
     UPDATE shop_order_items
     SET ${setClause}, updated_at = ?
     WHERE id = ?
-  `
+  `,
   ).run(...values, now, id);
 
   saveDatabase();
@@ -635,9 +660,11 @@ export interface ShopOrderRevision {
 
 export function getRevisionsByProjectId(projectId: string): ShopOrderRevision[] {
   const db = getDatabase();
-  const revisions = db.prepare(
-    `SELECT * FROM shop_order_revisions WHERE prep_project_id = ? ORDER BY revision_number`
-  ).all(projectId);
+  const revisions = db
+    .prepare(
+      `SELECT * FROM shop_order_revisions WHERE prep_project_id = ? ORDER BY revision_number`,
+    )
+    .all(projectId);
 
   return revisions as ShopOrderRevision[];
 }
@@ -654,7 +681,7 @@ export function createShopOrderRevision(data: Partial<ShopOrderRevision>): ShopO
     INSERT INTO shop_order_revisions (
       id, prep_project_id, revision_number, revision_date, notes, change_log, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `
+  `,
   ).run(
     id,
     data.prep_project_id!,
@@ -663,7 +690,7 @@ export function createShopOrderRevision(data: Partial<ShopOrderRevision>): ShopO
     data.notes || null,
     changeLog,
     now,
-    now
+    now,
   );
 
   saveDatabase();
@@ -729,7 +756,7 @@ export function createShopOrderNote(data: Partial<ShopOrderNote>): ShopOrderNote
     INSERT INTO shop_order_notes (
       id, prep_project_id, type, content, format, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?)
-  `
+  `,
   ).run(
     id,
     data.prep_project_id!,
@@ -737,14 +764,17 @@ export function createShopOrderNote(data: Partial<ShopOrderNote>): ShopOrderNote
     data.content || '',
     data.format || 'plain',
     now,
-    now
+    now,
   );
 
   saveDatabase();
   return getShopOrderNoteById(id)!;
 }
 
-export function updateShopOrderNote(id: string, updates: Partial<Pick<ShopOrderNote, 'content' | 'format'>>): ShopOrderNote {
+export function updateShopOrderNote(
+  id: string,
+  updates: Partial<Pick<ShopOrderNote, 'content' | 'format'>>,
+): ShopOrderNote {
   const db = getDatabase();
   const now = Date.now();
 
@@ -773,7 +803,7 @@ export function updateShopOrderNote(id: string, updates: Partial<Pick<ShopOrderN
     UPDATE shop_order_notes
     SET ${fields.join(', ')}
     WHERE id = ?
-  `
+  `,
   ).run(...values);
 
   saveDatabase();
@@ -825,9 +855,7 @@ export function getAllNoteTemplates(type?: string): ShopOrderNoteTemplate[] {
 
   query += ` ORDER BY is_default DESC, name ASC`;
 
-  const templates = params.length > 0
-    ? db.prepare(query).all(...params)
-    : db.prepare(query).all();
+  const templates = params.length > 0 ? db.prepare(query).all(...params) : db.prepare(query).all();
 
   return templates as ShopOrderNoteTemplate[];
 }
@@ -845,9 +873,9 @@ export function getNoteTemplateById(id: string): ShopOrderNoteTemplate | null {
 
 export function getDefaultNoteTemplate(type: string): ShopOrderNoteTemplate | null {
   const db = getDatabase();
-  const template = db.prepare(
-    `SELECT * FROM shop_order_note_templates WHERE type = ? AND is_default = 1 LIMIT 1`
-  ).get(type);
+  const template = db
+    .prepare(`SELECT * FROM shop_order_note_templates WHERE type = ? AND is_default = 1 LIMIT 1`)
+    .get(type);
 
   if (!template) {
     return null;
@@ -863,9 +891,9 @@ export function createNoteTemplate(data: Partial<ShopOrderNoteTemplate>): ShopOr
 
   // If setting as default, unset any existing defaults for this type
   if (data.is_default) {
-    db.prepare(
-      `UPDATE shop_order_note_templates SET is_default = 0 WHERE type = ?`
-    ).run(data.type!);
+    db.prepare(`UPDATE shop_order_note_templates SET is_default = 0 WHERE type = ?`).run(
+      data.type!,
+    );
   }
 
   db.prepare(
@@ -873,7 +901,7 @@ export function createNoteTemplate(data: Partial<ShopOrderNoteTemplate>): ShopOr
     INSERT INTO shop_order_note_templates (
       id, user_id, type, name, content, is_default, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `
+  `,
   ).run(
     id,
     data.user_id || null,
@@ -882,14 +910,17 @@ export function createNoteTemplate(data: Partial<ShopOrderNoteTemplate>): ShopOr
     data.content || '',
     data.is_default || 0,
     now,
-    now
+    now,
   );
 
   saveDatabase();
   return getNoteTemplateById(id)!;
 }
 
-export function updateNoteTemplate(id: string, updates: Partial<ShopOrderNoteTemplate>): ShopOrderNoteTemplate {
+export function updateNoteTemplate(
+  id: string,
+  updates: Partial<ShopOrderNoteTemplate>,
+): ShopOrderNoteTemplate {
   const db = getDatabase();
   const now = Date.now();
 
@@ -900,9 +931,9 @@ export function updateNoteTemplate(id: string, updates: Partial<ShopOrderNoteTem
 
   // If setting as default, unset any existing defaults for this type
   if (updates.is_default) {
-    db.prepare(
-      `UPDATE shop_order_note_templates SET is_default = 0 WHERE type = ?`
-    ).run(template.type);
+    db.prepare(`UPDATE shop_order_note_templates SET is_default = 0 WHERE type = ?`).run(
+      template.type,
+    );
   }
 
   const fields = [];
@@ -925,9 +956,9 @@ export function updateNoteTemplate(id: string, updates: Partial<ShopOrderNoteTem
   values.push(now);
   values.push(id);
 
-  db.prepare(
-    `UPDATE shop_order_note_templates SET ${fields.join(', ')} WHERE id = ?`
-  ).run(...values);
+  db.prepare(`UPDATE shop_order_note_templates SET ${fields.join(', ')} WHERE id = ?`).run(
+    ...values,
+  );
 
   saveDatabase();
   return getNoteTemplateById(id)!;

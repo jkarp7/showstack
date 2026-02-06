@@ -2,7 +2,7 @@ import {
   getSettings,
   saveSettings as saveSettingsQuery,
   getDefaultSettings,
-  resetSettings as resetSettingsQuery
+  resetSettings as resetSettingsQuery,
 } from '../database/queries/settings';
 import type { AppSettings } from '../../shared/types/settings.types';
 

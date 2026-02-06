@@ -16,8 +16,8 @@ const shortcutGroups: ShortcutGroup[] = [
       { keys: 'Mod+/', description: 'Show keyboard shortcuts' },
       { keys: 'Mod+S', description: 'Save template' },
       { keys: 'Mod+P', description: 'Toggle preview mode' },
-      { keys: 'ESC', description: 'Deselect / Close' }
-    ]
+      { keys: 'ESC', description: 'Deselect / Close' },
+    ],
   },
   {
     category: 'Editing',
@@ -26,8 +26,8 @@ const shortcutGroups: ShortcutGroup[] = [
       { keys: 'Mod+Shift+Z', description: 'Redo' },
       { keys: 'Mod+D', description: 'Duplicate element' },
       { keys: 'Delete', description: 'Delete selected element' },
-      { keys: 'Backspace', description: 'Delete selected element' }
-    ]
+      { keys: 'Backspace', description: 'Delete selected element' },
+    ],
   },
   {
     category: 'Text Formatting',
@@ -37,8 +37,8 @@ const shortcutGroups: ShortcutGroup[] = [
       { keys: 'Mod+U', description: 'Underline' },
       { keys: 'Mod+Shift+L', description: 'Align left' },
       { keys: 'Mod+Shift+E', description: 'Align center' },
-      { keys: 'Mod+Shift+R', description: 'Align right' }
-    ]
+      { keys: 'Mod+Shift+R', description: 'Align right' },
+    ],
   },
   {
     category: 'Canvas',
@@ -47,8 +47,8 @@ const shortcutGroups: ShortcutGroup[] = [
       { keys: 'Mod+-', description: 'Zoom out' },
       { keys: 'Mod+0', description: 'Reset zoom to 100%' },
       { keys: 'Mod+G', description: 'Toggle grid' },
-      { keys: 'Mod+Shift+G', description: 'Toggle snap guides' }
-    ]
+      { keys: 'Mod+Shift+G', description: 'Toggle snap guides' },
+    ],
   },
   {
     category: 'Navigation',
@@ -56,8 +56,8 @@ const shortcutGroups: ShortcutGroup[] = [
       { keys: '←/→/↑/↓', description: 'Move selected element (fine)' },
       { keys: 'Shift+←/→/↑/↓', description: 'Move selected element (coarse)' },
       { keys: 'Tab', description: 'Select next element' },
-      { keys: 'Shift+Tab', description: 'Select previous element' }
-    ]
+      { keys: 'Shift+Tab', description: 'Select previous element' },
+    ],
   },
   {
     category: 'Element Creation (Quick Add)',
@@ -66,9 +66,9 @@ const shortcutGroups: ShortcutGroup[] = [
       { keys: 'R', description: 'Add rectangle' },
       { keys: 'L', description: 'Add line' },
       { keys: 'I', description: 'Add image' },
-      { keys: 'D', description: 'Add data field' }
-    ]
-  }
+      { keys: 'D', description: 'Add data field' },
+    ],
+  },
 ];
 
 interface KeyboardShortcutsHelpProps {
@@ -95,10 +95,10 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
         <div className="p-6 border-b border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <h2 id="shortcuts-title" className="text-2xl font-bold text-white">Keyboard Shortcuts</h2>
-              <p className="text-sm text-gray-400 mt-1">
-                Master these shortcuts to work faster
-              </p>
+              <h2 id="shortcuts-title" className="text-2xl font-bold text-white">
+                Keyboard Shortcuts
+              </h2>
+              <p className="text-sm text-gray-400 mt-1">Master these shortcuts to work faster</p>
             </div>
             <button
               onClick={onClose}
@@ -106,7 +106,12 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
               aria-label="Close"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -129,20 +134,18 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
                       key={index}
                       className="flex items-center justify-between p-2 bg-gray-750 rounded-lg hover:bg-gray-700 transition-colors"
                     >
-                      <span className="text-sm text-gray-300">
-                        {shortcut.description}
-                      </span>
+                      <span className="text-sm text-gray-300">{shortcut.description}</span>
                       <div className="flex items-center gap-1">
-                        {formatShortcut(shortcut.keys).split('+').map((key, keyIndex) => (
-                          <span key={keyIndex} className="flex items-center gap-1">
-                            {keyIndex > 0 && (
-                              <span className="text-gray-500 text-xs">+</span>
-                            )}
-                            <kbd className="px-2 py-1 bg-gray-900 border border-gray-600 rounded text-xs font-mono text-gray-300 shadow-sm">
-                              {key}
-                            </kbd>
-                          </span>
-                        ))}
+                        {formatShortcut(shortcut.keys)
+                          .split('+')
+                          .map((key, keyIndex) => (
+                            <span key={keyIndex} className="flex items-center gap-1">
+                              {keyIndex > 0 && <span className="text-gray-500 text-xs">+</span>}
+                              <kbd className="px-2 py-1 bg-gray-900 border border-gray-600 rounded text-xs font-mono text-gray-300 shadow-sm">
+                                {key}
+                              </kbd>
+                            </span>
+                          ))}
                       </div>
                     </div>
                   ))}
@@ -155,7 +158,11 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
         {/* Footer */}
         <div className="p-4 border-t border-gray-700 flex items-center justify-between">
           <div className="text-xs text-gray-500">
-            Press <kbd className="px-2 py-0.5 bg-gray-700 border border-gray-600 rounded text-xs font-mono">{formatShortcut('Mod+/')}</kbd> anytime to view this help
+            Press{' '}
+            <kbd className="px-2 py-0.5 bg-gray-700 border border-gray-600 rounded text-xs font-mono">
+              {formatShortcut('Mod+/')}
+            </kbd>{' '}
+            anytime to view this help
           </div>
           <button
             onClick={onClose}

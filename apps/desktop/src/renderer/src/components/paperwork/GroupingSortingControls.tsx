@@ -15,12 +15,14 @@ interface GroupingSortingControlsProps {
 export function GroupingSortingControls({
   organization,
   columns,
-  onChange
+  onChange,
 }: GroupingSortingControlsProps) {
-  const groupableFields = columns.filter(c => c.visible).map(c => ({
-    value: c.field,
-    label: c.label
-  }));
+  const groupableFields = columns
+    .filter((c) => c.visible)
+    .map((c) => ({
+      value: c.field,
+      label: c.label,
+    }));
 
   return (
     <div className="space-y-4">
@@ -32,13 +34,13 @@ export function GroupingSortingControls({
           onChange={(e) =>
             onChange({
               ...organization,
-              groupBy: e.target.value === 'none' ? undefined : e.target.value
+              groupBy: e.target.value === 'none' ? undefined : e.target.value,
             })
           }
           className="w-full bg-gray-700 text-white px-3 py-2 rounded border border-gray-600"
         >
           <option value="none">No Grouping</option>
-          {groupableFields.map(field => (
+          {groupableFields.map((field) => (
             <option key={field.value} value={field.value}>
               {field.label}
             </option>
@@ -52,16 +54,16 @@ export function GroupingSortingControls({
         <div className="flex gap-2">
           <select
             value={organization.sortBy || columns[0]?.field || ''}
-            onChange={(e) =>
-              onChange({ ...organization, sortBy: e.target.value })
-            }
+            onChange={(e) => onChange({ ...organization, sortBy: e.target.value })}
             className="flex-1 bg-gray-700 text-white px-3 py-2 rounded border border-gray-600"
           >
-            {columns.filter(c => c.visible).map(col => (
-              <option key={col.field} value={col.field}>
-                {col.label}
-              </option>
-            ))}
+            {columns
+              .filter((c) => c.visible)
+              .map((col) => (
+                <option key={col.field} value={col.field}>
+                  {col.label}
+                </option>
+              ))}
           </select>
 
           <select
@@ -69,7 +71,7 @@ export function GroupingSortingControls({
             onChange={(e) =>
               onChange({
                 ...organization,
-                sortDirection: e.target.value as 'asc' | 'desc'
+                sortDirection: e.target.value as 'asc' | 'desc',
               })
             }
             className="bg-gray-700 text-white px-3 py-2 rounded border border-gray-600"
@@ -90,7 +92,7 @@ export function GroupingSortingControls({
               onChange={(e) =>
                 onChange({
                   ...organization,
-                  showGroupHeaders: e.target.checked
+                  showGroupHeaders: e.target.checked,
                 })
               }
               className="w-4 h-4"
@@ -105,7 +107,7 @@ export function GroupingSortingControls({
               onChange={(e) =>
                 onChange({
                   ...organization,
-                  groupPageBreaks: e.target.checked
+                  groupPageBreaks: e.target.checked,
                 })
               }
               className="w-4 h-4"

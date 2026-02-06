@@ -5,7 +5,7 @@ import {
   updatePDRack,
   deletePDRack,
   getPDRacksWithUsage,
-  PDRack
+  PDRack,
 } from '../database/queries/pdRacks';
 import { BaseService } from './BaseService';
 
@@ -30,7 +30,7 @@ export class PDRackService extends BaseService {
   async getAll(projectId?: string): Promise<PDRack[]> {
     const result = await this.executeWithRetry(
       async () => getAllPDRacks(projectId),
-      'pdRacks:getAll'
+      'pdRacks:getAll',
     );
     return result;
   }
@@ -44,10 +44,7 @@ export class PDRackService extends BaseService {
   async getById(id: string): Promise<PDRack | undefined> {
     this.validateId(id, 'PD Rack');
 
-    return await this.executeWithRetry(
-      async () => getPDRackById(id),
-      'pdRacks:getById'
-    );
+    return await this.executeWithRetry(async () => getPDRackById(id), 'pdRacks:getById');
   }
 
   /**
@@ -59,7 +56,7 @@ export class PDRackService extends BaseService {
   async getWithUsage(projectId?: string): Promise<any[]> {
     const result = await this.executeWithRetry(
       async () => getPDRacksWithUsage(projectId),
-      'pdRacks:getWithUsage'
+      'pdRacks:getWithUsage',
     );
     return result;
   }
@@ -71,7 +68,10 @@ export class PDRackService extends BaseService {
    * @param projectId Optional project ID
    * @returns Created PD rack
    */
-  async create(data: Omit<PDRack, 'id' | 'created_at' | 'updated_at'>, projectId?: string): Promise<PDRack> {
+  async create(
+    data: Omit<PDRack, 'id' | 'created_at' | 'updated_at'>,
+    projectId?: string,
+  ): Promise<PDRack> {
     this.validateRequired(data.name, 'name', 'Rack name');
 
     // Validate voltage
@@ -86,10 +86,7 @@ export class PDRackService extends BaseService {
       throw new Error('Circuit count must be 12, 24, 48, or 96');
     }
 
-    return await this.executeWithRetry(
-      async () => createPDRack(data, projectId),
-      'pdRacks:create'
-    );
+    return await this.executeWithRetry(async () => createPDRack(data, projectId), 'pdRacks:create');
   }
 
   /**
@@ -123,10 +120,7 @@ export class PDRackService extends BaseService {
       }
     }
 
-    return await this.executeWithRetry(
-      async () => updatePDRack(id, updates),
-      'pdRacks:update'
-    );
+    return await this.executeWithRetry(async () => updatePDRack(id, updates), 'pdRacks:update');
   }
 
   /**
@@ -137,10 +131,7 @@ export class PDRackService extends BaseService {
   async delete(id: string): Promise<void> {
     this.validateId(id, 'PD Rack');
 
-    return await this.executeWithRetry(
-      async () => deletePDRack(id),
-      'pdRacks:delete'
-    );
+    return await this.executeWithRetry(async () => deletePDRack(id), 'pdRacks:delete');
   }
 
   /**

@@ -18,7 +18,7 @@ export const FixtureReportTypeSchema = z.enum([
   'power-summary',
   'color-schedule',
   'gobo-schedule',
-  'color-cut-report'
+  'color-cut-report',
 ]);
 
 /**
@@ -29,7 +29,7 @@ export const InfrastructureReportTypeSchema = z.enum([
   'network-summary',
   'port-assignments',
   'infrastructure-power',
-  'infrastructure-location'
+  'infrastructure-location',
 ]);
 
 /**
@@ -47,7 +47,7 @@ export const ColumnFormatTypeSchema = z.enum([
   'amperage',
   'boolean',
   'date',
-  'color'
+  'color',
 ]);
 
 /**
@@ -69,7 +69,7 @@ export const PaperworkColumnConfigSchema = z.object({
   visible: z.boolean(),
   format: ColumnFormatTypeSchema.optional(),
   combinedWith: z.array(z.string()).optional(), // e.g., ['position', 'unit'] -> "FOH 1"
-  separator: z.string().optional() // Separator for merged columns (default: ' • ')
+  separator: z.string().optional(), // Separator for merged columns (default: ' • ')
 });
 
 /**
@@ -80,7 +80,7 @@ export const ReportOrganizationSchema = z.object({
   sortBy: z.string().optional(),
   sortDirection: z.enum(['asc', 'desc']).optional(),
   showGroupHeaders: z.boolean().optional(),
-  groupPageBreaks: z.boolean().optional()
+  groupPageBreaks: z.boolean().optional(),
 });
 
 /**
@@ -92,7 +92,7 @@ export const FontStyleSchema = z.object({
   headerFontSize: z.number().positive().optional(), // Header font size in points (default: 11)
   fontWeight: z.enum(['normal', 'bold']).optional(),
   fontStyle: z.enum(['normal', 'italic']).optional(),
-  lineHeight: z.number().positive().optional() // Line height multiplier (default: 1.2)
+  lineHeight: z.number().positive().optional(), // Line height multiplier (default: 1.2)
 });
 
 /**
@@ -106,7 +106,7 @@ export const PageSetupSchema = z.object({
   marginRight: z.number().nonnegative(),
   marginBottom: z.number().nonnegative(),
   marginLeft: z.number().nonnegative(),
-  fontStyle: FontStyleSchema.optional() // Font customization settings
+  fontStyle: FontStyleSchema.optional(), // Font customization settings
 });
 
 /**
@@ -133,7 +133,7 @@ export const PaperworkTemplateSchema = extendBaseEntity({
 
   // Header/Footer layout (references page_layout_templates)
   headerTemplateId: OptionalIDSchema,
-  footerTemplateId: OptionalIDSchema
+  footerTemplateId: OptionalIDSchema,
 });
 
 /**
@@ -156,14 +156,14 @@ export type PaperworkTemplate = z.infer<typeof PaperworkTemplateSchema>;
 export const CreatePaperworkTemplateSchema = PaperworkTemplateSchema.omit({
   id: true,
   created_at: true,
-  updated_at: true
+  updated_at: true,
 });
 
 /**
  * Schema for updating a paperwork template (all fields optional except id, isSystem readonly)
  */
 export const UpdatePaperworkTemplateSchema = PaperworkTemplateSchema.omit({
-  isSystem: true
+  isSystem: true,
 })
   .partial()
   .required({ id: true });

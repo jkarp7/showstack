@@ -27,6 +27,7 @@ npm test
 ## ✅ Just Completed (January 20, 2026)
 
 ### Shop Order Table Migration (PR #63)
+
 - Migrated from dialog-based to modern spreadsheet-like table interface
 - Inline cell editing with cell selection system
 - Clipboard operations (paste TSV/CSV, export to CSV)
@@ -38,6 +39,7 @@ npm test
 - Post-merge improvements tracked in Issue #65
 
 ### Previous Completions
+
 - Telemetry System Hardening (PR #61 - January 18, 2026)
 - Cloud-Native Architecture Planning (On hold until core features complete)
 
@@ -46,19 +48,24 @@ npm test
 ## 🎯 Immediate Priorities
 
 ### 1. Lightwright Parity Features (Short-term: 1-2 Months)
+
 **Focus:** Industry standard features to compete with Lightwright
 
 **High Priority:**
+
 - [ ] **MVR export support** - Industry standard CAD/visualizer format (6-8 weeks)
 - [ ] **Enhanced error checking** - Overlapping patches, overloaded dimmers, duplicate channels (4-6 weeks)
 - [ ] **Basic console integration** - OSC protocol for ETC Eos (8-12 weeks)
 
 **Medium Priority:**
+
 - [ ] Add power distribution printable reports with visualization
 - [ ] Implement CSV import/export with field mapping
 
 ### 2. Shop Order Post-Merge Improvements (Issue #65)
+
 **Non-critical enhancements from PR #63 review:**
+
 - [ ] Standardize error handling (toast notifications)
 - [ ] Add integration tests for critical workflows
 - [ ] Virtual scrolling for large tables (500+ items)
@@ -66,6 +73,7 @@ npm test
 - [ ] E2E tests with Playwright
 
 ### 3. Alpha.2 Release Preparation
+
 - [ ] Complete MVR export
 - [ ] Achieve 50% test coverage (in progress - shop order 100%, telemetry 100%)
 - [ ] Fix critical bugs from alpha.1 feedback
@@ -77,7 +85,9 @@ npm test
 ## 📋 Future Work (After Core Features)
 
 ### Cloud-Native Architecture (Issues #34 + #33)
+
 When ready to implement:
+
 1. Review `docs/CLOUD_NATIVE_ARCHITECTURE_PLAN.md`
 2. Confirm scope (15-16 weeks)
 3. Confirm budget (~$20-50/month hosting)
@@ -85,6 +95,7 @@ When ready to implement:
 5. Begin Phase 1: Backend Foundation
 
 **Key Features:**
+
 - Real-time collaboration
 - User authentication (JWT)
 - WebSocket integration

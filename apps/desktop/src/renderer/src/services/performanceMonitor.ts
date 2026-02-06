@@ -49,10 +49,7 @@ class PerformanceTimer {
  * // ... do work ...
  * timer.end({ pageCount: 5 });
  */
-export function startTimer(
-  metric: string,
-  context: EventProperties = {}
-): PerformanceTimer {
+export function startTimer(metric: string, context: EventProperties = {}): PerformanceTimer {
   return new PerformanceTimer(metric, context);
 }
 
@@ -72,7 +69,7 @@ export function startTimer(
 export async function measureAsync<T>(
   metric: string,
   fn: () => Promise<T>,
-  context: EventProperties = {}
+  context: EventProperties = {},
 ): Promise<T> {
   const timer = startTimer(metric, context);
 
@@ -99,11 +96,7 @@ export async function measureAsync<T>(
  *   return renderVirtualGrid(fixtures);
  * }, { fixtureCount: fixtures.length });
  */
-export function measureSync<T>(
-  metric: string,
-  fn: () => T,
-  context: EventProperties = {}
-): T {
+export function measureSync<T>(metric: string, fn: () => T, context: EventProperties = {}): T {
   const timer = startTimer(metric, context);
 
   try {
@@ -124,10 +117,7 @@ export function measureSync<T>(
  * @param duration Render duration in milliseconds
  * @param context Additional context (e.g., row count, column count)
  */
-export function trackGridRender(
-  duration: number,
-  context: EventProperties = {}
-): void {
+export function trackGridRender(duration: number, context: EventProperties = {}): void {
   telemetry.trackPerformance('virtual_grid_render', duration, {
     metric_type: 'render_time',
     ...context,
@@ -140,10 +130,7 @@ export function trackGridRender(
  * @param duration Export duration in milliseconds
  * @param context Additional context (e.g., page count, report type)
  */
-export function trackPDFExport(
-  duration: number,
-  context: EventProperties = {}
-): void {
+export function trackPDFExport(duration: number, context: EventProperties = {}): void {
   telemetry.trackPerformance('pdf_export', duration, {
     metric_type: 'export_time',
     ...context,
@@ -156,10 +143,7 @@ export function trackPDFExport(
  * @param duration Query duration in milliseconds
  * @param context Additional context (e.g., query type, record count)
  */
-export function trackDatabaseQuery(
-  duration: number,
-  context: EventProperties = {}
-): void {
+export function trackDatabaseQuery(duration: number, context: EventProperties = {}): void {
   telemetry.trackPerformance('database_query', duration, {
     metric_type: 'query_time',
     ...context,
@@ -176,7 +160,7 @@ export function trackDatabaseQuery(
 export function trackFileOperation(
   operation: string,
   duration: number,
-  context: EventProperties = {}
+  context: EventProperties = {},
 ): void {
   telemetry.trackPerformance(`file_${operation}`, duration, {
     metric_type: 'file_operation',
@@ -184,4 +168,3 @@ export function trackFileOperation(
     ...context,
   });
 }
-

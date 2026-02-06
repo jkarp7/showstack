@@ -82,16 +82,13 @@ async function testSupabaseConnection(): Promise<void> {
 
     for (const table of EXPECTED_TABLES) {
       try {
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/${table}?limit=0`,
-          {
-            headers: {
-              apikey: SUPABASE_ANON_KEY,
-              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-              Prefer: 'count=exact',
-            },
-          }
-        );
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?limit=0`, {
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            Prefer: 'count=exact',
+          },
+        });
 
         if (response.ok) {
           tablesFound.push(table);
@@ -115,9 +112,13 @@ async function testSupabaseConnection(): Promise<void> {
     if (tablesMissing.length === 0) {
       console.log(`✅ Schema verified (${tablesFound.length} tables found)`);
     } else if (tablesFound.length > 0) {
-      console.log(`⚠️  Partial schema: ${tablesFound.length}/${EXPECTED_TABLES.length} tables found`);
+      console.log(
+        `⚠️  Partial schema: ${tablesFound.length}/${EXPECTED_TABLES.length} tables found`,
+      );
       console.log(`   Missing: ${tablesMissing.join(', ')}`);
-      console.log('   Run migrations in order: 001_initial_schema.sql, 002_indexes.sql, 003_rls_policies.sql');
+      console.log(
+        '   Run migrations in order: 001_initial_schema.sql, 002_indexes.sql, 003_rls_policies.sql',
+      );
     } else {
       console.log('❌ Schema not deployed');
       console.log('   Run migrations via Supabase SQL Editor:');
@@ -129,15 +130,12 @@ async function testSupabaseConnection(): Promise<void> {
     // Test RLS by checking if anon user can see data
     console.log('\n🔒 Checking RLS policies...');
 
-    const projectsResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/projects?limit=1`,
-      {
-        headers: {
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        },
-      }
-    );
+    const projectsResponse = await fetch(`${SUPABASE_URL}/rest/v1/projects?limit=1`, {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+    });
 
     if (projectsResponse.status === 200) {
       const data = await projectsResponse.json();

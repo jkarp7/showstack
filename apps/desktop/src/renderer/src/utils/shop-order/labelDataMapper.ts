@@ -81,9 +81,9 @@ export function mapFixtureToLabelData(fixture: Fixture): LabelData {
     channel: fixture.channel || '',
     universe: fixture.universe?.toString() || '',
     dmxAddress: fixture.dmx_address?.toString() || '',
-    address: fixture.address || (fixture.universe && fixture.dmx_address
-      ? `${fixture.universe}/${fixture.dmx_address}`
-      : ''),
+    address:
+      fixture.address ||
+      (fixture.universe && fixture.dmx_address ? `${fixture.universe}/${fixture.dmx_address}` : ''),
     mode: fixture.mode || '',
     consoleLevel: fixture.console_level || '',
 
@@ -119,7 +119,7 @@ export function mapFixtureToLabelData(fixture: Fixture): LabelData {
     custom1: '',
     custom2: '',
     custom3: '',
-    custom4: ''
+    custom4: '',
   };
 }
 
@@ -135,14 +135,14 @@ export function mapFixturesToLabelData(fixtures: Fixture[]): LabelData[] {
  */
 export async function getLabelDataForFixtures(
   fixtureIds: string[],
-  projectId: string
+  projectId: string,
 ): Promise<LabelData[]> {
   try {
     // Load fixtures from database
     const allFixtures = await window.api.fixtures.getByProject(projectId);
 
     // Filter to requested IDs
-    const selectedFixtures = allFixtures.filter(f => fixtureIds.includes(f.id));
+    const selectedFixtures = allFixtures.filter((f) => fixtureIds.includes(f.id));
 
     // Map to label data
     return mapFixturesToLabelData(selectedFixtures);
@@ -190,12 +190,12 @@ export function createSampleLabelData(): LabelData {
     color: 'R02',
     colorFrame: '7.5"',
     gobo: 'R77729',
-    cable: 'Soco 50\'',
-    dataCable: 'DMX 25\'',
+    cable: "Soco 50'",
+    dataCable: "DMX 25'",
     location: 'Stage Right',
     system: 'FOH',
     status: 'Hung',
-    notes: 'Focus to DSC'
+    notes: 'Focus to DSC',
   };
 }
 
@@ -255,6 +255,6 @@ export function getAvailableLabelFields(): Array<{
     { key: 'custom1', label: 'Custom 1', category: 'Custom' },
     { key: 'custom2', label: 'Custom 2', category: 'Custom' },
     { key: 'custom3', label: 'Custom 3', category: 'Custom' },
-    { key: 'custom4', label: 'Custom 4', category: 'Custom' }
+    { key: 'custom4', label: 'Custom 4', category: 'Custom' },
   ];
 }

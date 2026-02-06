@@ -11,12 +11,24 @@ import { extendBaseEntity, OptionalIDSchema, OptionalTimestampSchema } from '../
 /**
  * Discipline types for multi-discipline support
  */
-export const DisciplineSchema = z.enum(['lighting', 'audio', 'video', 'rigging', 'scenic', 'props']);
+export const DisciplineSchema = z.enum([
+  'lighting',
+  'audio',
+  'video',
+  'rigging',
+  'scenic',
+  'props',
+]);
 
 /**
  * Note types for the 3-tier notes system
  */
-export const NoteTypeSchema = z.enum(['general_conditions', 'general_notes', 'fixture_notes', 'revision']);
+export const NoteTypeSchema = z.enum([
+  'general_conditions',
+  'general_notes',
+  'fixture_notes',
+  'revision',
+]);
 
 /**
  * Contact information schema
@@ -24,7 +36,7 @@ export const NoteTypeSchema = z.enum(['general_conditions', 'general_notes', 'fi
 export const ContactSchema = z.object({
   name: z.string().optional(),
   email: z.string().email().optional().or(z.literal('')),
-  phone: z.string().optional()
+  phone: z.string().optional(),
 });
 
 /**
@@ -32,7 +44,7 @@ export const ContactSchema = z.object({
  */
 export const AdditionalContactSchema = ContactSchema.extend({
   role: z.string(),
-  discipline: DisciplineSchema.optional()
+  discipline: DisciplineSchema.optional(),
 });
 
 /**
@@ -107,7 +119,7 @@ export const ShopOrderProjectSchema = extendBaseEntity({
   disciplines: z.array(DisciplineSchema).min(1, 'At least one discipline is required'),
 
   // Current revision number (0-5, 0 = no revisions yet)
-  current_revision: z.number().int().min(0).max(5)
+  current_revision: z.number().int().min(0).max(5),
 });
 
 /**
@@ -125,7 +137,7 @@ export const ShopOrderSectionSchema = extendBaseEntity({
   page_break: z.boolean(),
 
   // Section notes (optional)
-  notes: z.string().optional()
+  notes: z.string().optional(),
 });
 
 /**
@@ -162,7 +174,7 @@ export const ShopOrderItemSchema = extendBaseEntity({
 
   // NEW: Table-based revision tracking
   revision_quantities: z.string().optional(), // JSON string: { "0": 10, "1": 12, "2": 8 }
-  deleted_in_revision: z.number().int().min(0).max(5).optional()
+  deleted_in_revision: z.number().int().min(0).max(5).optional(),
 });
 
 /**
@@ -179,7 +191,7 @@ export const ItemChangeSchema = z.object({
   description: z.string(),
   section_name: z.string().optional(),
   old_values: z.record(z.any()).optional(), // Partial<ShopOrderItem>
-  new_values: z.record(z.any()).optional() // Partial<ShopOrderItem>
+  new_values: z.record(z.any()).optional(), // Partial<ShopOrderItem>
 });
 
 /**
@@ -197,7 +209,7 @@ export const ShopOrderRevisionSchema = extendBaseEntity({
   // Revision notes and change log (optional)
   notes: z.string().optional(),
   change_log: z.array(ItemChangeSchema), // Automatically generated change summary
-  spare_snapshot: z.string().optional() // JSON: snapshot of spare quantities { "item_id": spare_qty }
+  spare_snapshot: z.string().optional(), // JSON: snapshot of spare quantities { "item_id": spare_qty }
 });
 
 /**
@@ -211,7 +223,7 @@ export const ShopOrderNoteSchema = extendBaseEntity({
   // Note details (required)
   type: NoteTypeSchema,
   content: z.string(),
-  format: z.enum(['plain', 'bullets', 'numbered'])
+  format: z.enum(['plain', 'bullets', 'numbered']),
 });
 
 /**
@@ -226,7 +238,7 @@ export const ShopOrderNoteTemplateSchema = extendBaseEntity({
   type: z.enum(['general_conditions', 'general_notes', 'fixture_notes']),
   name: z.string().min(1, 'Template name is required'),
   content: z.string(),
-  is_default: z.number().int().min(0).max(1) // 0 or 1 (boolean as integer for SQLite)
+  is_default: z.number().int().min(0).max(1), // 0 or 1 (boolean as integer for SQLite)
 });
 
 /**
@@ -251,37 +263,37 @@ export type ShopOrderNoteTemplate = z.infer<typeof ShopOrderNoteTemplateSchema>;
 export const CreateShopOrderProjectSchema = ShopOrderProjectSchema.omit({
   id: true,
   created_at: true,
-  updated_at: true
+  updated_at: true,
 });
 
 export const CreateShopOrderSectionSchema = ShopOrderSectionSchema.omit({
   id: true,
   created_at: true,
-  updated_at: true
+  updated_at: true,
 });
 
 export const CreateShopOrderItemSchema = ShopOrderItemSchema.omit({
   id: true,
   created_at: true,
-  updated_at: true
+  updated_at: true,
 });
 
 export const CreateShopOrderRevisionSchema = ShopOrderRevisionSchema.omit({
   id: true,
   created_at: true,
-  updated_at: true
+  updated_at: true,
 });
 
 export const CreateShopOrderNoteSchema = ShopOrderNoteSchema.omit({
   id: true,
   created_at: true,
-  updated_at: true
+  updated_at: true,
 });
 
 export const CreateShopOrderNoteTemplateSchema = ShopOrderNoteTemplateSchema.omit({
   id: true,
   created_at: true,
-  updated_at: true
+  updated_at: true,
 });
 
 /**
@@ -290,9 +302,13 @@ export const CreateShopOrderNoteTemplateSchema = ShopOrderNoteTemplateSchema.omi
 export const UpdateShopOrderProjectSchema = ShopOrderProjectSchema.partial().required({ id: true });
 export const UpdateShopOrderSectionSchema = ShopOrderSectionSchema.partial().required({ id: true });
 export const UpdateShopOrderItemSchema = ShopOrderItemSchema.partial().required({ id: true });
-export const UpdateShopOrderRevisionSchema = ShopOrderRevisionSchema.partial().required({ id: true });
+export const UpdateShopOrderRevisionSchema = ShopOrderRevisionSchema.partial().required({
+  id: true,
+});
 export const UpdateShopOrderNoteSchema = ShopOrderNoteSchema.partial().required({ id: true });
-export const UpdateShopOrderNoteTemplateSchema = ShopOrderNoteTemplateSchema.partial().required({ id: true });
+export const UpdateShopOrderNoteTemplateSchema = ShopOrderNoteTemplateSchema.partial().required({
+  id: true,
+});
 
 /**
  * Create types (inferred from create schemas)

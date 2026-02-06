@@ -23,7 +23,7 @@ const MOCK_PROJECT_DATA = {
   closing_date: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days from now
   revision_number: 'Rev 3',
   revision_date: Date.now() - 2 * 24 * 60 * 60 * 1000, // 2 days ago
-  logo_path: null // No logo in preview to avoid file path issues
+  logo_path: null, // No logo in preview to avoid file path issues
 };
 
 const MOCK_REPORT_TEMPLATES = [
@@ -31,15 +31,13 @@ const MOCK_REPORT_TEMPLATES = [
     id: 'channel-hookup' as const,
     name: 'Channel Hookup',
     description: 'Complete fixture list',
-  }
+  },
 ];
 
 export function HeaderPreview({ layout }: HeaderPreviewProps) {
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-        Preview
-      </label>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Preview</label>
       <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
         <div className="transform scale-90 origin-top">
           <HeaderRenderer

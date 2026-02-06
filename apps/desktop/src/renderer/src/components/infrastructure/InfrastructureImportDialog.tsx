@@ -28,7 +28,7 @@ const INFRASTRUCTURE_FIELDS = [
   { value: 'amperage', label: 'Amperage' },
   { value: 'wattage', label: 'Wattage' },
   { value: 'status', label: 'Status' },
-  { value: 'notes', label: 'Notes' }
+  { value: 'notes', label: 'Notes' },
 ];
 
 export function InfrastructureImportDialog({ onClose }: InfrastructureImportDialogProps) {
@@ -39,7 +39,11 @@ export function InfrastructureImportDialog({ onClose }: InfrastructureImportDial
   const [selectedFile, setSelectedFile] = useState<string>('');
   const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
   const [fieldMapping, setFieldMapping] = useState<FieldMapping[]>([]);
-  const [importResult, setImportResult] = useState<{ success: boolean; imported: number; errors: string[] } | null>(null);
+  const [importResult, setImportResult] = useState<{
+    success: boolean;
+    imported: number;
+    errors: string[];
+  } | null>(null);
 
   const handleSelectFile = async () => {
     try {
@@ -57,32 +61,38 @@ export function InfrastructureImportDialog({ onClose }: InfrastructureImportDial
         setCsvHeaders(headersResult.headers);
 
         // Auto-map common field names
-        const autoMapping: FieldMapping[] = headersResult.headers.map(header => {
+        const autoMapping: FieldMapping[] = headersResult.headers.map((header) => {
           const lowerHeader = header.toLowerCase();
 
           // Try to match common field names
           let matchedField: string | null = null;
 
           if (lowerHeader === 'name' || lowerHeader === 'equipment name') matchedField = 'name';
-          else if (lowerHeader === 'manufacturer' || lowerHeader === 'make') matchedField = 'manufacturer';
+          else if (lowerHeader === 'manufacturer' || lowerHeader === 'make')
+            matchedField = 'manufacturer';
           else if (lowerHeader === 'model') matchedField = 'model';
           else if (lowerHeader === 'category' || lowerHeader === 'type') matchedField = 'category';
           else if (lowerHeader === 'quantity' || lowerHeader === 'qty') matchedField = 'quantity';
-          else if (lowerHeader === 'ip address' || lowerHeader === 'ip') matchedField = 'ip_address';
-          else if (lowerHeader === 'mac address' || lowerHeader === 'mac') matchedField = 'mac_address';
+          else if (lowerHeader === 'ip address' || lowerHeader === 'ip')
+            matchedField = 'ip_address';
+          else if (lowerHeader === 'mac address' || lowerHeader === 'mac')
+            matchedField = 'mac_address';
           else if (lowerHeader === 'hostname' || lowerHeader === 'host') matchedField = 'hostname';
           else if (lowerHeader === 'vlan' || lowerHeader === 'vlan id') matchedField = 'vlan_id';
-          else if (lowerHeader === 'port count' || lowerHeader === 'ports') matchedField = 'port_count';
+          else if (lowerHeader === 'port count' || lowerHeader === 'ports')
+            matchedField = 'port_count';
           else if (lowerHeader === 'location') matchedField = 'location';
           else if (lowerHeader === 'voltage' || lowerHeader === 'v') matchedField = 'voltage';
-          else if (lowerHeader === 'amperage' || lowerHeader === 'amps' || lowerHeader === 'a') matchedField = 'amperage';
-          else if (lowerHeader === 'wattage' || lowerHeader === 'watts' || lowerHeader === 'w') matchedField = 'wattage';
+          else if (lowerHeader === 'amperage' || lowerHeader === 'amps' || lowerHeader === 'a')
+            matchedField = 'amperage';
+          else if (lowerHeader === 'wattage' || lowerHeader === 'watts' || lowerHeader === 'w')
+            matchedField = 'wattage';
           else if (lowerHeader === 'status') matchedField = 'status';
           else if (lowerHeader === 'notes' || lowerHeader === 'comments') matchedField = 'notes';
 
           return {
             csv_column: header,
-            infrastructure_field: matchedField
+            infrastructure_field: matchedField,
           };
         });
 
@@ -96,12 +106,12 @@ export function InfrastructureImportDialog({ onClose }: InfrastructureImportDial
   };
 
   const handleFieldMappingChange = (csvColumn: string, infrastructureField: string | null) => {
-    setFieldMapping(prev =>
-      prev.map(mapping =>
+    setFieldMapping((prev) =>
+      prev.map((mapping) =>
         mapping.csv_column === csvColumn
           ? { ...mapping, infrastructure_field: infrastructureField }
-          : mapping
-      )
+          : mapping,
+      ),
     );
   };
 
@@ -114,7 +124,7 @@ export function InfrastructureImportDialog({ onClose }: InfrastructureImportDial
       const result = await window.api.infrastructure.importCSV(
         currentProject.id,
         selectedFile,
-        fieldMapping
+        fieldMapping,
       );
 
       setImportResult(result);
@@ -129,13 +139,15 @@ export function InfrastructureImportDialog({ onClose }: InfrastructureImportDial
       setImportResult({
         success: false,
         imported: 0,
-        errors: ['Failed to import CSV: ' + (error instanceof Error ? error.message : 'Unknown error')]
+        errors: [
+          'Failed to import CSV: ' + (error instanceof Error ? error.message : 'Unknown error'),
+        ],
       });
       setStep('complete');
     }
   };
 
-  const hasMappedName = fieldMapping.some(m => m.infrastructure_field === 'name');
+  const hasMappedName = fieldMapping.some((m) => m.infrastructure_field === 'name');
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -160,7 +172,8 @@ export function InfrastructureImportDialog({ onClose }: InfrastructureImportDial
           {step === 'select' && (
             <div className="space-y-4">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Import infrastructure equipment from a CSV file. The file should have headers in the first row.
+                Import infrastructure equipment from a CSV file. The file should have headers in the
+                first row.
               </p>
 
               <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
@@ -177,8 +190,9 @@ export function InfrastructureImportDialog({ onClose }: InfrastructureImportDial
               </div>
 
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded p-3 text-sm text-gray-700 dark:text-gray-300">
-                <strong>Tip:</strong> Your CSV should include at least a "Name" column. Other common columns include:
-                Manufacturer, Model, Category, IP Address, Location, Port Count, etc.
+                <strong>Tip:</strong> Your CSV should include at least a "Name" column. Other common
+                columns include: Manufacturer, Model, Category, IP Address, Location, Port Count,
+                etc.
               </div>
             </div>
           )}
@@ -203,7 +217,8 @@ export function InfrastructureImportDialog({ onClose }: InfrastructureImportDial
                   Map CSV Columns to Infrastructure Fields
                 </h3>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
-                  Match each CSV column to an infrastructure field. Fields marked with * are required.
+                  Match each CSV column to an infrastructure field. Fields marked with * are
+                  required.
                 </p>
 
                 <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
@@ -213,17 +228,22 @@ export function InfrastructureImportDialog({ onClose }: InfrastructureImportDial
                   </div>
                   <div className="divide-y divide-gray-200 dark:divide-gray-700">
                     {fieldMapping.map((mapping) => (
-                      <div key={mapping.csv_column} className="px-4 py-3 grid grid-cols-2 gap-4 items-center">
+                      <div
+                        key={mapping.csv_column}
+                        className="px-4 py-3 grid grid-cols-2 gap-4 items-center"
+                      >
                         <div className="text-sm font-medium text-gray-900 dark:text-white">
                           {mapping.csv_column}
                         </div>
                         <select
                           value={mapping.infrastructure_field || ''}
-                          onChange={(e) => handleFieldMappingChange(mapping.csv_column, e.target.value || null)}
+                          onChange={(e) =>
+                            handleFieldMappingChange(mapping.csv_column, e.target.value || null)
+                          }
                           className="px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                         >
                           <option value="">-- Skip this column --</option>
-                          {INFRASTRUCTURE_FIELDS.map(field => (
+                          {INFRASTRUCTURE_FIELDS.map((field) => (
                             <option key={field.value} value={field.value}>
                               {field.label}
                             </option>

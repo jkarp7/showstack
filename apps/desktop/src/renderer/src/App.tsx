@@ -71,32 +71,68 @@ function AppContent() {
         <Route path="/project/:projectId" element={<ProjectPage />} />
         <Route path="/project/:projectId/module/:moduleType" element={<ModuleLanding />} />
         <Route path="/project/:projectId/module/production/system-docs" element={<SystemDocs />} />
-        <Route path="/project/:projectId/module/production/shop-order" element={<ShopOrderBuilder />} />
-        <Route path="/project/:projectId/prep/label-designer/:averyCode" element={<LabelVisualDesigner />} />
+        <Route
+          path="/project/:projectId/module/production/shop-order"
+          element={<ShopOrderBuilder />}
+        />
+        <Route
+          path="/project/:projectId/prep/label-designer/:averyCode"
+          element={<LabelVisualDesigner />}
+        />
         <Route path="/project/:projectId/module/design" element={<Navigate to="prep" replace />} />
-        <Route path="/project/:projectId/module/prep" element={<Navigate to="/project/:projectId/module/production/shop-order" replace />} />
+        <Route
+          path="/project/:projectId/module/prep"
+          element={<Navigate to="/project/:projectId/module/production/shop-order" replace />}
+        />
         <Route path="/project/:projectId/module/manager" element={<Manager />} />
 
         {/* Direct module access (no project) */}
         <Route path="/module/:moduleType" element={<ModuleLanding />} />
         <Route path="/module/production/system-docs" element={<SystemDocs />} />
         <Route path="/module/production/shop-order" element={<ShopOrderBuilder />} />
-        <Route path="/module/prep" element={<Navigate to="/module/production/shop-order" replace />} />
+        <Route
+          path="/module/prep"
+          element={<Navigate to="/module/production/shop-order" replace />}
+        />
         <Route path="/module/manager" element={<Manager />} />
-        <Route path="/module/production" element={<Navigate to="/module/production/system-docs" replace />} />
+        <Route
+          path="/module/production"
+          element={<Navigate to="/module/production/system-docs" replace />}
+        />
         <Route path="/module/design" element={<Navigate to="/module/prep" replace />} />
 
         {/* Backwards compatibility - redirect old routes */}
         <Route path="/modules" element={<LandingPage />} />
-        <Route path="/modules/prep" element={<Navigate to="/module/production/shop-order" replace />} />
+        <Route
+          path="/modules/prep"
+          element={<Navigate to="/module/production/shop-order" replace />}
+        />
         <Route path="/modules/production" element={<Navigate to="/module/production" replace />} />
         <Route path="/modules/manager" element={<Navigate to="/module/manager" replace />} />
-        <Route path="/project/:projectId/module/production/equipment" element={<Navigate to="/project/:projectId/module/production/system-docs" replace />} />
-        <Route path="/project/:projectId/module/production/paperwork" element={<Navigate to="/project/:projectId/module/production/system-docs" replace />} />
-        <Route path="/project/:projectId/module/production/labels" element={<Navigate to="/project/:projectId/module/production/system-docs" replace />} />
-        <Route path="/module/production/equipment" element={<Navigate to="/module/production/system-docs" replace />} />
-        <Route path="/module/production/paperwork" element={<Navigate to="/module/production/system-docs" replace />} />
-        <Route path="/module/production/labels" element={<Navigate to="/module/production/system-docs" replace />} />
+        <Route
+          path="/project/:projectId/module/production/equipment"
+          element={<Navigate to="/project/:projectId/module/production/system-docs" replace />}
+        />
+        <Route
+          path="/project/:projectId/module/production/paperwork"
+          element={<Navigate to="/project/:projectId/module/production/system-docs" replace />}
+        />
+        <Route
+          path="/project/:projectId/module/production/labels"
+          element={<Navigate to="/project/:projectId/module/production/system-docs" replace />}
+        />
+        <Route
+          path="/module/production/equipment"
+          element={<Navigate to="/module/production/system-docs" replace />}
+        />
+        <Route
+          path="/module/production/paperwork"
+          element={<Navigate to="/module/production/system-docs" replace />}
+        />
+        <Route
+          path="/module/production/labels"
+          element={<Navigate to="/module/production/system-docs" replace />}
+        />
 
         {/* Admin panel */}
         <Route path="/admin" element={<AdminPanel />} />
@@ -119,8 +155,8 @@ export default function App() {
   // Only show splash on first app launch (main window), not in project windows
   const [showSplash, setShowSplash] = useState(() => {
     // Check if this is a project window by looking at the path
-    const isProjectPath = window.location.pathname.includes('/project/') ||
-                         window.location.hash.includes('/project/');
+    const isProjectPath =
+      window.location.pathname.includes('/project/') || window.location.hash.includes('/project/');
 
     // Don't show splash in project windows
     if (isProjectPath) return false;

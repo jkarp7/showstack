@@ -4,7 +4,11 @@
  * so it can re-seed with updated layout
  */
 
-import { deleteLayoutTemplate, getLayoutTemplateById, getLayoutElementsByTemplateId } from './queries/layoutTemplates';
+import {
+  deleteLayoutTemplate,
+  getLayoutTemplateById,
+  getLayoutElementsByTemplateId,
+} from './queries/layoutTemplates';
 import { getAppDatabase, saveAppDatabase } from './index';
 
 export function resetPaperworkHeaderTemplate(): void {
@@ -33,7 +37,7 @@ export function resetPaperworkHeaderTemplate(): void {
     }
 
     // Check 1: Has page number/total pages elements (old layout)
-    const hasOldPageNumberElements = elements.some(element => {
+    const hasOldPageNumberElements = elements.some((element) => {
       try {
         const config = JSON.parse(element.config);
         return config.fieldType === 'page_number' || config.fieldType === 'total_pages';
@@ -56,7 +60,7 @@ export function resetPaperworkHeaderTemplate(): void {
     }
 
     // Check 3: LD or Venue elements are not on row 2 (old positioning)
-    const ldElement = elements.find(element => {
+    const ldElement = elements.find((element) => {
       try {
         const config = JSON.parse(element.config);
         return config.fieldType === 'ld_name';
@@ -65,7 +69,7 @@ export function resetPaperworkHeaderTemplate(): void {
       }
     });
 
-    const venueElement = elements.find(element => {
+    const venueElement = elements.find((element) => {
       try {
         const config = JSON.parse(element.config);
         return config.fieldType === 'venue';
@@ -83,7 +87,7 @@ export function resetPaperworkHeaderTemplate(): void {
     }
 
     // Check 4: Has Associate LD element (removed in new layout)
-    const hasAssociateLdElement = elements.some(element => {
+    const hasAssociateLdElement = elements.some((element) => {
       try {
         const config = JSON.parse(element.config);
         return config.fieldType === 'ald_name';
@@ -105,14 +109,14 @@ export function resetPaperworkHeaderTemplate(): void {
       // First, clear foreign key references from paperwork_templates
       const db = getAppDatabase();
       db.prepare(
-        `UPDATE paperwork_templates SET header_template_id = NULL WHERE header_template_id = ?`
+        `UPDATE paperwork_templates SET header_template_id = NULL WHERE header_template_id = ?`,
       ).run('default-paperwork-header');
       saveAppDatabase();
 
       // Explicitly delete all elements first (should CASCADE but being extra thorough)
-      db.prepare(
-        `DELETE FROM page_layout_elements WHERE template_id = ?`
-      ).run('default-paperwork-header');
+      db.prepare(`DELETE FROM page_layout_elements WHERE template_id = ?`).run(
+        'default-paperwork-header',
+      );
       saveAppDatabase();
 
       // Now delete the template

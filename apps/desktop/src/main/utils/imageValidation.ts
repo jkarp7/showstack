@@ -19,12 +19,7 @@ import { InvalidFileTypeError, FileSizeExceededError, FileNotFoundError } from '
 export const MAX_FILE_SIZE = 2 * 1024 * 1024;
 
 // Whitelist of allowed image MIME types (NO SVG for XSS prevention)
-export const ALLOWED_IMAGE_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp'
-];
+export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 /**
  * Validate image file and convert to base64 data URL

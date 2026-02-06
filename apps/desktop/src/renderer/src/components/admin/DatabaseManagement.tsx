@@ -1,5 +1,14 @@
 import { useState } from 'react';
-import { Database, HardDrive, Download, Upload, RefreshCw, AlertCircle, CheckCircle, Trash2 } from 'lucide-react';
+import {
+  Database,
+  HardDrive,
+  Download,
+  Upload,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle,
+  Trash2,
+} from 'lucide-react';
 
 export function DatabaseManagement() {
   const [dbSize, setDbSize] = useState('0 MB');
@@ -48,8 +57,12 @@ export function DatabaseManagement() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Database Management</h2>
-        <p className="text-gray-600 dark:text-gray-400">Maintain, backup, and optimize application database</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          Database Management
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400">
+          Maintain, backup, and optimize application database
+        </p>
       </div>
 
       {/* Warning Notice */}
@@ -57,10 +70,13 @@ export function DatabaseManagement() {
         <div className="flex items-start gap-2">
           <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
           <div>
-            <h4 className="font-medium text-amber-900 dark:text-amber-100 mb-1">Important Safety Information</h4>
+            <h4 className="font-medium text-amber-900 dark:text-amber-100 mb-1">
+              Important Safety Information
+            </h4>
             <p className="text-sm text-amber-800 dark:text-amber-200">
-              Always create a backup before performing maintenance operations or restoring from a backup file.
-              These operations can significantly impact your data and should be performed with caution.
+              Always create a backup before performing maintenance operations or restoring from a
+              backup file. These operations can significantly impact your data and should be
+              performed with caution.
             </p>
           </div>
         </div>
@@ -86,7 +102,9 @@ export function DatabaseManagement() {
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Status</div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
-              <span className="text-lg font-semibold text-green-600 dark:text-green-400">Healthy</span>
+              <span className="text-lg font-semibold text-green-600 dark:text-green-400">
+                Healthy
+              </span>
             </div>
           </div>
         </div>
@@ -104,7 +122,8 @@ export function DatabaseManagement() {
             <div className="flex-1">
               <h4 className="font-medium text-gray-900 dark:text-white mb-1">Create Backup</h4>
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                Export a complete backup of the application database including all settings and templates
+                Export a complete backup of the application database including all settings and
+                templates
               </p>
             </div>
             <button
@@ -119,7 +138,9 @@ export function DatabaseManagement() {
 
           <div className="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
             <div className="flex-1">
-              <h4 className="font-medium text-gray-900 dark:text-white mb-1">Restore from Backup</h4>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-1">
+                Restore from Backup
+              </h4>
               <p className="text-sm text-gray-600 dark:text-gray-300">
                 Import and restore database from a previous backup file
               </p>
@@ -163,7 +184,9 @@ export function DatabaseManagement() {
 
           <div className="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
             <div className="flex-1">
-              <h4 className="font-medium text-gray-900 dark:text-white mb-1">Data Integrity Check</h4>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-1">
+                Data Integrity Check
+              </h4>
               <p className="text-sm text-gray-600 dark:text-gray-300">
                 Verify database integrity and detect potential corruption
               </p>

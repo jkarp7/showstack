@@ -4,7 +4,7 @@ import {
   createShopOrderItem,
   updateShopOrderItem,
   deleteShopOrderItem,
-  ShopOrderItem
+  ShopOrderItem,
 } from '../database/queries/shop-order';
 import { errorHandler, ValidationError } from '../errors';
 
@@ -23,7 +23,7 @@ export class ShopOrderItemService {
 
     return await errorHandler.executeWithRetry(
       async () => getItemsBySectionId(sectionId),
-      'shop-order:items:getBySectionId'
+      'shop-order:items:getBySectionId',
     );
   }
 
@@ -37,7 +37,7 @@ export class ShopOrderItemService {
 
     return await errorHandler.executeWithRetry(
       async () => getItemsByProjectId(projectId),
-      'shop-order:items:getByProjectId'
+      'shop-order:items:getByProjectId',
     );
   }
 
@@ -56,7 +56,7 @@ export class ShopOrderItemService {
 
     return await errorHandler.executeWithRetry(
       async () => createShopOrderItem(data),
-      'shop-order:items:create'
+      'shop-order:items:create',
     );
   }
 
@@ -73,13 +73,13 @@ export class ShopOrderItemService {
       throw new ValidationError(
         'Item description cannot be empty',
         'description',
-        updates.description
+        updates.description,
       );
     }
 
     return await errorHandler.executeWithRetry(
       async () => updateShopOrderItem(id, updates),
-      'shop-order:items:update'
+      'shop-order:items:update',
     );
   }
 
@@ -93,7 +93,7 @@ export class ShopOrderItemService {
 
     return await errorHandler.executeWithRetry(
       async () => deleteShopOrderItem(id),
-      'shop-order:items:delete'
+      'shop-order:items:delete',
     );
   }
 }

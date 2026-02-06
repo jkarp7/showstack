@@ -16,7 +16,7 @@ import {
   CAPACITY_WARNING_THRESHOLD,
   CAPACITY_CRITICAL_THRESHOLD,
   PHASE_IMBALANCE_WARNING_THRESHOLD,
-  PHASE_IMBALANCE_CRITICAL_THRESHOLD
+  PHASE_IMBALANCE_CRITICAL_THRESHOLD,
 } from '../types/power';
 
 // ============================================
@@ -59,7 +59,12 @@ export function wattsToAmps(watts: number, voltage: number = 120): number {
  */
 export function calculateDimmerRackCapacity(
   rack: DimmerRack,
-  modules?: Array<{ start_circuit: number; end_circuit: number; watts_per_circuit: number; module_type: string }>
+  modules?: Array<{
+    start_circuit: number;
+    end_circuit: number;
+    watts_per_circuit: number;
+    module_type: string;
+  }>,
 ): number {
   // If module configurations are provided, calculate capacity based on them
   if (modules && modules.length > 0) {
@@ -68,7 +73,7 @@ export function calculateDimmerRackCapacity(
       if (module.module_type === 'thrupower') return sum;
 
       const circuitCount = module.end_circuit - module.start_circuit + 1;
-      return sum + (circuitCount * (module.watts_per_circuit || 2400));
+      return sum + circuitCount * (module.watts_per_circuit || 2400);
     }, 0);
     return wattsToKW(totalWatts);
   }
@@ -84,9 +89,9 @@ export function calculateDimmerRackCapacity(
  */
 export function calculateDimmerRackLoad(
   rack: DimmerRack,
-  fixtures: Array<{ dimmer_rack_id?: string; wattage?: number }>
+  fixtures: Array<{ dimmer_rack_id?: string; wattage?: number }>,
 ): number {
-  const rackFixtures = fixtures.filter(f => f.dimmer_rack_id === rack.id);
+  const rackFixtures = fixtures.filter((f) => f.dimmer_rack_id === rack.id);
   const totalWatts = rackFixtures.reduce((sum, f) => sum + (f.wattage || 0), 0);
   return wattsToKW(totalWatts);
 }
@@ -98,17 +103,22 @@ export function calculateDimmerRackLoad(
 export function getDimmerRackSummary(
   rack: DimmerRack,
   fixtures: Array<{ dimmer_rack_id?: string; dimmer_channel_number?: number; wattage?: number }>,
-  modules?: Array<{ start_circuit: number; end_circuit: number; watts_per_circuit: number; module_type: string }>
+  modules?: Array<{
+    start_circuit: number;
+    end_circuit: number;
+    watts_per_circuit: number;
+    module_type: string;
+  }>,
 ): RackPowerSummary {
   const capacity = calculateDimmerRackCapacity(rack, modules);
   const load = calculateDimmerRackLoad(rack, fixtures);
   const utilization = capacity > 0 ? (load / capacity) * 100 : 0;
 
   // Count unique circuits used
-  const rackFixtures = fixtures.filter(f => f.dimmer_rack_id === rack.id && f.dimmer_channel_number);
-  const usedCircuits = new Set(
-    rackFixtures.map(f => f.dimmer_channel_number!)
-  ).size;
+  const rackFixtures = fixtures.filter(
+    (f) => f.dimmer_rack_id === rack.id && f.dimmer_channel_number,
+  );
+  const usedCircuits = new Set(rackFixtures.map((f) => f.dimmer_channel_number!)).size;
 
   const warnings: string[] = [];
   if (utilization >= CAPACITY_CRITICAL_THRESHOLD) {
@@ -127,7 +137,7 @@ export function getDimmerRackSummary(
     circuits_total: rack.circuit_count,
     circuits_used: usedCircuits,
     circuits_available: rack.circuit_count - usedCircuits,
-    warnings
+    warnings,
   };
 }
 
@@ -150,9 +160,9 @@ export function calculatePDRackCapacity(rack: PDRack): number {
  */
 export function calculatePDRackLoad(
   rack: PDRack,
-  fixtures: Array<{ pd_rack_id?: string; wattage?: number; amperage?: number }>
+  fixtures: Array<{ pd_rack_id?: string; wattage?: number; amperage?: number }>,
 ): number {
-  const rackFixtures = fixtures.filter(f => f.pd_rack_id === rack.id);
+  const rackFixtures = fixtures.filter((f) => f.pd_rack_id === rack.id);
   const totalWatts = rackFixtures.reduce((sum, f) => {
     if (f.wattage) return sum + f.wattage;
     if (f.amperage) return sum + ampsToWatts(f.amperage, rack.voltage);
@@ -166,7 +176,12 @@ export function calculatePDRackLoad(
  */
 export function getPDRackSummary(
   rack: PDRack,
-  fixtures: Array<{ pd_rack_id?: string; pd_circuit_number?: number; wattage?: number; amperage?: number }>
+  fixtures: Array<{
+    pd_rack_id?: string;
+    pd_circuit_number?: number;
+    wattage?: number;
+    amperage?: number;
+  }>,
 ): RackPowerSummary {
   const capacity = calculatePDRackCapacity(rack);
   const load = calculatePDRackLoad(rack, fixtures);
@@ -175,8 +190,8 @@ export function getPDRackSummary(
   // Count unique circuits used
   const usedCircuits = new Set(
     fixtures
-      .filter(f => f.pd_rack_id === rack.id && f.pd_circuit_number)
-      .map(f => f.pd_circuit_number!)
+      .filter((f) => f.pd_rack_id === rack.id && f.pd_circuit_number)
+      .map((f) => f.pd_circuit_number!),
   ).size;
 
   const warnings: string[] = [];
@@ -196,7 +211,7 @@ export function getPDRackSummary(
     circuits_total: rack.circuit_count,
     circuits_used: usedCircuits,
     circuits_available: rack.circuit_count - usedCircuits,
-    warnings
+    warnings,
   };
 }
 
@@ -209,12 +224,12 @@ export function getPDRackSummary(
  */
 export function calculatePhaseBalance(
   fixtures: Array<{ phase?: Phase; wattage?: number; amperage?: number }>,
-  voltage: number = 208
+  voltage: number = 208,
 ): PhaseBalance {
   // Sum loads by phase
   const phaseLoads = { A: 0, B: 0, C: 0 };
 
-  fixtures.forEach(f => {
+  fixtures.forEach((f) => {
     if (!f.phase) return;
 
     let watts = f.wattage || 0;
@@ -235,17 +250,19 @@ export function calculatePhaseBalance(
   // Calculate imbalance percentage
   const maxPhase = Math.max(phaseA, phaseB, phaseC);
   const minPhase = Math.min(phaseA, phaseB, phaseC);
-  const maxImbalance = averageLoad > 0
-    ? ((maxPhase - minPhase) / averageLoad) * 100
-    : 0;
+  const maxImbalance = averageLoad > 0 ? ((maxPhase - minPhase) / averageLoad) * 100 : 0;
 
   const isBalanced = maxImbalance < PHASE_IMBALANCE_WARNING_THRESHOLD;
 
   const warnings: string[] = [];
   if (maxImbalance >= PHASE_IMBALANCE_CRITICAL_THRESHOLD) {
-    warnings.push(`Phase imbalance is ${maxImbalance.toFixed(1)}% (CRITICAL - should be <${PHASE_IMBALANCE_CRITICAL_THRESHOLD}%)`);
+    warnings.push(
+      `Phase imbalance is ${maxImbalance.toFixed(1)}% (CRITICAL - should be <${PHASE_IMBALANCE_CRITICAL_THRESHOLD}%)`,
+    );
   } else if (maxImbalance >= PHASE_IMBALANCE_WARNING_THRESHOLD) {
-    warnings.push(`Phase imbalance is ${maxImbalance.toFixed(1)}% (WARNING - should be <${PHASE_IMBALANCE_WARNING_THRESHOLD}%)`);
+    warnings.push(
+      `Phase imbalance is ${maxImbalance.toFixed(1)}% (WARNING - should be <${PHASE_IMBALANCE_WARNING_THRESHOLD}%)`,
+    );
   }
 
   return {
@@ -256,7 +273,7 @@ export function calculatePhaseBalance(
     average_load: averageLoad,
     max_imbalance_percentage: maxImbalance,
     is_balanced: isBalanced,
-    warnings
+    warnings,
   };
 }
 
@@ -271,23 +288,23 @@ export function calculateServicePowerSummaries(
   dimmerRackSummaries: RackPowerSummary[],
   pdRackSummaries: RackPowerSummary[],
   dimmerRacks: DimmerRack[],
-  pdRacks: PDRack[]
+  pdRacks: PDRack[],
 ): ServicePowerSummary[] {
   // Create a map of rack_id to building_service
   const rackServiceMap = new Map<string, string>();
 
-  dimmerRacks.forEach(rack => {
+  dimmerRacks.forEach((rack) => {
     rackServiceMap.set(rack.id, rack.building_service || 'Unassigned');
   });
 
-  pdRacks.forEach(rack => {
+  pdRacks.forEach((rack) => {
     rackServiceMap.set(rack.id, rack.building_service || 'Unassigned');
   });
 
   // Group summaries by service
   const serviceGroups = new Map<string, RackPowerSummary[]>();
 
-  [...dimmerRackSummaries, ...pdRackSummaries].forEach(summary => {
+  [...dimmerRackSummaries, ...pdRackSummaries].forEach((summary) => {
     const service = rackServiceMap.get(summary.rack_id) || 'Unassigned';
 
     if (!serviceGroups.has(service)) {
@@ -315,9 +332,9 @@ export function calculateServicePowerSummaries(
     }
 
     // Include rack-level warnings
-    racks.forEach(rack => {
+    racks.forEach((rack) => {
       if (rack.warnings.length > 0) {
-        warnings.push(...rack.warnings.map(w => `${rack.rack_name}: ${w}`));
+        warnings.push(...rack.warnings.map((w) => `${rack.rack_name}: ${w}`));
       }
     });
 
@@ -327,7 +344,7 @@ export function calculateServicePowerSummaries(
       total_load_kw: totalLoad,
       utilization_percentage: utilization,
       racks,
-      warnings
+      warnings,
     });
   });
 
@@ -356,14 +373,22 @@ export function calculateProjectPowerSummary(
     amperage?: number;
     phase?: Phase;
   }>,
-  rackModules?: Map<string, Array<{ start_circuit: number; end_circuit: number; watts_per_circuit: number; module_type: string }>>
+  rackModules?: Map<
+    string,
+    Array<{
+      start_circuit: number;
+      end_circuit: number;
+      watts_per_circuit: number;
+      module_type: string;
+    }>
+  >,
 ): ProjectPowerSummary {
   // Calculate summaries for all racks
-  const dimmerSummaries = dimmerRacks.map(rack => {
+  const dimmerSummaries = dimmerRacks.map((rack) => {
     const modules = rackModules?.get(rack.id);
     return getDimmerRackSummary(rack, fixtures, modules);
   });
-  const pdSummaries = pdRacks.map(rack => getPDRackSummary(rack, fixtures));
+  const pdSummaries = pdRacks.map((rack) => getPDRackSummary(rack, fixtures));
 
   // Calculate totals
   const totalCapacity =
@@ -384,7 +409,7 @@ export function calculateProjectPowerSummary(
     dimmerSummaries,
     pdSummaries,
     dimmerRacks,
-    pdRacks
+    pdRacks,
   );
 
   // Collect all warnings
@@ -392,14 +417,14 @@ export function calculateProjectPowerSummary(
   const criticalWarnings: PowerWarning[] = [];
 
   // Rack capacity warnings
-  [...dimmerSummaries, ...pdSummaries].forEach(summary => {
-    summary.warnings.forEach(warning => {
+  [...dimmerSummaries, ...pdSummaries].forEach((summary) => {
+    summary.warnings.forEach((warning) => {
       const powerWarning: PowerWarning = {
         type: 'capacity',
         severity: warning.includes('CRITICAL') ? 'critical' : 'warning',
         message: warning,
         rack_id: summary.rack_id,
-        rack_name: summary.rack_name
+        rack_name: summary.rack_name,
       };
 
       if (powerWarning.severity === 'critical') {
@@ -411,11 +436,11 @@ export function calculateProjectPowerSummary(
   });
 
   // Phase balance warnings
-  phaseBalance.warnings.forEach(warning => {
+  phaseBalance.warnings.forEach((warning) => {
     const powerWarning: PowerWarning = {
       type: 'phase_imbalance',
       severity: warning.includes('CRITICAL') ? 'critical' : 'warning',
-      message: warning
+      message: warning,
     };
 
     if (powerWarning.severity === 'critical') {
@@ -434,7 +459,7 @@ export function calculateProjectPowerSummary(
     services,
     phase_balance: phaseBalance,
     warnings,
-    critical_warnings: criticalWarnings
+    critical_warnings: criticalWarnings,
   };
 }
 
@@ -447,16 +472,19 @@ export function calculateProjectPowerSummary(
  */
 export function checkRackCapacity(
   rack: DimmerRack | PDRack,
-  fixtures: Array<{ dimmer_rack_id?: string; pd_rack_id?: string; dimmer_channel_number?: number; pd_circuit_number?: number }>,
-  isDimmerRack: boolean
+  fixtures: Array<{
+    dimmer_rack_id?: string;
+    pd_rack_id?: string;
+    dimmer_channel_number?: number;
+    pd_circuit_number?: number;
+  }>,
+  isDimmerRack: boolean,
 ): CapacityCheckResult {
   const circuitKey = isDimmerRack ? 'dimmer_channel_number' : 'pd_circuit_number';
   const rackIdKey = isDimmerRack ? 'dimmer_rack_id' : 'pd_rack_id';
 
   const usedCircuits = new Set(
-    fixtures
-      .filter(f => f[rackIdKey] === rack.id && f[circuitKey])
-      .map(f => f[circuitKey]!)
+    fixtures.filter((f) => f[rackIdKey] === rack.id && f[circuitKey]).map((f) => f[circuitKey]!),
   ).size;
 
   const available = rack.circuit_count - usedCircuits;
@@ -473,7 +501,7 @@ export function checkRackCapacity(
     has_capacity: available > 0,
     circuits_available: available,
     percentage_used: percentageUsed,
-    warnings
+    warnings,
   };
 }
 

@@ -4,7 +4,7 @@ import {
   updateFixture,
   deleteFixture,
   deleteMultipleFixtures,
-  Fixture
+  Fixture,
 } from '../database/queries/fixtures';
 import { BaseService } from './BaseService';
 
@@ -29,7 +29,7 @@ export class FixtureService extends BaseService {
   async getAll(projectId?: string): Promise<Fixture[]> {
     const result = await this.executeWithRetry(
       async () => getAllFixtures(projectId),
-      'fixtures:getAll'
+      'fixtures:getAll',
     );
     return result;
   }
@@ -44,7 +44,7 @@ export class FixtureService extends BaseService {
   async create(data: Partial<Fixture>, projectId?: string): Promise<Fixture> {
     return await this.executeWithRetry(
       async () => createFixture(data, projectId),
-      'fixtures:create'
+      'fixtures:create',
     );
   }
 
@@ -58,10 +58,7 @@ export class FixtureService extends BaseService {
   async update(id: string, updates: Partial<Fixture>): Promise<Fixture> {
     this.validateId(id, 'Fixture');
 
-    return await this.executeWithRetry(
-      async () => updateFixture(id, updates),
-      'fixtures:update'
-    );
+    return await this.executeWithRetry(async () => updateFixture(id, updates), 'fixtures:update');
   }
 
   /**
@@ -72,10 +69,7 @@ export class FixtureService extends BaseService {
   async delete(id: string): Promise<void> {
     this.validateId(id, 'Fixture');
 
-    return await this.executeWithRetry(
-      async () => deleteFixture(id),
-      'fixtures:delete'
-    );
+    return await this.executeWithRetry(async () => deleteFixture(id), 'fixtures:delete');
   }
 
   /**
@@ -90,7 +84,7 @@ export class FixtureService extends BaseService {
 
     return await this.executeWithRetry(
       async () => deleteMultipleFixtures(ids),
-      'fixtures:deleteMultiple'
+      'fixtures:deleteMultiple',
     );
   }
 

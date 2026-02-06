@@ -16,7 +16,7 @@ export function FileMenu({ className = '', onDataReload, projectName }: FileMenu
     newFile,
     openFile,
     saveFile,
-    saveFileAs
+    saveFileAs,
   } = useFileStore();
 
   // Use projectName prop if provided, otherwise fall back to file store

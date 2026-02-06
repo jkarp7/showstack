@@ -4,7 +4,7 @@ import {
   createShopOrderProject,
   updateShopOrderProject,
   deleteShopOrderProject,
-  ShopOrderProject
+  ShopOrderProject,
 } from '../database/queries/shop-order';
 import { errorHandler, ValidationError } from '../errors';
 import { performanceMonitor } from '../monitoring/PerformanceMonitor';
@@ -22,19 +22,16 @@ export class ShopOrderProjectService {
     try {
       const result = await errorHandler.executeWithRetry(
         async () => getAllShopOrderProjects(),
-        'shop-order:projects:getAll'
+        'shop-order:projects:getAll',
       );
       performanceMonitor.trackDatabaseQuery(
         'shop-order:projects:getAll',
         Date.now() - start,
-        result.length
+        result.length,
       );
       return result;
     } catch (error) {
-      performanceMonitor.trackDatabaseQuery(
-        'shop-order:projects:getAll',
-        Date.now() - start
-      );
+      performanceMonitor.trackDatabaseQuery('shop-order:projects:getAll', Date.now() - start);
       throw error;
     }
   }
@@ -49,7 +46,7 @@ export class ShopOrderProjectService {
 
     return await errorHandler.executeWithRetry(
       async () => getShopOrderProjectById(id),
-      'shop-order:projects:getById'
+      'shop-order:projects:getById',
     );
   }
 
@@ -62,13 +59,13 @@ export class ShopOrderProjectService {
       throw new ValidationError(
         'Production name is required',
         'production_name',
-        data.production_name
+        data.production_name,
       );
     }
 
     return await errorHandler.executeWithRetry(
       async () => createShopOrderProject(data),
-      'shop-order:projects:create'
+      'shop-order:projects:create',
     );
   }
 
@@ -85,13 +82,13 @@ export class ShopOrderProjectService {
       throw new ValidationError(
         'Production name cannot be empty',
         'production_name',
-        updates.production_name
+        updates.production_name,
       );
     }
 
     return await errorHandler.executeWithRetry(
       async () => updateShopOrderProject(id, updates),
-      'shop-order:projects:update'
+      'shop-order:projects:update',
     );
   }
 
@@ -105,7 +102,7 @@ export class ShopOrderProjectService {
 
     return await errorHandler.executeWithRetry(
       async () => deleteShopOrderProject(id),
-      'shop-order:projects:delete'
+      'shop-order:projects:delete',
     );
   }
 }

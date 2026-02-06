@@ -23,7 +23,7 @@ export function seedPaperworkHeaderTemplate(): void {
     if (templateExists) {
       const checkElementsQuery = `SELECT COUNT(*) as count FROM page_layout_elements WHERE template_id = 'default-paperwork-header'`;
       const elementsResult = db.exec(checkElementsQuery);
-      const elementCount = elementsResult[0]?.values[0]?.[0] as number || 0;
+      const elementCount = (elementsResult[0]?.values[0]?.[0] as number) || 0;
       elementsExist = elementCount > 0;
     }
 
@@ -33,7 +33,9 @@ export function seedPaperworkHeaderTemplate(): void {
     }
 
     if (templateExists && !elementsExist) {
-      console.log('🌱 Re-seeding paperwork header elements (template exists but elements missing)...');
+      console.log(
+        '🌱 Re-seeding paperwork header elements (template exists but elements missing)...',
+      );
     } else {
       console.log('🌱 Seeding default paperwork header template...');
     }
@@ -48,7 +50,7 @@ export function seedPaperworkHeaderTemplate(): void {
           grid_columns, grid_rows, grid_gap,
           page_width, page_height, is_default,
           created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       ).run(
         headerLayout.template.id,
         headerLayout.template.user_id || null,
@@ -62,7 +64,7 @@ export function seedPaperworkHeaderTemplate(): void {
         headerLayout.template.page_height,
         headerLayout.template.is_default,
         headerLayout.template.created_at,
-        headerLayout.template.updated_at
+        headerLayout.template.updated_at,
       );
     }
 
@@ -72,7 +74,7 @@ export function seedPaperworkHeaderTemplate(): void {
         id, template_id, element_type, config,
         grid_column, grid_row, column_span, row_span,
         layer, style, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
 
     for (const element of headerLayout.elements) {
@@ -88,12 +90,14 @@ export function seedPaperworkHeaderTemplate(): void {
         element.layer,
         element.style,
         element.created_at,
-        element.updated_at
+        element.updated_at,
       );
     }
 
     saveAppDatabase(db);
-    console.log(`✅ Successfully seeded default paperwork header with ${headerLayout.elements.length} elements`);
+    console.log(
+      `✅ Successfully seeded default paperwork header with ${headerLayout.elements.length} elements`,
+    );
   } catch (error) {
     console.error('❌ Error seeding paperwork header template:', error);
     throw error;

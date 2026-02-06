@@ -30,7 +30,9 @@ export class DatabaseWriter {
    */
   async saveWithRetry(db: Database.Database, dbPath: string, dbName: string): Promise<void> {
     // WAL mode handles auto-persistence - no manual save needed
-    logger.info('DatabaseWriter saveWithRetry() called - WAL mode handles auto-persistence', { dbName });
+    logger.info('DatabaseWriter saveWithRetry() called - WAL mode handles auto-persistence', {
+      dbName,
+    });
   }
 }
 

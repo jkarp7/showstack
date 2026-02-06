@@ -3,7 +3,7 @@ import {
   getCurrentLicense,
   getLicenseByKey,
   createLicense,
-  updateLicense
+  updateLicense,
 } from '../database/queries/license';
 import type {
   UserLicense,
@@ -11,7 +11,7 @@ import type {
   ShowStackModule,
   ModuleAccess,
   ModuleFeatures,
-  LicenseTier
+  LicenseTier,
 } from '../../shared/types/license.types';
 
 /**
@@ -37,7 +37,7 @@ export class LicenseService {
         status: 'expired',
         message: 'No license found. Please activate.',
         canView: false,
-        canEdit: false
+        canEdit: false,
       };
     }
 
@@ -52,7 +52,7 @@ export class LicenseService {
           status: 'expired',
           message: 'Subscription expired. Please renew to continue editing.',
           canView: true,
-          canEdit: false
+          canEdit: false,
         };
       }
 
@@ -62,7 +62,7 @@ export class LicenseService {
         canView: true,
         canEdit: true,
         warningLevel: 'high',
-        daysSinceVerification
+        daysSinceVerification,
       };
     }
 
@@ -74,7 +74,7 @@ export class LicenseService {
         canView: true,
         canEdit: true,
         warningLevel: 'medium',
-        daysSinceVerification
+        daysSinceVerification,
       };
     }
 
@@ -86,7 +86,7 @@ export class LicenseService {
         canView: true,
         canEdit: true,
         warningLevel: 'low',
-        daysUntilExpiration
+        daysUntilExpiration,
       };
     }
 
@@ -94,7 +94,7 @@ export class LicenseService {
       status: 'active',
       message: 'License active',
       canView: true,
-      canEdit: true
+      canEdit: true,
     };
   }
 
@@ -108,7 +108,7 @@ export class LicenseService {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ licenseKey }),
-        signal: AbortSignal.timeout(5000) // 5 second timeout
+        signal: AbortSignal.timeout(5000), // 5 second timeout
       });
 
       if (!response.ok) return false;
@@ -122,7 +122,7 @@ export class LicenseService {
         status: data.status,
         expirationDate: new Date(data.expirationDate).getTime(),
         lastVerified: Date.now(),
-        modules: data.modules
+        modules: data.modules,
       });
 
       return data.status === 'active';
@@ -158,7 +158,7 @@ export class LicenseService {
       return false;
     }
 
-    const moduleAccess = license.modules.find(m => m.module === module);
+    const moduleAccess = license.modules.find((m) => m.module === module);
     return moduleAccess?.enabled ?? false;
   }
 
@@ -169,7 +169,7 @@ export class LicenseService {
     const license = getCurrentLicense();
     if (!license) return null;
 
-    const moduleAccess = license.modules.find(m => m.module === module);
+    const moduleAccess = license.modules.find((m) => m.module === module);
     return moduleAccess?.features ?? null;
   }
 
@@ -180,9 +180,7 @@ export class LicenseService {
     const license = getCurrentLicense();
     if (!license) return [];
 
-    return license.modules
-      .filter(m => m.enabled)
-      .map(m => m.module);
+    return license.modules.filter((m) => m.enabled).map((m) => m.module);
   }
 
   /**
@@ -224,14 +222,14 @@ export class LicenseService {
   activateLicense(
     licenseKey: string,
     email: string,
-    purchasedModules: ShowStackModule[]
+    purchasedModules: ShowStackModule[],
   ): UserLicense {
     const tier = this.determineTierFromModules(purchasedModules);
 
-    const modules: ModuleAccess[] = purchasedModules.map(module => ({
+    const modules: ModuleAccess[] = purchasedModules.map((module) => ({
       module,
       enabled: true,
-      features: this.getDefaultFeaturesForTier(tier, module)
+      features: this.getDefaultFeaturesForTier(tier, module),
     }));
 
     return createLicense({
@@ -240,7 +238,7 @@ export class LicenseService {
       licenseKey,
       tier,
       modules,
-      expirationDate: Date.now() + (365 * 24 * 60 * 60 * 1000) // 1 year
+      expirationDate: Date.now() + 365 * 24 * 60 * 60 * 1000, // 1 year
     });
   }
 
@@ -254,22 +252,22 @@ export class LicenseService {
         multiDiscipline: true,
         advancedExport: true,
         cloudSync: true,
-        prioritySupport: true
+        prioritySupport: true,
       },
       student: {
         maxRevisions: 2,
         multiDiscipline: false,
         advancedExport: false,
         cloudSync: false,
-        prioritySupport: false
+        prioritySupport: false,
       },
       institutional: {
         maxRevisions: 3,
         multiDiscipline: true,
         advancedExport: true,
         cloudSync: true,
-        prioritySupport: true
-      }
+        prioritySupport: true,
+      },
     };
 
     const baseFeatures = tierFeatures[tier] || tierFeatures.student;
@@ -281,7 +279,7 @@ export class LicenseService {
         logoIntegration: tier !== 'student',
         vendorTemplates: tier !== 'student',
         equipmentDatabase: true,
-        bulkOperations: tier !== 'student'
+        bulkOperations: tier !== 'student',
       };
     }
 
@@ -291,7 +289,7 @@ export class LicenseService {
         etcEosIntegration: tier !== 'student',
         paperworkGeneration: true,
         labelSystem: true,
-        powerManagement: tier !== 'student'
+        powerManagement: tier !== 'student',
       };
     }
 
@@ -301,7 +299,7 @@ export class LicenseService {
         multiShowManagement: true,
         budgetTracking: true,
         perDiemCalculation: tier !== 'student',
-        tourLogistics: tier !== 'student'
+        tourLogistics: tier !== 'student',
       };
     }
 

@@ -8,7 +8,12 @@ interface PasswordPromptProps {
   isFirstTime?: boolean;
 }
 
-export function PasswordPrompt({ isOpen, onClose, onSuccess, isFirstTime = false }: PasswordPromptProps) {
+export function PasswordPrompt({
+  isOpen,
+  onClose,
+  onSuccess,
+  isFirstTime = false,
+}: PasswordPromptProps) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -106,7 +111,10 @@ export function PasswordPrompt({ isOpen, onClose, onSuccess, isFirstTime = false
 
           {/* Password Input */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
               {isFirstTime ? 'New Password' : 'Password'}
             </label>
             <div className="relative">
@@ -137,7 +145,10 @@ export function PasswordPrompt({ isOpen, onClose, onSuccess, isFirstTime = false
           {/* Confirm Password (only for first time) */}
           {isFirstTime && (
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 Confirm Password
               </label>
               <input

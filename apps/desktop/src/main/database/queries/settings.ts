@@ -32,17 +32,21 @@ export function saveSettings(settings: AppSettings): void {
 
   if (existing[0] && existing[0].values.length > 0) {
     // Update existing
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE app_settings
       SET data = ?, updated_at = ?
       WHERE id = 1
-    `).run(data, now);
+    `,
+    ).run(data, now);
   } else {
     // Insert new
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO app_settings (id, data, updated_at)
       VALUES (1, ?, ?)
-    `).run(1, data, now);
+    `,
+    ).run(1, data, now);
   }
 
   saveAppDatabase();
@@ -58,13 +62,13 @@ export function getDefaultSettings(): AppSettings {
       autoSaveInterval: 5,
       defaultFileLocation: '',
       showWelcomeScreen: true,
-      checkUpdatesOnStartup: true
+      checkUpdatesOnStartup: true,
     },
     appearance: {
       theme: 'auto',
       fontSize: 'medium',
       compactMode: false,
-      showRevisionHighlighting: true
+      showRevisionHighlighting: true,
     },
     disciplines: {
       enabledDisciplines: ['lighting'],
@@ -75,21 +79,21 @@ export function getDefaultSettings(): AppSettings {
         audio: '#4ECDC4',
         video: '#45B7D1',
         scenic: '#96CEB4',
-        props: '#FFEAA7'
-      }
+        props: '#FFEAA7',
+      },
     },
     export: {
       defaultFormat: 'pdf',
       includeLogoInPDF: true,
       pdfPageSize: 'letter',
-      includeChangeTracking: true
+      includeChangeTracking: true,
     },
     advanced: {
       enableDebugMode: false,
       maxRevisions: 5,
       enableExperimentalFeatures: false,
-      cacheSize: 100
-    }
+      cacheSize: 100,
+    },
   };
 }
 
@@ -106,9 +110,13 @@ export function resetSettings(): void {
 export function getSetting(key: string): string | null {
   const db = getAppDatabase();
 
-  const row = db.prepare(`
+  const row = db
+    .prepare(
+      `
     SELECT value FROM app_settings_kv WHERE key = ?
-  `).get(key) as { value: string } | undefined;
+  `,
+    )
+    .get(key) as { value: string } | undefined;
 
   if (!row) {
     return null;
@@ -125,21 +133,27 @@ export function setSetting(key: string, value: string): void {
   const now = Date.now();
 
   // Check if setting exists
-  const existing = db.prepare(`SELECT key FROM app_settings_kv WHERE key = ?`).get(key) as { key: string } | undefined;
+  const existing = db.prepare(`SELECT key FROM app_settings_kv WHERE key = ?`).get(key) as
+    | { key: string }
+    | undefined;
 
   if (existing) {
     // Update existing
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE app_settings_kv
       SET value = ?, updated_at = ?
       WHERE key = ?
-    `).run(value, now, key);
+    `,
+    ).run(value, now, key);
   } else {
     // Insert new
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO app_settings_kv (key, value, updated_at)
       VALUES (?, ?, ?)
-    `).run(key, value, now);
+    `,
+    ).run(key, value, now);
   }
 
   saveAppDatabase();

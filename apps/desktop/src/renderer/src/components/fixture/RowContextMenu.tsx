@@ -19,7 +19,7 @@ export function RowContextMenu({
   onSetFlag,
   onHide,
   currentFlag,
-  isHidden
+  isHidden,
 }: RowContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -99,10 +99,7 @@ export function RowContextMenu({
           }}
           className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
         >
-          <div
-            className="w-3 h-3 rounded"
-            style={{ backgroundColor: def.color }}
-          />
+          <div className="w-3 h-3 rounded" style={{ backgroundColor: def.color }} />
           <span className="text-sm">
             {def.label}
             {currentFlag === key && ' ✓'}

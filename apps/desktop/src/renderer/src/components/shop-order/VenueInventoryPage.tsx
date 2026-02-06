@@ -17,11 +17,7 @@ export function VenueInventoryPage({ projectId }: VenueInventoryPageProps) {
   const { currentProject, sections, items } = useShopOrderStore();
 
   if (!currentProject) {
-    return (
-      <div className="p-8 text-center text-gray-500">
-        No project loaded
-      </div>
-    );
+    return <div className="p-8 text-center text-gray-500">No project loaded</div>;
   }
 
   // Filter items with venue quantity > 0
@@ -30,15 +26,11 @@ export function VenueInventoryPage({ projectId }: VenueInventoryPageProps) {
   // Group by section
   const sortedSections = [...sections]
     .sort((a, b) => a.sort_order - b.sort_order)
-    .filter((section) =>
-      venueItems.some((item) => item.section_id === section.id)
-    );
+    .filter((section) => venueItems.some((item) => item.section_id === section.id));
 
   if (venueItems.length === 0) {
     return (
-      <div className="p-8 text-center text-gray-500">
-        No venue-owned equipment in this project
-      </div>
+      <div className="p-8 text-center text-gray-500">No venue-owned equipment in this project</div>
     );
   }
 
@@ -55,9 +47,7 @@ export function VenueInventoryPage({ projectId }: VenueInventoryPageProps) {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Venue Inventory
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Venue Inventory</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {currentProject.production_name} • {venueItems.length} items
           </p>
@@ -142,7 +132,8 @@ export function VenueInventoryPage({ projectId }: VenueInventoryPageProps) {
                         const total = calculateTotalQuantity(item);
                         const rental = calculateRentalQuantity(item);
                         const venueQty = item.venue_qty || 0;
-                        const venuePercent = total > 0 ? ((venueQty / total) * 100).toFixed(0) : '0';
+                        const venuePercent =
+                          total > 0 ? ((venueQty / total) * 100).toFixed(0) : '0';
 
                         return (
                           <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
@@ -174,10 +165,16 @@ export function VenueInventoryPage({ projectId }: VenueInventoryPageProps) {
                           {sectionItems.reduce((sum, item) => sum + (item.venue_qty || 0), 0)}
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-700 dark:text-gray-300">
-                          {sectionItems.reduce((sum, item) => sum + calculateTotalQuantity(item), 0)}
+                          {sectionItems.reduce(
+                            (sum, item) => sum + calculateTotalQuantity(item),
+                            0,
+                          )}
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-green-600 dark:text-green-400">
-                          {sectionItems.reduce((sum, item) => sum + calculateRentalQuantity(item), 0)}
+                          {sectionItems.reduce(
+                            (sum, item) => sum + calculateRentalQuantity(item),
+                            0,
+                          )}
                         </td>
                         <td className="px-4 py-3 text-sm text-right text-gray-500 dark:text-gray-400">
                           {/* Empty */}

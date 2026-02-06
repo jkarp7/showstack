@@ -6,7 +6,7 @@ import {
   getAllLabelDataForProject,
   createSampleLabelData,
   getAvailableLabelFields,
-  type LabelData
+  type LabelData,
 } from '../labelDataMapper';
 import type { Fixture } from '../../../types';
 
@@ -43,14 +43,14 @@ const mockFixture: Fixture = {
   gobo_size: 'B',
   template_size: 'A',
   accessories: ['Top Hat', 'Barn Doors'],
-  cable: 'Soco 50\'',
-  data_cable: 'DMX 25\'',
+  cable: "Soco 50'",
+  data_cable: "DMX 25'",
   location: 'Stage Right',
   system: 'FOH',
   status: 'Hung',
   notes: 'Focus to DSC',
   created_at: Date.now(),
-  updated_at: Date.now()
+  updated_at: Date.now(),
 };
 
 describe('Label Data Mapper', () => {
@@ -86,7 +86,7 @@ describe('Label Data Mapper', () => {
     it('should use address field if provided directly', () => {
       const fixtureWithAddress: Fixture = {
         ...mockFixture,
-        address: '2/512'
+        address: '2/512',
       };
 
       const result = mapFixtureToLabelData(fixtureWithAddress);
@@ -102,7 +102,7 @@ describe('Label Data Mapper', () => {
     it('should handle empty accessories array', () => {
       const fixtureNoAccessories: Fixture = {
         ...mockFixture,
-        accessories: []
+        accessories: [],
       };
 
       const result = mapFixtureToLabelData(fixtureNoAccessories);
@@ -114,7 +114,7 @@ describe('Label Data Mapper', () => {
         id: 'fixture-2',
         project_id: 'project-1',
         created_at: Date.now(),
-        updated_at: Date.now()
+        updated_at: Date.now(),
       };
 
       const result = mapFixtureToLabelData(minimalFixture as Fixture);
@@ -133,7 +133,7 @@ describe('Label Data Mapper', () => {
         ...mockFixture,
         universe: undefined,
         dmx_address: undefined,
-        address: undefined
+        address: undefined,
       };
 
       const result = mapFixtureToLabelData(fixtureNoAddress as Fixture);
@@ -144,7 +144,7 @@ describe('Label Data Mapper', () => {
       const fixturePartialAddress: Partial<Fixture> = {
         ...mockFixture,
         universe: 1,
-        dmx_address: undefined
+        dmx_address: undefined,
       };
 
       const result = mapFixtureToLabelData(fixturePartialAddress as Fixture);
@@ -158,7 +158,7 @@ describe('Label Data Mapper', () => {
       const fixtureWithUnit: any = {
         ...mockFixture,
         unit_number: undefined,
-        unit: 42 // Alternative field name
+        unit: 42, // Alternative field name
       };
 
       const result = mapFixtureToLabelData(fixtureWithUnit);
@@ -181,7 +181,7 @@ describe('Label Data Mapper', () => {
         ...mockFixture,
         id: 'fixture-2',
         position: '2nd Electric',
-        unit_number: 24
+        unit_number: 24,
       };
 
       const result = mapFixturesToLabelData([mockFixture, fixture2]);
@@ -203,13 +203,10 @@ describe('Label Data Mapper', () => {
         id: 'fixture-3',
         project_id: 'project-1',
         created_at: Date.now(),
-        updated_at: Date.now()
+        updated_at: Date.now(),
       };
 
-      const result = mapFixturesToLabelData([
-        mockFixture,
-        minimalFixture as Fixture
-      ]);
+      const result = mapFixturesToLabelData([mockFixture, minimalFixture as Fixture]);
 
       expect(result).toHaveLength(2);
       expect(result[0].position).toBe('1st Electric');
@@ -226,15 +223,12 @@ describe('Label Data Mapper', () => {
       const mockFixtures = [
         mockFixture,
         { ...mockFixture, id: 'fixture-2', position: '2nd Electric' },
-        { ...mockFixture, id: 'fixture-3', position: '3rd Electric' }
+        { ...mockFixture, id: 'fixture-3', position: '3rd Electric' },
       ];
 
       vi.spyOn(window.api.fixtures, 'getByProject').mockResolvedValue(mockFixtures as any);
 
-      const result = await getLabelDataForFixtures(
-        ['fixture-1', 'fixture-3'],
-        'project-1'
-      );
+      const result = await getLabelDataForFixtures(['fixture-1', 'fixture-3'], 'project-1');
 
       expect(result).toHaveLength(2);
       expect(result[0].position).toBe('1st Electric');
@@ -244,10 +238,7 @@ describe('Label Data Mapper', () => {
     it('should return empty array if no fixtures match IDs', async () => {
       vi.spyOn(window.api.fixtures, 'getByProject').mockResolvedValue([mockFixture] as any);
 
-      const result = await getLabelDataForFixtures(
-        ['nonexistent-id'],
-        'project-1'
-      );
+      const result = await getLabelDataForFixtures(['nonexistent-id'], 'project-1');
 
       expect(result).toEqual([]);
     });
@@ -255,7 +246,7 @@ describe('Label Data Mapper', () => {
     it('should handle database errors gracefully', async () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       vi.spyOn(window.api.fixtures, 'getByProject').mockRejectedValue(
-        new Error('Database connection failed')
+        new Error('Database connection failed'),
       );
 
       const result = await getLabelDataForFixtures(['fixture-1'], 'project-1');
@@ -263,7 +254,7 @@ describe('Label Data Mapper', () => {
       expect(result).toEqual([]);
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Failed to get label data for fixtures:',
-        expect.any(Error)
+        expect.any(Error),
       );
 
       consoleErrorSpy.mockRestore();
@@ -278,7 +269,7 @@ describe('Label Data Mapper', () => {
     it('should fetch and map all fixtures in project', async () => {
       const mockFixtures = [
         mockFixture,
-        { ...mockFixture, id: 'fixture-2', position: '2nd Electric' }
+        { ...mockFixture, id: 'fixture-2', position: '2nd Electric' },
       ];
 
       vi.spyOn(window.api.fixtures, 'getByProject').mockResolvedValue(mockFixtures as any);
@@ -300,16 +291,14 @@ describe('Label Data Mapper', () => {
 
     it('should handle database errors gracefully', async () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      vi.spyOn(window.api.fixtures, 'getByProject').mockRejectedValue(
-        new Error('Database error')
-      );
+      vi.spyOn(window.api.fixtures, 'getByProject').mockRejectedValue(new Error('Database error'));
 
       const result = await getAllLabelDataForProject('project-1');
 
       expect(result).toEqual([]);
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Failed to get label data for project:',
-        expect.any(Error)
+        expect.any(Error),
       );
 
       consoleErrorSpy.mockRestore();
@@ -351,7 +340,7 @@ describe('Label Data Mapper', () => {
 
     it('should include all field categories', () => {
       const fields = getAvailableLabelFields();
-      const categories = [...new Set(fields.map(f => f.category))];
+      const categories = [...new Set(fields.map((f) => f.category))];
 
       expect(categories).toContain('Identification');
       expect(categories).toContain('Control');
@@ -365,7 +354,7 @@ describe('Label Data Mapper', () => {
 
     it('should include position field with correct metadata', () => {
       const fields = getAvailableLabelFields();
-      const positionField = fields.find(f => f.key === 'position');
+      const positionField = fields.find((f) => f.key === 'position');
 
       expect(positionField).toBeDefined();
       expect(positionField?.label).toBe('Position');
@@ -374,7 +363,7 @@ describe('Label Data Mapper', () => {
 
     it('should include address field with descriptive label', () => {
       const fields = getAvailableLabelFields();
-      const addressField = fields.find(f => f.key === 'address');
+      const addressField = fields.find((f) => f.key === 'address');
 
       expect(addressField).toBeDefined();
       expect(addressField?.label).toBe('Address (Universe/DMX)');
@@ -383,15 +372,10 @@ describe('Label Data Mapper', () => {
 
     it('should include all custom fields', () => {
       const fields = getAvailableLabelFields();
-      const customFields = fields.filter(f => f.category === 'Custom');
+      const customFields = fields.filter((f) => f.category === 'Custom');
 
       expect(customFields).toHaveLength(4);
-      expect(customFields.map(f => f.key)).toEqual([
-        'custom1',
-        'custom2',
-        'custom3',
-        'custom4'
-      ]);
+      expect(customFields.map((f) => f.key)).toEqual(['custom1', 'custom2', 'custom3', 'custom4']);
     });
   });
 
@@ -403,7 +387,7 @@ describe('Label Data Mapper', () => {
         universe: 0,
         dmx_address: 0,
         wattage: 0,
-        amperage: 0
+        amperage: 0,
       };
 
       const result = mapFixtureToLabelData(fixtureWithZeros);
@@ -420,7 +404,7 @@ describe('Label Data Mapper', () => {
       const fixtureWithLongStrings: Fixture = {
         ...mockFixture,
         notes: longString,
-        purpose: longString
+        purpose: longString,
       };
 
       const result = mapFixtureToLabelData(fixtureWithLongStrings);
@@ -434,7 +418,7 @@ describe('Label Data Mapper', () => {
         ...mockFixture,
         position: '1st Electric (SL) <FOH>',
         notes: 'Focus @ 18° with "barn doors" & top-hat',
-        purpose: 'Special: DS/US cross-fade'
+        purpose: 'Special: DS/US cross-fade',
       };
 
       const result = mapFixtureToLabelData(fixtureWithSpecialChars);

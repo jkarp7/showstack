@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useShopOrderStore } from '../../store/shopOrderStore';
 import type { ShopOrderSection, ShopOrderItem } from '../../types/shopOrder';
-import {
-  parseRevisionQuantities,
-  setRevisionQuantity,
-} from '../../utils/revisionUtils';
+import { parseRevisionQuantities, setRevisionQuantity } from '../../utils/revisionUtils';
 
 // Constants
 const MAX_REVISIONS = 5; // Maximum number of revisions (0-5 = 6 total)
@@ -27,7 +24,7 @@ function sanitizeCSVValue(value: string): string {
 
   // Check if value starts with a dangerous character
   const dangerousChars = ['=', '+', '-', '@', '\t', '\r'];
-  if (dangerousChars.some(char => value.startsWith(char))) {
+  if (dangerousChars.some((char) => value.startsWith(char))) {
     // Prefix with single quote to prevent formula injection
     return `'${value}`;
   }
@@ -58,7 +55,17 @@ interface EditingCell {
  * - Row reordering via drag-and-drop
  */
 export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps) {
-  const { currentProject, sections, items, updateItem, createItem, deleteItem, updateProject, createRevision, loadProject } = useShopOrderStore();
+  const {
+    currentProject,
+    sections,
+    items,
+    updateItem,
+    createItem,
+    deleteItem,
+    updateProject,
+    createRevision,
+    loadProject,
+  } = useShopOrderStore();
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null);
   const [editValue, setEditValue] = useState('');
   const editInputRef = useRef<HTMLInputElement>(null);
@@ -98,7 +105,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
         // Find first section or selected cell's section
         if (sections.length > 0) {
           const sectionId = selectedCell
-            ? items.find(item => item.id === selectedCell.itemId)?.section_id || sections[0].id
+            ? items.find((item) => item.id === selectedCell.itemId)?.section_id || sections[0].id
             : sections[0].id;
           handlePasteItems(sectionId);
         }
@@ -116,7 +123,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       // Delete/Backspace: Clear selected cell
       if (selectedCell && (e.key === 'Delete' || e.key === 'Backspace')) {
         e.preventDefault();
-        const item = items.find(i => i.id === selectedCell.itemId);
+        const item = items.find((i) => i.id === selectedCell.itemId);
         if (item) {
           if (selectedCell.field === 'description') {
             updateItem(item.id, { description: '' });
@@ -136,7 +143,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       // Enter: Start editing selected cell
       if (selectedCell && e.key === 'Enter') {
         e.preventDefault();
-        const item = items.find(i => i.id === selectedCell.itemId);
+        const item = items.find((i) => i.id === selectedCell.itemId);
         if (item) {
           if (selectedCell.field === 'description') {
             startEdit(item.id, 'description');
@@ -396,7 +403,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
           return updateItem(item.id, {
             revision_quantities: JSON.stringify(quantities),
           });
-        })
+        }),
       );
       console.log('[Add Revision] Step 2: Complete');
 
@@ -426,7 +433,11 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       return;
     }
 
-    if (!window.confirm(`Remove Revision ${revisionNumber}? This will delete the revision and its data.`)) {
+    if (
+      !window.confirm(
+        `Remove Revision ${revisionNumber}? This will delete the revision and its data.`,
+      )
+    ) {
       return;
     }
 
@@ -556,7 +567,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
     // Detect delimiter (tab or comma)
     const delimiter = lines[0].includes('\t') ? '\t' : ',';
 
-    const rows = lines.map(line => {
+    const rows = lines.map((line) => {
       // Split by delimiter, handling quoted values
       const values: string[] = [];
       let currentValue = '';
@@ -579,72 +590,85 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
     });
 
     // Check if first row is a header (contains common column names)
-    const firstRow = rows[0].map(v => v.toLowerCase());
-    const hasHeader = firstRow.some(v =>
-      ['description', 'name', 'item', 'active', 'qty', 'quantity', 'spare', 'venue', 'notes'].includes(v)
+    const firstRow = rows[0].map((v) => v.toLowerCase());
+    const hasHeader = firstRow.some((v) =>
+      [
+        'description',
+        'name',
+        'item',
+        'active',
+        'qty',
+        'quantity',
+        'spare',
+        'venue',
+        'notes',
+      ].includes(v),
     );
 
     const dataRows = hasHeader ? rows.slice(1) : rows;
     const headerRow = hasHeader ? firstRow : null;
 
     // Map columns based on header or position
-    return dataRows.map(row => {
-      let description = '';
-      let active_qty = 0;
-      let spare_qty = 0;
-      let venue_qty = 0;
-      let notes = '';
+    return dataRows
+      .map((row) => {
+        let description = '';
+        let active_qty = 0;
+        let spare_qty = 0;
+        let venue_qty = 0;
+        let notes = '';
 
-      if (headerRow) {
-        // Map by header names
-        headerRow.forEach((header, index) => {
-          const value = row[index] || '';
-          if (['description', 'name', 'item'].includes(header)) {
-            description = value;
-          } else if (['active', 'qty', 'quantity'].includes(header)) {
-            const parsed = parseInt(value, 10) || 0;
-            active_qty = Math.min(parsed, MAX_QUANTITY_VALUE);
-          } else if (header === 'spare') {
-            const parsed = parseInt(value, 10) || 0;
-            spare_qty = Math.min(parsed, MAX_QUANTITY_VALUE);
-          } else if (header === 'venue') {
-            const parsed = parseInt(value, 10) || 0;
-            venue_qty = Math.min(parsed, MAX_QUANTITY_VALUE);
-          } else if (header === 'notes') {
-            notes = value;
-          }
-        });
-      } else {
-        // Map by position: Description, Active, Spare, Venue, Notes
-        description = row[0] || '';
-        const parsedActive = row[1] ? parseInt(row[1], 10) || 0 : 0;
-        const parsedSpare = row[2] ? parseInt(row[2], 10) || 0 : 0;
-        const parsedVenue = row[3] ? parseInt(row[3], 10) || 0 : 0;
-        active_qty = Math.min(parsedActive, MAX_QUANTITY_VALUE);
-        spare_qty = Math.min(parsedSpare, MAX_QUANTITY_VALUE);
-        venue_qty = Math.min(parsedVenue, MAX_QUANTITY_VALUE);
-        notes = row[4] || '';
-      }
+        if (headerRow) {
+          // Map by header names
+          headerRow.forEach((header, index) => {
+            const value = row[index] || '';
+            if (['description', 'name', 'item'].includes(header)) {
+              description = value;
+            } else if (['active', 'qty', 'quantity'].includes(header)) {
+              const parsed = parseInt(value, 10) || 0;
+              active_qty = Math.min(parsed, MAX_QUANTITY_VALUE);
+            } else if (header === 'spare') {
+              const parsed = parseInt(value, 10) || 0;
+              spare_qty = Math.min(parsed, MAX_QUANTITY_VALUE);
+            } else if (header === 'venue') {
+              const parsed = parseInt(value, 10) || 0;
+              venue_qty = Math.min(parsed, MAX_QUANTITY_VALUE);
+            } else if (header === 'notes') {
+              notes = value;
+            }
+          });
+        } else {
+          // Map by position: Description, Active, Spare, Venue, Notes
+          description = row[0] || '';
+          const parsedActive = row[1] ? parseInt(row[1], 10) || 0 : 0;
+          const parsedSpare = row[2] ? parseInt(row[2], 10) || 0 : 0;
+          const parsedVenue = row[3] ? parseInt(row[3], 10) || 0 : 0;
+          active_qty = Math.min(parsedActive, MAX_QUANTITY_VALUE);
+          spare_qty = Math.min(parsedSpare, MAX_QUANTITY_VALUE);
+          venue_qty = Math.min(parsedVenue, MAX_QUANTITY_VALUE);
+          notes = row[4] || '';
+        }
 
-      // Skip empty rows
-      if (!description.trim()) {
-        return null;
-      }
+        // Skip empty rows
+        if (!description.trim()) {
+          return null;
+        }
 
-      // Truncate description to max length
-      const trimmedDescription = description.trim();
-      const validDescription = trimmedDescription.length > MAX_DESCRIPTION_LENGTH
-        ? trimmedDescription.substring(0, MAX_DESCRIPTION_LENGTH)
-        : trimmedDescription;
+        // Truncate description to max length
+        const trimmedDescription = description.trim();
+        const validDescription =
+          trimmedDescription.length > MAX_DESCRIPTION_LENGTH
+            ? trimmedDescription.substring(0, MAX_DESCRIPTION_LENGTH)
+            : trimmedDescription;
 
-      return {
-        description: validDescription,
-        active_qty,
-        spare_qty,
-        venue_qty,
-        notes: notes.trim(),
-      };
-    }).filter((item): item is Partial<ShopOrderItem> => item !== null);
+        return {
+          description: validDescription,
+          active_qty,
+          spare_qty,
+          venue_qty,
+          notes: notes.trim(),
+        };
+      })
+      .filter((item): item is Partial<ShopOrderItem> => item !== null);
   };
 
   const handlePasteItems = async (sectionId: string) => {
@@ -666,7 +690,12 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       }
 
       // Confirm with user
-      const message = `Found ${parsedItems.length} item(s) in clipboard:\n${parsedItems.slice(0, 5).map(item => `- ${item.description}`).join('\n')}${parsedItems.length > 5 ? `\n... and ${parsedItems.length - 5} more` : ''}\n\nAdd these items to "${sections.find(s => s.id === sectionId)?.name}"?`;
+      const message = `Found ${parsedItems.length} item(s) in clipboard:\n${parsedItems
+        .slice(0, 5)
+        .map((item) => `- ${item.description}`)
+        .join(
+          '\n',
+        )}${parsedItems.length > 5 ? `\n... and ${parsedItems.length - 5} more` : ''}\n\nAdd these items to "${sections.find((s) => s.id === sectionId)?.name}"?`;
 
       if (!window.confirm(message)) {
         return;
@@ -777,9 +806,9 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       // Sanitize filename - remove invalid filesystem chars, prevent path traversal, limit length
       const sanitizedFilename = currentProject.production_name
         .replace(/[<>:"/\\|?*]/g, '_') // Remove invalid filesystem characters
-        .replace(/\.\./g, '_')          // Prevent path traversal
-        .replace(/^\.+/, '_')           // Remove leading dots
-        .substring(0, 200);             // Limit to 200 chars (+ 16 for "_shop_order.csv" = 216 total)
+        .replace(/\.\./g, '_') // Prevent path traversal
+        .replace(/^\.+/, '_') // Remove leading dots
+        .substring(0, 200); // Limit to 200 chars (+ 16 for "_shop_order.csv" = 216 total)
       link.setAttribute('download', `${sanitizedFilename}_shop_order.csv`);
       link.style.visibility = 'hidden';
 
@@ -872,13 +901,33 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
             className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
             onClick={handleAddRevision}
             disabled={currentRevision >= MAX_REVISIONS || isLoading}
-            title={currentRevision >= MAX_REVISIONS ? `Maximum ${MAX_REVISIONS + 1} revisions reached` : 'Add new revision column'}
+            title={
+              currentRevision >= MAX_REVISIONS
+                ? `Maximum ${MAX_REVISIONS + 1} revisions reached`
+                : 'Add new revision column'
+            }
           >
             {isLoading ? (
               <>
-                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 <span>Adding...</span>
               </>
@@ -942,10 +991,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
                 <React.Fragment key={section.id}>
                   {/* Section Header Row */}
                   <tr className="bg-gray-100 dark:bg-gray-800 border-t-2 border-gray-400 dark:border-gray-600">
-                    <td
-                      colSpan={100}
-                      className="px-3 py-2"
-                    >
+                    <td colSpan={100} className="px-3 py-2">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-sm text-gray-900 dark:text-white">
                           {section.name.toUpperCase()}
@@ -990,7 +1036,8 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
                       >
                         {/* Description */}
                         <td className="px-3 py-2">
-                          {editingCell?.itemId === item.id && editingCell.field === 'description' ? (
+                          {editingCell?.itemId === item.id &&
+                          editingCell.field === 'description' ? (
                             <input
                               ref={editInputRef}
                               type="text"
@@ -1022,7 +1069,9 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
 
                         {/* Active (current revision) - Editable */}
                         <td className="px-3 py-2 text-center">
-                          {editingCell?.itemId === item.id && editingCell.field === 'revision' && editingCell.revisionNumber === currentRevision ? (
+                          {editingCell?.itemId === item.id &&
+                          editingCell.field === 'revision' &&
+                          editingCell.revisionNumber === currentRevision ? (
                             <input
                               ref={editInputRef}
                               type="number"
@@ -1189,7 +1238,11 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
         <div className="fixed bottom-4 right-4 z-50 animate-slide-up">
           <div className="bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 max-w-md">
             <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clipRule="evenodd"
+              />
             </svg>
             <span className="flex-1">{errorMessage}</span>
             <button

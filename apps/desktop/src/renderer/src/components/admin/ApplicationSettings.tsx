@@ -27,8 +27,12 @@ export function ApplicationSettings() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Application Settings</h2>
-        <p className="text-gray-600 dark:text-gray-400">Configure default paths, file naming, and auto-backup settings</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          Application Settings
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400">
+          Configure default paths, file naming, and auto-backup settings
+        </p>
       </div>
 
       {/* Info Notice */}
@@ -38,8 +42,9 @@ export function ApplicationSettings() {
           <div>
             <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">Settings Scope</h4>
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              These settings apply application-wide and affect all users. Changes take effect immediately after saving.
-              Default paths will be set to the application installation directory when bundled.
+              These settings apply application-wide and affect all users. Changes take effect
+              immediately after saving. Default paths will be set to the application installation
+              directory when bundled.
             </p>
           </div>
         </div>
@@ -72,7 +77,9 @@ export function ApplicationSettings() {
                 Browse
               </button>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Default location for exported layouts and files</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Default location for exported layouts and files
+            </p>
           </div>
 
           <div>
@@ -94,7 +101,9 @@ export function ApplicationSettings() {
                 Browse
               </button>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Default location for saving new projects</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Default location for saving new projects
+            </p>
           </div>
         </div>
       </div>
@@ -121,7 +130,10 @@ export function ApplicationSettings() {
               Available variables: {'{name}'}, {'{date}'}, {'{time}'}, {'{type}'}
             </p>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-              Example: <span className="font-mono bg-gray-100 dark:bg-gray-700 px-1 rounded">cover_layout_2024-12-01.json</span>
+              Example:{' '}
+              <span className="font-mono bg-gray-100 dark:bg-gray-700 px-1 rounded">
+                cover_layout_2024-12-01.json
+              </span>
             </p>
           </div>
         </div>
@@ -168,7 +180,9 @@ export function ApplicationSettings() {
                 max="168"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">How often to create automatic backups (1-168 hours)</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                How often to create automatic backups (1-168 hours)
+              </p>
             </div>
           )}
         </div>

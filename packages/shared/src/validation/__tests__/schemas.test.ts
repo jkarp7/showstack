@@ -61,7 +61,7 @@ import {
   parseWithZod,
   validateArray,
   formatValidationErrors,
-  safeParse
+  safeParse,
 } from '../index';
 import type { ValidationResult, ValidationError } from '../utils';
 
@@ -77,7 +77,7 @@ describe('Base Entity Schema', () => {
   it('should require id, created_at, and updated_at for full entity', () => {
     const result = parseWithZod(FixtureSchema, {
       position: 'FOH',
-      type: 'Source Four 19°'
+      type: 'Source Four 19°',
     });
 
     expect(result.success).toBe(false);
@@ -91,7 +91,7 @@ describe('Base Entity Schema', () => {
   it('should not require id/timestamps for Create schemas', () => {
     const result = parseWithZod(CreateFixtureSchema, {
       position: 'FOH',
-      type: 'Source Four 19°'
+      type: 'Source Four 19°',
     });
 
     expect(result.success).toBe(true);
@@ -100,7 +100,7 @@ describe('Base Entity Schema', () => {
   it('should require only id for Update schemas', () => {
     const result = parseWithZod(UpdateFixtureSchema, {
       id: 'fixture-123',
-      position: 'FOH'
+      position: 'FOH',
     });
 
     expect(result.success).toBe(true);
@@ -122,7 +122,7 @@ describe('FixtureSchema', () => {
       dmx_address: 1,
       dimmer: 'A-1',
       wattage: 575,
-      color: 'R02'
+      color: 'R02',
     };
 
     const result = parseWithZod(FixtureSchema, fixture);
@@ -131,7 +131,7 @@ describe('FixtureSchema', () => {
 
   it('should require position and type', () => {
     const result = parseWithZod(CreateFixtureSchema, {
-      manufacturer: 'ETC'
+      manufacturer: 'ETC',
     });
 
     expect(result.success).toBe(false);
@@ -145,14 +145,14 @@ describe('FixtureSchema', () => {
     const valid = parseWithZod(CreateFixtureSchema, {
       position: 'FOH',
       type: 'LED',
-      universe: 32768
+      universe: 32768,
     });
     expect(valid.success).toBe(true);
 
     const invalid = parseWithZod(CreateFixtureSchema, {
       position: 'FOH',
       type: 'LED',
-      universe: 32769
+      universe: 32769,
     });
     expect(invalid.success).toBe(false);
   });
@@ -161,14 +161,14 @@ describe('FixtureSchema', () => {
     const valid = parseWithZod(CreateFixtureSchema, {
       position: 'FOH',
       type: 'LED',
-      dmx_address: 512
+      dmx_address: 512,
     });
     expect(valid.success).toBe(true);
 
     const invalid = parseWithZod(CreateFixtureSchema, {
       position: 'FOH',
       type: 'LED',
-      dmx_address: 513
+      dmx_address: 513,
     });
     expect(invalid.success).toBe(false);
   });
@@ -186,7 +186,7 @@ describe('ProjectSchema', () => {
       lighting_designer_email: 'ken@example.com',
       venue: 'Gershwin Theatre',
       venue_city: 'New York',
-      venue_state: 'NY'
+      venue_state: 'NY',
     };
 
     const result = parseWithZod(ProjectSchema, project);
@@ -195,7 +195,7 @@ describe('ProjectSchema', () => {
 
   it('should require name', () => {
     const result = parseWithZod(CreateProjectSchema, {
-      description: 'Test project'
+      description: 'Test project',
     });
 
     expect(result.success).toBe(false);
@@ -207,20 +207,20 @@ describe('ProjectSchema', () => {
   it('should validate email addresses', () => {
     const invalid = parseWithZod(CreateProjectSchema, {
       name: 'Test Project',
-      lighting_designer_email: 'invalid-email'
+      lighting_designer_email: 'invalid-email',
     });
     expect(invalid.success).toBe(false);
 
     const valid = parseWithZod(CreateProjectSchema, {
       name: 'Test Project',
-      lighting_designer_email: 'test@example.com'
+      lighting_designer_email: 'test@example.com',
     });
     expect(valid.success).toBe(true);
 
     // Empty string should be allowed
     const empty = parseWithZod(CreateProjectSchema, {
       name: 'Test Project',
-      lighting_designer_email: ''
+      lighting_designer_email: '',
     });
     expect(empty.success).toBe(true);
   });
@@ -235,7 +235,7 @@ describe('ShopOrderProjectSchema', () => {
       production_name: 'Hamilton',
       order_date: Date.now(),
       disciplines: ['lighting'],
-      current_revision: 0
+      current_revision: 0,
     };
 
     const result = parseWithZod(ShopOrderProjectSchema, shopOrder);
@@ -244,7 +244,7 @@ describe('ShopOrderProjectSchema', () => {
 
   it('should require production_name, order_date, disciplines, and current_revision', () => {
     const result = parseWithZod(CreateShopOrderProjectSchema, {
-      venue: 'Test Venue'
+      venue: 'Test Venue',
     });
 
     expect(result.success).toBe(false);
@@ -261,7 +261,7 @@ describe('ShopOrderProjectSchema', () => {
       production_name: 'Test',
       order_date: Date.now(),
       disciplines: [],
-      current_revision: 0
+      current_revision: 0,
     });
 
     expect(result.success).toBe(false);
@@ -272,7 +272,7 @@ describe('ShopOrderProjectSchema', () => {
       production_name: 'Test',
       order_date: Date.now(),
       disciplines: ['lighting'],
-      current_revision: 5
+      current_revision: 5,
     });
     expect(valid.success).toBe(true);
 
@@ -280,7 +280,7 @@ describe('ShopOrderProjectSchema', () => {
       production_name: 'Test',
       order_date: Date.now(),
       disciplines: ['lighting'],
-      current_revision: 6
+      current_revision: 6,
     });
     expect(invalid.success).toBe(false);
   });
@@ -298,7 +298,7 @@ describe('InfrastructureEquipmentSchema', () => {
       status: 'active',
       category: 'network',
       ip_address: '192.168.1.100',
-      port_count: 24
+      port_count: 24,
     };
 
     const result = parseWithZod(InfrastructureEquipmentSchema, equipment);
@@ -315,7 +315,7 @@ describe('InfrastructureEquipmentSchema', () => {
       name: 'Switch',
       quantity: 1,
       status: 'active',
-      ip_address: '192.168.1.1'
+      ip_address: '192.168.1.1',
     });
     expect(valid.success).toBe(true);
 
@@ -328,7 +328,7 @@ describe('InfrastructureEquipmentSchema', () => {
       name: 'Switch',
       quantity: 1,
       status: 'active',
-      ip_address: 'not-an-ip'
+      ip_address: 'not-an-ip',
     });
     expect(invalid.success).toBe(false);
   });
@@ -342,7 +342,7 @@ describe('InfrastructureEquipmentSchema', () => {
       name: 'Switch',
       quantity: 1,
       status: 'active',
-      vlan_id: 100
+      vlan_id: 100,
     });
     expect(valid.success).toBe(true);
 
@@ -354,7 +354,7 @@ describe('InfrastructureEquipmentSchema', () => {
       name: 'Switch',
       quantity: 1,
       status: 'active',
-      vlan_id: 5000
+      vlan_id: 5000,
     });
     expect(invalid.success).toBe(false);
   });
@@ -368,7 +368,7 @@ describe('Power Schemas', () => {
       updated_at: Date.now(),
       project_id: 'project-1',
       name: 'Dimmer Rack A',
-      circuit_count: 96
+      circuit_count: 96,
     };
 
     const result = parseWithZod(DimmerRackSchema, rack);
@@ -382,7 +382,7 @@ describe('Power Schemas', () => {
       updated_at: Date.now(),
       project_id: 'project-1',
       name: 'Rack',
-      circuit_count: 48
+      circuit_count: 48,
     });
     expect(valid.success).toBe(true);
 
@@ -392,7 +392,7 @@ describe('Power Schemas', () => {
       updated_at: Date.now(),
       project_id: 'project-1',
       name: 'Rack',
-      circuit_count: 50
+      circuit_count: 50,
     });
     expect(invalid.success).toBe(false);
   });
@@ -405,7 +405,7 @@ describe('Power Schemas', () => {
       project_id: 'project-1',
       name: 'PD Rack Z',
       voltage: 208,
-      circuit_count: 24
+      circuit_count: 24,
     };
 
     const result = parseWithZod(PDRackSchema, rack);
@@ -420,7 +420,7 @@ describe('Power Schemas', () => {
       project_id: 'project-1',
       name: 'Rack',
       voltage: 110,
-      circuit_count: 24
+      circuit_count: 24,
     });
     expect(invalid.success).toBe(false);
   });
@@ -440,8 +440,8 @@ describe('PaperworkTemplateSchema', () => {
           field: 'channel',
           label: 'Channel',
           width: 10,
-          visible: true
-        }
+          visible: true,
+        },
       ],
       organization: {},
       pageSetup: {
@@ -451,9 +451,9 @@ describe('PaperworkTemplateSchema', () => {
         marginTop: 0.5,
         marginRight: 0.5,
         marginBottom: 0.5,
-        marginLeft: 0.5
+        marginLeft: 0.5,
       },
-      isSystem: false
+      isSystem: false,
     };
 
     const result = parseWithZod(PaperworkTemplateSchema, template);
@@ -476,9 +476,9 @@ describe('PaperworkTemplateSchema', () => {
         marginTop: 0.5,
         marginRight: 0.5,
         marginBottom: 0.5,
-        marginLeft: 0.5
+        marginLeft: 0.5,
       },
-      isSystem: false
+      isSystem: false,
     });
 
     expect(result.success).toBe(false);
@@ -499,7 +499,7 @@ describe('PageLayoutTemplateSchema', () => {
       grid_gap: 10,
       page_width: 816,
       page_height: 1056,
-      elements: []
+      elements: [],
     };
 
     const result = parseWithZod(PageLayoutTemplateSchema, template);
@@ -510,7 +510,7 @@ describe('PageLayoutTemplateSchema', () => {
 describe('Validation Utilities', () => {
   it('parseWithZod should return success with valid data', () => {
     const result = parseWithZod(CreateProjectSchema, {
-      name: 'Test Project'
+      name: 'Test Project',
     });
 
     expect(result.success).toBe(true);
@@ -521,7 +521,7 @@ describe('Validation Utilities', () => {
 
   it('parseWithZod should return errors with invalid data', () => {
     const result = parseWithZod(CreateProjectSchema, {
-      description: 'Missing name'
+      description: 'Missing name',
     });
 
     expect(result.success).toBe(false);
@@ -534,7 +534,7 @@ describe('Validation Utilities', () => {
   it('validateArray should validate array of items', () => {
     const fixtures = [
       { position: 'FOH', type: 'LED' },
-      { position: 'SR', type: 'Moving Light' }
+      { position: 'SR', type: 'Moving Light' },
     ];
 
     const result = validateArray(CreateFixtureSchema, fixtures);
@@ -544,7 +544,7 @@ describe('Validation Utilities', () => {
   it('validateArray should catch invalid items in array', () => {
     const fixtures = [
       { position: 'FOH', type: 'LED' },
-      { position: 'SR' } // Missing type
+      { position: 'SR' }, // Missing type
     ];
 
     const result = validateArray(CreateFixtureSchema, fixtures);
@@ -560,7 +560,7 @@ describe('Validation Utilities', () => {
   it('formatValidationErrors should format multiple errors', () => {
     const errors = [
       { field: 'name', message: 'Required', code: 'required' },
-      { field: 'email', message: 'Invalid email', code: 'invalid' }
+      { field: 'email', message: 'Invalid email', code: 'invalid' },
     ];
     const formatted = formatValidationErrors(errors);
     expect(formatted).toContain('name: Required');
@@ -592,7 +592,7 @@ describe('ShopOrderSectionSchema', () => {
     name: 'Moving Lights',
     discipline: 'lighting',
     sort_order: 0,
-    page_break: false
+    page_break: false,
   };
 
   it('should validate a complete section', () => {
@@ -602,7 +602,7 @@ describe('ShopOrderSectionSchema', () => {
 
   it('should require prep_project_id, name, discipline, sort_order, and page_break', () => {
     const result = parseWithZod(CreateShopOrderSectionSchema, {
-      notes: 'some notes'
+      notes: 'some notes',
     });
     expect(result.success).toBe(false);
     {
@@ -620,7 +620,7 @@ describe('ShopOrderSectionSchema', () => {
       name: 'LED Fixtures',
       discipline: 'lighting',
       sort_order: 1,
-      page_break: false
+      page_break: false,
     });
     expect(result.success).toBe(true);
   });
@@ -628,14 +628,14 @@ describe('ShopOrderSectionSchema', () => {
   it('should require only id for UpdateShopOrderSectionSchema', () => {
     const result = parseWithZod(UpdateShopOrderSectionSchema, {
       id: 'section-1',
-      name: 'Updated Section'
+      name: 'Updated Section',
     });
     expect(result.success).toBe(true);
   });
 
   it('should reject UpdateShopOrderSectionSchema without id', () => {
     const result = parseWithZod(UpdateShopOrderSectionSchema, {
-      name: 'Updated Section'
+      name: 'Updated Section',
     });
     expect(result.success).toBe(false);
   });
@@ -646,7 +646,7 @@ describe('ShopOrderSectionSchema', () => {
       name: 'Test',
       discipline: 'pyrotechnics',
       sort_order: 0,
-      page_break: false
+      page_break: false,
     });
     expect(result.success).toBe(false);
   });
@@ -657,7 +657,7 @@ describe('ShopOrderSectionSchema', () => {
       name: 'Test',
       discipline: 'lighting',
       sort_order: -1,
-      page_break: false
+      page_break: false,
     });
     expect(result.success).toBe(false);
   });
@@ -669,7 +669,7 @@ describe('ShopOrderSectionSchema', () => {
       discipline: 'audio',
       sort_order: 2,
       page_break: true,
-      notes: 'Some section notes'
+      notes: 'Some section notes',
     });
     expect(result.success).toBe(true);
   });
@@ -688,7 +688,7 @@ describe('ShopOrderItemSchema', () => {
     total_qty: 12,
     venue_active: 0,
     venue_spare: 0,
-    sort_order: 0
+    sort_order: 0,
   };
 
   it('should validate a complete item', () => {
@@ -698,7 +698,7 @@ describe('ShopOrderItemSchema', () => {
 
   it('should require section_id, description, sort_order, and quantity fields', () => {
     const result = parseWithZod(CreateShopOrderItemSchema, {
-      notes: 'optional note'
+      notes: 'optional note',
     });
     expect(result.success).toBe(false);
     {
@@ -722,7 +722,7 @@ describe('ShopOrderItemSchema', () => {
       total_qty: 6,
       venue_active: 0,
       venue_spare: 0,
-      sort_order: 0
+      sort_order: 0,
     });
     expect(result.success).toBe(true);
   });
@@ -730,14 +730,14 @@ describe('ShopOrderItemSchema', () => {
   it('should require only id for UpdateShopOrderItemSchema', () => {
     const result = parseWithZod(UpdateShopOrderItemSchema, {
       id: 'item-1',
-      active_qty: 20
+      active_qty: 20,
     });
     expect(result.success).toBe(true);
   });
 
   it('should reject UpdateShopOrderItemSchema without id', () => {
     const result = parseWithZod(UpdateShopOrderItemSchema, {
-      active_qty: 20
+      active_qty: 20,
     });
     expect(result.success).toBe(false);
   });
@@ -752,7 +752,7 @@ describe('ShopOrderItemSchema', () => {
       total_qty: 0,
       venue_active: 0,
       venue_spare: 0,
-      sort_order: 0
+      sort_order: 0,
     });
     expect(result.success).toBe(false);
   });
@@ -767,7 +767,7 @@ describe('ShopOrderItemSchema', () => {
       total_qty: 0,
       venue_active: 0,
       venue_spare: 0,
-      sort_order: 0
+      sort_order: 0,
     });
     expect(result.success).toBe(true);
   });
@@ -785,7 +785,7 @@ describe('ShopOrderItemSchema', () => {
       sort_order: 0,
       added_in_revision: 0,
       removed_in_revision: 5,
-      modified_in_revision: 3
+      modified_in_revision: 3,
     });
     expect(valid.success).toBe(true);
 
@@ -799,7 +799,7 @@ describe('ShopOrderItemSchema', () => {
       venue_active: 0,
       venue_spare: 0,
       sort_order: 0,
-      added_in_revision: 6
+      added_in_revision: 6,
     });
     expect(invalid.success).toBe(false);
   });
@@ -816,7 +816,7 @@ describe('ShopOrderItemSchema', () => {
       venue_spare: 0,
       sort_order: 0,
       weight: 15.5,
-      power: 575
+      power: 575,
     });
     expect(result.success).toBe(true);
   });
@@ -832,7 +832,7 @@ describe('ShopOrderItemSchema', () => {
       venue_active: 0,
       venue_spare: 0,
       sort_order: 0,
-      weight: -5
+      weight: -5,
     });
     expect(result.success).toBe(false);
   });
@@ -846,7 +846,7 @@ describe('ShopOrderRevisionSchema', () => {
     prep_project_id: 'prep-1',
     revision_number: 1,
     revision_date: Date.now(),
-    change_log: []
+    change_log: [],
   };
 
   it('should validate a complete revision', () => {
@@ -856,7 +856,7 @@ describe('ShopOrderRevisionSchema', () => {
 
   it('should require prep_project_id and revision_number', () => {
     const result = parseWithZod(CreateShopOrderRevisionSchema, {
-      notes: 'some notes'
+      notes: 'some notes',
     });
     expect(result.success).toBe(false);
     {
@@ -870,7 +870,7 @@ describe('ShopOrderRevisionSchema', () => {
       prep_project_id: 'prep-1',
       revision_number: 2,
       revision_date: Date.now(),
-      change_log: []
+      change_log: [],
     });
     expect(result.success).toBe(true);
   });
@@ -878,14 +878,14 @@ describe('ShopOrderRevisionSchema', () => {
   it('should require only id for UpdateShopOrderRevisionSchema', () => {
     const result = parseWithZod(UpdateShopOrderRevisionSchema, {
       id: 'rev-1',
-      notes: 'Updated notes'
+      notes: 'Updated notes',
     });
     expect(result.success).toBe(true);
   });
 
   it('should reject UpdateShopOrderRevisionSchema without id', () => {
     const result = parseWithZod(UpdateShopOrderRevisionSchema, {
-      notes: 'Updated notes'
+      notes: 'Updated notes',
     });
     expect(result.success).toBe(false);
   });
@@ -895,7 +895,7 @@ describe('ShopOrderRevisionSchema', () => {
       prep_project_id: 'prep-1',
       revision_number: 1,
       revision_date: Date.now(),
-      change_log: []
+      change_log: [],
     });
     expect(validMin.success).toBe(true);
 
@@ -903,7 +903,7 @@ describe('ShopOrderRevisionSchema', () => {
       prep_project_id: 'prep-1',
       revision_number: 5,
       revision_date: Date.now(),
-      change_log: []
+      change_log: [],
     });
     expect(validMax.success).toBe(true);
 
@@ -911,7 +911,7 @@ describe('ShopOrderRevisionSchema', () => {
       prep_project_id: 'prep-1',
       revision_number: 0,
       revision_date: Date.now(),
-      change_log: []
+      change_log: [],
     });
     expect(invalidZero.success).toBe(false);
 
@@ -919,7 +919,7 @@ describe('ShopOrderRevisionSchema', () => {
       prep_project_id: 'prep-1',
       revision_number: 6,
       revision_date: Date.now(),
-      change_log: []
+      change_log: [],
     });
     expect(invalidSix.success).toBe(false);
   });
@@ -929,7 +929,7 @@ describe('ShopOrderRevisionSchema', () => {
       prep_project_id: 'prep-1',
       revision_number: 1,
       revision_date: -100,
-      change_log: []
+      change_log: [],
     });
     expect(result.success).toBe(false);
   });
@@ -943,15 +943,15 @@ describe('ShopOrderRevisionSchema', () => {
         {
           item_id: 'item-1',
           change_type: 'addition',
-          description: 'Added new fixture'
+          description: 'Added new fixture',
         },
         {
           item_id: 'item-2',
           change_type: 'deletion',
           description: 'Removed old fixture',
-          section_name: 'Moving Lights'
-        }
-      ]
+          section_name: 'Moving Lights',
+        },
+      ],
     });
     expect(result.success).toBe(true);
   });
@@ -965,7 +965,7 @@ describe('ShopOrderNoteSchema', () => {
     prep_project_id: 'prep-1',
     type: 'general_notes',
     content: 'All fixtures must be safety cabled.',
-    format: 'plain'
+    format: 'plain',
   };
 
   it('should validate a complete note', () => {
@@ -975,7 +975,7 @@ describe('ShopOrderNoteSchema', () => {
 
   it('should require prep_project_id, type, and content', () => {
     const result = parseWithZod(CreateShopOrderNoteSchema, {
-      format: 'plain'
+      format: 'plain',
     });
     expect(result.success).toBe(false);
     {
@@ -990,7 +990,7 @@ describe('ShopOrderNoteSchema', () => {
       prep_project_id: 'prep-1',
       type: 'fixture_notes',
       content: 'Handle with care.',
-      format: 'bullets'
+      format: 'bullets',
     });
     expect(result.success).toBe(true);
   });
@@ -998,14 +998,14 @@ describe('ShopOrderNoteSchema', () => {
   it('should require only id for UpdateShopOrderNoteSchema', () => {
     const result = parseWithZod(UpdateShopOrderNoteSchema, {
       id: 'note-1',
-      content: 'Updated note content'
+      content: 'Updated note content',
     });
     expect(result.success).toBe(true);
   });
 
   it('should reject UpdateShopOrderNoteSchema without id', () => {
     const result = parseWithZod(UpdateShopOrderNoteSchema, {
-      content: 'Updated note content'
+      content: 'Updated note content',
     });
     expect(result.success).toBe(false);
   });
@@ -1015,7 +1015,7 @@ describe('ShopOrderNoteSchema', () => {
       prep_project_id: 'prep-1',
       type: 'invalid_type',
       content: 'Test',
-      format: 'plain'
+      format: 'plain',
     });
     expect(result.success).toBe(false);
   });
@@ -1025,7 +1025,7 @@ describe('ShopOrderNoteSchema', () => {
       prep_project_id: 'prep-1',
       type: 'general_notes',
       content: 'Test',
-      format: 'html'
+      format: 'html',
     });
     expect(result.success).toBe(false);
   });
@@ -1036,7 +1036,7 @@ describe('ShopOrderNoteSchema', () => {
         prep_project_id: 'prep-1',
         type: 'general_conditions',
         content: 'Test',
-        format
+        format,
       });
       expect(result.success).toBe(true);
     }
@@ -1051,7 +1051,7 @@ describe('ShopOrderNoteTemplateSchema', () => {
     type: 'general_conditions',
     name: 'Standard Safety Language',
     content: 'All equipment must be safety cabled per ANSI standards.',
-    is_default: 0
+    is_default: 0,
   };
 
   it('should validate a complete note template', () => {
@@ -1061,7 +1061,7 @@ describe('ShopOrderNoteTemplateSchema', () => {
 
   it('should require type, name, and content', () => {
     const result = parseWithZod(CreateShopOrderNoteTemplateSchema, {
-      is_default: 0
+      is_default: 0,
     });
     expect(result.success).toBe(false);
     {
@@ -1076,7 +1076,7 @@ describe('ShopOrderNoteTemplateSchema', () => {
       type: 'general_notes',
       name: 'Template',
       content: 'Template content',
-      is_default: 1
+      is_default: 1,
     });
     expect(result.success).toBe(true);
   });
@@ -1084,14 +1084,14 @@ describe('ShopOrderNoteTemplateSchema', () => {
   it('should require only id for UpdateShopOrderNoteTemplateSchema', () => {
     const result = parseWithZod(UpdateShopOrderNoteTemplateSchema, {
       id: 'tmpl-1',
-      name: 'Updated Template'
+      name: 'Updated Template',
     });
     expect(result.success).toBe(true);
   });
 
   it('should reject UpdateShopOrderNoteTemplateSchema without id', () => {
     const result = parseWithZod(UpdateShopOrderNoteTemplateSchema, {
-      name: 'Updated Template'
+      name: 'Updated Template',
     });
     expect(result.success).toBe(false);
   });
@@ -1101,7 +1101,7 @@ describe('ShopOrderNoteTemplateSchema', () => {
       type: 'general_notes',
       name: 'Template',
       content: 'Content',
-      is_default: 0
+      is_default: 0,
     });
     expect(valid0.success).toBe(true);
 
@@ -1109,7 +1109,7 @@ describe('ShopOrderNoteTemplateSchema', () => {
       type: 'general_notes',
       name: 'Template',
       content: 'Content',
-      is_default: 1
+      is_default: 1,
     });
     expect(valid1.success).toBe(true);
 
@@ -1117,7 +1117,7 @@ describe('ShopOrderNoteTemplateSchema', () => {
       type: 'general_notes',
       name: 'Template',
       content: 'Content',
-      is_default: 2
+      is_default: 2,
     });
     expect(invalid.success).toBe(false);
   });
@@ -1127,7 +1127,7 @@ describe('ShopOrderNoteTemplateSchema', () => {
       type: 'revision',
       name: 'Template',
       content: 'Content',
-      is_default: 0
+      is_default: 0,
     });
     expect(result.success).toBe(false);
   });
@@ -1138,7 +1138,7 @@ describe('ShopOrderNoteTemplateSchema', () => {
         type,
         name: 'Template',
         content: 'Content',
-        is_default: 0
+        is_default: 0,
       });
       expect(result.success).toBe(true);
     }
@@ -1204,7 +1204,7 @@ describe('ContactSchema', () => {
     const result = ContactSchema.safeParse({
       name: 'John Doe',
       email: 'john@example.com',
-      phone: '555-1234'
+      phone: '555-1234',
     });
     expect(result.success).toBe(true);
   });
@@ -1217,14 +1217,14 @@ describe('ContactSchema', () => {
   it('should allow empty string for email', () => {
     const result = ContactSchema.safeParse({
       name: 'John',
-      email: ''
+      email: '',
     });
     expect(result.success).toBe(true);
   });
 
   it('should reject invalid email', () => {
     const result = ContactSchema.safeParse({
-      email: 'not-an-email'
+      email: 'not-an-email',
     });
     expect(result.success).toBe(false);
   });
@@ -1237,21 +1237,21 @@ describe('AdditionalContactSchema', () => {
       email: 'jane@example.com',
       phone: '555-5678',
       role: 'Associate Designer',
-      discipline: 'lighting'
+      discipline: 'lighting',
     });
     expect(result.success).toBe(true);
   });
 
   it('should require role', () => {
     const result = AdditionalContactSchema.safeParse({
-      name: 'Jane Smith'
+      name: 'Jane Smith',
     });
     expect(result.success).toBe(false);
   });
 
   it('should allow discipline to be optional', () => {
     const result = AdditionalContactSchema.safeParse({
-      role: 'Programmer'
+      role: 'Programmer',
     });
     expect(result.success).toBe(true);
   });
@@ -1259,7 +1259,7 @@ describe('AdditionalContactSchema', () => {
   it('should reject invalid discipline in additional contact', () => {
     const result = AdditionalContactSchema.safeParse({
       role: 'Programmer',
-      discipline: 'invalid'
+      discipline: 'invalid',
     });
     expect(result.success).toBe(false);
   });
@@ -1270,7 +1270,7 @@ describe('ItemChangeSchema', () => {
     const result = ItemChangeSchema.safeParse({
       item_id: 'item-1',
       change_type: 'addition',
-      description: 'Added new fixture'
+      description: 'Added new fixture',
     });
     expect(result.success).toBe(true);
   });
@@ -1280,7 +1280,7 @@ describe('ItemChangeSchema', () => {
       item_id: 'item-1',
       change_type: 'deletion',
       description: 'Removed fixture',
-      section_name: 'Moving Lights'
+      section_name: 'Moving Lights',
     });
     expect(result.success).toBe(true);
   });
@@ -1294,7 +1294,7 @@ describe('ItemChangeSchema', () => {
     const result = ItemChangeSchema.safeParse({
       item_id: '',
       change_type: 'addition',
-      description: 'Test'
+      description: 'Test',
     });
     expect(result.success).toBe(false);
   });
@@ -1303,7 +1303,7 @@ describe('ItemChangeSchema', () => {
     const result = ItemChangeSchema.safeParse({
       item_id: 'item-1',
       change_type: 'update',
-      description: 'Test'
+      description: 'Test',
     });
     expect(result.success).toBe(false);
   });
@@ -1313,7 +1313,7 @@ describe('ItemChangeSchema', () => {
       const result = ItemChangeSchema.safeParse({
         item_id: 'item-1',
         change_type,
-        description: 'Test change'
+        description: 'Test change',
       });
       expect(result.success).toBe(true);
     }
@@ -1330,7 +1330,7 @@ describe('CreateInfrastructureEquipmentSchema', () => {
       project_id: 'project-1',
       name: 'Luminex GigaCore 26i',
       quantity: 1,
-      status: 'active'
+      status: 'active',
     });
     expect(result.success).toBe(true);
   });
@@ -1338,7 +1338,7 @@ describe('CreateInfrastructureEquipmentSchema', () => {
   it('should require project_id and name', () => {
     const result = parseWithZod(CreateInfrastructureEquipmentSchema, {
       quantity: 1,
-      status: 'active'
+      status: 'active',
     });
     expect(result.success).toBe(false);
     {
@@ -1353,7 +1353,7 @@ describe('CreateInfrastructureEquipmentSchema', () => {
       project_id: 'project-1',
       name: 'Switch',
       quantity: 1,
-      status: 'active'
+      status: 'active',
     });
     // The id field should be stripped (omitted) but not cause failure
     if (result.success) {
@@ -1371,7 +1371,7 @@ describe('CreateInfrastructureEquipmentSchema', () => {
       subnet_mask: '255.255.255.0',
       gateway: '10.0.0.254',
       vlan_id: 100,
-      hostname: 'switch-01'
+      hostname: 'switch-01',
     });
     expect(result.success).toBe(true);
   });
@@ -1380,14 +1380,14 @@ describe('CreateInfrastructureEquipmentSchema', () => {
 describe('UpdateInfrastructureEquipmentSchema', () => {
   it('should require id', () => {
     const result = parseWithZod(UpdateInfrastructureEquipmentSchema, {
-      name: 'Updated Switch'
+      name: 'Updated Switch',
     });
     expect(result.success).toBe(false);
   });
 
   it('should allow partial updates with only id', () => {
     const result = parseWithZod(UpdateInfrastructureEquipmentSchema, {
-      id: 'infra-1'
+      id: 'infra-1',
     });
     expect(result.success).toBe(true);
   });
@@ -1396,7 +1396,7 @@ describe('UpdateInfrastructureEquipmentSchema', () => {
     const result = parseWithZod(UpdateInfrastructureEquipmentSchema, {
       id: 'infra-1',
       ip_address: '192.168.2.100',
-      location: 'FOH Rack'
+      location: 'FOH Rack',
     });
     expect(result.success).toBe(true);
   });
@@ -1446,26 +1446,26 @@ describe('PortAssignmentSchema', () => {
       type: 'ethernet',
       vlan: 100,
       status: 'active',
-      notes: 'Uplink'
+      notes: 'Uplink',
     });
     expect(result.success).toBe(true);
   });
 
   it('should require port number', () => {
     const result = PortAssignmentSchema.safeParse({
-      connected_to: 'Something'
+      connected_to: 'Something',
     });
     expect(result.success).toBe(false);
   });
 
   it('should require positive port number', () => {
     const result = PortAssignmentSchema.safeParse({
-      port: 0
+      port: 0,
     });
     expect(result.success).toBe(false);
 
     const resultNeg = PortAssignmentSchema.safeParse({
-      port: -1
+      port: -1,
     });
     expect(resultNeg.success).toBe(false);
   });
@@ -1489,7 +1489,7 @@ describe('PortAssignmentSchema', () => {
       port: 5,
       linked_fixture_id: 'fixture-1',
       linked_equipment_id: 'equip-2',
-      linked_port: 12
+      linked_port: 12,
     });
     expect(result.success).toBe(true);
   });
@@ -1522,14 +1522,14 @@ describe('CreateDimmerRackSchema', () => {
     const result = parseWithZod(CreateDimmerRackSchema, {
       project_id: 'project-1',
       name: 'Dimmer Rack A',
-      circuit_count: 96
+      circuit_count: 96,
     });
     expect(result.success).toBe(true);
   });
 
   it('should require project_id, name, and circuit_count', () => {
     const result = parseWithZod(CreateDimmerRackSchema, {
-      location: 'Basement'
+      location: 'Basement',
     });
     expect(result.success).toBe(false);
     {
@@ -1552,7 +1552,7 @@ describe('CreateDimmerRackSchema', () => {
       watts_per_module: 7200,
       location: 'Stage Left',
       building_service: 'Service A',
-      notes: 'Main rack'
+      notes: 'Main rack',
     });
     expect(result.success).toBe(true);
   });
@@ -1561,14 +1561,14 @@ describe('CreateDimmerRackSchema', () => {
 describe('UpdateDimmerRackSchema', () => {
   it('should require id', () => {
     const result = parseWithZod(UpdateDimmerRackSchema, {
-      name: 'Updated Rack'
+      name: 'Updated Rack',
     });
     expect(result.success).toBe(false);
   });
 
   it('should allow partial updates with only id', () => {
     const result = parseWithZod(UpdateDimmerRackSchema, {
-      id: 'dimmer-1'
+      id: 'dimmer-1',
     });
     expect(result.success).toBe(true);
   });
@@ -1577,7 +1577,7 @@ describe('UpdateDimmerRackSchema', () => {
     const result = parseWithZod(UpdateDimmerRackSchema, {
       id: 'dimmer-1',
       name: 'Renamed Rack',
-      location: 'New Location'
+      location: 'New Location',
     });
     expect(result.success).toBe(true);
   });
@@ -1589,14 +1589,14 @@ describe('CreatePDRackSchema', () => {
       project_id: 'project-1',
       name: 'PD Rack Z',
       voltage: 208,
-      circuit_count: 24
+      circuit_count: 24,
     });
     expect(result.success).toBe(true);
   });
 
   it('should require project_id, name, voltage, and circuit_count', () => {
     const result = parseWithZod(CreatePDRackSchema, {
-      location: 'FOH'
+      location: 'FOH',
     });
     expect(result.success).toBe(false);
     {
@@ -1620,7 +1620,7 @@ describe('CreatePDRackSchema', () => {
       amps_per_breaker: 20,
       location: 'Front of House',
       building_service: 'Service B',
-      notes: 'FOH power'
+      notes: 'FOH power',
     });
     expect(result.success).toBe(true);
   });
@@ -1629,14 +1629,14 @@ describe('CreatePDRackSchema', () => {
 describe('UpdatePDRackSchema', () => {
   it('should require id', () => {
     const result = parseWithZod(UpdatePDRackSchema, {
-      name: 'Updated PD Rack'
+      name: 'Updated PD Rack',
     });
     expect(result.success).toBe(false);
   });
 
   it('should allow partial updates with only id', () => {
     const result = parseWithZod(UpdatePDRackSchema, {
-      id: 'pd-1'
+      id: 'pd-1',
     });
     expect(result.success).toBe(true);
   });
@@ -1645,7 +1645,7 @@ describe('UpdatePDRackSchema', () => {
     const result = parseWithZod(UpdatePDRackSchema, {
       id: 'pd-1',
       voltage: 240,
-      amps_per_breaker: 30
+      amps_per_breaker: 30,
     });
     expect(result.success).toBe(true);
   });
@@ -1731,7 +1731,7 @@ describe('DimmerRackModuleSchema', () => {
     rack_id: 'dimmer-1',
     start_circuit: 1,
     end_circuit: 12,
-    module_type: 'dimmer'
+    module_type: 'dimmer',
   };
 
   it('should validate a complete dimmer rack module', () => {
@@ -1741,7 +1741,7 @@ describe('DimmerRackModuleSchema', () => {
 
   it('should require rack_id, start_circuit, end_circuit, and module_type', () => {
     const result = parseWithZod(CreateDimmerRackModuleSchema, {
-      notes: 'test'
+      notes: 'test',
     });
     expect(result.success).toBe(false);
     {
@@ -1757,7 +1757,7 @@ describe('DimmerRackModuleSchema', () => {
       rack_id: 'dimmer-1',
       start_circuit: 1,
       end_circuit: 12,
-      module_type: 'relay'
+      module_type: 'relay',
     });
     expect(result.success).toBe(true);
   });
@@ -1765,14 +1765,14 @@ describe('DimmerRackModuleSchema', () => {
   it('should require only id for UpdateDimmerRackModuleSchema', () => {
     const result = parseWithZod(UpdateDimmerRackModuleSchema, {
       id: 'module-1',
-      module_type: 'thrupower'
+      module_type: 'thrupower',
     });
     expect(result.success).toBe(true);
   });
 
   it('should reject UpdateDimmerRackModuleSchema without id', () => {
     const result = parseWithZod(UpdateDimmerRackModuleSchema, {
-      module_type: 'dimmer'
+      module_type: 'dimmer',
     });
     expect(result.success).toBe(false);
   });
@@ -1782,7 +1782,7 @@ describe('DimmerRackModuleSchema', () => {
       rack_id: 'dimmer-1',
       start_circuit: 0,
       end_circuit: 12,
-      module_type: 'dimmer'
+      module_type: 'dimmer',
     });
     expect(resultZero.success).toBe(false);
 
@@ -1790,7 +1790,7 @@ describe('DimmerRackModuleSchema', () => {
       rack_id: 'dimmer-1',
       start_circuit: 1,
       end_circuit: -1,
-      module_type: 'dimmer'
+      module_type: 'dimmer',
     });
     expect(resultNeg.success).toBe(false);
   });
@@ -1802,7 +1802,7 @@ describe('DimmerRackModuleSchema', () => {
       end_circuit: 24,
       module_type: 'constant_current',
       watts_per_circuit: 1200,
-      notes: 'LED modules'
+      notes: 'LED modules',
     });
     expect(result.success).toBe(true);
   });
@@ -1813,7 +1813,7 @@ describe('DimmerRackModuleSchema', () => {
       start_circuit: 1,
       end_circuit: 12,
       module_type: 'dimmer',
-      watts_per_circuit: -100
+      watts_per_circuit: -100,
     });
     expect(result.success).toBe(false);
   });
@@ -1823,7 +1823,7 @@ describe('DimmerRackModuleSchema', () => {
       rack_id: 'dimmer-1',
       start_circuit: 1,
       end_circuit: 12,
-      module_type: 'led'
+      module_type: 'led',
     });
     expect(result.success).toBe(false);
   });

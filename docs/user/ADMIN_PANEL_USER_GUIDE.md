@@ -12,9 +12,11 @@ The ShowStack Admin Panel provides secure access to system-wide configuration an
 ## Accessing the Admin Panel
 
 ### Method 1: Keyboard Shortcut (Recommended)
+
 Press **Cmd+Shift+A** (Mac) or **Ctrl+Shift+A** (Windows/Linux) from anywhere in the application.
 
 ### Method 2: Direct URL
+
 Navigate to `/admin` in the application.
 
 ## First-Time Setup
@@ -31,6 +33,7 @@ Navigate to `/admin` in the application.
 ### Subsequent Access
 
 When accessing the admin panel after setup:
+
 1. Enter your admin password
 2. Click "Unlock"
 3. You'll be granted access to the admin panel
@@ -46,6 +49,7 @@ The Layout Template Manager allows you to export, import, and manage default pag
 #### Viewing Current Layouts
 
 The main panel displays all default layouts with:
+
 - Template name and description
 - Page type (cover, contacts, equipment-by-section, notes, revision-summary)
 - Grid configuration (columns × rows)
@@ -54,17 +58,20 @@ The main panel displays all default layouts with:
 #### Exporting Layouts
 
 **Export Single Layout:**
+
 1. Find the layout you want to export in the list
 2. Click the "Export" button next to it
 3. Choose a save location
 4. The layout will be saved as a JSON file
 
 **Export All Default Layouts:**
+
 1. Click "Export All Default Layouts" in Quick Actions
 2. Select a directory to save all layouts
 3. All default layouts will be exported as individual JSON files
 
 **Use Cases:**
+
 - Creating backups before making changes
 - Sharing custom layouts between installations
 - Version controlling layout templates
@@ -78,6 +85,7 @@ The main panel displays all default layouts with:
 4. You'll see a success message with the count of imported layouts
 
 **Validation:**
+
 - The system validates JSON structure before importing
 - Invalid files will be skipped with error messages
 - Successfully imported layouts are immediately available
@@ -92,6 +100,7 @@ The main panel displays all default layouts with:
 4. Original factory layouts will be restored
 
 **When to use:**
+
 - After breaking layouts during customization
 - Reverting to original ShowStack designs
 - Starting fresh after experiments
@@ -170,11 +179,13 @@ This creates backup copies of all current layouts.
 ### Step 2: Modify Layouts
 
 **Option A: Edit JSON Files Directly**
+
 1. Open exported JSON files in a text editor
 2. Modify template properties or element configurations
 3. Save changes
 
 **Option B: Use Layout Designer**
+
 1. Open the Production module's Shop Order tool
 2. Access Print Builder → Manage Templates
 3. Create or edit a layout visually
@@ -216,6 +227,7 @@ src/main/database/defaultLayouts/
 ### Version Control
 
 These JSON files are included in the repository, making them:
+
 - **Version controlled**: Track changes over time
 - **Shareable**: Distribute custom layouts easily
 - **Reviewable**: See exactly what changed in diffs
@@ -268,12 +280,14 @@ These JSON files are included in the repository, making them:
 
 **Problem**: Password prompt doesn't appear
 **Solution**:
+
 - Try the keyboard shortcut (Cmd/Ctrl+Shift+A)
 - Check browser console for errors
 - Restart the application
 
 **Problem**: Forgot admin password
 **Solution**:
+
 - Password cannot be recovered
 - Manually delete password from app database:
   ```sql
@@ -285,6 +299,7 @@ These JSON files are included in the repository, making them:
 
 **Problem**: Import shows errors
 **Solution**:
+
 - Check JSON syntax (use JSONLint.com)
 - Verify all required fields are present
 - Ensure element types are valid
@@ -292,6 +307,7 @@ These JSON files are included in the repository, making them:
 
 **Problem**: Imported layouts don't appear
 **Solution**:
+
 - Refresh the layout list
 - Check that `is_default: true` is set
 - Verify page_type matches expected values
@@ -301,6 +317,7 @@ These JSON files are included in the repository, making them:
 
 **Problem**: Blank pages in print preview
 **Solution**:
+
 - Check that layout has elements
 - Verify element grid positions are within bounds
 - Check element visibility (layer, style)
@@ -311,6 +328,7 @@ These JSON files are included in the repository, making them:
 ## Support
 
 For additional help:
+
 - Check the [Technical Documentation](./ADMIN_PANEL_MIGRATION.md)
 - Review [Phase 1 Development Guide](./PHASE_1_DEVELOPMENT_GUIDE.md)
 - Report issues on GitHub

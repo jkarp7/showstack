@@ -78,8 +78,8 @@ export class ErrorBoundary extends Component<Props, State> {
                 <div className="flex-1">
                   <h1 className="text-2xl font-bold mb-2">Something went wrong</h1>
                   <p className="text-gray-300 mb-4">
-                    The application encountered an unexpected error. This has been
-                    reported automatically.
+                    The application encountered an unexpected error. This has been reported
+                    automatically.
                   </p>
 
                   {this.state.error && (
@@ -92,9 +92,7 @@ export class ErrorBoundary extends Component<Props, State> {
                         {this.state.error.stack && (
                           <>
                             {'\n\n'}
-                            <code className="text-gray-500">
-                              {this.state.error.stack}
-                            </code>
+                            <code className="text-gray-500">{this.state.error.stack}</code>
                           </>
                         )}
                       </pre>
@@ -120,8 +118,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </div>
 
             <p className="mt-4 text-sm text-gray-400 text-center">
-              If this problem persists, please contact support or report an issue on
-              GitHub.
+              If this problem persists, please contact support or report an issue on GitHub.
             </p>
           </div>
         </div>

@@ -7,6 +7,7 @@ Implement Save/Open/New file operations for ShowStack that work across all modul
 ## File Format
 
 ### .showstack File Structure
+
 ```json
 {
   "version": "1.0.0",
@@ -32,6 +33,7 @@ Implement Save/Open/New file operations for ShowStack that work across all modul
 ```
 
 ###Alternative: SQLite Export
+
 - Export entire SQLite database as the .showstack file
 - Simpler: just copy the database file
 - Native SQL.js support for export/import
@@ -42,9 +44,11 @@ Implement Save/Open/New file operations for ShowStack that work across all modul
 ## Architecture
 
 ### 1. File Service (Main Process)
+
 **Location:** `src/main/services/fileService.ts`
 
 **Responsibilities:**
+
 - Handle Electron dialog operations (open, save, save-as)
 - File I/O operations (read, write, validate)
 - Export current database to file
@@ -52,82 +56,88 @@ Implement Save/Open/New file operations for ShowStack that work across all modul
 - Validate file format/version compatibility
 
 **API Methods:**
+
 ```typescript
 interface FileService {
   // Dialog operations
-  showOpenDialog(): Promise<string | null>
-  showSaveDialog(defaultName?: string): Promise<string | null>
+  showOpenDialog(): Promise<string | null>;
+  showSaveDialog(defaultName?: string): Promise<string | null>;
 
   // File operations
-  exportProject(filePath: string, projectId: string): Promise<void>
-  importProject(filePath: string): Promise<ProjectImportResult>
-  createNewProject(): Promise<string> // Returns new project ID
+  exportProject(filePath: string, projectId: string): Promise<void>;
+  importProject(filePath: string): Promise<ProjectImportResult>;
+  createNewProject(): Promise<string>; // Returns new project ID
 
   // Validation
-  validateFile(filePath: string): Promise<FileValidationResult>
+  validateFile(filePath: string): Promise<FileValidationResult>;
 }
 
 interface ProjectImportResult {
-  success: boolean
-  projectId?: string
-  error?: string
-  warnings?: string[]
+  success: boolean;
+  projectId?: string;
+  error?: string;
+  warnings?: string[];
 }
 ```
 
 ### 2. IPC Handlers (Main Process)
+
 **Location:** `src/main/ipc/files.ts`
 
 **Handlers:**
+
 ```typescript
 ipcMain.handle('file:open', async () => {
-  const filePath = await fileService.showOpenDialog()
-  if (!filePath) return null
+  const filePath = await fileService.showOpenDialog();
+  if (!filePath) return null;
 
-  const result = await fileService.importProject(filePath)
-  return result
-})
+  const result = await fileService.importProject(filePath);
+  return result;
+});
 
 ipcMain.handle('file:save', async (_, projectId, filePath?) => {
   if (!filePath) {
-    filePath = await fileService.showSaveDialog()
+    filePath = await fileService.showSaveDialog();
   }
-  if (!filePath) return null
+  if (!filePath) return null;
 
-  await fileService.exportProject(filePath, projectId)
-  return filePath
-})
+  await fileService.exportProject(filePath, projectId);
+  return filePath;
+});
 
 ipcMain.handle('file:new', async () => {
   // Confirm if current project has unsaved changes
-  const projectId = await fileService.createNewProject()
-  return projectId
-})
+  const projectId = await fileService.createNewProject();
+  return projectId;
+});
 ```
 
 ### 3. File State Management (Renderer)
+
 **Location:** `src/renderer/src/store/fileStore.ts`
 
 **State:**
+
 ```typescript
 interface FileStore {
-  currentFilePath: string | null
-  isDirty: boolean // Has unsaved changes
-  projectName: string
+  currentFilePath: string | null;
+  isDirty: boolean; // Has unsaved changes
+  projectName: string;
 
   // Actions
-  openFile: () => Promise<void>
-  saveFile: () => Promise<void>
-  saveFileAs: () => Promise<void>
-  newFile: () => Promise<void>
-  setDirty: (dirty: boolean) => void
-  setFilePath: (path: string | null) => void
+  openFile: () => Promise<void>;
+  saveFile: () => Promise<void>;
+  saveFileAs: () => Promise<void>;
+  newFile: () => Promise<void>;
+  setDirty: (dirty: boolean) => void;
+  setFilePath: (path: string | null) => void;
 }
 ```
 
 ### 4. UI Components
 
 #### File Menu (All Modules)
+
 **Location:** Add to each module's header
 
 ```tsx
@@ -142,9 +152,11 @@ interface FileStore {
 ```
 
 #### Unsaved Changes Dialog
+
 **Location:** `src/renderer/src/components/common/UnsavedChangesDialog.tsx`
 
 Shown when:
+
 - User tries to open a new file with unsaved changes
 - User tries to create a new project with unsaved changes
 - User tries to close the app with unsaved changes
@@ -152,6 +164,7 @@ Shown when:
 ## Implementation Steps
 
 ### Phase 1: Core Infrastructure (High Priority)
+
 1. **Create FileService** (Main Process)
    - Implement SQLite database export
    - Implement file dialogs (open/save)
@@ -171,10 +184,11 @@ Shown when:
    - Type definitions
 
 ### Phase 2: UI Integration
+
 5. **Create File Menu Component**
    - New/Open/Save/Save As buttons
    - Show current filename
-   - Visual indicator for unsaved changes (*)
+   - Visual indicator for unsaved changes (\*)
 
 6. **Integrate into Production Module**
    - Add File Menu to header
@@ -190,6 +204,7 @@ Shown when:
    - Prevent data loss
 
 ### Phase 3: Enhanced Features
+
 9. **Auto-Save**
    - Periodic auto-save (every 5 minutes)
    - Save to temporary location
@@ -207,6 +222,7 @@ Shown when:
 ## File Locations
 
 ### User Data Directory
+
 ```
 ~/Library/Application Support/ShowStack/  (macOS)
 %APPDATA%/ShowStack/                      (Windows)
@@ -214,6 +230,7 @@ Shown when:
 ```
 
 ### Files:
+
 ```
 showstack.db              - Current working database
 autosave.db               - Auto-save backup
@@ -224,6 +241,7 @@ preferences.json          - App preferences
 ## Dirty State Tracking
 
 ### When to Set Dirty = true:
+
 - Fixture added/modified/deleted
 - Column visibility/order changed
 - User column definitions changed
@@ -231,27 +249,30 @@ preferences.json          - App preferences
 - Bulk edit operations
 
 ### When to Set Dirty = false:
+
 - After successful save
 - After opening a file
 - After creating new file
 
 ### Implementation:
+
 ```typescript
 // In fixtureStore
 addFixture: async (fixture) => {
   // ... add fixture logic
-  useFileStore.getState().setDirty(true)
-}
+  useFileStore.getState().setDirty(true);
+};
 
 updateFixture: async (id, updates) => {
   // ... update logic
-  useFileStore.getState().setDirty(true)
-}
+  useFileStore.getState().setDirty(true);
+};
 ```
 
 ## Error Handling
 
 ### File Not Found
+
 ```
 "The file 'MyShow.showstack' could not be found.
 It may have been moved or deleted."
@@ -259,6 +280,7 @@ It may have been moved or deleted."
 ```
 
 ### Incompatible Version
+
 ```
 "This file was created with a newer version of ShowStack.
 Please update your application to open this file."
@@ -266,6 +288,7 @@ Please update your application to open this file."
 ```
 
 ### Corrupted File
+
 ```
 "The file appears to be corrupted and cannot be opened.
 Would you like to try recovering data?"
@@ -283,17 +306,20 @@ Would you like to try recovering data?"
 ## Testing Plan
 
 ### Unit Tests
+
 - FileService export/import
 - File validation
 - Version compatibility
 
 ### Integration Tests
+
 - Open file → Verify data loaded
 - Save file → Verify data persisted
 - Dirty state tracking
 - Unsaved changes prompt
 
 ### Manual Tests
+
 - Create project → Add fixtures → Save → Close → Reopen
 - Modify data → Don't save → Confirm data not persisted
 - Save As with different name
@@ -302,6 +328,7 @@ Would you like to try recovering data?"
 ## Migration Strategy
 
 ### Existing Users
+
 Since this is alpha, existing database files will need migration:
 
 1. On first launch after this update:
@@ -317,17 +344,20 @@ Since this is alpha, existing database files will need migration:
 ## Future Enhancements
 
 ### Export Formats
+
 - Export to CSV (fixture list)
 - Export to PDF (paperwork)
 - Export to LightWright format
 - Export to Vectorworks
 
 ### Cloud Sync
+
 - Auto-save to cloud storage
 - Multi-device sync
 - Collaboration features
 
 ### File Locking
+
 - Prevent multiple instances editing same file
 - Lock file mechanism
 - Conflict resolution
@@ -335,11 +365,13 @@ Since this is alpha, existing database files will need migration:
 ## Dependencies
 
 ### Electron Modules
+
 - `dialog` - For file dialogs
 - `app` - For user data path
 - `fs` - For file I/O
 
 ### Libraries
+
 - `sql.js` - Already in use, supports export/import
 - No additional dependencies needed!
 
@@ -355,6 +387,7 @@ Since this is alpha, existing database files will need migration:
 ## Priority Level
 
 **CRITICAL** - This is foundational infrastructure needed before:
+
 - Multi-project support
 - Sharing files between users
 - Version control/backup

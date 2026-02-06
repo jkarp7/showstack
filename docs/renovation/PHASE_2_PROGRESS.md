@@ -12,6 +12,7 @@
 Phase 2 is now 100% complete with all validation infrastructure, IPC integration, and service layer extraction finished. The project is ready to proceed with Phase 3 (PowerSync Integration).
 
 **Key Achievements:**
+
 - ✅ Logging abstraction implemented across database layer
 - ✅ Type safety improved in bulk operations
 - ✅ Error messages secured (no path leaking)
@@ -31,39 +32,47 @@ Phase 2 is now 100% complete with all validation infrastructure, IPC integration
 **Duration:** 1 week (Feb 4, 2026)
 
 #### 2.0.1 Logging Abstraction ✅
+
 - Created centralized logger utility with environment-aware levels
 - Replaced all console.log/error calls in database layer
 - Added structured logging with context objects
 - Split user-facing (info) from dev-only (debug) messages
 
 **Files Modified:**
+
 - Created: `apps/desktop/src/main/utils/logger.ts`
 - Updated: DatabaseManager, TransactionManager, DatabaseWriter, MigrationRunner
 - Updated: ErrorHandler (integrated logger)
 
 #### 2.0.2 Type Safety in bulkOperations ✅
+
 - Defined `SQLValue` type union for allowed SQL types
 - Updated all 4 bulk operation signatures to use `Array<Array<SQLValue>>`
 - All 25 bulk operation tests passing without modification
 
 **Files Modified:**
+
 - `apps/desktop/src/main/database/utils/bulkOperations.ts`
 
 #### 2.0.3 Improved Error Messages ✅
+
 - Moved system path logging from info → debug level
 - User-facing errors no longer leak internal paths
 - Development details still available via DEBUG_DATABASE flag
 
 **Files Modified:**
+
 - DatabaseManager, ErrorHandler
 - Updated test to check console.warn instead of console.error
 
 #### 2.0.4 Exponential Backoff with Jitter ✅
+
 - Implemented exponential backoff: `100ms * 2^(attempt-1)`
 - Added 0-10% jitter to prevent thundering herd
 - Both async and sync retry methods updated
 
 **Files Modified:**
+
 - `apps/desktop/src/main/errors/ErrorHandler.ts`
 - All 20 error handler tests passing
 
@@ -74,6 +83,7 @@ Phase 2 is now 100% complete with all validation infrastructure, IPC integration
 **Duration:** 1 day (Feb 4, 2026)
 
 **Structure Created:**
+
 ```
 showstack/
 ├── apps/
@@ -90,6 +100,7 @@ showstack/
 ```
 
 **Changes:**
+
 - Moved 338 files from `src/` → `apps/desktop/src/`
 - Created `packages/shared/` for validation schemas
 - Configured npm workspaces
@@ -108,6 +119,7 @@ showstack/
 #### 2.2.1 Core Validation Infrastructure ✅
 
 **Created Files:**
+
 - `packages/shared/src/validation/base.ts`
   - BaseEntitySchema (id, created_at, updated_at)
   - extendBaseEntity() helper
@@ -127,6 +139,7 @@ showstack/
 #### 2.2.2 Entity Schemas ✅
 
 **Created Schemas:**
+
 1. **FixtureSchema** (60+ fields)
    - Required: position, type
    - Validation: DMX (1-512), Universe (1-32768), wattage/amperage (non-negative)
@@ -172,12 +185,14 @@ showstack/
    - Element styling (typography, colors, borders, spacing)
 
 **All schemas include:**
+
 - Create/Update variants (omit id/timestamps appropriately)
 - TypeScript type inference
 - Comprehensive field validation
 - Clear error messages
 
 **Testing:**
+
 - 32 tests created
 - 100% test coverage on validation schemas
 - Tests verify: required fields, range validation, enum validation, email/IP format
@@ -188,6 +203,7 @@ showstack/
 #### 2.2.3 IPC Integration ✅
 
 **Integrated Validation in:**
+
 1. **fixtures.ts**
    - `fixtures:create` - CreateFixtureSchema validation
    - `fixtures:update` - UpdateFixtureSchema validation
@@ -213,6 +229,7 @@ showstack/
    - `pdRacks:update` - UpdatePDRackSchema
 
 **Integration Pattern:**
+
 ```typescript
 // Validate with Zod schema
 const validation = parseWithZod(CreateSchema, data);
@@ -222,7 +239,7 @@ if (!validation.success) {
   throw new ValidationError(
     `Invalid data:\n${errorMessage}`,
     validation.errors[0]?.field || 'unknown',
-    data
+    data,
   );
 }
 
@@ -231,6 +248,7 @@ return await service.create(validation.data);
 ```
 
 **Benefits:**
+
 - Runtime type safety at IPC boundary
 - Consistent validation across all handlers
 - Clear, formatted error messages
@@ -238,6 +256,7 @@ return await service.create(validation.data);
 - Type inference prevents mismatches
 
 **Build & Testing:**
+
 - ✅ Build succeeds with all validation integration
 - ✅ No breaking changes to IPC signatures
 - ✅ Error handling maintains user-friendly messages
@@ -256,6 +275,7 @@ return await service.create(validation.data);
 #### 2.3.1 Service Infrastructure ✅
 
 **Created Files:**
+
 - `apps/desktop/src/main/services/BaseService.ts` - Abstract base class with common functionality:
   - `executeWithRetry()` - Wraps errorHandler.executeWithRetry with performance monitoring
   - `validateRequired()` - Required field validation
@@ -267,6 +287,7 @@ return await service.create(validation.data);
 #### 2.3.2 Service Implementation ✅
 
 **Services Created:**
+
 1. **FixtureService** (`FixtureService.ts`)
    - CRUD operations: getAll, getById, create, update, delete, deleteMultiple
    - Business logic methods: calculateDMXFootprint(), calculatePowerTotal()
@@ -294,6 +315,7 @@ return await service.create(validation.data);
    - Helper methods: calculatePowerCapacity(), calculateAvailableCircuits()
 
 **All services:**
+
 - Extend BaseService for common functionality
 - Use executeWithRetry for database operations
 - Integrate with performance monitoring
@@ -302,6 +324,7 @@ return await service.create(validation.data);
 #### 2.3.3 IPC Handler Refactoring ✅
 
 **Refactored Files:**
+
 1. **fixtures.ts** - Now uses fixtureService
    - Thin wrapper pattern: validation → service → error handling
    - All CRUD operations delegated to service
@@ -323,12 +346,13 @@ return await service.create(validation.data);
    - Consistent error handling pattern
 
 **Refactoring Pattern:**
+
 ```typescript
 // Before
 import { getAllFixtures, createFixture } from '../database/queries/fixtures';
 return await errorHandler.executeWithRetry(
   async () => getAllFixtures(projectId),
-  'fixtures:getAll'
+  'fixtures:getAll',
 );
 
 // After
@@ -337,12 +361,14 @@ return await fixtureService.getAll(projectId);
 ```
 
 #### 2.3.4 Build & Testing ✅
+
 - ✅ Build succeeds without errors
 - ✅ All TypeScript types resolve correctly
 - ✅ No breaking changes to IPC signatures
-- ✅ Confirmed no functional regressions (pre-existing __dirname error unrelated to Phase 2.3)
+- ✅ Confirmed no functional regressions (pre-existing \_\_dirname error unrelated to Phase 2.3)
 
 **Code Metrics:**
+
 - Files created: 6 service files
 - Files modified: 5 IPC handler files
 - Lines added: 903 lines
@@ -354,6 +380,7 @@ return await fixtureService.getAll(projectId);
 The service layer provides clean abstraction between IPC handlers and database queries, preparing the codebase for PowerSync integration in Phase 3. Services centralize business logic, provide consistent error handling, and enable easier testing.
 
 **Key Benefits:**
+
 1. **Clean PowerSync Integration Points** - Services provide single locations to integrate PowerSync SDK
 2. **Centralized Business Logic** - All validation and calculations in one place per entity
 3. **Reduced Code Duplication** - BaseService handles common operations
@@ -365,6 +392,7 @@ The service layer provides clean abstraction between IPC handlers and database q
 ### Why Service Layer is Critical
 
 The service layer must be completed before Phase 3 (PowerSync integration) because:
+
 1. Services provide clean abstraction layer for PowerSync
 2. Without services, PowerSync integrates with 20+ IPC handlers (complex)
 3. Services handle business logic that PowerSync shouldn't manage
@@ -374,13 +402,16 @@ The service layer must be completed before Phase 3 (PowerSync integration) becau
 ### Service Layer Plan
 
 #### 2.3.1 Service Infrastructure
+
 - Create `apps/desktop/src/main/services/` directory
 - Create BaseService class with common utilities
 - Set up dependency injection pattern
 - Create service error handling
 
 #### 2.3.2 Service Implementation
+
 Services to create:
+
 - FixtureService (CRUD, DMX calculations, power totals)
 - ProjectService (CRUD, metadata management)
 - ShopOrderService (creation, sections, items, revisions) - **PARTIALLY EXISTS**
@@ -393,11 +424,13 @@ Services to create:
 **Note:** ShopOrderProjectService, ShopOrderSectionService, etc. already exist and can serve as templates.
 
 #### 2.3.3 IPC Handler Refactoring
+
 - Refactor all IPC handlers to thin wrappers (<20 lines)
 - Remove business logic from handlers
 - Keep only: validation → service call → error handling
 
 #### 2.3.4 Service Testing
+
 - Test each service with 80%+ coverage
 - Test error handling and transaction rollback
 - Test business logic independently of IPC layer
@@ -409,12 +442,14 @@ Services to create:
 **IMPORTANT:** Accounts are created and configured, ready for integration.
 
 ### Prerequisites (from Phase 2)
+
 - ✅ Service layer extraction complete (Phase 2.3) - **REQUIRED BEFORE PHASE 3**
 - ✅ Zod validation schemas complete (Phase 2.2)
 - ✅ Monorepo setup complete (Phase 2.1)
 - ✅ Database schema validated and tested
 
 ### What's Ready Now
+
 - ✅ Supabase account created with production-grade configuration
 - ✅ PowerSync account created and ready for service setup
 - ✅ Database schema matches PowerSync requirements
@@ -425,12 +460,14 @@ Services to create:
 ### Phase 3 Integration Plan (After Phase 2.3)
 
 **Phase 3.1: Supabase Setup (1 week)**
+
 - Deploy ShowStack schema to Supabase
 - Configure Row-Level Security (RLS) policies
 - Set up environment variables
 - Test connection from desktop app
 
 **Phase 3.2: PowerSync Integration (3-4 weeks)**
+
 - Install PowerSync SDK
 - Create PowerSync configuration
 - Define PowerSync schema (match Supabase tables)
@@ -439,12 +476,14 @@ Services to create:
 - Test offline mode and conflict resolution
 
 **Phase 3.3: Supabase Auth (1-2 weeks)**
+
 - Implement email/password auth
 - Build Login/SignUp UI
 - Add session persistence
 - Test full auth flow
 
 **Phase 3.4: Collaboration UI (1 week)**
+
 - Build presence indicators
 - Build sync status component
 - Build conflict resolution dialog
@@ -453,12 +492,14 @@ Services to create:
 ### Why Service Layer is Required First
 
 **Without services:**
+
 - PowerSync must integrate with 20+ IPC handlers
 - Business logic scattered across handlers
 - Conflict resolution complex and error-prone
 - Testing becomes difficult
 
 **With services:**
+
 - PowerSync integrates with 8 service classes
 - Business logic centralized and testable
 - Conflict resolution handled in services
@@ -469,7 +510,9 @@ Services to create:
 ## Metrics & Statistics
 
 ### Code Changes
+
 **Phase 2.0-2.3 Combined:**
+
 - Files changed: 34 files total
   - Phase 2.0-2.2: 23 files
   - Phase 2.3: 11 files (6 created, 5 modified)
@@ -483,22 +526,27 @@ Services to create:
 - Build time: <2 seconds
 
 ### Test Coverage
+
 **Validation Schemas:**
+
 - 32/32 tests passing (100%)
 - 7 entity schemas covered
 - All validation rules tested
 - Edge cases tested
 
 **Database Layer:**
+
 - 736/806 tests passing (91%)
 - 70 pre-existing failures (unrelated to Phase 2 work)
 
 **Service Layer:**
+
 - Services tested via IPC integration
 - Build succeeds without errors
 - No functional regressions
 
 ### Performance
+
 - Build time: <2s
 - Test suite: <1s
 - No performance regressions
@@ -509,7 +557,9 @@ Services to create:
 ## Key Decisions & Trade-offs
 
 ### Decision: Use Zod over other validation libraries
+
 **Rationale:**
+
 - TypeScript-first design
 - Excellent type inference
 - Schema composition
@@ -517,21 +567,27 @@ Services to create:
 - Great error messages
 
 ### Decision: Integrate validation at IPC boundary
+
 **Rationale:**
+
 - Validates all external input
 - Single point of validation
 - Doesn't slow down internal service calls
 - Clear error messages to renderer
 
 ### Decision: Wait for Phase 2.3 before PowerSync
+
 **Rationale:**
+
 - Service layer required for clean integration
 - Services enable proper conflict resolution
 - Without services, PowerSync integration 3x more complex
 - Better testing with services
 
 ### Decision: Monorepo structure now, not later
+
 **Rationale:**
+
 - Enable code sharing early
 - Prepare for future mobile app
 - Validation schemas reusable
@@ -542,17 +598,20 @@ Services to create:
 ## Lessons Learned
 
 ### What Went Well
+
 1. **Zod integration smooth** - TypeScript inference worked perfectly
 2. **Monorepo setup straightforward** - npm workspaces simple and effective
 3. **Test-driven validation** - Writing tests first ensured complete coverage
 4. **Build system stable** - electron-vite handled monorepo well
 
 ### What Was Challenging
+
 1. **IP validation** - Zod doesn't have built-in IP validator, used regex
 2. **Workspace dependencies** - Needed to add explicit workspace link
 3. **Type inference** - Some complex union types needed careful schema design
 
 ### What We'd Do Differently
+
 1. **Start with service layer** - Could have done Phase 2.3 before Phase 2.2
 2. **More incremental commits** - Some commits were large (338 files)
 
@@ -561,9 +620,11 @@ Services to create:
 ## Next Steps
 
 ### Immediate (Phase 3 - PowerSync Integration)
+
 **Prerequisites:** ✅ All Phase 2 work complete
 
 ### Phase 3 - PowerSync Integration
+
 1. Deploy schema to Supabase
 2. Configure RLS policies
 3. Install PowerSync SDK
@@ -576,12 +637,14 @@ Services to create:
 ## Resources
 
 ### Documentation
+
 - [Phase-2-Validation-Services.md](./Phase-2-Validation-Services.md) - Full Phase 2 plan
 - [Phase-3-Cloud-Collaboration.md](./Phase-3-Cloud-Collaboration.md) - PowerSync integration plan
 - [Zod Documentation](https://zod.dev) - Validation library docs
 - [PowerSync Documentation](https://docs.powersync.com) - Sync platform docs
 
 ### Commits
+
 - `69b5f61` - Phase 0.4 complete (monitoring infrastructure)
 - `56190fa` - Phase 0 documentation updates
 - `f982318` - Shop-order service layer extraction
@@ -603,12 +666,14 @@ Services to create:
 **Total Duration:** 2 days (Feb 4-5, 2026)
 
 **Completed Phases:**
+
 - ✅ Phase 2.0: Code Quality Improvements (Feb 4)
 - ✅ Phase 2.1: Monorepo Setup (Feb 4)
 - ✅ Phase 2.2: Zod Validation (Feb 4)
 - ✅ Phase 2.3: Service Layer Extraction (Feb 5)
 
 **Deliverables:**
+
 1. Centralized logging with environment-aware levels
 2. Type-safe bulk operations
 3. Secure error messages (no path leaking)
@@ -621,6 +686,7 @@ Services to create:
 10. BaseService infrastructure for common functionality
 
 **Code Impact:**
+
 - 34 files modified
 - 3,328 lines added
 - 199 lines removed
@@ -629,6 +695,7 @@ Services to create:
 - Zero performance regressions
 
 **Ready For:**
+
 - ✅ Phase 3.1: Supabase deployment
 - ✅ Phase 3.2: PowerSync SDK integration
 - ✅ Phase 3.3: Authentication implementation

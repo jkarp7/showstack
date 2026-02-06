@@ -12,7 +12,10 @@ import { extendBaseEntity, OptionalIDSchema, OptionalTimestampSchema } from '../
 /**
  * Color flag options for fixtures
  */
-export const ColorFlagSchema = z.enum(['hot', 'spare', 'special', 'dimmer_doubles', 'two_fer']).nullable().optional();
+export const ColorFlagSchema = z
+  .enum(['hot', 'spare', 'special', 'dimmer_doubles', 'two_fer'])
+  .nullable()
+  .optional();
 
 /**
  * Fixture validation schema
@@ -112,7 +115,7 @@ export const FixtureSchema = extendBaseEntity({
   changed_who: z.string().optional(),
 
   // Computed/Virtual fields
-  address: z.string().optional()
+  address: z.string().optional(),
 });
 
 /**
@@ -126,7 +129,7 @@ export type Fixture = z.infer<typeof FixtureSchema>;
 export const CreateFixtureSchema = FixtureSchema.omit({
   id: true,
   created_at: true,
-  updated_at: true
+  updated_at: true,
 });
 
 /**

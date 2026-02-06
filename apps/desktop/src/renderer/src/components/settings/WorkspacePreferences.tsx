@@ -14,8 +14,12 @@ export function WorkspacePreferences() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Workspace Preferences</h2>
-        <p className="text-gray-600 dark:text-gray-400">Customize your workspace layout and default views</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          Workspace Preferences
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400">
+          Customize your workspace layout and default views
+        </p>
       </div>
 
       <div className="bg-white dark:bg-gray-800 border border-gray-200 rounded-lg p-6">
@@ -38,7 +42,9 @@ export function WorkspacePreferences() {
             <option value="designer">Layout Designer</option>
             <option value="last">Last Opened Project</option>
           </select>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Which view opens when you start the application</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Which view opens when you start the application
+          </p>
         </div>
       </div>
 
@@ -52,10 +58,17 @@ export function WorkspacePreferences() {
           <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
             <div>
               <div className="font-medium text-gray-900 dark:text-white">Show Grid</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Display grid lines in designer</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Display grid lines in designer
+              </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" checked={workspace.gridDisplay} onChange={(e) => updateWorkspace({ gridDisplay: e.target.checked })} className="sr-only peer" />
+              <input
+                type="checkbox"
+                checked={workspace.gridDisplay}
+                onChange={(e) => updateWorkspace({ gridDisplay: e.target.checked })}
+                className="sr-only peer"
+              />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-gray-800 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
           </div>
@@ -63,10 +76,17 @@ export function WorkspacePreferences() {
           <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
             <div>
               <div className="font-medium text-gray-900 dark:text-white">Snap to Grid</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Automatically align elements to grid</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Automatically align elements to grid
+              </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" checked={workspace.snapToGrid} onChange={(e) => updateWorkspace({ snapToGrid: e.target.checked })} className="sr-only peer" />
+              <input
+                type="checkbox"
+                checked={workspace.snapToGrid}
+                onChange={(e) => updateWorkspace({ snapToGrid: e.target.checked })}
+                className="sr-only peer"
+              />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-gray-800 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
           </div>
@@ -108,8 +128,16 @@ export function WorkspacePreferences() {
                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
           >
-            <div className={`font-medium mb-1 ${workspace.units === 'imperial' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}>Imperial</div>
-            <div className={`text-sm ${workspace.units === 'imperial' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}>Feet, inches (ft, in)</div>
+            <div
+              className={`font-medium mb-1 ${workspace.units === 'imperial' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}
+            >
+              Imperial
+            </div>
+            <div
+              className={`text-sm ${workspace.units === 'imperial' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}
+            >
+              Feet, inches (ft, in)
+            </div>
           </button>
 
           <button
@@ -120,14 +148,25 @@ export function WorkspacePreferences() {
                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
             }`}
           >
-            <div className={`font-medium mb-1 ${workspace.units === 'metric' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}>Metric</div>
-            <div className={`text-sm ${workspace.units === 'metric' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}>Meters, centimeters (m, cm)</div>
+            <div
+              className={`font-medium mb-1 ${workspace.units === 'metric' ? 'text-blue-900 dark:text-white' : 'text-gray-900 dark:text-white'}`}
+            >
+              Metric
+            </div>
+            <div
+              className={`text-sm ${workspace.units === 'metric' ? 'text-blue-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}
+            >
+              Meters, centimeters (m, cm)
+            </div>
           </button>
         </div>
       </div>
 
       <div className="flex justify-end">
-        <button onClick={handleSave} className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium">
+        <button
+          onClick={handleSave}
+          className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium"
+        >
           <Save className="w-4 h-4" />
           <span>Save Preferences</span>
         </button>

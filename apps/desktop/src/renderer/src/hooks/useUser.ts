@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
-import type { UserLicense, LicenseValidation, ShowStackModule } from '../../../shared/types/license.types';
+import type {
+  UserLicense,
+  LicenseValidation,
+  ShowStackModule,
+} from '../../../shared/types/license.types';
 
 /**
  * Hook for accessing user license information and status
@@ -57,11 +61,7 @@ export function useUser() {
     }
   }
 
-  async function activateLicense(
-    licenseKey: string,
-    email: string,
-    modules: ShowStackModule[]
-  ) {
+  async function activateLicense(licenseKey: string, email: string, modules: ShowStackModule[]) {
     try {
       const data = await window.api.license.activate(licenseKey, email, modules);
       setLicense(data);
@@ -82,6 +82,6 @@ export function useUser() {
     status,
     loading,
     activateLicense,
-    refreshStatus
+    refreshStatus,
   };
 }

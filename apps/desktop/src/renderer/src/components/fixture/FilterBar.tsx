@@ -31,7 +31,12 @@ export function FilterBar({
   availableTypes,
   availableStatuses,
 }: FilterBarProps) {
-  const hasActiveFilters = searchQuery || locationFilter !== 'all' || typeFilter !== 'all' || statusFilter !== 'all' || showHidden;
+  const hasActiveFilters =
+    searchQuery ||
+    locationFilter !== 'all' ||
+    typeFilter !== 'all' ||
+    statusFilter !== 'all' ||
+    showHidden;
 
   return (
     <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center gap-2">

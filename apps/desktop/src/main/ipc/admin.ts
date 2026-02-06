@@ -37,25 +37,22 @@ export function registerAdminHandlers(): void {
         throw new ValidationError('Password is required', 'password', password);
       }
 
-      return await errorHandler.executeWithRetry(
-        async () => {
-          const storedHash = await getSetting('admin_password_hash');
+      return await errorHandler.executeWithRetry(async () => {
+        const storedHash = await getSetting('admin_password_hash');
 
-          // If no password is set, allow access (first time setup)
-          if (!storedHash) {
-            return { success: true, firstTime: true };
-          }
+        // If no password is set, allow access (first time setup)
+        if (!storedHash) {
+          return { success: true, firstTime: true };
+        }
 
-          // Verify password
-          const isValid = await bcrypt.compare(password, storedHash);
-          return { success: isValid, firstTime: false };
-        },
-        'admin:verifyPassword'
-      );
+        // Verify password
+        const isValid = await bcrypt.compare(password, storedHash);
+        return { success: isValid, firstTime: false };
+      }, 'admin:verifyPassword');
     } catch (error) {
       console.error('Failed to verify admin password:', {
         operation: 'admin:verifyPassword',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof ValidationError) {
@@ -78,22 +75,19 @@ export function registerAdminHandlers(): void {
         throw new ValidationError('Password must be at least 4 characters', 'password', password);
       }
 
-      return await errorHandler.executeWithRetry(
-        async () => {
-          // Hash the password
-          const hash = await bcrypt.hash(password, SALT_ROUNDS);
+      return await errorHandler.executeWithRetry(async () => {
+        // Hash the password
+        const hash = await bcrypt.hash(password, SALT_ROUNDS);
 
-          // Store the hash
-          await setSetting('admin_password_hash', hash);
+        // Store the hash
+        await setSetting('admin_password_hash', hash);
 
-          return { success: true };
-        },
-        'admin:setPassword'
-      );
+        return { success: true };
+      }, 'admin:setPassword');
     } catch (error) {
       console.error('Failed to set admin password:', {
         operation: 'admin:setPassword',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof ValidationError) {
@@ -111,17 +105,14 @@ export function registerAdminHandlers(): void {
    */
   ipcMain.handle('admin:hasPassword', async () => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => {
-          const storedHash = await getSetting('admin_password_hash');
-          return { hasPassword: !!storedHash };
-        },
-        'admin:hasPassword'
-      );
+      return await errorHandler.executeWithRetry(async () => {
+        const storedHash = await getSetting('admin_password_hash');
+        return { hasPassword: !!storedHash };
+      }, 'admin:hasPassword');
     } catch (error) {
       console.error('Failed to check admin password:', {
         operation: 'admin:hasPassword',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -147,7 +138,7 @@ export function registerAdminHandlers(): void {
 
       // Get template and elements
       const templates = getAllLayoutTemplates();
-      const template = templates.find(t => t.id === templateId);
+      const template = templates.find((t) => t.id === templateId);
 
       if (!template) {
         throw new Error(`Template not found: ${templateId}`);
@@ -156,7 +147,7 @@ export function registerAdminHandlers(): void {
       const elements = getLayoutElementsByTemplateId(templateId);
 
       // Parse JSON strings in elements
-      const parsedElements = elements.map(el => ({
+      const parsedElements = elements.map((el) => ({
         ...el,
         config: typeof el.config === 'string' ? JSON.parse(el.config) : el.config,
         style: typeof el.style === 'string' ? JSON.parse(el.style) : el.style,
@@ -175,7 +166,7 @@ export function registerAdminHandlers(): void {
           page_height: template.page_height,
           is_default: template.is_default,
         },
-        elements: parsedElements.map(el => ({
+        elements: parsedElements.map((el) => ({
           element_type: el.element_type,
           config: el.config,
           grid_column: el.grid_column,
@@ -235,7 +226,7 @@ export function registerAdminHandlers(): void {
 
       // Get all default templates
       const templates = getAllLayoutTemplates();
-      const defaultTemplates = templates.filter(t => t.is_default);
+      const defaultTemplates = templates.filter((t) => t.is_default);
 
       let exportedCount = 0;
 
@@ -243,7 +234,7 @@ export function registerAdminHandlers(): void {
         const elements = getLayoutElementsByTemplateId(template.id);
 
         // Parse JSON strings in elements
-        const parsedElements = elements.map(el => ({
+        const parsedElements = elements.map((el) => ({
           ...el,
           config: typeof el.config === 'string' ? JSON.parse(el.config) : el.config,
           style: typeof el.style === 'string' ? JSON.parse(el.style) : el.style,
@@ -262,7 +253,7 @@ export function registerAdminHandlers(): void {
             page_height: template.page_height,
             is_default: template.is_default,
           },
-          elements: parsedElements.map(el => ({
+          elements: parsedElements.map((el) => ({
             element_type: el.element_type,
             config: el.config,
             grid_column: el.grid_column,
@@ -333,7 +324,9 @@ export function registerAdminHandlers(): void {
 
           // Validate structure
           if (!data.template || !data.elements) {
-            errors.push(`${path.basename(filePath)}: Invalid structure (missing template or elements)`);
+            errors.push(
+              `${path.basename(filePath)}: Invalid structure (missing template or elements)`,
+            );
             continue;
           }
 
@@ -364,7 +357,9 @@ export function registerAdminHandlers(): void {
           createLayoutTemplate(templateData, elementsData);
           importedCount++;
         } catch (err) {
-          errors.push(`${path.basename(filePath)}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+          errors.push(
+            `${path.basename(filePath)}: ${err instanceof Error ? err.message : 'Unknown error'}`,
+          );
         }
       }
 
@@ -384,33 +379,32 @@ export function registerAdminHandlers(): void {
    */
   ipcMain.handle('admin:resetLayoutsToFactory', async () => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => {
-          // Delete all existing default layouts
-          const templates = getAllLayoutTemplates();
-          const defaultTemplates = templates.filter(t => t.is_default);
+      return await errorHandler.executeWithRetry(async () => {
+        // Delete all existing default layouts
+        const templates = getAllLayoutTemplates();
+        const defaultTemplates = templates.filter((t) => t.is_default);
 
-          for (const template of defaultTemplates) {
-            deleteLayoutTemplate(template.id);
-          }
+        for (const template of defaultTemplates) {
+          deleteLayoutTemplate(template.id);
+        }
 
-          // Re-seed default layouts
-          seedDefaultPageLayouts();
+        // Re-seed default layouts
+        seedDefaultPageLayouts();
 
-          return { success: true };
-        },
-        'admin:resetLayoutsToFactory'
-      );
+        return { success: true };
+      }, 'admin:resetLayoutsToFactory');
     } catch (error) {
       console.error('Failed to reset layouts to factory:', {
         operation: 'admin:resetLayoutsToFactory',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
         throw new Error(`Unable to reset layouts: ${error.message}`);
       }
-      throw new Error(`Unable to reset layouts: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to reset layouts: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
@@ -428,7 +422,7 @@ export function registerAdminHandlers(): void {
       }
 
       const files = await fs.readdir(DEFAULT_LAYOUTS_DIR);
-      const jsonFiles = files.filter(f => f.endsWith('.json'));
+      const jsonFiles = files.filter((f) => f.endsWith('.json'));
 
       return {
         success: true,

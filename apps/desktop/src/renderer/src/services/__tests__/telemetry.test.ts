@@ -55,13 +55,16 @@ describe('TelemetryService', () => {
       // Create new instance
       const service = new (telemetry.constructor as any)();
 
-      expect(posthog.init).toHaveBeenCalledWith('test-api-key', expect.objectContaining({
-        api_host: 'https://us.i.posthog.com',
-        autocapture: false,
-        capture_pageview: false,
-        capture_pageleave: false,
-        persistence: 'localStorage',
-      }));
+      expect(posthog.init).toHaveBeenCalledWith(
+        'test-api-key',
+        expect.objectContaining({
+          api_host: 'https://us.i.posthog.com',
+          autocapture: false,
+          capture_pageview: false,
+          capture_pageleave: false,
+          persistence: 'localStorage',
+        }),
+      );
 
       // Cleanup
       import.meta.env.VITE_POSTHOG_KEY = undefined;
@@ -179,12 +182,15 @@ describe('TelemetryService', () => {
       const error = new Error('Test error');
       await telemetry.trackError(error);
 
-      expect(posthog.capture).toHaveBeenCalledWith('$exception', expect.objectContaining({
-        $exception_message: 'Test error',
-        $exception_type: 'Error',
-        // Stack trace is sanitized, so just verify it's defined
-        $exception_stack_trace_raw: expect.any(String),
-      }));
+      expect(posthog.capture).toHaveBeenCalledWith(
+        '$exception',
+        expect.objectContaining({
+          $exception_message: 'Test error',
+          $exception_type: 'Error',
+          // Stack trace is sanitized, so just verify it's defined
+          $exception_stack_trace_raw: expect.any(String),
+        }),
+      );
 
       // Verify stack trace was sanitized (should not contain full absolute paths)
       const captureCall = vi.mocked(posthog.capture).mock.calls[0][1];
@@ -413,7 +419,7 @@ describe('TelemetryService', () => {
 
   describe('Data Retention', () => {
     it('should clean up old synced events after retention period', async () => {
-      const oldTimestamp = Date.now() - (91 * 24 * 60 * 60 * 1000); // 91 days ago
+      const oldTimestamp = Date.now() - 91 * 24 * 60 * 60 * 1000; // 91 days ago
 
       // Add old synced event
       (telemetry as any).localEvents.push({
@@ -444,7 +450,7 @@ describe('TelemetryService', () => {
     });
 
     it('should keep unsynced events regardless of age', async () => {
-      const oldTimestamp = Date.now() - (91 * 24 * 60 * 60 * 1000); // 91 days ago
+      const oldTimestamp = Date.now() - 91 * 24 * 60 * 60 * 1000; // 91 days ago
 
       (telemetry as any).localEvents.push({
         id: 'old-unsynced',

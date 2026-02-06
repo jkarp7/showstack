@@ -7,7 +7,7 @@ import {
   CreateFixtureSchema,
   UpdateFixtureSchema,
   parseWithZod,
-  formatValidationErrors
+  formatValidationErrors,
 } from '@showstack/shared';
 
 export function registerFixtureHandlers(): void {
@@ -19,7 +19,7 @@ export function registerFixtureHandlers(): void {
       console.error('Failed to get fixtures:', {
         operation: 'fixtures:getAll',
         projectId,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -30,37 +30,40 @@ export function registerFixtureHandlers(): void {
   });
 
   // Create fixture
-  ipcMain.handle('fixtures:create', async (_event, fixture: Partial<Fixture>, projectId?: string) => {
-    try {
-      // Validate with Zod schema
-      const validation = parseWithZod(CreateFixtureSchema, fixture);
+  ipcMain.handle(
+    'fixtures:create',
+    async (_event, fixture: Partial<Fixture>, projectId?: string) => {
+      try {
+        // Validate with Zod schema
+        const validation = parseWithZod(CreateFixtureSchema, fixture);
 
-      if (!validation.success) {
-        const errorMessage = formatValidationErrors(validation.errors);
-        throw new ValidationError(
-          `Invalid fixture data:\n${errorMessage}`,
-          validation.errors[0]?.field || 'unknown',
-          fixture
-        );
-      }
+        if (!validation.success) {
+          const errorMessage = formatValidationErrors(validation.errors);
+          throw new ValidationError(
+            `Invalid fixture data:\n${errorMessage}`,
+            validation.errors[0]?.field || 'unknown',
+            fixture,
+          );
+        }
 
-      return await fixtureService.create(validation.data, projectId);
-    } catch (error) {
-      console.error('Failed to create fixture:', {
-        operation: 'fixtures:create',
-        fixture,
-        error: error instanceof Error ? error.message : error
-      });
+        return await fixtureService.create(validation.data, projectId);
+      } catch (error) {
+        console.error('Failed to create fixture:', {
+          operation: 'fixtures:create',
+          fixture,
+          error: error instanceof Error ? error.message : error,
+        });
 
-      if (error instanceof ValidationError) {
-        throw new Error(error.toUserMessage());
+        if (error instanceof ValidationError) {
+          throw new Error(error.toUserMessage());
+        }
+        if (error instanceof DatabaseError) {
+          throw new Error(`Unable to create fixture: ${error.message}`);
+        }
+        throw error;
       }
-      if (error instanceof DatabaseError) {
-        throw new Error(`Unable to create fixture: ${error.message}`);
-      }
-      throw error;
-    }
-  });
+    },
+  );
 
   // Update fixture
   ipcMain.handle('fixtures:update', async (_event, id: string, updates: Partial<Fixture>) => {
@@ -73,7 +76,7 @@ export function registerFixtureHandlers(): void {
         throw new ValidationError(
           `Invalid fixture update data:\n${errorMessage}`,
           validation.errors[0]?.field || 'unknown',
-          updates
+          updates,
         );
       }
 
@@ -83,7 +86,7 @@ export function registerFixtureHandlers(): void {
         operation: 'fixtures:update',
         id,
         updates,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof ValidationError) {
@@ -104,7 +107,7 @@ export function registerFixtureHandlers(): void {
       console.error('Failed to delete fixture:', {
         operation: 'fixtures:delete',
         id,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -122,7 +125,7 @@ export function registerFixtureHandlers(): void {
       console.error('Failed to delete multiple fixtures:', {
         operation: 'fixtures:deleteMultiple',
         count: ids.length,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {

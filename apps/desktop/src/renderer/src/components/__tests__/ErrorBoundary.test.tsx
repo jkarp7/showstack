@@ -38,7 +38,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <div>Test content</div>
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText('Test content')).toBeInTheDocument();
@@ -49,7 +49,7 @@ describe('ErrorBoundary', () => {
         <ErrorBoundary>
           <div>Child 1</div>
           <div>Child 2</div>
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText('Child 1')).toBeInTheDocument();
@@ -62,7 +62,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText('Something went wrong')).toBeInTheDocument();
@@ -73,7 +73,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       const details = screen.getByText('Error details');
@@ -84,7 +84,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(telemetry.trackError).toHaveBeenCalledWith(
@@ -92,7 +92,7 @@ describe('ErrorBoundary', () => {
         expect.objectContaining({
           errorBoundary: true,
           componentStack: expect.any(String),
-        })
+        }),
       );
 
       const calls = vi.mocked(telemetry.trackError).mock.calls;
@@ -106,7 +106,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       // SVG path for alert icon should be present
@@ -118,10 +118,12 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
-      expect(screen.getByText(/The application encountered an unexpected error/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/The application encountered an unexpected error/),
+      ).toBeInTheDocument();
       expect(screen.getByText(/This has been reported automatically/)).toBeInTheDocument();
     });
 
@@ -129,7 +131,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText('Try Again')).toBeInTheDocument();
@@ -139,7 +141,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText('Reload App')).toBeInTheDocument();
@@ -149,7 +151,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText(/If this problem persists/)).toBeInTheDocument();
@@ -163,7 +165,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText('Something went wrong')).toBeInTheDocument();
@@ -189,7 +191,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       const reloadButton = screen.getByText('Reload App');
@@ -209,7 +211,7 @@ describe('ErrorBoundary', () => {
       const { container } = render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       // Error details section should contain error message
@@ -222,7 +224,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       const detailsElement = screen.getByText('Error details');
@@ -245,7 +247,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowErrorNoStack />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText('Something went wrong')).toBeInTheDocument();
@@ -260,7 +262,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowLongError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText('Something went wrong')).toBeInTheDocument();
@@ -271,7 +273,7 @@ describe('ErrorBoundary', () => {
       const { unmount } = render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText('Something went wrong')).toBeInTheDocument();
@@ -284,7 +286,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText('Something went wrong')).toBeInTheDocument();
@@ -305,7 +307,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <NestedComponent />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText('Something went wrong')).toBeInTheDocument();
@@ -318,7 +320,7 @@ describe('ErrorBoundary', () => {
       const { container } = render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       // Check for main container classes
@@ -330,7 +332,7 @@ describe('ErrorBoundary', () => {
       const { container } = render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       // Check for dark mode classes

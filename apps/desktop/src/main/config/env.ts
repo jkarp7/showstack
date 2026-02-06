@@ -123,9 +123,7 @@ function parseConfig(): Config {
 /**
  * Parse NODE_ENV with fallback to 'development'
  */
-function parseNodeEnv(
-  value: string | undefined
-): 'development' | 'staging' | 'production' {
+function parseNodeEnv(value: string | undefined): 'development' | 'staging' | 'production' {
   if (value === 'production' || value === 'staging') {
     return value;
   }
@@ -168,7 +166,7 @@ export function requireCloudConfig(): void {
     throw new Error(
       `Missing required environment variables: ${missing.join(', ')}\n` +
         'Please copy .env.example to .env and fill in your credentials.\n' +
-        'See SUPABASE_SETUP_GUIDE.md for setup instructions.'
+        'See SUPABASE_SETUP_GUIDE.md for setup instructions.',
     );
   }
 }

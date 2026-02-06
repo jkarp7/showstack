@@ -9,12 +9,12 @@ export default defineConfig({
     build: {
       lib: {
         entry: resolve(__dirname, 'apps/desktop/src/main/index.ts'),
-        formats: ['cjs']
+        formats: ['cjs'],
       },
       rollupOptions: {
         external: ['sql.js', 'puppeteer', 'better-sqlite3'],
         output: {
-          entryFileNames: '[name].cjs'
+          entryFileNames: '[name].cjs',
         },
         plugins: [
           {
@@ -28,40 +28,40 @@ export default defineConfig({
                 mkdirSync(destDir, { recursive: true });
               }
 
-              const files = readdirSync(srcDir).filter(f => f.endsWith('.json'));
-              files.forEach(file => {
+              const files = readdirSync(srcDir).filter((f) => f.endsWith('.json'));
+              files.forEach((file) => {
                 copyFileSync(join(srcDir, file), join(destDir, file));
               });
 
               console.log(`✓ Copied ${files.length} layout files to build output`);
-            }
-          }
-        ]
-      }
-    }
+            },
+          },
+        ],
+      },
+    },
   },
   preload: {
     build: {
       lib: {
-        entry: resolve(__dirname, 'apps/desktop/src/preload/index.ts')
+        entry: resolve(__dirname, 'apps/desktop/src/preload/index.ts'),
       },
       rollupOptions: {
-        external: ['electron']
-      }
-    }
+        external: ['electron'],
+      },
+    },
   },
   renderer: {
     root: resolve(__dirname, 'apps/desktop/src/renderer'),
     build: {
       rollupOptions: {
-        input: resolve(__dirname, 'apps/desktop/src/renderer/index.html')
-      }
+        input: resolve(__dirname, 'apps/desktop/src/renderer/index.html'),
+      },
     },
     resolve: {
       alias: {
-        '@': resolve('apps/desktop/src/renderer/src')
-      }
+        '@': resolve('apps/desktop/src/renderer/src'),
+      },
     },
-    plugins: [react()]
-  }
+    plugins: [react()],
+  },
 });

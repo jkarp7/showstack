@@ -10,7 +10,7 @@ vi.mock('../../database/queries/infrastructure', () => ({
   getAllInfrastructure: vi.fn(),
   createInfrastructure: vi.fn(),
   updateInfrastructure: vi.fn(),
-  deleteInfrastructure: vi.fn()
+  deleteInfrastructure: vi.fn(),
 }));
 
 vi.mock('../../errors', async () => {
@@ -18,21 +18,21 @@ vi.mock('../../errors', async () => {
   return {
     ...actual,
     errorHandler: {
-      executeWithRetry: vi.fn((fn) => fn())
-    }
+      executeWithRetry: vi.fn((fn) => fn()),
+    },
   };
 });
 
 vi.mock('../../monitoring/PerformanceMonitor', () => ({
   performanceMonitor: {
-    trackDatabaseQuery: vi.fn()
-  }
+    trackDatabaseQuery: vi.fn(),
+  },
 }));
 
 vi.mock('../../database/monitoring/DatabaseMonitor', () => ({
   databaseMonitor: {
-    recordQuery: vi.fn()
-  }
+    recordQuery: vi.fn(),
+  },
 }));
 
 // Import after mocking
@@ -41,7 +41,7 @@ import {
   getAllInfrastructure,
   createInfrastructure,
   updateInfrastructure,
-  deleteInfrastructure
+  deleteInfrastructure,
 } from '../../database/queries/infrastructure';
 import type { InfrastructureEquipment } from '../../database/queries/infrastructure';
 
@@ -63,7 +63,7 @@ describe('InfrastructureService', () => {
     wattage: 45,
     status: 'active',
     created_at: 1704067200000,
-    updated_at: 1704067200000
+    updated_at: 1704067200000,
   };
 
   const mockEquipment2: InfrastructureEquipment = {
@@ -77,7 +77,7 @@ describe('InfrastructureService', () => {
     wattage: 20,
     status: 'active',
     created_at: 1704153600000,
-    updated_at: 1704153600000
+    updated_at: 1704153600000,
   };
 
   beforeEach(() => {
@@ -121,7 +121,7 @@ describe('InfrastructureService', () => {
       const data: Partial<InfrastructureEquipment> = {
         name: 'Main Network Switch',
         category: 'network',
-        wattage: 45
+        wattage: 45,
       };
       vi.mocked(createInfrastructure).mockReturnValue(mockEquipment as any);
 
@@ -201,30 +201,22 @@ describe('InfrastructureService', () => {
     });
 
     it('should throw ValidationError for empty ID', async () => {
-      await expect(service.update('', { name: 'Test' })).rejects.toThrow(
-        ValidationError
-      );
+      await expect(service.update('', { name: 'Test' })).rejects.toThrow(ValidationError);
       expect(updateInfrastructure).not.toHaveBeenCalled();
     });
 
     it('should throw ValidationError for whitespace-only ID', async () => {
-      await expect(service.update('   ', { name: 'Test' })).rejects.toThrow(
-        ValidationError
-      );
+      await expect(service.update('   ', { name: 'Test' })).rejects.toThrow(ValidationError);
       expect(updateInfrastructure).not.toHaveBeenCalled();
     });
 
     it('should throw ValidationError when name is updated to empty string', async () => {
-      await expect(
-        service.update('equip-1', { name: '' })
-      ).rejects.toThrow(ValidationError);
+      await expect(service.update('equip-1', { name: '' })).rejects.toThrow(ValidationError);
       expect(updateInfrastructure).not.toHaveBeenCalled();
     });
 
     it('should throw ValidationError when name is updated to whitespace only', async () => {
-      await expect(
-        service.update('equip-1', { name: '   ' })
-      ).rejects.toThrow(ValidationError);
+      await expect(service.update('equip-1', { name: '   ' })).rejects.toThrow(ValidationError);
       expect(updateInfrastructure).not.toHaveBeenCalled();
     });
 
@@ -259,29 +251,26 @@ describe('InfrastructureService', () => {
     });
 
     it('should throw ValidationError for VLAN ID below minimum (0)', async () => {
-      await expect(
-        service.update('equip-1', { vlan_id: 0 })
-      ).rejects.toThrow(ValidationError);
+      await expect(service.update('equip-1', { vlan_id: 0 })).rejects.toThrow(ValidationError);
       expect(updateInfrastructure).not.toHaveBeenCalled();
     });
 
     it('should throw ValidationError for VLAN ID above maximum (4095)', async () => {
-      await expect(
-        service.update('equip-1', { vlan_id: 4095 })
-      ).rejects.toThrow(ValidationError);
+      await expect(service.update('equip-1', { vlan_id: 4095 })).rejects.toThrow(ValidationError);
       expect(updateInfrastructure).not.toHaveBeenCalled();
     });
 
     it('should throw ValidationError for negative VLAN ID', async () => {
-      await expect(
-        service.update('equip-1', { vlan_id: -1 })
-      ).rejects.toThrow(ValidationError);
+      await expect(service.update('equip-1', { vlan_id: -1 })).rejects.toThrow(ValidationError);
       expect(updateInfrastructure).not.toHaveBeenCalled();
     });
 
     it('should allow null VLAN ID (clearing the value)', async () => {
       const updates: Partial<InfrastructureEquipment> = { vlan_id: null as any };
-      vi.mocked(updateInfrastructure).mockReturnValue({ ...mockEquipment, vlan_id: undefined } as any);
+      vi.mocked(updateInfrastructure).mockReturnValue({
+        ...mockEquipment,
+        vlan_id: undefined,
+      } as any);
 
       await service.update('equip-1', updates);
 
@@ -323,20 +312,19 @@ describe('InfrastructureService', () => {
     it('should parse a valid JSON array of port assignments', () => {
       const equipment: InfrastructureEquipment = {
         ...mockEquipment,
-        port_assignments: '[{"port":1,"connected_to":"DMX Node","type":"ethernet"}]' as any
+        port_assignments: '[{"port":1,"connected_to":"DMX Node","type":"ethernet"}]' as any,
       };
 
       const result = service.getPortAssignments(equipment);
 
-      expect(result).toEqual([
-        { port: 1, connected_to: 'DMX Node', type: 'ethernet' }
-      ]);
+      expect(result).toEqual([{ port: 1, connected_to: 'DMX Node', type: 'ethernet' }]);
     });
 
     it('should parse multiple port assignments', () => {
       const equipment: InfrastructureEquipment = {
         ...mockEquipment,
-        port_assignments: '[{"port":1,"connected_to":"DMX Node"},{"port":2,"connected_to":"Audio Console"}]' as any
+        port_assignments:
+          '[{"port":1,"connected_to":"DMX Node"},{"port":2,"connected_to":"Audio Console"}]' as any,
       };
 
       const result = service.getPortAssignments(equipment);
@@ -349,7 +337,7 @@ describe('InfrastructureService', () => {
     it('should return an empty array when port_assignments is null', () => {
       const equipment: InfrastructureEquipment = {
         ...mockEquipment,
-        port_assignments: null as any
+        port_assignments: null as any,
       };
 
       const result = service.getPortAssignments(equipment);
@@ -360,7 +348,7 @@ describe('InfrastructureService', () => {
     it('should return an empty array when port_assignments is undefined', () => {
       const equipment: InfrastructureEquipment = {
         ...mockEquipment,
-        port_assignments: undefined
+        port_assignments: undefined,
       };
 
       const result = service.getPortAssignments(equipment);
@@ -372,7 +360,7 @@ describe('InfrastructureService', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const equipment: InfrastructureEquipment = {
         ...mockEquipment,
-        port_assignments: 'not-valid-json' as any
+        port_assignments: 'not-valid-json' as any,
       };
 
       const result = service.getPortAssignments(equipment);
@@ -385,7 +373,7 @@ describe('InfrastructureService', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const equipment: InfrastructureEquipment = {
         ...mockEquipment,
-        port_assignments: '[{"port":1,' as any
+        port_assignments: '[{"port":1,' as any,
       };
 
       const result = service.getPortAssignments(equipment);
@@ -397,7 +385,7 @@ describe('InfrastructureService', () => {
     it('should handle an empty JSON array', () => {
       const equipment: InfrastructureEquipment = {
         ...mockEquipment,
-        port_assignments: '[]' as any
+        port_assignments: '[]' as any,
       };
 
       const result = service.getPortAssignments(equipment);
@@ -423,7 +411,7 @@ describe('InfrastructureService', () => {
         quantity: 1,
         status: 'active',
         created_at: 1704067200000,
-        updated_at: 1704067200000
+        updated_at: 1704067200000,
       };
       const equipment = [mockEquipment, equipmentNoWattage];
 
@@ -435,7 +423,7 @@ describe('InfrastructureService', () => {
     it('should handle equipment with null wattage', () => {
       const equipmentNullWattage: InfrastructureEquipment = {
         ...mockEquipment2,
-        wattage: null as any
+        wattage: null as any,
       };
       const equipment = [mockEquipment, equipmentNullWattage];
 
@@ -459,11 +447,11 @@ describe('InfrastructureService', () => {
     it('should handle all equipment having zero wattage', () => {
       const zeroWattage1: InfrastructureEquipment = {
         ...mockEquipment,
-        wattage: 0
+        wattage: 0,
       };
       const zeroWattage2: InfrastructureEquipment = {
         ...mockEquipment2,
-        wattage: 0
+        wattage: 0,
       };
 
       const result = service.calculatePowerTotal([zeroWattage1, zeroWattage2]);

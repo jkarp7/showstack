@@ -15,12 +15,7 @@ import {
   PowerSyncBackendConnector,
   UpdateType,
 } from '@powersync/web';
-import {
-  createClient,
-  SupabaseClient,
-  Session,
-  AuthChangeEvent,
-} from '@supabase/supabase-js';
+import { createClient, SupabaseClient, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { getConfig } from '../../config/env';
 
 /**
@@ -50,7 +45,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
 
     if (!config.supabase.url || !config.supabase.anonKey) {
       throw new Error(
-        'Supabase configuration missing. Ensure SUPABASE_URL and SUPABASE_ANON_KEY are set.'
+        'Supabase configuration missing. Ensure SUPABASE_URL and SUPABASE_ANON_KEY are set.',
       );
     }
 
@@ -63,16 +58,14 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
     });
 
     // Listen for auth state changes
-    this.supabase.auth.onAuthStateChange(
-      (event: AuthChangeEvent, session: Session | null) => {
-        this.currentSession = session;
-        this.notifySessionListeners(session);
+    this.supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      this.currentSession = session;
+      this.notifySessionListeners(session);
 
-        if (config.app.debugPowerSync) {
-          console.log('[SupabaseConnector] Auth state changed:', event);
-        }
+      if (config.app.debugPowerSync) {
+        console.log('[SupabaseConnector] Auth state changed:', event);
       }
-    );
+    });
 
     // Initialize session
     this.initSession();
@@ -123,10 +116,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
   /**
    * Sign in with email and password
    */
-  async signIn(
-    email: string,
-    password: string
-  ): Promise<{ success: boolean; error?: string }> {
+  async signIn(email: string, password: string): Promise<{ success: boolean; error?: string }> {
     try {
       const { data, error } = await this.supabase.auth.signInWithPassword({
         email,
@@ -150,10 +140,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
   /**
    * Sign up with email and password
    */
-  async signUp(
-    email: string,
-    password: string
-  ): Promise<{ success: boolean; error?: string }> {
+  async signUp(email: string, password: string): Promise<{ success: boolean; error?: string }> {
     try {
       const { data, error } = await this.supabase.auth.signUp({
         email,
@@ -229,9 +216,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
     const config = getConfig();
 
     if (!config.powersync.url) {
-      throw new Error(
-        'PowerSync URL not configured. Ensure POWERSYNC_URL is set.'
-      );
+      throw new Error('PowerSync URL not configured. Ensure POWERSYNC_URL is set.');
     }
 
     // Ensure we have a fresh session
@@ -254,9 +239,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
     return {
       endpoint: config.powersync.url,
       token: session.access_token,
-      expiresAt: session.expires_at
-        ? new Date(session.expires_at * 1000)
-        : undefined,
+      expiresAt: session.expires_at ? new Date(session.expires_at * 1000) : undefined,
     };
   }
 
@@ -310,10 +293,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
 
       case UpdateType.PATCH: {
         // Update existing record
-        const { error } = await this.supabase
-          .from(table)
-          .update(data)
-          .eq('id', id);
+        const { error } = await this.supabase.from(table).update(data).eq('id', id);
 
         if (error) {
           throw new Error(`Failed to update ${table}/${id}: ${error.message}`);

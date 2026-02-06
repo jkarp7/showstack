@@ -90,7 +90,7 @@ export const ProjectSchema = extendBaseEntity({
   venue: z.string().optional(),
   venue_city: z.string().optional(),
   venue_state: z.string().optional(),
-  show_dates: JSONStringArraySchema
+  show_dates: JSONStringArraySchema,
 });
 
 /**
@@ -104,7 +104,7 @@ export type Project = z.infer<typeof ProjectSchema>;
 export const CreateProjectSchema = ProjectSchema.omit({
   id: true,
   created_at: true,
-  updated_at: true
+  updated_at: true,
 });
 
 /**

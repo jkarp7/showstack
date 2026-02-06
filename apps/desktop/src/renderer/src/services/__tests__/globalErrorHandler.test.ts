@@ -78,7 +78,7 @@ describe('GlobalErrorHandler', () => {
           filename: 'test.js',
           lineno: 10,
           colno: 5,
-        })
+        }),
       );
     });
 
@@ -97,7 +97,7 @@ describe('GlobalErrorHandler', () => {
           type: 'unhandled_error',
           filename: 'app.js',
           lineno: 20,
-        })
+        }),
       );
     });
   });
@@ -121,7 +121,7 @@ describe('GlobalErrorHandler', () => {
         error,
         expect.objectContaining({
           type: 'unhandled_promise_rejection',
-        })
+        }),
       );
     });
 
@@ -138,7 +138,7 @@ describe('GlobalErrorHandler', () => {
         expect.any(Error),
         expect.objectContaining({
           type: 'unhandled_promise_rejection',
-        })
+        }),
       );
 
       // Check that error message contains the reason
@@ -176,7 +176,7 @@ describe('GlobalErrorHandler', () => {
         error,
         expect.objectContaining({
           type: 'console_error',
-        })
+        }),
       );
     });
 
@@ -187,7 +187,7 @@ describe('GlobalErrorHandler', () => {
         'Error: Something went wrong',
         expect.objectContaining({
           type: 'console_error_string',
-        })
+        }),
       );
     });
 
@@ -202,7 +202,7 @@ describe('GlobalErrorHandler', () => {
         error,
         expect.objectContaining({
           type: 'console_error',
-        })
+        }),
       );
 
       // Ensure sensitiveData is NOT in the tracking call
@@ -247,7 +247,7 @@ describe('GlobalErrorHandler', () => {
         expect.objectContaining({
           type: 'manual_report',
           source: 'manual',
-        })
+        }),
       );
     });
 
@@ -259,7 +259,7 @@ describe('GlobalErrorHandler', () => {
         expect.objectContaining({
           type: 'manual_report',
           context: 'test',
-        })
+        }),
       );
     });
 
@@ -270,7 +270,7 @@ describe('GlobalErrorHandler', () => {
         'Simple error',
         expect.objectContaining({
           type: 'manual_report',
-        })
+        }),
       );
     });
   });
@@ -288,7 +288,7 @@ describe('GlobalErrorHandler', () => {
         error,
         expect.objectContaining({
           type: 'console_error',
-        })
+        }),
       );
     });
 

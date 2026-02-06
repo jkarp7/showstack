@@ -29,7 +29,13 @@ interface QueuedBatch {
   fixtures: Partial<Fixture>[];
 }
 
-export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount, autoFillSuggestions }: AddFixtureDialogProps) {
+export function AddFixtureDialog({
+  isOpen,
+  onClose,
+  onAdd,
+  existingFixturesCount,
+  autoFillSuggestions,
+}: AddFixtureDialogProps) {
   const [quantity, setQuantity] = useState(1);
   const [position, setPosition] = useState('');
   const [unit, setUnit] = useState<string>('');
@@ -83,7 +89,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
       try {
         const [dimmer, pd] = await Promise.all([
           window.api.dimmerRacks.getAll(),
-          window.api.pdRacks.getAll()
+          window.api.pdRacks.getAll(),
         ]);
         setDimmerRacks(dimmer);
         setPdRacks(pd);
@@ -117,7 +123,10 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
 
       // Handle accessories (comma-separated to array)
       if (accessories) {
-        fixture.accessories = accessories.split(',').map(a => a.trim()).filter(Boolean);
+        fixture.accessories = accessories
+          .split(',')
+          .map((a) => a.trim())
+          .filter(Boolean);
       }
 
       // Handle unit with auto-increment
@@ -284,7 +293,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
 
   // Add all queued batches to worksheet
   const handleAddAll = () => {
-    const allFixtures = queue.flatMap(batch => batch.fixtures);
+    const allFixtures = queue.flatMap((batch) => batch.fixtures);
     onAdd(allFixtures);
     handleClose();
   };
@@ -298,7 +307,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
 
   // Remove batch from queue
   const handleRemoveBatch = (batchId: string) => {
-    setQueue(queue.filter(b => b.id !== batchId));
+    setQueue(queue.filter((b) => b.id !== batchId));
   };
 
   const resetForm = () => {
@@ -345,8 +354,9 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
     onClose();
   };
 
-  const inputClass = "w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:border-blue-500";
-  const labelClass = "text-xs font-medium text-gray-300 mb-1";
+  const inputClass =
+    'w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-gray-900 dark:text-white text-sm focus:outline-none focus:border-blue-500';
+  const labelClass = 'text-xs font-medium text-gray-300 mb-1';
 
   const totalFixturesInQueue = queue.reduce((sum, batch) => sum + batch.quantity, 0);
 
@@ -358,7 +368,8 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
           <h2 className="text-xl font-bold">Add Fixture(s)</h2>
           {queue.length > 0 && (
             <span className="text-sm text-gray-400">
-              {queue.length} {queue.length === 1 ? 'batch' : 'batches'} ({totalFixturesInQueue} fixtures) in queue
+              {queue.length} {queue.length === 1 ? 'batch' : 'batches'} ({totalFixturesInQueue}{' '}
+              fixtures) in queue
             </span>
           )}
         </div>
@@ -612,7 +623,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                           className={inputClass}
                         >
                           <option value="">None</option>
-                          {dimmerRacks.map(rack => (
+                          {dimmerRacks.map((rack) => (
                             <option key={rack.id} value={rack.id}>
                               {rack.name} ({rack.circuit_count} circuits)
                             </option>
@@ -658,7 +669,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
                           className={inputClass}
                         >
                           <option value="">None</option>
-                          {pdRacks.map(rack => (
+                          {pdRacks.map((rack) => (
                             <option key={rack.id} value={rack.id}>
                               {rack.name} ({rack.voltage}V, {rack.circuit_count} circuits)
                             </option>
@@ -789,9 +800,7 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
 
               {/* Status */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Status
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -872,8 +881,10 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
 
               {queue.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center text-gray-500 text-sm text-center p-4">
-                  No batches queued.<br />
-                  Fill out the form and click<br />
+                  No batches queued.
+                  <br />
+                  Fill out the form and click
+                  <br />
                   "Add to Queue" to queue fixtures.
                 </div>
               ) : (
@@ -949,47 +960,47 @@ export function AddFixtureDialog({ isOpen, onClose, onAdd, existingFixturesCount
         {autoFillSuggestions && (
           <>
             <datalist id="position-suggestions">
-              {autoFillSuggestions.positions.map(pos => (
+              {autoFillSuggestions.positions.map((pos) => (
                 <option key={pos} value={pos} />
               ))}
             </datalist>
             <datalist id="type-suggestions">
-              {autoFillSuggestions.types.map(type => (
+              {autoFillSuggestions.types.map((type) => (
                 <option key={type} value={type} />
               ))}
             </datalist>
             <datalist id="purpose-suggestions">
-              {autoFillSuggestions.purposes.map(purpose => (
+              {autoFillSuggestions.purposes.map((purpose) => (
                 <option key={purpose} value={purpose} />
               ))}
             </datalist>
             <datalist id="manufacturer-suggestions">
-              {autoFillSuggestions.manufacturers.map(mfr => (
+              {autoFillSuggestions.manufacturers.map((mfr) => (
                 <option key={mfr} value={mfr} />
               ))}
             </datalist>
             <datalist id="model-suggestions">
-              {autoFillSuggestions.models.map(model => (
+              {autoFillSuggestions.models.map((model) => (
                 <option key={model} value={model} />
               ))}
             </datalist>
             <datalist id="color-suggestions">
-              {autoFillSuggestions.colors.map(color => (
+              {autoFillSuggestions.colors.map((color) => (
                 <option key={color} value={color} />
               ))}
             </datalist>
             <datalist id="gobo-suggestions">
-              {autoFillSuggestions.gobos.map(gobo => (
+              {autoFillSuggestions.gobos.map((gobo) => (
                 <option key={gobo} value={gobo} />
               ))}
             </datalist>
             <datalist id="location-suggestions">
-              {autoFillSuggestions.locations.map(loc => (
+              {autoFillSuggestions.locations.map((loc) => (
                 <option key={loc} value={loc} />
               ))}
             </datalist>
             <datalist id="system-suggestions">
-              {autoFillSuggestions.systems.map(sys => (
+              {autoFillSuggestions.systems.map((sys) => (
                 <option key={sys} value={sys} />
               ))}
             </datalist>

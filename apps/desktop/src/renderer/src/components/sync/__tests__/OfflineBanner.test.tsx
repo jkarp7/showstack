@@ -181,7 +181,9 @@ describe('OfflineBanner', () => {
       fireEvent.click(retryButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Network unavailable. Check your internet connection.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Network unavailable. Check your internet connection.'),
+        ).toBeInTheDocument();
       });
     });
 
@@ -194,7 +196,9 @@ describe('OfflineBanner', () => {
       fireEvent.click(retryButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Network unavailable. Check your internet connection.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Network unavailable. Check your internet connection.'),
+        ).toBeInTheDocument();
       });
     });
 
@@ -207,7 +211,9 @@ describe('OfflineBanner', () => {
       fireEvent.click(retryButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Authentication failed. Please sign in again.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Authentication failed. Please sign in again.'),
+        ).toBeInTheDocument();
       });
     });
 

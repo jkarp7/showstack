@@ -15,7 +15,7 @@ import { DEFAULT_PAGE_SETUP } from '../../renderer/src/types/paperwork';
 const PAPERWORK_PAGE_SETUP = {
   ...DEFAULT_PAGE_SETUP,
   orientation: 'portrait' as const,
-  colorMode: 'bw' as const
+  colorMode: 'bw' as const,
 };
 
 /**
@@ -28,7 +28,8 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
 
   {
     name: 'Channel Hookup',
-    description: 'Comprehensive channel-to-dimmer reference. Primary report for electricians during load-in and focus.',
+    description:
+      'Comprehensive channel-to-dimmer reference. Primary report for electricians during load-in and focus.',
     reportType: 'channel-hookup',
     headerTemplateId: 'default-paperwork-header',
     columns: COLUMN_DEFAULTS['channel-hookup'],
@@ -36,10 +37,10 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
       sortBy: 'channel',
       sortDirection: 'asc',
       showGroupHeaders: false,
-      groupPageBreaks: false
+      groupPageBreaks: false,
     },
     pageSetup: PAPERWORK_PAGE_SETUP,
-    isSystem: true
+    isSystem: true,
   },
 
   {
@@ -53,10 +54,10 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
       sortBy: 'channel',
       sortDirection: 'asc',
       showGroupHeaders: true,
-      groupPageBreaks: false
+      groupPageBreaks: false,
     },
     pageSetup: PAPERWORK_PAGE_SETUP,
-    isSystem: true
+    isSystem: true,
   },
 
   {
@@ -70,10 +71,10 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
       sortBy: 'position',
       sortDirection: 'asc',
       showGroupHeaders: true,
-      groupPageBreaks: false
+      groupPageBreaks: false,
     },
     pageSetup: PAPERWORK_PAGE_SETUP,
-    isSystem: true
+    isSystem: true,
   },
 
   {
@@ -87,10 +88,10 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
       sortBy: 'dmx_address',
       sortDirection: 'asc',
       showGroupHeaders: true,
-      groupPageBreaks: false
+      groupPageBreaks: false,
     },
     pageSetup: PAPERWORK_PAGE_SETUP,
-    isSystem: true
+    isSystem: true,
   },
 
   {
@@ -104,10 +105,10 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
       sortBy: 'wattage',
       sortDirection: 'desc',
       showGroupHeaders: true,
-      groupPageBreaks: false
+      groupPageBreaks: false,
     },
     pageSetup: PAPERWORK_PAGE_SETUP,
-    isSystem: true
+    isSystem: true,
   },
 
   {
@@ -121,10 +122,10 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
       sortBy: 'channel',
       sortDirection: 'asc',
       showGroupHeaders: true,
-      groupPageBreaks: false
+      groupPageBreaks: false,
     },
     pageSetup: PAPERWORK_PAGE_SETUP,
-    isSystem: true
+    isSystem: true,
   },
 
   {
@@ -138,10 +139,10 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
       sortBy: 'channel',
       sortDirection: 'asc',
       showGroupHeaders: true,
-      groupPageBreaks: false
+      groupPageBreaks: false,
     },
     pageSetup: PAPERWORK_PAGE_SETUP,
-    isSystem: true
+    isSystem: true,
   },
 
   {
@@ -154,10 +155,10 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
       sortBy: 'gel_code',
       sortDirection: 'asc',
       showGroupHeaders: false,
-      groupPageBreaks: false
+      groupPageBreaks: false,
     },
     pageSetup: PAPERWORK_PAGE_SETUP,
-    isSystem: true
+    isSystem: true,
   },
 
   // ============================================
@@ -175,10 +176,10 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
       sortBy: 'name',
       sortDirection: 'asc',
       showGroupHeaders: true,
-      groupPageBreaks: false
+      groupPageBreaks: false,
     },
     pageSetup: PAPERWORK_PAGE_SETUP,
-    isSystem: true
+    isSystem: true,
   },
 
   {
@@ -192,10 +193,10 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
       sortBy: 'ip_address',
       sortDirection: 'asc',
       showGroupHeaders: true,
-      groupPageBreaks: false
+      groupPageBreaks: false,
     },
     pageSetup: PAPERWORK_PAGE_SETUP,
-    isSystem: true
+    isSystem: true,
   },
 
   {
@@ -208,10 +209,10 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
       sortBy: 'port',
       sortDirection: 'asc',
       showGroupHeaders: false,
-      groupPageBreaks: false
+      groupPageBreaks: false,
     },
     pageSetup: PAPERWORK_PAGE_SETUP,
-    isSystem: true
+    isSystem: true,
   },
 
   {
@@ -225,10 +226,10 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
       sortBy: 'name',
       sortDirection: 'asc',
       showGroupHeaders: true,
-      groupPageBreaks: false
+      groupPageBreaks: false,
     },
     pageSetup: PAPERWORK_PAGE_SETUP,
-    isSystem: true
+    isSystem: true,
   },
 
   {
@@ -242,16 +243,18 @@ export const DEFAULT_PAPERWORK_TEMPLATES: PaperworkTemplateInput[] = [
       sortBy: 'name',
       sortDirection: 'asc',
       showGroupHeaders: true,
-      groupPageBreaks: false
+      groupPageBreaks: false,
     },
     pageSetup: PAPERWORK_PAGE_SETUP,
-    isSystem: true
-  }
+    isSystem: true,
+  },
 ];
 
 /**
  * Get default template for a specific report type
  */
-export function getDefaultTemplateForReportType(reportType: string): PaperworkTemplateInput | undefined {
-  return DEFAULT_PAPERWORK_TEMPLATES.find(t => t.reportType === reportType);
+export function getDefaultTemplateForReportType(
+  reportType: string,
+): PaperworkTemplateInput | undefined {
+  return DEFAULT_PAPERWORK_TEMPLATES.find((t) => t.reportType === reportType);
 }

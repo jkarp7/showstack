@@ -15,8 +15,8 @@ vi.mock('../../utils/logger', () => ({
     info: vi.fn(),
     error: vi.fn(),
     warn: vi.fn(),
-    debug: vi.fn()
-  }
+    debug: vi.fn(),
+  },
 }));
 
 describe('DatabaseWriter', () => {
@@ -29,10 +29,10 @@ describe('DatabaseWriter', () => {
       prepare: vi.fn(() => ({
         run: vi.fn(),
         get: vi.fn(),
-        all: vi.fn()
+        all: vi.fn(),
       })),
       pragma: vi.fn(),
-      close: vi.fn()
+      close: vi.fn(),
     };
   });
 
@@ -68,7 +68,7 @@ describe('DatabaseWriter', () => {
   describe('saveWithRetry', () => {
     it('should be a no-op with WAL mode (does not throw)', async () => {
       await expect(
-        writer.saveWithRetry(mockDb, '/test/path/db.sqlite', 'test')
+        writer.saveWithRetry(mockDb, '/test/path/db.sqlite', 'test'),
       ).resolves.not.toThrow();
     });
 

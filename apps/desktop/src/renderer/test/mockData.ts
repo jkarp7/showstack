@@ -110,7 +110,7 @@ export const mockLayoutElement = {
   element_type: 'text' as const,
   config: {
     content: 'Test Text',
-    placeholder: 'Enter text'
+    placeholder: 'Enter text',
   },
   style: {
     fontSize: 12,
@@ -182,7 +182,7 @@ export function createMockFixtures(count: number, baseOverrides: Partial<typeof 
       id: `fixture-${i + 1}`,
       position: `${i + 1}`,
       unit_number: (baseOverrides.unit_number || 100) + i,
-    })
+    }),
   );
 }
 

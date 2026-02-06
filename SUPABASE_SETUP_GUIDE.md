@@ -11,12 +11,14 @@
 This guide walks you through setting up Supabase and PowerSync for ShowStack. We're preparing the infrastructure now, but won't integrate it with the app until Phase 2.3 (Service Layer) is complete.
 
 **What we're doing:**
+
 1. Creating Supabase project and deploying schema
 2. Configuring Row-Level Security (RLS) policies
 3. Setting up PowerSync instance
 4. Storing credentials securely
 
 **What we're NOT doing yet:**
+
 - Writing PowerSync integration code
 - Modifying service layer
 - Building sync UI components
@@ -82,6 +84,7 @@ Once your project is ready:
 5. Confirm: `Success. No rows returned`
 
 **What RLS does:**
+
 - Users can only access projects they own or are shared with
 - Anonymous users can't access any data
 - Service role can bypass RLS for admin operations
@@ -162,6 +165,7 @@ Now we'll create your local `.env` file:
 6. Click **"Deploy"**
 
 **What sync rules do:**
+
 - Define which tables to sync
 - Filter data by user (only sync user's projects)
 - Transform data for local storage
@@ -196,12 +200,14 @@ npm run test:supabase
 ```
 
 This will:
+
 - Connect to Supabase
 - Verify schema exists
 - Test RLS policies
 - Print connection status
 
 Expected output:
+
 ```
 ✅ Connected to Supabase
 ✅ Schema verified (15 tables found)
@@ -215,12 +221,14 @@ npm run test:powersync
 ```
 
 This will:
+
 - Connect to PowerSync
 - Verify sync rules deployed
 - Test token validity
 - Print connection status
 
 Expected output:
+
 ```
 ✅ Connected to PowerSync
 ✅ Sync rules deployed (15 tables configured)
@@ -247,12 +255,14 @@ Before moving on, verify:
 ✅ **Setup Complete!** Your cloud infrastructure is ready.
 
 **Deferred until Phase 2.3 (Service Layer) complete:**
+
 - Installing PowerSync SDK (`@powersync/web`)
 - Writing PowerSync integration code
 - Updating service layer to use PowerSync
 - Building sync UI components
 
 **Why wait?**
+
 - Service layer provides clean integration points for PowerSync
 - Without services, PowerSync would integrate with 20+ IPC handlers (complex)
 - Services enable proper conflict resolution and business logic separation
@@ -265,6 +275,7 @@ Before moving on, verify:
 
 **Problem:** Can't connect to Supabase
 **Solution:**
+
 - Verify API keys are correct
 - Check URL format (should include `https://`)
 - Ensure project is fully initialized (wait 2-3 minutes)
@@ -273,6 +284,7 @@ Before moving on, verify:
 
 **Problem:** SQL migration fails
 **Solution:**
+
 - Run migrations in order (001, 002, 003)
 - Check for syntax errors in SQL
 - Verify you're using correct Supabase region
@@ -282,6 +294,7 @@ Before moving on, verify:
 
 **Problem:** Can't access data even when authenticated
 **Solution:**
+
 - Verify RLS policies are applied correctly
 - Check user ID matches policy filter
 - Use service_role key for admin access (bypasses RLS)
@@ -291,6 +304,7 @@ Before moving on, verify:
 
 **Problem:** Can't connect to PowerSync
 **Solution:**
+
 - Verify PowerSync instance is active
 - Check token expiration
 - Ensure Supabase connection is configured first
@@ -300,6 +314,7 @@ Before moving on, verify:
 
 **Problem:** Sync rules fail to validate
 **Solution:**
+
 - Check YAML syntax (indentation matters)
 - Verify table names match Supabase schema
 - Ensure user ID filter is correct
@@ -312,12 +327,14 @@ Before moving on, verify:
 ### Current Setup (Free Tier)
 
 **Supabase Free Tier:**
+
 - 500MB database storage
 - 2GB bandwidth/month
 - 50,000 monthly active users
 - Unlimited API requests
 
 **PowerSync Free Tier:**
+
 - Up to 10 users
 - Unlimited sync operations
 - Community support
@@ -327,6 +344,7 @@ Before moving on, verify:
 ### Production Upgrade Path
 
 **Supabase Pro ($25/month):**
+
 - 8GB database storage
 - 50GB bandwidth/month
 - 100,000 monthly active users
@@ -334,6 +352,7 @@ Before moving on, verify:
 - Email support
 
 **PowerSync Pro ($99/month):**
+
 - Unlimited users
 - Priority support
 - Advanced monitoring

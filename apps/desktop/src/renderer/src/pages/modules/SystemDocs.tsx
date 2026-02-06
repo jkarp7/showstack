@@ -41,7 +41,7 @@ export function SystemDocs() {
     { id: 'equipment' as SystemDocsTab, name: 'Equipment Manager' },
     { id: 'power' as SystemDocsTab, name: 'Power Management' },
     { id: 'paperwork' as SystemDocsTab, name: 'Paperwork' },
-    { id: 'labels' as SystemDocsTab, name: 'Labels' }
+    { id: 'labels' as SystemDocsTab, name: 'Labels' },
   ];
 
   const handleBackClick = () => {
@@ -69,12 +69,12 @@ export function SystemDocs() {
       {/* Tab Navigation */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         <div className="flex">
-          {tabs.map(tab => (
+          {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => {
                 setActiveTab(tab.id);
-                setTabSwitchCount(prev => prev + 1);
+                setTabSwitchCount((prev) => prev + 1);
               }}
               className={`px-6 py-3 border-r border-gray-200 dark:border-gray-700 transition ${
                 activeTab === tab.id
@@ -111,8 +111,10 @@ export function SystemDocs() {
         }}
       >
         <div className="space-y-2">
-          <p className="text-xs">Active Tool: {tabs.find(t => t.id === activeTab)?.name}</p>
-          <p className="text-xs text-purple-300">Equipment Manager, Paperwork, and Labels integrated</p>
+          <p className="text-xs">Active Tool: {tabs.find((t) => t.id === activeTab)?.name}</p>
+          <p className="text-xs text-purple-300">
+            Equipment Manager, Paperwork, and Labels integrated
+          </p>
         </div>
       </DeveloperPanel>
     </div>

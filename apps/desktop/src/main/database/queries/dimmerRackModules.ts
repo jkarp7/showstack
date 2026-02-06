@@ -22,11 +22,15 @@ export interface DimmerRackModule {
 export function getModulesByRackId(rackId: string): DimmerRackModule[] {
   const db = getDatabase();
 
-  const modules = db.prepare(`
+  const modules = db
+    .prepare(
+      `
     SELECT * FROM dimmer_rack_modules
     WHERE rack_id = ?
     ORDER BY start_circuit
-  `).all(rackId);
+  `,
+    )
+    .all(rackId);
 
   return modules as DimmerRackModule[];
 }
@@ -35,18 +39,20 @@ export function getModulesByRackId(rackId: string): DimmerRackModule[] {
  * Create a new dimmer rack module
  */
 export function createModule(
-  module: Omit<DimmerRackModule, 'id' | 'created_at' | 'updated_at'>
+  module: Omit<DimmerRackModule, 'id' | 'created_at' | 'updated_at'>,
 ): DimmerRackModule {
   const db = getDatabase();
   const id = uuidv4();
   const now = Date.now();
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO dimmer_rack_modules (
       id, rack_id, start_circuit, end_circuit, module_type,
       watts_per_circuit, notes, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
+  `,
+  ).run(
     id,
     module.rack_id,
     module.start_circuit,
@@ -55,7 +61,7 @@ export function createModule(
     module.watts_per_circuit || 2400,
     module.notes || null,
     now,
-    now
+    now,
   );
 
   saveDatabase();
@@ -68,10 +74,14 @@ export function createModule(
 export function getModuleById(id: string): DimmerRackModule {
   const db = getDatabase();
 
-  const module = db.prepare(`
+  const module = db
+    .prepare(
+      `
     SELECT * FROM dimmer_rack_modules
     WHERE id = ?
-  `).get(id);
+  `,
+    )
+    .get(id);
 
   if (!module) {
     throw new Error(`Dimmer rack module not found: ${id}`);
@@ -119,11 +129,13 @@ export function updateModule(id: string, updates: Partial<DimmerRackModule>): Di
   values.push(now);
   values.push(id);
 
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE dimmer_rack_modules
     SET ${setClauses.join(', ')}
     WHERE id = ?
-  `).run(...values);
+  `,
+  ).run(...values);
 
   saveDatabase();
   return getModuleById(id);
@@ -157,13 +169,17 @@ export function deleteModulesByRackId(rackId: string): void {
 export function getModuleTypeForCircuit(rackId: string, circuit: number): DimmerRackModule | null {
   const db = getDatabase();
 
-  const module = db.prepare(`
+  const module = db
+    .prepare(
+      `
     SELECT * FROM dimmer_rack_modules
     WHERE rack_id = ?
       AND start_circuit <= ?
       AND end_circuit >= ?
     LIMIT 1
-  `).get(rackId, circuit, circuit);
+  `,
+    )
+    .get(rackId, circuit, circuit);
 
   if (!module) {
     return null;

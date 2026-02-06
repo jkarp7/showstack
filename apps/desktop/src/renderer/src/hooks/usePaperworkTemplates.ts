@@ -1,8 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type {
-  PaperworkTemplate,
-  PaperworkTemplateInput
-} from '../types/paperworkTemplate';
+import type { PaperworkTemplate, PaperworkTemplateInput } from '../types/paperworkTemplate';
 import type { ReportType } from '../types/paperwork';
 
 /**
@@ -80,61 +77,63 @@ export function usePaperworkTemplates(options: UsePaperworkTemplatesOptions = {}
   /**
    * Create a new template
    */
-  const createTemplate = useCallback(async (
-    input: PaperworkTemplateInput
-  ): Promise<PaperworkTemplate | null> => {
-    if (!hasAPI()) {
-      console.warn('API not available');
-      return null;
-    }
+  const createTemplate = useCallback(
+    async (input: PaperworkTemplateInput): Promise<PaperworkTemplate | null> => {
+      if (!hasAPI()) {
+        console.warn('API not available');
+        return null;
+      }
 
-    setError(null);
+      setError(null);
 
-    try {
-      const created = await window.api.paperworkTemplates.create(input);
+      try {
+        const created = await window.api.paperworkTemplates.create(input);
 
-      // Add to local state
-      setTemplates((prev) => [...prev, created]);
+        // Add to local state
+        setTemplates((prev) => [...prev, created]);
 
-      return created;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to create template';
-      setError(message);
-      console.error('Failed to create template:', err);
-      return null;
-    }
-  }, []);
+        return created;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to create template';
+        setError(message);
+        console.error('Failed to create template:', err);
+        return null;
+      }
+    },
+    [],
+  );
 
   /**
    * Update an existing template
    */
-  const updateTemplate = useCallback(async (
-    id: string,
-    updates: Partial<PaperworkTemplateInput>
-  ): Promise<PaperworkTemplate | null> => {
-    if (!hasAPI()) {
-      console.warn('API not available');
-      return null;
-    }
+  const updateTemplate = useCallback(
+    async (
+      id: string,
+      updates: Partial<PaperworkTemplateInput>,
+    ): Promise<PaperworkTemplate | null> => {
+      if (!hasAPI()) {
+        console.warn('API not available');
+        return null;
+      }
 
-    setError(null);
+      setError(null);
 
-    try {
-      const updated = await window.api.paperworkTemplates.update(id, updates);
+      try {
+        const updated = await window.api.paperworkTemplates.update(id, updates);
 
-      // Update in local state
-      setTemplates((prev) =>
-        prev.map((t) => (t.id === id ? updated : t))
-      );
+        // Update in local state
+        setTemplates((prev) => prev.map((t) => (t.id === id ? updated : t)));
 
-      return updated;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to update template';
-      setError(message);
-      console.error('Failed to update template:', err);
-      return null;
-    }
-  }, []);
+        return updated;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to update template';
+        setError(message);
+        console.error('Failed to update template:', err);
+        return null;
+      }
+    },
+    [],
+  );
 
   /**
    * Delete a template
@@ -165,31 +164,31 @@ export function usePaperworkTemplates(options: UsePaperworkTemplatesOptions = {}
   /**
    * Duplicate a template (creates a custom copy)
    */
-  const duplicateTemplate = useCallback(async (
-    id: string,
-    newName?: string
-  ): Promise<PaperworkTemplate | null> => {
-    if (!hasAPI()) {
-      console.warn('API not available');
-      return null;
-    }
+  const duplicateTemplate = useCallback(
+    async (id: string, newName?: string): Promise<PaperworkTemplate | null> => {
+      if (!hasAPI()) {
+        console.warn('API not available');
+        return null;
+      }
 
-    setError(null);
+      setError(null);
 
-    try {
-      const duplicated = await window.api.paperworkTemplates.duplicate(id, newName);
+      try {
+        const duplicated = await window.api.paperworkTemplates.duplicate(id, newName);
 
-      // Add to local state
-      setTemplates((prev) => [...prev, duplicated]);
+        // Add to local state
+        setTemplates((prev) => [...prev, duplicated]);
 
-      return duplicated;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to duplicate template';
-      setError(message);
-      console.error('Failed to duplicate template:', err);
-      return null;
-    }
-  }, []);
+        return duplicated;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to duplicate template';
+        setError(message);
+        console.error('Failed to duplicate template:', err);
+        return null;
+      }
+    },
+    [],
+  );
 
   /**
    * Get system templates only
@@ -228,7 +227,7 @@ export function usePaperworkTemplates(options: UsePaperworkTemplatesOptions = {}
 
     // Utilities
     getSystemTemplates,
-    getCustomTemplates
+    getCustomTemplates,
   };
 }
 
@@ -236,7 +235,9 @@ export function usePaperworkTemplates(options: UsePaperworkTemplatesOptions = {}
  * Hook for managing a single active template
  */
 export function useActiveTemplate(initialTemplate?: PaperworkTemplate) {
-  const [activeTemplate, setActiveTemplate] = useState<PaperworkTemplate | undefined>(initialTemplate);
+  const [activeTemplate, setActiveTemplate] = useState<PaperworkTemplate | undefined>(
+    initialTemplate,
+  );
   const [isDirty, setIsDirty] = useState(false);
 
   /**
@@ -279,6 +280,6 @@ export function useActiveTemplate(initialTemplate?: PaperworkTemplate) {
     loadTemplate,
     updateActiveTemplate,
     clearTemplate,
-    markClean
+    markClean,
   };
 }

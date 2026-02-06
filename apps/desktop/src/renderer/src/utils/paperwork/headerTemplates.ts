@@ -37,7 +37,7 @@ export async function getDefaultPaperworkHeaderTemplate(): Promise<PageLayoutTem
  * Get a paperwork header template by ID with its elements
  */
 export async function getPaperworkHeaderTemplate(
-  id: string
+  id: string,
 ): Promise<{ template: PageLayoutTemplate; elements: LayoutElement[] } | null> {
   if (!window.api?.prep?.layoutTemplates) {
     throw new Error('Prep API not available');
@@ -60,7 +60,7 @@ export async function createPaperworkHeaderTemplate(
   name: string,
   description: string,
   templateData: Partial<PageLayoutTemplate>,
-  elements: Partial<LayoutElement>[]
+  elements: Partial<LayoutElement>[],
 ): Promise<PageLayoutTemplate> {
   if (!window.api?.prep?.layoutTemplates) {
     throw new Error('Prep API not available');
@@ -88,7 +88,7 @@ export async function createPaperworkHeaderTemplate(
 export async function updatePaperworkHeaderTemplate(
   id: string,
   updates: Partial<PageLayoutTemplate>,
-  elements?: Partial<LayoutElement>[]
+  elements?: Partial<LayoutElement>[],
 ): Promise<PageLayoutTemplate> {
   if (!window.api?.prep?.layoutTemplates) {
     throw new Error('Prep API not available');
@@ -113,7 +113,7 @@ export async function deletePaperworkHeaderTemplate(id: string): Promise<void> {
  */
 export async function duplicatePaperworkHeaderTemplate(
   sourceId: string,
-  newName: string
+  newName: string,
 ): Promise<PageLayoutTemplate> {
   const source = await getPaperworkHeaderTemplate(sourceId);
   if (!source) {
@@ -123,7 +123,7 @@ export async function duplicatePaperworkHeaderTemplate(
   const { template, elements } = source;
 
   // Remove IDs from elements so they get new IDs
-  const newElements = elements.map(el => {
+  const newElements = elements.map((el) => {
     const { id, template_id, created_at, updated_at, ...rest } = el;
     return rest;
   });
@@ -139,7 +139,7 @@ export async function duplicatePaperworkHeaderTemplate(
       page_height: template.page_height,
       is_default: 0, // Duplicates are never default
     },
-    newElements
+    newElements,
   );
 }
 

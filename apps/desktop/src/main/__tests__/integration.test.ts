@@ -14,12 +14,12 @@ let db: Database.Database;
 vi.mock('../database/index', () => ({
   getDatabase: () => db,
   saveDatabase: vi.fn(),
-  getAppDatabase: () => db
+  getAppDatabase: () => db,
 }));
 
 // Mock the logger to prevent console noise
 vi.mock('../utils/logger', () => ({
-  logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() }
+  logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
 import {
@@ -27,7 +27,7 @@ import {
   getAllFixtures,
   updateFixture,
   deleteFixture,
-  deleteMultipleFixtures
+  deleteMultipleFixtures,
 } from '../database/queries/fixtures';
 
 import {
@@ -35,14 +35,14 @@ import {
   getAllProjects,
   getProjectById,
   updateProject,
-  deleteProject
+  deleteProject,
 } from '../database/queries/projects';
 
 import {
   createInfrastructure,
   getAllInfrastructure,
   updateInfrastructure,
-  deleteInfrastructure
+  deleteInfrastructure,
 } from '../database/queries/infrastructure';
 
 /**
@@ -166,9 +166,9 @@ describe('Fixture CRUD Lifecycle', () => {
         type: 'ETC Source Four',
         channel: '101',
         color: 'R02',
-        purpose: 'Front Wash'
+        purpose: 'Front Wash',
       },
-      'project-1'
+      'project-1',
     );
 
     expect(fixture).toBeDefined();
@@ -191,21 +191,19 @@ describe('Fixture CRUD Lifecycle', () => {
     const fixtures = getAllFixtures('project-1');
 
     expect(fixtures).toHaveLength(3);
-    expect(fixtures.map(f => f.channel)).toEqual(
-      expect.arrayContaining(['1', '2', '3'])
-    );
+    expect(fixtures.map((f) => f.channel)).toEqual(expect.arrayContaining(['1', '2', '3']));
   });
 
   it('should update a fixture and verify changes persisted', () => {
     const created = createFixture(
       { position: 'BOX BOOM L', type: 'PAR 64', color: 'R60' },
-      'project-1'
+      'project-1',
     );
 
     const updated = updateFixture(created.id, {
       color: 'L201',
       type: 'Source Four 36deg',
-      purpose: 'Sidelight'
+      purpose: 'Sidelight',
     });
 
     expect(updated.id).toBe(created.id);
@@ -219,7 +217,7 @@ describe('Fixture CRUD Lifecycle', () => {
   it('should delete a fixture and verify it is gone', () => {
     const created = createFixture(
       { position: 'TRUSS 1', type: 'VL3500', channel: '200' },
-      'project-1'
+      'project-1',
     );
 
     deleteFixture(created.id);
@@ -292,9 +290,9 @@ describe('Infrastructure CRUD Lifecycle', () => {
         model: 'Net3 4-Port Gateway',
         category: 'network',
         ip_address: '10.101.1.10',
-        port_count: 4
+        port_count: 4,
       },
-      'project-1'
+      'project-1',
     );
 
     expect(equipment).toBeDefined();
@@ -311,13 +309,13 @@ describe('Infrastructure CRUD Lifecycle', () => {
   it('should update equipment and verify changes', () => {
     const created = createInfrastructure(
       { name: 'Luminex Switch', category: 'network', ip_address: '10.0.0.1' },
-      'project-1'
+      'project-1',
     );
 
     const updated = updateInfrastructure(created.id, {
       ip_address: '10.101.1.50',
       location: 'Stage Left Rack',
-      notes: 'Primary network switch'
+      notes: 'Primary network switch',
     });
 
     expect(updated.id).toBe(created.id);
@@ -331,7 +329,7 @@ describe('Infrastructure CRUD Lifecycle', () => {
   it('should delete equipment and verify removal', () => {
     const created = createInfrastructure(
       { name: 'Old DMX Splitter', category: 'data_distribution' },
-      'project-1'
+      'project-1',
     );
 
     deleteInfrastructure(created.id);
@@ -358,7 +356,7 @@ describe('Cross-Entity Workflows', () => {
 
     expect(fixturesA).toHaveLength(2);
     expect(fixturesB).toHaveLength(1);
-    expect(fixturesA.every(f => f.project_id === project1.id)).toBe(true);
+    expect(fixturesA.every((f) => f.project_id === project1.id)).toBe(true);
     expect(fixturesB[0].project_id).toBe(project2.id);
     expect(fixturesB[0].type).toBe('VL3500');
   });
@@ -376,7 +374,7 @@ describe('Cross-Entity Workflows', () => {
 
     expect(infraA).toHaveLength(2);
     expect(infraB).toHaveLength(1);
-    expect(infraA.every(e => e.project_id === project1.id)).toBe(true);
+    expect(infraA.every((e) => e.project_id === project1.id)).toBe(true);
     expect(infraB[0].project_id).toBe(project2.id);
   });
 
@@ -392,7 +390,7 @@ describe('Cross-Entity Workflows', () => {
     const remaining = getAllFixtures('project-1');
     expect(remaining).toHaveLength(2);
 
-    const remainingIds = remaining.map(f => f.id);
+    const remainingIds = remaining.map((f) => f.id);
     expect(remainingIds).toContain(f3.id);
     expect(remainingIds).toContain(f4.id);
     expect(remainingIds).not.toContain(f1.id);
@@ -408,9 +406,9 @@ describe('Cross-Entity Workflows', () => {
         channel: '50',
         color: 'N/C',
         purpose: 'TBD',
-        wattage: 575
+        wattage: 575,
       },
-      'project-1'
+      'project-1',
     );
 
     const updated = updateFixture(created.id, {
@@ -421,7 +419,7 @@ describe('Cross-Entity Workflows', () => {
       wattage: 750,
       dimmer: 'D42',
       circuit: 'C12',
-      notes: 'Refocused for Act 2'
+      notes: 'Refocused for Act 2',
     });
 
     expect(updated.id).toBe(created.id);
@@ -446,7 +444,7 @@ describe('Cross-Entity Workflows', () => {
     const all = getAllProjects();
     expect(all).toHaveLength(3);
 
-    const names = all.map(p => p.name);
+    const names = all.map((p) => p.name);
     expect(names).toContain('First Show');
     expect(names).toContain('Second Show');
     expect(names).toContain('Third Show');
@@ -476,10 +474,7 @@ describe('Cross-Entity Workflows', () => {
 describe('Data Integrity', () => {
   it('should set created_at and updated_at timestamps on fixture creation', () => {
     const before = Date.now();
-    const fixture = createFixture(
-      { position: 'BOOM SR', type: 'PAR 64' },
-      'project-1'
-    );
+    const fixture = createFixture({ position: 'BOOM SR', type: 'PAR 64' }, 'project-1');
     const after = Date.now();
 
     expect(fixture.created_at).toBeDefined();
@@ -493,10 +488,7 @@ describe('Data Integrity', () => {
   });
 
   it('should update updated_at on fixture update but preserve created_at', () => {
-    const fixture = createFixture(
-      { position: 'CATWALK', type: 'Fresnel' },
-      'project-1'
-    );
+    const fixture = createFixture({ position: 'CATWALK', type: 'Fresnel' }, 'project-1');
     const originalCreatedAt = fixture.created_at;
     const originalUpdatedAt = fixture.updated_at;
 
@@ -544,7 +536,7 @@ describe('Data Integrity', () => {
     const before = Date.now();
     const equipment = createInfrastructure(
       { name: 'Test Switch', category: 'network' },
-      'project-1'
+      'project-1',
     );
     const after = Date.now();
 
@@ -562,9 +554,9 @@ describe('Data Integrity', () => {
       {
         position: 'TRUSS 2',
         type: 'VL3500',
-        custom_fields: customFields
+        custom_fields: customFields,
       },
-      'project-1'
+      'project-1',
     );
 
     expect(created.custom_fields).toEqual(customFields);
@@ -581,9 +573,9 @@ describe('Data Integrity', () => {
       {
         position: 'PIPE 3',
         type: 'Source Four',
-        accessories
+        accessories,
       },
-      'project-1'
+      'project-1',
     );
 
     expect(created.accessories).toEqual(accessories);
@@ -595,8 +587,13 @@ describe('Data Integrity', () => {
 
   it('should handle infrastructure with port_assignments JSON correctly', () => {
     const portAssignments = [
-      { port: 1, connected_to: 'Stage Left Dimmer Rack', type: 'dmx' as const, status: 'active' as const },
-      { port: 2, connected_to: 'SR Universe 2', type: 'dmx' as const, status: 'active' as const }
+      {
+        port: 1,
+        connected_to: 'Stage Left Dimmer Rack',
+        type: 'dmx' as const,
+        status: 'active' as const,
+      },
+      { port: 2, connected_to: 'SR Universe 2', type: 'dmx' as const, status: 'active' as const },
     ];
 
     const created = createInfrastructure(
@@ -604,9 +601,9 @@ describe('Data Integrity', () => {
         name: 'DMX Splitter',
         category: 'data_distribution',
         port_count: 8,
-        port_assignments: portAssignments
+        port_assignments: portAssignments,
       },
-      'project-1'
+      'project-1',
     );
 
     expect(created.port_assignments).toHaveLength(2);
@@ -621,9 +618,9 @@ describe('Data Integrity', () => {
         position: 'FOH',
         type: 'Moving Light',
         universe: 3,
-        dmx_address: 101
+        dmx_address: 101,
       },
-      'project-1'
+      'project-1',
     );
 
     expect(fixture.address).toBe('3/101');

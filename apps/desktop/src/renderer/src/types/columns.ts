@@ -1,27 +1,27 @@
 // LightWright-compatible column keys
 export type ColumnKey =
   // DISPLAYED BY DEFAULT in LightWright
-  | 'address'          // Auto-calc: universe/dmx_address
+  | 'address' // Auto-calc: universe/dmx_address
   | 'dimmer'
   | 'position'
-  | 'unit'             // Unit #
-  | 'type'             // Instrument Type
-  | 'wattage'          // Load
-  | 'accessories'      // Accessory
+  | 'unit' // Unit #
+  | 'type' // Instrument Type
+  | 'wattage' // Load
+  | 'accessories' // Accessory
   | 'purpose'
   | 'color'
   | 'gobo'
   | 'channel'
   // OPTIONAL in LightWright
   | 'gobo_size'
-  | 'circuit'          // Circuit Name
-  | 'circuit_number'   // Circuit #
+  | 'circuit' // Circuit Name
+  | 'circuit_number' // Circuit #
   | 'cable'
   | 'data_cable'
   | 'mark'
-  | 'universe'         // Auto-populates from address
-  | 'dmx_address'      // DMX # - Auto-populates from address
-  | 'mode'             // LED/Moving Light mode
+  | 'universe' // Auto-populates from address
+  | 'dmx_address' // DMX # - Auto-populates from address
+  | 'mode' // LED/Moving Light mode
   | 'system'
   | 'scenery'
   | 'vw_layer'
@@ -37,7 +37,7 @@ export type ColumnKey =
   | 'vw_symbol'
   | 'showstack_id'
   | 'console_level'
-  | 'phase'            // Dimmer Phase
+  | 'phase' // Dimmer Phase
   | 'work_note_status'
   | 'color_frame'
   | 'changed_at'
@@ -46,18 +46,38 @@ export type ColumnKey =
   | 'location'
   | 'notes'
   // User columns (will be user1-user24)
-  | 'user1' | 'user2' | 'user3' | 'user4' | 'user5' | 'user6'
-  | 'user7' | 'user8' | 'user9' | 'user10' | 'user11' | 'user12'
-  | 'user13' | 'user14' | 'user15' | 'user16' | 'user17' | 'user18'
-  | 'user19' | 'user20' | 'user21' | 'user22' | 'user23' | 'user24';
+  | 'user1'
+  | 'user2'
+  | 'user3'
+  | 'user4'
+  | 'user5'
+  | 'user6'
+  | 'user7'
+  | 'user8'
+  | 'user9'
+  | 'user10'
+  | 'user11'
+  | 'user12'
+  | 'user13'
+  | 'user14'
+  | 'user15'
+  | 'user16'
+  | 'user17'
+  | 'user18'
+  | 'user19'
+  | 'user20'
+  | 'user21'
+  | 'user22'
+  | 'user23'
+  | 'user24';
 
 export interface ColumnConfig {
   key: ColumnKey;
   label: string;
   width: string;
-  isRequired?: boolean;  // Can't be hidden
-  isComputed?: boolean;  // Computed from other fields
-  group?: string;        // For grouping in menu (e.g., "Focus Cut", "Vectorworks")
+  isRequired?: boolean; // Can't be hidden
+  isComputed?: boolean; // Computed from other fields
+  group?: string; // For grouping in menu (e.g., "Focus Cut", "Vectorworks")
 }
 
 // Column configurations matching LightWright order and grouping
@@ -141,9 +161,9 @@ export type ColumnVisibility = Record<ColumnKey, boolean>;
 // Helper function to apply custom user column labels
 export function applyUserColumnLabels(
   configs: typeof COLUMN_CONFIGS,
-  userDefinitions: Record<string, string>
+  userDefinitions: Record<string, string>,
 ): typeof COLUMN_CONFIGS {
-  return configs.map(config => {
+  return configs.map((config) => {
     // Check if this is a user column and has a custom definition
     if (config.key.startsWith('user') && userDefinitions[config.key]) {
       return {
@@ -162,14 +182,14 @@ export function getOrderedColumns(order?: ColumnKey[]): typeof COLUMN_CONFIGS {
   }
 
   // Create a map for quick lookup
-  const configMap = new Map(COLUMN_CONFIGS.map(c => [c.key, c]));
+  const configMap = new Map(COLUMN_CONFIGS.map((c) => [c.key, c]));
 
   // Return columns in the specified order
-  return order.map(key => configMap.get(key)).filter(Boolean) as typeof COLUMN_CONFIGS;
+  return order.map((key) => configMap.get(key)).filter(Boolean) as typeof COLUMN_CONFIGS;
 }
 
 // Default column order (matches COLUMN_CONFIGS order)
-export const DEFAULT_COLUMN_ORDER: ColumnKey[] = COLUMN_CONFIGS.map(c => c.key);
+export const DEFAULT_COLUMN_ORDER: ColumnKey[] = COLUMN_CONFIGS.map((c) => c.key);
 
 // Default visibility matching LightWright defaults
 export const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = {
@@ -179,7 +199,7 @@ export const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = {
   position: true,
   unit: true,
   type: true,
-  wattage: true,        // Load
+  wattage: true, // Load
   accessories: true,
   purpose: true,
   color: true,

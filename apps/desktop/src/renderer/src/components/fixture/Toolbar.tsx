@@ -16,7 +16,20 @@ interface ToolbarProps {
   userColumnDefinitions?: Record<string, string>;
 }
 
-export function Toolbar({ selectedCount, onAddFixture, onBulkEdit, onDeleteSelected, onDeselectAll, onHideSelected, onUnhideSelected, onUserColumnSettings, onConditionalFormatting, columnVisibility, onColumnVisibilityChange, userColumnDefinitions }: ToolbarProps) {
+export function Toolbar({
+  selectedCount,
+  onAddFixture,
+  onBulkEdit,
+  onDeleteSelected,
+  onDeselectAll,
+  onHideSelected,
+  onUnhideSelected,
+  onUserColumnSettings,
+  onConditionalFormatting,
+  columnVisibility,
+  onColumnVisibilityChange,
+  userColumnDefinitions,
+}: ToolbarProps) {
   return (
     <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center gap-2">
       <button

@@ -5,7 +5,7 @@ import {
   PaginatedResult,
   normalizePaginationOptions,
   buildOrderByClause,
-  buildPaginatedResult
+  buildPaginatedResult,
 } from '../utils/pagination';
 
 // Extended Fixture interface matching database schema with LightWright parity
@@ -31,10 +31,10 @@ export interface Fixture {
 
   // Power (LightWright: Dimmer, Circuit Name, Circuit #, Load, Dimmer Phase)
   dimmer?: string;
-  circuit?: string;        // Circuit name
+  circuit?: string; // Circuit name
   circuit_number?: string; // Circuit #
   phase?: string;
-  wattage?: number;        // Load
+  wattage?: number; // Load
   amperage?: number;
 
   // Color & Accessories (LightWright: Color, Gobo, Gobo Size, Accessory, Color Frame)
@@ -116,11 +116,15 @@ export interface Fixture {
 export function getAllFixtures(projectId: string = 'default-project'): Fixture[] {
   const db = getDatabase();
 
-  const fixtures = db.prepare(`
+  const fixtures = db
+    .prepare(
+      `
     SELECT * FROM fixtures
     WHERE project_id = ?
     ORDER BY CAST(position AS INTEGER), position
-  `).all(projectId);
+  `,
+    )
+    .all(projectId);
 
   return fixtures.map((fixture: any) => {
     // Compute address from universe and dmx_address
@@ -135,7 +139,7 @@ export function getAllFixtures(projectId: string = 'default-project'): Fixture[]
       address, // Computed field
       accessories: fixture.accessories ? JSON.parse(fixture.accessories) : [],
       custom_fields: fixture.custom_fields ? JSON.parse(fixture.custom_fields) : {},
-      on_light_plot: Boolean(fixture.on_light_plot) // Convert to boolean
+      on_light_plot: Boolean(fixture.on_light_plot), // Convert to boolean
     } as Fixture;
   });
 }
@@ -158,7 +162,7 @@ const FIXTURE_SORT_FIELDS = Object.freeze([
   'color',
   'status',
   'created_at',
-  'updated_at'
+  'updated_at',
 ] as const);
 
 /**
@@ -185,24 +189,28 @@ const FIXTURE_SORT_FIELDS = Object.freeze([
  */
 export function getFixturesPaginated(
   projectId: string = 'default-project',
-  options: Partial<PaginationOptions> = {}
+  options: Partial<PaginationOptions> = {},
 ): PaginatedResult<Fixture> {
   const db = getDatabase();
   const normalized = normalizePaginationOptions(options, FIXTURE_SORT_FIELDS);
   const orderBy = buildOrderByClause(normalized.sortBy, normalized.sortOrder, FIXTURE_SORT_FIELDS);
 
   // Get total count
-  const countResult = db.prepare(
-    'SELECT COUNT(*) as count FROM fixtures WHERE project_id = ?'
-  ).get(projectId) as { count: number };
+  const countResult = db
+    .prepare('SELECT COUNT(*) as count FROM fixtures WHERE project_id = ?')
+    .get(projectId) as { count: number };
 
   // Get paginated data
-  const fixtures = db.prepare(`
+  const fixtures = db
+    .prepare(
+      `
     SELECT * FROM fixtures
     WHERE project_id = ?
     ORDER BY ${orderBy}
     LIMIT ? OFFSET ?
-  `).all(projectId, normalized.limit, normalized.offset);
+  `,
+    )
+    .all(projectId, normalized.limit, normalized.offset);
 
   // Transform fixtures (same as getAllFixtures)
   const transformedFixtures = fixtures.map((fixture: any) => {
@@ -217,7 +225,7 @@ export function getFixturesPaginated(
       address,
       accessories: fixture.accessories ? JSON.parse(fixture.accessories) : [],
       custom_fields: fixture.custom_fields ? JSON.parse(fixture.custom_fields) : {},
-      on_light_plot: Boolean(fixture.on_light_plot)
+      on_light_plot: Boolean(fixture.on_light_plot),
     } as Fixture;
   });
 
@@ -226,7 +234,7 @@ export function getFixturesPaginated(
 
 export function createFixture(
   fixture: Partial<Fixture>,
-  projectId: string = 'default-project'
+  projectId: string = 'default-project',
 ): Fixture {
   const db = getDatabase();
   const id = uuidv4();
@@ -236,14 +244,16 @@ export function createFixture(
   const accessories = fixture.accessories ? JSON.stringify(fixture.accessories) : null;
   const customFields = fixture.custom_fields ? JSON.stringify(fixture.custom_fields) : null;
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO fixtures (
       id, project_id, position, unit_number, type, manufacturer, model, purpose,
       channel, universe, dmx_address, dimmer, circuit, circuit_number,
       color, gobo, accessories, location, system, wattage,
       status, notes, custom_fields, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
+  `,
+  ).run(
     id,
     projectId,
     fixture.position || '',
@@ -268,7 +278,7 @@ export function createFixture(
     fixture.notes || '',
     customFields,
     now,
-    now
+    now,
   );
 
   saveDatabase();
@@ -280,15 +290,36 @@ export function createFixture(
  * Frozen to prevent runtime modification (security hardening).
  */
 const FIXTURE_ALLOWED_FIELDS = Object.freeze([
-  'position', 'unit_number', 'type', 'manufacturer', 'model', 'purpose',
-  'channel', 'universe', 'dmx_address', 'dimmer', 'circuit', 'circuit_number',
-  'color', 'gobo', 'accessories', 'location', 'system', 'wattage',
-  'status', 'notes', 'custom_fields',
-  'dimmer_rack_id', 'dimmer_channel_number', 'pd_rack_id', 'pd_circuit_number',
-  'hidden', 'color_flag'
+  'position',
+  'unit_number',
+  'type',
+  'manufacturer',
+  'model',
+  'purpose',
+  'channel',
+  'universe',
+  'dmx_address',
+  'dimmer',
+  'circuit',
+  'circuit_number',
+  'color',
+  'gobo',
+  'accessories',
+  'location',
+  'system',
+  'wattage',
+  'status',
+  'notes',
+  'custom_fields',
+  'dimmer_rack_id',
+  'dimmer_channel_number',
+  'pd_rack_id',
+  'pd_circuit_number',
+  'hidden',
+  'color_flag',
 ] as const);
 
-type FixtureAllowedField = typeof FIXTURE_ALLOWED_FIELDS[number];
+type FixtureAllowedField = (typeof FIXTURE_ALLOWED_FIELDS)[number];
 
 function isFixtureAllowedField(field: string): field is FixtureAllowedField {
   return FIXTURE_ALLOWED_FIELDS.includes(field as FixtureAllowedField) || field === 'unit';
@@ -323,17 +354,20 @@ export function updateFixture(id: string, updates: Partial<Fixture>): Fixture {
   const filteredFields = fields.filter((f): f is FixtureAllowedField => (f as string) !== 'unit');
 
   const setClause = filteredFields
-    .map(f => f === 'unit_number' ? 'unit_number = ?' : `${f} = ?`)
+    .map((f) => (f === 'unit_number' ? 'unit_number = ?' : `${f} = ?`))
     .join(', ');
 
-  const values = filteredFields
-    .map(f => f === 'unit_number' ? mappedUpdates.unit_number : mappedUpdates[f]);
+  const values = filteredFields.map((f) =>
+    f === 'unit_number' ? mappedUpdates.unit_number : mappedUpdates[f],
+  );
 
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE fixtures
     SET ${setClause}, updated_at = ?
     WHERE id = ?
-  `).run(...values, now, id);
+  `,
+  ).run(...values, now, id);
 
   saveDatabase();
   return getFixtureById(id);
@@ -374,6 +408,6 @@ function getFixtureById(id: string): Fixture {
     address, // Computed field
     accessories: (fixture as any).accessories ? JSON.parse((fixture as any).accessories) : [],
     custom_fields: (fixture as any).custom_fields ? JSON.parse((fixture as any).custom_fields) : {},
-    on_light_plot: Boolean((fixture as any).on_light_plot) // Convert to boolean
+    on_light_plot: Boolean((fixture as any).on_light_plot), // Convert to boolean
   };
 }

@@ -5,7 +5,7 @@ import {
   createPhaseTemplate,
   updatePhaseTemplate,
   deletePhaseTemplate,
-  seedSystemPhaseTemplates
+  seedSystemPhaseTemplates,
 } from '../database/queries/phaseTemplates';
 import { errorHandler } from '../errors';
 import { DatabaseError, ValidationError } from '../errors';
@@ -16,13 +16,13 @@ export function registerPhaseTemplateHandlers() {
     try {
       return await errorHandler.executeWithRetry(
         async () => getAllPhaseTemplates(projectId),
-        'phaseTemplates:getAll'
+        'phaseTemplates:getAll',
       );
     } catch (error) {
       console.error('Failed to get phase templates:', {
         operation: 'phaseTemplates:getAll',
         projectId,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -37,13 +37,13 @@ export function registerPhaseTemplateHandlers() {
     try {
       return await errorHandler.executeWithRetry(
         async () => getPhaseTemplateById(id),
-        'phaseTemplates:getById'
+        'phaseTemplates:getById',
       );
     } catch (error) {
       console.error('Failed to get phase template:', {
         operation: 'phaseTemplates:getById',
         id,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -58,22 +58,18 @@ export function registerPhaseTemplateHandlers() {
     try {
       // Basic validation
       if (!template.name || template.name.trim().length === 0) {
-        throw new ValidationError(
-          'Phase template name is required',
-          'name',
-          template.name
-        );
+        throw new ValidationError('Phase template name is required', 'name', template.name);
       }
 
       return await errorHandler.executeWithRetry(
         async () => createPhaseTemplate(template, projectId),
-        'phaseTemplates:create'
+        'phaseTemplates:create',
       );
     } catch (error) {
       console.error('Failed to create phase template:', {
         operation: 'phaseTemplates:create',
         template,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof ValidationError) {
@@ -91,23 +87,19 @@ export function registerPhaseTemplateHandlers() {
     try {
       // Validate name if being updated
       if (updates.name !== undefined && (!updates.name || updates.name.trim().length === 0)) {
-        throw new ValidationError(
-          'Phase template name cannot be empty',
-          'name',
-          updates.name
-        );
+        throw new ValidationError('Phase template name cannot be empty', 'name', updates.name);
       }
 
       return await errorHandler.executeWithRetry(
         async () => updatePhaseTemplate(id, updates),
-        'phaseTemplates:update'
+        'phaseTemplates:update',
       );
     } catch (error) {
       console.error('Failed to update phase template:', {
         operation: 'phaseTemplates:update',
         id,
         updates,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof ValidationError) {
@@ -125,13 +117,13 @@ export function registerPhaseTemplateHandlers() {
     try {
       await errorHandler.executeWithRetry(
         async () => deletePhaseTemplate(id),
-        'phaseTemplates:delete'
+        'phaseTemplates:delete',
       );
     } catch (error) {
       console.error('Failed to delete phase template:', {
         operation: 'phaseTemplates:delete',
         id,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -146,13 +138,13 @@ export function registerPhaseTemplateHandlers() {
     try {
       await errorHandler.executeWithRetry(
         async () => seedSystemPhaseTemplates(projectId),
-        'phaseTemplates:seed'
+        'phaseTemplates:seed',
       );
     } catch (error) {
       console.error('Failed to seed system phase templates:', {
         operation: 'phaseTemplates:seed',
         projectId,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {

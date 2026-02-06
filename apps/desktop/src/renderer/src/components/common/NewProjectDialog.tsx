@@ -48,7 +48,7 @@ export function NewProjectDialog({ isOpen, onClose, onCreate }: NewProjectDialog
 
   const toggleModule = (module: string) => {
     if (enabledModules.includes(module)) {
-      setEnabledModules(enabledModules.filter(m => m !== module));
+      setEnabledModules(enabledModules.filter((m) => m !== module));
     } else {
       setEnabledModules([...enabledModules, module]);
     }
@@ -79,7 +79,10 @@ export function NewProjectDialog({ isOpen, onClose, onCreate }: NewProjectDialog
 
           {/* Description */}
           <div className="mb-4">
-            <label htmlFor="project-description" className="block text-sm font-medium text-gray-300 mb-2">
+            <label
+              htmlFor="project-description"
+              className="block text-sm font-medium text-gray-300 mb-2"
+            >
               Description
             </label>
             <textarea
@@ -94,9 +97,7 @@ export function NewProjectDialog({ isOpen, onClose, onCreate }: NewProjectDialog
 
           {/* Logo Upload */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Show Logo
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Show Logo</label>
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -126,9 +127,7 @@ export function NewProjectDialog({ isOpen, onClose, onCreate }: NewProjectDialog
 
           {/* Module Selection */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-300 mb-3">
-              Modules to Use
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-3">Modules to Use</label>
             <div className="space-y-2">
               <label className="flex items-center gap-3 p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-650">
                 <input

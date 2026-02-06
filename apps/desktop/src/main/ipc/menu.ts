@@ -27,10 +27,12 @@ export function registerMenuHandlers(): void {
     } catch (error) {
       console.error('Failed to set menu state:', {
         operation: 'menu:setState',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
-      throw new Error(`Unable to update menu: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to update menu: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
@@ -41,10 +43,12 @@ export function registerMenuHandlers(): void {
     } catch (error) {
       console.error('Failed to get menu state:', {
         operation: 'menu:getState',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
-      throw new Error(`Unable to get menu state: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to get menu state: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
@@ -56,7 +60,7 @@ export function registerMenuHandlers(): void {
       // Rebuild menu with default state
       const menu = buildMenu(menuState.getState());
       const windows = BrowserWindow.getAllWindows();
-      windows.forEach(window => {
+      windows.forEach((window) => {
         window.setMenu(menu);
       });
 
@@ -64,10 +68,12 @@ export function registerMenuHandlers(): void {
     } catch (error) {
       console.error('Failed to reset menu:', {
         operation: 'menu:reset',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
-      throw new Error(`Unable to reset menu: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to reset menu: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
@@ -87,10 +93,12 @@ export function registerMenuHandlers(): void {
       console.error('Failed to toggle developer mode:', {
         operation: 'menu:developerModeChanged',
         enabled,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
-      throw new Error(`Unable to toggle developer mode: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to toggle developer mode: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 }
@@ -119,7 +127,7 @@ export function initializeApplicationMenu(): void {
   const menu = buildMenu(menuState.getState());
 
   console.log('🍔 Menu has', menu.items.length, 'top-level items');
-  console.log('🍔 Menu items:', menu.items.map(item => item.label).join(', '));
+  console.log('🍔 Menu items:', menu.items.map((item) => item.label).join(', '));
 
   // On macOS, set application menu (global)
   if (process.platform === 'darwin') {
@@ -135,7 +143,7 @@ export function initializeApplicationMenu(): void {
     } else {
       // On Windows/Linux, update all window menus
       const windows = BrowserWindow.getAllWindows();
-      windows.forEach(window => {
+      windows.forEach((window) => {
         window.setMenu(updatedMenu);
       });
     }

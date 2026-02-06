@@ -34,15 +34,25 @@ function validateSqlIdentifier(identifier: string, type: string = 'identifier'):
 
   if (!validIdentifierPattern.test(identifier)) {
     throw new Error(
-      `Invalid ${type} "${identifier}": must start with letter or underscore and contain only letters, numbers, and underscores`
+      `Invalid ${type} "${identifier}": must start with letter or underscore and contain only letters, numbers, and underscores`,
     );
   }
 
   // Block SQL keywords and dangerous patterns
   const upperIdentifier = identifier.toUpperCase();
   const dangerousKeywords = [
-    'DROP', 'DELETE', 'TRUNCATE', 'ALTER', 'EXEC', 'EXECUTE',
-    'UNION', 'INSERT', 'UPDATE', 'CREATE', 'REPLACE', 'PRAGMA'
+    'DROP',
+    'DELETE',
+    'TRUNCATE',
+    'ALTER',
+    'EXEC',
+    'EXECUTE',
+    'UNION',
+    'INSERT',
+    'UPDATE',
+    'CREATE',
+    'REPLACE',
+    'PRAGMA',
   ];
 
   if (dangerousKeywords.includes(upperIdentifier)) {
@@ -84,7 +94,7 @@ function validateSqlIdentifiers(identifiers: string[], type: string = 'identifie
 export function bulkInsert(
   tableName: string,
   records: Array<Array<SQLValue>>,
-  columns: string[]
+  columns: string[],
 ): number {
   if (records.length === 0) {
     return 0;
@@ -133,7 +143,7 @@ export function bulkInsert(
 export function bulkUpdate(
   tableName: string,
   updates: Array<{ id: string; updates: Record<string, SQLValue> }>,
-  idColumn: string = 'id'
+  idColumn: string = 'id',
 ): number {
   if (updates.length === 0) {
     return 0;
@@ -157,8 +167,8 @@ export function bulkUpdate(
     let count = 0;
     for (const { id, updates: updateData } of updates) {
       const columns = Object.keys(updateData);
-      const setClause = columns.map(col => `${col} = ?`).join(', ');
-      const values = columns.map(col => updateData[col]);
+      const setClause = columns.map((col) => `${col} = ?`).join(', ');
+      const values = columns.map((col) => updateData[col]);
 
       const sql = `UPDATE ${tableName} SET ${setClause} WHERE ${idColumn} = ?`;
       const stmt = db.prepare(sql);
@@ -183,11 +193,7 @@ export function bulkUpdate(
  * const count = bulkDelete('fixtures', ['id1', 'id2', 'id3']);
  * ```
  */
-export function bulkDelete(
-  tableName: string,
-  ids: string[],
-  idColumn: string = 'id'
-): number {
+export function bulkDelete(tableName: string, ids: string[], idColumn: string = 'id'): number {
   if (ids.length === 0) {
     return 0;
   }
@@ -230,7 +236,7 @@ export function executeInTransaction<T>(operations: Array<() => T>): T[] {
   const txManager = createTransactionManager(db);
 
   return txManager.execute(() => {
-    return operations.map(op => op());
+    return operations.map((op) => op());
   });
 }
 
@@ -255,7 +261,7 @@ export function executeInTransaction<T>(operations: Array<() => T>): T[] {
 export function bulkUpsert(
   tableName: string,
   records: Array<Array<SQLValue>>,
-  columns: string[]
+  columns: string[],
 ): number {
   if (records.length === 0) {
     return 0;

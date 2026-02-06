@@ -8,7 +8,7 @@ import {
   validateFileSize,
   validateFileSizeSync,
   MAX_FILE_SIZE,
-  ALLOWED_IMAGE_TYPES
+  ALLOWED_IMAGE_TYPES,
 } from '../imageValidation';
 import { InvalidFileTypeError, FileSizeExceededError, FileNotFoundError } from '../errors';
 import * as fs from 'fs/promises';
@@ -24,12 +24,12 @@ vi.mock('../pathValidation', () => ({
     if (path.includes('..') || path.includes('\x00')) {
       throw new Error('Invalid path');
     }
-  })
+  }),
 }));
 vi.mock('electron', () => ({
   app: {
-    getPath: vi.fn(() => '/mock/path')
-  }
+    getPath: vi.fn(() => '/mock/path'),
+  },
 }));
 
 /**
@@ -51,7 +51,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(imageBuffer);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'png',
-        mime: 'image/png'
+        mime: 'image/png',
       });
 
       const result = await readImageAsDataUrl(imagePath);
@@ -63,12 +63,12 @@ describe('Image Validation Module', () => {
 
     it('should successfully process valid JPEG image', async () => {
       const imagePath = '/Users/test/photo.jpg';
-      const imageBuffer = Buffer.from([0xFF, 0xD8, 0xFF, 0xE0]); // JPEG header
+      const imageBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0]); // JPEG header
 
       vi.mocked(fs.readFile).mockResolvedValue(imageBuffer);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'jpg',
-        mime: 'image/jpeg'
+        mime: 'image/jpeg',
       });
 
       const result = await readImageAsDataUrl(imagePath);
@@ -82,7 +82,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(mockBuffer);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'gif',
-        mime: 'image/gif'
+        mime: 'image/gif',
       });
 
       const result = await readImageAsDataUrl('/Users/test/animation.gif');
@@ -94,7 +94,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(mockBuffer);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'webp',
-        mime: 'image/webp'
+        mime: 'image/webp',
       });
 
       const result = await readImageAsDataUrl('/Users/test/image.webp');
@@ -106,22 +106,24 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(mockBuffer);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'svg',
-        mime: 'image/svg+xml'
+        mime: 'image/svg+xml',
       });
 
-      await expect(readImageAsDataUrl('/Users/test/image.svg'))
-        .rejects.toThrow(InvalidFileTypeError);
+      await expect(readImageAsDataUrl('/Users/test/image.svg')).rejects.toThrow(
+        InvalidFileTypeError,
+      );
     });
 
     it('should reject executable files disguised as images', async () => {
       vi.mocked(fs.readFile).mockResolvedValue(mockBuffer);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'exe',
-        mime: 'application/x-msdownload'
+        mime: 'application/x-msdownload',
       });
 
-      await expect(readImageAsDataUrl('/Users/test/virus.png'))
-        .rejects.toThrow(InvalidFileTypeError);
+      await expect(readImageAsDataUrl('/Users/test/virus.png')).rejects.toThrow(
+        InvalidFileTypeError,
+      );
     });
 
     it('should reject files over 2MB', async () => {
@@ -129,8 +131,9 @@ describe('Image Validation Module', () => {
 
       vi.mocked(fs.readFile).mockResolvedValue(largeBuffer);
 
-      await expect(readImageAsDataUrl('/Users/test/large.png'))
-        .rejects.toThrow(FileSizeExceededError);
+      await expect(readImageAsDataUrl('/Users/test/large.png')).rejects.toThrow(
+        FileSizeExceededError,
+      );
     });
 
     it('should accept files exactly at 2MB limit', async () => {
@@ -139,7 +142,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(maxBuffer);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'png',
-        mime: 'image/png'
+        mime: 'image/png',
       });
 
       const result = await readImageAsDataUrl('/Users/test/max-size.png');
@@ -152,51 +155,47 @@ describe('Image Validation Module', () => {
       error.code = 'ENOENT';
       vi.mocked(fs.readFile).mockRejectedValue(error);
 
-      await expect(readImageAsDataUrl('/nonexistent/file.png'))
-        .rejects.toThrow(FileNotFoundError);
+      await expect(readImageAsDataUrl('/nonexistent/file.png')).rejects.toThrow(FileNotFoundError);
     });
 
     it('should throw for empty path', async () => {
-      await expect(readImageAsDataUrl(''))
-        .rejects.toThrow();
+      await expect(readImageAsDataUrl('')).rejects.toThrow();
     });
 
     it('should throw for null path', async () => {
-      await expect(readImageAsDataUrl(null as any))
-        .rejects.toThrow();
+      await expect(readImageAsDataUrl(null as any)).rejects.toThrow();
     });
 
     it('should reject files with path traversal', async () => {
-      await expect(readImageAsDataUrl('../../etc/passwd'))
-        .rejects.toThrow('Invalid path');
+      await expect(readImageAsDataUrl('../../etc/passwd')).rejects.toThrow('Invalid path');
     });
 
     it('should reject files with null byte injection', async () => {
-      await expect(readImageAsDataUrl('image.png\x00.exe'))
-        .rejects.toThrow('Invalid path');
+      await expect(readImageAsDataUrl('image.png\x00.exe')).rejects.toThrow('Invalid path');
     });
 
     it('should handle corrupted files gracefully', async () => {
       vi.mocked(fs.readFile).mockResolvedValue(mockBuffer);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue(undefined);
 
-      await expect(readImageAsDataUrl('/Users/test/corrupted.png'))
-        .rejects.toThrow(InvalidFileTypeError);
+      await expect(readImageAsDataUrl('/Users/test/corrupted.png')).rejects.toThrow(
+        InvalidFileTypeError,
+      );
     });
 
     it('should handle file read errors', async () => {
       vi.mocked(fs.readFile).mockRejectedValue(new Error('Permission denied'));
 
-      await expect(readImageAsDataUrl('/restricted/file.png'))
-        .rejects.toThrow('Permission denied');
+      await expect(readImageAsDataUrl('/restricted/file.png')).rejects.toThrow('Permission denied');
     });
 
     it('should handle fileType detection errors', async () => {
       vi.mocked(fs.readFile).mockResolvedValue(mockBuffer);
       vi.mocked(fileTypeFromBuffer).mockRejectedValue(new Error('Detection failed'));
 
-      await expect(readImageAsDataUrl('/Users/test/unknown.png'))
-        .rejects.toThrow('Detection failed');
+      await expect(readImageAsDataUrl('/Users/test/unknown.png')).rejects.toThrow(
+        'Detection failed',
+      );
     });
   });
 
@@ -230,7 +229,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.stat).mockResolvedValue({
         size: 1024 * 500, // 500KB
         isFile: () => true,
-        isDirectory: () => false
+        isDirectory: () => false,
       } as any);
 
       const size = await getFileSize('/Users/test/file.png');
@@ -241,7 +240,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.stat).mockResolvedValue({
         size: 1024, // 1KB
         isFile: () => true,
-        isDirectory: () => false
+        isDirectory: () => false,
       } as any);
 
       const size = await getFileSize('/Users/test/small.png');
@@ -252,7 +251,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.stat).mockResolvedValue({
         size: 5 * 1024 * 1024, // 5MB
         isFile: () => true,
-        isDirectory: () => false
+        isDirectory: () => false,
       } as any);
 
       const size = await getFileSize('/Users/test/large.png');
@@ -265,7 +264,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.stat).mockResolvedValue({
         size: 1024 * 1024, // 1MB
         isFile: () => true,
-        isDirectory: () => false
+        isDirectory: () => false,
       } as any);
 
       await expect(validateFileSize('/Users/test/small.png')).resolves.not.toThrow();
@@ -275,18 +274,19 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.stat).mockResolvedValue({
         size: 3 * 1024 * 1024, // 3MB
         isFile: () => true,
-        isDirectory: () => false
+        isDirectory: () => false,
       } as any);
 
-      await expect(validateFileSize('/Users/test/large.png'))
-        .rejects.toThrow(FileSizeExceededError);
+      await expect(validateFileSize('/Users/test/large.png')).rejects.toThrow(
+        FileSizeExceededError,
+      );
     });
 
     it('should pass for files at exact limit', async () => {
       vi.mocked(fs.stat).mockResolvedValue({
         size: 2 * 1024 * 1024, // Exactly 2MB
         isFile: () => true,
-        isDirectory: () => false
+        isDirectory: () => false,
       } as any);
 
       await expect(validateFileSize('/Users/test/max.png')).resolves.not.toThrow();
@@ -300,12 +300,7 @@ describe('Image Validation Module', () => {
     });
 
     it('should have correct ALLOWED_IMAGE_TYPES', () => {
-      expect(ALLOWED_IMAGE_TYPES).toEqual([
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-        'image/webp'
-      ]);
+      expect(ALLOWED_IMAGE_TYPES).toEqual(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
       expect(ALLOWED_IMAGE_TYPES).toHaveLength(4);
     });
 
@@ -325,7 +320,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(testBuffer);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'png',
-        mime: 'image/png'
+        mime: 'image/png',
       });
 
       const result = await readImageAsDataUrl('/Users/test/test.png');
@@ -335,12 +330,12 @@ describe('Image Validation Module', () => {
     });
 
     it('should correctly encode binary data', async () => {
-      const binaryBuffer = Buffer.from([0xFF, 0xD8, 0xFF, 0xE0]); // JPEG header
+      const binaryBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0]); // JPEG header
 
       vi.mocked(fs.readFile).mockResolvedValue(binaryBuffer);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'jpg',
-        mime: 'image/jpeg'
+        mime: 'image/jpeg',
       });
 
       const result = await readImageAsDataUrl('/Users/test/binary.jpg');
@@ -357,7 +352,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(imageData);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'jpg',
-        mime: 'image/jpeg'
+        mime: 'image/jpeg',
       });
 
       // Simulate complete handler flow
@@ -376,11 +371,10 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(exeData);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'exe',
-        mime: 'application/x-msdownload'
+        mime: 'application/x-msdownload',
       });
 
-      await expect(readImageAsDataUrl(maliciousPath))
-        .rejects.toThrow(InvalidFileTypeError);
+      await expect(readImageAsDataUrl(maliciousPath)).rejects.toThrow(InvalidFileTypeError);
     });
   });
 
@@ -392,22 +386,24 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(passwdContent);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue(undefined); // Not an image
 
-      await expect(readImageAsDataUrl('/malicious/image.png'))
-        .rejects.toThrow(InvalidFileTypeError);
+      await expect(readImageAsDataUrl('/malicious/image.png')).rejects.toThrow(
+        InvalidFileTypeError,
+      );
     });
 
     it('should reject symlink to executable via MIME validation', async () => {
       // Simulate symlink to /bin/bash or malicious executable
-      const exeData = Buffer.from([0x7F, 0x45, 0x4C, 0x46]); // ELF header
+      const exeData = Buffer.from([0x7f, 0x45, 0x4c, 0x46]); // ELF header
 
       vi.mocked(fs.readFile).mockResolvedValue(exeData);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'elf',
-        mime: 'application/x-executable'
+        mime: 'application/x-executable',
       });
 
-      await expect(readImageAsDataUrl('/malicious/symlink.jpg'))
-        .rejects.toThrow(InvalidFileTypeError);
+      await expect(readImageAsDataUrl('/malicious/symlink.jpg')).rejects.toThrow(
+        InvalidFileTypeError,
+      );
     });
 
     it('should reject symlink to large file via size validation', async () => {
@@ -417,8 +413,9 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(largeBuffer);
 
       // Size check happens before MIME check
-      await expect(readImageAsDataUrl('/malicious/large-symlink.png'))
-        .rejects.toThrow(FileSizeExceededError);
+      await expect(readImageAsDataUrl('/malicious/large-symlink.png')).rejects.toThrow(
+        FileSizeExceededError,
+      );
     });
 
     it('should reject symlink to system file (ssh key)', async () => {
@@ -428,8 +425,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(sshKey);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue(undefined); // Not an image
 
-      await expect(readImageAsDataUrl('/malicious/key.png'))
-        .rejects.toThrow(InvalidFileTypeError);
+      await expect(readImageAsDataUrl('/malicious/key.png')).rejects.toThrow(InvalidFileTypeError);
     });
 
     it('should follow symlink to valid image and accept it', async () => {
@@ -439,7 +435,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(validImageData);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'png',
-        mime: 'image/png'
+        mime: 'image/png',
       });
 
       const result = await readImageAsDataUrl('/symlink/to/valid-image.png');
@@ -452,8 +448,7 @@ describe('Image Validation Module', () => {
       error.code = 'ENOENT';
       vi.mocked(fs.readFile).mockRejectedValue(error);
 
-      await expect(readImageAsDataUrl('/broken/symlink.png'))
-        .rejects.toThrow(FileNotFoundError);
+      await expect(readImageAsDataUrl('/broken/symlink.png')).rejects.toThrow(FileNotFoundError);
     });
 
     it('should prevent symlink chain exploitation', async () => {
@@ -464,8 +459,9 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(sensitiveData);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue(undefined);
 
-      await expect(readImageAsDataUrl('/symlink-chain/attack.png'))
-        .rejects.toThrow(InvalidFileTypeError);
+      await expect(readImageAsDataUrl('/symlink-chain/attack.png')).rejects.toThrow(
+        InvalidFileTypeError,
+      );
     });
 
     it('should sanitize symlink target paths in error messages', async () => {
@@ -489,8 +485,7 @@ describe('Image Validation Module', () => {
       error.code = 'EISDIR';
       vi.mocked(fs.readFile).mockRejectedValue(error);
 
-      await expect(readImageAsDataUrl('/symlink-to-dir'))
-        .rejects.toThrow();
+      await expect(readImageAsDataUrl('/symlink-to-dir')).rejects.toThrow();
     });
   });
 
@@ -503,7 +498,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(largeBuffer);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'png',
-        mime: 'image/png'
+        mime: 'image/png',
       });
 
       await readImageAsDataUrl('/large/image.png');
@@ -519,19 +514,19 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(imageBuffer);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'png',
-        mime: 'image/png'
+        mime: 'image/png',
       });
 
       // Simulate 10 concurrent image reads
       const promises = Array.from({ length: 10 }, (_, i) =>
-        readImageAsDataUrl(`/concurrent/image-${i}.png`)
+        readImageAsDataUrl(`/concurrent/image-${i}.png`),
       );
 
       const results = await Promise.all(promises);
 
       // All should succeed
       expect(results).toHaveLength(10);
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result).toMatch(/^data:image\/png;base64,/);
       });
     });
@@ -551,19 +546,18 @@ describe('Image Validation Module', () => {
 
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'png',
-        mime: 'image/png'
+        mime: 'image/png',
       });
 
       const promises = Array.from({ length: 6 }, (_, i) =>
-        readImageAsDataUrl(`/mixed/image-${i}.png`)
-          .catch(err => ({ error: err.message }))
+        readImageAsDataUrl(`/mixed/image-${i}.png`).catch((err) => ({ error: err.message })),
       );
 
       const results = await Promise.all(promises);
 
       // Check we have mix of success and failure
-      const successes = results.filter(r => typeof r === 'string');
-      const failures = results.filter(r => typeof r === 'object' && 'error' in r);
+      const successes = results.filter((r) => typeof r === 'string');
+      const failures = results.filter((r) => typeof r === 'object' && 'error' in r);
 
       expect(successes.length).toBe(3); // Odd indices
       expect(failures.length).toBe(3); // Even indices
@@ -573,8 +567,7 @@ describe('Image Validation Module', () => {
       // Test that path validation happens before expensive file read
       const start = Date.now();
 
-      await expect(readImageAsDataUrl('../../etc/passwd'))
-        .rejects.toThrow();
+      await expect(readImageAsDataUrl('../../etc/passwd')).rejects.toThrow();
 
       const duration = Date.now() - start;
 
@@ -589,7 +582,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(imageBuffer);
       vi.mocked(fileTypeFromBuffer).mockResolvedValue({
         ext: 'png',
-        mime: 'image/png'
+        mime: 'image/png',
       });
 
       const start = Date.now();
@@ -613,8 +606,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(hugeBuffer);
 
       // Should throw without processing the full buffer
-      await expect(readImageAsDataUrl('/huge/file.png'))
-        .rejects.toThrow(FileSizeExceededError);
+      await expect(readImageAsDataUrl('/huge/file.png')).rejects.toThrow(FileSizeExceededError);
 
       // Verify MIME check never ran (failed at size check)
       expect(fileTypeFromBuffer).not.toHaveBeenCalled();
@@ -623,13 +615,13 @@ describe('Image Validation Module', () => {
     it('should handle concurrent operations with different error types', async () => {
       // Mock different scenarios BEFORE creating promises
       vi.mocked(fs.readFile)
-        .mockResolvedValueOnce(Buffer.from('VALID'))       // valid.png
+        .mockResolvedValueOnce(Buffer.from('VALID')) // valid.png
         .mockResolvedValueOnce(Buffer.alloc(3 * 1024 * 1024)) // large.png
-        .mockResolvedValueOnce(Buffer.from('EXE'))         // executable.png
+        .mockResolvedValueOnce(Buffer.from('EXE')) // executable.png
         .mockRejectedValueOnce(Object.assign(new Error('ENOENT'), { code: 'ENOENT' })); // missing.png
 
       vi.mocked(fileTypeFromBuffer)
-        .mockResolvedValueOnce({ ext: 'png', mime: 'image/png' })  // valid
+        .mockResolvedValueOnce({ ext: 'png', mime: 'image/png' }) // valid
         .mockResolvedValueOnce({ ext: 'exe', mime: 'application/x-msdownload' }); // executable
 
       const promises = [
@@ -659,8 +651,7 @@ describe('Image Validation Module', () => {
       vi.mocked(fs.readFile).mockResolvedValue(buffer);
       vi.mocked(fileTypeFromBuffer).mockRejectedValue(new Error('Detection failed'));
 
-      await expect(readImageAsDataUrl('/test.png'))
-        .rejects.toThrow('Detection failed');
+      await expect(readImageAsDataUrl('/test.png')).rejects.toThrow('Detection failed');
 
       // Buffer should be eligible for garbage collection
       // (In real code, ensure no lingering references)
@@ -673,16 +664,14 @@ describe('Image Validation Module', () => {
 
       vi.mocked(fs.readFile).mockRejectedValue(error);
 
-      await expect(readImageAsDataUrl('/test.png'))
-        .rejects.toThrow();
+      await expect(readImageAsDataUrl('/test.png')).rejects.toThrow();
     });
 
     it('should handle corrupted buffers', async () => {
       // Empty buffer (0 bytes)
       vi.mocked(fs.readFile).mockResolvedValue(Buffer.alloc(0));
 
-      await expect(readImageAsDataUrl('/empty.png'))
-        .rejects.toThrow();
+      await expect(readImageAsDataUrl('/empty.png')).rejects.toThrow();
     });
 
     it('should handle filesystem permission errors', async () => {
@@ -691,8 +680,7 @@ describe('Image Validation Module', () => {
 
       vi.mocked(fs.readFile).mockRejectedValue(error);
 
-      await expect(readImageAsDataUrl('/restricted.png'))
-        .rejects.toThrow();
+      await expect(readImageAsDataUrl('/restricted.png')).rejects.toThrow();
     });
 
     it('should handle read-only filesystem errors', async () => {
@@ -701,8 +689,7 @@ describe('Image Validation Module', () => {
 
       vi.mocked(fs.readFile).mockRejectedValue(error);
 
-      await expect(readImageAsDataUrl('/readonly/file.png'))
-        .rejects.toThrow();
+      await expect(readImageAsDataUrl('/readonly/file.png')).rejects.toThrow();
     });
   });
 });

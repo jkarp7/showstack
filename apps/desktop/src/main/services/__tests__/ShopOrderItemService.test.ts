@@ -11,7 +11,7 @@ vi.mock('../../database/queries/shop-order', () => ({
   getItemsByProjectId: vi.fn(),
   createShopOrderItem: vi.fn(),
   updateShopOrderItem: vi.fn(),
-  deleteShopOrderItem: vi.fn()
+  deleteShopOrderItem: vi.fn(),
 }));
 
 vi.mock('../../errors', async () => {
@@ -19,8 +19,8 @@ vi.mock('../../errors', async () => {
   return {
     ...actual,
     errorHandler: {
-      executeWithRetry: vi.fn(async (fn) => fn())
-    }
+      executeWithRetry: vi.fn(async (fn) => fn()),
+    },
   };
 });
 
@@ -30,7 +30,7 @@ import {
   getItemsByProjectId,
   createShopOrderItem,
   updateShopOrderItem,
-  deleteShopOrderItem
+  deleteShopOrderItem,
 } from '../../database/queries/shop-order';
 
 const mockGetBySectionId = vi.mocked(getItemsBySectionId);
@@ -53,7 +53,7 @@ describe('ShopOrderItemService', () => {
     venue_active: 0,
     venue_spare: 0,
     created_at: Date.now(),
-    updated_at: Date.now()
+    updated_at: Date.now(),
   };
 
   const mockItems = [
@@ -69,8 +69,8 @@ describe('ShopOrderItemService', () => {
       venue_active: 0,
       venue_spare: 0,
       created_at: Date.now(),
-      updated_at: Date.now()
-    }
+      updated_at: Date.now(),
+    },
   ];
 
   beforeEach(() => {
@@ -185,15 +185,21 @@ describe('ShopOrderItemService', () => {
 
     it('should throw ValidationError when section_id is missing', async () => {
       await expect(service.create({ description: 'Par 64' })).rejects.toThrow(ValidationError);
-      await expect(service.create({ description: 'Par 64' })).rejects.toThrow('Section ID is required');
+      await expect(service.create({ description: 'Par 64' })).rejects.toThrow(
+        'Section ID is required',
+      );
     });
 
     it('should throw ValidationError when section_id is empty string', async () => {
-      await expect(service.create({ section_id: '', description: 'Par 64' })).rejects.toThrow(ValidationError);
+      await expect(service.create({ section_id: '', description: 'Par 64' })).rejects.toThrow(
+        ValidationError,
+      );
     });
 
     it('should throw ValidationError when section_id is whitespace only', async () => {
-      await expect(service.create({ section_id: '   ', description: 'Par 64' })).rejects.toThrow(ValidationError);
+      await expect(service.create({ section_id: '   ', description: 'Par 64' })).rejects.toThrow(
+        ValidationError,
+      );
     });
 
     it('should throw ValidationError with correct field for section_id', async () => {
@@ -207,15 +213,21 @@ describe('ShopOrderItemService', () => {
 
     it('should throw ValidationError when description is missing', async () => {
       await expect(service.create({ section_id: 'section-1' })).rejects.toThrow(ValidationError);
-      await expect(service.create({ section_id: 'section-1' })).rejects.toThrow('Item description is required');
+      await expect(service.create({ section_id: 'section-1' })).rejects.toThrow(
+        'Item description is required',
+      );
     });
 
     it('should throw ValidationError when description is empty string', async () => {
-      await expect(service.create({ section_id: 'section-1', description: '' })).rejects.toThrow(ValidationError);
+      await expect(service.create({ section_id: 'section-1', description: '' })).rejects.toThrow(
+        ValidationError,
+      );
     });
 
     it('should throw ValidationError when description is whitespace only', async () => {
-      await expect(service.create({ section_id: 'section-1', description: '   ' })).rejects.toThrow(ValidationError);
+      await expect(service.create({ section_id: 'section-1', description: '   ' })).rejects.toThrow(
+        ValidationError,
+      );
     });
 
     it('should throw ValidationError with correct field for description', async () => {
@@ -250,7 +262,7 @@ describe('ShopOrderItemService', () => {
         section_id: 'section-1',
         description: 'Moving Light',
         active_qty: 20,
-        spare_qty: 4
+        spare_qty: 4,
       };
       mockCreate.mockResolvedValue({ ...mockItem, ...input } as any);
 
@@ -273,7 +285,9 @@ describe('ShopOrderItemService', () => {
 
     it('should throw ValidationError for empty id', async () => {
       await expect(service.update('', { description: 'Desc' })).rejects.toThrow(ValidationError);
-      await expect(service.update('', { description: 'Desc' })).rejects.toThrow('Item ID is required');
+      await expect(service.update('', { description: 'Desc' })).rejects.toThrow(
+        'Item ID is required',
+      );
     });
 
     it('should throw ValidationError for whitespace-only id', async () => {
@@ -291,11 +305,15 @@ describe('ShopOrderItemService', () => {
 
     it('should throw ValidationError when description is explicitly empty string', async () => {
       await expect(service.update('item-1', { description: '' })).rejects.toThrow(ValidationError);
-      await expect(service.update('item-1', { description: '' })).rejects.toThrow('Item description cannot be empty');
+      await expect(service.update('item-1', { description: '' })).rejects.toThrow(
+        'Item description cannot be empty',
+      );
     });
 
     it('should throw ValidationError when description is whitespace only', async () => {
-      await expect(service.update('item-1', { description: '   ' })).rejects.toThrow(ValidationError);
+      await expect(service.update('item-1', { description: '   ' })).rejects.toThrow(
+        ValidationError,
+      );
     });
 
     it('should throw ValidationError with correct field for description', async () => {

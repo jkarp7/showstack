@@ -24,7 +24,7 @@ describe('ValidationError', () => {
         'Invalid email',
         'email',
         'not-an-email',
-        'Must be valid email format'
+        'Must be valid email format',
       );
 
       expect(error.constraint).toBe('Must be valid email format');
@@ -44,7 +44,7 @@ describe('ValidationError', () => {
         'Technical error',
         'password',
         'short',
-        'Must be at least 8 characters'
+        'Must be at least 8 characters',
       );
 
       expect(error.toUserMessage()).toBe('Invalid password: Must be at least 8 characters');
@@ -57,12 +57,7 @@ describe('ValidationError', () => {
     });
 
     it('should handle special characters in field names', () => {
-      const error = new ValidationError(
-        'Invalid',
-        'user_email',
-        'test',
-        'Format error'
-      );
+      const error = new ValidationError('Invalid', 'user_email', 'test', 'Format error');
 
       expect(error.toUserMessage()).toBe('Invalid user_email: Format error');
     });
@@ -140,7 +135,7 @@ describe('ValidationError', () => {
 
       expect(errors.toUserMessages()).toEqual([
         'Invalid name: Cannot be empty',
-        'Invalid email: Must be valid email'
+        'Invalid email: Must be valid email',
       ]);
     });
 
@@ -151,7 +146,7 @@ describe('ValidationError', () => {
 
       expect(errors.toUserMessages()).toEqual([
         'Invalid username: Field is required',
-        'Invalid age: Field is invalid'
+        'Invalid age: Field is invalid',
       ]);
     });
 

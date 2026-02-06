@@ -15,13 +15,13 @@ export function registerPaperworkHandlers(): void {
     try {
       return await errorHandler.executeWithRetry(
         async () => paperworkTemplateQueries.getAllPaperworkTemplates(reportType),
-        'paperwork-templates:getAll'
+        'paperwork-templates:getAll',
       );
     } catch (error) {
       console.error('Failed to get paperwork templates:', {
         operation: 'paperwork-templates:getAll',
         reportType,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -36,13 +36,13 @@ export function registerPaperworkHandlers(): void {
     try {
       return await errorHandler.executeWithRetry(
         async () => paperworkTemplateQueries.getPaperworkTemplateById(id),
-        'paperwork-templates:getById'
+        'paperwork-templates:getById',
       );
     } catch (error) {
       console.error('Failed to get paperwork template:', {
         operation: 'paperwork-templates:getById',
         id,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -62,13 +62,13 @@ export function registerPaperworkHandlers(): void {
 
       return await errorHandler.executeWithRetry(
         async () => paperworkTemplateQueries.createPaperworkTemplate(data),
-        'paperwork-templates:create'
+        'paperwork-templates:create',
       );
     } catch (error) {
       console.error('Failed to create paperwork template:', {
         operation: 'paperwork-templates:create',
         data,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof ValidationError) {
@@ -91,14 +91,14 @@ export function registerPaperworkHandlers(): void {
 
       return await errorHandler.executeWithRetry(
         async () => paperworkTemplateQueries.updatePaperworkTemplate(id, updates),
-        'paperwork-templates:update'
+        'paperwork-templates:update',
       );
     } catch (error) {
       console.error('Failed to update paperwork template:', {
         operation: 'paperwork-templates:update',
         id,
         updates,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof ValidationError) {
@@ -116,13 +116,13 @@ export function registerPaperworkHandlers(): void {
     try {
       return await errorHandler.executeWithRetry(
         async () => paperworkTemplateQueries.deletePaperworkTemplate(id),
-        'paperwork-templates:delete'
+        'paperwork-templates:delete',
       );
     } catch (error) {
       console.error('Failed to delete paperwork template:', {
         operation: 'paperwork-templates:delete',
         id,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -137,14 +137,14 @@ export function registerPaperworkHandlers(): void {
     try {
       return await errorHandler.executeWithRetry(
         async () => paperworkTemplateQueries.duplicatePaperworkTemplate(id, newName),
-        'paperwork-templates:duplicate'
+        'paperwork-templates:duplicate',
       );
     } catch (error) {
       console.error('Failed to duplicate paperwork template:', {
         operation: 'paperwork-templates:duplicate',
         id,
         newName,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
       if (error instanceof DatabaseError) {
@@ -159,87 +159,96 @@ export function registerPaperworkHandlers(): void {
   // ============================================
 
   // Export Paperwork Report to PDF using Puppeteer
-  ipcMain.handle('paperwork:exportPDF', async (_event, htmlContent: string, filename: string, pageSettings: any, fontFamily?: string) => {
-    let browser;
-    try {
-      // Validation
-      if (!htmlContent || htmlContent.trim().length === 0) {
-        throw new ValidationError('HTML content is required', 'htmlContent', htmlContent);
-      }
-      if (!filename || filename.trim().length === 0) {
-        throw new ValidationError('Filename is required', 'filename', filename);
-      }
+  ipcMain.handle(
+    'paperwork:exportPDF',
+    async (
+      _event,
+      htmlContent: string,
+      filename: string,
+      pageSettings: any,
+      fontFamily?: string,
+    ) => {
+      let browser;
+      try {
+        // Validation
+        if (!htmlContent || htmlContent.trim().length === 0) {
+          throw new ValidationError('HTML content is required', 'htmlContent', htmlContent);
+        }
+        if (!filename || filename.trim().length === 0) {
+          throw new ValidationError('Filename is required', 'filename', filename);
+        }
 
-      // Show save dialog
-      const mainWindow = BrowserWindow.getFocusedWindow();
-      if (!mainWindow) {
-        throw new Error('No active window');
-      }
+        // Show save dialog
+        const mainWindow = BrowserWindow.getFocusedWindow();
+        if (!mainWindow) {
+          throw new Error('No active window');
+        }
 
-      const result = await dialog.showSaveDialog(mainWindow, {
-        title: 'Export PDF',
-        defaultPath: filename,
-        filters: [{ name: 'PDF Files', extensions: ['pdf'] }],
-      });
+        const result = await dialog.showSaveDialog(mainWindow, {
+          title: 'Export PDF',
+          defaultPath: filename,
+          filters: [{ name: 'PDF Files', extensions: ['pdf'] }],
+        });
 
-      if (result.canceled || !result.filePath) {
-        return { success: false, canceled: true };
-      }
+        if (result.canceled || !result.filePath) {
+          return { success: false, canceled: true };
+        }
 
-      console.log('📄 Launching Puppeteer for PDF generation...');
+        console.log('📄 Launching Puppeteer for PDF generation...');
 
-      // Launch Puppeteer browser
-      browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      });
+        // Launch Puppeteer browser
+        browser = await puppeteer.launch({
+          headless: true,
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        });
 
-      const page = await browser.newPage();
+        const page = await browser.newPage();
 
-      // Set the HTML content
-      await page.setContent(htmlContent, {
-        waitUntil: 'networkidle0',
-      });
+        // Set the HTML content
+        await page.setContent(htmlContent, {
+          waitUntil: 'networkidle0',
+        });
 
-      // Apply grayscale filter if black & white mode
-      if (pageSettings?.colorMode === 'bw') {
-        console.log('📄 Applying grayscale filter for black & white mode...');
-        await page.addStyleTag({
-          content: `
+        // Apply grayscale filter if black & white mode
+        if (pageSettings?.colorMode === 'bw') {
+          console.log('📄 Applying grayscale filter for black & white mode...');
+          await page.addStyleTag({
+            content: `
             body {
               -webkit-filter: grayscale(100%);
               filter: grayscale(100%);
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
             }
-          `
-        });
-      }
+          `,
+          });
+        }
 
-      console.log('📄 Generating PDF with Puppeteer...');
+        console.log('📄 Generating PDF with Puppeteer...');
 
-      // Map page size names to Puppeteer format
-      const pageSizeMap: Record<string, any> = {
-        'letter': 'Letter',
-        'legal': 'Legal',
-        'a4': 'A4',
-        'tabloid': 'Tabloid',
-      };
+        // Map page size names to Puppeteer format
+        const pageSizeMap: Record<string, any> = {
+          letter: 'Letter',
+          legal: 'Legal',
+          a4: 'A4',
+          tabloid: 'Tabloid',
+        };
 
-      // Generate PDF with Puppeteer
-      const userName = 'User'; // TODO: Get from user preferences
-      // Escape font family for use in CSS - remove any existing quotes and re-wrap
-      const footerFontFamily = (fontFamily || '-apple-system, BlinkMacSystemFont, Segoe UI, Arial, sans-serif')
-        .replace(/["']/g, ''); // Remove quotes
+        // Generate PDF with Puppeteer
+        const userName = 'User'; // TODO: Get from user preferences
+        // Escape font family for use in CSS - remove any existing quotes and re-wrap
+        const footerFontFamily = (
+          fontFamily || '-apple-system, BlinkMacSystemFont, Segoe UI, Arial, sans-serif'
+        ).replace(/["']/g, ''); // Remove quotes
 
-      await page.pdf({
-        path: result.filePath,
-        format: pageSizeMap[pageSettings.size] || 'Letter',
-        landscape: pageSettings.orientation === 'landscape',
-        printBackground: true,
-        displayHeaderFooter: true,
-        headerTemplate: '<div></div>', // Empty header - we use the custom header in the HTML
-        footerTemplate: `
+        await page.pdf({
+          path: result.filePath,
+          format: pageSizeMap[pageSettings.size] || 'Letter',
+          landscape: pageSettings.orientation === 'landscape',
+          printBackground: true,
+          displayHeaderFooter: true,
+          headerTemplate: '<div></div>', // Empty header - we use the custom header in the HTML
+          footerTemplate: `
           <div style="
             width: 100%;
             font-family: ${footerFontFamily};
@@ -255,43 +264,46 @@ export function registerPaperworkHandlers(): void {
             <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
           </div>
         `,
-        margin: {
-          top: `${pageSettings.marginTop || 0.5}in`,
-          bottom: `${pageSettings.marginBottom || 0.75}in`, // Slightly larger to fit footer
-          left: `${pageSettings.marginLeft || 0.5}in`,
-          right: `${pageSettings.marginRight || 0.5}in`,
-        },
-      });
+          margin: {
+            top: `${pageSettings.marginTop || 0.5}in`,
+            bottom: `${pageSettings.marginBottom || 0.75}in`, // Slightly larger to fit footer
+            left: `${pageSettings.marginLeft || 0.5}in`,
+            right: `${pageSettings.marginRight || 0.5}in`,
+          },
+        });
 
-      console.log('✅ PDF generated successfully with Puppeteer');
+        console.log('✅ PDF generated successfully with Puppeteer');
 
-      await browser.close();
+        await browser.close();
 
-      return {
-        success: true,
-        filePath: result.filePath,
-      };
-    } catch (error) {
-      console.error('Failed to export PDF:', {
-        operation: 'paperwork:exportPDF',
-        filename,
-        error: error instanceof Error ? error.message : error
-      });
+        return {
+          success: true,
+          filePath: result.filePath,
+        };
+      } catch (error) {
+        console.error('Failed to export PDF:', {
+          operation: 'paperwork:exportPDF',
+          filename,
+          error: error instanceof Error ? error.message : error,
+        });
 
-      if (browser) {
-        try {
-          await browser.close();
-        } catch (closeError) {
-          console.error('Failed to close browser:', closeError);
+        if (browser) {
+          try {
+            await browser.close();
+          } catch (closeError) {
+            console.error('Failed to close browser:', closeError);
+          }
         }
-      }
 
-      if (error instanceof ValidationError) {
-        throw new Error(error.toUserMessage());
+        if (error instanceof ValidationError) {
+          throw new Error(error.toUserMessage());
+        }
+        throw new Error(
+          `Unable to export PDF: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
       }
-      throw new Error(`Unable to export PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  });
+    },
+  );
 
   console.log('✅ Paperwork IPC handlers registered');
 }

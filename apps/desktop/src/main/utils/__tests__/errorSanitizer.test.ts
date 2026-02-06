@@ -3,7 +3,7 @@ import {
   sanitizeError,
   sanitizeFilePath,
   sanitizeErrorForLogging,
-  createUserFriendlyError
+  createUserFriendlyError,
 } from '../errorSanitizer';
 import {
   InvalidFileTypeError,
@@ -11,7 +11,7 @@ import {
   FileNotFoundError,
   PathTraversalError,
   NullByteError,
-  InvalidPathError
+  InvalidPathError,
 } from '../errors';
 
 /**
@@ -292,7 +292,9 @@ describe('Error Sanitizer - Security', () => {
     });
 
     it('should handle multiple paths in one error', () => {
-      const error = new Error('Copy failed from /Users/john/secret/a.txt to /Users/john/secret/b.txt');
+      const error = new Error(
+        'Copy failed from /Users/john/secret/a.txt to /Users/john/secret/b.txt',
+      );
       const result = sanitizeError(error);
 
       expect(result).not.toContain('/Users/john/secret');

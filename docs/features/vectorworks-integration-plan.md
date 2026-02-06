@@ -14,6 +14,7 @@
 ## Overview
 
 This plan implements complete bidirectional Vectorworks integration for ShowStack, providing:
+
 - **Import** Vectorworks XML files into ShowStack
 - **Export** ShowStack fixtures to Vectorworks XML
 - **MVR Export** Industry-standard format for visualizers/consoles
@@ -25,27 +26,32 @@ This plan implements complete bidirectional Vectorworks integration for ShowStac
 ## Architecture Decisions
 
 ### 1. XML Library: `fast-xml-parser`
+
 - 2-3x faster than xml2js (critical for 1000+ fixture files)
 - Native TypeScript support
 - Built-in XSD validation
 - Already used in GrandMA export
 
 ### 2. File Processing: Main Process (Node.js)
+
 - Follows Electron security best practices
 - Matches existing InfrastructureImportDialog pattern
 - Centralized security validation
 
 ### 3. State Management: Zustand Store
+
 - `vectorworksStore.ts` for reconciliation UI state
 - Existing `fixtureStore.ts` unchanged
 - Follows existing pattern
 
 ### 4. Undo/Redo: YES - Use Existing Command Pattern
+
 - `ImportVectorworksCommand` for fixture import
 - `ReconcileVectorworksCommand` for conflict resolution
 - Critical for user safety (bulk operations)
 
 ### 5. Field Mapping: User-Defined from Start
+
 - **Phase 1:** User-configurable field mapping in import wizard (like infrastructure import)
 - Auto-map common fields (channel, universe, dmx_address, position, etc.)
 - Allow users to skip unnecessary fields (not all Vectorworks fields needed for lighting paperwork)
@@ -53,13 +59,16 @@ This plan implements complete bidirectional Vectorworks integration for ShowStac
 - **Rationale:** Many Vectorworks fields (focus cuts, scenery, etc.) aren't needed for typical lighting workflows
 
 ### 6. Field Selection Philosophy
+
 Users should control which Vectorworks fields to import:
+
 - **Core fields** always mapped: position, unit, type, channel, universe, dmx_address
 - **Optional fields** user selects: color, gobo, wattage, focus data, Vectorworks coordinates
 - **Skip unnecessary** fields that aren't relevant to their workflow
 - **Save preferences** so subsequent imports use same mappings
 
 ### 7. Reconciliation Matching Logic
+
 1. **Primary:** Match by `vw_uid` field (exact)
 2. **Fallback:** Match by position + unit_number + type (fuzzy)
 3. **Last Resort:** Manual user selection
@@ -108,11 +117,13 @@ src/main/database/projectSchema.ts            (Add field_mapping_preferences tab
 ### Key Implementation Details
 
 #### 1. Add Dependency
+
 ```bash
 npm install fast-xml-parser@4.3.3
 ```
 
 #### 2. Create Vectorworks Parser
+
 **File:** `src/main/utils/vectorworksParser.ts`
 
 ```typescript
@@ -164,9 +175,11 @@ export class VectorworksParser {
 ```
 
 #### 3. Create Field Mapper
+
 **File:** `src/main/utils/vectorworksFieldMapper.ts`
 
 **Default Auto-Mapping (user can override):**
+
 - `Instrument Type` → `type`
 - `Unit Number` → `unit_number`
 - `Channel` → `channel`
@@ -179,10 +192,12 @@ export class VectorworksParser {
 - `Purpose` → `purpose`
 
 **Always Map (Required):**
+
 - `UID` → `vw_uid` (for reconciliation)
 - `Layer` → `vw_layer` (preserve Vectorworks data)
 
 **User Selects (Optional):**
+
 - All other fields are opt-in via field mapping UI
 - Common skipped fields: focus cuts, scenery, Vectorworks coordinates (unless doing 3D work)
 
@@ -199,10 +214,7 @@ export class VectorworksFieldMapper {
   }
 
   // Apply user-configured mappings
-  mapToFixture(
-    vwFixture: VectorworksFixture,
-    fieldMappings: FieldMapping[]
-  ): Partial<Fixture> {
+  mapToFixture(vwFixture: VectorworksFixture, fieldMappings: FieldMapping[]): Partial<Fixture> {
     const result: Partial<Fixture> = {
       vw_uid: vwFixture.uid, // Always map
       import_source: 'vectorworks',
@@ -222,6 +234,7 @@ export class VectorworksFieldMapper {
 ```
 
 #### 4. Create IPC Handlers
+
 **File:** `src/main/ipc/vectorworks.ts`
 
 ```typescript
@@ -230,13 +243,13 @@ ipcMain.handle('vectorworks:showImportDialog', async () => {
     properties: ['openFile'],
     filters: [
       { name: 'Vectorworks Files', extensions: ['xml', 'vwx'] },
-      { name: 'All Files', extensions: ['*'] }
-    ]
+      { name: 'All Files', extensions: ['*'] },
+    ],
   });
 
   return {
     canceled: result.canceled,
-    filePath: result.filePaths[0]
+    filePath: result.filePaths[0],
   };
 });
 
@@ -252,26 +265,31 @@ ipcMain.handle('vectorworks:getAvailableFields', async (_event, filePath: string
   return { success: true, fields };
 });
 
-ipcMain.handle('vectorworks:import', async (
-  _event,
-  projectId: string,
-  fixtures: Partial<Fixture>[],
-  fieldMappings: FieldMapping[]
-) => {
-  // Save field mapping preferences for this project
-  await saveFieldMappingPreference(projectId, fieldMappings);
+ipcMain.handle(
+  'vectorworks:import',
+  async (
+    _event,
+    projectId: string,
+    fixtures: Partial<Fixture>[],
+    fieldMappings: FieldMapping[],
+  ) => {
+    // Save field mapping preferences for this project
+    await saveFieldMappingPreference(projectId, fieldMappings);
 
-  // Import fixtures to database
-  // Return import result
-});
+    // Import fixtures to database
+    // Return import result
+  },
+);
 ```
 
 #### 5. Create Import Dialog with Field Mapping
+
 **File:** `src/renderer/src/components/fixture/VectorworksImportDialog.tsx`
 
 **Pattern:** Multi-step wizard (matches InfrastructureImportDialog.tsx)
 
 Steps:
+
 1. **Select File** - File picker for Vectorworks XML
 2. **Map Fields** - User selects which Vectorworks fields to import
    - Auto-map common fields (channel, universe, position, etc.)
@@ -283,6 +301,7 @@ Steps:
 5. **Complete** - Success/error summary
 
 **Field Mapping UI:**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │ Map Vectorworks Fields to ShowStack             │
@@ -304,6 +323,7 @@ Steps:
 ```
 
 #### 6. Field Mapping Preferences Storage
+
 **Database Schema Addition:**
 
 ```sql
@@ -321,12 +341,14 @@ CREATE TABLE IF NOT EXISTS field_mapping_preferences (
 ### Testing Strategy
 
 **Coverage Targets:**
+
 - Parser: 80%+ (critical utility)
 - Field Mapper: 80%+ (critical utility)
 - IPC Handlers: 70%+ (IPC handlers)
 - Components: 50%+ (UI components)
 
 **Key Tests:**
+
 - Valid Vectorworks 2024 XML parsing
 - Invalid XML rejection
 - Empty fixture list handling
@@ -338,6 +360,7 @@ CREATE TABLE IF NOT EXISTS field_mapping_preferences (
 - Security validations (path traversal)
 
 ### Deliverables
+
 - [x] XML parser with 80%+ coverage
 - [x] Field mapper with configurable mappings and 80%+ coverage
 - [x] IPC handlers with 70%+ coverage
@@ -379,6 +402,7 @@ src/renderer/src/pages/modules/EquipmentManager.tsx  (Add menu item)
 ### Key Implementation Details
 
 #### 1. Create XML Exporter
+
 **File:** `src/main/utils/vectorworksExporter.ts`
 
 ```typescript
@@ -393,9 +417,9 @@ export class VectorworksExporter {
         '@_version': '2024',
         Layer: {
           '@_name': 'Lighting',
-          LightObject: fixtures.map(f => this.fixtureToVectorworks(f))
-        }
-      }
+          LightObject: fixtures.map((f) => this.fixtureToVectorworks(f)),
+        },
+      },
     };
 
     return this.builder.build(document);
@@ -419,19 +443,14 @@ export class VectorworksExporter {
 ```
 
 #### 2. Add Export IPC Handler
+
 **File:** `src/main/ipc/vectorworks.ts`
 
 ```typescript
-ipcMain.handle('vectorworks:export', async (
-  _event,
-  projectId: string,
-  fixtureIds?: string[]
-) => {
+ipcMain.handle('vectorworks:export', async (_event, projectId: string, fixtureIds?: string[]) => {
   // Get fixtures
   const allFixtures = await getAllFixtures(projectId);
-  const fixtures = fixtureIds
-    ? allFixtures.filter(f => fixtureIds.includes(f.id))
-    : allFixtures;
+  const fixtures = fixtureIds ? allFixtures.filter((f) => fixtureIds.includes(f.id)) : allFixtures;
 
   // Generate XML
   const exporter = new VectorworksExporter();
@@ -445,12 +464,14 @@ ipcMain.handle('vectorworks:export', async (
 ### Testing Strategy
 
 **Key Tests:**
+
 - Generate valid Vectorworks 2024 XML
 - Preserve Vectorworks-specific fields
 - Handle fixtures without Vectorworks data
 - **Round-trip testing:** Import → Export → Import (data integrity)
 
 ### Deliverables
+
 - [x] XML exporter with 80%+ coverage
 - [x] Round-trip tests
 - [x] Export dialog with options
@@ -484,14 +505,17 @@ src/main/ipc/vectorworks.ts                   (Add MVR export handler)
 ### Key Implementation Details
 
 #### 1. Add Dependency
+
 ```bash
 npm install adm-zip@0.5.10
 ```
 
 #### 2. Create MVR Exporter
+
 **File:** `src/main/utils/mvrExporter.ts`
 
 MVR format = ZIP archive containing:
+
 - `GeneralSceneDescription.xml` (Vectorworks format)
 - `manifest.xml` (MVR metadata)
 - Optional: 3D geometry (future phase)
@@ -522,12 +546,14 @@ export class MVRExporter {
 ### Testing Strategy
 
 **Key Tests:**
+
 - Valid MVR file creation (ZIP structure)
 - GeneralSceneDescription.xml validity
 - Manifest.xml structure
 - File extraction and validation
 
 ### Deliverables
+
 - [x] MVR exporter with 70%+ coverage
 - [x] MVR validation tests
 - [x] IPC handler
@@ -574,6 +600,7 @@ src/renderer/src/commands/
 ### Key Implementation Details
 
 #### 1. Create Reconciliation Store
+
 **File:** `src/renderer/src/store/vectorworksStore.ts`
 
 ```typescript
@@ -605,19 +632,23 @@ export const useVectorworksStore = create<VectorworksStore>((set, get) => ({
 ```
 
 #### 2. Create Reconciliation Engine
+
 **File:** `src/renderer/src/utils/reconciliationUtils.ts`
 
 **Matching Logic:**
+
 1. Try exact match by `vw_uid`
 2. Fallback: fuzzy match by `position` + `unit_number` + `type`
 3. Detect field-level conflicts
 
 **Conflict Detection:**
+
 - Compare all imported fields (based on user's field mapping)
 - Flag differences where both values are non-null
 - Store conflicts for user resolution
 
 #### 3. Create Vectorworks Commands
+
 **File:** `src/renderer/src/commands/vectorworksCommands.ts`
 
 ```typescript
@@ -651,9 +682,11 @@ export class ReconcileVectorworksCommand implements Command {
 ```
 
 #### 4. Create Reconciliation UI
+
 **File:** `src/renderer/src/components/fixture/VectorworksReconciliationDialog.tsx`
 
 **UI Layout:**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │ Reconcile with Vectorworks                      │
@@ -672,6 +705,7 @@ export class ReconcileVectorworksCommand implements Command {
 ```
 
 **Expanded Row (Field Diff):**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │ Channel                                          │
@@ -686,6 +720,7 @@ export class ReconcileVectorworksCommand implements Command {
 ### Testing Strategy
 
 **Key Tests:**
+
 - Fixture matching (exact, fuzzy, none)
 - Conflict detection (all field types)
 - Resolution application
@@ -693,6 +728,7 @@ export class ReconcileVectorworksCommand implements Command {
 - Component interactions
 
 ### Deliverables
+
 - [x] Reconciliation engine with 80%+ coverage
 - [x] Vectorworks commands with 70%+ coverage
 - [x] Reconciliation UI with 50%+ coverage
@@ -711,27 +747,35 @@ export class ReconcileVectorworksCommand implements Command {
 ### Implementation Steps
 
 #### 1. Menu Integration
+
 Add to Equipment Manager menu:
+
 - File → Import → From Vectorworks...
 - File → Export → To Vectorworks...
 - File → Export → To MVR...
 - File → Import → Reconcile with Vectorworks...
 
 #### 2. Error Handling
+
 Global error handling with actionable messages:
+
 - `PARSE_ERROR` → "Failed to parse Vectorworks file. Please check the file format."
 - `UNSUPPORTED_VERSION` → "This Vectorworks file version is not supported. Please export as Vectorworks 2024 XML."
 - `IMPORT_FAILED` → "Import failed. Check fixture data for errors."
 
 #### 3. Progress Indicators
+
 For large operations (1000+ fixtures):
+
 - Parsing XML progress
 - Importing fixtures progress
 - Reconciliation progress
 - Cancelable operations
 
 #### 4. Documentation
+
 Create comprehensive user documentation:
+
 - Import guide with field mapping instructions
 - Export guide
 - Reconciliation workflow
@@ -740,7 +784,9 @@ Create comprehensive user documentation:
 - Keyboard shortcuts
 
 #### 5. End-to-End Testing
+
 Test full workflow:
+
 1. Import Vectorworks XML with custom field mapping
 2. Edit fixtures in ShowStack
 3. Export to Vectorworks
@@ -749,6 +795,7 @@ Test full workflow:
 6. Verify final state
 
 ### Deliverables
+
 - [x] Complete menu integration
 - [x] Global error handling
 - [x] Progress indicators
@@ -764,20 +811,21 @@ Test full workflow:
 
 ## Testing Summary
 
-| Component | Files | Tests | Coverage |
-|-----------|-------|-------|----------|
-| XML Parser | 1 | 20 | 80%+ |
-| Field Mapper | 1 | 18 | 80%+ |
-| XML Exporter | 1 | 18 | 80%+ |
-| MVR Exporter | 1 | 12 | 70%+ |
-| Reconciliation Engine | 1 | 25 | 80%+ |
-| IPC Handlers | 1 | 22 | 70%+ |
-| Commands | 1 | 10 | 70%+ |
-| UI Components | 8 | 40 | 50%+ |
-| E2E Tests | 1 | 5 | N/A |
-| **TOTAL** | **16** | **170** | **70%** |
+| Component             | Files  | Tests   | Coverage |
+| --------------------- | ------ | ------- | -------- |
+| XML Parser            | 1      | 20      | 80%+     |
+| Field Mapper          | 1      | 18      | 80%+     |
+| XML Exporter          | 1      | 18      | 80%+     |
+| MVR Exporter          | 1      | 12      | 70%+     |
+| Reconciliation Engine | 1      | 25      | 80%+     |
+| IPC Handlers          | 1      | 22      | 70%+     |
+| Commands              | 1      | 10      | 70%+     |
+| UI Components         | 8      | 40      | 50%+     |
+| E2E Tests             | 1      | 5       | N/A      |
+| **TOTAL**             | **16** | **170** | **70%**  |
 
 **Testing Tools:**
+
 - Vitest + React Testing Library
 - Mock data from real Vectorworks files
 - CI/CD: GitHub Actions
@@ -787,6 +835,7 @@ Test full workflow:
 ## Dependencies
 
 ### New NPM Packages
+
 ```json
 {
   "dependencies": {
@@ -849,6 +898,7 @@ Week 13:    Phase 5 - Documentation & E2E Tests
 ```
 
 ### Iterative Delivery Points
+
 - ✅ **Week 4:** Import works with field mapping (Phase 1)
 - ✅ **Week 6:** Export works (Phase 2)
 - ✅ **Week 8:** MVR export works (Phase 3)
@@ -860,6 +910,7 @@ Week 13:    Phase 5 - Documentation & E2E Tests
 ## Critical Files Reference
 
 ### Existing Files to Study (Patterns)
+
 ```
 src/renderer/src/components/infrastructure/InfrastructureImportDialog.tsx
   → Multi-step wizard pattern (select → map → importing → complete)
@@ -885,6 +936,7 @@ docs/testing/TESTING_GUIDE.md
 ```
 
 ### New Files to Create (Summary)
+
 ```
 Phase 1 (Import):
   src/main/utils/vectorworksParser.ts
@@ -915,6 +967,7 @@ Phase 4 (Reconciliation):
 ## Success Criteria
 
 ### Technical Requirements
+
 - [x] Import Vectorworks 2024 XML with user-defined field mapping
 - [x] Export to Vectorworks 2024 XML with round-trip integrity
 - [x] Export to MVR format compatible with GrandMA3, Vectorworks, Vision
@@ -926,6 +979,7 @@ Phase 4 (Reconciliation):
 - [x] Zero data loss through import → export → import cycle
 
 ### User Experience Requirements
+
 - [x] Import wizard is intuitive (< 4 clicks with field mapping)
 - [x] Field mapping is clear with smart defaults
 - [x] Reconciliation clearly shows conflicts
@@ -956,16 +1010,19 @@ Phase 4 (Reconciliation):
 ### Field Mapping Best Practices (for users)
 
 **Recommended Core Fields:**
+
 - Position, Unit Number, Type, Manufacturer, Model
 - Channel, Universe, DMX Address, Mode
 - Wattage, Purpose
 
 **Optional Fields (import as needed):**
+
 - Color, Gobo, Accessories (if using these)
 - Location, System (if tracking these)
 - Vectorworks coordinates (only if doing 3D work)
 
 **Fields to Skip (typically):**
+
 - Focus cuts (unless you track focus in Vectorworks)
 - Scenery references (unless relevant to your workflow)
 - Work notes (these are typically ShowStack-specific)

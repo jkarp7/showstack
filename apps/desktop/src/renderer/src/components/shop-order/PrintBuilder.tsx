@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
-import type { PrintTemplate, PrintSection, PrintSectionType, ShopOrderProject } from '../../types/shopOrder';
+import type {
+  PrintTemplate,
+  PrintSection,
+  PrintSectionType,
+  ShopOrderProject,
+} from '../../types/shopOrder';
 import { LayoutDesigner } from './layout/LayoutDesigner';
 
 interface PrintBuilderProps {
@@ -21,19 +26,19 @@ const availableSections: DraggableSection[] = [
     type: 'cover',
     label: 'Cover Page',
     description: 'Title, logo, and production info',
-    defaultConfig: { showLogo: true, showDate: true }
+    defaultConfig: { showLogo: true, showDate: true },
   },
   {
     type: 'project-details',
     label: 'Project Details',
     description: 'Production name, order date, etc.',
-    defaultConfig: { includeFields: ['production_name', 'order_date', 'disciplines'] }
+    defaultConfig: { includeFields: ['production_name', 'order_date', 'disciplines'] },
   },
   {
     type: 'venue-info',
     label: 'Venue Information',
     description: 'Venue name, city, state, contact',
-    defaultConfig: { includeContact: true, includeAddress: true }
+    defaultConfig: { includeContact: true, includeAddress: true },
   },
   {
     type: 'schedule',
@@ -41,14 +46,14 @@ const availableSections: DraggableSection[] = [
     description: 'Load-in, tech, show dates',
     defaultConfig: {
       dateFormat: 'MM/DD/YYYY',
-      includeDates: ['load_in_date', 'opening_night_date', 'closing_date', 'load_out_date']
-    }
+      includeDates: ['load_in_date', 'opening_night_date', 'closing_date', 'load_out_date'],
+    },
   },
   {
     type: 'contacts',
     label: 'Contacts',
     description: 'GM, PM, LD, ALD contacts',
-    defaultConfig: { contactTypes: ['gm', 'pm', 'ld', 'ald', 'pe'] }
+    defaultConfig: { contactTypes: ['gm', 'pm', 'ld', 'ald', 'pe'] },
   },
   {
     type: 'equipment-by-section',
@@ -59,20 +64,20 @@ const availableSections: DraggableSection[] = [
       showVenueColumn: true,
       showWeightColumn: false,
       showPowerColumn: false,
-      showRevisionMarkers: true
-    }
+      showRevisionMarkers: true,
+    },
   },
   {
     type: 'equipment-summary',
     label: 'Equipment Summary',
     description: 'Totals and summary statistics',
-    defaultConfig: { groupBy: 'discipline' }
+    defaultConfig: { groupBy: 'discipline' },
   },
   {
     type: 'notes',
     label: 'Notes',
     description: 'General conditions and notes',
-    defaultConfig: { noteType: 'general_notes' }
+    defaultConfig: { noteType: 'general_notes' },
   },
   {
     type: 'revision-summary',
@@ -81,24 +86,29 @@ const availableSections: DraggableSection[] = [
     defaultConfig: {
       showRevisionDetails: true,
       includeChangelog: true,
-      onlyShowIfRevisions: true
-    }
+      onlyShowIfRevisions: true,
+    },
   },
   {
     type: 'custom-text',
     label: 'Custom Text',
     description: 'Custom text block',
-    defaultConfig: { customText: '', fontSize: 12, alignment: 'left' }
+    defaultConfig: { customText: '', fontSize: 12, alignment: 'left' },
   },
   {
     type: 'page-break',
     label: 'Page Break',
     description: 'Start new page',
-    defaultConfig: {}
+    defaultConfig: {},
   },
 ];
 
-export function PrintBuilder({ currentProject, template, onTemplateChange, onSaveTemplate }: PrintBuilderProps) {
+export function PrintBuilder({
+  currentProject,
+  template,
+  onTemplateChange,
+  onSaveTemplate,
+}: PrintBuilderProps) {
   const [draggedSection, setDraggedSection] = useState<string | null>(null);
   const [draggedFromBuilder, setDraggedFromBuilder] = useState<boolean>(false);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
@@ -155,8 +165,8 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
             showLogo: true,
             showDate: true,
             title: 'ELECTRICS SHOP ORDER',
-            subtitle: 'For Bid Only'
-          }
+            subtitle: 'For Bid Only',
+          },
         },
         { id: 's2', type: 'page-break', order: 1, enabled: true, config: {} },
 
@@ -167,8 +177,8 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
           order: 2,
           enabled: true,
           config: {
-            contactTypes: ['gm', 'pm', 'ld', 'ald', 'pe']
-          }
+            contactTypes: ['gm', 'pm', 'ld', 'ald', 'pe'],
+          },
         },
         {
           id: 's4',
@@ -176,8 +186,15 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
           order: 3,
           enabled: true,
           config: {
-            includeDates: ['prep_start_date', 'prep_end_date', 'load_in_date', 'first_preview_date', 'opening_night_date', 'closing_date']
-          }
+            includeDates: [
+              'prep_start_date',
+              'prep_end_date',
+              'load_in_date',
+              'first_preview_date',
+              'opening_night_date',
+              'closing_date',
+            ],
+          },
         },
         { id: 's5', type: 'page-break', order: 4, enabled: true, config: {} },
 
@@ -188,8 +205,8 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
           order: 5,
           enabled: true,
           config: {
-            noteType: 'general_conditions'
-          }
+            noteType: 'general_conditions',
+          },
         },
         { id: 's7', type: 'page-break', order: 6, enabled: true, config: {} },
 
@@ -202,8 +219,8 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
           config: {
             showRevisionDetails: true,
             includeChangelog: true,
-            onlyShowIfRevisions: true
-          }
+            onlyShowIfRevisions: true,
+          },
         },
         { id: 's9', type: 'page-break', order: 8, enabled: true, config: {} },
 
@@ -218,8 +235,8 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
             showVenueColumn: true,
             showWeightColumn: false,
             showPowerColumn: false,
-            showRevisionMarkers: true
-          }
+            showRevisionMarkers: true,
+          },
         },
       ],
     };
@@ -242,13 +259,13 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
 
     if (draggedFromBuilder) {
       // Reordering existing section
-      const draggedIndex = sections.findIndex(s => s.id === draggedSection);
+      const draggedIndex = sections.findIndex((s) => s.id === draggedSection);
       const [removed] = sections.splice(draggedIndex, 1);
       const insertIndex = targetIndex !== undefined ? targetIndex : sections.length;
       sections.splice(insertIndex, 0, removed);
     } else {
       // Adding new section from palette
-      const sectionType = availableSections.find(s => s.type === draggedSection);
+      const sectionType = availableSections.find((s) => s.type === draggedSection);
       if (sectionType) {
         const newSection: PrintSection = {
           id: `section-${Date.now()}`,
@@ -273,13 +290,13 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
     e.preventDefault();
     if (!template) return;
 
-    const targetIndex = template.sections.findIndex(s => s.id === targetSectionId);
+    const targetIndex = template.sections.findIndex((s) => s.id === targetSectionId);
     handleDropOnBuilder(e, targetIndex);
   };
 
   const handleDeleteSection = (sectionId: string) => {
     if (!template) return;
-    const sections = template.sections.filter(s => s.id !== sectionId);
+    const sections = template.sections.filter((s) => s.id !== sectionId);
     const reorderedSections = sections.map((s, idx) => ({ ...s, order: idx }));
     onTemplateChange({ ...template, sections: reorderedSections, updated_at: Date.now() });
     if (selectedSectionId === sectionId) {
@@ -289,8 +306,8 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
 
   const handleToggleSection = (sectionId: string) => {
     if (!template) return;
-    const sections = template.sections.map(s =>
-      s.id === sectionId ? { ...s, enabled: !s.enabled } : s
+    const sections = template.sections.map((s) =>
+      s.id === sectionId ? { ...s, enabled: !s.enabled } : s,
     );
     onTemplateChange({ ...template, sections, updated_at: Date.now() });
   };
@@ -303,12 +320,14 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
   };
 
   const getSectionLabel = (type: PrintSectionType): string => {
-    return availableSections.find(s => s.type === type)?.label || type;
+    return availableSections.find((s) => s.type === type)?.label || type;
   };
 
   // Check if section supports visual layout editing
   const supportsLayoutEditing = (type: PrintSectionType): boolean => {
-    return ['cover', 'contacts', 'notes', 'project-details', 'venue-info', 'schedule'].includes(type);
+    return ['cover', 'contacts', 'notes', 'project-details', 'venue-info', 'schedule'].includes(
+      type,
+    );
   };
 
   if (!template) return null;
@@ -316,33 +335,49 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
   return (
     <div className="flex h-full gap-4">
       {/* Left Sidebar - Section Palette */}
-      <div className="w-80 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 300px)' }}>
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase mb-3">Available Sections</h3>
-        <p className="text-xs text-gray-500 dark:text-gray-500 mb-4">Drag sections to the builder to add them</p>
+      <div
+        className="w-80 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-4 overflow-y-auto"
+        style={{ maxHeight: 'calc(100vh - 300px)' }}
+      >
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase mb-3">
+          Available Sections
+        </h3>
+        <p className="text-xs text-gray-500 dark:text-gray-500 mb-4">
+          Drag sections to the builder to add them
+        </p>
 
         <div className="space-y-2">
-          {availableSections.map(section => (
+          {availableSections.map((section) => (
             <div
               key={section.type}
               draggable
               onDragStart={() => handleDragStart(section.type, false)}
               className="p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded cursor-move hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
             >
-              <div className="font-medium text-sm text-gray-900 dark:text-gray-200">{section.label}</div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">{section.description}</div>
+              <div className="font-medium text-sm text-gray-900 dark:text-gray-200">
+                {section.label}
+              </div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                {section.description}
+              </div>
             </div>
           ))}
         </div>
       </div>
 
       {/* Main Builder Area */}
-      <div className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-6 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 300px)' }}>
+      <div
+        className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-6 overflow-y-auto"
+        style={{ maxHeight: 'calc(100vh - 300px)' }}
+      >
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{template.name}</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {template.sections.filter(s => s.enabled).length} sections enabled
-              {template.isDefault && <span className="ml-2 text-blue-500 dark:text-blue-400">• System Default</span>}
+              {template.sections.filter((s) => s.enabled).length} sections enabled
+              {template.isDefault && (
+                <span className="ml-2 text-blue-500 dark:text-blue-400">• System Default</span>
+              )}
             </p>
           </div>
           <div className="flex gap-3">
@@ -350,7 +385,9 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
               onClick={async () => {
                 try {
                   await window.api.prep.layoutTemplates.seedDefaults();
-                  alert('Default page layouts created successfully! You can now edit layouts for each section.');
+                  alert(
+                    'Default page layouts created successfully! You can now edit layouts for each section.',
+                  );
                 } catch (error) {
                   console.error('Error seeding defaults:', error);
                   alert('Failed to create default layouts.');
@@ -380,17 +417,23 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
 
         {/* Page Settings - Moved to top */}
         <div className="mb-6 pb-6 border-b border-gray-300 dark:border-gray-700">
-          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase mb-4">Page Settings</h4>
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase mb-4">
+            Page Settings
+          </h4>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Page Size</label>
+              <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                Page Size
+              </label>
               <select
                 value={template.pageSettings.pageSize}
-                onChange={(e) => onTemplateChange({
-                  ...template,
-                  pageSettings: { ...template.pageSettings, pageSize: e.target.value as any },
-                  updated_at: Date.now()
-                })}
+                onChange={(e) =>
+                  onTemplateChange({
+                    ...template,
+                    pageSettings: { ...template.pageSettings, pageSize: e.target.value as any },
+                    updated_at: Date.now(),
+                  })
+                }
                 className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white"
               >
                 <option value="letter">Letter</option>
@@ -400,14 +443,18 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
               </select>
             </div>
             <div>
-              <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Orientation</label>
+              <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                Orientation
+              </label>
               <select
                 value={template.pageSettings.orientation}
-                onChange={(e) => onTemplateChange({
-                  ...template,
-                  pageSettings: { ...template.pageSettings, orientation: e.target.value as any },
-                  updated_at: Date.now()
-                })}
+                onChange={(e) =>
+                  onTemplateChange({
+                    ...template,
+                    pageSettings: { ...template.pageSettings, orientation: e.target.value as any },
+                    updated_at: Date.now(),
+                  })
+                }
                 className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white"
               >
                 <option value="portrait">Portrait</option>
@@ -419,11 +466,13 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
                 <input
                   type="checkbox"
                   checked={template.pageSettings.showPageNumbers ?? true}
-                  onChange={(e) => onTemplateChange({
-                    ...template,
-                    pageSettings: { ...template.pageSettings, showPageNumbers: e.target.checked },
-                    updated_at: Date.now()
-                  })}
+                  onChange={(e) =>
+                    onTemplateChange({
+                      ...template,
+                      pageSettings: { ...template.pageSettings, showPageNumbers: e.target.checked },
+                      updated_at: Date.now(),
+                    })
+                  }
                   className="w-4 h-4 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded"
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-300">Show page numbers</span>
@@ -434,99 +483,112 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
 
         {/* Sections Builder */}
         <div>
-          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase mb-4">Print Sections</h4>
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase mb-4">
+            Print Sections
+          </h4>
           <div
             onDragOver={handleDragOver}
             onDrop={(e) => handleDropOnBuilder(e)}
             className="min-h-96 space-y-2"
           >
-          {template.sections.length === 0 ? (
-            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-12 text-center text-gray-500 dark:text-gray-500">
-              Drag sections here to build your print layout
-            </div>
-          ) : (
-            template.sections
-              .sort((a, b) => a.order - b.order)
-              .map((section, index) => (
-                <div
-                  key={section.id}
-                  draggable
-                  onDragStart={() => handleDragStart(section.id, true)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDropOnSection(e, section.id)}
-                  onClick={() => setSelectedSectionId(section.id)}
-                  className={`p-4 border rounded-lg cursor-move transition-all ${
-                    selectedSectionId === section.id
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                      : section.enabled
-                      ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500'
-                      : 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="text-gray-500 dark:text-gray-500 text-sm font-mono w-8">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-900 dark:text-gray-200">
-                          {getSectionLabel(section.type)}
+            {template.sections.length === 0 ? (
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-12 text-center text-gray-500 dark:text-gray-500">
+                Drag sections here to build your print layout
+              </div>
+            ) : (
+              template.sections
+                .sort((a, b) => a.order - b.order)
+                .map((section, index) => (
+                  <div
+                    key={section.id}
+                    draggable
+                    onDragStart={() => handleDragStart(section.id, true)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDropOnSection(e, section.id)}
+                    onClick={() => setSelectedSectionId(section.id)}
+                    className={`p-4 border rounded-lg cursor-move transition-all ${
+                      selectedSectionId === section.id
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                        : section.enabled
+                          ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500'
+                          : 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="text-gray-500 dark:text-gray-500 text-sm font-mono w-8">
+                          {index + 1}
                         </div>
-                        {section.type === 'page-break' && (
-                          <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                            Start new page
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-gray-200">
+                            {getSectionLabel(section.type)}
                           </div>
-                        )}
-                        {section.type === 'revision-summary' && section.config.onlyShowIfRevisions && (
-                          <div className="text-xs text-yellow-600 dark:text-yellow-500 mt-1">
-                            ⚠ Only shown if revisions exist
-                          </div>
-                        )}
+                          {section.type === 'page-break' && (
+                            <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                              Start new page
+                            </div>
+                          )}
+                          {section.type === 'revision-summary' &&
+                            section.config.onlyShowIfRevisions && (
+                              <div className="text-xs text-yellow-600 dark:text-yellow-500 mt-1">
+                                ⚠ Only shown if revisions exist
+                              </div>
+                            )}
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="flex items-center space-x-2">
-                      {supportsLayoutEditing(section.type) && (
+                      <div className="flex items-center space-x-2">
+                        {supportsLayoutEditing(section.type) && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingLayoutFor(section.type);
+                            }}
+                            className="px-3 py-1 text-xs rounded-md bg-blue-600/20 text-blue-400 border border-blue-600/30 hover:bg-blue-600/30 transition"
+                            title="Customize page layout"
+                          >
+                            Edit Layout
+                          </button>
+                        )}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            setEditingLayoutFor(section.type);
+                            handleToggleSection(section.id);
                           }}
-                          className="px-3 py-1 text-xs rounded-md bg-blue-600/20 text-blue-400 border border-blue-600/30 hover:bg-blue-600/30 transition"
-                          title="Customize page layout"
+                          className={`px-3 py-1 text-xs rounded-md ${
+                            section.enabled
+                              ? 'bg-green-600/20 text-green-400 border border-green-600/30'
+                              : 'bg-gray-600/20 text-gray-400 border border-gray-600/30'
+                          }`}
                         >
-                          Edit Layout
+                          {section.enabled ? 'Enabled' : 'Disabled'}
                         </button>
-                      )}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleToggleSection(section.id);
-                        }}
-                        className={`px-3 py-1 text-xs rounded-md ${
-                          section.enabled
-                            ? 'bg-green-600/20 text-green-400 border border-green-600/30'
-                            : 'bg-gray-600/20 text-gray-400 border border-gray-600/30'
-                        }`}
-                      >
-                        {section.enabled ? 'Enabled' : 'Disabled'}
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteSection(section.id);
-                        }}
-                        className="p-1 text-red-400 hover:bg-red-900/20 rounded transition"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteSection(section.id);
+                          }}
+                          className="p-1 text-red-400 hover:bg-red-900/20 rounded transition"
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
-          )}
+                ))
+            )}
           </div>
         </div>
       </div>
@@ -537,7 +599,9 @@ export function PrintBuilder({ currentProject, template, onTemplateChange, onSav
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
             <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Save Template</h3>
             <div className="mb-4">
-              <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">Template Name</label>
+              <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">
+                Template Name
+              </label>
               <input
                 type="text"
                 value={templateName}

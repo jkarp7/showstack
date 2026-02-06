@@ -61,7 +61,7 @@ const sortedKeys = Object.keys(gelColors).sort((a, b) => {
   const bPrefix = b.match(/^[A-Z]+/)[0];
 
   // Sort order: G (GAM), L (LEE), R (Rosco)
-  const prefixOrder = { 'G': 0, 'L': 1, 'R': 2 };
+  const prefixOrder = { G: 0, L: 1, R: 2 };
   const aOrder = prefixOrder[aPrefix] || 3;
   const bOrder = prefixOrder[bPrefix] || 3;
 
@@ -76,12 +76,12 @@ const sortedKeys = Object.keys(gelColors).sort((a, b) => {
 
 // Group by manufacturer for output
 const manufacturers = {
-  'G': { name: 'GAM (G prefix)', colors: [] },
-  'L': { name: 'LEE Filters (L prefix)', colors: [] },
-  'R': { name: 'Roscolux (R prefix)', colors: [] }
+  G: { name: 'GAM (G prefix)', colors: [] },
+  L: { name: 'LEE Filters (L prefix)', colors: [] },
+  R: { name: 'Roscolux (R prefix)', colors: [] },
 };
 
-sortedKeys.forEach(key => {
+sortedKeys.forEach((key) => {
   const prefix = key.match(/^[A-Z]+/)[0];
   if (manufacturers[prefix]) {
     manufacturers[prefix].colors.push(key);
@@ -99,10 +99,12 @@ Object.entries(manufacturers).forEach(([prefix, data]) => {
   const colors = data.colors;
   for (let i = 0; i < colors.length; i += 4) {
     const batch = colors.slice(i, i + 4);
-    const line = batch.map((key, idx) => {
-      const comma = (i + idx < colors.length - 1 || prefix !== 'R') ? ',' : '';
-      return `'${key}': '${gelColors[key]}'${comma}`;
-    }).join(' ');
+    const line = batch
+      .map((key, idx) => {
+        const comma = i + idx < colors.length - 1 || prefix !== 'R' ? ',' : '';
+        return `'${key}': '${gelColors[key]}'${comma}`;
+      })
+      .join(' ');
     console.log(`    ${line}`);
   }
 

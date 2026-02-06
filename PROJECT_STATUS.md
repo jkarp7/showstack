@@ -12,15 +12,15 @@ This document tracks the development status of all ShowStack feature domains and
 
 ## 📊 Overall Progress
 
-| Feature Domain | Status | Completion |
-|----------------|--------|------------|
-| Lighting Features | 🚧 In Progress | 80% |
-| Core Infrastructure | ✅ Complete | 100% |
-| Sound Features | ⬜ Planned | 0% |
-| Video Features | ⬜ Planned | 0% |
-| Production Features | ⬜ Planned | 0% |
-| Tour Features | ⬜ Planned | 5% |
-| Producer Features | ⬜ Planned | 0% |
+| Feature Domain      | Status         | Completion |
+| ------------------- | -------------- | ---------- |
+| Lighting Features   | 🚧 In Progress | 80%        |
+| Core Infrastructure | ✅ Complete    | 100%       |
+| Sound Features      | ⬜ Planned     | 0%         |
+| Video Features      | ⬜ Planned     | 0%         |
+| Production Features | ⬜ Planned     | 0%         |
+| Tour Features       | ⬜ Planned     | 5%         |
+| Producer Features   | ⬜ Planned     | 0%         |
 
 ---
 
@@ -28,20 +28,20 @@ This document tracks the development status of all ShowStack feature domains and
 
 ### ✅ Recently Completed (December 2025 - January 2026)
 
-**Latest (January 2026):**
-9. ✅ Shop Order Table Migration (PR #63) - COMPLETED (January 20, 2026)
-   - Migrated from dialog-based to spreadsheet-like table interface
-   - Inline cell editing (double-click to edit, single-click to select)
-   - Paste from clipboard (TSV/CSV) with intelligent format detection
-   - Export to CSV with proper sanitization and escaping
-   - Keyboard shortcuts (Ctrl/Cmd+V paste, Delete to clear, Enter to edit)
-   - Debounced saves (500ms delay, reduces DB writes by ~90%)
-   - Input validation (max 1000 rows, 500 char descriptions, quantity caps)
-   - Enhanced filename sanitization (path traversal protection)
-   - Parallel database updates for revision creation
-   - Comprehensive test coverage (82 tests, 100% passing)
-   - 4,876 lines of production code added across 17 files
-   - Documentation: PHASE2_COMPLETE.md, PHASE3_COMPLETE.md, PHASE4_5_COMPLETE.md
+**Latest (January 2026):** 9. ✅ Shop Order Table Migration (PR #63) - COMPLETED (January 20, 2026)
+
+- Migrated from dialog-based to spreadsheet-like table interface
+- Inline cell editing (double-click to edit, single-click to select)
+- Paste from clipboard (TSV/CSV) with intelligent format detection
+- Export to CSV with proper sanitization and escaping
+- Keyboard shortcuts (Ctrl/Cmd+V paste, Delete to clear, Enter to edit)
+- Debounced saves (500ms delay, reduces DB writes by ~90%)
+- Input validation (max 1000 rows, 500 char descriptions, quantity caps)
+- Enhanced filename sanitization (path traversal protection)
+- Parallel database updates for revision creation
+- Comprehensive test coverage (82 tests, 100% passing)
+- 4,876 lines of production code added across 17 files
+- Documentation: PHASE2_COMPLETE.md, PHASE3_COMPLETE.md, PHASE4_5_COMPLETE.md
 
 8. ✅ Telemetry System Hardening (PR #61) - COMPLETED (January 18, 2026)
    - Fixed 5 critical security & reliability issues from code review
@@ -59,6 +59,7 @@ This document tracks the development status of all ShowStack feature domains and
 ### 📋 On Hold / Future Planning
 
 **Cloud-Native Architecture (Issues #34 + #33):**
+
 - Comprehensive 15-16 week implementation plan created
 - Backend server (Express.js + PostgreSQL + Socket.io)
 - Real-time collaboration using Operational Transform (OT)
@@ -72,6 +73,7 @@ This document tracks the development status of all ShowStack feature domains and
 ---
 
 ### ✅ Previously Completed
+
 1. ✅ Undo/redo system - COMPLETED
 2. ✅ Customizable headers to Paperwork Generator - COMPLETED (Phase 1 & 2)
 3. ✅ Paperwork Header/Footer System - COMPLETED
@@ -91,18 +93,18 @@ This document tracks the development status of all ShowStack feature domains and
    - Major refactor of Paperwork.tsx (2353 → 409 lines, 82% reduction)
    - Color Cut Report with gel database (628 colors) and sheet calculations
    - Template migration system for automatic updates
-4. ✅ Layout Designer UI Improvements - COMPLETED
+5. ✅ Layout Designer UI Improvements - COMPLETED
    - Enhanced LayoutCanvas with better grid visualization, resize handles, snap guides
    - Modernized ElementPalette and ElementInspector
    - Floating toolbar with zoom and undo/redo
    - Improved drag-and-drop feedback with ghost elements
    - Phase 2 text & shape formatting controls
    - Streamlined typography controls
-5. ✅ UI Polish: Emoji Removal - COMPLETED (January 2, 2026)
+6. ✅ UI Polish: Emoji Removal - COMPLETED (January 2, 2026)
    - Removed all emoji icons across the application for professional appearance
    - Updated 8 files: ReportTypeSelector, Paperwork, ModuleLanding, SystemDocs, LabelDesigner, ElementPalette, ElementInspector, HeaderPreview
    - Cleaner, more professional UI aesthetic without decorative emojis
-6. ✅ Power Management & Infrastructure Enhancements (Sprints 1-4) - COMPLETED (January 3, 2026)
+7. ✅ Power Management & Infrastructure Enhancements (Sprints 1-4) - COMPLETED (January 3, 2026)
    - **Sprint 1**: Building service assignment (Service A/B/C) with capacity tracking
    - **Sprint 1**: Custom phase labels (A/B/C → 1/2/3 or custom names)
    - **Sprint 2**: Phase distribution templates (save/load phasing configurations)
@@ -113,7 +115,7 @@ This document tracks the development status of all ShowStack feature domains and
    - **UI**: Service configuration panel with persistence
    - **Database**: Migrations for building_service, phase_label_a/b/c, phase_template_id
    - **Testing**: Comprehensive testing with bug fixes
-7. ✅ Phase 4: Label Integration - COMPLETED (January 3, 2026)
+8. ✅ Phase 4: Label Integration - COMPLETED (January 3, 2026)
    - Grid-based visual designer for all Avery label templates
    - 5 Avery templates supported: 5160, 5163, 5164, 8160, 5167
    - Label grid calculator (4 cells per inch resolution)
@@ -130,6 +132,7 @@ This document tracks the development status of all ShowStack feature domains and
    - Comprehensive documentation (617 lines)
 
 ### 🚀 v0.1.0-alpha Release (January 4, 2026)
+
 - ✅ **Alpha Release Published**: https://github.com/jkarp7/showstack/releases/tag/v0.1.0-alpha
 - ✅ **Multi-platform Builds**: macOS (ARM64), Windows (x64), Linux (x64)
 - ✅ **macOS Sequoia Compatibility**: Added proper entitlements for macOS 15.1+
@@ -138,7 +141,9 @@ This document tracks the development status of all ShowStack feature domains and
 - ⬜ **Alpha Feedback Collection**: Awaiting user testing feedback (week of Jan 6-10, 2026)
 
 ### ✅ v0.1.0-alpha.2 Requirements (Issue #55) - COMPLETED
+
 **All blocking items for alpha.2 release completed:**
+
 1. ✅ **Test Coverage** - Minimum 50% overall coverage achieved
    - Critical path: Label rendering, phase templates, circuit parser, power calculations
    - High priority: Port validation, image upload, CSV import
@@ -156,6 +161,7 @@ This document tracks the development status of all ShowStack feature domains and
 **Status:** Issue #55 closed - all requirements met
 
 ### Short-term (Next 1-2 Months) - **Focus on Lightwright Parity**
+
 1. **MVR export support** - Industry standard CAD/visualizer format
 2. **Enhanced error checking** - Overlapping patches, overloaded dimmers, duplicate channels, missing data
 3. **Basic console integration** - OSC protocol for ETC Eos
@@ -163,6 +169,7 @@ This document tracks the development status of all ShowStack feature domains and
 5. Implement CSV import/export with field mapping
 
 ### Medium-term (Next 3-6 Months) - **Professional Integration**
+
 1. **Vectorworks XML integration** - Automatic data sync with CAD
 2. **Advanced console support** - grandMA parameter calculations, additional consoles
 3. **Power/cable diagrams** - Visual power distribution and cable path layouts
@@ -170,6 +177,7 @@ This document tracks the development status of all ShowStack feature domains and
 5. Beta release with 10+ testers
 
 ### Long-term (6-12 Months) - **Market Differentiation**
+
 1. **Real-time multi-user collaboration** (strategic decision - requires cloud backend)
 2. Tour & Production features (logistics, budgeting)
 3. Advanced features (focus charts, work notes, cable tracking)
@@ -194,6 +202,7 @@ Comprehensive lighting production suite including fixture management, shop order
 Core fixture database and virtual grid for managing lighting plots.
 
 **Completed Components:**
+
 - ✅ **Virtual Data Grid** - `src/renderer/src/components/fixture/VirtualDataGrid.tsx`
   - Virtual scrolling for 10,000+ fixtures
   - 60 FPS performance
@@ -236,9 +245,11 @@ Core fixture database and virtual grid for managing lighting plots.
   - 100-item history limit
 
 **Remaining Work:**
+
 - (All quick wins completed!)
 
 **Recently Completed Quick Wins (January 2026):**
+
 - ✅ **Remove focus columns** - Removed focus-related columns from codebase - COMPLETED
 - ✅ **Point circuit notation** - Support for circuits like "1.2", "1.3" for power thru/daisy chains - COMPLETED
 - ✅ **Auto-complete from project data** - Inline autocomplete suggestions based on existing fixture data - COMPLETED
@@ -255,6 +266,7 @@ Core fixture database and virtual grid for managing lighting plots.
 - ✅ **Remove legacy recent files** - Removed recent files from Landing Page and Module Landing pages - COMPLETED (Jan 3, 2026)
 
 **Implementation Details:**
+
 - Color flags (`color_flag` field) are specific designations shown as vertical colored bars on row edges
   - Predefined types: hot, spare, special, dimmer_doubles, two_fer
   - Each has a specific color and meaning for label printing
@@ -270,6 +282,7 @@ Core fixture database and virtual grid for managing lighting plots.
 - Column visibility preferences stored per-project using preferences API
 
 **Future Enhancements:**
+
 - 💡 **Auto-complete System** - Manufacturer, type, color, gobo database (deferred - requires extensive fixture database)
 - 💡 **DMX Conflict Detection** - Highlight conflicts in grid (waiting for Vectorworks integration)
 
@@ -282,6 +295,7 @@ Core fixture database and virtual grid for managing lighting plots.
 Grid-based visual label designer with batch printing and multi-label PDF sheet export.
 
 **Completed:**
+
 - ✅ **Label Visual Designer** - Unified grid-based editor for all Avery templates
   - Grid-based layout system (4 cells per inch resolution)
   - Template conversion from canvas to grid coordinates
@@ -307,6 +321,7 @@ Grid-based visual label designer with batch printing and multi-label PDF sheet e
 #### Power Management Enhancements
 
 **Completed (Sprints 1-4):**
+
 - ✅ **Power service assignment** - Building service designation (Service A/B/C) with capacity tracking
 - ✅ **Phase distribution templates** - Save/load phase configurations (AB vs AC phasing)
 - ✅ **Custom phase labels** - User-defined phase naming (A/B/C → 1/2/3 or custom labels)
@@ -315,6 +330,7 @@ Grid-based visual label designer with batch printing and multi-label PDF sheet e
 - ✅ **Color mode PDF exports** - Toggle between color and grayscale printing
 
 **Pending Additions:**
+
 - ⬜ **Cable Run Visualization** - Visual cable path layout
 - ⬜ **Advanced Phase Balancing** - Automatic phase assignment suggestions
 - ⬜ **Power Distribution Reports** - Printable rack schedules and load reports
@@ -326,6 +342,7 @@ Grid-based visual label designer with batch printing and multi-label PDF sheet e
 #### Paperwork Enhancements
 
 **Completed:**
+
 - ✅ **Gel color swatches** - Visual color chips for gel/color fields in reports
   - Complete gel color database (628 theatrical gels: GAM, LEE, Roscolux)
   - Color swatch rendering in Color Cut Report
@@ -338,6 +355,7 @@ Grid-based visual label designer with batch printing and multi-label PDF sheet e
   - Manufacturer detection from gel codes
 
 **Completed:**
+
 - ✅ **Phase 3.5: Logo & Image Support** - Image upload, project logo storage, PDF rendering (COMPLETE)
 - ✅ **Color printing support** - Color mode toggle for PDF exports (Sprint 4 - COMPLETE)
   - Color/grayscale toggle in print settings
@@ -354,6 +372,7 @@ Grid-based visual label designer with batch printing and multi-label PDF sheet e
 Complete shop order and equipment specification builder with modern spreadsheet-like interface and professional PDF output.
 
 **Core Functionality:**
+
 - ✅ **Shop Order Table** - `src/renderer/src/components/prep/ShopOrderTable.tsx` (MIGRATED - PR #63)
   - Spreadsheet-like table interface with inline editing
   - Cell selection system (single-click select, double-click edit)
@@ -384,6 +403,7 @@ Complete shop order and equipment specification builder with modern spreadsheet-
   - Note templates (save/load common notes)
 
 **Print & Export:**
+
 - ✅ **Print Builder** - `src/renderer/src/components/prep/PrintBuilder.tsx`
   - Drag-and-drop section arrangement
   - 11 section types
@@ -394,12 +414,14 @@ Complete shop order and equipment specification builder with modern spreadsheet-
   - Electron printToPDF API
 
 **Database:**
+
 - ✅ **Shop Order Schema** - `src/main/database/projectSchema.ts`
   - Complete database schema with 6 tables
   - Default page layouts
   - Query functions
 
 **Planned Enhancements:**
+
 - ⬜ **Auto-populate from System Documentation** - Create shop order items automatically from fixture and infrastructure data
 - ⬜ **Post-Migration Improvements** (Issue #65) - Non-critical enhancements identified during PR #63 review:
   - Standardize error handling (use toast notifications consistently)
@@ -415,6 +437,7 @@ Complete shop order and equipment specification builder with modern spreadsheet-
 Custom report and paperwork templates with fully customizable headers using visual layout designer.
 
 **Core Reports:**
+
 - ✅ **Paperwork Page** - `src/renderer/src/pages/modules/Paperwork.tsx`
   - **Fixture Reports (8)**: Channel hookup, dimmer schedule, circuit list, DMX addresses, power summary, color schedule, gobo schedule, color cut report
   - **Infrastructure Reports (5)**: Equipment list, network summary, port assignments, power consumption, location map
@@ -423,10 +446,12 @@ Custom report and paperwork templates with fully customizable headers using visu
   - Page setup configuration
 
 **Phase 1: Preset-Based Headers:**
+
 - ✅ **HeaderRenderer** - 5 predefined layout presets
 - ✅ **HeaderLayoutSelector** - Preset dropdown selection
 
 **Phase 2: Visual Layout Designer:**
+
 - ✅ **PaperworkHeaderDesigner** - 12-column × 8-row grid
 - ✅ **HeaderFromTemplate** - Renders headers from visual templates
 - ✅ **Data Field Mapper** - Calculates fixture and infrastructure summaries
@@ -440,6 +465,7 @@ Custom report and paperwork templates with fully customizable headers using visu
 Comprehensive power distribution tracking and management system.
 
 **Core Functionality:**
+
 - ✅ **Power Rack Management** - Dimmer rack and PD rack configuration
 - ✅ **Module Configuration** - Configure mixed module types per rack
 - ✅ **Power Summary Panel** - Real-time utilization tracking
@@ -447,6 +473,7 @@ Comprehensive power distribution tracking and management system.
 - ✅ **Power Calculations** - Per-module capacity calculations
 
 **Database Schema:**
+
 - ✅ **Power Tables** - Complete schema with 3 tables
 
 ---
@@ -456,28 +483,34 @@ Comprehensive power distribution tracking and management system.
 Comprehensive tracking system for network equipment, data distribution, audio/video infrastructure with port assignment management.
 
 **Core Functionality:**
+
 - ✅ **Infrastructure Equipment Tracking** - Full CRUD operations
 - ✅ **Port Assignment Management** - Dynamic port count configuration (0-128 ports)
 - ✅ **Equipment Dialogs** - Add and edit dialogs with comprehensive fields
 - ✅ **Column Visibility System** - 17 configurable columns
 
 **Database Schema:**
+
 - ✅ **Infrastructure Table** - 33 columns covering all equipment attributes
 - ✅ **Query Functions** - Complete CRUD operations
 - ✅ **IPC Integration** - Full IPC handlers
 
 **State Management:**
+
 - ✅ **Infrastructure Store** - Zustand-based state management
 
 **Integration:**
+
 - ✅ **Equipment Manager Integration** - Three-tab interface (Fixtures | Infrastructure | Power)
 
 **Enhanced Features (Sprint 3):**
+
 - ✅ **Port Linking** - Link ports to fixtures, equipment, or free text notes
 - ✅ **Port Usage Tracking** - Visual indicators and statistics showing port utilization
 - ✅ **Import/Export** - CSV import/export with field mapping UI
 
 **Pending Enhancements:**
+
 - ⬜ **Port Validation** - IP address, VLAN range validation
 - ⬜ **Network Topology Visualization** - Visual network layout
 
@@ -545,12 +578,14 @@ Additional production tools.
 **See:** `docs/mockups/unified-editor-mockup.md` for detailed visual mockups
 
 **Strategic Goals:**
+
 - One editor for all contexts - Paperwork headers, full reports, labels, shop orders
 - Professional UX - Optimized for production electricians/audio/video techs
 - Modern appearance - Clean, floating toolbars, collapsible panels, dark mode optimized
 - Speed-first design - Keyboard shortcuts, command palette, inline editing
 
 **Completed Features:**
+
 - ✅ Enhanced LayoutCanvas with grid visualization, resize handles, and snap guides
 - ✅ Modernized ElementPalette and ElementInspector
 - ✅ ColorPicker component with custom color saving
@@ -563,6 +598,7 @@ Additional production tools.
 - ✅ Template management and validation
 
 **Documentation:**
+
 - `docs/features/phase-3.5-logo-image-support.md`
 - `docs/features/phase-4-label-integration.md`
 - `docs/features/phase-5-polish-ux.md`
@@ -571,6 +607,7 @@ Additional production tools.
 **Status:** Feature complete and production ready
 
 **Benefits:**
+
 - Consistent UX across all paperwork/label tasks
 - Professional-grade formatting control
 - Modern visual editor vs. LightWright's settings-based approach
@@ -582,6 +619,7 @@ Additional production tools.
 Lightwright 6 parity feature - custom categorization system for grouping fixtures.
 
 **Planned Features:**
+
 - Custom categories/families with rule-based auto-assignment
 - Integration with labels, paperwork, and shop order automation
 - Color-coded visual indicators and filtering
@@ -599,6 +637,7 @@ Lightwright 6 parity feature - custom categorization system for grouping fixture
 #### UI/UX Improvements
 
 **Menu Bar Reorganization:**
+
 - ⬜ **Evaluate menu bar access** - Move common functions to menu for easier access
   - Add fixture/infrastructure
   - Generate paperwork
@@ -723,6 +762,7 @@ Based on Minotaur parity analysis (see `docs/features/migration-sound-features.m
 All features from Lighting, Sound, and Video editions combined. Users can work across all three disciplines in a single unified project.
 
 **Key Advantage:** Cross-discipline integration
+
 - Shared equipment libraries
 - Unified paperwork
 - Integrated power calculations
@@ -750,6 +790,7 @@ All features from Lighting, Sound, and Video editions combined. Users can work a
 Comprehensive production calendar system for managing rehearsals, performances, load-in/load-out, and technical rehearsals.
 
 **Core Features:**
+
 - ⬜ **Production Calendar** (8-10 weeks)
   - Multi-view calendar (year, month, week, day, timeline, list)
   - Event types: rehearsal, performance, load-in, load-out, focus, tech, notes session
@@ -781,6 +822,7 @@ Comprehensive production calendar system for managing rehearsals, performances, 
 Comprehensive budget system with line-item tracking, real-time cost updates, and integration with labor, equipment, and vendor costs.
 
 **Core Features:**
+
 - ⬜ **Budget Builder** (6-8 weeks)
   - Line-item budgets with categories (Labor, Equipment, Venue, Materials, Transportation, Other)
   - Estimated vs. actual tracking
@@ -819,6 +861,7 @@ Comprehensive budget system with line-item tracking, real-time cost updates, and
 Comprehensive crew database, position management, booking system, and payroll integration.
 
 **Core Features:**
+
 - ⬜ **Crew Database** (8-10 weeks)
   - Crew member profiles (contact info, emergency contacts, W-9 status)
   - Position/role assignments with pay rates
@@ -859,6 +902,7 @@ Comprehensive crew database, position management, booking system, and payroll in
 Extend existing fixture and infrastructure tracking to include props, costumes, scenery, video equipment, and general production inventory.
 
 **Core Features:**
+
 - ⬜ **Multi-Department Inventory** (6-8 weeks)
   - Props, costumes, scenery, wardrobe, tools, consumables, general equipment
   - Ownership tracking (owned, rented, borrowed)
@@ -900,6 +944,7 @@ Extend existing fixture and infrastructure tracking to include props, costumes, 
 Comprehensive vendor database, purchase order system, and invoice tracking.
 
 **Core Features:**
+
 - ⬜ **Vendor Database** (6-8 weeks)
   - Vendor profiles (name, type, contact info, payment terms, tax ID)
   - Vendor types: equipment rental, consumables, services, fabrication, trucking
@@ -944,6 +989,7 @@ Comprehensive vendor database, purchase order system, and invoice tracking.
 Tools for managing touring productions, including tour calendar, venue database, per diem tracking, and equipment manifests.
 
 **Core Features:**
+
 - ⬜ **Tour Calendar** (8-12 weeks)
   - Visual tour calendar (timeline view)
   - Tour date tracking (load-in, focus, tech, performances, strike, load-out)
@@ -991,6 +1037,7 @@ Tools for managing touring productions, including tour calendar, venue database,
 Web-based information sharing portal for production schedules, notes, rosters, and documents.
 
 **Core Features:**
+
 - ⬜ **Production Book Builder** (6-8 weeks)
   - Cover page (show title, dates, contact info)
   - Production schedule
@@ -1028,6 +1075,7 @@ Web-based information sharing portal for production schedules, notes, rosters, a
 Comprehensive reporting system for budgets, labor, schedules, and production metrics.
 
 **Core Reports:**
+
 - ⬜ **Budget Reports**
   - Budget summary (estimated vs. actual)
   - Variance analysis
@@ -1070,6 +1118,7 @@ Comprehensive reporting system for budgets, labor, schedules, and production met
 ### Development Timeline
 
 **Phase 1: Core Production Features** (Year 3, 2027-2028)
+
 - Production Scheduling (8-10 weeks)
 - Budget Tracking (6-8 weeks)
 - Labor Management (8-10 weeks)
@@ -1077,6 +1126,7 @@ Comprehensive reporting system for budgets, labor, schedules, and production met
 - **Deliverable:** Production Edition v1.0 with 70% Propared parity
 
 **Phase 2: Enhanced Features** (Year 3-4, 2028)
+
 - Inventory Extensions (6-8 weeks)
 - Vendor Management (6-8 weeks)
 - Tour Logistics (8-12 weeks)
@@ -1084,6 +1134,7 @@ Comprehensive reporting system for budgets, labor, schedules, and production met
 - **Deliverable:** Production Edition v2.0 with 90% Propared parity
 
 **Phase 3: Advanced Features** (Year 4+, 2029+)
+
 - Production Books (6-8 weeks)
 - Advanced Reporting (4-6 weeks)
 - Mobile App (12-16 weeks, optional)
@@ -1097,28 +1148,33 @@ Comprehensive reporting system for budgets, labor, schedules, and production met
 ### Unique ShowStack Advantages
 
 **1. Technical Design Integration**
+
 - Fixture plot → Equipment list → Shop order → Budget → Schedule
 - Labor hours for focus call calculated from fixture count
 - Rental costs from shop order feed budget automatically
 - Inventory allocation includes technical equipment
 
 **2. Pricing Advantage**
+
 - **ShowStack Production Edition:** $599/year (Lighting + Sound + Video + Production + Tour)
 - **Propared alone:** $1,750/user/year (production management only)
 - **Cost Savings:** 66% cheaper while offering MORE features
 
 **3. Offline-First Architecture**
+
 - Works fully offline (SQLite database)
 - No internet required for day-to-day work
 - Fast performance (no cloud latency)
 - Data ownership (files on user's machine)
 
 **4. Comprehensive Reporting**
+
 - 12+ technical reports already implemented
 - Production reports added to existing system
 - Professional PDF export for all documents
 
 **See Also:**
+
 - `docs/features/propared-parity-analysis.md` - Detailed competitive analysis
 - `docs/features/migration-production-features.md` - Complete feature specifications
 
@@ -1133,6 +1189,7 @@ Comprehensive reporting system for budgets, labor, schedules, and production met
 **Status:** Launches with Producer features (Year 4+)
 
 Complete access to all ShowStack features across all professional disciplines. Ideal for:
+
 - Producing theaters and opera companies
 - University theater programs
 - Large production companies
@@ -1178,6 +1235,7 @@ Portfolio management for producers and general managers. Available in Complete e
 Privacy-first telemetry system with full PostHog SDK integration.
 
 **Completed:**
+
 - ✅ **Telemetry Service** - `src/renderer/src/services/telemetry.ts`
   - Event tracking with localStorage buffering
   - Batch syncing (50 events or 60 seconds)
@@ -1474,6 +1532,7 @@ Full developer mode implementation with DevTools integration.
   - Access developer mode state from any component
 
 **Future Enhancement:**
+
 - ⬜ **Feature Flag System** - Not yet connected to developer mode
 
 ---
@@ -1493,6 +1552,7 @@ Full developer mode implementation with DevTools integration.
 - ⬜ **Team Collaboration** - Multi-user access, permissions
 
 **Existing UI Mockups (Non-functional):**
+
 - `IntegrationSettings.tsx` - Cloud storage toggle UI, provider selection
 - `Collaboration.tsx` - Placeholder settings panel
 - All backend functions are TODO stubs
@@ -1513,6 +1573,7 @@ Full developer mode implementation with DevTools integration.
 - ⬜ **Password Reset** - No reset functionality
 
 **Existing UI (Non-functional):**
+
 - `Login.tsx` - Login form with "Skip login (development)" that bypasses everything
 - handleLogin() just navigates to /modules without validation
 
@@ -1550,65 +1611,69 @@ Full developer mode implementation with DevTools integration.
 
 ### ShowStack Competitive Advantages
 
-| Category | ShowStack Advantage | Strategic Value |
-|----------|-------------------|-----------------|
-| **Infrastructure Management** | Comprehensive tracking for network, audio, video, data distribution with 5 dedicated reports + port-level management | **MAJOR** - Lightwright only covers power/cable |
-| **Shop Order System** | Full Prep module for equipment lists, notes, revisions, professional PDFs | **MAJOR** - Unique to ShowStack, Lightwright has no equivalent |
-| **Visual Template Designer** | Drag-and-drop layout designer for headers and shop orders with live preview | **MODERATE** - More advanced than Lightwright's customization |
-| **Paperwork Customization** | Phase 1 (presets) + Phase 2 (visual editor) for headers | **MODERATE** - Matches/exceeds Lightwright's "re-imagined paperwork" |
-| **Dimmer Rack Management** | Module-level configuration with rack identifiers, mixed module types | **MODERATE** - Not mentioned in Lightwright features |
-| **Pricing Model** | One-time purchase option | **DEBATABLE** - Different from Lightwright's subscription model |
-| **Modern Tech Stack** | Electron + React + TypeScript, cross-platform | **MODERATE** - Future-proof architecture |
-| **Multi-Discipline Support** | Unified platform for Lighting + Sound + Video + Production | **MAJOR** - Lightwright is lighting-only |
+| Category                      | ShowStack Advantage                                                                                                  | Strategic Value                                                      |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **Infrastructure Management** | Comprehensive tracking for network, audio, video, data distribution with 5 dedicated reports + port-level management | **MAJOR** - Lightwright only covers power/cable                      |
+| **Shop Order System**         | Full Prep module for equipment lists, notes, revisions, professional PDFs                                            | **MAJOR** - Unique to ShowStack, Lightwright has no equivalent       |
+| **Visual Template Designer**  | Drag-and-drop layout designer for headers and shop orders with live preview                                          | **MODERATE** - More advanced than Lightwright's customization        |
+| **Paperwork Customization**   | Phase 1 (presets) + Phase 2 (visual editor) for headers                                                              | **MODERATE** - Matches/exceeds Lightwright's "re-imagined paperwork" |
+| **Dimmer Rack Management**    | Module-level configuration with rack identifiers, mixed module types                                                 | **MODERATE** - Not mentioned in Lightwright features                 |
+| **Pricing Model**             | One-time purchase option                                                                                             | **DEBATABLE** - Different from Lightwright's subscription model      |
+| **Modern Tech Stack**         | Electron + React + TypeScript, cross-platform                                                                        | **MODERATE** - Future-proof architecture                             |
+| **Multi-Discipline Support**  | Unified platform for Lighting + Sound + Video + Production                                                           | **MAJOR** - Lightwright is lighting-only                             |
 
 ### Critical Feature Gaps to Address
 
-| Priority | Feature | Lightwright Status | Impact | Effort Estimate |
-|----------|---------|-------------------|--------|----------------|
-| **🔴 HIGH** | Real-time multi-user collaboration | ✅ Core new feature | Market differentiator | 12-16 weeks |
-| **🟡 MEDIUM-HIGH** | MVR export | ✅ Implemented | Industry standard | 6-8 weeks |
-| **🟡 MEDIUM** | Console integration (OSC) | ✅ ETC Eos, grandMA | Professional workflow | 8-12 weeks |
-| **🟡 MEDIUM** | Vectorworks XML sync | ✅ Implemented | CAD integration | 8-12 weeks |
-| **🟢 LOW-MEDIUM** | Roll printer support | ✅ Direct support | Specialized hardware | 4-6 weeks |
-| **🟢 LOW** | Circuit breaker labels | ✅ Dedicated functionality | Niche feature | 2-3 weeks |
+| Priority           | Feature                            | Lightwright Status         | Impact                | Effort Estimate |
+| ------------------ | ---------------------------------- | -------------------------- | --------------------- | --------------- |
+| **🔴 HIGH**        | Real-time multi-user collaboration | ✅ Core new feature        | Market differentiator | 12-16 weeks     |
+| **🟡 MEDIUM-HIGH** | MVR export                         | ✅ Implemented             | Industry standard     | 6-8 weeks       |
+| **🟡 MEDIUM**      | Console integration (OSC)          | ✅ ETC Eos, grandMA        | Professional workflow | 8-12 weeks      |
+| **🟡 MEDIUM**      | Vectorworks XML sync               | ✅ Implemented             | CAD integration       | 8-12 weeks      |
+| **🟢 LOW-MEDIUM**  | Roll printer support               | ✅ Direct support          | Specialized hardware  | 4-6 weeks       |
+| **🟢 LOW**         | Circuit breaker labels             | ✅ Dedicated functionality | Niche feature         | 2-3 weeks       |
 
 ### Feature Parity Status
 
-| Category | ShowStack | Lightwright New Platform | Parity Status |
-|----------|-----------|-------------------------|---------------|
-| Fixture Management | ✅ Full | ✅ Full | ✅ **PARITY** |
-| Paperwork Generation | ✅ 12 reports | ✅ Multiple reports | ✅ **PARITY** |
-| Infrastructure Tracking | ✅ **Advanced** | ⚠️ Power/cable only | 🚀 **ADVANTAGE** |
-| Customizable Headers | ✅ Visual designer | ✅ Customization | ✅ **PARITY+** |
-| Error Checking | ⚠️ Partial | ✅ Full | ⚠️ **GAP** |
-| Dark Mode | ✅ Full | ✅ Native | ✅ **PARITY** |
-| Database | ✅ SQLite | ✅ Not disclosed | ✅ **PARITY** |
-| Multi-user Collaboration | ❌ | ✅ **Real-time** | ❌ **CRITICAL GAP** |
-| MVR Export | ❌ | ✅ Implemented | ❌ **GAP** |
-| Console Integration | ❌ | ✅ OSC protocol | ❌ **GAP** |
-| CAD Integration | ❌ | ✅ Vectorworks XML | ❌ **GAP** |
-| Shop Orders | ✅ **Full module** | ❌ None | 🚀 **UNIQUE** |
-| Multi-Discipline | ✅ **6 domains** | ❌ Lighting only | 🚀 **UNIQUE** |
+| Category                 | ShowStack          | Lightwright New Platform | Parity Status       |
+| ------------------------ | ------------------ | ------------------------ | ------------------- |
+| Fixture Management       | ✅ Full            | ✅ Full                  | ✅ **PARITY**       |
+| Paperwork Generation     | ✅ 12 reports      | ✅ Multiple reports      | ✅ **PARITY**       |
+| Infrastructure Tracking  | ✅ **Advanced**    | ⚠️ Power/cable only      | 🚀 **ADVANTAGE**    |
+| Customizable Headers     | ✅ Visual designer | ✅ Customization         | ✅ **PARITY+**      |
+| Error Checking           | ⚠️ Partial         | ✅ Full                  | ⚠️ **GAP**          |
+| Dark Mode                | ✅ Full            | ✅ Native                | ✅ **PARITY**       |
+| Database                 | ✅ SQLite          | ✅ Not disclosed         | ✅ **PARITY**       |
+| Multi-user Collaboration | ❌                 | ✅ **Real-time**         | ❌ **CRITICAL GAP** |
+| MVR Export               | ❌                 | ✅ Implemented           | ❌ **GAP**          |
+| Console Integration      | ❌                 | ✅ OSC protocol          | ❌ **GAP**          |
+| CAD Integration          | ❌                 | ✅ Vectorworks XML       | ❌ **GAP**          |
+| Shop Orders              | ✅ **Full module** | ❌ None                  | 🚀 **UNIQUE**       |
+| Multi-Discipline         | ✅ **6 domains**   | ❌ Lighting only         | 🚀 **UNIQUE**       |
 
 ### Recommended Development Priorities
 
 #### **Phase 1: Industry Standards** (6-8 weeks)
+
 1. MVR export support - table stakes for professional workflows
 2. Enhanced error checking - overlapping patches, overloaded dimmers, missing data
 3. Basic console integration (OSC protocol for ETC Eos)
 
 #### **Phase 2: Advanced Integration** (8-12 weeks)
+
 1. Vectorworks XML integration
 2. Power distribution diagrams/visualization
 3. Additional console support (grandMA parameters)
 
 #### **Phase 3: Collaboration** (12-16 weeks) - Strategic Decision Required
+
 - Multi-user real-time collaboration (requires cloud backend)
 - WebSocket infrastructure
 - Conflict resolution system
 - Cloud sync architecture
 
 #### **Phase 4: Polish & Professional Features** (6-8 weeks)
+
 1. Roll printer support
 2. Circuit breaker label functionality
 3. Advanced cable management visualization
@@ -1637,6 +1702,7 @@ This section preserves user feedback for historical reference. **Action items fr
 **Impact**: **URGENT** - Lightwright's new platform has native cloud collaboration. This is now a competitive requirement.
 
 **Proposed Solutions:**
+
 - **Option A (Quick)**: File-based merge/reconciliation system (4-6 weeks)
   - Import/compare two .showstack files
   - Side-by-side diff of changes
@@ -1692,6 +1758,7 @@ Incorporated into **Lighting Edition → Planned** section above.
 **Decision Point**: ShowStack must choose positioning:
 
 ### Option 1: "Own It Outright" (Current Strategy)
+
 - Maintain offline-first, file-based architecture
 - Implement file merge/reconciliation (Option A above)
 - Position as "no subscription, own your data" alternative
@@ -1699,6 +1766,7 @@ Incorporated into **Lighting Edition → Planned** section above.
 - **Cons**: Perceived as "outdated" vs Lightwright's cloud features
 
 ### Option 2: "Cloud-Enabled Pro" (Strategic Pivot)
+
 - Implement real-time collaboration (Option C above)
 - Requires subscription model for infrastructure costs
 - Compete head-to-head with Lightwright
@@ -1706,6 +1774,7 @@ Incorporated into **Lighting Edition → Planned** section above.
 - **Cons**: 16-20 week development, operational costs, subscription pricing
 
 ### Recommended Hybrid Approach
+
 1. **Immediate (4-6 weeks)**: Ship Option A (file merge) to address workflow pain
 2. **Evaluate (Month 2-3)**: Gather user feedback on collaboration needs
 3. **Strategic Decision (Month 3)**: Choose Option 1 or Option 2 based on:
@@ -1721,6 +1790,7 @@ Incorporated into **Lighting Edition → Planned** section above.
 ## 📝 Notes
 
 ### Architecture Decisions
+
 - **Offline-first**: All data stored locally in SQLite (sql.js)
 - **Unified application**: Single app with license-based edition access
 - **Two-database approach**: App DB (never exported) + Project DB (exportable)
@@ -1729,23 +1799,27 @@ Incorporated into **Lighting Edition → Planned** section above.
 - **TypeScript strict mode**: Full type safety throughout
 
 ### Edition Structure
+
 - **Six Feature Domains**: Lighting, Sound, Video, Production, Tour, Producer
 - **Six Professional Editions**: Lighting, Sound, Video, Designer, Production, Complete
 - **License-Based Activation**: Features unlocked via license key, UI only shows licensed features
 - **Data Preservation**: Project files contain all data; visible features depend on edition license
 
 ### Known Limitations
+
 - **No cloud sync yet**: Planned for future release
 - **No testing suite**: Needs to be built
 - **Limited telemetry**: Basic implementation, needs expansion
 - **Fixture management incomplete**: Core features in progress
 
 ### Breaking Changes Log
+
 - None yet (still in alpha)
 
 ---
 
 **For detailed implementation plans, see:**
+
 - [Naming & Editions Guide](docs/architecture/naming-and-editions.md)
 - [Migration to Unified Licensing](docs/architecture/migration-unified-licensing.md)
 - [Sound Features Specification](docs/features/migration-sound-features.md)

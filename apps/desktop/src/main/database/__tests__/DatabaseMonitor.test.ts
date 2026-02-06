@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   DatabaseMonitor,
   monitoredQuery,
-  monitoredQueryAsync
+  monitoredQueryAsync,
 } from '../monitoring/DatabaseMonitor';
 
 // Mock the logger
@@ -15,8 +15,8 @@ vi.mock('../../utils/logger', () => ({
     info: vi.fn(),
     warn: vi.fn(),
     error: vi.fn(),
-    debug: vi.fn()
-  }
+    debug: vi.fn(),
+  },
 }));
 
 describe('DatabaseMonitor', () => {

@@ -184,7 +184,7 @@ const defaultSettings = {
     services: [
       { name: 'Service A', capacity_amps: 400 },
       { name: 'Service B', capacity_amps: 400 },
-      { name: 'Service C', capacity_amps: 200 }
+      { name: 'Service C', capacity_amps: 200 },
     ],
   },
 };
@@ -245,6 +245,6 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'showstack-settings',
-    }
-  )
+    },
+  ),
 );

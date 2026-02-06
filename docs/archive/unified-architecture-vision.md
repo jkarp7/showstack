@@ -1,4 +1,5 @@
 # ShowStack Project Status
+
 ## Unified Production Management Platform
 
 **Last Updated:** December 29, 2025
@@ -12,6 +13,7 @@
 **ShowStack** is a comprehensive production management platform for live entertainment, unifying lighting, sound, video, production management, tour logistics, and producer oversight in a single collaborative application.
 
 ### Core Philosophy
+
 - **One Application** - Unified codebase with role-based views
 - **Multiple Editions** - Feature access controlled by licensing
 - **Single Source of Truth** - All departments share the same project data
@@ -95,27 +97,28 @@ ShowStack
 
 ### Professional Editions (Annual Pricing)
 
-| Edition | Price | Activated Features | Target Users |
-|---------|-------|-------------------|--------------|
-| **Lighting Edition** | $249/year | Lighting only | Lighting Designers, Electricians |
-| **Sound Edition** | $199/year | Sound only | Sound Designers, A1s |
-| **Video Edition** | $199/year | Video only | Video/Projection Designers |
-| **Designer Edition** | $449/year | Lighting + Sound + Video | Multi-discipline Designers |
-| **Production Edition** | $599/year | L+S+V + Production + Tour | Production Managers, TDs |
-| **Complete Edition** | $999/year | All features | Organizations, Producers |
+| Edition                | Price     | Activated Features        | Target Users                     |
+| ---------------------- | --------- | ------------------------- | -------------------------------- |
+| **Lighting Edition**   | $249/year | Lighting only             | Lighting Designers, Electricians |
+| **Sound Edition**      | $199/year | Sound only                | Sound Designers, A1s             |
+| **Video Edition**      | $199/year | Video only                | Video/Projection Designers       |
+| **Designer Edition**   | $449/year | Lighting + Sound + Video  | Multi-discipline Designers       |
+| **Production Edition** | $599/year | L+S+V + Production + Tour | Production Managers, TDs         |
+| **Complete Edition**   | $999/year | All features              | Organizations, Producers         |
 
 ### Student & Institutional Pricing
 
-| Edition | Price | Notes |
-|---------|-------|-------|
-| **Student Edition** | $99/year | All features, student verification required |
-| **Institutional Site License** | Custom | Per-seat pricing, volume discounts |
+| Edition                        | Price    | Notes                                       |
+| ------------------------------ | -------- | ------------------------------------------- |
+| **Student Edition**            | $99/year | All features, student verification required |
+| **Institutional Site License** | Custom   | Per-seat pricing, volume discounts          |
 
 ---
 
 ## 🏗️ Technical Architecture
 
 ### Core Platform
+
 - **Framework:** Electron (desktop app: Mac, Windows, Linux)
 - **Frontend:** React 18+ with TypeScript 5+
 - **State Management:** Zustand
@@ -124,18 +127,21 @@ ShowStack
 - **Build Tool:** Vite
 
 ### Feature Flag System
+
 - License-based feature activation
 - Role-based UI visibility
 - Clean, focused interfaces per edition
 - Seamless upgrade path (license key change)
 
 ### Data Architecture
+
 - **Unified project file format** (.showstack)
 - All feature domains share same database
 - Cross-department data automatically synchronized
 - Real-time collaboration via optional cloud sync
 
 ### Integration Points
+
 - **Vectorworks:** LIR import/export, reconciliation
 - **ETC Eos:** OSC protocol, patch export, live control
 - **QLab:** Cue import, output assignment
@@ -148,9 +154,11 @@ ShowStack
 ## 📊 Current Status by Feature Domain
 
 ### ✅ Lighting Features
+
 **Status:** Foundation Complete (Proof-of-Concept)
 
 **Completed:**
+
 - ✅ Virtual data grid (10,000+ fixture performance)
 - ✅ Basic fixture types and properties
 - ✅ In-cell editing with Tab/Enter navigation
@@ -159,12 +167,14 @@ ShowStack
 - ✅ TypeScript type definitions
 
 **In Progress:**
+
 - 🚧 SQLite database integration
 - 🚧 Power & dimmer management
 - 🚧 Circuit tracking
 - 🚧 Multi-cable (Socapex) management
 
 **Planned (Phase 1-2):**
+
 - ⬜ Vectorworks integration
 - ⬜ ETC Eos integration
 - ⬜ Label designer & printing
@@ -174,11 +184,13 @@ ShowStack
 ---
 
 ### 🎵 Sound Features
+
 **Status:** Planned (Year 2 Development)
 
 **Scope:** Full Minotaur Sound System Database parity
 
 **Key Features to Implement:**
+
 - ⬜ Sound equipment database & management
 - ⬜ Multi-pair cable tracking (snakes, fiber, Cat6)
 - ⬜ Pin-to-pin cable assignment interface
@@ -195,16 +207,19 @@ ShowStack
 **Competitive Target:** Minotaur Sound System Database
 
 **Development Timeline:** 16 months (9 phases)
+
 - See `docs/minotaur-parity-analysis.md` for detailed roadmap
 
 ---
 
 ### 📺 Video Features
+
 **Status:** Planned (Year 3 Development)
 
 **Market Opportunity:** Greenfield (no existing competitor)
 
 **Key Features to Implement:**
+
 - ⬜ Projector & display management
 - ⬜ Screen positions & rigging calculations
 - ⬜ Throw distance & resolution calculations
@@ -222,11 +237,13 @@ ShowStack
 ---
 
 ### 📋 Production Management Features
+
 **Status:** Planned (Year 3 Development)
 
 **Scope:** Unified oversight of all departments
 
 **Key Features to Implement:**
+
 - ⬜ Master schedule & timeline management
 - ⬜ Budget tracking (aggregated from all departments)
 - ⬜ Personnel & crew management
@@ -245,11 +262,13 @@ ShowStack
 ---
 
 ### 🚌 Tour Management Features
+
 **Status:** Planned (Year 3 Development)
 
 **Scope:** Touring logistics and coordination
 
 **Key Features to Implement:**
+
 - ⬜ Tour routing & advance planning
 - ⬜ Venue database & specifications
 - ⬜ Travel logistics (buses, flights, hotels)
@@ -268,11 +287,13 @@ ShowStack
 ---
 
 ### 🎭 Producer Features
+
 **Status:** Planned (Year 4 Development)
 
 **Scope:** Multi-show portfolio management
 
 **Key Features to Implement:**
+
 - ⬜ Multi-show portfolio overview
 - ⬜ Budget aggregation & financial reporting
 - ⬜ Contract management
@@ -293,9 +314,11 @@ ShowStack
 ## 🗺️ Development Roadmap
 
 ### Year 1: Foundation (2025-2026)
+
 **Goal:** Launch ShowStack: Lighting Edition
 
 **Q1-Q2:**
+
 - ✅ Strategic architecture defined (unified app with editions)
 - ✅ Proof-of-concept validated (virtual data grid)
 - 🎯 Electron app shell setup
@@ -306,6 +329,7 @@ ShowStack
 - 🎯 Undo/redo system
 
 **Q3-Q4:**
+
 - 🎯 Power & dimmer management
 - 🎯 Circuit tracking & phase balancing
 - 🎯 DMX mapping
@@ -320,9 +344,11 @@ ShowStack
 ---
 
 ### Year 2: Sound Expansion (2026-2027)
+
 **Goal:** Add sound features, launch Designer Edition
 
 **Q1-Q2:**
+
 - 🎯 Sound equipment database
 - 🎯 Multi-pair cable management
 - 🎯 Pin-to-pin assignment interface
@@ -331,6 +357,7 @@ ShowStack
 - 🎯 Conflict detection algorithm
 
 **Q3-Q4:**
+
 - 🎯 Audio patch management
 - 🎯 Speaker & amplifier assignment
 - 🎯 Audio power distribution
@@ -339,6 +366,7 @@ ShowStack
 - 🎯 Label designer enhancements
 
 **Launch:**
+
 - ShowStack: Sound Edition ($199/year)
 - ShowStack: Designer Edition ($449/year - L+S)
 
@@ -347,9 +375,11 @@ ShowStack
 ---
 
 ### Year 3: Multi-Discipline Platform (2027-2028)
+
 **Goal:** Add Video, Production, Tour features
 
 **Q1-Q2:**
+
 - 🎯 Video equipment management
 - 🎯 Projector calculations
 - 🎯 Media server tracking
@@ -358,6 +388,7 @@ ShowStack
 - 🎯 Master schedule & timeline
 
 **Q3-Q4:**
+
 - 🎯 Budget aggregation system
 - 🎯 Personnel management
 - 🎯 Tour routing & logistics
@@ -366,6 +397,7 @@ ShowStack
 - 🎯 Advanced paperwork system
 
 **Launch:**
+
 - ShowStack: Video Edition ($199/year)
 - ShowStack: Production Edition ($599/year)
 - ShowStack: Complete Edition ($999/year)
@@ -375,9 +407,11 @@ ShowStack
 ---
 
 ### Year 4: Producer & Enterprise (2028-2029)
+
 **Goal:** Complete feature set, enterprise capabilities
 
 **Q1-Q2:**
+
 - 🎯 Multi-show portfolio management
 - 🎯 Financial reporting & analytics
 - 🎯 Contract management
@@ -385,6 +419,7 @@ ShowStack
 - 🎯 Enterprise SSO & permissions
 
 **Q3-Q4:**
+
 - 🎯 API for third-party integrations
 - 🎯 Advanced collaboration features
 - 🎯 Mobile companion apps
@@ -401,17 +436,18 @@ ShowStack
 
 ### Direct Competitors by Feature Domain
 
-| ShowStack Edition | Primary Competitor | Competitor Price | ShowStack Advantage |
-|-------------------|-------------------|------------------|---------------------|
-| **Lighting Edition** | LightWright 6 | $845 one-time | 71% cheaper Year 1, real-time collaboration |
-| **Sound Edition** | Minotaur | Not public | Modern UI, QLab integration, cloud sync |
-| **Video Edition** | None (greenfield!) | N/A | First-to-market, no competition |
-| **Production Edition** | Manual tools/Excel | Free-$500/year | Entertainment-specific, integrated data |
-| **Complete Edition** | None | N/A | Only comprehensive platform |
+| ShowStack Edition      | Primary Competitor | Competitor Price | ShowStack Advantage                         |
+| ---------------------- | ------------------ | ---------------- | ------------------------------------------- |
+| **Lighting Edition**   | LightWright 6      | $845 one-time    | 71% cheaper Year 1, real-time collaboration |
+| **Sound Edition**      | Minotaur           | Not public       | Modern UI, QLab integration, cloud sync     |
+| **Video Edition**      | None (greenfield!) | N/A              | First-to-market, no competition             |
+| **Production Edition** | Manual tools/Excel | Free-$500/year   | Entertainment-specific, integrated data     |
+| **Complete Edition**   | None               | N/A              | Only comprehensive platform                 |
 
 ### Unique Competitive Moat
 
 **ShowStack is the ONLY platform offering:**
+
 - ✅ Unified cross-department management
 - ✅ Real-time collaboration across disciplines
 - ✅ Single source of truth for production data
@@ -426,6 +462,7 @@ ShowStack
 ## 📈 Success Metrics
 
 ### Year 1 Targets (Lighting Edition)
+
 - 600 professional users
 - 400 student users
 - 50 institutional seats
@@ -434,6 +471,7 @@ ShowStack
 - NPS >50
 
 ### Year 2 Targets (+ Sound, Designer Edition)
+
 - 1,700 total users
 - 500+ on Designer Edition (bundle)
 - **$522k ARR** (2.7x growth)
@@ -441,6 +479,7 @@ ShowStack
 - NPS >50
 
 ### Year 3 Targets (All Editions)
+
 - 3,000+ total users
 - 800+ on Designer Edition
 - 400+ on Production Edition
@@ -450,6 +489,7 @@ ShowStack
 - NPS >50
 
 ### Year 5 Targets (Mature Platform)
+
 - 8,000+ users
 - 200+ institutional sites
 - **$5M+ ARR**
@@ -461,12 +501,14 @@ ShowStack
 ## 🏢 Team & Organization
 
 ### Current Team
+
 - **Phase:** Pre-Alpha / Strategic Planning
 - **Team Size:** Founder + AI development assistance
 
 ### Planned Team Structure (Year 2-3)
 
 **Engineering:**
+
 - 3-4 Core Platform Engineers
 - 2-3 Lighting Feature Engineers
 - 2-3 Sound Feature Engineers
@@ -475,10 +517,12 @@ ShowStack
 - 1-2 Infrastructure Engineers
 
 **Product & Design:**
+
 - 1 Product Manager
 - 1-2 UX/UI Designers
 
 **Support & Success:**
+
 - 2-3 Support Specialists (discipline-specific)
 - 1 Customer Success Manager (institutions)
 - 1 Community Manager
@@ -492,6 +536,7 @@ ShowStack
 ### Target Markets
 
 **Professional Market:**
+
 - Lighting designers (10,000+ potential users)
 - Sound designers (5,000+ potential users)
 - Video/projection designers (3,000+ potential users)
@@ -500,12 +545,14 @@ ShowStack
 - Producers (1,000+ potential users)
 
 **Educational Market:**
+
 - University theater programs (1,000+ schools)
 - High school theater programs (5,000+ schools)
 - Trade schools and conservatories
 - Workshop and certificate programs
 
 **Institutional Market:**
+
 - Regional theaters
 - Touring productions
 - Corporate event companies
@@ -514,12 +561,14 @@ ShowStack
 ### Marketing Channels
 
 **Industry Events:**
+
 - USITT (United States Institute for Theatre Technology)
 - LDI (Live Design International)
 - InfoComm
 - NAB Show
 
 **Communities:**
+
 - Association of Sound Designers (ASD)
 - Vectorworks user community
 - ETC user community
@@ -527,6 +576,7 @@ ShowStack
 - Facebook groups (lighting, sound, video design)
 
 **Content Marketing:**
+
 - Tutorial videos
 - Workflow case studies
 - Blog posts on production workflows
@@ -537,18 +587,21 @@ ShowStack
 ## 📚 Documentation
 
 ### Strategic Documents
+
 - ✅ `docs/unified-vs-modular-analysis.md` - Architecture decision rationale
 - ✅ `docs/product-family-architecture.md` - Original modular proposal
 - ✅ `docs/naming-restructure-summary.md` - Naming strategy evolution
 - ✅ `docs/minotaur-parity-analysis.md` - Sound feature requirements
 
 ### Technical Documents
+
 - ✅ `docs/technical-spec.md` - Original technical specification
 - ✅ `docs/pricing.md` - Pricing strategy and analysis
 - ✅ `docs/dev-setup.md` - Development environment setup
 - ✅ `docs/summary.md` - Development package summary
 
 ### Migration Documents
+
 - 🎯 `docs/migration-sound-features.md` - Sound edition implementation guide
 - 🎯 `docs/migration-unified-licensing.md` - License-based feature flag implementation
 
@@ -561,6 +614,7 @@ ShowStack
 **Decision:** Build unified application with edition-based licensing instead of separate modular applications.
 
 **Rationale:**
+
 - Production workflows require integration, not fragmentation
 - Single source of truth eliminates data sync issues
 - Unique competitive position (only comprehensive platform)
@@ -569,6 +623,7 @@ ShowStack
 - Higher revenue potential ($1.77M vs $1.38M by Year 3)
 
 **Impact:**
+
 - All features developed in single ShowStack application
 - Feature flags control edition access
 - Unified project file format
@@ -582,6 +637,7 @@ ShowStack
 ## 🚀 Next Actions
 
 ### Immediate (This Week)
+
 - ✅ Finalize unified architecture strategy
 - ✅ Document Minotaur parity requirements
 - 🎯 Create migration documents
@@ -589,6 +645,7 @@ ShowStack
 - 🎯 Begin Electron app setup
 
 ### Next Month
+
 - 🎯 Complete lighting feature parity with LightWright 6
 - 🎯 Implement SQLite database layer
 - 🎯 Build feature flag system
@@ -596,6 +653,7 @@ ShowStack
 - 🎯 Recruit beta testers (lighting designers)
 
 ### Next Quarter
+
 - 🎯 Launch ShowStack: Lighting Edition beta
 - 🎯 Begin sound feature development
 - 🎯 Build marketing website
@@ -611,6 +669,7 @@ ShowStack
 **Repository:** github.com/jkarp7/showstack
 
 **Industry Partnerships:**
+
 - USITT (United States Institute for Theatre Technology)
 - Association of Sound Designers
 - Entertainment Technology organizations
@@ -661,6 +720,7 @@ ShowStack
 **Confidence Level:** High
 
 **Key Achievements:**
+
 - ✅ Validated unified app architecture
 - ✅ Completed Minotaur parity analysis
 - ✅ Defined edition-based pricing strategy

@@ -29,7 +29,7 @@ export const CircuitCountSchema = z.union([
   z.literal(12),
   z.literal(24),
   z.literal(48),
-  z.literal(96)
+  z.literal(96),
 ]);
 
 /**
@@ -39,7 +39,7 @@ export const VoltageSchema = z.union([
   z.literal(120),
   z.literal(208),
   z.literal(230),
-  z.literal(240)
+  z.literal(240),
 ]);
 
 /**
@@ -57,7 +57,7 @@ export const DimmerRackModuleSchema = extendBaseEntity({
 
   // Power specifications (optional)
   watts_per_circuit: z.number().nonnegative().optional(),
-  notes: z.string().optional()
+  notes: z.string().optional(),
 });
 
 /**
@@ -85,7 +85,7 @@ export const DimmerRackSchema = extendBaseEntity({
   building_service: z.string().optional(), // Service A, B, C, etc.
 
   // Notes
-  notes: z.string().optional()
+  notes: z.string().optional(),
 });
 
 /**
@@ -117,7 +117,7 @@ export const PDRackSchema = extendBaseEntity({
   building_service: z.string().optional(), // Service A, B, C, etc.
 
   // Notes
-  notes: z.string().optional()
+  notes: z.string().optional(),
 });
 
 /**
@@ -136,19 +136,19 @@ export type PDRack = z.infer<typeof PDRackSchema>;
 export const CreateDimmerRackModuleSchema = DimmerRackModuleSchema.omit({
   id: true,
   created_at: true,
-  updated_at: true
+  updated_at: true,
 });
 
 export const CreateDimmerRackSchema = DimmerRackSchema.omit({
   id: true,
   created_at: true,
-  updated_at: true
+  updated_at: true,
 });
 
 export const CreatePDRackSchema = PDRackSchema.omit({
   id: true,
   created_at: true,
-  updated_at: true
+  updated_at: true,
 });
 
 /**

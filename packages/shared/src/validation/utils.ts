@@ -40,10 +40,7 @@ export interface ValidationError {
  * }
  * ```
  */
-export function parseWithZod<T>(
-  schema: ZodSchema<T>,
-  data: unknown
-): ValidationResult<T> {
+export function parseWithZod<T>(schema: ZodSchema<T>, data: unknown): ValidationResult<T> {
   try {
     const validated = schema.parse(data);
     return { success: true, data: validated };
@@ -53,14 +50,14 @@ export function parseWithZod<T>(
       const errors: ValidationError[] = errorIssues.map((err: any) => ({
         field: err.path ? err.path.join('.') : '',
         message: err.message || 'Validation error',
-        code: err.code || 'invalid'
+        code: err.code || 'invalid',
       }));
       return { success: false, errors };
     }
     // Unexpected error
     return {
       success: false,
-      errors: [{ field: '', message: String(error), code: 'unknown' }]
+      errors: [{ field: '', message: String(error), code: 'unknown' }],
     };
   }
 }
@@ -80,10 +77,7 @@ export function parseWithZod<T>(
  * }
  * ```
  */
-export function validateArray<T>(
-  schema: ZodSchema<T>,
-  data: unknown[]
-): ValidationResult<T[]> {
+export function validateArray<T>(schema: ZodSchema<T>, data: unknown[]): ValidationResult<T[]> {
   const arraySchema = z.array(schema);
   return parseWithZod(arraySchema, data);
 }

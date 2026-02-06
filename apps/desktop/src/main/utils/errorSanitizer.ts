@@ -5,7 +5,14 @@
  * information disclosure (file paths, system details, stack traces).
  */
 
-import { InvalidFileTypeError, FileSizeExceededError, FileNotFoundError, PathTraversalError, NullByteError, InvalidPathError } from './errors';
+import {
+  InvalidFileTypeError,
+  FileSizeExceededError,
+  FileNotFoundError,
+  PathTraversalError,
+  NullByteError,
+  InvalidPathError,
+} from './errors';
 import * as path from 'path';
 
 /**

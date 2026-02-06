@@ -9,7 +9,7 @@ export function registerSettingsHandlers() {
     try {
       const windows = windowManager.getAllWindows();
 
-      windows.forEach(window => {
+      windows.forEach((window) => {
         if (!window.isDestroyed()) {
           if (enabled) {
             // Open DevTools
@@ -26,10 +26,12 @@ export function registerSettingsHandlers() {
       console.error('Failed to toggle developer mode:', {
         operation: 'settings:developer-mode-changed',
         enabled,
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
-      throw new Error(`Unable to toggle developer mode: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to toggle developer mode: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 
@@ -38,9 +40,7 @@ export function registerSettingsHandlers() {
    */
   ipcMain.handle('settings:toggle-devtools', async (event) => {
     try {
-      const window = windowManager.getAllWindows().find(
-        w => w.webContents === event.sender
-      );
+      const window = windowManager.getAllWindows().find((w) => w.webContents === event.sender);
 
       if (window && !window.isDestroyed()) {
         if (window.webContents.isDevToolsOpened()) {
@@ -55,10 +55,12 @@ export function registerSettingsHandlers() {
     } catch (error) {
       console.error('Failed to toggle devtools:', {
         operation: 'settings:toggle-devtools',
-        error: error instanceof Error ? error.message : error
+        error: error instanceof Error ? error.message : error,
       });
 
-      throw new Error(`Unable to toggle DevTools: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Unable to toggle DevTools: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   });
 }
