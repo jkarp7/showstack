@@ -68,10 +68,18 @@ export function normalizePaginationOptions(
     throw new Error('allowedSortFields must not be empty');
   }
 
-  const offset = Math.max(0, Math.floor(options.offset ?? DEFAULT_PAGINATION.offset));
+  // Handle Infinity/NaN edge cases - fall back to defaults for non-finite values
+  const rawOffset = options.offset ?? DEFAULT_PAGINATION.offset;
+  const rawLimit = options.limit ?? DEFAULT_PAGINATION.limit;
+
+  const offset = Math.max(0, Math.floor(
+    Number.isFinite(rawOffset) ? rawOffset : DEFAULT_PAGINATION.offset
+  ));
   const limit = Math.min(
     MAX_PAGINATION_LIMIT,
-    Math.max(1, Math.floor(options.limit ?? DEFAULT_PAGINATION.limit))
+    Math.max(1, Math.floor(
+      Number.isFinite(rawLimit) ? rawLimit : DEFAULT_PAGINATION.limit
+    ))
   );
 
   // Validate sortBy against allowed fields

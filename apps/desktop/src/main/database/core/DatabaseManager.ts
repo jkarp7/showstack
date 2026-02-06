@@ -361,10 +361,9 @@ export class DatabaseManager {
    * reliability is maintained.
    */
   startPeriodicCheckpointing(): void {
-    if (this.walCheckpointInterval) {
-      logger.debug('WAL checkpointing already started');
-      return;
-    }
+    // Defensive cleanup: stop any existing interval to prevent memory leaks
+    // if this method is called multiple times
+    this.stopPeriodicCheckpointing();
 
     logger.info('Starting periodic WAL checkpointing', {
       intervalMs: this.walConfig.checkpointIntervalMs

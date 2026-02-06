@@ -206,14 +206,31 @@ describe('pagination utility', () => {
         expect(result.offset).toBeGreaterThan(0);
       });
 
-      it('should clamp Infinity to a reasonable value', () => {
+      it('should handle Infinity by falling back to default', () => {
         const result = normalizePaginationOptions(
           { offset: Infinity },
           ['id']
         );
-        // Math.floor(Infinity) is Infinity, Math.max(0, Infinity) is Infinity
-        // This is technically valid but may cause issues - documenting current behavior
-        expect(result.offset).toBe(Infinity);
+        // Non-finite values fall back to default (0) to prevent SQLite issues
+        expect(result.offset).toBe(0);
+      });
+
+      it('should handle NaN by falling back to default', () => {
+        const result = normalizePaginationOptions(
+          { offset: NaN, limit: NaN },
+          ['id']
+        );
+        // NaN falls back to defaults
+        expect(result.offset).toBe(0);
+        expect(result.limit).toBe(50); // DEFAULT_PAGINATION.limit
+      });
+
+      it('should handle negative Infinity by falling back to default', () => {
+        const result = normalizePaginationOptions(
+          { offset: -Infinity },
+          ['id']
+        );
+        expect(result.offset).toBe(0);
       });
     });
   });
