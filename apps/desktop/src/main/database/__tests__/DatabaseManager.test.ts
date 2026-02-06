@@ -74,9 +74,12 @@ describe('DatabaseManager', () => {
   });
 
   afterEach(() => {
-    // Clean up any intervals
-    manager.stopPeriodicCheckpointing();
-    vi.useRealTimers();
+    try {
+      // Clean up any intervals
+      manager.stopPeriodicCheckpointing();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   describe('initialization', () => {

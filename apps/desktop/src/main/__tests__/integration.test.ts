@@ -257,7 +257,7 @@ describe('Project CRUD Lifecycle', () => {
   it('should update a project name and verify changes', () => {
     const created = createProject('Draft Show', 'Working title');
 
-    const updated = updateProject(created.id, { name: 'Final Show Name' } as any);
+    const updated = updateProject(created.id, { name: 'Final Show Name' });
 
     expect(updated.name).toBe('Final Show Name');
     expect(updated.id).toBe(created.id);
@@ -462,7 +462,7 @@ describe('Cross-Entity Workflows', () => {
       // busy-wait
     }
 
-    updateProject(p1.id, { name: 'First Show (Updated)' } as any);
+    updateProject(p1.id, { name: 'First Show (Updated)' });
 
     const all = getAllProjects();
     // p1 was updated more recently, so it should come first
@@ -534,7 +534,7 @@ describe('Data Integrity', () => {
       // busy-wait
     }
 
-    const updated = updateProject(project.id, { name: 'Renamed Project' } as any);
+    const updated = updateProject(project.id, { name: 'Renamed Project' });
 
     expect(updated.created_at).toBe(originalCreatedAt);
     expect(updated.updated_at).toBeGreaterThan(originalUpdatedAt);
