@@ -93,7 +93,7 @@ const mockStoreData = {
   ] as ShopOrderItem[],
 };
 
-vi.mock('../../../store/prepStore', () => ({
+vi.mock('../../../store/shopOrderStore', () => ({
   useShopOrderStore: () => mockStoreData,
 }));
 

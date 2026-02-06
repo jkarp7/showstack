@@ -20,6 +20,9 @@ describe('Performance Indexes', () => {
     tempDir = mkdtempSync(join(tmpdir(), 'showstack-perf-test-'));
     const dbPath = join(tempDir, 'test.db');
     db = new Database(dbPath);
+    // Use WAL mode and NORMAL sync for faster writes (especially on Windows CI)
+    db.pragma('journal_mode = WAL');
+    db.pragma('synchronous = NORMAL');
 
     // Create test tables matching production schema
     db.exec(`
@@ -83,9 +86,10 @@ describe('Performance Indexes', () => {
       );
     `);
 
-    // Insert test data
-    seedTestData(db);
-  });
+    // Insert test data (wrapped in transaction for performance)
+    const seed = db.transaction(() => seedTestData(db));
+    seed();
+  }, 30000);
 
   afterEach(() => {
     db.close();

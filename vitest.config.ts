@@ -8,6 +8,12 @@ export default defineConfig({
     // Environment
     environment: 'jsdom',
 
+    // Use node environment for main process tests (native modules like better-sqlite3)
+    environmentMatchGlobs: [
+      ['apps/desktop/src/main/**', 'node'],
+      ['packages/**', 'node']
+    ],
+
     // Setup files
     setupFiles: ['./apps/desktop/src/renderer/test/setup.ts'],
 
