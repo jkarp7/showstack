@@ -1,6 +1,6 @@
 # Phase 3: Cloud Collaboration + Performance Optimization
 
-**Status:** 🟢 Phase 3.0-3.4 Complete
+**Status:** 🟢 Phase 3.0-3.4 Complete (Presence Indicators deferred as optional)
 **Priority:** CRITICAL (required for Lightwright parity)
 **Goal:** Local-first cloud sync using PowerSync + Supabase, plus database performance optimization
 
@@ -613,12 +613,16 @@ Current services continue using local SQLite; PowerSync provides sync layer.
 - [x] Expandable conflict details with timestamps
 - [x] Visual indicators for resolution choices
 
-### 3.4.3 Presence Indicators (Optional)
+### 3.4.3 Presence Indicators (Optional - Deferred)
 
-**Tasks:**
+**Status:** Deferred - requires Supabase Realtime integration and live multi-user testing
+
+**Tasks (Future Enhancement):**
 - [ ] Implement real-time presence via Supabase Realtime
 - [ ] Show active collaborators on project
 - [ ] Show cursor/selection for active users (stretch goal)
+
+**Note:** This is a "nice-to-have" feature that can be added after core sync functionality is validated with real users.
 
 ---
 
