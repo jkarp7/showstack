@@ -70,34 +70,44 @@ export function ConflictResolutionDialog({
     setApplyToAll(null);
   }, [conflicts]);
 
+  if (!isOpen || conflicts.length === 0) {
+    return null;
+  }
+
+  const allResolved = conflicts.every((c) => resolutions.has(c.id));
+
+  /**
+   * Attempts to close the dialog, showing a confirmation if there are
+   * partial resolutions that would be lost.
+   * @returns true if the dialog was closed, false if the user cancelled
+   */
+  const attemptClose = (): boolean => {
+    // Show confirmation if user has started resolving but hasn't finished
+    if (resolutions.size > 0 && !allResolved) {
+      const confirmed = window.confirm(
+        'You have unresolved conflicts. Are you sure you want to close?'
+      );
+      if (!confirmed) return false;
+    }
+    onClose();
+    return true;
+  };
+
   // Focus dialog and handle Escape key when open
   useEffect(() => {
-    if (!isOpen) return;
-
     // Focus the dialog
     dialogRef.current?.focus();
 
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        // Use the same close logic with confirmation
-        if (resolutions.size > 0 && !conflicts.every((c) => resolutions.has(c.id))) {
-          const confirmed = window.confirm(
-            'You have unresolved conflicts. Are you sure you want to close?'
-          );
-          if (!confirmed) return;
-        }
-        onClose();
+        attemptClose();
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, resolutions, conflicts, onClose]);
-
-  if (!isOpen || conflicts.length === 0) {
-    return null;
-  }
+  }, [resolutions, conflicts, onClose]);
 
   const handleResolutionChange = (conflictId: string, choice: 'local' | 'remote') => {
     setResolutions((prev) => {
@@ -129,23 +139,10 @@ export function ConflictResolutionDialog({
     });
   };
 
-  const allResolved = conflicts.every((c) => resolutions.has(c.id));
-
   const handleSubmit = () => {
     if (allResolved) {
       onResolve(resolutions);
     }
-  };
-
-  const handleClose = () => {
-    // Confirm if there are unresolved conflicts
-    if (resolutions.size > 0 && !allResolved) {
-      const confirmed = window.confirm(
-        'You have unresolved conflicts. Are you sure you want to close?'
-      );
-      if (!confirmed) return;
-    }
-    onClose();
   };
 
   return (
@@ -153,7 +150,7 @@ export function ConflictResolutionDialog({
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50"
-        onClick={handleClose}
+        onClick={attemptClose}
         role="presentation"
         aria-hidden="true"
       />
@@ -182,7 +179,7 @@ export function ConflictResolutionDialog({
             </p>
           </div>
           <button
-            onClick={handleClose}
+            onClick={attemptClose}
             className="ml-auto p-1 text-gray-400 hover:text-gray-600 rounded"
             aria-label="Close dialog"
           >
@@ -329,7 +326,7 @@ export function ConflictResolutionDialog({
           </p>
           <div className="flex items-center gap-3">
             <button
-              onClick={handleClose}
+              onClick={attemptClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded transition"
             >
               Cancel

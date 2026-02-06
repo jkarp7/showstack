@@ -5,7 +5,7 @@
  * Shows pending changes count and reconnection status.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { WifiOff, X, RefreshCw } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
@@ -14,14 +14,29 @@ export function OfflineBanner(): JSX.Element | null {
   const [isDismissed, setIsDismissed] = useState(false);
   const [isReconnecting, setIsReconnecting] = useState(false);
   const [retryError, setRetryError] = useState<string | null>(null);
+  const prevStateRef = useRef(syncStatus.state);
 
-  // Reset state when coming back online
+  // Reset dismissal state when a NEW disconnection occurs
+  // (i.e., when transitioning from connected/syncing to disconnected/error)
   useEffect(() => {
-    if (syncStatus.state === 'connected') {
+    const prevState = prevStateRef.current;
+    const currentState = syncStatus.state;
+    const wasOnline = prevState === 'connected' || prevState === 'syncing';
+    const isOffline = currentState === 'disconnected' || currentState === 'error';
+
+    // If we just went offline from an online state, reset the dismissed state
+    if (wasOnline && isOffline) {
       setIsDismissed(false);
+      setRetryError(null);
+    }
+
+    // Also reset reconnecting state when connected
+    if (currentState === 'connected') {
       setIsReconnecting(false);
       setRetryError(null);
     }
+
+    prevStateRef.current = currentState;
   }, [syncStatus.state]);
 
   // Don't show if:
