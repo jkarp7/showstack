@@ -17,7 +17,7 @@ export function useProjectMenuHandlers() {
     const handleEditProject = () => {
       // Get current project ID from menu state or params
       const currentPath = window.location.pathname;
-      const projectIdMatch = currentPath.match(/\/project\/([^\/]+)/);
+      const projectIdMatch = currentPath.match(/\/project\/([^/]+)/);
 
       if (projectIdMatch) {
         const projectId = projectIdMatch[1];

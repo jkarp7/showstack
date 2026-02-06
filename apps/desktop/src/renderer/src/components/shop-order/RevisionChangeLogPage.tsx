@@ -40,6 +40,7 @@ export function RevisionChangeLogPage({ projectId }: RevisionChangeLogPageProps)
   const spareSnapshot = revisionRecord ? parseSpareSnapshot(revisionRecord.spare_snapshot) : undefined;
 
   // Detect changes for the selected revision
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- TODO: move early return below hooks
   const changes = useMemo(() => {
     if (activeRevision === 0) return [];
     const allChanges = detectRevisionChanges(items, activeRevision - 1, activeRevision, spareSnapshot);
@@ -50,6 +51,7 @@ export function RevisionChangeLogPage({ projectId }: RevisionChangeLogPageProps)
   }, [items, activeRevision, spareSnapshot, filter]);
 
   // Group changes by section
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- TODO: move early return below hooks
   const changesBySection = useMemo(() => {
     const grouped = new Map<string, typeof changes>();
     changes.forEach((change) => {

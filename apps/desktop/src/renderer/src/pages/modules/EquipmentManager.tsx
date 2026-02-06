@@ -556,7 +556,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
       const rows = processedFixtures.map(fixture => {
         return visibleColumns.map(col => {
-          let value = fixture[col.key as keyof Fixture];
+          const value = fixture[col.key as keyof Fixture];
 
           // Handle special cases
           if (value === undefined || value === null) return '';

@@ -121,7 +121,7 @@ export const useShopOrderFileStore = create<ShopOrderFileStore>((set, get) => ({
   // Save file (save to current path or prompt for new path)
   saveFile: async (projectId, projectName) => {
     const state = get();
-    let filePath = state.currentFilePath;
+    const filePath = state.currentFilePath;
 
     // If no current file path, prompt for one
     if (!filePath) {

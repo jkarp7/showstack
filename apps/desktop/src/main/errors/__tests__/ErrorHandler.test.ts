@@ -260,7 +260,7 @@ describe('ErrorHandler', () => {
 
         try {
           await errorHandler.executeWithRetry(operation, 'test', 2);
-        } catch {}
+        } catch { /* expected error */ }
 
         // Should have retried (called twice)
         expect(operation).toHaveBeenCalledTimes(2);
@@ -282,7 +282,7 @@ describe('ErrorHandler', () => {
 
         try {
           await errorHandler.executeWithRetry(operation, 'test', 3);
-        } catch {}
+        } catch { /* expected error */ }
 
         // Should not have retried (called once)
         expect(operation).toHaveBeenCalledTimes(1);
@@ -299,7 +299,7 @@ describe('ErrorHandler', () => {
 
       try {
         await errorHandler.executeWithRetry(operation, 'test-operation', 2);
-      } catch {}
+      } catch { /* expected error */ }
 
       // ErrorHandler now uses logger.warn which calls console.warn
       expect(consoleWarnSpy).toHaveBeenCalled();

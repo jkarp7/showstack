@@ -1100,7 +1100,7 @@ function renderLayoutElement(
       return ''; // No placeholder
     }
 
-    let allContent: string[] = [];
+    const allContent: string[] = [];
 
     notes.forEach(note => {
       const content = note.content || '';

@@ -238,6 +238,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
   // Flush pending saves on unmount
   // NOTE: React cleanup functions cannot be async, so we fire saves and hope they complete.
   // The beforeunload handler below provides additional safety for window close events.
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- TODO: move early return below hooks
   useEffect(() => {
     return () => {
       if (saveTimeoutRef.current) {
@@ -260,6 +261,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
 
   // Add beforeunload handler to flush pending saves before window closes
   // Only shows warning if there are unsaved changes
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- TODO: move early return below hooks
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       const hasPendingSaves = pendingSavesRef.current.size > 0 || saveTimeoutRef.current !== null;

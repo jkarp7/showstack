@@ -308,7 +308,7 @@ class FileService {
       const importedDb = new SQL.Database(buffer);
 
       // Get project info
-      let projectId = resolution.projectId;
+      const projectId = resolution.projectId;
       let projectName = 'Untitled Project';
 
       try {
