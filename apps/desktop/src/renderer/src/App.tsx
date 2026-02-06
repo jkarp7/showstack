@@ -18,6 +18,7 @@ import { ConsentDialog } from './components/common/ConsentDialog';
 import { SettingsDialog } from './components/common/SettingsDialog';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthModal } from './components/auth';
+import { OfflineBanner } from './components/sync';
 import { useUser } from './hooks/useUser';
 import { useSettingsStore } from './store/settingsStore';
 import { useUIStore } from './store/uiStore';
@@ -55,6 +56,9 @@ function AppContent() {
     <>
       {/* License Status Banner - shows warnings for expiration/offline */}
       {status && <LicenseBanner status={status} />}
+
+      {/* Offline Banner - shows when cloud sync is disconnected */}
+      <OfflineBanner />
 
       <Routes>
         {/* Default route - show landing page (projects) */}
