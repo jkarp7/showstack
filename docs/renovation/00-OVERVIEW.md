@@ -27,6 +27,41 @@ Transform ShowStack from a desktop-only lighting tool to a **local-first, cloud-
 
 ---
 
+## 🚨 Renovation Testing Standards
+
+**CRITICAL:** All code changes must pass existing tests. Tests must NOT be altered to force passing.
+
+### Core Principles
+
+1. **Tests are contracts** - When a test fails, fix the code, not the test
+2. **Specific assertions** - Tests verify exact behavior, not "something happened"
+3. **No weakening** - Never generalize assertions to make tests pass
+4. **Architecture over shortcuts** - Proper fixes, not workarounds
+
+### Requirements for Every Phase
+
+✅ All existing tests must pass before proceeding
+✅ New code must include new tests
+✅ Test assertions must remain specific
+✅ Code fixes architecture, tests stay unchanged
+✅ Commit messages include test status
+
+### Unacceptable Practices
+
+❌ Weakening test assertions (e.g., `toThrow(/Specific/)` → `toThrow()`)
+❌ Commenting out failing tests
+❌ Using `.skip()` to bypass failures
+❌ Modifying mocks to hide bugs
+❌ Adding `any` types to avoid test failures
+
+**Example from Phase 1:**
+- ❌ WRONG: Changed test to accept any error
+- ✅ CORRECT: Moved validation before transaction, kept specific test
+
+See Phase-2-Validation-Services.md for detailed testing workflow.
+
+---
+
 ## Current State Assessment
 
 ### Critical Issues

@@ -10,7 +10,10 @@
   "license": "UNLICENSED",
   "private": true,
   "type": "module",
-  "main": "out/main/index.js",
+  "main": "out/main/index.cjs",
+  "workspaces": [
+    "packages/*"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/jkarp7/showstack.git"
@@ -72,6 +75,7 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "@showstack/shared": "workspace:*",
     "@types/better-sqlite3": "^7.6.13",
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^12.6.2",

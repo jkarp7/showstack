@@ -1,9 +1,15 @@
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: 'class', // Enable class-based dark mode
+  darkMode: 'class',
   content: [
-    "./src/renderer/index.html",
-    "./src/renderer/src/**/*.{js,ts,jsx,tsx}",
+    join(__dirname, 'apps/desktop/src/renderer/index.html'),
+    join(__dirname, 'apps/desktop/src/renderer/src/**/*.{js,ts,jsx,tsx}'),
   ],
   theme: {
     extend: {},

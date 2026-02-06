@@ -9,7 +9,7 @@ export default defineConfig({
     environment: 'jsdom',
 
     // Setup files
-    setupFiles: ['./src/renderer/test/setup.ts'],
+    setupFiles: ['./apps/desktop/src/renderer/test/setup.ts'],
 
     // Coverage
     coverage: {
@@ -54,10 +54,12 @@ export default defineConfig({
     // Globals (allows using `describe`, `it`, `expect` without imports)
     globals: true,
 
-    // Test matching
+    // Test matching (monorepo structure)
     include: [
-      'src/**/*.{test,spec}.{ts,tsx}',
-      'src/**/__tests__/**/*.{ts,tsx}'
+      'apps/**/src/**/*.{test,spec}.{ts,tsx}',
+      'apps/**/src/**/__tests__/**/*.{ts,tsx}',
+      'packages/**/*.{test,spec}.{ts,tsx}',
+      'packages/**/__tests__/**/*.{ts,tsx}'
     ],
 
     // Mocking

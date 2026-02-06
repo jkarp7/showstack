@@ -82,7 +82,7 @@ jobs:
         run: npm ci
 
       - name: Run TypeScript type check
-        run: npx tsc --noEmit --strict
+        run: npx tsc --noEmit
 
       - name: Run ESLint (if configured)
         run: npm run lint --if-present

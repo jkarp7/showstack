@@ -1,9 +1,38 @@
 # Phase 3: Cloud Collaboration + Performance Optimization
 
 **Duration:** 7-9 weeks
-**Status:** 🟡 Depends on Phase 2
+**Status:** 🟡 Depends on Phase 2.3 (Service Layer)
 **Priority:** CRITICAL (required for Lightwright parity)
 **Goal:** Local-first cloud sync using PowerSync + Supabase, plus database performance optimization
+
+---
+
+## 🟢 Supabase & PowerSync - Accounts Ready
+
+**READY TO INTEGRATE:** Both Supabase and PowerSync accounts are created and configured.
+
+**Prerequisites (from Phase 2):**
+- ✅ Service layer extraction complete (Phase 2.3) - **REQUIRED BEFORE STARTING**
+- ✅ Zod validation schemas complete (Phase 2.2)
+- ✅ Monorepo setup complete (Phase 2.1)
+- ✅ Database schema validated and tested
+
+**What's ready:**
+- ✅ Supabase project created with production-grade configuration
+- ✅ PowerSync account created and ready for service setup
+- ✅ Database schema matches PowerSync requirements
+- ✅ Validation layer ready for cloud data validation
+
+**Integration approach:**
+1. **Phase 3.1:** Deploy schema to Supabase (1 week)
+2. **Phase 3.2:** Integrate PowerSync with service layer (3-4 weeks)
+3. **Phase 3.3:** Add Supabase Auth (1-2 weeks)
+4. **Phase 3.4:** Build collaboration UI (1 week)
+
+**Critical dependencies:**
+- Service layer (Phase 2.3) provides clean integration points for PowerSync
+- Without services, PowerSync integration becomes significantly more complex
+- Services enable proper conflict resolution and business logic separation
 
 ---
 

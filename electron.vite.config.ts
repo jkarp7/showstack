@@ -7,14 +7,21 @@ import { join } from 'path';
 export default defineConfig({
   main: {
     build: {
+      lib: {
+        entry: resolve(__dirname, 'apps/desktop/src/main/index.ts'),
+        formats: ['cjs']
+      },
       rollupOptions: {
-        external: ['sql.js', 'puppeteer'],
+        external: ['sql.js', 'puppeteer', 'better-sqlite3'],
+        output: {
+          entryFileNames: '[name].cjs'
+        },
         plugins: [
           {
             name: 'copy-default-layouts',
             writeBundle() {
               // Copy defaultLayouts directory to build output
-              const srcDir = resolve(__dirname, 'src/main/database/defaultLayouts');
+              const srcDir = resolve(__dirname, 'apps/desktop/src/main/database/defaultLayouts');
               const destDir = resolve(__dirname, 'out/main/database/defaultLayouts');
 
               if (!existsSync(destDir)) {
@@ -35,15 +42,24 @@ export default defineConfig({
   },
   preload: {
     build: {
+      lib: {
+        entry: resolve(__dirname, 'apps/desktop/src/preload/index.ts')
+      },
       rollupOptions: {
         external: ['electron']
       }
     }
   },
   renderer: {
+    root: resolve(__dirname, 'apps/desktop/src/renderer'),
+    build: {
+      rollupOptions: {
+        input: resolve(__dirname, 'apps/desktop/src/renderer/index.html')
+      }
+    },
     resolve: {
       alias: {
-        '@': resolve('src/renderer/src')
+        '@': resolve('apps/desktop/src/renderer/src')
       }
     },
     plugins: [react()]
