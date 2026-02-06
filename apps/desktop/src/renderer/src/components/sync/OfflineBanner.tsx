@@ -13,12 +13,14 @@ export function OfflineBanner() {
   const { isAuthenticated, syncStatus, isCloudConfigured } = useAuthStore();
   const [isDismissed, setIsDismissed] = useState(false);
   const [isReconnecting, setIsReconnecting] = useState(false);
+  const [retryError, setRetryError] = useState<string | null>(null);
 
-  // Reset dismissed state when coming back online
+  // Reset state when coming back online
   useEffect(() => {
     if (syncStatus.state === 'connected') {
       setIsDismissed(false);
       setIsReconnecting(false);
+      setRetryError(null);
     }
   }, [syncStatus.state]);
 
@@ -38,16 +40,16 @@ export function OfflineBanner() {
 
   const handleRetry = async () => {
     setIsReconnecting(true);
+    setRetryError(null);
     try {
       await window.api.sync.initialize();
     } catch (error) {
       console.error('[OfflineBanner] Retry failed:', error);
+      setRetryError('Connection failed. Please try again.');
     } finally {
       setIsReconnecting(false);
     }
   };
-
-  const pendingCount = syncStatus.hasPendingChanges ? 'some' : 'no';
 
   return (
     <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-2">
@@ -57,9 +59,13 @@ export function OfflineBanner() {
           <div className="text-sm">
             <span className="font-medium text-yellow-800">You're offline</span>
             <span className="text-yellow-700 ml-2">
-              {syncStatus.hasPendingChanges
-                ? 'Changes will sync when you reconnect.'
-                : 'Your work is saved locally.'}
+              {retryError ? (
+                <span className="text-red-600">{retryError}</span>
+              ) : syncStatus.hasPendingChanges ? (
+                'Changes will sync when you reconnect.'
+              ) : (
+                'Your work is saved locally.'
+              )}
             </span>
           </div>
         </div>

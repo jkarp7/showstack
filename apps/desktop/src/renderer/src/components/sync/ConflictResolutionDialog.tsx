@@ -8,6 +8,28 @@
 import { useState } from 'react';
 import { AlertTriangle, Check, X, ChevronDown, ChevronUp } from 'lucide-react';
 
+/**
+ * Format a value for display in the conflict dialog
+ * Truncates large objects to prevent UI issues
+ */
+function formatValue(value: unknown): string {
+  if (value === null || value === undefined) {
+    return '(empty)';
+  }
+  if (typeof value === 'object') {
+    const json = JSON.stringify(value, null, 2);
+    return json.length > 500 ? json.substring(0, 500) + '...' : json;
+  }
+  return String(value);
+}
+
+/**
+ * Format a timestamp for display
+ */
+function formatTimestamp(date: Date): string {
+  return date.toLocaleString();
+}
+
 export interface SyncConflict {
   id: string;
   tableName: string;
@@ -82,24 +104,25 @@ export function ConflictResolutionDialog({
     }
   };
 
-  const formatValue = (value: unknown): string => {
-    if (value === null || value === undefined) {
-      return '(empty)';
+  const handleClose = () => {
+    // Confirm if there are unresolved conflicts
+    if (resolutions.size > 0 && !allResolved) {
+      const confirmed = window.confirm(
+        'You have unresolved conflicts. Are you sure you want to close?'
+      );
+      if (!confirmed) return;
     }
-    if (typeof value === 'object') {
-      return JSON.stringify(value, null, 2);
-    }
-    return String(value);
-  };
-
-  const formatTimestamp = (date: Date): string => {
-    return new Date(date).toLocaleString();
+    onClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/50"
+        onClick={handleClose}
+        role="presentation"
+      />
 
       {/* Dialog */}
       <div className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col">
@@ -118,7 +141,7 @@ export function ConflictResolutionDialog({
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="ml-auto p-1 text-gray-400 hover:text-gray-600 rounded"
           >
             <X className="h-5 w-5" />
@@ -264,7 +287,7 @@ export function ConflictResolutionDialog({
           </p>
           <div className="flex items-center gap-3">
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded transition"
             >
               Cancel
