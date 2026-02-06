@@ -1,9 +1,9 @@
 # ShowStack Project Status
 
 **Created:** December 18, 2025
-**Last Updated:** January 20, 2026
+**Last Updated:** February 6, 2026
 **Current Version:** 0.1.0-alpha
-**Development Phase:** Alpha
+**Development Phase:** Alpha (Renovation ~65% complete)
 **Active Branch:** `develop`
 
 This document tracks the development status of all ShowStack feature domains and editions. It serves as the central source of truth for what's completed, in progress, and planned.
@@ -1543,21 +1543,17 @@ Full developer mode implementation with DevTools integration.
 
 ### Cloud Sync & Collaboration
 
-**Status:** UI mockups only (2% complete) - No backend implementation
+**Status:** ✅ Core implementation complete (Renovation Phase 3)
 
-- ⬜ **Backend API** - Express.js + PostgreSQL
-- ⬜ **Real-time Sync** - Socket.io or WebSocket integration
-- ⬜ **Conflict Resolution** - Automatic merge or manual resolution
-- ⬜ **File Storage** - AWS S3 or Cloudflare R2 for assets
-- ⬜ **Team Collaboration** - Multi-user access, permissions
+- ✅ **PowerSync + Supabase** - Local-first sync architecture
+- ✅ **Offline-first** - Full functionality without internet
+- ✅ **Real-time sync** - Multi-device collaboration via PowerSync
+- ✅ **Conflict resolution** - Automatic merge with manual resolution UI
+- ✅ **Sync status indicators** - Online/offline status, sync progress
+- ⬜ **Team collaboration** - Multi-user access, permissions (future)
+- ⬜ **File Storage** - Asset sync for images/attachments (future)
 
-**Existing UI Mockups (Non-functional):**
-
-- `IntegrationSettings.tsx` - Cloud storage toggle UI, provider selection
-- `Collaboration.tsx` - Placeholder settings panel
-- All backend functions are TODO stubs
-
-**See Strategic Urgency section below for collaboration decision framework**
+**Architecture:** PowerSync + Supabase ($0/month MVP, saves 15-20 weeks vs custom backend)
 
 ---
 
@@ -1583,15 +1579,23 @@ Full developer mode implementation with DevTools integration.
 
 ### Testing & Quality
 
-**Status:** Not implemented (0% complete)
+**Status:** ✅ Complete (Renovation Phase 4)
 
-- ⬜ **Unit Tests** - Vitest test suite
-- ⬜ **Component Tests** - React Testing Library
-- ⬜ **Integration Tests** - End-to-end critical flows
-- ⬜ **E2E Tests** - Playwright user journeys
-- ⬜ **Performance Tests** - Load testing with 10k+ fixtures
+- ✅ **Unit Tests** - Vitest test suite (1,440+ tests across 47 files)
+- ✅ **Component Tests** - React Testing Library
+- ✅ **Integration Tests** - Database, service layer, sync
+- ⬜ **E2E Tests** - Playwright user journeys (planned)
+- ⬜ **Performance Tests** - Load testing with 10k+ fixtures (planned)
 
-**Current State:** Zero test files in src/ directory, no testing framework installed
+**CI/CD (Renovation Phase 5):**
+
+- ✅ ESLint 9 with TypeScript + React plugins (0 errors)
+- ✅ Prettier formatting (423 files)
+- ✅ Husky + lint-staged pre-commit hooks
+- ✅ GitHub Actions: multi-platform tests, lint, security audit
+- ✅ Codecov integration (50% project / 60% patch targets)
+
+**Current coverage:** 70%+ with 1,440+ tests
 
 ---
 
@@ -1791,12 +1795,14 @@ Incorporated into **Lighting Edition → Planned** section above.
 
 ### Architecture Decisions
 
-- **Offline-first**: All data stored locally in SQLite (sql.js)
+- **Local-first with cloud sync**: PowerSync + Supabase for offline-first sync
+- **better-sqlite3**: Replaced sql.js (10-20x faster), WAL mode, transactions
 - **Unified application**: Single app with license-based edition access
 - **Two-database approach**: App DB (never exported) + Project DB (exportable)
-- **Electron + React**: Cross-platform desktop with modern web tech
+- **Electron + React**: Cross-platform desktop with modern web tech (electron-vite)
 - **Zustand over Redux**: Simpler state management
-- **TypeScript strict mode**: Full type safety throughout
+- **Zod validation**: Runtime type safety at system boundaries
+- **Monorepo structure**: `apps/desktop/` + `packages/shared/`
 
 ### Edition Structure
 
@@ -1807,10 +1813,10 @@ Incorporated into **Lighting Edition → Planned** section above.
 
 ### Known Limitations
 
-- **No cloud sync yet**: Planned for future release
-- **No testing suite**: Needs to be built
-- **Limited telemetry**: Basic implementation, needs expansion
-- **Fixture management incomplete**: Core features in progress
+- **Team collaboration**: Multi-user permissions not yet implemented (sync is device-level)
+- **E2E tests**: Playwright tests not yet implemented
+- **Fixture management**: ~80% complete, some advanced features remaining
+- **ESLint warnings**: ~1,016 warnings (0 errors) - gradual reduction planned
 
 ### Breaking Changes Log
 
