@@ -22,6 +22,27 @@
 - [ ] Cloud sync (offline → online → sync)
 - [ ] Multi-user editing
 
+### 4.3 Database Monitoring & Observability (From PR #74 Review)
+
+#### 4.3.1 DatabaseMonitor Class (10-16 hours) - MEDIUM Priority
+- [ ] Create DatabaseMonitor class for metrics collection
+- [ ] Track query execution times
+- [ ] Track error rates and transaction statistics
+- [ ] Identify slow queries (>100ms threshold)
+- [ ] Implement MonitoredTransactionManager wrapper
+- [ ] Add metrics dashboard UI component
+
+#### 4.3.2 WAL Checkpoint Monitoring (2-4 hours) - MEDIUM Priority
+- [ ] Implement periodic checkpointing (every 5 minutes, PASSIVE mode)
+- [ ] Add WAL file size monitoring
+- [ ] Create alerts for unbounded WAL growth
+- [ ] Prevent WAL file from growing too large
+
+#### 4.3.3 Statement Caching (6-10 hours) - LOW Priority (OPTIONAL)
+- [ ] Profile database operations first
+- [ ] Defer unless profiling shows bottlenecks
+- [ ] Note: better-sqlite3 has internal caching, may not be necessary
+
 ---
 
 ## Success Criteria
@@ -30,6 +51,8 @@
 - ✅ 15+ integration tests
 - ✅ All critical workflows tested
 - ✅ Tests run in <30 seconds
+- ✅ Database monitoring infrastructure in place
+- ✅ WAL checkpoint management operational
 
 **Status:** 🟡 Depends on Phase 3
 **Next:** Phase 5 - CI/CD & DevOps
