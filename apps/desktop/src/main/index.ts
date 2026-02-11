@@ -34,6 +34,7 @@ import { registerHealthHandlers } from './ipc/health';
 import { registerBackupHandlers } from './ipc/backup';
 import { backgroundVerifier } from './services/BackgroundVerifier';
 import { backupService } from './services/BackupService';
+import { crashRecoveryService } from './services/CrashRecoveryService';
 import { licenseService } from './services/LicenseService';
 import { performanceMonitor } from './monitoring/PerformanceMonitor';
 
@@ -58,6 +59,12 @@ app.on('ready', async () => {
   try {
     // Initialize database
     await initDatabase();
+
+    // Check for crash and recover if needed
+    const recoveryResult = await crashRecoveryService.checkAndRecover();
+    if (recoveryResult.crashDetected) {
+      logger.warn('Previous crash detected', { ...recoveryResult });
+    }
   } catch (err) {
     logger.error('Database initialization failed', err instanceof Error ? err : undefined);
   }
@@ -99,6 +106,9 @@ app.on('ready', async () => {
     logger.error('Failed to start backup service', err instanceof Error ? err : undefined);
   });
 
+  // Mark app as running for crash detection
+  crashRecoveryService.markRunning();
+
   // Initial license check (non-blocking)
   licenseService.checkAndVerifyIfNeeded().catch(() => {
     logger.info('Initial license verification skipped (offline mode)');
@@ -132,6 +142,9 @@ app.on('activate', () => {
 });
 
 app.on('before-quit', async () => {
+  // Mark clean shutdown for crash detection
+  await crashRecoveryService.markCleanShutdown();
+
   // Stop backup service
   backupService.stop();
 
