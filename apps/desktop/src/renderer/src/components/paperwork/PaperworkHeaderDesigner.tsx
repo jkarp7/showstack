@@ -16,6 +16,7 @@ import {
   mapPaperworkToTemplateData,
   type PaperworkProjectData,
 } from '../../utils/paperwork/dataFieldMapper';
+import { logger } from '../../utils/logger';
 
 interface PaperworkHeaderDesignerProps {
   projectId: string;
@@ -79,7 +80,7 @@ export function PaperworkHeaderDesigner({
           }
         }
       } catch (error) {
-        console.error('Failed to load header designer data:', error);
+        logger.error('Failed to load header designer data:', error);
       } finally {
         setIsLoading(false);
       }
@@ -89,7 +90,7 @@ export function PaperworkHeaderDesigner({
   }, [projectId, headerTemplateId]);
 
   const handleSave = async (template: PageLayoutTemplate) => {
-    console.log('Header template saved:', template.id);
+    logger.info('Header template saved:', template.id);
     // Template is already saved to database by LayoutDesigner
     // Pass the ID back to parent to update the paperwork template
     onSave(template.id);

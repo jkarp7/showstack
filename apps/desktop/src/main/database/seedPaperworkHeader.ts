@@ -5,9 +5,10 @@
 
 import { getAppDatabase, saveAppDatabase } from './index';
 import { getDefaultPaperworkHeader } from './defaultPaperworkHeader';
+import { logger } from '../utils/logger';
 
 export function seedPaperworkHeaderTemplate(): void {
-  console.log('🌱 Checking paperwork header template seeding...');
+  logger.info('🌱 Checking paperwork header template seeding...');
 
   const db = getAppDatabase();
 
@@ -28,16 +29,16 @@ export function seedPaperworkHeaderTemplate(): void {
     }
 
     if (templateExists && elementsExist) {
-      console.log('✅ Default paperwork header already seeded');
+      logger.info('✅ Default paperwork header already seeded');
       return;
     }
 
     if (templateExists && !elementsExist) {
-      console.log(
+      logger.info(
         '🌱 Re-seeding paperwork header elements (template exists but elements missing)...',
       );
     } else {
-      console.log('🌱 Seeding default paperwork header template...');
+      logger.info('🌱 Seeding default paperwork header template...');
     }
 
     const headerLayout = getDefaultPaperworkHeader();
@@ -95,11 +96,11 @@ export function seedPaperworkHeaderTemplate(): void {
     }
 
     saveAppDatabase(db);
-    console.log(
+    logger.info(
       `✅ Successfully seeded default paperwork header with ${headerLayout.elements.length} elements`,
     );
   } catch (error) {
-    console.error('❌ Error seeding paperwork header template:', error);
+    logger.error('❌ Error seeding paperwork header template:', error);
     throw error;
   }
 }

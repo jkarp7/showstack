@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { logger } from '../utils/logger';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUIStore } from '../store/uiStore';
 
@@ -24,7 +25,7 @@ export function useProjectMenuHandlers() {
         // Navigate to project page with edit dialog flag
         navigate(`/project/${projectId}`, { state: { openEditDialog: true } });
       } else {
-        console.log('No project context for Edit Project Info');
+        logger.info('No project context for Edit Project Info');
       }
     };
 

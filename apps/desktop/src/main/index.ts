@@ -1,10 +1,15 @@
 import { app, BrowserWindow } from 'electron';
 import { loadEnv } from './config/env';
+import { initSentry } from './services/sentry';
 import { initDatabase } from './database';
 import { windowManager } from './services/WindowManager';
+import { logger } from './utils/logger';
 
 // Load environment variables before anything else
 loadEnv();
+
+// Initialize Sentry early (no-op if SENTRY_DSN not set)
+initSentry();
 import { registerFixtureHandlers } from './ipc/fixtures';
 import { registerProjectHandlers } from './ipc/projects';
 import { registerDialogHandlers } from './ipc/dialogs';
@@ -25,6 +30,7 @@ import { registerPDRackHandlers } from './ipc/pdRacks';
 import { registerPhaseTemplateHandlers } from './ipc/phaseTemplates';
 import { registerInfrastructureHandlers } from './ipc/infrastructure';
 import { registerSyncHandlers, initializePowerSync, disposePowerSync } from './ipc/sync';
+import { registerHealthHandlers } from './ipc/health';
 import { backgroundVerifier } from './services/BackgroundVerifier';
 import { licenseService } from './services/LicenseService';
 import { performanceMonitor } from './monitoring/PerformanceMonitor';
@@ -45,10 +51,14 @@ if (!gotTheLock) {
 }
 
 app.on('ready', async () => {
-  // Initialize database
-  await initDatabase();
+  try {
+    // Initialize database
+    await initDatabase();
+  } catch (err) {
+    logger.error('Database initialization failed', err instanceof Error ? err : undefined);
+  }
 
-  // Register IPC handlers
+  // Register IPC handlers (always, even if DB init fails)
   registerFixtureHandlers();
   registerProjectHandlers();
   registerDialogHandlers();
@@ -69,18 +79,19 @@ app.on('ready', async () => {
   registerPhaseTemplateHandlers();
   registerInfrastructureHandlers();
   registerSyncHandlers();
+  registerHealthHandlers();
 
   // Initialize PowerSync (non-blocking, works offline)
   initializePowerSync().catch((err) => {
-    console.log('[Sync] PowerSync initialization deferred:', err.message);
+    logger.info('[Sync] PowerSync initialization deferred:', err.message);
   });
 
   // Start background license verification (non-blocking)
   backgroundVerifier.start();
 
   // Initial license check (non-blocking)
-  licenseService.checkAndVerifyIfNeeded().catch((err) => {
-    console.log('Initial license verification skipped (offline mode)');
+  licenseService.checkAndVerifyIfNeeded().catch(() => {
+    logger.info('Initial license verification skipped (offline mode)');
   });
 
   // Initialize application menu BEFORE creating any windows (critical for macOS)

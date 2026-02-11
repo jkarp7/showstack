@@ -6,6 +6,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ValidationError } from '../../errors';
 
 // Mock dependencies
+vi.mock('../../utils/logger', () => ({
+  logger: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
 vi.mock('../../database/queries/projects', () => ({
   getAllProjects: vi.fn(),
   getProjectById: vi.fn(),
@@ -46,6 +55,7 @@ import {
   deleteProject,
 } from '../../database/queries/projects';
 import type { Project } from '../../database/queries/projects';
+import { logger } from '../../utils/logger';
 
 describe('ProjectService', () => {
   let service: ProjectService;
@@ -294,7 +304,6 @@ describe('ProjectService', () => {
     });
 
     it('should return an empty array for invalid JSON', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const project: Project = {
         ...mockProject,
         enabled_modules: 'not-valid-json',
@@ -303,11 +312,13 @@ describe('ProjectService', () => {
       const result = service.getEnabledModules(project);
 
       expect(result).toEqual([]);
-      consoleSpy.mockRestore();
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to parse enabled modules:',
+        expect.any(Error),
+      );
     });
 
     it('should return an empty array for malformed JSON', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const project: Project = {
         ...mockProject,
         enabled_modules: '["lighting",',
@@ -316,7 +327,10 @@ describe('ProjectService', () => {
       const result = service.getEnabledModules(project);
 
       expect(result).toEqual([]);
-      consoleSpy.mockRestore();
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to parse enabled modules:',
+        expect.any(Error),
+      );
     });
 
     it('should handle a single-element JSON array', () => {
@@ -383,14 +397,16 @@ describe('ProjectService', () => {
     });
 
     it('should return false for invalid JSON in enabled_modules', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const project: Project = {
         ...mockProject,
         enabled_modules: 'bad-json',
       };
 
       expect(service.isModuleEnabled(project, 'lighting')).toBe(false);
-      consoleSpy.mockRestore();
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to parse enabled modules:',
+        expect.any(Error),
+      );
     });
 
     it('should be case-sensitive when checking module names', () => {

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '../../utils/logger';
 import { Fixture } from '../../types';
 import { DimmerRack, PDRack } from '../../types/power';
 
@@ -94,7 +95,7 @@ export function AddFixtureDialog({
         setDimmerRacks(dimmer);
         setPdRacks(pd);
       } catch (error) {
-        console.error('Failed to load power racks:', error);
+        logger.error('Failed to load power racks:', error);
       }
     };
 

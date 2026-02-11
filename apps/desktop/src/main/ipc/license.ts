@@ -5,6 +5,7 @@ import type { ShowStackModule } from '../../shared/types/license.types';
 import type { AppSettings } from '../../shared/types/settings.types';
 import { errorHandler } from '../errors';
 import { ValidationError } from '../errors';
+import { logger } from '../utils/logger';
 
 /**
  * Register all license and settings IPC handlers
@@ -24,7 +25,7 @@ export function registerLicenseHandlers(): void {
         'license:getStatus',
       );
     } catch (error) {
-      console.error('Failed to get license status:', {
+      logger.error('Failed to get license status:', {
         operation: 'license:getStatus',
         error: error instanceof Error ? error.message : error,
       });
@@ -44,7 +45,7 @@ export function registerLicenseHandlers(): void {
         'license:getCurrent',
       );
     } catch (error) {
-      console.error('Failed to get current license:', {
+      logger.error('Failed to get current license:', {
         operation: 'license:getCurrent',
         error: error instanceof Error ? error.message : error,
       });
@@ -64,7 +65,7 @@ export function registerLicenseHandlers(): void {
         'license:hasModule',
       );
     } catch (error) {
-      console.error('Failed to check module access:', {
+      logger.error('Failed to check module access:', {
         operation: 'license:hasModule',
         module,
         error: error instanceof Error ? error.message : error,
@@ -85,7 +86,7 @@ export function registerLicenseHandlers(): void {
         'license:getModuleFeatures',
       );
     } catch (error) {
-      console.error('Failed to get module features:', {
+      logger.error('Failed to get module features:', {
         operation: 'license:getModuleFeatures',
         module,
         error: error instanceof Error ? error.message : error,
@@ -106,7 +107,7 @@ export function registerLicenseHandlers(): void {
         'license:getAvailableModules',
       );
     } catch (error) {
-      console.error('Failed to get available modules:', {
+      logger.error('Failed to get available modules:', {
         operation: 'license:getAvailableModules',
         error: error instanceof Error ? error.message : error,
       });
@@ -126,7 +127,7 @@ export function registerLicenseHandlers(): void {
         'license:canUseFeature',
       );
     } catch (error) {
-      console.error('Failed to check feature access:', {
+      logger.error('Failed to check feature access:', {
         operation: 'license:canUseFeature',
         module,
         feature,
@@ -158,7 +159,7 @@ export function registerLicenseHandlers(): void {
           'license:activate',
         );
       } catch (error) {
-        console.error('Failed to activate license:', {
+        logger.error('Failed to activate license:', {
           operation: 'license:activate',
           email,
           error: error instanceof Error ? error.message : error,
@@ -185,7 +186,7 @@ export function registerLicenseHandlers(): void {
         return await licenseService.verifyLicenseOnline(license.licenseKey);
       }, 'license:verifyOnline');
     } catch (error) {
-      console.error('Failed to verify license online:', {
+      logger.error('Failed to verify license online:', {
         operation: 'license:verifyOnline',
         error: error instanceof Error ? error.message : error,
       });
@@ -209,7 +210,7 @@ export function registerLicenseHandlers(): void {
         'settings:get',
       );
     } catch (error) {
-      console.error('Failed to get settings:', {
+      logger.error('Failed to get settings:', {
         operation: 'settings:get',
         error: error instanceof Error ? error.message : error,
       });
@@ -230,7 +231,7 @@ export function registerLicenseHandlers(): void {
       );
       return { success: true };
     } catch (error) {
-      console.error('Failed to save settings:', {
+      logger.error('Failed to save settings:', {
         operation: 'settings:save',
         error: error instanceof Error ? error.message : error,
       });
@@ -251,7 +252,7 @@ export function registerLicenseHandlers(): void {
       );
       return { success: true };
     } catch (error) {
-      console.error('Failed to update settings:', {
+      logger.error('Failed to update settings:', {
         operation: 'settings:update',
         error: error instanceof Error ? error.message : error,
       });
@@ -272,7 +273,7 @@ export function registerLicenseHandlers(): void {
       );
       return { success: true };
     } catch (error) {
-      console.error('Failed to reset settings:', {
+      logger.error('Failed to reset settings:', {
         operation: 'settings:reset',
         error: error instanceof Error ? error.message : error,
       });

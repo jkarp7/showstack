@@ -4,6 +4,7 @@ import { PhaseDistributionTemplate, PhaseDistribution } from '../../types/phaseT
 import { useProjectStore } from '../../store/projectStore';
 import { getPhaseLabel } from '../../utils/phaseLabels';
 import { PhaseTemplateEditor } from './PhaseTemplateEditor';
+import { logger } from '../../utils/logger';
 
 interface PhaseTemplateManagerProps {
   projectId?: string;
@@ -34,7 +35,7 @@ export function PhaseTemplateManager({
       const allTemplates = await window.api.phaseTemplates.getAll(projectId);
       setTemplates(allTemplates);
     } catch (error) {
-      console.error('Error loading phase templates:', error);
+      logger.error('Error loading phase templates:', error);
     } finally {
       setLoading(false);
     }
@@ -47,7 +48,7 @@ export function PhaseTemplateManager({
       await window.api.phaseTemplates.delete(templateId);
       await loadTemplates();
     } catch (error) {
-      console.error('Error deleting template:', error);
+      logger.error('Error deleting template:', error);
       alert('Failed to delete template');
     }
   };
@@ -100,7 +101,7 @@ export function PhaseTemplateManager({
       setShowEditor(false);
       setEditingTemplate(undefined);
     } catch (error) {
-      console.error('Error saving template:', error);
+      logger.error('Error saving template:', error);
       alert('Failed to save template');
     }
   };

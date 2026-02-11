@@ -6,6 +6,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ValidationError } from '../../errors';
 
 // Mock dependencies
+vi.mock('../../utils/logger', () => ({
+  logger: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
 vi.mock('../../database/queries/infrastructure', () => ({
   getAllInfrastructure: vi.fn(),
   createInfrastructure: vi.fn(),
@@ -44,6 +53,7 @@ import {
   deleteInfrastructure,
 } from '../../database/queries/infrastructure';
 import type { InfrastructureEquipment } from '../../database/queries/infrastructure';
+import { logger } from '../../utils/logger';
 
 describe('InfrastructureService', () => {
   let service: InfrastructureService;
@@ -357,7 +367,6 @@ describe('InfrastructureService', () => {
     });
 
     it('should return an empty array for invalid JSON', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const equipment: InfrastructureEquipment = {
         ...mockEquipment,
         port_assignments: 'not-valid-json' as any,
@@ -366,11 +375,13 @@ describe('InfrastructureService', () => {
       const result = service.getPortAssignments(equipment);
 
       expect(result).toEqual([]);
-      consoleSpy.mockRestore();
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to parse port assignments:',
+        expect.any(Error),
+      );
     });
 
     it('should return an empty array for malformed JSON', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const equipment: InfrastructureEquipment = {
         ...mockEquipment,
         port_assignments: '[{"port":1,' as any,
@@ -379,7 +390,10 @@ describe('InfrastructureService', () => {
       const result = service.getPortAssignments(equipment);
 
       expect(result).toEqual([]);
-      consoleSpy.mockRestore();
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to parse port assignments:',
+        expect.any(Error),
+      );
     });
 
     it('should handle an empty JSON array', () => {

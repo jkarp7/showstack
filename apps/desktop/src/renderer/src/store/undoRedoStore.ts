@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { logger } from '../utils/logger';
 import { Command } from '../types/commands';
 
 interface UndoRedoState {
@@ -61,7 +62,7 @@ export const useUndoRedoStore = create<UndoRedoState>((set, get) => ({
         };
       });
     } catch (error) {
-      console.error('Failed to execute command:', error);
+      logger.error('Failed to execute command:', error);
       throw error;
     }
   },
@@ -70,7 +71,7 @@ export const useUndoRedoStore = create<UndoRedoState>((set, get) => ({
     const { undoStack } = get();
 
     if (undoStack.length === 0) {
-      console.warn('Nothing to undo');
+      logger.warn('Nothing to undo');
       return;
     }
 
@@ -87,7 +88,7 @@ export const useUndoRedoStore = create<UndoRedoState>((set, get) => ({
         redoStack: [...state.redoStack, command],
       }));
     } catch (error) {
-      console.error('Failed to undo command:', error);
+      logger.error('Failed to undo command:', error);
       // Remove the failed command from the stack
       set((state) => ({
         undoStack: state.undoStack.slice(0, -1),
@@ -100,7 +101,7 @@ export const useUndoRedoStore = create<UndoRedoState>((set, get) => ({
     const { redoStack } = get();
 
     if (redoStack.length === 0) {
-      console.warn('Nothing to redo');
+      logger.warn('Nothing to redo');
       return;
     }
 
@@ -117,7 +118,7 @@ export const useUndoRedoStore = create<UndoRedoState>((set, get) => ({
         undoStack: [...state.undoStack, command],
       }));
     } catch (error) {
-      console.error('Failed to redo command:', error);
+      logger.error('Failed to redo command:', error);
       // Remove the failed command from the stack
       set((state) => ({
         redoStack: state.redoStack.slice(0, -1),

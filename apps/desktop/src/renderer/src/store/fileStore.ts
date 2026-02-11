@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { logger } from '../utils/logger';
 import { addRecentFile, getModuleTypeFromPath } from '../utils/recentFiles';
 
 export interface ConflictInfo {
@@ -130,7 +131,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
       // Check for conflict
       if (!result.success && result.conflict?.exists) {
-        console.log('Import conflict detected:', result.conflict);
+        logger.info('Import conflict detected:', result.conflict);
         set({
           conflictInfo: {
             existingProject: result.conflict.existingProject,
@@ -143,7 +144,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
       }
 
       if (!result.success) {
-        console.error('Open failed:', result.error);
+        logger.error('Open failed:', result.error);
         set({ error: result.error || 'Failed to open file', isOpening: false });
         return false;
       }
@@ -170,7 +171,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
       return true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to open file';
-      console.error('Error in openFile:', error);
+      logger.error('Error in openFile:', error);
       set({ error: errorMessage, isOpening: false });
       return false;
     }
@@ -213,7 +214,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
       // Check for conflict
       if (!result.success && result.conflict?.exists) {
-        console.log('Import conflict detected:', result.conflict);
+        logger.info('Import conflict detected:', result.conflict);
         set({
           conflictInfo: {
             existingProject: result.conflict.existingProject,
@@ -226,7 +227,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
       }
 
       if (!result.success) {
-        console.error('Open failed:', result.error);
+        logger.error('Open failed:', result.error);
         set({ error: result.error || 'Failed to open file', isOpening: false });
         return false;
       }
@@ -253,7 +254,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
       return true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to open file';
-      console.error('Error in openFileByPath:', error);
+      logger.error('Error in openFileByPath:', error);
       set({ error: errorMessage, isOpening: false });
       return false;
     }
@@ -264,7 +265,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
     const state = get();
 
     if (!state.conflictFilePath || !state.conflictInfo) {
-      console.error('No conflict to resolve');
+      logger.error('No conflict to resolve');
       return false;
     }
 
@@ -282,7 +283,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
       });
 
       if (!result.success) {
-        console.error('Conflict resolution failed:', result.error);
+        logger.error('Conflict resolution failed:', result.error);
         set({ error: result.error || 'Failed to resolve conflict', isOpening: false });
         return false;
       }
@@ -311,7 +312,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
       return true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to resolve conflict';
-      console.error('Error in resolveConflict:', error);
+      logger.error('Error in resolveConflict:', error);
       set({ error: errorMessage, isOpening: false });
       return false;
     }
@@ -391,7 +392,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
         try {
           await window.api.projects.update('default-project', { name: newProjectName });
         } catch (error) {
-          console.error('Failed to update project name:', error);
+          logger.error('Failed to update project name:', error);
         }
       }
 
@@ -471,7 +472,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
       return true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create new file';
-      console.error('Error in newFile:', error);
+      logger.error('Error in newFile:', error);
       set({ error: errorMessage });
       return false;
     }

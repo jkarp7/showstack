@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '../../utils/logger';
 import { InfrastructureEquipment, PortAssignment } from '../../types/infrastructure';
 import { useProjectStore } from '../../store/projectStore';
 import { useFixtureStore } from '../../store/fixtureStore';
@@ -70,7 +71,7 @@ export function PortAssignmentEditor({
           );
           setLinkValidation((prev) => ({ ...prev, [port]: validation }));
         } catch (error) {
-          console.error('Error validating port assignment:', error);
+          logger.error('Error validating port assignment:', error);
         }
       }
     }

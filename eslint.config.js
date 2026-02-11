@@ -34,7 +34,7 @@ export default tseslint.config(
     files: ['**/*.{ts,tsx}'],
     rules: {
       // Relax rules for existing codebase (strict is off for main process)
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {

@@ -6,6 +6,7 @@ import {
   InfrastructureEquipment,
 } from '../database/queries/infrastructure';
 import { BaseService } from './BaseService';
+import { logger } from '../utils/logger';
 
 /**
  * InfrastructureService
@@ -113,7 +114,7 @@ export class InfrastructureService extends BaseService {
     try {
       return JSON.parse(equipment.port_assignments as any);
     } catch (error) {
-      console.error('Failed to parse port assignments:', error);
+      logger.error('Failed to parse port assignments:', error);
       return [];
     }
   }

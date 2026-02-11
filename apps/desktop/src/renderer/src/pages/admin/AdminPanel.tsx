@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { logger } from '../../utils/logger';
 import {
   Shield,
   ArrowLeft,
@@ -10,6 +11,7 @@ import {
   FileText,
   Link2,
   BarChart3,
+  Activity,
 } from 'lucide-react';
 import { PasswordPrompt } from '../../components/admin/PasswordPrompt';
 import { LayoutTemplateManager } from '../../components/admin/LayoutTemplateManager';
@@ -18,8 +20,16 @@ import { DatabaseManagement } from '../../components/admin/DatabaseManagement';
 import { AuditLogging } from '../../components/admin/AuditLogging';
 import { IntegrationSettings } from '../../components/admin/IntegrationSettings';
 import { AnalyticsDashboard } from '../../components/admin/AnalyticsDashboard';
+import { HealthPanel } from '../../components/admin/HealthPanel';
 
-type Tab = 'layouts' | 'application' | 'database' | 'audit' | 'integration' | 'analytics';
+type Tab =
+  | 'layouts'
+  | 'application'
+  | 'database'
+  | 'audit'
+  | 'integration'
+  | 'analytics'
+  | 'health';
 
 export function AdminPanel() {
   const navigate = useNavigate();
@@ -47,7 +57,7 @@ export function AdminPanel() {
         setShowPasswordPrompt(true);
       }
     } catch (error) {
-      console.error('Error checking authentication:', error);
+      logger.error('Error checking authentication:', error);
     } finally {
       setIsLoading(false);
     }
@@ -201,6 +211,17 @@ export function AdminPanel() {
                 <BarChart3 className="w-5 h-5" />
                 <span>Analytics</span>
               </button>
+              <button
+                onClick={() => setActiveTab('health')}
+                className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
+                  activeTab === 'health'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                }`}
+              >
+                <Activity className="w-5 h-5" />
+                <span>System Health</span>
+              </button>
             </nav>
           </div>
         </div>
@@ -217,6 +238,7 @@ export function AdminPanel() {
             {activeTab === 'audit' && <AuditLogging />}
             {activeTab === 'integration' && <IntegrationSettings />}
             {activeTab === 'analytics' && <AnalyticsDashboard />}
+            {activeTab === 'health' && <HealthPanel />}
           </div>
         </div>
       </main>

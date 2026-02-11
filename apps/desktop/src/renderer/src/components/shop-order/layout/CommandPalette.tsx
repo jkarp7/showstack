@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { formatShortcut } from '../../../hooks/usePlatform';
+import { logger } from '../../../utils/logger';
 
 export interface Command {
   id: string;
@@ -123,7 +124,7 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
             command.action();
             onClose();
           } catch (error) {
-            console.error(`Command "${command.label}" execution failed:`, error);
+            logger.error(`Command "${command.label}" execution failed:`, error);
             // Command palette stays open on error so user can try another command
           }
         }
@@ -228,7 +229,7 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
                               command.action();
                               onClose();
                             } catch (error) {
-                              console.error(`Command "${command.label}" execution failed:`, error);
+                              logger.error(`Command "${command.label}" execution failed:`, error);
                             }
                           }}
                           className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-all ${

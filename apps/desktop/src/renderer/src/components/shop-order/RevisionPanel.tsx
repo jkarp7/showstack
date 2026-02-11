@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { ShopOrderRevision, ShopOrderProject, ItemChange } from '../../types/shopOrder';
+import { logger } from '../../utils/logger';
 
 interface RevisionPanelProps {
   project: ShopOrderProject;
@@ -33,7 +34,7 @@ export function RevisionPanel({
     try {
       await onDeleteRevision(revisionId);
     } catch (error) {
-      console.error('Failed to delete revision:', error);
+      logger.error('Failed to delete revision:', error);
       alert('Failed to delete revision');
     } finally {
       setDeletingId(null);

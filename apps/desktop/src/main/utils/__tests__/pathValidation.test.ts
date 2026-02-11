@@ -10,6 +10,15 @@ import {
 import { PathTraversalError, NullByteError, InvalidPathError } from '../errors';
 import { app } from 'electron';
 
+vi.mock('../logger', () => ({
+  logger: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
 // Mock electron app
 vi.mock('electron', () => ({
   app: {

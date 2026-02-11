@@ -85,7 +85,10 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Run ESLint
-        run: npm run lint
+        # ESLint warning threshold tracks @typescript-eslint/no-explicit-any migration.
+        # Baseline: 1,559 (Phase 5) → 855 (Phase 6) → 853 (current).
+        # Target: reduce to 0 by end of Phase 8. Only lower this number, never raise it.
+        run: npm run lint -- --max-warnings 855
 
       - name: Check formatting
         run: npm run format:check
@@ -111,7 +114,6 @@ jobs:
 
       - name: Run npm audit
         run: npm audit --audit-level=high
-        continue-on-error: true # Report but don't block on audit findings
 
   # Summary job that all other jobs depend on
   test-summary:
@@ -131,7 +133,8 @@ jobs:
             echo "Linting, formatting, or type check failed"
             exit 1
           fi
-          if [ "${{ needs.security.result }}" == "failure" ]; then
+          if [ "${{ needs.security.result }}" != "success" ]; then
             echo "Security audit found critical vulnerabilities"
+            exit 1
           fi
           echo "All checks passed!"

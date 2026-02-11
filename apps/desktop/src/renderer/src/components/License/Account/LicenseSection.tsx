@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '../../../utils/logger';
 import { useUser } from '../../../hooks/useUser';
 import { CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
@@ -20,10 +21,10 @@ export function LicenseSection() {
 
   // Debug logging
   React.useEffect(() => {
-    console.log('LicenseSection - license:', license);
-    console.log('LicenseSection - loading:', loading);
+    logger.info('LicenseSection - license:', license);
+    logger.info('LicenseSection - loading:', loading);
     if (license) {
-      console.log('License properties:', {
+      logger.info('License properties:', {
         tier: license.tier,
         status: license.status,
         expirationDate: license.expirationDate,
@@ -45,7 +46,7 @@ export function LicenseSection() {
       setLicenseKey('');
       setEmail('');
     } catch (err) {
-      console.error('Activation failed:', err);
+      logger.error('Activation failed:', err);
       setError('Activation failed. Please check your license key and try again.');
     } finally {
       setActivating(false);

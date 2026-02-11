@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { logger } from '../../utils/logger';
 import { Package, Wrench, Briefcase, GraduationCap, Lock } from 'lucide-react';
 import type { ShowStackModule } from '../../../../shared/types/license.types';
 
@@ -44,7 +45,7 @@ export function ModuleSelector({ currentModule, onModuleChange }: ModuleSelector
       const modules = await window.api.license.getAvailableModules();
       setAvailableModules(modules);
     } catch (error) {
-      console.error('Failed to load modules:', error);
+      logger.error('Failed to load modules:', error);
     } finally {
       setLoading(false);
     }

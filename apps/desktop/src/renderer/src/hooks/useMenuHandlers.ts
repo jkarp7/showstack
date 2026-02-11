@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { logger } from '../utils/logger';
 import { useNavigate } from 'react-router-dom';
 import { useThemeStore } from '../store/themeStore';
 
@@ -39,17 +40,17 @@ export function useMenuHandlers() {
 
     const handleHelpShortcuts = () => {
       // TODO: Show keyboard shortcuts modal
-      console.log('Show keyboard shortcuts modal');
+      logger.info('Show keyboard shortcuts modal');
     };
 
     const handleHelpUpdates = () => {
       // TODO: Show check for updates dialog
-      console.log('Check for updates');
+      logger.info('Check for updates');
     };
 
     const handleHelpAbout = () => {
       // TODO: Show about dialog
-      console.log('Show about dialog');
+      logger.info('Show about dialog');
     };
 
     // Register all handlers

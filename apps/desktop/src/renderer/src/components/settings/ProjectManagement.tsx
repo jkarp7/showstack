@@ -1,5 +1,6 @@
 import { FolderOpen, Clock, Archive, Save } from 'lucide-react';
 import { useSettingsStore } from '../../store/settingsStore';
+import { logger } from '../../utils/logger';
 
 export function ProjectManagement() {
   const projectManagement = useSettingsStore((state) => state.projectManagement);
@@ -107,7 +108,7 @@ export function ProjectManagement() {
 
       <div className="flex justify-end">
         <button
-          onClick={() => console.log('Save')}
+          onClick={() => logger.info('Save')}
           className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium"
         >
           <Save className="w-4 h-4" />

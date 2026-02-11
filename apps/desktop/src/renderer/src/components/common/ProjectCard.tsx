@@ -1,5 +1,6 @@
 import { Project } from '../store/projectStore';
 import { useState, useEffect } from 'react';
+import { logger } from '../../utils/logger';
 
 interface ProjectCardProps {
   project: Project;
@@ -35,7 +36,7 @@ export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
           setLogoDataUrl(dataUrl);
         }
       } catch (error) {
-        console.error('[ProjectCard] Error loading logo:', error);
+        logger.error('[ProjectCard] Error loading logo:', error);
         setLogoDataUrl(null);
       }
     };

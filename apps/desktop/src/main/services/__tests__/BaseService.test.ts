@@ -6,6 +6,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ValidationError } from '../../errors';
 
 // Mock dependencies
+vi.mock('../../utils/logger', () => ({
+  logger: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
 vi.mock('../../errors', async () => {
   const actual = await vi.importActual('../../errors');
   return {

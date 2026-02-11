@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useShopOrderStore } from '../../store/shopOrderStore';
 import type { ShopOrderSection, ShopOrderItem } from '../../types/shopOrder';
 import { parseRevisionQuantities, setRevisionQuantity } from '../../utils/revisionUtils';
+import { logger } from '../../utils/logger';
 
 // Constants
 const MAX_REVISIONS = 5; // Maximum number of revisions (0-5 = 6 total)
@@ -116,7 +117,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       if (cmdOrCtrl && e.key === 'c') {
         e.preventDefault();
         // TODO: Implement copy selected cell/row to clipboard
-        console.log('[Keyboard] Copy not yet implemented');
+        logger.info('[Keyboard] Copy not yet implemented');
         return;
       }
 
@@ -235,7 +236,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
         try {
           await updateItem(id, updateData);
         } catch (error) {
-          console.error('[Debounced Save] Error:', error);
+          logger.error('[Debounced Save] Error:', error);
           showError('Failed to save changes. Please try again.');
         }
       }
@@ -259,7 +260,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
         // Fire saves without awaiting (React cleanup can't be async)
         for (const [id, updates] of savesMap.entries()) {
           updateItem(id, updates).catch((error) => {
-            console.error('[Unmount Save] Error saving item:', id, error);
+            logger.error('[Unmount Save] Error saving item:', id, error);
           });
         }
       }
@@ -287,7 +288,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
 
           for (const [id, updates] of savesMap.entries()) {
             updateItem(id, updates).catch((error) => {
-              console.error('[BeforeUnload Save] Error saving item:', id, error);
+              logger.error('[BeforeUnload Save] Error saving item:', id, error);
             });
           }
         }
@@ -331,7 +332,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
         debouncedSave(item.id, { section_id: editValue });
       }
     } catch (error) {
-      console.error('Error saving edit:', error);
+      logger.error('Error saving edit:', error);
     }
 
     cancelEdit();
@@ -374,27 +375,27 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
 
   const handleAddRevision = async () => {
     if (!currentProject || currentRevision >= MAX_REVISIONS) {
-      console.log('Cannot add revision:', { currentProject: !!currentProject, currentRevision });
+      logger.info('Cannot add revision:', { currentProject: !!currentProject, currentRevision });
       return;
     }
 
     const newRevisionNumber = currentRevision + 1;
-    console.log(`[Add Revision] Starting: current=${currentRevision}, new=${newRevisionNumber}`);
+    logger.info(`[Add Revision] Starting: current=${currentRevision}, new=${newRevisionNumber}`);
 
     setIsLoading(true);
     try {
       // Create the revision record
-      console.log('[Add Revision] Step 1: Creating revision record');
+      logger.info('[Add Revision] Step 1: Creating revision record');
       await createRevision({
         prep_project_id: projectId,
         revision_number: newRevisionNumber,
         notes: '',
       });
-      console.log('[Add Revision] Step 1: Complete');
+      logger.info('[Add Revision] Step 1: Complete');
 
       // Initialize revision_quantities for all items with the new revision
       // Copy quantity from previous revision (batched for performance)
-      console.log(`[Add Revision] Step 2: Updating ${items.length} items in parallel`);
+      logger.info(`[Add Revision] Step 2: Updating ${items.length} items in parallel`);
       await Promise.all(
         items.map(async (item) => {
           const quantities = parseRevisionQuantities(item.revision_quantities);
@@ -405,21 +406,21 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
           });
         }),
       );
-      console.log('[Add Revision] Step 2: Complete');
+      logger.info('[Add Revision] Step 2: Complete');
 
       // Update project's current revision LAST
-      console.log('[Add Revision] Step 3: Updating project current_revision');
+      logger.info('[Add Revision] Step 3: Updating project current_revision');
       await updateProject(projectId, {
         current_revision: newRevisionNumber,
       });
-      console.log('[Add Revision] Step 3: Complete');
+      logger.info('[Add Revision] Step 3: Complete');
 
       // Reload the project to get fresh data and trigger re-render
-      console.log('[Add Revision] Step 4: Reloading project');
+      logger.info('[Add Revision] Step 4: Reloading project');
       await loadProject(projectId);
-      console.log('[Add Revision] Step 4: Complete - Done!');
+      logger.info('[Add Revision] Step 4: Complete - Done!');
     } catch (error) {
-      console.error('[Add Revision] Error:', error);
+      logger.error('[Add Revision] Error:', error);
       showError('Failed to add revision. Please try again.');
     } finally {
       setIsLoading(false);
@@ -428,7 +429,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
 
   const handleRemoveRevision = async (revisionNumber: number) => {
     if (!currentProject || revisionNumber === 0 || revisionNumber !== currentRevision) {
-      console.log('Cannot remove revision:', { revisionNumber, currentRevision });
+      logger.info('Cannot remove revision:', { revisionNumber, currentRevision });
       showError('Can only remove the latest revision.');
       return;
     }
@@ -441,11 +442,11 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       return;
     }
 
-    console.log(`[Remove Revision] Starting: removing rev ${revisionNumber}`);
+    logger.info(`[Remove Revision] Starting: removing rev ${revisionNumber}`);
 
     try {
       // Remove revision quantities for all items
-      console.log('[Remove Revision] Step 1: Removing quantities from items');
+      logger.info('[Remove Revision] Step 1: Removing quantities from items');
       for (const item of items) {
         const quantities = parseRevisionQuantities(item.revision_quantities);
         delete quantities[revisionNumber];
@@ -453,21 +454,21 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
           revision_quantities: JSON.stringify(quantities),
         });
       }
-      console.log('[Remove Revision] Step 1: Complete');
+      logger.info('[Remove Revision] Step 1: Complete');
 
       // Update project's current revision
-      console.log('[Remove Revision] Step 2: Updating project current_revision');
+      logger.info('[Remove Revision] Step 2: Updating project current_revision');
       await updateProject(projectId, {
         current_revision: revisionNumber - 1,
       });
-      console.log('[Remove Revision] Step 2: Complete');
+      logger.info('[Remove Revision] Step 2: Complete');
 
       // Reload the project
-      console.log('[Remove Revision] Step 3: Reloading project');
+      logger.info('[Remove Revision] Step 3: Reloading project');
       await loadProject(projectId);
-      console.log('[Remove Revision] Complete!');
+      logger.info('[Remove Revision] Complete!');
     } catch (error) {
-      console.error('[Remove Revision] Error:', error);
+      logger.error('[Remove Revision] Error:', error);
     }
   };
 
@@ -498,7 +499,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       return;
     }
 
-    console.log('[Merge Duplicates] Starting...');
+    logger.info('[Merge Duplicates] Starting...');
 
     try {
       for (const [_, duplicateItems] of duplicates) {
@@ -534,10 +535,10 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
         }
       }
 
-      console.log('[Merge Duplicates] Complete!');
+      logger.info('[Merge Duplicates] Complete!');
       await loadProject(projectId);
     } catch (error) {
-      console.error('[Merge Duplicates] Error:', error);
+      logger.error('[Merge Duplicates] Error:', error);
       showError('Failed to merge duplicates. Please try again.');
     }
   };
@@ -701,7 +702,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
         return;
       }
 
-      console.log('[Paste Items] Starting...');
+      logger.info('[Paste Items] Starting...');
 
       // Get max sort_order for this section
       const sectionItems = items.filter((i) => i.section_id === sectionId);
@@ -722,10 +723,10 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
         });
       }
 
-      console.log('[Paste Items] Complete!');
+      logger.info('[Paste Items] Complete!');
       await loadProject(projectId);
     } catch (error) {
-      console.error('[Paste Items] Error:', error);
+      logger.error('[Paste Items] Error:', error);
       showError('Failed to paste items. Make sure you have copied valid spreadsheet data.');
     }
   };
@@ -736,7 +737,7 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
   const handleExportToCSV = () => {
     if (!currentProject) return;
 
-    console.log('[Export CSV] Starting...');
+    logger.info('[Export CSV] Starting...');
 
     try {
       const csvRows: string[] = [];
@@ -816,9 +817,9 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
       link.click();
       document.body.removeChild(link);
 
-      console.log('[Export CSV] Complete!');
+      logger.info('[Export CSV] Complete!');
     } catch (error) {
-      console.error('[Export CSV] Error:', error);
+      logger.error('[Export CSV] Error:', error);
       showError('Failed to export to CSV. Please try again.');
     }
   };

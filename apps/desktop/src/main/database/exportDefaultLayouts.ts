@@ -5,6 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { logger } from '../utils/logger';
 
 const DEFAULT_LAYOUTS_DIR = path.join(__dirname, 'defaultLayouts');
 
@@ -47,13 +48,13 @@ export function exportHardcodedLayoutsToJSON() {
   exportRevisionSummaryLayout();
   exportNotesPageLayout();
 
-  console.log('✅ All default layouts exported to JSON files');
+  logger.info('✅ All default layouts exported to JSON files');
 }
 
 function saveLayoutToJSON(filename: string, data: LayoutExportData) {
   const filePath = path.join(DEFAULT_LAYOUTS_DIR, filename);
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
-  console.log(`  ✓ Exported: ${filename}`);
+  logger.info(`  ✓ Exported: ${filename}`);
 }
 
 function exportCoverPageLayout() {

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Bell, Save } from 'lucide-react';
+import { logger } from '../../utils/logger';
 
 export function Notifications() {
   const [exportComplete, setExportComplete] = useState(true);
@@ -7,7 +8,7 @@ export function Notifications() {
   const [changeDetection, setChangeDetection] = useState(false);
   const [updates, setUpdates] = useState(true);
 
-  const handleSave = () => console.log('Saving notifications...');
+  const handleSave = () => logger.info('Saving notifications...');
 
   return (
     <div className="space-y-6">

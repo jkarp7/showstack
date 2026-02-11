@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '../utils/logger';
 import type { AppSettings } from '../../../shared/types/settings.types';
 
 /**
@@ -44,7 +45,7 @@ export function useSettings() {
       const data = await window.api.settings.get();
       setSettings(data);
     } catch (error) {
-      console.error('Failed to load settings:', error);
+      logger.error('Failed to load settings:', error);
     } finally {
       setLoading(false);
     }
@@ -60,7 +61,7 @@ export function useSettings() {
     try {
       await window.api.settings.save(updated);
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      logger.error('Failed to save settings:', error);
       // Revert on error
       setSettings(settings);
       throw error;
@@ -72,7 +73,7 @@ export function useSettings() {
       await window.api.settings.reset();
       await loadSettings();
     } catch (error) {
-      console.error('Failed to reset settings:', error);
+      logger.error('Failed to reset settings:', error);
       throw error;
     }
   }

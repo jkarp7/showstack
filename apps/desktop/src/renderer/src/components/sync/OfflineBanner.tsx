@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
+import { logger } from '../../utils/logger';
 import { WifiOff, X, RefreshCw } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
@@ -63,7 +64,7 @@ export function OfflineBanner(): JSX.Element | null {
       }
       await window.api.sync.initialize();
     } catch (error) {
-      console.error('[OfflineBanner] Retry failed:', error);
+      logger.error('[OfflineBanner] Retry failed:', error);
       // Provide specific error messages based on error type
       if (error instanceof Error) {
         if (error.message.includes('network') || error.message.includes('fetch')) {

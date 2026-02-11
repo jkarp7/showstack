@@ -22,6 +22,15 @@ import {
 
 let testDb: Database.Database;
 
+vi.mock('../../utils/logger', () => ({
+  logger: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
 // Mock the getDatabase function
 vi.mock('../index', () => ({
   getDatabase: () => testDb,

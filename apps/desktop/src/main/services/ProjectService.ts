@@ -7,6 +7,7 @@ import {
   Project,
 } from '../database/queries/projects';
 import { BaseService } from './BaseService';
+import { logger } from '../utils/logger';
 
 /**
  * ProjectService
@@ -109,7 +110,7 @@ export class ProjectService extends BaseService {
     try {
       return JSON.parse(project.enabled_modules);
     } catch (error) {
-      console.error('Failed to parse enabled modules:', error);
+      logger.error('Failed to parse enabled modules:', error);
       return [];
     }
   }

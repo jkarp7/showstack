@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { logger } from '../utils/logger';
 
 interface EquipmentMenuHandlersProps {
   selectedRows: Set<string>;
@@ -44,7 +45,7 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       if (onPrint) {
         onPrint();
       } else {
-        console.log('Print equipment list');
+        logger.info('Print equipment list');
         // TODO: Implement print functionality
       }
     };
@@ -54,7 +55,7 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       if (onExportCSV) {
         onExportCSV();
       } else {
-        console.log('Export to CSV');
+        logger.info('Export to CSV');
         // TODO: Implement CSV export
       }
     };
@@ -64,7 +65,7 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       if (onExportEos) {
         onExportEos();
       } else {
-        console.log('Export for ETC Eos');
+        logger.info('Export for ETC Eos');
         // TODO: Implement Eos export
       }
     };
@@ -74,7 +75,7 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       if (onExportGrandMA2) {
         onExportGrandMA2();
       } else {
-        console.log('Export for GrandMA2');
+        logger.info('Export for GrandMA2');
         // TODO: Implement GrandMA2 export
       }
     };
@@ -84,7 +85,7 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       if (onExportGrandMA3) {
         onExportGrandMA3();
       } else {
-        console.log('Export for GrandMA3');
+        logger.info('Export for GrandMA3');
         // TODO: Implement GrandMA3 export
       }
     };
@@ -100,7 +101,7 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       if (selectedRows.size > 0) {
         onBulkEdit();
       } else {
-        console.log('No fixtures selected for bulk edit');
+        logger.info('No fixtures selected for bulk edit');
       }
     };
 
@@ -110,11 +111,11 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
         if (onDuplicate) {
           onDuplicate();
         } else {
-          console.log('Duplicate selected fixtures');
+          logger.info('Duplicate selected fixtures');
           // TODO: Implement duplicate functionality
         }
       } else {
-        console.log('No fixtures selected to duplicate');
+        logger.info('No fixtures selected to duplicate');
       }
     };
 
@@ -133,7 +134,7 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       if (onUndo) {
         onUndo();
       } else {
-        console.log('Undo not implemented');
+        logger.info('Undo not implemented');
       }
     };
 
@@ -142,7 +143,7 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       if (onRedo) {
         onRedo();
       } else {
-        console.log('Redo not implemented');
+        logger.info('Redo not implemented');
       }
     };
 

@@ -337,6 +337,11 @@ contextBridge.exposeInMainWorld('api', {
     },
   },
 
+  // Health check operations
+  health: {
+    check: () => ipcRenderer.invoke('health:check'),
+  },
+
   // Authentication operations
   auth: {
     signIn: (email: string, password: string) => ipcRenderer.invoke('auth:signIn', email, password),
@@ -595,6 +600,18 @@ export interface ElectronAPI {
     unsubscribeStatus: () => Promise<{ success: boolean }>;
     onStatusChanged: (callback: (status: any) => void) => void;
     offStatusChanged: (callback: (status: any) => void) => void;
+  };
+  health: {
+    check: () => Promise<{
+      status: 'healthy' | 'degraded' | 'unhealthy';
+      timestamp: string;
+      checks: {
+        database: { status: string; message: string; details?: Record<string, unknown> };
+        filesystem: { status: string; message: string; details?: Record<string, unknown> };
+        memory: { status: string; message: string; details?: Record<string, unknown> };
+        sync: { status: string; message: string; details?: Record<string, unknown> };
+      };
+    }>;
   };
   auth: {
     signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;

@@ -13,6 +13,7 @@ import {
   formatPercentage,
 } from '../../utils/powerCalculations';
 import { DimmerRackModule } from '../../../../main/database/queries/dimmerRackModules';
+import { logger } from '../../utils/logger';
 
 interface PowerSummaryPanelProps {
   dimmerRacks: DimmerRack[];
@@ -54,7 +55,7 @@ export function PowerSummaryPanel({
               modulesMap.set(rack.id, modules);
             }
           } catch (error) {
-            console.error(`Error loading modules for rack ${rack.id}:`, error);
+            logger.error(`Error loading modules for rack ${rack.id}:`, error);
           }
         }),
       );

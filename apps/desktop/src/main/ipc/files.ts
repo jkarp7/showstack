@@ -7,6 +7,7 @@ import {
 // import path from 'path';
 import { readImageAsDataUrl } from '../utils/imageValidation';
 import { sanitizeError, sanitizeErrorForLogging } from '../utils/errorSanitizer';
+import { logger } from '../utils/logger';
 
 /**
  * Register file operation IPC handlers
@@ -30,7 +31,7 @@ export function registerFileHandlers(): void {
         filePath: result.success ? filePath : undefined,
       } as ProjectImportResult & { filePath?: string };
     } catch (error) {
-      console.error('Error in file:open handler:', error);
+      logger.error('Error in file:open handler:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to open file',
@@ -51,7 +52,7 @@ export function registerFileHandlers(): void {
         filePath: result.success ? filePath : undefined,
       } as ProjectImportResult & { filePath?: string };
     } catch (error) {
-      console.error('Error in file:openByPath handler:', error);
+      logger.error('Error in file:openByPath handler:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to open file',
@@ -76,7 +77,7 @@ export function registerFileHandlers(): void {
           filePath: result.success ? filePath : undefined,
         } as ProjectImportResult & { filePath?: string };
       } catch (error) {
-        console.error('Error in file:resolveConflict handler:', error);
+        logger.error('Error in file:resolveConflict handler:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Failed to resolve conflict',
@@ -105,7 +106,7 @@ export function registerFileHandlers(): void {
       await fileService.exportProject(targetPath);
       return targetPath;
     } catch (error) {
-      console.error('Error in file:save handler:', error);
+      logger.error('Error in file:save handler:', error);
       throw new Error(error instanceof Error ? error.message : 'Failed to save file');
     }
   });
@@ -125,7 +126,7 @@ export function registerFileHandlers(): void {
         await fileService.exportProject(filePath);
         return filePath;
       } catch (error) {
-        console.error('Error in file:saveAs handler:', error);
+        logger.error('Error in file:saveAs handler:', error);
         throw new Error(error instanceof Error ? error.message : 'Failed to save file');
       }
     },
@@ -139,7 +140,7 @@ export function registerFileHandlers(): void {
       const projectId = await fileService.createNewProject();
       return projectId;
     } catch (error) {
-      console.error('Error in file:new handler:', error);
+      logger.error('Error in file:new handler:', error);
       throw new Error(error instanceof Error ? error.message : 'Failed to create new project');
     }
   });
@@ -151,7 +152,7 @@ export function registerFileHandlers(): void {
     try {
       return await fileService.validateFile(filePath);
     } catch (error) {
-      console.error('Error in file:validate handler:', error);
+      logger.error('Error in file:validate handler:', error);
       return {
         valid: false,
         error: error instanceof Error ? error.message : 'Failed to validate file',
@@ -190,7 +191,7 @@ export function registerFileHandlers(): void {
         return await readImageAsDataUrl(imagePath);
       } catch (error) {
         // Log full error details securely (console only, not sent to renderer)
-        console.error('Error reading image file:', sanitizeErrorForLogging(error));
+        logger.error(`Error reading image file: ${sanitizeErrorForLogging(error)}`);
 
         // Sanitize error message before sending to renderer (prevents path disclosure)
         const sanitizedMessage = sanitizeError(error);
@@ -199,5 +200,5 @@ export function registerFileHandlers(): void {
     },
   );
 
-  console.log('✅ File IPC handlers registered');
+  logger.info('✅ File IPC handlers registered');
 }

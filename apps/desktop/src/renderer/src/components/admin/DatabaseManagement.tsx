@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { logger } from '../../utils/logger';
 import {
   Database,
   HardDrive,
@@ -18,28 +19,28 @@ export function DatabaseManagement() {
   const handleVacuum = async () => {
     setIsWorking(true);
     // TODO: Implement vacuum
-    console.log('Vacuuming database...');
+    logger.info('Vacuuming database...');
     setTimeout(() => setIsWorking(false), 1000);
   };
 
   const handleBackup = async () => {
     setIsWorking(true);
     // TODO: Implement backup
-    console.log('Creating backup...');
+    logger.info('Creating backup...');
     setTimeout(() => setIsWorking(false), 1000);
   };
 
   const handleRestore = async () => {
     setIsWorking(true);
     // TODO: Implement restore
-    console.log('Restoring from backup...');
+    logger.info('Restoring from backup...');
     setTimeout(() => setIsWorking(false), 1000);
   };
 
   const handleIntegrityCheck = async () => {
     setIsWorking(true);
     // TODO: Implement integrity check
-    console.log('Checking integrity...');
+    logger.info('Checking integrity...');
     setTimeout(() => setIsWorking(false), 1000);
   };
 
@@ -49,7 +50,7 @@ export function DatabaseManagement() {
     }
     setIsWorking(true);
     // TODO: Implement cleanup
-    console.log('Cleaning up old data...');
+    logger.info('Cleaning up old data...');
     setTimeout(() => setIsWorking(false), 1000);
   };
 

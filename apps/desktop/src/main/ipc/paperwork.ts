@@ -4,6 +4,7 @@ import * as paperworkTemplateQueries from '../database/queries/paperworkTemplate
 import puppeteer from 'puppeteer';
 import { errorHandler } from '../errors';
 import { DatabaseError, ValidationError } from '../errors';
+import { logger } from '../utils/logger';
 
 export function registerPaperworkHandlers(): void {
   // ============================================
@@ -18,7 +19,7 @@ export function registerPaperworkHandlers(): void {
         'paperwork-templates:getAll',
       );
     } catch (error) {
-      console.error('Failed to get paperwork templates:', {
+      logger.error('Failed to get paperwork templates:', {
         operation: 'paperwork-templates:getAll',
         reportType,
         error: error instanceof Error ? error.message : error,
@@ -39,7 +40,7 @@ export function registerPaperworkHandlers(): void {
         'paperwork-templates:getById',
       );
     } catch (error) {
-      console.error('Failed to get paperwork template:', {
+      logger.error('Failed to get paperwork template:', {
         operation: 'paperwork-templates:getById',
         id,
         error: error instanceof Error ? error.message : error,
@@ -65,7 +66,7 @@ export function registerPaperworkHandlers(): void {
         'paperwork-templates:create',
       );
     } catch (error) {
-      console.error('Failed to create paperwork template:', {
+      logger.error('Failed to create paperwork template:', {
         operation: 'paperwork-templates:create',
         data,
         error: error instanceof Error ? error.message : error,
@@ -94,7 +95,7 @@ export function registerPaperworkHandlers(): void {
         'paperwork-templates:update',
       );
     } catch (error) {
-      console.error('Failed to update paperwork template:', {
+      logger.error('Failed to update paperwork template:', {
         operation: 'paperwork-templates:update',
         id,
         updates,
@@ -119,7 +120,7 @@ export function registerPaperworkHandlers(): void {
         'paperwork-templates:delete',
       );
     } catch (error) {
-      console.error('Failed to delete paperwork template:', {
+      logger.error('Failed to delete paperwork template:', {
         operation: 'paperwork-templates:delete',
         id,
         error: error instanceof Error ? error.message : error,
@@ -140,7 +141,7 @@ export function registerPaperworkHandlers(): void {
         'paperwork-templates:duplicate',
       );
     } catch (error) {
-      console.error('Failed to duplicate paperwork template:', {
+      logger.error('Failed to duplicate paperwork template:', {
         operation: 'paperwork-templates:duplicate',
         id,
         newName,
@@ -194,7 +195,7 @@ export function registerPaperworkHandlers(): void {
           return { success: false, canceled: true };
         }
 
-        console.log('📄 Launching Puppeteer for PDF generation...');
+        logger.info('📄 Launching Puppeteer for PDF generation...');
 
         // Launch Puppeteer browser
         browser = await puppeteer.launch({
@@ -211,7 +212,7 @@ export function registerPaperworkHandlers(): void {
 
         // Apply grayscale filter if black & white mode
         if (pageSettings?.colorMode === 'bw') {
-          console.log('📄 Applying grayscale filter for black & white mode...');
+          logger.info('📄 Applying grayscale filter for black & white mode...');
           await page.addStyleTag({
             content: `
             body {
@@ -224,7 +225,7 @@ export function registerPaperworkHandlers(): void {
           });
         }
 
-        console.log('📄 Generating PDF with Puppeteer...');
+        logger.info('📄 Generating PDF with Puppeteer...');
 
         // Map page size names to Puppeteer format
         const pageSizeMap: Record<string, any> = {
@@ -272,7 +273,7 @@ export function registerPaperworkHandlers(): void {
           },
         });
 
-        console.log('✅ PDF generated successfully with Puppeteer');
+        logger.info('✅ PDF generated successfully with Puppeteer');
 
         await browser.close();
 
@@ -281,7 +282,7 @@ export function registerPaperworkHandlers(): void {
           filePath: result.filePath,
         };
       } catch (error) {
-        console.error('Failed to export PDF:', {
+        logger.error('Failed to export PDF:', {
           operation: 'paperwork:exportPDF',
           filename,
           error: error instanceof Error ? error.message : error,
@@ -291,7 +292,7 @@ export function registerPaperworkHandlers(): void {
           try {
             await browser.close();
           } catch (closeError) {
-            console.error('Failed to close browser:', closeError);
+            logger.error('Failed to close browser:', closeError);
           }
         }
 
@@ -305,5 +306,5 @@ export function registerPaperworkHandlers(): void {
     },
   );
 
-  console.log('✅ Paperwork IPC handlers registered');
+  logger.info('✅ Paperwork IPC handlers registered');
 }

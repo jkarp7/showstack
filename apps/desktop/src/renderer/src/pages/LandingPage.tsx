@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { logger } from '../utils/logger';
 import { NewProjectDialog } from '../components/common/NewProjectDialog';
 import { DeleteProjectDialog } from '../components/common/DeleteProjectDialog';
 import { ImportConflictDialog } from '../components/common/ImportConflictDialog';
@@ -54,7 +55,7 @@ export function LandingPage() {
             }
           }
         } catch (error) {
-          console.error(`[LandingPage] Error loading logo for project ${project.id}:`, error);
+          logger.error(`[LandingPage] Error loading logo for project ${project.id}:`, error);
         }
       }
 
@@ -73,7 +74,7 @@ export function LandingPage() {
     try {
       await createProject(name, description, logoPath, enabledModules);
     } catch (error) {
-      console.error('Failed to create project:', error);
+      logger.error('Failed to create project:', error);
     }
   };
 
@@ -83,7 +84,7 @@ export function LandingPage() {
       // Open project in a new window
       await window.api.windows.openProject(projectId);
     } catch (error) {
-      console.error('Failed to open project window:', error);
+      logger.error('Failed to open project window:', error);
     }
   };
 
@@ -92,7 +93,7 @@ export function LandingPage() {
       try {
         await deleteProject(projectToDelete.id);
       } catch (error) {
-        console.error('Failed to delete project:', error);
+        logger.error('Failed to delete project:', error);
       }
     }
   };

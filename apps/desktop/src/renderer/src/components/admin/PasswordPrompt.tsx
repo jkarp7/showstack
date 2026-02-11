@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Lock, Eye, EyeOff } from 'lucide-react';
+import { logger } from '../../utils/logger';
 
 interface PasswordPromptProps {
   isOpen: boolean;
@@ -49,7 +50,7 @@ export function PasswordPrompt({
         }
       } catch (err) {
         setError('An error occurred. Please try again.');
-        console.error('Error setting password:', err);
+        logger.error('Error setting password:', err);
       } finally {
         setIsLoading(false);
       }
@@ -67,7 +68,7 @@ export function PasswordPrompt({
         }
       } catch (err) {
         setError('An error occurred. Please try again.');
-        console.error('Error verifying password:', err);
+        logger.error('Error verifying password:', err);
       } finally {
         setIsLoading(false);
       }

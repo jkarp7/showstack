@@ -1,3 +1,5 @@
+import { logger } from '../utils/logger';
+
 // Paperwork Generator Type Definitions
 
 // Report Types
@@ -224,7 +226,7 @@ export function loadHeaderLayout(projectId: string): HeaderLayoutConfig | null {
       return JSON.parse(stored);
     }
   } catch (error) {
-    console.error('Failed to load header layout from localStorage:', error);
+    logger.error('Failed to load header layout from localStorage:', error);
   }
   return null;
 }
@@ -237,7 +239,7 @@ export function saveHeaderLayout(projectId: string, layout: HeaderLayoutConfig):
     const key = getHeaderLayoutStorageKey(projectId);
     localStorage.setItem(key, JSON.stringify(layout));
   } catch (error) {
-    console.error('Failed to save header layout to localStorage:', error);
+    logger.error('Failed to save header layout to localStorage:', error);
   }
 }
 
@@ -249,6 +251,6 @@ export function clearHeaderLayout(projectId: string): void {
     const key = getHeaderLayoutStorageKey(projectId);
     localStorage.removeItem(key);
   } catch (error) {
-    console.error('Failed to clear header layout from localStorage:', error);
+    logger.error('Failed to clear header layout from localStorage:', error);
   }
 }

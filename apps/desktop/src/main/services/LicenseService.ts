@@ -5,6 +5,7 @@ import {
   createLicense,
   updateLicense,
 } from '../database/queries/license';
+import { logger } from '../utils/logger';
 import type {
   UserLicense,
   LicenseValidation,
@@ -127,7 +128,7 @@ export class LicenseService {
 
       return data.status === 'active';
     } catch (error) {
-      console.error('License verification failed (offline):', error);
+      logger.error('License verification failed (offline):', error);
       return false;
     }
   }

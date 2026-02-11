@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { DimmerRack, MODULE_TYPE_OPTIONS, ModuleType } from '../../types/power';
 import { DimmerRackModule } from '../../../../main/database/queries/dimmerRackModules';
+import { logger } from '../../utils/logger';
 
 interface ModuleConfigDialogProps {
   rack: DimmerRack;
@@ -17,7 +18,7 @@ export function ModuleConfigDialog({ rack, onClose }: ModuleConfigDialogProps) {
 
   const loadModules = async () => {
     if (!window.api?.dimmerRackModules) {
-      console.error('dimmerRackModules API not available');
+      logger.error('dimmerRackModules API not available');
       setIsLoading(false);
       return;
     }
@@ -26,7 +27,7 @@ export function ModuleConfigDialog({ rack, onClose }: ModuleConfigDialogProps) {
       const modules = await window.api.dimmerRackModules.getByRackId(rack.id);
       setModules(modules);
     } catch (error) {
-      console.error('Error loading modules:', error);
+      logger.error('Error loading modules:', error);
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +56,7 @@ export function ModuleConfigDialog({ rack, onClose }: ModuleConfigDialogProps) {
       });
       await loadModules();
     } catch (error) {
-      console.error('Error creating module:', error);
+      logger.error('Error creating module:', error);
       alert('Failed to create module');
     }
   };
@@ -67,7 +68,7 @@ export function ModuleConfigDialog({ rack, onClose }: ModuleConfigDialogProps) {
       await window.api.dimmerRackModules.update(id, updates);
       await loadModules();
     } catch (error) {
-      console.error('Error updating module:', error);
+      logger.error('Error updating module:', error);
       alert('Failed to update module');
     }
   };
@@ -80,7 +81,7 @@ export function ModuleConfigDialog({ rack, onClose }: ModuleConfigDialogProps) {
       await window.api.dimmerRackModules.delete(id);
       await loadModules();
     } catch (error) {
-      console.error('Error deleting module:', error);
+      logger.error('Error deleting module:', error);
       alert('Failed to delete module');
     }
   };

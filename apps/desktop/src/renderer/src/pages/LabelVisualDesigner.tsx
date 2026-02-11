@@ -6,6 +6,7 @@
  */
 
 import { useParams, useNavigate } from 'react-router-dom';
+import { logger } from '../utils/logger';
 import LabelLayoutDesigner from '../components/shop-order/label/LabelLayoutDesigner';
 
 export function LabelVisualDesigner() {
@@ -19,7 +20,7 @@ export function LabelVisualDesigner() {
   }
 
   const handleSave = (templateId: string) => {
-    console.log('Label template saved:', templateId);
+    logger.info('Label template saved:', templateId);
     // Navigate back to system docs after save
     navigate(`/project/${projectId}/module/production/system-docs`);
   };

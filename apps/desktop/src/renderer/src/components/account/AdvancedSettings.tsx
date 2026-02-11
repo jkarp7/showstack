@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Settings, BarChart, Beaker, Save } from 'lucide-react';
+import { logger } from '../../utils/logger';
 
 export function AdvancedSettings() {
   const [telemetryEnabled, setTelemetryEnabled] = useState(true);
   const [betaFeatures, setBetaFeatures] = useState(false);
 
-  const handleSave = () => console.log('Saving advanced settings...');
+  const handleSave = () => logger.info('Saving advanced settings...');
 
   return (
     <div className="space-y-6">

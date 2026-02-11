@@ -14,6 +14,7 @@ import { seedDefaultPageLayouts } from '../database/seedDefaultLayouts';
 import { getSetting, setSetting } from '../database/queries/settings';
 import { errorHandler } from '../errors';
 import { DatabaseError, ValidationError } from '../errors';
+import { logger } from '../utils/logger';
 
 const SALT_ROUNDS = 10;
 const DEFAULT_LAYOUTS_DIR = path.join(__dirname, '..', 'database', 'defaultLayouts');
@@ -50,7 +51,7 @@ export function registerAdminHandlers(): void {
         return { success: isValid, firstTime: false };
       }, 'admin:verifyPassword');
     } catch (error) {
-      console.error('Failed to verify admin password:', {
+      logger.error('Failed to verify admin password:', {
         operation: 'admin:verifyPassword',
         error: error instanceof Error ? error.message : error,
       });
@@ -85,7 +86,7 @@ export function registerAdminHandlers(): void {
         return { success: true };
       }, 'admin:setPassword');
     } catch (error) {
-      console.error('Failed to set admin password:', {
+      logger.error('Failed to set admin password:', {
         operation: 'admin:setPassword',
         error: error instanceof Error ? error.message : error,
       });
@@ -110,7 +111,7 @@ export function registerAdminHandlers(): void {
         return { hasPassword: !!storedHash };
       }, 'admin:hasPassword');
     } catch (error) {
-      console.error('Failed to check admin password:', {
+      logger.error('Failed to check admin password:', {
         operation: 'admin:hasPassword',
         error: error instanceof Error ? error.message : error,
       });
@@ -197,7 +198,7 @@ export function registerAdminHandlers(): void {
         filePath: result.filePath,
       };
     } catch (error) {
-      console.error('Error exporting layout:', error);
+      logger.error('Error exporting layout:', error);
       throw error;
     }
   });
@@ -277,7 +278,7 @@ export function registerAdminHandlers(): void {
         directory: exportDir,
       };
     } catch (error) {
-      console.error('Error exporting all default layouts:', error);
+      logger.error('Error exporting all default layouts:', error);
       throw error;
     }
   });
@@ -369,7 +370,7 @@ export function registerAdminHandlers(): void {
         errors: errors.length > 0 ? errors : undefined,
       };
     } catch (error) {
-      console.error('Error importing layouts:', error);
+      logger.error('Error importing layouts:', error);
       throw error;
     }
   });
@@ -394,7 +395,7 @@ export function registerAdminHandlers(): void {
         return { success: true };
       }, 'admin:resetLayoutsToFactory');
     } catch (error) {
-      console.error('Failed to reset layouts to factory:', {
+      logger.error('Failed to reset layouts to factory:', {
         operation: 'admin:resetLayoutsToFactory',
         error: error instanceof Error ? error.message : error,
       });
@@ -430,10 +431,10 @@ export function registerAdminHandlers(): void {
         directory: DEFAULT_LAYOUTS_DIR,
       };
     } catch (error) {
-      console.error('Error getting default layout files:', error);
+      logger.error('Error getting default layout files:', error);
       throw error;
     }
   });
 
-  console.log('✅ Admin IPC handlers registered');
+  logger.info('✅ Admin IPC handlers registered');
 }

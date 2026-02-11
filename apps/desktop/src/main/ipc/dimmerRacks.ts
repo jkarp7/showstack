@@ -9,6 +9,7 @@ import {
   parseWithZod,
   formatValidationErrors,
 } from '@showstack/shared';
+import { logger } from '../utils/logger';
 
 export function registerDimmerRackHandlers(): void {
   // Get all dimmer racks for a project
@@ -16,7 +17,7 @@ export function registerDimmerRackHandlers(): void {
     try {
       return await dimmerService.getAll(projectId);
     } catch (error) {
-      console.error('Failed to get dimmer racks:', {
+      logger.error('Failed to get dimmer racks:', {
         operation: 'dimmerRacks:getAll',
         projectId,
         error: error instanceof Error ? error.message : error,
@@ -34,7 +35,7 @@ export function registerDimmerRackHandlers(): void {
     try {
       return await dimmerService.getById(id);
     } catch (error) {
-      console.error('Failed to get dimmer rack:', {
+      logger.error('Failed to get dimmer rack:', {
         operation: 'dimmerRacks:getById',
         id,
         error: error instanceof Error ? error.message : error,
@@ -73,7 +74,7 @@ export function registerDimmerRackHandlers(): void {
 
         return await dimmerService.create(rack, projectId);
       } catch (error) {
-        console.error('Failed to create dimmer rack:', {
+        logger.error('Failed to create dimmer rack:', {
           operation: 'dimmerRacks:create',
           rack,
           error: error instanceof Error ? error.message : error,
@@ -107,7 +108,7 @@ export function registerDimmerRackHandlers(): void {
 
       return await dimmerService.update(id, updates);
     } catch (error) {
-      console.error('Failed to update dimmer rack:', {
+      logger.error('Failed to update dimmer rack:', {
         operation: 'dimmerRacks:update',
         id,
         updates,
@@ -129,7 +130,7 @@ export function registerDimmerRackHandlers(): void {
     try {
       await dimmerService.delete(id);
     } catch (error) {
-      console.error('Failed to delete dimmer rack:', {
+      logger.error('Failed to delete dimmer rack:', {
         operation: 'dimmerRacks:delete',
         id,
         error: error instanceof Error ? error.message : error,
@@ -147,7 +148,7 @@ export function registerDimmerRackHandlers(): void {
     try {
       return await dimmerService.getWithUsage(projectId);
     } catch (error) {
-      console.error('Failed to get dimmer racks with usage:', {
+      logger.error('Failed to get dimmer racks with usage:', {
         operation: 'dimmerRacks:getWithUsage',
         projectId,
         error: error instanceof Error ? error.message : error,
@@ -160,5 +161,5 @@ export function registerDimmerRackHandlers(): void {
     }
   });
 
-  console.log('✅ Dimmer Rack IPC handlers registered');
+  logger.info('✅ Dimmer Rack IPC handlers registered');
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '../utils/logger';
 import type { PaperworkTemplate, PaperworkTemplateInput } from '../types/paperworkTemplate';
 import type { ReportType } from '../types/paperwork';
 
@@ -38,7 +39,7 @@ export function usePaperworkTemplates(options: UsePaperworkTemplatesOptions = {}
    */
   const loadTemplates = useCallback(async (filterReportType?: ReportType) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -51,7 +52,7 @@ export function usePaperworkTemplates(options: UsePaperworkTemplatesOptions = {}
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load templates';
       setError(message);
-      console.error('Failed to load paperwork templates:', err);
+      logger.error('Failed to load paperwork templates:', err);
     } finally {
       setLoading(false);
     }
@@ -62,14 +63,14 @@ export function usePaperworkTemplates(options: UsePaperworkTemplatesOptions = {}
    */
   const getTemplate = useCallback(async (id: string): Promise<PaperworkTemplate | null> => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return null;
     }
 
     try {
       return await window.api.paperworkTemplates.getById(id);
     } catch (err) {
-      console.error('Failed to get template:', err);
+      logger.error('Failed to get template:', err);
       return null;
     }
   }, []);
@@ -80,7 +81,7 @@ export function usePaperworkTemplates(options: UsePaperworkTemplatesOptions = {}
   const createTemplate = useCallback(
     async (input: PaperworkTemplateInput): Promise<PaperworkTemplate | null> => {
       if (!hasAPI()) {
-        console.warn('API not available');
+        logger.warn('API not available');
         return null;
       }
 
@@ -96,7 +97,7 @@ export function usePaperworkTemplates(options: UsePaperworkTemplatesOptions = {}
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to create template';
         setError(message);
-        console.error('Failed to create template:', err);
+        logger.error('Failed to create template:', err);
         return null;
       }
     },
@@ -112,7 +113,7 @@ export function usePaperworkTemplates(options: UsePaperworkTemplatesOptions = {}
       updates: Partial<PaperworkTemplateInput>,
     ): Promise<PaperworkTemplate | null> => {
       if (!hasAPI()) {
-        console.warn('API not available');
+        logger.warn('API not available');
         return null;
       }
 
@@ -128,7 +129,7 @@ export function usePaperworkTemplates(options: UsePaperworkTemplatesOptions = {}
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to update template';
         setError(message);
-        console.error('Failed to update template:', err);
+        logger.error('Failed to update template:', err);
         return null;
       }
     },
@@ -140,7 +141,7 @@ export function usePaperworkTemplates(options: UsePaperworkTemplatesOptions = {}
    */
   const deleteTemplate = useCallback(async (id: string): Promise<boolean> => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return false;
     }
 
@@ -156,7 +157,7 @@ export function usePaperworkTemplates(options: UsePaperworkTemplatesOptions = {}
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to delete template';
       setError(message);
-      console.error('Failed to delete template:', err);
+      logger.error('Failed to delete template:', err);
       return false;
     }
   }, []);
@@ -167,7 +168,7 @@ export function usePaperworkTemplates(options: UsePaperworkTemplatesOptions = {}
   const duplicateTemplate = useCallback(
     async (id: string, newName?: string): Promise<PaperworkTemplate | null> => {
       if (!hasAPI()) {
-        console.warn('API not available');
+        logger.warn('API not available');
         return null;
       }
 
@@ -183,7 +184,7 @@ export function usePaperworkTemplates(options: UsePaperworkTemplatesOptions = {}
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to duplicate template';
         setError(message);
-        console.error('Failed to duplicate template:', err);
+        logger.error('Failed to duplicate template:', err);
         return null;
       }
     },

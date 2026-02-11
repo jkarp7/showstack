@@ -8,18 +8,23 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ErrorHandler } from '../ErrorHandler';
 import { ConnectionError, QueryError, TransactionError, DatabaseError } from '../DatabaseError';
 
+vi.mock('../../utils/logger', () => ({
+  logger: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
+import { logger } from '../../utils/logger';
+
 describe('ErrorHandler', () => {
   let errorHandler: ErrorHandler;
-  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
-  let consoleLogSpy: ReturnType<typeof vi.spyOn>;
-  let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     errorHandler = new ErrorHandler();
-    // Suppress console output in tests
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.clearAllMocks();
   });
 
   describe('executeWithRetry - Success Cases', () => {
@@ -279,9 +284,8 @@ describe('ErrorHandler', () => {
         /* expected error */
       }
 
-      // ErrorHandler now uses logger.warn which calls console.warn
-      expect(consoleWarnSpy).toHaveBeenCalled();
-      const warnCalls = consoleWarnSpy.mock.calls;
+      expect(logger.warn).toHaveBeenCalled();
+      const warnCalls = (logger.warn as ReturnType<typeof vi.fn>).mock.calls;
       expect(
         warnCalls.some((call) => call[0].includes('test-operation') && call[0].includes('failed')),
       ).toBe(true);

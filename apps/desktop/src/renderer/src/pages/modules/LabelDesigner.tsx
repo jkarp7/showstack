@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { logger } from '../../utils/logger';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { promptAndMigrate, needsMigration } from '../../utils/shop-order/labelMigration';
 
@@ -233,7 +234,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
           setProjectName(project.name);
         }
       } catch (error) {
-        console.error('Failed to load project info:', error);
+        logger.error('Failed to load project info:', error);
       }
     };
 
@@ -245,7 +246,7 @@ export function LabelDesigner({ embedded = false }: LabelDesignerProps = {}) {
           setCustomDesigns(designs);
         }
       } catch (error) {
-        console.error('Failed to load custom designs:', error);
+        logger.error('Failed to load custom designs:', error);
       }
     };
 

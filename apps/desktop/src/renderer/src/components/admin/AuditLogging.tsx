@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FileText, Download, Trash2, Filter, Calendar, AlertCircle } from 'lucide-react';
+import { logger } from '../../utils/logger';
 
 type LogLevel = 'all' | 'info' | 'warning' | 'error';
 
@@ -45,7 +46,7 @@ export function AuditLogging() {
 
   const handleExportLogs = async () => {
     // TODO: Implement export
-    console.log('Exporting logs...');
+    logger.info('Exporting logs...');
   };
 
   const handleClearLogs = async () => {
@@ -54,7 +55,7 @@ export function AuditLogging() {
     }
     setLogs([]);
     // TODO: Implement clear logs
-    console.log('Clearing logs...');
+    logger.info('Clearing logs...');
   };
 
   const filteredLogs = logs.filter((log) => logLevel === 'all' || log.level === logLevel);

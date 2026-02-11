@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { InfrastructureEquipment, PortAssignment } from '../../types/infrastructure';
 import { PortAssignmentEditor } from './PortAssignmentEditor';
+import { logger } from '../../utils/logger';
 
 interface EditInfrastructureDialogProps {
   isOpen: boolean;
@@ -78,7 +79,7 @@ export function EditInfrastructureDialog({
       await onUpdate(equipment.id, updates);
       onClose();
     } catch (error) {
-      console.error('Failed to update equipment:', error);
+      logger.error('Failed to update equipment:', error);
       alert('Failed to update equipment. Please try again.');
     }
   };

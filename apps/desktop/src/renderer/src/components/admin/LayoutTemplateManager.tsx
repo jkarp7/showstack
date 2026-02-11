@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '../../utils/logger';
 import {
   Download,
   Upload,
@@ -36,7 +37,7 @@ export function LayoutTemplateManager() {
       const defaultLayouts = allLayouts.filter((l: any) => l.is_default);
       setLayouts(defaultLayouts);
     } catch (error) {
-      console.error('Error loading layouts:', error);
+      logger.error('Error loading layouts:', error);
       showNotification('error', 'Failed to load layouts');
     }
   };
@@ -48,7 +49,7 @@ export function LayoutTemplateManager() {
         setDefaultLayoutFiles(result.files);
       }
     } catch (error) {
-      console.error('Error loading default layout files:', error);
+      logger.error('Error loading default layout files:', error);
     }
   };
 
@@ -73,7 +74,7 @@ export function LayoutTemplateManager() {
         showNotification('error', 'Failed to export layout');
       }
     } catch (error) {
-      console.error('Error exporting layout:', error);
+      logger.error('Error exporting layout:', error);
       showNotification('error', 'An error occurred while exporting');
     } finally {
       setIsLoading(false);
@@ -100,7 +101,7 @@ export function LayoutTemplateManager() {
         showNotification('error', 'Failed to export layouts');
       }
     } catch (error) {
-      console.error('Error exporting all layouts:', error);
+      logger.error('Error exporting all layouts:', error);
       showNotification('error', 'An error occurred while exporting');
     } finally {
       setIsLoading(false);
@@ -126,7 +127,7 @@ export function LayoutTemplateManager() {
 
         // Log errors to console for debugging
         if (result.errors) {
-          console.error('Import errors:', result.errors);
+          logger.error('Import errors:', result.errors);
         }
 
         await loadLayouts();
@@ -134,7 +135,7 @@ export function LayoutTemplateManager() {
         showNotification('error', 'Failed to import layouts');
       }
     } catch (error) {
-      console.error('Error importing layouts:', error);
+      logger.error('Error importing layouts:', error);
       showNotification('error', 'An error occurred while importing');
     } finally {
       setIsLoading(false);
@@ -161,7 +162,7 @@ export function LayoutTemplateManager() {
         showNotification('error', 'Failed to reset layouts');
       }
     } catch (error) {
-      console.error('Error resetting layouts:', error);
+      logger.error('Error resetting layouts:', error);
       showNotification('error', 'An error occurred while resetting');
     } finally {
       setIsLoading(false);
@@ -183,7 +184,7 @@ export function LayoutTemplateManager() {
       setEditingLayout(layout);
       setEditingElements(parsedElements);
     } catch (error) {
-      console.error('Error loading layout for editing:', error);
+      logger.error('Error loading layout for editing:', error);
       showNotification('error', 'Failed to load layout');
     }
   };
@@ -211,7 +212,7 @@ export function LayoutTemplateManager() {
       setEditingElements(parsedElements);
       showNotification('info', 'Layout restored to last saved state');
     } catch (error) {
-      console.error('Error restoring layout:', error);
+      logger.error('Error restoring layout:', error);
       showNotification('error', 'Failed to restore layout');
     }
   };
@@ -269,7 +270,7 @@ export function LayoutTemplateManager() {
       setEditingElements([]);
       await loadLayouts();
     } catch (error) {
-      console.error('Error creating custom layout:', error);
+      logger.error('Error creating custom layout:', error);
       showNotification('error', 'Failed to save layout');
     } finally {
       setIsLoading(false);

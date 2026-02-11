@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { logger } from '../utils/logger';
 import { ModuleCard } from '../components/common/ModuleCard';
 import { EditProjectDialog } from '../components/common/EditProjectDialog';
 import { Breadcrumbs } from '../components/common/Breadcrumbs';
@@ -71,7 +72,7 @@ export function ProjectPage() {
           setLogoDataUrl(dataUrl);
         }
       } catch (error) {
-        console.error('[ProjectPage] Error loading logo:', error);
+        logger.error('[ProjectPage] Error loading logo:', error);
         setLogoDataUrl(null);
       }
     };
@@ -84,7 +85,7 @@ export function ProjectPage() {
       await updateProject(projectId, updates);
       setIsEditDialogOpen(false);
     } catch (error) {
-      console.error('Failed to update project:', error);
+      logger.error('Failed to update project:', error);
     }
   };
 

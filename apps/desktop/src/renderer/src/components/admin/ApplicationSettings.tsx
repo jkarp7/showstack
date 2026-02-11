@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Settings, FolderOpen, FileText, Save, AlertCircle } from 'lucide-react';
+import { logger } from '../../utils/logger';
 
 export function ApplicationSettings() {
   const [defaultExportPath, setDefaultExportPath] = useState('');
@@ -10,17 +11,17 @@ export function ApplicationSettings() {
 
   const handleSave = async () => {
     // TODO: Implement save functionality
-    console.log('Saving application settings...');
+    logger.info('Saving application settings...');
   };
 
   const handleSelectExportPath = async () => {
     // TODO: Implement folder selection
-    console.log('Select export path...');
+    logger.info('Select export path...');
   };
 
   const handleSelectProjectPath = async () => {
     // TODO: Implement folder selection
-    console.log('Select project path...');
+    logger.info('Select project path...');
   };
 
   return (

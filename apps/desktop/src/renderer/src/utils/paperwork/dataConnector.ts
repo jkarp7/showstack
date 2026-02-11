@@ -3,6 +3,7 @@
  * Bridge between Zustand stores and report renderer
  */
 
+import { logger } from '../logger';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { useInfrastructureStore } from '../../store/infrastructureStore';
 import { ReportDataItem } from './reportOrganizer';
@@ -145,7 +146,7 @@ async function aggregatePowerSummary(
       pdRacks = await window.api.pdRacks.getAll(projectId);
     }
   } catch (error) {
-    console.error('Error loading racks:', error);
+    logger.error('Error loading racks:', error);
   }
 
   // Create rack lookup maps (rack_id -> voltage)

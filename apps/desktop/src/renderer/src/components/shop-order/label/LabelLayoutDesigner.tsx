@@ -9,6 +9,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { LayoutDesigner } from '../layout/LayoutDesigner';
+import { logger } from '../../../utils/logger';
 import {
   calculateLabelGrid,
   getAveryTemplate,
@@ -39,7 +40,7 @@ export default function LabelLayoutDesigner({
     const averySpec = getAveryTemplate(templateCode);
 
     if (!averySpec) {
-      console.error('Invalid Avery template code:', templateCode);
+      logger.error('Invalid Avery template code:', templateCode);
       return;
     }
 
@@ -114,7 +115,7 @@ export default function LabelLayoutDesigner({
 
       onSave(savedId);
     } catch (error) {
-      console.error('Failed to save label template:', error);
+      logger.error('Failed to save label template:', error);
       alert('Failed to save label template. Please try again.');
     }
   };

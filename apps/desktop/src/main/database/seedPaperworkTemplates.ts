@@ -4,6 +4,7 @@ import {
   createPaperworkTemplate,
   updatePaperworkTemplate,
 } from './queries/paperworkTemplates';
+import { logger } from '../utils/logger';
 
 /**
  * Seed Paperwork Templates
@@ -18,19 +19,19 @@ import {
  */
 export async function seedPaperworkTemplates(): Promise<void> {
   try {
-    console.log('🌱 Checking paperwork template seeding...');
+    logger.info('🌱 Checking paperwork template seeding...');
 
     // Check if system templates already exist
     const existingSystemTemplates = getSystemPaperworkTemplates();
 
     if (existingSystemTemplates.length > 0) {
-      console.log(
+      logger.info(
         `✅ System templates already seeded (${existingSystemTemplates.length} templates)`,
       );
       return;
     }
 
-    console.log('📝 Seeding system templates...');
+    logger.info('📝 Seeding system templates...');
 
     // Create all default templates
     let successCount = 0;
@@ -41,18 +42,18 @@ export async function seedPaperworkTemplates(): Promise<void> {
         createPaperworkTemplate(templateData);
         successCount++;
       } catch (error) {
-        console.error(`Failed to seed template: ${templateData.name}`, error);
+        logger.error(`Failed to seed template: ${templateData.name}`, error);
         errorCount++;
       }
     }
 
     if (errorCount > 0) {
-      console.warn(`⚠️ Seeded ${successCount} templates with ${errorCount} errors`);
+      logger.warn(`⚠️ Seeded ${successCount} templates with ${errorCount} errors`);
     } else {
-      console.log(`✅ Successfully seeded ${successCount} system templates`);
+      logger.info(`✅ Successfully seeded ${successCount} system templates`);
     }
   } catch (error) {
-    console.error('❌ Error seeding paperwork templates:', error);
+    logger.error('❌ Error seeding paperwork templates:', error);
     // Don't throw - seeding failure shouldn't prevent app from starting
   }
 }
@@ -66,7 +67,7 @@ export function needsSeeding(): boolean {
     const systemTemplates = getSystemPaperworkTemplates();
     return systemTemplates.length === 0;
   } catch (error) {
-    console.error('Error checking template seeding status:', error);
+    logger.error('Error checking template seeding status:', error);
     return false;
   }
 }
@@ -77,7 +78,7 @@ export function needsSeeding(): boolean {
  */
 export async function reseedMissingTemplates(): Promise<void> {
   try {
-    console.log('🔄 Re-seeding missing system templates...');
+    logger.info('🔄 Re-seeding missing system templates...');
 
     const existingSystemTemplates = getSystemPaperworkTemplates();
     const existingReportTypes = new Set(existingSystemTemplates.map((t) => t.reportType));
@@ -89,20 +90,20 @@ export async function reseedMissingTemplates(): Promise<void> {
         try {
           createPaperworkTemplate(templateData);
           addedCount++;
-          console.log(`  ✅ Added: ${templateData.name}`);
+          logger.info(`  ✅ Added: ${templateData.name}`);
         } catch (error) {
-          console.error(`  ❌ Failed to add: ${templateData.name}`, error);
+          logger.error(`  ❌ Failed to add: ${templateData.name}`, error);
         }
       }
     }
 
     if (addedCount > 0) {
-      console.log(`✅ Added ${addedCount} missing system templates`);
+      logger.info(`✅ Added ${addedCount} missing system templates`);
     } else {
-      console.log('✅ All system templates already exist');
+      logger.info('✅ All system templates already exist');
     }
   } catch (error) {
-    console.error('❌ Error re-seeding templates:', error);
+    logger.error('❌ Error re-seeding templates:', error);
   }
 }
 
@@ -112,7 +113,7 @@ export async function reseedMissingTemplates(): Promise<void> {
  */
 export async function updateSystemTemplates(): Promise<void> {
   try {
-    console.log('🔄 Updating system templates with latest configurations...');
+    logger.info('🔄 Updating system templates with latest configurations...');
 
     const existingSystemTemplates = getSystemPaperworkTemplates();
     let updatedCount = 0;
@@ -134,13 +135,13 @@ export async function updateSystemTemplates(): Promise<void> {
           );
           updatedCount++;
         } catch (error) {
-          console.error(`  ❌ Failed to update: ${existingTemplate.name}`, error);
+          logger.error(`  ❌ Failed to update: ${existingTemplate.name}`, error);
         }
       }
     }
 
-    console.log(`✅ Updated ${updatedCount} system templates`);
+    logger.info(`✅ Updated ${updatedCount} system templates`);
   } catch (error) {
-    console.error('❌ Error updating system templates:', error);
+    logger.error('❌ Error updating system templates:', error);
   }
 }

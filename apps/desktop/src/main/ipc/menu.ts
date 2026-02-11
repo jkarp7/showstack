@@ -6,6 +6,7 @@
 import { ipcMain, BrowserWindow, Menu } from 'electron';
 import { menuState, MenuStateData } from '../menu/menuState';
 import { buildMenu } from '../menu/menuTemplate';
+import { logger } from '../utils/logger';
 
 /**
  * Register all menu-related IPC handlers
@@ -25,7 +26,7 @@ export function registerMenuHandlers(): void {
 
       return { success: true };
     } catch (error) {
-      console.error('Failed to set menu state:', {
+      logger.error('Failed to set menu state:', {
         operation: 'menu:setState',
         error: error instanceof Error ? error.message : error,
       });
@@ -41,7 +42,7 @@ export function registerMenuHandlers(): void {
     try {
       return menuState.getState();
     } catch (error) {
-      console.error('Failed to get menu state:', {
+      logger.error('Failed to get menu state:', {
         operation: 'menu:getState',
         error: error instanceof Error ? error.message : error,
       });
@@ -66,7 +67,7 @@ export function registerMenuHandlers(): void {
 
       return { success: true };
     } catch (error) {
-      console.error('Failed to reset menu:', {
+      logger.error('Failed to reset menu:', {
         operation: 'menu:reset',
         error: error instanceof Error ? error.message : error,
       });
@@ -90,7 +91,7 @@ export function registerMenuHandlers(): void {
       }
       return { success: true };
     } catch (error) {
-      console.error('Failed to toggle developer mode:', {
+      logger.error('Failed to toggle developer mode:', {
         operation: 'menu:developerModeChanged',
         enabled,
         error: error instanceof Error ? error.message : error,
@@ -107,32 +108,32 @@ export function registerMenuHandlers(): void {
  * Initialize application menu (called once at startup)
  */
 export function initializeApplicationMenu(): void {
-  console.log('🍔 Initializing application menu, platform:', process.platform);
+  logger.info(`Initializing application menu, platform: ${process.platform}`);
 
   // Import app to check and set name
   const { app } = require('electron');
-  console.log('🏷️  Current app name:', app.getName());
+  logger.info(`Current app name: ${app.getName()}`);
 
   // Force set app name right before menu creation
   app.setName('ShowStack');
-  console.log('🏷️  App name after setName:', app.getName());
+  logger.info(`App name after setName: ${app.getName()}`);
 
   // Clear any default Electron menu first
   if (process.platform === 'darwin') {
     Menu.setApplicationMenu(null);
-    console.log('🧹 Cleared default menu');
+    logger.info('Cleared default menu');
   }
 
   // Build initial menu
   const menu = buildMenu(menuState.getState());
 
-  console.log('🍔 Menu has', menu.items.length, 'top-level items');
-  console.log('🍔 Menu items:', menu.items.map((item) => item.label).join(', '));
+  logger.info(`Menu has ${menu.items.length} top-level items`);
+  logger.info(`Menu items: ${menu.items.map((item) => item.label).join(', ')}`);
 
   // On macOS, set application menu (global)
   if (process.platform === 'darwin') {
     Menu.setApplicationMenu(menu);
-    console.log('✅ Application menu set for macOS');
+    logger.info('Application menu set for macOS');
   }
 
   // Subscribe to state changes (only once, not per-window)
@@ -158,7 +159,7 @@ export function initializeMenuForWindow(window: BrowserWindow): void {
   if (process.platform !== 'darwin') {
     const menu = buildMenu(menuState.getState());
     window.setMenu(menu);
-    console.log('✅ Window menu set for', process.platform);
+    logger.info(`Window menu set for ${process.platform}`);
   }
   // On macOS, menu is already set globally, nothing to do
 }

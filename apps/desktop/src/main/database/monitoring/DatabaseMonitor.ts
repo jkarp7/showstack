@@ -331,7 +331,7 @@ export class DatabaseMonitor {
    */
   configure(config: Partial<DatabaseMonitorConfig>): void {
     this.config = { ...this.config, ...config };
-    logger.debug('Database monitor configured', { config: this.config });
+    logger.debug('Database monitor configured', { ...this.config });
   }
 
   /**

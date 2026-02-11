@@ -7,6 +7,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { useNavigate, useParams } from 'react-router-dom';
+import { logger } from '../../utils/logger';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { useInfrastructureStore } from '../../store/infrastructureStore';
 import { ReportType, PageSetup, DEFAULT_PAGE_SETUP } from '../../types/paperwork';
@@ -85,7 +86,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
           setProjectData(project);
         }
       } catch (error) {
-        console.error('Failed to load project info:', error);
+        logger.error('Failed to load project info:', error);
       }
     };
 
@@ -101,7 +102,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
       }
 
       try {
-        console.log('Starting PDF export for template:', template.name);
+        logger.info('Starting PDF export for template:', template.name);
 
         // Get report data
         const reportData = await getReportData(template.reportType, currentProjectId);
@@ -111,8 +112,8 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
           template.columns,
         );
 
-        console.log('Report data loaded:', reportData.length, 'items');
-        console.log('Organized data:', organizedData);
+        logger.info('Report data loaded:', reportData.length, 'items');
+        logger.info('Organized data:', organizedData);
 
         // Render the table to HTML using React server-side rendering
         const tableHTML = renderToStaticMarkup(
@@ -126,7 +127,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
           />,
         );
 
-        console.log('Table HTML rendered, length:', tableHTML.length);
+        logger.info('Table HTML rendered, length:', tableHTML.length);
 
         // Prepare header/footer data
         const headerData = {
@@ -144,7 +145,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
         // Render header and footer HTML with print-friendly grid layout
         let headerHTML = '';
         if (template.headerTemplateId) {
-          console.log('Rendering header template:', template.headerTemplateId);
+          logger.info('Rendering header template:', template.headerTemplateId);
           headerHTML = (await renderHeaderHTML(template.headerTemplateId, headerData)) || '';
         }
         const footerHTML = renderFooterHTML(userName, dataRange);
@@ -255,7 +256,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
         const filename = `${projectName}_${template.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
 
-        console.log('Calling PDF export API with filename:', filename);
+        logger.info('Calling PDF export API with filename:', filename);
 
         const result = await window.api.paperwork.exportPDF(
           htmlContent,
@@ -266,10 +267,10 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
         );
 
         if (result.success) {
-          console.log('PDF exported successfully');
+          logger.info('PDF exported successfully');
         }
       } catch (error) {
-        console.error('Error exporting PDF:', error);
+        logger.error('Error exporting PDF:', error);
         alert('Failed to export PDF');
       }
     },
@@ -319,7 +320,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
           const template = allTemplates.find((t) => t.reportType === reportType && t.isSystem);
 
           if (!template) {
-            console.error(`No template found for report type: ${reportType}`);
+            logger.error(`No template found for report type: ${reportType}`);
             continue;
           }
 
@@ -329,7 +330,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             defaultFontSize = template.pageSetup.fontStyle?.fontSize || defaultFontSize;
           }
 
-          console.log(`Batch export: Rendering ${reportName} using template:`, template.name);
+          logger.info(`Batch export: Rendering ${reportName} using template:`, template.name);
 
           // Get report data
           const reportData = await getReportData(reportType, currentProjectId);
@@ -339,7 +340,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             template.columns,
           );
 
-          console.log(`Batch export: ${reportName} has ${reportData.length} items`);
+          logger.info(`Batch export: ${reportName} has ${reportData.length} items`);
 
           // Render the table to HTML using React server-side rendering
           const tableHTML = renderToStaticMarkup(
@@ -397,7 +398,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
           reportSections.push(reportSection);
         } catch (error) {
-          console.error(`Error rendering ${reportName}:`, error);
+          logger.error(`Error rendering ${reportName}:`, error);
         }
       }
 
@@ -548,12 +549,12 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
       if (result.success) {
         alert(`Successfully exported ${reportSections.length} reports to a single PDF`);
-        console.log('Batch export: Successfully created combined PDF');
+        logger.info('Batch export: Successfully created combined PDF');
       } else {
         alert('Batch export failed');
       }
     } catch (error) {
-      console.error('Batch export error:', error);
+      logger.error('Batch export error:', error);
       alert('Batch export failed');
     } finally {
       setIsBatchProcessing(false);
@@ -599,7 +600,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => {
-                  console.log('Batch Export button clicked');
+                  logger.info('Batch Export button clicked');
                   setShowBatchExport(true);
                 }}
                 className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm transition"
@@ -618,7 +619,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
           projectId={currentProjectId}
           onExport={handleExportPDF}
           onBatchExport={() => {
-            console.log('Batch Export clicked from editor toolbar');
+            logger.info('Batch Export clicked from editor toolbar');
             setShowBatchExport(true);
           }}
           onHeaderDesign={(template) => {
@@ -640,11 +641,11 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
               // Save the header template ID to the paperwork template
               // Skip for system templates - they already reference default-paperwork-header
               try {
-                console.log('Header template saved:', headerTemplateId);
+                logger.info('Header template saved:', headerTemplateId);
 
                 // Only update the paperwork template if it's NOT a system template
                 if (!currentTemplate.isSystem) {
-                  console.log(
+                  logger.info(
                     'Updating paperwork template:',
                     currentTemplate.id,
                     'with header:',
@@ -653,16 +654,16 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
                   await window.api.paperworkTemplates.update(currentTemplate.id, {
                     headerTemplateId,
                   });
-                  console.log('Header template ID saved to paperwork template');
+                  logger.info('Header template ID saved to paperwork template');
                 } else {
-                  console.log(
+                  logger.info(
                     'Skipping paperwork template update (system template) - header changes saved',
                   );
                 }
 
                 setShowHeaderDesigner(false);
               } catch (error) {
-                console.error('Failed to save header template:', error);
+                logger.error('Failed to save header template:', error);
                 alert('Failed to save header template');
               }
             }}

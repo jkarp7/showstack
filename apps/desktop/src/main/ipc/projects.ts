@@ -4,6 +4,7 @@ import { getCurrentProject, Project } from '../database/queries/projects';
 import { projectService } from '../services/ProjectService';
 import { errorHandler } from '../errors';
 import { DatabaseError, ValidationError } from '../errors';
+import { logger } from '../utils/logger';
 import {
   CreateProjectSchema,
   UpdateProjectSchema,
@@ -16,7 +17,7 @@ export function registerProjectHandlers(): void {
     try {
       return await projectService.getAll();
     } catch (error) {
-      console.error('Failed to get projects:', {
+      logger.error('Failed to get projects:', {
         operation: 'projects:getAll',
         error: error instanceof Error ? error.message : error,
       });
@@ -35,7 +36,7 @@ export function registerProjectHandlers(): void {
         'projects:getCurrent',
       );
     } catch (error) {
-      console.error('Failed to get current project:', {
+      logger.error('Failed to get current project:', {
         operation: 'projects:getCurrent',
         error: error instanceof Error ? error.message : error,
       });
@@ -51,7 +52,7 @@ export function registerProjectHandlers(): void {
     try {
       return await projectService.getById(id);
     } catch (error) {
-      console.error('Failed to get project by id:', {
+      logger.error('Failed to get project by id:', {
         operation: 'projects:getById',
         id,
         error: error instanceof Error ? error.message : error,
@@ -96,7 +97,7 @@ export function registerProjectHandlers(): void {
 
         return await projectService.create(name, description, logoPath, enabledModules);
       } catch (error) {
-        console.error('Failed to create project:', {
+        logger.error('Failed to create project:', {
           operation: 'projects:create',
           name,
           error: error instanceof Error ? error.message : error,
@@ -129,7 +130,7 @@ export function registerProjectHandlers(): void {
 
       return await projectService.update(id, updates);
     } catch (error) {
-      console.error('Failed to update project:', {
+      logger.error('Failed to update project:', {
         operation: 'projects:update',
         id,
         updates,
@@ -150,7 +151,7 @@ export function registerProjectHandlers(): void {
     try {
       await projectService.delete(id);
     } catch (error) {
-      console.error('Failed to delete project:', {
+      logger.error('Failed to delete project:', {
         operation: 'projects:delete',
         id,
         error: error instanceof Error ? error.message : error,
@@ -163,5 +164,5 @@ export function registerProjectHandlers(): void {
     }
   });
 
-  console.log('✅ Project IPC handlers registered');
+  logger.info('✅ Project IPC handlers registered');
 }

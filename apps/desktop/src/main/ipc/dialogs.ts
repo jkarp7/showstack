@@ -1,4 +1,5 @@
 import { ipcMain, dialog, BrowserWindow } from 'electron';
+import { logger } from '../utils/logger';
 
 export function registerDialogHandlers(): void {
   // Show open dialog for selecting image files (logo upload)
@@ -24,7 +25,7 @@ export function registerDialogHandlers(): void {
 
       return result.filePaths[0];
     } catch (error) {
-      console.error('Failed to open image dialog:', {
+      logger.error('Failed to open image dialog:', {
         operation: 'dialog:openImage',
         error: error instanceof Error ? error.message : error,
       });
@@ -58,7 +59,7 @@ export function registerDialogHandlers(): void {
 
       return result.filePaths[0];
     } catch (error) {
-      console.error('Failed to open project dialog:', {
+      logger.error('Failed to open project dialog:', {
         operation: 'dialog:openProject',
         error: error instanceof Error ? error.message : error,
       });
@@ -69,5 +70,5 @@ export function registerDialogHandlers(): void {
     }
   });
 
-  console.log('✅ Dialog IPC handlers registered');
+  logger.info('✅ Dialog IPC handlers registered');
 }

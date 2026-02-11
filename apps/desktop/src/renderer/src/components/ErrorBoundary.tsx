@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { telemetry } from '../services/telemetry';
+import { logger } from '../utils/logger';
 
 interface Props {
   children: ReactNode;
@@ -43,7 +44,7 @@ export class ErrorBoundary extends Component<Props, State> {
     });
 
     // Also log to console for development
-    console.error('Error caught by boundary:', error, errorInfo);
+    logger.error('Error caught by boundary:', error, errorInfo);
   }
 
   handleReset = () => {

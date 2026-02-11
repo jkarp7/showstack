@@ -5,6 +5,7 @@
  */
 
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { logger } from '../../utils/logger';
 import { ChevronRight, Home } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -36,7 +37,7 @@ export function Breadcrumbs() {
           }
         })
         .catch((err) => {
-          console.error('Failed to fetch project for breadcrumbs:', err);
+          logger.error('Failed to fetch project for breadcrumbs:', err);
         });
     } else {
       setProjectName('');

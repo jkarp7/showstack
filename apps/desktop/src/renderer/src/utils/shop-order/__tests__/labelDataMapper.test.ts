@@ -9,6 +9,17 @@ import {
   type LabelData,
 } from '../labelDataMapper';
 import type { Fixture } from '../../../types';
+import { logger } from '../../logger';
+
+// Mock logger
+vi.mock('../../logger', () => ({
+  logger: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
 
 /**
  * Comprehensive tests for label data mapper
@@ -244,7 +255,6 @@ describe('Label Data Mapper', () => {
     });
 
     it('should handle database errors gracefully', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       vi.spyOn(window.api.fixtures, 'getByProject').mockRejectedValue(
         new Error('Database connection failed'),
       );
@@ -252,12 +262,10 @@ describe('Label Data Mapper', () => {
       const result = await getLabelDataForFixtures(['fixture-1'], 'project-1');
 
       expect(result).toEqual([]);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         'Failed to get label data for fixtures:',
         expect.any(Error),
       );
-
-      consoleErrorSpy.mockRestore();
     });
   });
 
@@ -290,18 +298,15 @@ describe('Label Data Mapper', () => {
     });
 
     it('should handle database errors gracefully', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       vi.spyOn(window.api.fixtures, 'getByProject').mockRejectedValue(new Error('Database error'));
 
       const result = await getAllLabelDataForProject('project-1');
 
       expect(result).toEqual([]);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         'Failed to get label data for project:',
         expect.any(Error),
       );
-
-      consoleErrorSpy.mockRestore();
     });
   });
 

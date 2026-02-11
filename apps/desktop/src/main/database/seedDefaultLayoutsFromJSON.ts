@@ -2,6 +2,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { createLayoutTemplate } from './queries/layoutTemplates';
+import { logger } from '../utils/logger';
 
 type PrintSectionType = string;
 
@@ -38,13 +39,13 @@ interface LayoutJSONData {
  * This replaces the hardcoded approach with a file-based system
  */
 export function seedDefaultPageLayoutsFromJSON(): void {
-  console.log('Seeding default page layouts from JSON files...');
+  logger.info('Seeding default page layouts from JSON files...');
 
   try {
     // Check if directory exists
     if (!fs.existsSync(DEFAULT_LAYOUTS_DIR)) {
-      console.warn(`⚠️  Default layouts directory not found: ${DEFAULT_LAYOUTS_DIR}`);
-      console.warn('   Falling back to hardcoded layouts');
+      logger.warn(`⚠️  Default layouts directory not found: ${DEFAULT_LAYOUTS_DIR}`);
+      logger.warn('   Falling back to hardcoded layouts');
       // Import and use the original seed function as fallback
       const { seedDefaultPageLayouts } = require('./seedDefaultLayouts');
       seedDefaultPageLayouts();
@@ -55,8 +56,8 @@ export function seedDefaultPageLayoutsFromJSON(): void {
     const files = fs.readdirSync(DEFAULT_LAYOUTS_DIR).filter((file) => file.endsWith('.json'));
 
     if (files.length === 0) {
-      console.warn('⚠️  No JSON layout files found in directory');
-      console.warn('   Falling back to hardcoded layouts');
+      logger.warn('⚠️  No JSON layout files found in directory');
+      logger.warn('   Falling back to hardcoded layouts');
       const { seedDefaultPageLayouts } = require('./seedDefaultLayouts');
       seedDefaultPageLayouts();
       return;
@@ -74,7 +75,7 @@ export function seedDefaultPageLayoutsFromJSON(): void {
 
         // Validate structure
         if (!data.template || !data.elements) {
-          console.error(`✗ Invalid structure in ${file}: missing template or elements`);
+          logger.error(`✗ Invalid structure in ${file}: missing template or elements`);
           errorCount++;
           continue;
         }
@@ -106,24 +107,24 @@ export function seedDefaultPageLayoutsFromJSON(): void {
 
         // Create the layout
         createLayoutTemplate(templateData, elementsData as any);
-        console.log(`✓ Loaded layout from ${file}`);
+        logger.info(`✓ Loaded layout from ${file}`);
         successCount++;
       } catch (error) {
-        console.error(`✗ Error loading ${file}:`, error);
+        logger.error(`✗ Error loading ${file}:`, error);
         errorCount++;
       }
     }
 
-    console.log(`✅ Seeding complete: ${successCount} layouts loaded, ${errorCount} errors`);
+    logger.info(`✅ Seeding complete: ${successCount} layouts loaded, ${errorCount} errors`);
 
     if (successCount === 0 && errorCount > 0) {
-      console.warn('   No layouts were loaded successfully, falling back to hardcoded layouts');
+      logger.warn('   No layouts were loaded successfully, falling back to hardcoded layouts');
       const { seedDefaultPageLayouts } = require('./seedDefaultLayouts');
       seedDefaultPageLayouts();
     }
   } catch (error) {
-    console.error('Error seeding layouts from JSON:', error);
-    console.warn('Falling back to hardcoded layouts');
+    logger.error('Error seeding layouts from JSON:', error);
+    logger.warn('Falling back to hardcoded layouts');
     const { seedDefaultPageLayouts } = require('./seedDefaultLayouts');
     seedDefaultPageLayouts();
   }

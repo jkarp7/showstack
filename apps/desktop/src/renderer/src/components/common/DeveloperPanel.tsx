@@ -1,4 +1,5 @@
 import { Code, X } from 'lucide-react';
+import { logger } from '../../utils/logger';
 import { useState } from 'react';
 import { useDeveloperMode } from '../../hooks/useDeveloperMode';
 
@@ -99,10 +100,10 @@ export function DeveloperPanel({ title, data, metrics, children }: DeveloperPane
               <button
                 onClick={() => {
                   if (data) {
-                    console.log(`[${title}] State:`, data);
+                    logger.info(`[${title}] State:`, data);
                   }
                   if (metrics) {
-                    console.log(`[${title}] Metrics:`, metrics);
+                    logger.info(`[${title}] Metrics:`, metrics);
                   }
                 }}
                 className="text-xs px-3 py-1.5 bg-purple-700 hover:bg-purple-600 rounded transition-colors"

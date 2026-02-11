@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '../utils/logger';
 import type { ShowStackModule, ModuleFeatures } from '../../../shared/types/license.types';
 
 /**
@@ -34,7 +35,7 @@ export function useModuleAccess(module: ShowStackModule) {
       setHasAccess(access);
       setFeatures(moduleFeatures);
     } catch (error) {
-      console.error('Failed to check module access:', error);
+      logger.error('Failed to check module access:', error);
       setHasAccess(false);
       setFeatures(null);
     } finally {

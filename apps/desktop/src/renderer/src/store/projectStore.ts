@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { logger } from '../utils/logger';
 
 export interface ShowDates {
   prep_start?: string;
@@ -92,7 +93,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
 
   loadProjects: async () => {
     if (!hasAPI()) {
-      console.warn('API not available, using empty projects');
+      logger.warn('API not available, using empty projects');
       return;
     }
 
@@ -101,7 +102,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       const currentProject = await window.api.projects.getCurrent();
       set({ currentProject, projects: allProjects });
     } catch (error) {
-      console.error('Failed to load projects:', error);
+      logger.error('Failed to load projects:', error);
     }
   },
 
@@ -112,7 +113,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     enabledModules?: string[],
   ) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       throw new Error('API not available');
     }
 
@@ -124,14 +125,14 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       }));
       return project;
     } catch (error) {
-      console.error('Failed to create project:', error);
+      logger.error('Failed to create project:', error);
       throw error;
     }
   },
 
   updateProject: async (projectId: string, updates: Partial<Project>) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       throw new Error('API not available');
     }
 
@@ -148,14 +149,14 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
             : currentProject,
       });
     } catch (error) {
-      console.error('Failed to update project:', error);
+      logger.error('Failed to update project:', error);
       throw error;
     }
   },
 
   deleteProject: async (projectId: string) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       throw new Error('API not available');
     }
 
@@ -166,7 +167,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
         currentProject: state.currentProject?.id === projectId ? null : state.currentProject,
       }));
     } catch (error) {
-      console.error('Failed to delete project:', error);
+      logger.error('Failed to delete project:', error);
       throw error;
     }
   },

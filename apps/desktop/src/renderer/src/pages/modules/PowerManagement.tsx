@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { logger } from '../../utils/logger';
 import { useProjectStore } from '../../store/projectStore';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { RackManager } from '../../components/power/RackManager';
@@ -44,7 +45,7 @@ export function PowerManagement({ embedded = false }: PowerManagementProps) {
         setDimmerRacks(dimmers || []);
         setPdRacks(pds || []);
       } catch (error) {
-        console.error('Error loading racks:', error);
+        logger.error('Error loading racks:', error);
       }
     };
 

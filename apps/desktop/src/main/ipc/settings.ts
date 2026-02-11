@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron';
 import { windowManager } from '../services/WindowManager';
+import { logger } from '../utils/logger';
 
 export function registerSettingsHandlers() {
   /**
@@ -23,7 +24,7 @@ export function registerSettingsHandlers() {
 
       return { success: true };
     } catch (error) {
-      console.error('Failed to toggle developer mode:', {
+      logger.error('Failed to toggle developer mode:', {
         operation: 'settings:developer-mode-changed',
         enabled,
         error: error instanceof Error ? error.message : error,
@@ -53,7 +54,7 @@ export function registerSettingsHandlers() {
 
       return { success: false };
     } catch (error) {
-      console.error('Failed to toggle devtools:', {
+      logger.error('Failed to toggle devtools:', {
         operation: 'settings:toggle-devtools',
         error: error instanceof Error ? error.message : error,
       });

@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import { PageRenderer } from '../shop-order/PageRenderer';
 import type { PageLayoutTemplate, PrintSection, PrepProject } from '../../types/shopOrder';
 import type { PrepTemplateData } from '../../utils/paperwork/dataFieldMapper';
+import { logger } from '../../utils/logger';
 
 interface HeaderFromTemplateProps {
   templateId: string;
@@ -60,7 +61,7 @@ export function HeaderFromTemplate({
           elements: parsedElements,
         });
       } catch (err) {
-        console.error('Error loading header template:', err);
+        logger.error('Error loading header template:', err);
         setError(err instanceof Error ? err.message : 'Failed to load template');
       } finally {
         setLoading(false);

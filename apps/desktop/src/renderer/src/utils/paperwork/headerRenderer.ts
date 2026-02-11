@@ -5,6 +5,7 @@
  * Loads templates from the database and converts layout elements to positioned HTML.
  */
 
+import { logger } from '../logger';
 import type { PaperworkTemplate } from '../../types/paperworkTemplate';
 
 interface LayoutElement {
@@ -51,7 +52,7 @@ export async function loadHeaderTemplate(templateId: string): Promise<{
 } | null> {
   try {
     if (!window.api?.prep?.layoutTemplates) {
-      console.error('Prep layout templates API not available');
+      logger.error('Prep layout templates API not available');
       return null;
     }
 
@@ -59,7 +60,7 @@ export async function loadHeaderTemplate(templateId: string): Promise<{
     const template = await window.api.prep.layoutTemplates.getById(templateId);
 
     if (!template) {
-      console.error('Header template not found:', templateId);
+      logger.error('Header template not found:', templateId);
       return null;
     }
 
@@ -71,7 +72,7 @@ export async function loadHeaderTemplate(templateId: string): Promise<{
       elements: (elements || []) as LayoutElement[],
     };
   } catch (error) {
-    console.error('Error loading header template:', error);
+    logger.error('Error loading header template:', error);
     return null;
   }
 }
@@ -138,7 +139,7 @@ function calculateElementStyle(element: LayoutElement, template: LayoutTemplate)
   try {
     styleObj = JSON.parse(element.style);
   } catch (e) {
-    console.warn('Failed to parse element style:', element.id);
+    logger.warn('Failed to parse element style:', element.id);
   }
 
   return `
@@ -195,7 +196,7 @@ function renderElement(element: LayoutElement, template: LayoutTemplate, data: H
       }
     }
   } catch (e) {
-    console.warn('Failed to parse element config:', element.id);
+    logger.warn('Failed to parse element config:', element.id);
   }
 
   return `<div style="${style}">${content}</div>`;
@@ -362,7 +363,7 @@ export async function renderHeaderTemplate(
           }
         }
       } catch (e) {
-        console.warn('Failed to parse element config:', element.id);
+        logger.warn('Failed to parse element config:', element.id);
       }
 
       return `<div style="${style}">${content}</div>`;

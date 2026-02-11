@@ -8,6 +8,7 @@ import {
   seedSystemPhaseTemplates,
 } from '../database/queries/phaseTemplates';
 import { errorHandler } from '../errors';
+import { logger } from '../utils/logger';
 import { DatabaseError, ValidationError } from '../errors';
 
 export function registerPhaseTemplateHandlers() {
@@ -19,7 +20,7 @@ export function registerPhaseTemplateHandlers() {
         'phaseTemplates:getAll',
       );
     } catch (error) {
-      console.error('Failed to get phase templates:', {
+      logger.error('Failed to get phase templates:', {
         operation: 'phaseTemplates:getAll',
         projectId,
         error: error instanceof Error ? error.message : error,
@@ -40,7 +41,7 @@ export function registerPhaseTemplateHandlers() {
         'phaseTemplates:getById',
       );
     } catch (error) {
-      console.error('Failed to get phase template:', {
+      logger.error('Failed to get phase template:', {
         operation: 'phaseTemplates:getById',
         id,
         error: error instanceof Error ? error.message : error,
@@ -66,7 +67,7 @@ export function registerPhaseTemplateHandlers() {
         'phaseTemplates:create',
       );
     } catch (error) {
-      console.error('Failed to create phase template:', {
+      logger.error('Failed to create phase template:', {
         operation: 'phaseTemplates:create',
         template,
         error: error instanceof Error ? error.message : error,
@@ -95,7 +96,7 @@ export function registerPhaseTemplateHandlers() {
         'phaseTemplates:update',
       );
     } catch (error) {
-      console.error('Failed to update phase template:', {
+      logger.error('Failed to update phase template:', {
         operation: 'phaseTemplates:update',
         id,
         updates,
@@ -120,7 +121,7 @@ export function registerPhaseTemplateHandlers() {
         'phaseTemplates:delete',
       );
     } catch (error) {
-      console.error('Failed to delete phase template:', {
+      logger.error('Failed to delete phase template:', {
         operation: 'phaseTemplates:delete',
         id,
         error: error instanceof Error ? error.message : error,
@@ -141,7 +142,7 @@ export function registerPhaseTemplateHandlers() {
         'phaseTemplates:seed',
       );
     } catch (error) {
-      console.error('Failed to seed system phase templates:', {
+      logger.error('Failed to seed system phase templates:', {
         operation: 'phaseTemplates:seed',
         projectId,
         error: error instanceof Error ? error.message : error,
@@ -154,5 +155,5 @@ export function registerPhaseTemplateHandlers() {
     }
   });
 
-  console.log('✅ Phase Template IPC handlers registered');
+  logger.info('✅ Phase Template IPC handlers registered');
 }

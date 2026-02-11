@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { logger } from '../../utils/logger';
 import { VirtualDataGrid } from '../../components/fixture/VirtualDataGrid';
 import { Toolbar } from '../../components/fixture/Toolbar';
 import { FilterBar } from '../../components/fixture/FilterBar';
@@ -192,7 +193,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
       setDimmerRacks(dimmer);
       setPDRacks(pd);
     } catch (error) {
-      console.error('Failed to load power racks:', error);
+      logger.error('Failed to load power racks:', error);
     }
   };
 
@@ -214,7 +215,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
         }
       }
     } catch (error) {
-      console.error('Failed to reload project data:', error);
+      logger.error('Failed to reload project data:', error);
     }
   };
 
@@ -295,7 +296,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
           }
         }
       } catch (error) {
-        console.error('Failed to load project and preferences:', error);
+        logger.error('Failed to load project and preferences:', error);
       }
     };
 
@@ -368,12 +369,12 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
       // Apply all updates
       if (fixturesToUpdate.length > 0) {
-        console.log(`[Auto-link] Linking ${fixturesToUpdate.length} fixtures to racks`);
+        logger.info(`[Auto-link] Linking ${fixturesToUpdate.length} fixtures to racks`);
         for (const { id, updates } of fixturesToUpdate) {
           try {
             await updateFixture(id, updates);
           } catch (error) {
-            console.error(`[Auto-link] Failed to update ${id}:`, error);
+            logger.error(`[Auto-link] Failed to update ${id}:`, error);
           }
         }
 
@@ -409,7 +410,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
       try {
         await window.api.preferences.set(currentProjectId, 'columnVisibility', columnVisibility);
       } catch (error) {
-        console.error('Failed to save column visibility:', error);
+        logger.error('Failed to save column visibility:', error);
       }
     };
     savePreference();
@@ -422,7 +423,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
       try {
         await window.api.preferences.set(currentProjectId, 'columnOrder', columnOrder);
       } catch (error) {
-        console.error('Failed to save column order:', error);
+        logger.error('Failed to save column order:', error);
       }
     };
     savePreference();
@@ -435,7 +436,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
       try {
         await window.api.preferences.set(currentProjectId, 'columnWidths', columnWidths);
       } catch (error) {
-        console.error('Failed to save column widths:', error);
+        logger.error('Failed to save column widths:', error);
       }
     };
     savePreference();
@@ -452,7 +453,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
           infrastructureColumnVisibility,
         );
       } catch (error) {
-        console.error('Failed to save infrastructure column visibility:', error);
+        logger.error('Failed to save infrastructure column visibility:', error);
       }
     };
     savePreference();
@@ -569,7 +570,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     try {
       await window.api.preferences.set(currentProjectId, 'userColumnDefinitions', definitions);
     } catch (error) {
-      console.error('Failed to save user column definitions:', error);
+      logger.error('Failed to save user column definitions:', error);
     }
   };
 

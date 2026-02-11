@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { logger } from '../../utils/logger';
 import { Activity, AlertCircle } from 'lucide-react';
 
 export interface PortUsageStats {
@@ -38,7 +39,7 @@ export function PortUsageIndicator({
       const portStats = await window.api.infrastructure.getPortUsageStats(equipmentId);
       setStats(portStats);
     } catch (error) {
-      console.error('Error loading port usage stats:', error);
+      logger.error('Error loading port usage stats:', error);
     } finally {
       setLoading(false);
     }

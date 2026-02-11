@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '../utils/logger';
 import type {
   UserLicense,
   LicenseValidation,
@@ -46,7 +47,7 @@ export function useUser() {
       const data = await window.api.license.getCurrent();
       setLicense(data);
     } catch (error) {
-      console.error('Failed to load license:', error);
+      logger.error('Failed to load license:', error);
     } finally {
       setLoading(false);
     }
@@ -57,7 +58,7 @@ export function useUser() {
       const data = await window.api.license.getStatus();
       setStatus(data);
     } catch (error) {
-      console.error('Failed to load license status:', error);
+      logger.error('Failed to load license status:', error);
     }
   }
 
@@ -68,7 +69,7 @@ export function useUser() {
       await loadStatus();
       return data;
     } catch (error) {
-      console.error('Failed to activate license:', error);
+      logger.error('Failed to activate license:', error);
       throw error;
     }
   }

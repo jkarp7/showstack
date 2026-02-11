@@ -1,10 +1,11 @@
 import { Shield, Download, Trash2, Save } from 'lucide-react';
+import { logger } from '../../utils/logger';
 
 export function DataPrivacy() {
-  const handleExportData = () => console.log('Exporting user data...');
+  const handleExportData = () => logger.info('Exporting user data...');
   const handleDeleteData = () => {
     if (confirm('Delete all user data? This cannot be undone.')) {
-      console.log('Deleting user data...');
+      logger.info('Deleting user data...');
     }
   };
 
