@@ -51,10 +51,14 @@ if (!gotTheLock) {
 }
 
 app.on('ready', async () => {
-  // Initialize database
-  await initDatabase();
+  try {
+    // Initialize database
+    await initDatabase();
+  } catch (err) {
+    logger.error('Database initialization failed', err instanceof Error ? err : undefined);
+  }
 
-  // Register IPC handlers
+  // Register IPC handlers (always, even if DB init fails)
   registerFixtureHandlers();
   registerProjectHandlers();
   registerDialogHandlers();
@@ -86,7 +90,7 @@ app.on('ready', async () => {
   backgroundVerifier.start();
 
   // Initial license check (non-blocking)
-  licenseService.checkAndVerifyIfNeeded().catch((err) => {
+  licenseService.checkAndVerifyIfNeeded().catch(() => {
     logger.info('Initial license verification skipped (offline mode)');
   });
 
