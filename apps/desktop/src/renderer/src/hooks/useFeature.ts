@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { logger } from '../../utils/logger';
+import { logger } from '../utils/logger';
 import type { ShowStackModule } from '../../../shared/types/license.types';
 
 /**

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { logger } from '../../utils/logger';
+import { logger } from '../utils/logger';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUIStore } from '../store/uiStore';
 

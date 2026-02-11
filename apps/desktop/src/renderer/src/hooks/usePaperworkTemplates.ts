@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { logger } from '../../utils/logger';
+import { logger } from '../utils/logger';
 import type { PaperworkTemplate, PaperworkTemplateInput } from '../types/paperworkTemplate';
 import type { ReportType } from '../types/paperwork';
 
