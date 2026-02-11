@@ -191,7 +191,7 @@ export function registerFileHandlers(): void {
         return await readImageAsDataUrl(imagePath);
       } catch (error) {
         // Log full error details securely (console only, not sent to renderer)
-        logger.error('Error reading image file:', sanitizeErrorForLogging(error));
+        logger.error(`Error reading image file: ${sanitizeErrorForLogging(error)}`);
 
         // Sanitize error message before sending to renderer (prevents path disclosure)
         const sanitizedMessage = sanitizeError(error);

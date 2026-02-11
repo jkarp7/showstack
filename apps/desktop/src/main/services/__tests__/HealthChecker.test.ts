@@ -46,7 +46,12 @@ vi.mock('../../database/core/DatabaseManager', () => ({
 
 // Mock config
 vi.mock('../../config/env', () => ({
-  getConfig: vi.fn(() => ({ POWERSYNC_URL: '' })),
+  getConfig: vi.fn(() => ({
+    app: { nodeEnv: 'development', debugDatabase: false, debugPowerSync: false },
+    supabase: { url: undefined, anonKey: undefined, serviceRoleKey: undefined },
+    powersync: { url: '' },
+    isConfigured: false,
+  })),
 }));
 
 // Mock sync
@@ -58,6 +63,17 @@ import { HealthCheckerService } from '../HealthChecker';
 import * as fs from 'fs/promises';
 import { getConfig } from '../../config/env';
 import { getPowerSyncStatus } from '../../ipc/sync';
+import type { Config } from '../../config/env';
+
+// Helper to create a mock config with powersync URL
+function mockConfig(powersyncUrl: string): Config {
+  return {
+    app: { nodeEnv: 'development', debugDatabase: false, debugPowerSync: false },
+    supabase: { url: undefined, anonKey: undefined, serviceRoleKey: undefined },
+    powersync: { url: powersyncUrl || undefined },
+    isConfigured: false,
+  };
+}
 
 describe('HealthChecker', () => {
   let checker: HealthCheckerService;
@@ -74,8 +90,6 @@ describe('HealthChecker', () => {
       prepare: () => ({ get: () => ({ ok: 1 }) }),
     });
     vi.mocked(fs.access).mockResolvedValue(undefined);
-    vi.mocked(fs.writeFile).mockResolvedValue(undefined);
-    vi.mocked(fs.unlink).mockResolvedValue(undefined);
   });
 
   describe('check()', () => {
@@ -182,7 +196,7 @@ describe('HealthChecker', () => {
 
   describe('sync check', () => {
     it('should be healthy when sync is not configured', async () => {
-      vi.mocked(getConfig).mockReturnValue({ POWERSYNC_URL: '' } as ReturnType<typeof getConfig>);
+      vi.mocked(getConfig).mockReturnValue(mockConfig(''));
 
       const report = await checker.check();
 
@@ -191,9 +205,7 @@ describe('HealthChecker', () => {
     });
 
     it('should be healthy when sync is connected', async () => {
-      vi.mocked(getConfig).mockReturnValue({
-        POWERSYNC_URL: 'https://sync.example.com',
-      } as ReturnType<typeof getConfig>);
+      vi.mocked(getConfig).mockReturnValue(mockConfig('https://sync.example.com'));
       vi.mocked(getPowerSyncStatus).mockReturnValue({
         state: 'connected',
         connected: true,
@@ -202,7 +214,7 @@ describe('HealthChecker', () => {
         lastSyncedAt: new Date(),
         error: null,
         isAuthenticated: true,
-      } as any);
+      } as ReturnType<typeof getPowerSyncStatus>);
 
       const report = await checker.check();
 
@@ -211,9 +223,7 @@ describe('HealthChecker', () => {
     });
 
     it('should be degraded when sync has an error', async () => {
-      vi.mocked(getConfig).mockReturnValue({
-        POWERSYNC_URL: 'https://sync.example.com',
-      } as ReturnType<typeof getConfig>);
+      vi.mocked(getConfig).mockReturnValue(mockConfig('https://sync.example.com'));
       vi.mocked(getPowerSyncStatus).mockReturnValue({
         state: 'error',
         connected: false,
@@ -222,7 +232,7 @@ describe('HealthChecker', () => {
         lastSyncedAt: null,
         error: 'Connection refused',
         isAuthenticated: false,
-      } as any);
+      } as ReturnType<typeof getPowerSyncStatus>);
 
       const report = await checker.check();
 
@@ -230,9 +240,7 @@ describe('HealthChecker', () => {
     });
 
     it('should be degraded when sync service is not initialized', async () => {
-      vi.mocked(getConfig).mockReturnValue({
-        POWERSYNC_URL: 'https://sync.example.com',
-      } as ReturnType<typeof getConfig>);
+      vi.mocked(getConfig).mockReturnValue(mockConfig('https://sync.example.com'));
       vi.mocked(getPowerSyncStatus).mockReturnValue(null);
 
       const report = await checker.check();

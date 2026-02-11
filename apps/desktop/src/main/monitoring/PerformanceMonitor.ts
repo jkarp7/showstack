@@ -53,9 +53,9 @@ export class PerformanceMonitor {
 
     // Warn if memory usage is high (>1GB heap)
     if (usage.heapUsed > 1024 * 1024 * 1024) {
-      logger.warn('⚠️ High memory usage:', metrics.heap_used_mb, 'MB');
+      logger.warn(`High memory usage: ${metrics.heap_used_mb}MB`);
     } else {
-      logger.debug('Memory usage:', metrics.heap_used_mb, 'MB heap');
+      logger.debug(`Memory usage: ${metrics.heap_used_mb}MB heap`);
     }
 
     // TODO: Send to PostHog when implemented

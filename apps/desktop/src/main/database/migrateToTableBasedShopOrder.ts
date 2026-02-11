@@ -184,7 +184,7 @@ export function migrateAllProjectsToTableFormat(db: Database): {
         projectId: project.id,
         error: result.errors.join(', '),
       });
-      logger.error(`✗ Failed to migrate project ${project.id}:`, result.errors);
+      logger.error(`Failed to migrate project ${project.id}: ${result.errors.join(', ')}`);
     }
   }
 

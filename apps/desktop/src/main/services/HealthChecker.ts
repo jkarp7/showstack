@@ -9,7 +9,6 @@
  */
 
 import * as fs from 'fs/promises';
-import * as path from 'path';
 import { app } from 'electron';
 import { logger } from '../utils/logger';
 
@@ -34,6 +33,11 @@ export interface HealthReport {
 
 const MEMORY_WARN_MB = 512;
 const MEMORY_CRITICAL_MB = 1024;
+
+// Cached dynamic imports to avoid repeated import overhead
+let _databaseManager: typeof import('../database/core/DatabaseManager') | null = null;
+let _envModule: typeof import('../config/env') | null = null;
+let _syncModule: typeof import('../ipc/sync') | null = null;
 
 class HealthCheckerService {
   /**
@@ -72,8 +76,10 @@ class HealthCheckerService {
    */
   private async checkDatabase(): Promise<CheckResult> {
     try {
-      // Dynamic import to avoid circular dependencies
-      const { databaseManager } = await import('../database/core/DatabaseManager');
+      if (!_databaseManager) {
+        _databaseManager = await import('../database/core/DatabaseManager');
+      }
+      const { databaseManager } = _databaseManager;
 
       const appDb = databaseManager.getAppDatabase();
       const appResult = appDb.prepare('SELECT 1 AS ok').get() as { ok: number } | undefined;
@@ -113,12 +119,8 @@ class HealthCheckerService {
   private async checkFilesystem(): Promise<CheckResult> {
     try {
       const userDataPath = app.getPath('userData');
+      // Verify read+write permissions without creating temp files
       await fs.access(userDataPath, fs.constants.R_OK | fs.constants.W_OK);
-
-      // Check available space by writing and removing a temp file
-      const testFile = path.join(userDataPath, '.health-check-test');
-      await fs.writeFile(testFile, 'ok');
-      await fs.unlink(testFile);
 
       return {
         status: 'healthy',
@@ -177,19 +179,22 @@ class HealthCheckerService {
    */
   private async checkSync(): Promise<CheckResult> {
     try {
-      const { getConfig } = await import('../config/env');
-      const config = getConfig();
+      if (!_envModule) {
+        _envModule = await import('../config/env');
+      }
+      const config = _envModule.getConfig();
 
-      if (!config.POWERSYNC_URL) {
+      if (!config.powersync.url) {
         return {
           status: 'healthy',
           message: 'Cloud sync not configured (offline mode)',
         };
       }
 
-      // Try to get sync status from the PowerSync service
-      const { getPowerSyncStatus } = await import('../ipc/sync');
-      const status = await getPowerSyncStatus();
+      if (!_syncModule) {
+        _syncModule = await import('../ipc/sync');
+      }
+      const status = await _syncModule.getPowerSyncStatus();
 
       if (!status) {
         return {

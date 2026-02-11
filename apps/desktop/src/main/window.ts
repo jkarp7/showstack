@@ -33,13 +33,13 @@ export function createWindow(routePath: string = '/'): BrowserWindow {
     // In development, load from Vite dev server with hash route
     const devServerUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173';
     const fullUrl = routePath !== '/' ? `${devServerUrl}/#${routePath}` : devServerUrl;
-    logger.info('Loading from dev server:', fullUrl);
+    logger.info(`Loading from dev server: ${fullUrl}`);
     window.loadURL(fullUrl);
     window.webContents.openDevTools();
   } else {
     // In production, load from built files with hash route
     const indexPath = join(__dirname, '../renderer/index.html');
-    logger.info('Loading from file:', indexPath, 'with hash:', routePath);
+    logger.info(`Loading from file: ${indexPath} with hash: ${routePath}`);
     window.loadFile(indexPath, { hash: routePath });
   }
 

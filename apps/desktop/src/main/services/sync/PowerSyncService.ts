@@ -127,7 +127,9 @@ export class PowerSyncService {
         const config = getConfig();
 
         if (config.app.debugPowerSync) {
-          logger.info('[PowerSyncService] Status changed:', status);
+          logger.info(
+            `[PowerSyncService] Status changed: ${status.connected ? 'connected' : 'disconnected'}`,
+          );
         }
 
         // Update last synced time when sync completes

@@ -79,9 +79,9 @@ export function loadEnv(): void {
   if (envPath) {
     const result = dotenvConfig({ path: envPath });
     if (result.error) {
-      logger.warn('[ENV] Failed to load .env file:', result.error.message);
+      logger.warn(`[ENV] Failed to load .env file: ${result.error.message}`);
     } else {
-      logger.info('[ENV] Loaded environment from:', envPath);
+      logger.info(`[ENV] Loaded environment from: ${envPath}`);
     }
   } else {
     logger.info('[ENV] No .env file found, using process environment only');

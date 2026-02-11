@@ -18,7 +18,7 @@ export enum LogLevel {
 }
 
 interface LogContext {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 class Logger {

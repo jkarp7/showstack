@@ -4,12 +4,38 @@
  * Initializes Sentry in the Electron main process for crash reporting
  * and error tracking. Configured via SENTRY_DSN environment variable.
  *
- * Uses lazy loading to avoid crashing the app if @sentry/electron
+ * Uses lazy require() to avoid crashing the app if @sentry/electron
  * fails to load (e.g., in dev mode without proper native module support).
  */
 
+interface SentryBreadcrumb {
+  data?: Record<string, unknown>;
+}
+
+interface SentryException {
+  stacktrace?: {
+    frames?: Array<{ abs_path?: string }>;
+  };
+}
+
+interface SentryEvent {
+  breadcrumbs?: SentryBreadcrumb[];
+  exception?: { values?: SentryException[] };
+  contexts?: Record<string, unknown>;
+}
+
+interface SentryScope {
+  setExtras(extras: Record<string, unknown>): void;
+}
+
+interface SentryModule {
+  init(options: Record<string, unknown>): void;
+  captureException(error: Error): void;
+  withScope(callback: (scope: SentryScope) => void): void;
+}
+
 let initialized = false;
-let SentryModule: typeof import('@sentry/electron/main') | null = null;
+let sentryModule: SentryModule | null = null;
 
 /**
  * Initialize Sentry in the main process.
@@ -28,30 +54,52 @@ export function initSentry(): void {
   }
 
   try {
-    SentryModule = require('@sentry/electron/main');
+    sentryModule = require('@sentry/electron/main') as SentryModule;
     const { app } = require('electron');
 
-    SentryModule!.init({
+    sentryModule.init({
       dsn,
       environment: process.env.NODE_ENV || 'development',
       release: `showstack@${app.getVersion()}`,
-      beforeSend(event: any) {
+      beforeSend(event: SentryEvent) {
+        // Filter URL data from breadcrumbs
         if (event.breadcrumbs) {
-          event.breadcrumbs = event.breadcrumbs.map((breadcrumb: any) => {
+          event.breadcrumbs = event.breadcrumbs.map((breadcrumb) => {
             if (breadcrumb.data?.url) {
               breadcrumb.data.url = '[filtered]';
             }
             return breadcrumb;
           });
         }
+
+        // Filter absolute paths from stack traces
+        if (event.exception?.values) {
+          for (const ex of event.exception.values) {
+            if (ex.stacktrace?.frames) {
+              for (const frame of ex.stacktrace.frames) {
+                if (frame.abs_path) {
+                  frame.abs_path = undefined;
+                }
+              }
+            }
+          }
+        }
+
+        // Remove OS/device context to avoid leaking system info
+        if (event.contexts) {
+          delete event.contexts.os;
+          delete event.contexts.device;
+        }
+
         return event;
       },
       tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 0,
     });
 
     initialized = true;
-  } catch {
-    // Sentry failed to load — continue without error tracking
+  } catch (error) {
+    // Log failure so developers can diagnose, but don't crash the app
+    console.error('[Sentry] Failed to initialize:', error instanceof Error ? error.message : error);
   }
 }
 
@@ -59,15 +107,15 @@ export function initSentry(): void {
  * Capture an error in Sentry with optional context
  */
 export function captureError(error: Error, context?: Record<string, unknown>): void {
-  if (!initialized || !SentryModule) return;
+  if (!initialized || !sentryModule) return;
 
   if (context) {
-    SentryModule.withScope((scope) => {
+    sentryModule.withScope((scope) => {
       scope.setExtras(context);
-      SentryModule!.captureException(error);
+      sentryModule!.captureException(error);
     });
   } else {
-    SentryModule.captureException(error);
+    sentryModule.captureException(error);
   }
 }
 

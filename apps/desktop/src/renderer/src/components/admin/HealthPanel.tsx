@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { logger } from '../../utils/logger';
 import {
   Activity,
@@ -128,6 +128,11 @@ export function HealthPanel() {
       setIsChecking(false);
     }
   }, []);
+
+  // Auto-run health check on mount
+  useEffect(() => {
+    runHealthCheck();
+  }, [runHealthCheck]);
 
   return (
     <div className="space-y-6">

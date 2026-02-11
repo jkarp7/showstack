@@ -64,7 +64,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       this.notifySessionListeners(session);
 
       if (config.app.debugPowerSync) {
-        logger.info('[SupabaseConnector] Auth state changed:', event);
+        logger.info(`[SupabaseConnector] Auth state changed: ${event}`);
       }
     });
 

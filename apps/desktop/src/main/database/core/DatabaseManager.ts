@@ -479,7 +479,7 @@ export class DatabaseManager {
    */
   configureWalCheckpoint(config: Partial<WalCheckpointConfig>): void {
     this.walConfig = { ...this.walConfig, ...config };
-    logger.info('WAL checkpoint configuration updated', this.walConfig);
+    logger.info('WAL checkpoint configuration updated', { ...this.walConfig });
   }
 
   /**
