@@ -5,6 +5,7 @@
  * layout templates in the database.
  */
 
+import { logger } from '../logger';
 import {
   loadLabelDesignsFromLocalStorage,
   convertLabelDesignToTemplate,
@@ -39,11 +40,11 @@ export async function migrateLabelDesigns(projectId: string): Promise<MigrationR
     const designs = loadLabelDesignsFromLocalStorage(projectId);
 
     if (designs.length === 0) {
-      console.log('No label designs to migrate');
+      logger.info('No label designs to migrate');
       return result;
     }
 
-    console.log(`Migrating ${designs.length} label designs...`);
+    logger.info(`Migrating ${designs.length} label designs...`);
 
     // Convert and save each design
     for (const design of designs) {
@@ -70,28 +71,28 @@ export async function migrateLabelDesigns(projectId: string): Promise<MigrationR
         result.migratedCount++;
         result.templateIds.push(templateId);
 
-        console.log(`✓ Migrated: ${design.name} (${templateId})`);
+        logger.info(`✓ Migrated: ${design.name} (${templateId})`);
       } catch (error) {
         result.failedCount++;
         result.errors.push(`Failed to migrate "${design.name}": ${error}`);
         result.success = false;
-        console.error(`✗ Failed to migrate "${design.name}":`, error);
+        logger.error(`✗ Failed to migrate "${design.name}":`, error);
       }
     }
 
     // Clear localStorage after successful migration
     if (result.migratedCount > 0 && result.failedCount === 0) {
       clearLabelDesignsFromLocalStorage(projectId);
-      console.log(`✅ Migration complete. Migrated ${result.migratedCount} designs.`);
+      logger.info(`✅ Migration complete. Migrated ${result.migratedCount} designs.`);
     } else if (result.failedCount > 0) {
-      console.warn(
+      logger.warn(
         `⚠️ Migration completed with errors: ${result.migratedCount} succeeded, ${result.failedCount} failed.`,
       );
     }
   } catch (error) {
     result.success = false;
     result.errors.push(`Migration failed: ${error}`);
-    console.error('Migration failed:', error);
+    logger.error('Migration failed:', error);
   }
 
   return result;
@@ -105,7 +106,7 @@ export function needsMigration(projectId: string): boolean {
     const designs = loadLabelDesignsFromLocalStorage(projectId);
     return designs.length > 0;
   } catch (error) {
-    console.error('Error checking migration status:', error);
+    logger.error('Error checking migration status:', error);
     return false;
   }
 }
@@ -166,7 +167,7 @@ export async function promptAndMigrate(projectId: string): Promise<MigrationResu
   );
 
   if (!confirmed) {
-    console.log('Migration cancelled by user');
+    logger.info('Migration cancelled by user');
     return null;
   }
 

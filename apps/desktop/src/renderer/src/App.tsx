@@ -25,6 +25,7 @@ import { useUIStore } from './store/uiStore';
 import { useAuthStore } from './store/authStore';
 import { telemetry } from './services/telemetry';
 import { initializeGlobalErrorHandlers } from './services/globalErrorHandler';
+import { logger } from './utils/logger';
 import { useMenuHandlers } from './hooks/useMenuHandlers';
 import { useProjectMenuHandlers } from './hooks/useProjectMenuHandlers';
 
@@ -196,7 +197,7 @@ export default function App() {
       try {
         await useAuthStore.getState().initializeSync();
       } catch (error) {
-        console.error('[App] Failed to initialize sync:', error);
+        logger.error('[App] Failed to initialize sync:', error);
       }
     };
     initSync();

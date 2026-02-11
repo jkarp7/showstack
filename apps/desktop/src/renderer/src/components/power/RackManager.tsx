@@ -11,6 +11,7 @@ import {
   BUILDING_SERVICE_OPTIONS,
 } from '../../types/power';
 import { ModuleConfigDialog } from './ModuleConfigDialog';
+import { logger } from '../../utils/logger';
 
 interface RackManagerProps {
   projectId?: string;
@@ -46,7 +47,7 @@ export function RackManager({ projectId = 'default-project', onRacksChange }: Ra
       setDimmerRacks(dimmer);
       setPDRacks(pd);
     } catch (error) {
-      console.error('Error loading racks:', error);
+      logger.error('Error loading racks:', error);
     }
   };
 
@@ -72,7 +73,7 @@ export function RackManager({ projectId = 'default-project', onRacksChange }: Ra
       await loadRacks();
       onRacksChange?.();
     } catch (error) {
-      console.error('Error deleting rack:', error);
+      logger.error('Error deleting rack:', error);
       alert('Failed to delete rack');
     }
   };
@@ -318,7 +319,7 @@ function RackDialog({ type, rack, projectId, onClose, onSave }: RackDialogProps)
       }
       onSave();
     } catch (error) {
-      console.error('Error saving rack:', error);
+      logger.error('Error saving rack:', error);
       alert('Failed to save rack');
     } finally {
       setIsSaving(false);

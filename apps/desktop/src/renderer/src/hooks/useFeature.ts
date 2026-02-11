@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '../../utils/logger';
 import type { ShowStackModule } from '../../../shared/types/license.types';
 
 /**
@@ -36,7 +37,7 @@ export function useFeature(module: ShowStackModule, feature: string) {
       const canUse = await window.api.license.canUseFeature(module, feature);
       setEnabled(canUse);
     } catch (error) {
-      console.error('Failed to check feature:', error);
+      logger.error('Failed to check feature:', error);
       setEnabled(false);
     } finally {
       setLoading(false);

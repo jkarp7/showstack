@@ -5,6 +5,7 @@
  * for the unified visual editor system.
  */
 
+import { logger } from '../logger';
 import {
   calculateLabelGrid,
   calculateCellDimensions,
@@ -219,7 +220,7 @@ export function loadLabelDesignsFromLocalStorage(projectId: string): CustomLabel
     const designs = JSON.parse(stored) as CustomLabelDesign[];
     return designs;
   } catch (error) {
-    console.error('Failed to load label designs from localStorage:', error);
+    logger.error('Failed to load label designs from localStorage:', error);
     return [];
   }
 }
@@ -247,10 +248,10 @@ export function clearLabelDesignsFromLocalStorage(projectId: string): void {
       // Clear original
       localStorage.removeItem(`showstack_labelDesigns_${projectId}`);
 
-      console.log(`Migrated ${designs.length} label designs. Backup created at: ${backupKey}`);
+      logger.info(`Migrated ${designs.length} label designs. Backup created at: ${backupKey}`);
     }
   } catch (error) {
-    console.error('Failed to clear label designs from localStorage:', error);
+    logger.error('Failed to clear label designs from localStorage:', error);
   }
 }
 

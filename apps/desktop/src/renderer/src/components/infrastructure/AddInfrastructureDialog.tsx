@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { InfrastructureEquipment, PortAssignment } from '../../types/infrastructure';
 import { PortAssignmentEditor } from './PortAssignmentEditor';
+import { logger } from '../../utils/logger';
 
 interface AddInfrastructureDialogProps {
   isOpen: boolean;
@@ -72,7 +73,7 @@ export function AddInfrastructureDialog({ isOpen, onClose, onAdd }: AddInfrastru
       setPortAssignments([]);
       onClose();
     } catch (error) {
-      console.error('Failed to add equipment:', error);
+      logger.error('Failed to add equipment:', error);
       alert('Failed to add equipment. Please try again.');
     }
   };

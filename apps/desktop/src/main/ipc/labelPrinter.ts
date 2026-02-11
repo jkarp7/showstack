@@ -11,6 +11,7 @@ import puppeteer from 'puppeteer';
 import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { renderLabelSheet, calculatePageCount } from '../utils/labelSheetRenderer';
+import { logger } from '../utils/logger';
 import {
   getLayoutTemplateById,
   getLayoutElementsByTemplateId,
@@ -28,7 +29,7 @@ async function printLabelBatch(
   colorMode?: 'color' | 'bw', // Optional color mode
 ): Promise<string> {
   try {
-    console.log(`📄 Batch label print requested:`, {
+    logger.info(`📄 Batch label print requested:`, {
       templateId,
       labelCount: labelDataArray.length,
       averyCode,
@@ -98,13 +99,13 @@ async function printLabelBatch(
         margin: { top: 0, right: 0, bottom: 0, left: 0 },
       });
 
-      console.log(`✅ Label batch PDF generated: ${pdfPath}`);
+      logger.info(`✅ Label batch PDF generated: ${pdfPath}`);
       return pdfPath;
     } finally {
       await browser.close();
     }
   } catch (error) {
-    console.error('❌ Label batch print failed:', error);
+    logger.error('❌ Label batch print failed:', error);
     throw error;
   }
 }
@@ -118,12 +119,12 @@ async function printLabelPreview(
   sampleData: any,
 ): Promise<string> {
   try {
-    console.log(`📄 Label preview requested:`, { templateId });
+    logger.info(`📄 Label preview requested:`, { templateId });
 
     // Use batch printer with single label
     return await printLabelBatch(event, templateId, [sampleData], '5160');
   } catch (error) {
-    console.error('❌ Label preview failed:', error);
+    logger.error('❌ Label preview failed:', error);
     throw error;
   }
 }
@@ -135,5 +136,5 @@ export function registerLabelPrinterHandlers(): void {
   ipcMain.handle('label-printer:batch', printLabelBatch);
   ipcMain.handle('label-printer:preview', printLabelPreview);
 
-  console.log('✅ Label Printer IPC handlers registered');
+  logger.info('✅ Label Printer IPC handlers registered');
 }

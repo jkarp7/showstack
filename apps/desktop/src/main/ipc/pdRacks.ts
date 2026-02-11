@@ -3,6 +3,7 @@ import { ipcMain } from 'electron';
 import { PDRack } from '../database/queries/pdRacks';
 import { pdRackService } from '../services/PDRackService';
 import { DatabaseError, ValidationError } from '../errors';
+import { logger } from '../utils/logger';
 import {
   CreatePDRackSchema,
   UpdatePDRackSchema,
@@ -16,7 +17,7 @@ export function registerPDRackHandlers(): void {
     try {
       return await pdRackService.getAll(projectId);
     } catch (error) {
-      console.error('Failed to get PD racks:', {
+      logger.error('Failed to get PD racks:', {
         operation: 'pdRacks:getAll',
         projectId,
         error: error instanceof Error ? error.message : error,
@@ -34,7 +35,7 @@ export function registerPDRackHandlers(): void {
     try {
       return await pdRackService.getById(id);
     } catch (error) {
-      console.error('Failed to get PD rack:', {
+      logger.error('Failed to get PD rack:', {
         operation: 'pdRacks:getById',
         id,
         error: error instanceof Error ? error.message : error,
@@ -69,7 +70,7 @@ export function registerPDRackHandlers(): void {
 
         return await pdRackService.create(rack, projectId);
       } catch (error) {
-        console.error('Failed to create PD rack:', {
+        logger.error('Failed to create PD rack:', {
           operation: 'pdRacks:create',
           rack,
           error: error instanceof Error ? error.message : error,
@@ -103,7 +104,7 @@ export function registerPDRackHandlers(): void {
 
       return await pdRackService.update(id, updates);
     } catch (error) {
-      console.error('Failed to update PD rack:', {
+      logger.error('Failed to update PD rack:', {
         operation: 'pdRacks:update',
         id,
         updates,
@@ -125,7 +126,7 @@ export function registerPDRackHandlers(): void {
     try {
       await pdRackService.delete(id);
     } catch (error) {
-      console.error('Failed to delete PD rack:', {
+      logger.error('Failed to delete PD rack:', {
         operation: 'pdRacks:delete',
         id,
         error: error instanceof Error ? error.message : error,
@@ -143,7 +144,7 @@ export function registerPDRackHandlers(): void {
     try {
       return await pdRackService.getWithUsage(projectId);
     } catch (error) {
-      console.error('Failed to get PD racks with usage:', {
+      logger.error('Failed to get PD racks with usage:', {
         operation: 'pdRacks:getWithUsage',
         projectId,
         error: error instanceof Error ? error.message : error,
@@ -156,5 +157,5 @@ export function registerPDRackHandlers(): void {
     }
   });
 
-  console.log('✅ PD Rack IPC handlers registered');
+  logger.info('✅ PD Rack IPC handlers registered');
 }

@@ -40,8 +40,8 @@
     "test:run": "vitest run",
     "test:supabase": "npx tsx scripts/test-supabase.ts",
     "test:powersync": "npx tsx scripts/test-powersync.ts",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "eslint --cache .",
+    "lint:fix": "eslint --cache . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"
@@ -94,6 +94,7 @@
   },
   "dependencies": {
     "@powersync/web": "^1.32.0",
+    "@sentry/electron": "^7.7.1",
     "@showstack/shared": "workspace:*",
     "@supabase/supabase-js": "^2.95.2",
     "@types/better-sqlite3": "^7.6.13",

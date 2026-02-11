@@ -17,6 +17,7 @@ import {
 import { infrastructureService } from '../services/InfrastructureService';
 import { errorHandler } from '../errors';
 import { DatabaseError, ValidationError } from '../errors';
+import { logger } from '../utils/logger';
 import {
   CreateInfrastructureEquipmentSchema,
   UpdateInfrastructureEquipmentSchema,
@@ -30,7 +31,7 @@ export function registerInfrastructureHandlers(): void {
     try {
       return await infrastructureService.getAll(projectId);
     } catch (error) {
-      console.error('Failed to get infrastructure:', {
+      logger.error('Failed to get infrastructure:', {
         operation: 'infrastructure:getAll',
         projectId,
         error: error instanceof Error ? error.message : error,
@@ -65,7 +66,7 @@ export function registerInfrastructureHandlers(): void {
 
         return await infrastructureService.create(equipment, projectId);
       } catch (error) {
-        console.error('Failed to create infrastructure:', {
+        logger.error('Failed to create infrastructure:', {
           operation: 'infrastructure:create',
           equipment,
           error: error instanceof Error ? error.message : error,
@@ -101,7 +102,7 @@ export function registerInfrastructureHandlers(): void {
 
         return await infrastructureService.update(id, updates);
       } catch (error) {
-        console.error('Failed to update infrastructure:', {
+        logger.error('Failed to update infrastructure:', {
           operation: 'infrastructure:update',
           id,
           updates,
@@ -124,7 +125,7 @@ export function registerInfrastructureHandlers(): void {
     try {
       await infrastructureService.delete(id);
     } catch (error) {
-      console.error('Failed to delete infrastructure:', {
+      logger.error('Failed to delete infrastructure:', {
         operation: 'infrastructure:delete',
         id,
         error: error instanceof Error ? error.message : error,
@@ -146,7 +147,7 @@ export function registerInfrastructureHandlers(): void {
           'infrastructure:deleteMultiple',
       );
     } catch (error) {
-      console.error('Failed to delete multiple infrastructure:', {
+      logger.error('Failed to delete multiple infrastructure:', {
         operation: 'infrastructure:deleteMultiple',
         count: ids.length,
         error: error instanceof Error ? error.message : error,
@@ -169,7 +170,7 @@ export function registerInfrastructureHandlers(): void {
           'infrastructure:getPortLinkages',
         );
       } catch (error) {
-        console.error('Failed to get port linkages:', {
+        logger.error('Failed to get port linkages:', {
           operation: 'infrastructure:getPortLinkages',
           equipmentId,
           projectId,
@@ -194,7 +195,7 @@ export function registerInfrastructureHandlers(): void {
           'infrastructure:getFixtureConnections',
         );
       } catch (error) {
-        console.error('Failed to get fixture connections:', {
+        logger.error('Failed to get fixture connections:', {
           operation: 'infrastructure:getFixtureConnections',
           fixtureId,
           projectId,
@@ -219,7 +220,7 @@ export function registerInfrastructureHandlers(): void {
           'infrastructure:getEquipmentConnections',
         );
       } catch (error) {
-        console.error('Failed to get equipment connections:', {
+        logger.error('Failed to get equipment connections:', {
           operation: 'infrastructure:getEquipmentConnections',
           equipmentId,
           projectId,
@@ -244,7 +245,7 @@ export function registerInfrastructureHandlers(): void {
           'infrastructure:validatePortAssignment',
         );
       } catch (error) {
-        console.error('Failed to validate port assignment:', {
+        logger.error('Failed to validate port assignment:', {
           operation: 'infrastructure:validatePortAssignment',
           equipmentId,
           portAssignment,
@@ -267,7 +268,7 @@ export function registerInfrastructureHandlers(): void {
         'infrastructure:getPortUsageStats',
       );
     } catch (error) {
-      console.error('Failed to get port usage stats:', {
+      logger.error('Failed to get port usage stats:', {
         operation: 'infrastructure:getPortUsageStats',
         equipmentId,
         error: error instanceof Error ? error.message : error,
@@ -288,7 +289,7 @@ export function registerInfrastructureHandlers(): void {
         'infrastructure:getAllPortUsageStats',
       );
     } catch (error) {
-      console.error('Failed to get all port usage stats:', {
+      logger.error('Failed to get all port usage stats:', {
         operation: 'infrastructure:getAllPortUsageStats',
         projectId,
         error: error instanceof Error ? error.message : error,
@@ -327,7 +328,7 @@ export function registerInfrastructureHandlers(): void {
         return { success: true, filePath: result.filePath };
       }, 'infrastructure:exportCSV');
     } catch (error) {
-      console.error('Failed to export infrastructure CSV:', {
+      logger.error('Failed to export infrastructure CSV:', {
         operation: 'infrastructure:exportCSV',
         projectId,
         error: error instanceof Error ? error.message : error,
@@ -352,7 +353,7 @@ export function registerInfrastructureHandlers(): void {
           return result;
         }, 'infrastructure:importCSV');
       } catch (error) {
-        console.error('Failed to import infrastructure CSV:', {
+        logger.error('Failed to import infrastructure CSV:', {
           operation: 'infrastructure:importCSV',
           projectId,
           csvFilePath,
@@ -402,7 +403,7 @@ export function registerInfrastructureHandlers(): void {
         return { success: true, headers };
       }, 'infrastructure:readCSVHeaders');
     } catch (error) {
-      console.error('Failed to read CSV headers:', {
+      logger.error('Failed to read CSV headers:', {
         operation: 'infrastructure:readCSVHeaders',
         filePath,
         error: error instanceof Error ? error.message : error,
@@ -432,7 +433,7 @@ export function registerInfrastructureHandlers(): void {
 
       return { success: true, filePath: result.filePaths[0] };
     } catch (error) {
-      console.error('Failed to show import dialog:', {
+      logger.error('Failed to show import dialog:', {
         operation: 'infrastructure:showImportDialog',
         error: error instanceof Error ? error.message : error,
       });
@@ -443,5 +444,5 @@ export function registerInfrastructureHandlers(): void {
     }
   });
 
-  console.log('✅ Infrastructure IPC handlers registered');
+  logger.info('✅ Infrastructure IPC handlers registered');
 }

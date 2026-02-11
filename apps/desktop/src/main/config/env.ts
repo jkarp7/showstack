@@ -7,13 +7,14 @@
  * Usage:
  *   import { loadEnv, config } from './config/env';
  *   loadEnv(); // Call once at app startup
- *   console.log(config.supabase.url); // Access config values
+ *   logger.info(config.supabase.url); // Access config values
  */
 
 import { config as dotenvConfig } from 'dotenv';
 import { resolve } from 'path';
 import { existsSync } from 'fs';
 import { app } from 'electron';
+import { logger } from '../utils/logger';
 
 /**
  * Cloud service configuration
@@ -78,12 +79,12 @@ export function loadEnv(): void {
   if (envPath) {
     const result = dotenvConfig({ path: envPath });
     if (result.error) {
-      console.warn('[ENV] Failed to load .env file:', result.error.message);
+      logger.warn('[ENV] Failed to load .env file:', result.error.message);
     } else {
-      console.log('[ENV] Loaded environment from:', envPath);
+      logger.info('[ENV] Loaded environment from:', envPath);
     }
   } else {
-    console.log('[ENV] No .env file found, using process environment only');
+    logger.info('[ENV] No .env file found, using process environment only');
   }
 
   // Parse and validate configuration

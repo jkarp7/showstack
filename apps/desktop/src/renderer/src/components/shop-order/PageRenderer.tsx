@@ -6,6 +6,7 @@ import type {
   LayoutElement,
 } from '../../types/shopOrder';
 import { formatPhoneNumber } from '../../utils/phoneFormatter';
+import { logger } from '../../utils/logger';
 
 interface PageRendererProps {
   section: PrintSection;
@@ -149,7 +150,7 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
           });
         }
       } catch (error) {
-        console.error('Error loading page layout:', error);
+        logger.error('Error loading page layout:', error);
       } finally {
         setLoading(false);
       }
@@ -166,19 +167,19 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
 
       // If no logo in ShopOrderProject, check parent project
       if (!logoPath && (project as any).parent_project_id) {
-        console.log('[PageRenderer] No logo in ShopOrderProject, checking parent project...');
+        logger.info('[PageRenderer] No logo in ShopOrderProject, checking parent project...');
         try {
           const parentProject = await window.api.projects.getById(
             (project as any).parent_project_id,
           );
           if (parentProject?.logo_path) {
-            console.log('[PageRenderer] Found logo in parent project:', parentProject.logo_path);
+            logger.info('[PageRenderer] Found logo in parent project:', parentProject.logo_path);
             logoPath = parentProject.logo_path;
           } else {
-            console.log('[PageRenderer] Parent project has no logo');
+            logger.info('[PageRenderer] Parent project has no logo');
           }
         } catch (error) {
-          console.error('[PageRenderer] Error loading parent project:', error);
+          logger.error('[PageRenderer] Error loading parent project:', error);
         }
       }
 
@@ -204,7 +205,7 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
           setLogoDataUrl(dataUrl);
         }
       } catch (error) {
-        console.error('[PageRenderer] Error loading logo:', error);
+        logger.error('[PageRenderer] Error loading logo:', error);
         setLogoDataUrl(null);
       }
     };

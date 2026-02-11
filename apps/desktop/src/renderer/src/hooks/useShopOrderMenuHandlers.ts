@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { logger } from '../../utils/logger';
 
 interface PrepMenuHandlersProps {
   onNewProject: () => void;
@@ -26,7 +27,7 @@ export function useShopOrderMenuHandlers(props: PrepMenuHandlersProps) {
       if (onPrint) {
         onPrint();
       } else {
-        console.log('Print prep document');
+        logger.info('Print prep document');
         window.print();
       }
     };
@@ -37,10 +38,10 @@ export function useShopOrderMenuHandlers(props: PrepMenuHandlersProps) {
         if (onAddSection) {
           onAddSection();
         } else {
-          console.log('Add section');
+          logger.info('Add section');
         }
       } else {
-        console.log('No project selected to add section to');
+        logger.info('No project selected to add section to');
       }
     };
 

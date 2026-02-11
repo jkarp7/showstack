@@ -14,6 +14,8 @@
  * - Sub-millisecond response times for indexed queries
  */
 
+import { logger } from '../../utils/logger';
+
 import Database from 'better-sqlite3';
 
 /**
@@ -23,7 +25,7 @@ import Database from 'better-sqlite3';
  * @param db - better-sqlite3 database instance
  */
 export function createPerformanceIndexes(db: Database.Database): void {
-  console.log('Creating performance indexes...');
+  logger.info('Creating performance indexes...');
 
   // Fixtures table indexes
   createFixtureIndexes(db);
@@ -43,7 +45,7 @@ export function createPerformanceIndexes(db: Database.Database): void {
   // Project table indexes
   createProjectIndexes(db);
 
-  console.log('✅ Performance indexes created');
+  logger.info('✅ Performance indexes created');
 }
 
 /**
@@ -263,7 +265,7 @@ function createProjectIndexes(db: Database.Database): void {
  * @param db - better-sqlite3 database instance
  */
 export function dropPerformanceIndexes(db: Database.Database): void {
-  console.log('Dropping performance indexes...');
+  logger.info('Dropping performance indexes...');
 
   const indexes = [
     // Fixtures
@@ -313,7 +315,7 @@ export function dropPerformanceIndexes(db: Database.Database): void {
     db.prepare(`DROP INDEX IF EXISTS ${index}`).run();
   }
 
-  console.log('✅ Performance indexes dropped');
+  logger.info('✅ Performance indexes dropped');
 }
 
 /**

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BarChart3, TrendingUp, Users, Activity, Download, Trash2 } from 'lucide-react';
+import { logger } from '../../utils/logger';
 import { telemetry } from '../../services/telemetry';
 
 /**
@@ -48,7 +49,7 @@ export function AnalyticsDashboard() {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Failed to export telemetry data:', error);
+      logger.error('Failed to export telemetry data:', error);
       alert('Failed to export data. Please try again.');
     }
   };
@@ -63,7 +64,7 @@ export function AnalyticsDashboard() {
         loadEventData();
         alert('Telemetry data cleared successfully.');
       } catch (error) {
-        console.error('Failed to clear telemetry data:', error);
+        logger.error('Failed to clear telemetry data:', error);
         alert('Failed to clear data. Please try again.');
       }
     }

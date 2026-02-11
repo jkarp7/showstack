@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { logger } from '../utils/logger';
 
 interface ShopOrderFileStore {
   // State
@@ -117,7 +118,7 @@ export const useShopOrderFileStore = create<ShopOrderFileStore>((set, get) => ({
 
       return true;
     } catch (error) {
-      console.error('Error opening file:', error);
+      logger.error('Error opening file:', error);
       alert('Failed to open shop order');
       set({ isOpening: false });
       return false;
@@ -147,7 +148,7 @@ export const useShopOrderFileStore = create<ShopOrderFileStore>((set, get) => ({
 
       return true;
     } catch (error) {
-      console.error('Error saving file:', error);
+      logger.error('Error saving file:', error);
       alert('Failed to save shop order');
       set({ isSaving: false });
       return false;
@@ -177,7 +178,7 @@ export const useShopOrderFileStore = create<ShopOrderFileStore>((set, get) => ({
 
       return true;
     } catch (error) {
-      console.error('Error saving file:', error);
+      logger.error('Error saving file:', error);
       alert('Failed to save shop order');
       set({ isSaving: false });
       return false;

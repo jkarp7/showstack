@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { ShopOrderProject, ShopOrderNote, ShopOrderNoteTemplate } from '../../types/shopOrder';
+import { logger } from '../../utils/logger';
 
 interface NotesPanelProps {
   project: ShopOrderProject;
@@ -56,7 +57,7 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
         }
       });
     } catch (error) {
-      console.error('Failed to load notes:', error);
+      logger.error('Failed to load notes:', error);
     }
   };
 
@@ -94,7 +95,7 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
         }
       }
     } catch (error) {
-      console.error('Failed to save note:', error);
+      logger.error('Failed to save note:', error);
       alert('Failed to save note');
     } finally {
       setIsSaving(false);
@@ -121,7 +122,7 @@ export function NotesPanel({ project, onManageTemplates }: NotesPanelProps) {
         alert('No default template found. Create one in Template Settings.');
       }
     } catch (error) {
-      console.error('Failed to load template:', error);
+      logger.error('Failed to load template:', error);
       alert('Failed to load template');
     }
   };

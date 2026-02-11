@@ -12,6 +12,7 @@ import { PowerSyncDatabase, SyncStatus, SyncStatusOptions } from '@powersync/web
 import { AppSchema } from './powerSyncSchema';
 import { SupabaseConnector, getSupabaseConnector } from './SupabaseConnector';
 import { getConfig } from '../../config/env';
+import { logger } from '../../utils/logger';
 
 /**
  * Sync status for UI display
@@ -61,14 +62,14 @@ export class PowerSyncService {
    */
   async initialize(): Promise<void> {
     if (this.isInitialized) {
-      console.log('[PowerSyncService] Already initialized');
+      logger.info('[PowerSyncService] Already initialized');
       return;
     }
 
     const config = getConfig();
 
     if (!config.isConfigured) {
-      console.log('[PowerSyncService] Cloud not configured, skipping initialization');
+      logger.info('[PowerSyncService] Cloud not configured, skipping initialization');
       return;
     }
 
@@ -104,10 +105,10 @@ export class PowerSyncService {
       this.isInitialized = true;
 
       if (config.app.debugPowerSync) {
-        console.log('[PowerSyncService] Initialized successfully');
+        logger.info('[PowerSyncService] Initialized successfully');
       }
     } catch (error) {
-      console.error('[PowerSyncService] Initialization failed:', error);
+      logger.error('[PowerSyncService] Initialization failed:', error);
       this.currentError = error instanceof Error ? error.message : 'Initialization failed';
       this.notifyStatusListeners();
       throw error;
@@ -126,7 +127,7 @@ export class PowerSyncService {
         const config = getConfig();
 
         if (config.app.debugPowerSync) {
-          console.log('[PowerSyncService] Status changed:', status);
+          logger.info('[PowerSyncService] Status changed:', status);
         }
 
         // Update last synced time when sync completes
@@ -179,7 +180,7 @@ export class PowerSyncService {
       await this.db.disconnect();
       this.currentError = null;
     } catch (error) {
-      console.error('[PowerSyncService] Disconnect error:', error);
+      logger.error('[PowerSyncService] Disconnect error:', error);
     }
 
     this.notifyStatusListeners();
@@ -301,7 +302,7 @@ export class PowerSyncService {
       try {
         listener(status);
       } catch (error) {
-        console.error('[PowerSyncService] Status listener error:', error);
+        logger.error('[PowerSyncService] Status listener error:', error);
       }
     });
   }
@@ -370,7 +371,7 @@ export class PowerSyncService {
         }
       } catch (error) {
         if (error instanceof Error && error.name !== 'AbortError') {
-          console.error('[PowerSyncService] Watch error:', error);
+          logger.error('[PowerSyncService] Watch error:', error);
         }
       }
     })();

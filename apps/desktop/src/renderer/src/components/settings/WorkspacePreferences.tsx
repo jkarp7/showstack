@@ -1,5 +1,6 @@
 import { Monitor, Grid, Ruler, Save } from 'lucide-react';
 import { useSettingsStore } from '../../store/settingsStore';
+import { logger } from '../../utils/logger';
 
 export function WorkspacePreferences() {
   const workspace = useSettingsStore((state) => state.workspace);
@@ -8,7 +9,7 @@ export function WorkspacePreferences() {
   const handleSave = () => {
     // Settings are already saved via Zustand persist middleware
     // This is just for user feedback
-    console.log('Workspace preferences saved!', workspace);
+    logger.info('Workspace preferences saved!', workspace);
   };
 
   return (

@@ -6,6 +6,7 @@
  */
 
 import { create } from 'zustand';
+import { logger } from '../utils/logger';
 
 /**
  * Sync status from PowerSync
@@ -182,7 +183,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         email: state.email,
       });
     } catch (error) {
-      console.error('[AuthStore] Failed to refresh auth state:', error);
+      logger.error('[AuthStore] Failed to refresh auth state:', error);
     }
   },
 
@@ -192,7 +193,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const status = await window.api.sync.getStatus();
       set({ syncStatus: status });
     } catch (error) {
-      console.error('[AuthStore] Failed to refresh sync status:', error);
+      logger.error('[AuthStore] Failed to refresh sync status:', error);
     }
   },
 
@@ -204,14 +205,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isCloudConfigured: isConfigured });
 
       if (!isConfigured) {
-        console.log('[AuthStore] Cloud sync not configured');
+        logger.info('[AuthStore] Cloud sync not configured');
         return;
       }
 
       // Initialize PowerSync
       const result = await window.api.sync.initialize();
       if (!result.success) {
-        console.warn('[AuthStore] Sync initialization failed:', result.error);
+        logger.warn('[AuthStore] Sync initialization failed:', result.error);
       }
 
       // Refresh states
@@ -224,7 +225,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ syncStatus: status });
       });
     } catch (error) {
-      console.error('[AuthStore] Failed to initialize sync:', error);
+      logger.error('[AuthStore] Failed to initialize sync:', error);
     }
   },
 

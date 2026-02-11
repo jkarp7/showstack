@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useShopOrderStore } from '../../store/shopOrderStore';
 import type { ShopOrderItem } from '../../types/shopOrder';
 import { detectRevisionChanges, parseSpareSnapshot } from '../../utils/revisionUtils';
+import { logger } from '../../utils/logger';
 
 interface RevisionChangeLogPageProps {
   projectId: string;
@@ -86,7 +87,7 @@ export function RevisionChangeLogPage({ projectId }: RevisionChangeLogPageProps)
     try {
       await window.api.prep.print.revisionChangeLog(projectId, activeRevision);
     } catch (error) {
-      console.error('Error printing revision change log:', error);
+      logger.error('Error printing revision change log:', error);
     }
   };
 

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { logger } from '../utils/logger';
 import type {
   ShopOrderProject,
   ShopOrderSection,
@@ -125,7 +126,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
   // ===== PROJECT ACTIONS =====
   loadAllProjects: async () => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -134,14 +135,14 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       const projects = await window.api.prep.projects.getAll();
       set({ allProjects: projects, isLoading: false });
     } catch (error) {
-      console.error('Failed to load prep projects:', error);
+      logger.error('Failed to load prep projects:', error);
       set({ isLoading: false });
     }
   },
 
   loadProject: async (id: string) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -160,14 +161,14 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       }
       set({ isLoading: false });
     } catch (error) {
-      console.error('Failed to load prep project:', error);
+      logger.error('Failed to load prep project:', error);
       set({ isLoading: false });
     }
   },
 
   createProject: async (data) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -204,7 +205,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
             };
           }
         } catch (error) {
-          console.error('Failed to load parent project:', error);
+          logger.error('Failed to load parent project:', error);
         }
       }
 
@@ -224,39 +225,39 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
 
       return project;
     } catch (error) {
-      console.error('Failed to create prep project:', error);
+      logger.error('Failed to create prep project:', error);
     }
   },
 
   updateProject: async (id, updates) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
     try {
-      console.log('🔧 prepStore.updateProject called with id:', id, 'updates:', updates);
+      logger.info('🔧 prepStore.updateProject called with id:', id, 'updates:', updates);
       const updated = await window.api.prep.projects.update(id, updates);
-      console.log('📦 API returned updated project:', updated);
+      logger.info('📦 API returned updated project:', updated);
 
       // Check specific fields that were updated
       Object.keys(updates).forEach((key) => {
-        console.log(`🔍 Field ${key}: sent="${updates[key]}" received="${updated[key]}"`);
+        logger.info(`🔍 Field ${key}: sent="${updates[key]}" received="${updated[key]}"`);
       });
 
       set((state) => ({
         currentProject: state.currentProject?.id === id ? updated : state.currentProject,
         allProjects: state.allProjects.map((p) => (p.id === id ? updated : p)),
       }));
-      console.log('✅ State updated. New currentProject:', get().currentProject);
+      logger.info('✅ State updated. New currentProject:', get().currentProject);
     } catch (error) {
-      console.error('Failed to update prep project:', error);
+      logger.error('Failed to update prep project:', error);
     }
   },
 
   deleteProject: async (id) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -267,13 +268,13 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         currentProject: state.currentProject?.id === id ? null : state.currentProject,
       }));
     } catch (error) {
-      console.error('Failed to delete prep project:', error);
+      logger.error('Failed to delete prep project:', error);
     }
   },
 
   syncFromParent: async (projectId: string, parentProjectId: string) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return { success: false, error: 'API not available' };
     }
 
@@ -396,7 +397,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
             }
           }
         } catch (e) {
-          console.error('Failed to parse lighting_associates for ALD sync:', e);
+          logger.error('Failed to parse lighting_associates for ALD sync:', e);
         }
       }
 
@@ -423,7 +424,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
             });
           }
         } catch (e) {
-          console.error('Failed to parse lighting_associates:', e);
+          logger.error('Failed to parse lighting_associates:', e);
         }
       }
 
@@ -447,7 +448,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
             });
           }
         } catch (e) {
-          console.error('Failed to parse audio_associates:', e);
+          logger.error('Failed to parse audio_associates:', e);
         }
       }
 
@@ -471,7 +472,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
             });
           }
         } catch (e) {
-          console.error('Failed to parse video_associates:', e);
+          logger.error('Failed to parse video_associates:', e);
         }
       }
 
@@ -499,7 +500,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         };
       }
     } catch (error) {
-      console.error('Failed to sync from parent:', error);
+      logger.error('Failed to sync from parent:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to sync from parent',
@@ -510,7 +511,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
   // ===== SECTION ACTIONS =====
   loadSections: async (projectId: string) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -518,13 +519,13 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       const sections = await window.api.prep.sections.getByProjectId(projectId);
       set({ sections });
     } catch (error) {
-      console.error('Failed to load prep sections:', error);
+      logger.error('Failed to load prep sections:', error);
     }
   },
 
   createSection: async (data) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -534,13 +535,13 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         sections: [...state.sections, section],
       }));
     } catch (error) {
-      console.error('Failed to create prep section:', error);
+      logger.error('Failed to create prep section:', error);
     }
   },
 
   updateSection: async (id, updates) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -550,13 +551,13 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         sections: state.sections.map((s) => (s.id === id ? updated : s)),
       }));
     } catch (error) {
-      console.error('Failed to update prep section:', error);
+      logger.error('Failed to update prep section:', error);
     }
   },
 
   deleteSection: async (id) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -566,14 +567,14 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         sections: state.sections.filter((s) => s.id !== id),
       }));
     } catch (error) {
-      console.error('Failed to delete prep section:', error);
+      logger.error('Failed to delete prep section:', error);
     }
   },
 
   // ===== EQUIPMENT ITEM ACTIONS =====
   loadItems: async (projectId: string) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -581,13 +582,13 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       const items = await window.api.prep.items.getByProjectId(projectId);
       set({ items });
     } catch (error) {
-      console.error('Failed to load prep items:', error);
+      logger.error('Failed to load prep items:', error);
     }
   },
 
   loadItemsBySection: async (sectionId: string) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -595,13 +596,13 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       const items = await window.api.prep.items.getBySectionId(sectionId);
       set({ items });
     } catch (error) {
-      console.error('Failed to load prep items by section:', error);
+      logger.error('Failed to load prep items by section:', error);
     }
   },
 
   createItem: async (data) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -611,13 +612,13 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         items: [...state.items, item],
       }));
     } catch (error) {
-      console.error('Failed to create prep item:', error);
+      logger.error('Failed to create prep item:', error);
     }
   },
 
   updateItem: async (id, updates) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -627,13 +628,13 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         items: state.items.map((i) => (i.id === id ? updated : i)),
       }));
     } catch (error) {
-      console.error('Failed to update prep item:', error);
+      logger.error('Failed to update prep item:', error);
     }
   },
 
   deleteItem: async (id) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -643,14 +644,14 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         items: state.items.filter((i) => i.id !== id),
       }));
     } catch (error) {
-      console.error('Failed to delete prep item:', error);
+      logger.error('Failed to delete prep item:', error);
     }
   },
 
   // ===== REVISION ACTIONS =====
   loadRevisions: async (projectId: string) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -658,13 +659,13 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       const revisions = await window.api.prep.revisions.getByProjectId(projectId);
       set({ revisions });
     } catch (error) {
-      console.error('Failed to load prep revisions:', error);
+      logger.error('Failed to load prep revisions:', error);
     }
   },
 
   createRevision: async (data) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -677,20 +678,20 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         revisions: [...state.revisions, revision],
       }));
     } catch (error) {
-      console.error('Failed to create prep revision:', error);
+      logger.error('Failed to create prep revision:', error);
     }
   },
 
   setRevisionZero: async (projectId: string, notes?: string) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
     const { currentProject, items, sections } = get();
 
     if (!currentProject || currentProject.id !== projectId) {
-      console.error('No current project loaded');
+      logger.error('No current project loaded');
       return;
     }
 
@@ -739,23 +740,23 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       await get().loadRevisions(projectId);
       await get().loadItems(projectId);
 
-      console.log('Revision 0 baseline set successfully');
+      logger.info('Revision 0 baseline set successfully');
     } catch (error) {
-      console.error('Failed to set revision 0:', error);
+      logger.error('Failed to set revision 0:', error);
       throw error;
     }
   },
 
   generateRevision: async (projectId: string, notes?: string) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
     const { currentProject, items, sections, revisions } = get();
 
     if (!currentProject || currentProject.id !== projectId) {
-      console.error('No current project loaded');
+      logger.error('No current project loaded');
       return;
     }
 
@@ -885,21 +886,21 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       // Reload project data once after all updates
       await get().loadProject(projectId);
     } catch (error) {
-      console.error('Failed to generate revision:', error);
+      logger.error('Failed to generate revision:', error);
       throw error;
     }
   },
 
   deleteRevision: async (projectId: string, revisionId: string) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
     const { currentProject, revisions } = get();
 
     if (!currentProject || currentProject.id !== projectId) {
-      console.error('No current project loaded');
+      logger.error('No current project loaded');
       return;
     }
 
@@ -938,7 +939,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
             }
           } catch (error) {
             // Item might not exist anymore, skip it
-            console.warn(`Could not update item ${change.item_id}:`, error);
+            logger.warn(`Could not update item ${change.item_id}:`, error);
           }
         }),
       );
@@ -954,7 +955,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       // Reload project data
       await get().loadProject(projectId);
     } catch (error) {
-      console.error('Failed to delete revision:', error);
+      logger.error('Failed to delete revision:', error);
       throw error;
     }
   },
@@ -962,7 +963,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
   // ===== NOTE ACTIONS =====
   loadNotes: async (projectId: string, type?: 'general' | 'equipment' | 'revision') => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -970,13 +971,13 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       const notes = await window.api.prep.notes.getByProjectId(projectId, type);
       set({ notes });
     } catch (error) {
-      console.error('Failed to load prep notes:', error);
+      logger.error('Failed to load prep notes:', error);
     }
   },
 
   createNote: async (data) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -986,13 +987,13 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         notes: [note, ...state.notes],
       }));
     } catch (error) {
-      console.error('Failed to create prep note:', error);
+      logger.error('Failed to create prep note:', error);
     }
   },
 
   updateNote: async (id, content) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -1002,13 +1003,13 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         notes: state.notes.map((n) => (n.id === id ? updated : n)),
       }));
     } catch (error) {
-      console.error('Failed to update prep note:', error);
+      logger.error('Failed to update prep note:', error);
     }
   },
 
   deleteNote: async (id) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       return;
     }
 
@@ -1018,14 +1019,14 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         notes: state.notes.filter((n) => n.id !== id),
       }));
     } catch (error) {
-      console.error('Failed to delete prep note:', error);
+      logger.error('Failed to delete prep note:', error);
     }
   },
 
   // ===== PRINT TEMPLATE ACTIONS =====
   loadPrintTemplates: async (projectId: string) => {
     if (!hasAPI()) {
-      console.warn('API not available - using default template');
+      logger.warn('API not available - using default template');
       return;
     }
 
@@ -1033,7 +1034,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       const templates = await window.api.prep.printTemplates?.getByProjectId(projectId);
       set({ printTemplates: templates || [] });
     } catch (error) {
-      console.error('Failed to load print templates:', error);
+      logger.error('Failed to load print templates:', error);
       set({ printTemplates: [] });
     }
   },
@@ -1044,7 +1045,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
 
   saveTemplate: async (template: PrintTemplate) => {
     if (!hasAPI()) {
-      console.warn('API not available - storing template locally');
+      logger.warn('API not available - storing template locally');
       set((state) => ({
         printTemplates: [...state.printTemplates, template],
         currentTemplate: template,
@@ -1061,13 +1062,13 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         }));
       }
     } catch (error) {
-      console.error('Failed to save print template:', error);
+      logger.error('Failed to save print template:', error);
     }
   },
 
   deleteTemplate: async (templateId: string) => {
     if (!hasAPI()) {
-      console.warn('API not available');
+      logger.warn('API not available');
       set((state) => ({
         printTemplates: state.printTemplates.filter((t) => t.id !== templateId),
         currentTemplate: state.currentTemplate?.id === templateId ? null : state.currentTemplate,
@@ -1082,7 +1083,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         currentTemplate: state.currentTemplate?.id === templateId ? null : state.currentTemplate,
       }));
     } catch (error) {
-      console.error('Failed to delete print template:', error);
+      logger.error('Failed to delete print template:', error);
     }
   },
 

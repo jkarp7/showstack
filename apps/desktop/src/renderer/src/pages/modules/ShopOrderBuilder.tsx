@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { logger } from '../../utils/logger';
 import { useShopOrderStore } from '../../store/shopOrderStore';
 import { useProjectStore } from '../../store/projectStore';
 import { useShopOrderFileStore } from '../../store/shopOrderFileStore';
@@ -153,7 +154,7 @@ export function ShopOrderBuilder() {
                 await loadProject(newProject.id);
               }
             } catch (error) {
-              console.error('Failed to auto-create shop order:', error);
+              logger.error('Failed to auto-create shop order:', error);
             }
           }
         }
@@ -215,7 +216,7 @@ export function ShopOrderBuilder() {
       setRevisionNotes('');
       setShowRevisionNotes(false);
     } catch (error) {
-      console.error('Failed to generate revision:', error);
+      logger.error('Failed to generate revision:', error);
       alert('Failed to generate revision');
     } finally {
       setIsGeneratingRevision(false);
@@ -231,7 +232,7 @@ export function ShopOrderBuilder() {
       setRevisionZeroNotes('');
       setShowRevisionZeroNotes(false);
     } catch (error) {
-      console.error('Failed to set revision 0:', error);
+      logger.error('Failed to set revision 0:', error);
       alert(
         `Failed to set revision 0: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -255,7 +256,7 @@ export function ShopOrderBuilder() {
         }
       }
     } catch (error) {
-      console.error('Failed to link to parent:', error);
+      logger.error('Failed to link to parent:', error);
       alert('Failed to link to parent project');
     }
   };
@@ -271,7 +272,7 @@ export function ShopOrderBuilder() {
       await updateProject(currentProject.id, { parent_project_id: null });
       alert('Successfully unlinked from parent project');
     } catch (error) {
-      console.error('Failed to unlink from parent:', error);
+      logger.error('Failed to unlink from parent:', error);
       alert('Failed to unlink from parent project');
     }
   };
@@ -293,7 +294,7 @@ export function ShopOrderBuilder() {
         alert(result.error || 'Failed to sync from parent project');
       }
     } catch (error) {
-      console.error('Failed to sync from parent:', error);
+      logger.error('Failed to sync from parent:', error);
       alert('Failed to sync from parent project');
     }
   };
@@ -384,19 +385,19 @@ export function ShopOrderBuilder() {
   };
 
   const handleFieldBlur = async () => {
-    console.log('💾 handleFieldBlur called. editingField:', editingField, 'editValue:', editValue);
+    logger.info('💾 handleFieldBlur called. editingField:', editingField, 'editValue:', editValue);
     if (!editingField || !currentProject) {
-      console.log('❌ Exiting early - no editingField or currentProject');
+      logger.info('❌ Exiting early - no editingField or currentProject');
       return;
     }
 
     let finalValue = editValue.trim();
-    console.log('📝 finalValue after trim:', finalValue);
+    logger.info('📝 finalValue after trim:', finalValue);
 
     // Format phone numbers
     if (editingField.includes('_phone') && finalValue) {
       finalValue = formatPhoneNumber(finalValue);
-      console.log('📞 Formatted phone:', finalValue);
+      logger.info('📞 Formatted phone:', finalValue);
     }
 
     // Format dates
@@ -407,7 +408,7 @@ export function ShopOrderBuilder() {
       } else {
         finalValue = formatDate(finalValue);
       }
-      console.log('📅 Formatted date:', finalValue);
+      logger.info('📅 Formatted date:', finalValue);
     }
 
     // Validate email
@@ -420,16 +421,16 @@ export function ShopOrderBuilder() {
     }
 
     const currentValue = (currentProject as any)[editingField];
-    console.log('🔍 Comparing - currentValue:', currentValue, 'finalValue:', finalValue);
+    logger.info('🔍 Comparing - currentValue:', currentValue, 'finalValue:', finalValue);
 
     if (currentValue !== finalValue) {
-      console.log('✨ Values differ - calling updateProject');
+      logger.info('✨ Values differ - calling updateProject');
       await updateProject(currentProject.id, {
         [editingField]: finalValue || null,
       });
-      console.log('✅ updateProject complete');
+      logger.info('✅ updateProject complete');
     } else {
-      console.log('⏭️ Values same - skipping update');
+      logger.info('⏭️ Values same - skipping update');
     }
 
     setEditingField(null);
@@ -1240,7 +1241,7 @@ export function ShopOrderBuilder() {
                         }
                         onCompareRevisions={(rev1, rev2) => {
                           // TODO: Implement revision comparison
-                          console.log('Compare revisions:', rev1, rev2);
+                          logger.info('Compare revisions:', rev1, rev2);
                         }}
                       />
                     </div>

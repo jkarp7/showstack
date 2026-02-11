@@ -1,6 +1,7 @@
 import * as path from 'path';
 import { app } from 'electron';
 import { PathTraversalError, NullByteError, InvalidPathError } from './errors';
+import { logger } from './logger';
 
 /**
  * Path validation utilities for security
@@ -57,7 +58,7 @@ export function isPathAllowed(filePath: string): boolean {
       return relative && !relative.startsWith('..') && !path.isAbsolute(relative);
     });
   } catch (error) {
-    console.error('Error validating path:', error);
+    logger.error('Error validating path:', error);
     return false;
   }
 }

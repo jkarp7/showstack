@@ -12,6 +12,7 @@
 
 import Database from 'better-sqlite3';
 import { databaseManager } from './core/DatabaseManager';
+import { logger } from '../utils/logger';
 
 /**
  * Initialize both app and project databases
@@ -45,7 +46,7 @@ export function getDatabase(): Database.Database {
  */
 export function saveAppDatabase(): void {
   // WAL mode handles auto-persistence - no manual save needed
-  console.log('[Database] saveAppDatabase() called - WAL mode handles auto-persistence');
+  logger.info('[Database] saveAppDatabase() called - WAL mode handles auto-persistence');
 }
 
 /**
@@ -56,7 +57,7 @@ export function saveAppDatabase(): void {
  */
 export function saveDatabase(): void {
   // WAL mode handles auto-persistence - no manual save needed
-  console.log('[Database] saveDatabase() called - WAL mode handles auto-persistence');
+  logger.info('[Database] saveDatabase() called - WAL mode handles auto-persistence');
 }
 
 // Alias for backwards compatibility
@@ -96,7 +97,7 @@ export async function replaceProjectDatabase(importedData: Uint8Array): Promise<
  */
 export async function saveBothDatabasesWithRetry(): Promise<void> {
   // WAL mode handles auto-persistence - no manual save needed
-  console.log('[Database] saveBothDatabasesWithRetry() called - WAL mode handles auto-persistence');
+  logger.info('[Database] saveBothDatabasesWithRetry() called - WAL mode handles auto-persistence');
 }
 
 /**

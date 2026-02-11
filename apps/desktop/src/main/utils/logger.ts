@@ -5,10 +5,10 @@
  * - Environment-aware log levels
  * - Structured logging with context
  * - Timestamps for all log entries
- * - Future-ready for log aggregation services
- *
- * Phase 2.0.1 - Code Quality Improvements
+ * - Sentry integration for error forwarding
  */
+
+import { captureError, isSentryInitialized } from '../services/sentry';
 
 export enum LogLevel {
   DEBUG = 'DEBUG',
@@ -91,10 +91,21 @@ class Logger {
         message: context.message,
         stack: context.stack,
       });
+      // Forward to Sentry
+      if (isSentryInitialized()) {
+        captureError(context);
+      }
     } else if (context) {
       console.error(formatted, context);
+      // Forward to Sentry with context
+      if (isSentryInitialized()) {
+        captureError(new Error(message), context as Record<string, unknown>);
+      }
     } else {
       console.error(formatted);
+      if (isSentryInitialized()) {
+        captureError(new Error(message));
+      }
     }
   }
 

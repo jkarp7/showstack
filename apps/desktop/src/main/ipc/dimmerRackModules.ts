@@ -9,6 +9,7 @@ import {
 } from '../database/queries/dimmerRackModules';
 import { errorHandler } from '../errors';
 import { DatabaseError, ValidationError } from '../errors';
+import { logger } from '../utils/logger';
 
 export function registerDimmerRackModuleHandlers(): void {
   // Get all modules for a rack
@@ -19,7 +20,7 @@ export function registerDimmerRackModuleHandlers(): void {
         'dimmerRackModules:getByRackId',
       );
     } catch (error) {
-      console.error('Failed to get dimmer rack modules:', {
+      logger.error('Failed to get dimmer rack modules:', {
         operation: 'dimmerRackModules:getByRackId',
         rackId,
         error: error instanceof Error ? error.message : error,
@@ -47,7 +48,7 @@ export function registerDimmerRackModuleHandlers(): void {
           'dimmerRackModules:create',
         );
       } catch (error) {
-        console.error('Failed to create dimmer rack module:', {
+        logger.error('Failed to create dimmer rack module:', {
           operation: 'dimmerRackModules:create',
           module,
           error: error instanceof Error ? error.message : error,
@@ -74,7 +75,7 @@ export function registerDimmerRackModuleHandlers(): void {
           'dimmerRackModules:update',
         );
       } catch (error) {
-        console.error('Failed to update dimmer rack module:', {
+        logger.error('Failed to update dimmer rack module:', {
           operation: 'dimmerRackModules:update',
           id,
           updates,
@@ -94,7 +95,7 @@ export function registerDimmerRackModuleHandlers(): void {
     try {
       await errorHandler.executeWithRetry(async () => deleteModule(id), 'dimmerRackModules:delete');
     } catch (error) {
-      console.error('Failed to delete dimmer rack module:', {
+      logger.error('Failed to delete dimmer rack module:', {
         operation: 'dimmerRackModules:delete',
         id,
         error: error instanceof Error ? error.message : error,
@@ -117,7 +118,7 @@ export function registerDimmerRackModuleHandlers(): void {
           'dimmerRackModules:getTypeForCircuit',
         );
       } catch (error) {
-        console.error('Failed to get module type for circuit:', {
+        logger.error('Failed to get module type for circuit:', {
           operation: 'dimmerRackModules:getTypeForCircuit',
           rackId,
           circuit,
@@ -132,5 +133,5 @@ export function registerDimmerRackModuleHandlers(): void {
     },
   );
 
-  console.log('✅ Dimmer Rack Module IPC handlers registered');
+  logger.info('✅ Dimmer Rack Module IPC handlers registered');
 }

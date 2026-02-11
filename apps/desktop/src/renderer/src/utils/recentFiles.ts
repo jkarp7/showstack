@@ -1,3 +1,5 @@
+import { logger } from './logger';
+
 export interface RecentFile {
   filePath: string;
   projectName: string;
@@ -59,7 +61,7 @@ export async function addRecentFile(
     const storageKey = getStorageKey(moduleType);
     localStorage.setItem(storageKey, JSON.stringify(trimmed));
   } catch (error) {
-    console.error('Failed to add recent file:', error);
+    logger.error('Failed to add recent file:', error);
   }
 }
 
@@ -73,7 +75,7 @@ export async function getRecentFiles(moduleType?: ModuleType): Promise<RecentFil
     if (!stored) return [];
     return JSON.parse(stored) as RecentFile[];
   } catch (error) {
-    console.error('Failed to get recent files:', error);
+    logger.error('Failed to get recent files:', error);
     return [];
   }
 }
@@ -88,7 +90,7 @@ export async function removeRecentFile(filePath: string, moduleType?: ModuleType
     const storageKey = getStorageKey(moduleType);
     localStorage.setItem(storageKey, JSON.stringify(filtered));
   } catch (error) {
-    console.error('Failed to remove recent file:', error);
+    logger.error('Failed to remove recent file:', error);
   }
 }
 
@@ -108,7 +110,7 @@ export async function clearRecentFiles(moduleType?: ModuleType): Promise<void> {
       localStorage.removeItem(RECENT_FILES_KEY_PREFIX); // Legacy key
     }
   } catch (error) {
-    console.error('Failed to clear recent files:', error);
+    logger.error('Failed to clear recent files:', error);
   }
 }
 
@@ -150,8 +152,8 @@ export async function migrateLegacyRecentFiles(): Promise<void> {
 
     // Remove legacy storage after successful migration
     localStorage.removeItem(RECENT_FILES_KEY_PREFIX);
-    console.log(`Migrated ${legacyFiles.length} legacy recent files to module-specific storage`);
+    logger.info(`Migrated ${legacyFiles.length} legacy recent files to module-specific storage`);
   } catch (error) {
-    console.error('Failed to migrate legacy recent files:', error);
+    logger.error('Failed to migrate legacy recent files:', error);
   }
 }

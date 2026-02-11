@@ -1,6 +1,7 @@
 import { BrowserWindow, dialog } from 'electron';
 import { join } from 'path';
 import { initializeMenuForWindow } from './ipc/menu';
+import { logger } from './utils/logger';
 
 export function createWindow(routePath: string = '/'): BrowserWindow {
   const window = new BrowserWindow({
@@ -32,13 +33,13 @@ export function createWindow(routePath: string = '/'): BrowserWindow {
     // In development, load from Vite dev server with hash route
     const devServerUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173';
     const fullUrl = routePath !== '/' ? `${devServerUrl}/#${routePath}` : devServerUrl;
-    console.log('Loading from dev server:', fullUrl);
+    logger.info('Loading from dev server:', fullUrl);
     window.loadURL(fullUrl);
     window.webContents.openDevTools();
   } else {
     // In production, load from built files with hash route
     const indexPath = join(__dirname, '../renderer/index.html');
-    console.log('Loading from file:', indexPath, 'with hash:', routePath);
+    logger.info('Loading from file:', indexPath, 'with hash:', routePath);
     window.loadFile(indexPath, { hash: routePath });
   }
 
@@ -78,7 +79,7 @@ export function createWindow(routePath: string = '/'): BrowserWindow {
         // Cancel - do nothing, window stays open
       }
     } catch (error) {
-      console.error('Error checking for unsaved changes:', error);
+      logger.error('Error checking for unsaved changes:', error);
       // If there's an error, allow closing
     }
   });

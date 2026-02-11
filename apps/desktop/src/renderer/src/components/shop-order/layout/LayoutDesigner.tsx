@@ -6,6 +6,7 @@ import { ElementInspector } from './ElementInspector';
 import { CommandPalette, type Command } from './CommandPalette';
 import { KeyboardShortcutsHelp } from './KeyboardShortcutsHelp';
 import { usePlatform } from '../../../hooks/usePlatform';
+import { logger } from '../../../utils/logger';
 import type {
   PageLayoutTemplate,
   LayoutElement,
@@ -117,7 +118,7 @@ export function LayoutDesigner({
           }
         }
       } catch (error) {
-        console.error('Error loading layouts:', error);
+        logger.error('Error loading layouts:', error);
       } finally {
         setIsLoadingDefault(false);
       }
@@ -307,7 +308,7 @@ export function LayoutDesigner({
         onSave(template);
       }
     } catch (error) {
-      console.error('Error saving page layout:', error);
+      logger.error('Error saving page layout:', error);
       alert('Failed to save page layout. Please try again.');
     }
   }, [template, projectId, pageType, onSave]);
@@ -342,7 +343,7 @@ export function LayoutDesigner({
       setHasChanges(false);
       setShowLoadDialog(false);
     } catch (error) {
-      console.error('Error loading layout:', error);
+      logger.error('Error loading layout:', error);
       alert('Failed to load layout. Please try again.');
     }
   }, []);

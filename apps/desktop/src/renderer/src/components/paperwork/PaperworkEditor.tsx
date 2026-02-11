@@ -15,6 +15,7 @@ import { ReportTableRenderer } from './ReportTableRenderer';
 import { usePaperworkTemplates, useActiveTemplate } from '../../hooks/usePaperworkTemplates';
 import { getReportData } from '../../utils/paperwork/dataConnector';
 import { organizeReportData } from '../../utils/paperwork/reportOrganizer';
+import { logger } from '../../utils/logger';
 
 interface PaperworkEditorProps {
   reportType: ReportType;
@@ -148,7 +149,7 @@ export function PaperworkEditor({
       }
 
       try {
-        console.log('Creating new template:', name);
+        logger.info('Creating new template:', name);
         const result = await createTemplate({
           name,
           reportType,
@@ -164,12 +165,12 @@ export function PaperworkEditor({
           loadTemplate(result);
           setTemplateName(result.name);
           alert(`Template "${name}" created successfully!`);
-          console.log('Template created:', result);
+          logger.info('Template created:', result);
         } else {
           alert('Failed to create template - check console for errors');
         }
       } catch (error) {
-        console.error('Failed to create template:', error);
+        logger.error('Failed to create template:', error);
         alert(
           `Error creating template: ${error instanceof Error ? error.message : 'Unknown error'}`,
         );
@@ -196,7 +197,7 @@ export function PaperworkEditor({
       let result;
       if (activeTemplate.id) {
         // Update existing custom template
-        console.log('Updating template:', activeTemplate.id);
+        logger.info('Updating template:', activeTemplate.id);
         result = await updateTemplate(activeTemplate.id, {
           name: templateName || activeTemplate.name,
           columns: activeTemplate.columns,
@@ -205,7 +206,7 @@ export function PaperworkEditor({
         });
       } else {
         // Create new template
-        console.log('Creating new template');
+        logger.info('Creating new template');
         result = await createTemplate({
           name: templateName || `Custom ${reportType}`,
           reportType,
@@ -222,12 +223,12 @@ export function PaperworkEditor({
         loadTemplate(result);
         setTemplateName(result.name);
         alert('Template saved successfully!');
-        console.log('Template saved:', result);
+        logger.info('Template saved:', result);
       } else {
         alert('Failed to save template - check console for errors');
       }
     } catch (error) {
-      console.error('Failed to save template:', error);
+      logger.error('Failed to save template:', error);
       alert(`Error saving template: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }, [
@@ -244,19 +245,19 @@ export function PaperworkEditor({
   const handleDuplicateTemplate = useCallback(
     async (template: PaperworkTemplate) => {
       try {
-        console.log('Duplicating template:', template.id, template.name);
+        logger.info('Duplicating template:', template.id, template.name);
         const newName = `${template.name} (Copy)`;
         const result = await duplicateTemplate(template.id, newName);
         if (result) {
           // Load the duplicated template
           handleLoadTemplate(result);
           alert(`Template "${newName}" created successfully!`);
-          console.log('Template duplicated:', result);
+          logger.info('Template duplicated:', result);
         } else {
           alert('Failed to duplicate template - check console for errors');
         }
       } catch (error) {
-        console.error('Failed to duplicate template:', error);
+        logger.error('Failed to duplicate template:', error);
         alert(
           `Error duplicating template: ${error instanceof Error ? error.message : 'Unknown error'}`,
         );
@@ -269,7 +270,7 @@ export function PaperworkEditor({
   const handleDeleteTemplate = useCallback(
     async (templateId: string) => {
       try {
-        console.log('Deleting template:', templateId);
+        logger.info('Deleting template:', templateId);
         const success = await deleteTemplate(templateId);
         if (success) {
           // If we deleted the active template, clear it
@@ -283,12 +284,12 @@ export function PaperworkEditor({
             }
           }
           alert('Template deleted successfully!');
-          console.log('Template deleted:', templateId);
+          logger.info('Template deleted:', templateId);
         } else {
           alert('Failed to delete template - check console for errors');
         }
       } catch (error) {
-        console.error('Failed to delete template:', error);
+        logger.error('Failed to delete template:', error);
         alert(
           `Error deleting template: ${error instanceof Error ? error.message : 'Unknown error'}`,
         );

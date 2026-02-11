@@ -430,7 +430,7 @@ export function getPortLinkages(equipmentId: string, projectId: string): PortLin
             linkage.linked_to_name = (fixture as any).position;
           }
         } catch (error) {
-          console.error('Error fetching fixture name:', error);
+          logger.error('Error fetching fixture name:', error);
         }
       }
 

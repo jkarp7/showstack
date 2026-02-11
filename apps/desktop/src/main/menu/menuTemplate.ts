@@ -6,6 +6,7 @@
 
 import { Menu, MenuItemConstructorOptions, BrowserWindow, app } from 'electron';
 import { MenuStateData } from './menuState';
+import { logger } from '../utils/logger';
 
 /**
  * Build the application menu based on current context
@@ -14,7 +15,7 @@ export function buildMenu(state: MenuStateData): Menu {
   const isMac = process.platform === 'darwin';
   const template: MenuItemConstructorOptions[] = [];
 
-  console.log('🏗️ Building menu for context:', state.context, 'isMac:', isMac);
+  logger.info('🏗️ Building menu for context:', state.context, 'isMac:', isMac);
 
   // macOS app menu
   if (isMac) {

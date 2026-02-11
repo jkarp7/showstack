@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { UserCircle, Mail, Building, Phone, Save, Camera, Check } from 'lucide-react';
+import { logger } from '../../utils/logger';
 import { useSettingsStore } from '../../store/settingsStore';
 
 export function UserProfile() {
@@ -54,7 +55,7 @@ export function UserProfile() {
 
       input.click();
     } catch (error) {
-      console.error('Failed to upload avatar:', error);
+      logger.error('Failed to upload avatar:', error);
     }
   };
 

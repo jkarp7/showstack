@@ -13,6 +13,8 @@
  * Usage: Call this migration when updating to table-based shop order format
  */
 
+import { logger } from '../utils/logger';
+
 import type { Database } from 'better-sqlite3';
 
 export interface MigrationResult {
@@ -168,7 +170,7 @@ export function migrateAllProjectsToTableFormat(db: Database): {
   for (const project of projects) {
     // Skip if already migrated
     if (hasMigrated(db, project.id)) {
-      console.log(`Project ${project.id} already migrated, skipping...`);
+      logger.info(`Project ${project.id} already migrated, skipping...`);
       continue;
     }
 
@@ -176,13 +178,13 @@ export function migrateAllProjectsToTableFormat(db: Database): {
     if (result.success) {
       projectsMigrated++;
       totalItems += result.itemsMigrated;
-      console.log(`✓ Migrated project ${project.id}: ${result.itemsMigrated} items`);
+      logger.info(`✓ Migrated project ${project.id}: ${result.itemsMigrated} items`);
     } else {
       failures.push({
         projectId: project.id,
         error: result.errors.join(', '),
       });
-      console.error(`✗ Failed to migrate project ${project.id}:`, result.errors);
+      logger.error(`✗ Failed to migrate project ${project.id}:`, result.errors);
     }
   }
 

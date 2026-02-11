@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, basename } from 'path';
 import initSqlJs, { Database } from 'sql.js';
 import { getDatabase, saveDatabase, replaceProjectDatabase } from '../database';
+import { logger } from '../utils/logger';
 
 export interface ProjectImportResult {
   success: boolean;
@@ -167,9 +168,9 @@ class FileService {
       // Save to current working project database as well
       saveDatabase();
 
-      console.log('✅ Project exported successfully (app data preserved separately)');
+      logger.info('✅ Project exported successfully (app data preserved separately)');
     } catch (error) {
-      console.error('Error exporting project:', error);
+      logger.error('Error exporting project:', error);
       throw new Error(
         `Failed to export project: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -274,7 +275,7 @@ class FileService {
 
       // If project exists, return conflict info instead of importing
       if (existingProject) {
-        console.log('⚠️ Project conflict detected:', projectId);
+        logger.info('⚠️ Project conflict detected:', projectId);
         return {
           success: false,
           conflict: {
@@ -294,7 +295,7 @@ class FileService {
 
       return importResult;
     } catch (error) {
-      console.error('❌ Error importing project:', error);
+      logger.error('❌ Error importing project:', error);
       return {
         success: false,
         error: `Failed to import project: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -350,12 +351,12 @@ class FileService {
 
       if (resolution.action === 'replace') {
         // Delete existing project and import with same ID
-        console.log('🔄 Replacing existing project:', projectId);
+        logger.info('🔄 Replacing existing project:', projectId);
         await this.deleteExistingProject(projectId);
         return await this.mergeImportedProject(buffer, projectId, projectName);
       } else if (resolution.action === 'keep-both') {
         // Import with new ID
-        console.log('➕ Importing as new project (keep both)');
+        logger.info('➕ Importing as new project (keep both)');
         const { v4: uuidv4 } = await import('uuid');
         const newProjectId = uuidv4();
         const newProjectName = `${projectName} (2)`;
@@ -367,7 +368,7 @@ class FileService {
         error: 'Invalid resolution action',
       };
     } catch (error) {
-      console.error('❌ Error resolving import conflict:', error);
+      logger.error('❌ Error resolving import conflict:', error);
       return {
         success: false,
         error: `Failed to resolve conflict: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -448,14 +449,14 @@ class FileService {
       importedDb.close();
       saveDatabase();
 
-      console.log('✅ Project merged successfully:', targetProjectId);
+      logger.info('✅ Project merged successfully:', targetProjectId);
       return {
         success: true,
         projectId: targetProjectId,
         projectName: targetProjectName,
       };
     } catch (error) {
-      console.error('❌ Error merging project:', error);
+      logger.error('❌ Error merging project:', error);
       throw error;
     }
   }
@@ -628,11 +629,11 @@ class FileService {
       // Save to disk
       saveDatabase();
 
-      console.log('✅ New project created (app data preserved)');
+      logger.info('✅ New project created (app data preserved)');
 
       return projectId;
     } catch (error) {
-      console.error('Error creating new project:', error);
+      logger.error('Error creating new project:', error);
       throw new Error(
         `Failed to create new project: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );

@@ -3,6 +3,7 @@ import { ipcMain } from 'electron';
 import { Fixture } from '../database/queries/fixtures';
 import { fixtureService } from '../services/FixtureService';
 import { DatabaseError, ValidationError } from '../errors';
+import { logger } from '../utils/logger';
 import {
   CreateFixtureSchema,
   UpdateFixtureSchema,
@@ -16,7 +17,7 @@ export function registerFixtureHandlers(): void {
     try {
       return await fixtureService.getAll(projectId);
     } catch (error) {
-      console.error('Failed to get fixtures:', {
+      logger.error('Failed to get fixtures:', {
         operation: 'fixtures:getAll',
         projectId,
         error: error instanceof Error ? error.message : error,
@@ -48,7 +49,7 @@ export function registerFixtureHandlers(): void {
 
         return await fixtureService.create(validation.data, projectId);
       } catch (error) {
-        console.error('Failed to create fixture:', {
+        logger.error('Failed to create fixture:', {
           operation: 'fixtures:create',
           fixture,
           error: error instanceof Error ? error.message : error,
@@ -82,7 +83,7 @@ export function registerFixtureHandlers(): void {
 
       return await fixtureService.update(id, updates);
     } catch (error) {
-      console.error('Failed to update fixture:', {
+      logger.error('Failed to update fixture:', {
         operation: 'fixtures:update',
         id,
         updates,
@@ -104,7 +105,7 @@ export function registerFixtureHandlers(): void {
     try {
       await fixtureService.delete(id);
     } catch (error) {
-      console.error('Failed to delete fixture:', {
+      logger.error('Failed to delete fixture:', {
         operation: 'fixtures:delete',
         id,
         error: error instanceof Error ? error.message : error,
@@ -122,7 +123,7 @@ export function registerFixtureHandlers(): void {
     try {
       await fixtureService.deleteMultiple(ids);
     } catch (error) {
-      console.error('Failed to delete multiple fixtures:', {
+      logger.error('Failed to delete multiple fixtures:', {
         operation: 'fixtures:deleteMultiple',
         count: ids.length,
         error: error instanceof Error ? error.message : error,
@@ -135,5 +136,5 @@ export function registerFixtureHandlers(): void {
     }
   });
 
-  console.log('✅ Fixture IPC handlers registered');
+  logger.info('✅ Fixture IPC handlers registered');
 }

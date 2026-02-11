@@ -12,6 +12,7 @@ import {
   createShopOrderRevision,
   createShopOrderNote,
 } from '../database/queries/shop-order';
+import { logger } from '../utils/logger';
 
 export interface ShopOrderFileData {
   version: string;
@@ -108,7 +109,7 @@ class ShopOrderFileService {
       const jsonData = JSON.stringify(exportData, null, 2);
       writeFileSync(filePath, jsonData, 'utf-8');
     } catch (error) {
-      console.error('Error exporting prep project:', error);
+      logger.error('Error exporting prep project:', error);
       throw new Error(
         `Failed to export project: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -213,7 +214,7 @@ class ShopOrderFileService {
         projectName: newProject.production_name,
       };
     } catch (error) {
-      console.error('Error importing prep project:', error);
+      logger.error('Error importing prep project:', error);
       return {
         success: false,
         error: `Failed to import project: ${error instanceof Error ? error.message : 'Unknown error'}`,

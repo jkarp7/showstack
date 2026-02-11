@@ -2,6 +2,7 @@ import React from 'react';
 import { useShopOrderStore } from '../../store/shopOrderStore';
 import type { ShopOrderItem } from '../../types/shopOrder';
 import { calculateTotalQuantity, calculateRentalQuantity } from '../../utils/revisionUtils';
+import { logger } from '../../utils/logger';
 
 interface VenueInventoryPageProps {
   projectId: string;
@@ -38,7 +39,7 @@ export function VenueInventoryPage({ projectId }: VenueInventoryPageProps) {
     try {
       await window.api.prep.print.venueInventory(projectId);
     } catch (error) {
-      console.error('Error printing venue inventory:', error);
+      logger.error('Error printing venue inventory:', error);
     }
   };
 

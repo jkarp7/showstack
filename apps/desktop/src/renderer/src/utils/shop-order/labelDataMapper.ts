@@ -5,6 +5,7 @@
  * Supports all common label data fields used in theatrical lighting.
  */
 
+import { logger } from '../logger';
 import type { Fixture } from '../../types';
 
 /**
@@ -147,7 +148,7 @@ export async function getLabelDataForFixtures(
     // Map to label data
     return mapFixturesToLabelData(selectedFixtures);
   } catch (error) {
-    console.error('Failed to get label data for fixtures:', error);
+    logger.error('Failed to get label data for fixtures:', error);
     return [];
   }
 }
@@ -160,7 +161,7 @@ export async function getAllLabelDataForProject(projectId: string): Promise<Labe
     const fixtures = await window.api.fixtures.getByProject(projectId);
     return mapFixturesToLabelData(fixtures);
   } catch (error) {
-    console.error('Failed to get label data for project:', error);
+    logger.error('Failed to get label data for project:', error);
     return [];
   }
 }

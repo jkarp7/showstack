@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Zap, RotateCcw, Save } from 'lucide-react';
 import { useProjectStore } from '../../store/projectStore';
 import { getDefaultPhaseLabels, hasCustomPhaseLabels } from '../../utils/phaseLabels';
+import { logger } from '../../utils/logger';
 
 export function PhaseLabelsSettings() {
   const currentProject = useProjectStore((state) => state.currentProject);
@@ -47,7 +48,7 @@ export function PhaseLabelsSettings() {
       // Clear success message after 3 seconds
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (error) {
-      console.error('Failed to save phase labels:', error);
+      logger.error('Failed to save phase labels:', error);
       setSaveMessage({ type: 'error', text: 'Failed to save phase labels' });
     } finally {
       setIsSaving(false);

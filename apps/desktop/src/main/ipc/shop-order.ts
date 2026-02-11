@@ -28,6 +28,7 @@ import {
 import { seedDefaultPageLayoutsFromJSON } from '../database/seedDefaultLayoutsFromJSON';
 
 import { DatabaseError, ValidationError } from '../errors';
+import { logger } from '../utils/logger';
 import { performanceMonitor } from '../monitoring/PerformanceMonitor';
 import {
   CreateShopOrderProjectSchema,
@@ -71,7 +72,7 @@ export function registerShopOrderHandlers(): void {
       return result;
     } catch (error) {
       performanceMonitor.trackIPCHandler('shop-order:projects:getAll', Date.now() - start);
-      console.error('Failed to get prep projects:', {
+      logger.error('Failed to get prep projects:', {
         operation: 'shop-order:projects:getAll',
         error: error instanceof Error ? error.message : error,
       });
@@ -86,7 +87,7 @@ export function registerShopOrderHandlers(): void {
     try {
       return await shopOrderProjectService.getById(id);
     } catch (error) {
-      console.error('Failed to get prep project:', {
+      logger.error('Failed to get prep project:', {
         operation: 'shop-order:projects:getById',
         id,
         error: error instanceof Error ? error.message : error,
@@ -114,7 +115,7 @@ export function registerShopOrderHandlers(): void {
 
       return await shopOrderProjectService.create(validation.data);
     } catch (error) {
-      console.error('Failed to create prep project:', {
+      logger.error('Failed to create prep project:', {
         operation: 'shop-order:projects:create',
         data,
         error: error instanceof Error ? error.message : error,
@@ -147,7 +148,7 @@ export function registerShopOrderHandlers(): void {
 
         return await shopOrderProjectService.update(id, updates);
       } catch (error) {
-        console.error('Failed to update prep project:', {
+        logger.error('Failed to update prep project:', {
           operation: 'shop-order:projects:update',
           id,
           updates,
@@ -168,7 +169,7 @@ export function registerShopOrderHandlers(): void {
     try {
       await shopOrderProjectService.delete(id);
     } catch (error) {
-      console.error('Failed to delete prep project:', {
+      logger.error('Failed to delete prep project:', {
         operation: 'shop-order:projects:delete',
         id,
         error: error instanceof Error ? error.message : error,
@@ -188,7 +189,7 @@ export function registerShopOrderHandlers(): void {
     try {
       return await shopOrderSectionService.getByProjectId(projectId);
     } catch (error) {
-      console.error('Error getting prep sections:', error);
+      logger.error('Error getting prep sections:', error);
       throw error;
     }
   });
@@ -197,7 +198,7 @@ export function registerShopOrderHandlers(): void {
     try {
       return await shopOrderSectionService.create(data);
     } catch (error) {
-      console.error('Error creating prep section:', error);
+      logger.error('Error creating prep section:', error);
       throw error;
     }
   });
@@ -208,7 +209,7 @@ export function registerShopOrderHandlers(): void {
       try {
         return await shopOrderSectionService.update(id, updates);
       } catch (error) {
-        console.error('Error updating prep section:', error);
+        logger.error('Error updating prep section:', error);
         throw error;
       }
     },
@@ -218,7 +219,7 @@ export function registerShopOrderHandlers(): void {
     try {
       deleteShopOrderSection(id);
     } catch (error) {
-      console.error('Error deleting prep section:', error);
+      logger.error('Error deleting prep section:', error);
       throw error;
     }
   });
@@ -231,7 +232,7 @@ export function registerShopOrderHandlers(): void {
     try {
       return await shopOrderItemService.getBySectionId(sectionId);
     } catch (error) {
-      console.error('Error getting prep items by section:', error);
+      logger.error('Error getting prep items by section:', error);
       throw error;
     }
   });
@@ -240,7 +241,7 @@ export function registerShopOrderHandlers(): void {
     try {
       return await shopOrderItemService.getByProjectId(projectId);
     } catch (error) {
-      console.error('Error getting prep items by project:', error);
+      logger.error('Error getting prep items by project:', error);
       throw error;
     }
   });
@@ -249,7 +250,7 @@ export function registerShopOrderHandlers(): void {
     try {
       return await shopOrderItemService.create(data);
     } catch (error) {
-      console.error('Error creating prep item:', error);
+      logger.error('Error creating prep item:', error);
       throw error;
     }
   });
@@ -260,7 +261,7 @@ export function registerShopOrderHandlers(): void {
       try {
         return await shopOrderItemService.update(id, updates);
       } catch (error) {
-        console.error('Error updating prep item:', error);
+        logger.error('Error updating prep item:', error);
         throw error;
       }
     },
@@ -270,7 +271,7 @@ export function registerShopOrderHandlers(): void {
     try {
       deleteShopOrderItem(id);
     } catch (error) {
-      console.error('Error deleting prep item:', error);
+      logger.error('Error deleting prep item:', error);
       throw error;
     }
   });
@@ -283,7 +284,7 @@ export function registerShopOrderHandlers(): void {
     try {
       return await shopOrderRevisionService.getByProjectId(projectId);
     } catch (error) {
-      console.error('Error getting prep revisions:', error);
+      logger.error('Error getting prep revisions:', error);
       throw error;
     }
   });
@@ -294,7 +295,7 @@ export function registerShopOrderHandlers(): void {
       try {
         return await shopOrderRevisionService.create(data);
       } catch (error) {
-        console.error('Error creating prep revision:', error);
+        logger.error('Error creating prep revision:', error);
         throw error;
       }
     },
@@ -304,7 +305,7 @@ export function registerShopOrderHandlers(): void {
     try {
       deleteShopOrderRevision(id);
     } catch (error) {
-      console.error('Error deleting prep revision:', error);
+      logger.error('Error deleting prep revision:', error);
       throw error;
     }
   });
@@ -319,7 +320,7 @@ export function registerShopOrderHandlers(): void {
       try {
         return getNotesByProjectId(projectId, type);
       } catch (error) {
-        console.error('Error getting prep notes:', error);
+        logger.error('Error getting prep notes:', error);
         throw error;
       }
     },
@@ -329,7 +330,7 @@ export function registerShopOrderHandlers(): void {
     try {
       return await shopOrderNoteService.create(data);
     } catch (error) {
-      console.error('Error creating prep note:', error);
+      logger.error('Error creating prep note:', error);
       throw error;
     }
   });
@@ -340,7 +341,7 @@ export function registerShopOrderHandlers(): void {
       try {
         return await shopOrderNoteService.update(id, updates);
       } catch (error) {
-        console.error('Error updating prep note:', error);
+        logger.error('Error updating prep note:', error);
         throw error;
       }
     },
@@ -350,7 +351,7 @@ export function registerShopOrderHandlers(): void {
     try {
       deleteShopOrderNote(id);
     } catch (error) {
-      console.error('Error deleting prep note:', error);
+      logger.error('Error deleting prep note:', error);
       throw error;
     }
   });
@@ -363,7 +364,7 @@ export function registerShopOrderHandlers(): void {
     try {
       return getAllNoteTemplates(type);
     } catch (error) {
-      console.error('Error getting note templates:', error);
+      logger.error('Error getting note templates:', error);
       throw error;
     }
   });
@@ -372,7 +373,7 @@ export function registerShopOrderHandlers(): void {
     try {
       return await shopOrderNoteService.getTemplateById(id);
     } catch (error) {
-      console.error('Error getting note template:', error);
+      logger.error('Error getting note template:', error);
       throw error;
     }
   });
@@ -381,7 +382,7 @@ export function registerShopOrderHandlers(): void {
     try {
       return await shopOrderNoteService.getDefaultTemplate(type);
     } catch (error) {
-      console.error('Error getting default note template:', error);
+      logger.error('Error getting default note template:', error);
       throw error;
     }
   });
@@ -392,7 +393,7 @@ export function registerShopOrderHandlers(): void {
       try {
         return await shopOrderNoteService.createTemplate(data);
       } catch (error) {
-        console.error('Error creating note template:', error);
+        logger.error('Error creating note template:', error);
         throw error;
       }
     },
@@ -404,7 +405,7 @@ export function registerShopOrderHandlers(): void {
       try {
         return await shopOrderNoteService.updateTemplate(id, updates);
       } catch (error) {
-        console.error('Error updating note template:', error);
+        logger.error('Error updating note template:', error);
         throw error;
       }
     },
@@ -414,7 +415,7 @@ export function registerShopOrderHandlers(): void {
     try {
       deleteNoteTemplate(id);
     } catch (error) {
-      console.error('Error deleting note template:', error);
+      logger.error('Error deleting note template:', error);
       throw error;
     }
   });
@@ -427,7 +428,7 @@ export function registerShopOrderHandlers(): void {
     try {
       return await shopOrderFileService.showOpenDialog();
     } catch (error) {
-      console.error('Error showing open dialog:', error);
+      logger.error('Error showing open dialog:', error);
       throw error;
     }
   });
@@ -436,7 +437,7 @@ export function registerShopOrderHandlers(): void {
     try {
       return await shopOrderFileService.showSaveDialog(defaultName);
     } catch (error) {
-      console.error('Error showing save dialog:', error);
+      logger.error('Error showing save dialog:', error);
       throw error;
     }
   });
@@ -446,7 +447,7 @@ export function registerShopOrderHandlers(): void {
       await shopOrderFileService.exportProject(projectId, filePath);
       return { success: true };
     } catch (error) {
-      console.error('Error exporting prep project:', error);
+      logger.error('Error exporting prep project:', error);
       throw error;
     }
   });
@@ -455,7 +456,7 @@ export function registerShopOrderHandlers(): void {
     try {
       return await shopOrderFileService.importProject(filePath);
     } catch (error) {
-      console.error('Error importing prep project:', error);
+      logger.error('Error importing prep project:', error);
       throw error;
     }
   });
@@ -475,7 +476,7 @@ export function registerShopOrderHandlers(): void {
         // Note: projectId is ignored since templates are now app-level user preferences
         return getAllLayoutTemplates(pageType);
       } catch (error) {
-        console.error('Error getting layout templates:', error);
+        logger.error('Error getting layout templates:', error);
         throw error;
       }
     },
@@ -485,7 +486,7 @@ export function registerShopOrderHandlers(): void {
     try {
       return getLayoutTemplateById(id);
     } catch (error) {
-      console.error('Error getting layout template:', error);
+      logger.error('Error getting layout template:', error);
       throw error;
     }
   });
@@ -494,7 +495,7 @@ export function registerShopOrderHandlers(): void {
     try {
       return getLayoutElementsByTemplateId(templateId);
     } catch (error) {
-      console.error('Error getting layout elements:', error);
+      logger.error('Error getting layout elements:', error);
       throw error;
     }
   });
@@ -506,7 +507,7 @@ export function registerShopOrderHandlers(): void {
         // Note: projectId is ignored since templates are now app-level user preferences
         return getDefaultLayoutTemplate(pageType);
       } catch (error) {
-        console.error('Error getting default layout template:', error);
+        logger.error('Error getting default layout template:', error);
         throw error;
       }
     },
@@ -518,7 +519,7 @@ export function registerShopOrderHandlers(): void {
       try {
         return createLayoutTemplate(data, elements);
       } catch (error) {
-        console.error('Error creating layout template:', error);
+        logger.error('Error creating layout template:', error);
         throw error;
       }
     },
@@ -535,7 +536,7 @@ export function registerShopOrderHandlers(): void {
       try {
         return updateLayoutTemplate(id, updates, elements);
       } catch (error) {
-        console.error('Error updating layout template:', error);
+        logger.error('Error updating layout template:', error);
         throw error;
       }
     },
@@ -545,7 +546,7 @@ export function registerShopOrderHandlers(): void {
     try {
       deleteLayoutTemplate(id);
     } catch (error) {
-      console.error('Error deleting layout template:', error);
+      logger.error('Error deleting layout template:', error);
       throw error;
     }
   });
@@ -556,7 +557,7 @@ export function registerShopOrderHandlers(): void {
       seedDefaultPageLayoutsFromJSON();
       return { success: true, message: 'Default page layouts created successfully' };
     } catch (error) {
-      console.error('Error seeding default layouts:', error);
+      logger.error('Error seeding default layouts:', error);
       throw error;
     }
   });
@@ -626,7 +627,7 @@ export function registerShopOrderHandlers(): void {
         filePath: result.filePath,
       };
     } catch (error) {
-      console.error('Error exporting PDF:', error);
+      logger.error('Error exporting PDF:', error);
       throw error;
     }
   });
@@ -668,7 +669,7 @@ export function registerShopOrderHandlers(): void {
         },
         (success, failureReason) => {
           if (!success && failureReason) {
-            console.error('Print failed:', failureReason);
+            logger.error('Print failed:', failureReason);
           }
           // Close the hidden window after printing or canceling
           printWindow.close();
@@ -677,12 +678,12 @@ export function registerShopOrderHandlers(): void {
 
       return { success: true };
     } catch (error) {
-      console.error('Error printing:', error);
+      logger.error('Error printing:', error);
       throw error;
     }
   });
 
-  console.log('✅ Prep IPC handlers registered');
+  logger.info('✅ Prep IPC handlers registered');
 }
 
 // Helper function to generate HTML content for PDF using page layouts
@@ -872,11 +873,11 @@ function renderLayoutElement(
 
     // Special handling for logo field - render as image
     if (config.fieldType === 'logo') {
-      console.log('[PDF] Logo field detected!');
-      console.log('[PDF] Project logo_path:', (project as any).logo_path);
-      console.log('[PDF] Project logo_storage_path:', project.logo_storage_path);
-      console.log('[PDF] Project logo_url:', project.logo_url);
-      console.log('[PDF] Project parent_project_id:', project.parent_project_id);
+      logger.info('[PDF] Logo field detected!');
+      logger.info('[PDF] Project logo_path:', (project as any).logo_path);
+      logger.info('[PDF] Project logo_storage_path:', project.logo_storage_path);
+      logger.info('[PDF] Project logo_url:', project.logo_url);
+      logger.info('[PDF] Project parent_project_id:', project.parent_project_id);
 
       // Support both unified Project (logo_path) and legacy ShopOrderProject (logo_storage_path)
       // Prioritize logo_path as the unified field
@@ -884,26 +885,26 @@ function renderLayoutElement(
 
       // If no logo in prep project, check parent project
       if (!logoPath && project.parent_project_id) {
-        console.log('[PDF] No logo in ShopOrderProject, checking parent project...');
+        logger.info('[PDF] No logo in ShopOrderProject, checking parent project...');
         try {
           const parentProject = getProjectById(project.parent_project_id);
           if (parentProject?.logo_path) {
-            console.log('[PDF] Found logo in parent project:', parentProject.logo_path);
+            logger.info('[PDF] Found logo in parent project:', parentProject.logo_path);
             logoPath = parentProject.logo_path;
           } else {
-            console.log('[PDF] Parent project has no logo');
+            logger.info('[PDF] Parent project has no logo');
           }
         } catch (error) {
-          console.error('[PDF] Error loading parent project:', error);
+          logger.error('[PDF] Error loading parent project:', error);
         }
       }
 
       if (logoPath) {
-        console.log('[PDF] Using logo path:', logoPath);
+        logger.info('[PDF] Using logo path:', logoPath);
         try {
           // Read logo file and convert to base64 data URL
           if (fs.existsSync(logoPath)) {
-            console.log('[PDF] File exists, reading...');
+            logger.info('[PDF] File exists, reading...');
             const buffer = fs.readFileSync(logoPath);
             const ext = path.extname(logoPath).toLowerCase();
             const mimeTypes: Record<string, string> = {
@@ -917,19 +918,19 @@ function renderLayoutElement(
             const mimeType = mimeTypes[ext] || 'image/png';
             const base64 = buffer.toString('base64');
             const dataUrl = `data:${mimeType};base64,${base64}`;
-            console.log('[PDF] Logo converted to data URL, length:', dataUrl.length);
+            logger.info('[PDF] Logo converted to data URL, length:', dataUrl.length);
 
             return `<div style="${baseStyle} padding: 0;">
               <img src="${dataUrl}" alt="Project Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
             </div>`;
           } else {
-            console.log('[PDF] File does NOT exist at path:', logoPath);
+            logger.info('[PDF] File does NOT exist at path:', logoPath);
           }
         } catch (error) {
-          console.error('[PDF] Error loading logo:', error);
+          logger.error('[PDF] Error loading logo:', error);
         }
       } else {
-        console.log('[PDF] No logo_path or logo_storage_path in project');
+        logger.info('[PDF] No logo_path or logo_storage_path in project');
       }
       return ''; // No logo or failed to load
     }
@@ -988,7 +989,7 @@ function renderLayoutElement(
         try {
           previousSpareSnapshot = JSON.parse(previousRevision.spare_snapshot);
         } catch (e) {
-          console.error('Error parsing spare snapshot:', e);
+          logger.error('Error parsing spare snapshot:', e);
         }
       }
     }
@@ -1045,7 +1046,7 @@ function renderLayoutElement(
         try {
           revisionQuantities = item.revision_quantities ? JSON.parse(item.revision_quantities) : {};
         } catch (e) {
-          console.error('Error parsing revision_quantities:', e);
+          logger.error('Error parsing revision_quantities:', e);
         }
 
         // Get quantities for current and previous revisions

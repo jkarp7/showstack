@@ -4,9 +4,10 @@
  */
 
 import { getAppDatabase, saveAppDatabase } from './index';
+import { logger } from '../utils/logger';
 
 export function updatePaperworkTemplateHeaders(): void {
-  console.log('🔄 Updating paperwork templates with default header reference...');
+  logger.info('🔄 Updating paperwork templates with default header reference...');
 
   const db = getAppDatabase();
 
@@ -19,9 +20,9 @@ export function updatePaperworkTemplateHeaders(): void {
     ).run();
 
     saveAppDatabase(db);
-    console.log('✅ Updated paperwork templates with default header');
+    logger.info('✅ Updated paperwork templates with default header');
   } catch (error) {
-    console.error('❌ Error updating paperwork templates:', error);
+    logger.error('❌ Error updating paperwork templates:', error);
     // Don't throw - this is a non-critical update
   }
 }

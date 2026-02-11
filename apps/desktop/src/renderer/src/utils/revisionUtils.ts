@@ -1,3 +1,4 @@
+import { logger } from './logger';
 import type { PrepEquipmentItem, PrepSection, ItemChange, ChangeType } from '../types/shopOrder';
 
 /**
@@ -179,7 +180,7 @@ export function parseRevisionQuantities(jsonString?: string): RevisionQuantities
   try {
     return JSON.parse(jsonString);
   } catch (error) {
-    console.error('Failed to parse revision_quantities:', error);
+    logger.error('Failed to parse revision_quantities:', error);
     return {};
   }
 }
@@ -327,7 +328,7 @@ export function parseSpareSnapshot(jsonString?: string): SpareSnapshot {
   try {
     return JSON.parse(jsonString);
   } catch (error) {
-    console.error('Failed to parse spare_snapshot:', error);
+    logger.error('Failed to parse spare_snapshot:', error);
     return {};
   }
 }

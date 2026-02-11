@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { createLayoutTemplate } from './queries/layoutTemplates';
 import type { PrintSectionType } from '../types/prep';
+import { logger } from '../utils/logger';
 
 /**
  * Seed default page layouts that match the professional shop order format
@@ -19,7 +20,7 @@ interface LayoutElementData {
 }
 
 export function seedDefaultPageLayouts() {
-  console.log('Seeding default page layouts...');
+  logger.info('Seeding default page layouts...');
 
   // Cover Page Layout
   seedCoverPageLayout();
@@ -36,7 +37,7 @@ export function seedDefaultPageLayouts() {
   // Notes Layout
   seedNotesPageLayout();
 
-  console.log('Default page layouts seeded successfully');
+  logger.info('Default page layouts seeded successfully');
 }
 
 function seedCoverPageLayout() {
@@ -251,7 +252,7 @@ function seedCoverPageLayout() {
     elements as any,
   );
 
-  console.log('✓ Cover page layout created');
+  logger.info('✓ Cover page layout created');
 }
 
 function seedContactsPageLayout() {
@@ -894,7 +895,7 @@ function seedContactsPageLayout() {
     elements as any,
   );
 
-  console.log('✓ Contacts & Dates page layout created');
+  logger.info('✓ Contacts & Dates page layout created');
 }
 
 function seedEquipmentPageLayout() {
@@ -1020,7 +1021,7 @@ function seedEquipmentPageLayout() {
     elements as any,
   );
 
-  console.log('✓ Equipment page layout created');
+  logger.info('✓ Equipment page layout created');
 }
 
 function seedRevisionSummaryLayout() {
@@ -1079,7 +1080,7 @@ function seedRevisionSummaryLayout() {
     elements as any,
   );
 
-  console.log('✓ Revision Summary page layout created');
+  logger.info('✓ Revision Summary page layout created');
 }
 
 function seedNotesPageLayout() {
@@ -1269,5 +1270,5 @@ function seedNotesPageLayout() {
     elements as any,
   );
 
-  console.log('✓ Notes page layout created');
+  logger.info('✓ Notes page layout created');
 }

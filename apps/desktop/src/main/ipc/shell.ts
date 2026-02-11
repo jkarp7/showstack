@@ -5,6 +5,7 @@
 
 import { ipcMain, shell } from 'electron';
 import { ValidationError } from '../errors';
+import { logger } from '../utils/logger';
 
 /**
  * Register shell IPC handlers
@@ -28,7 +29,7 @@ export function registerShellHandlers(): void {
       await shell.openExternal(url);
       return { success: true };
     } catch (error) {
-      console.error('Failed to open external URL:', {
+      logger.error('Failed to open external URL:', {
         operation: 'shell:openExternal',
         url: url?.substring(0, 50), // Log only first 50 chars
         error: error instanceof Error ? error.message : error,

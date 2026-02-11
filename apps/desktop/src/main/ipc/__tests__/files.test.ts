@@ -17,6 +17,14 @@ import {
 vi.mock('fs/promises');
 vi.mock('fs');
 vi.mock('file-type');
+vi.mock('../../utils/logger', () => ({
+  logger: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
 vi.mock('electron', () => ({
   ipcMain: {
     handle: vi.fn(),

@@ -11,6 +11,7 @@ import {
   getSupabaseConnector,
   type ShowStackSyncStatus,
 } from '../services/sync';
+import { logger } from '../utils/logger';
 
 /**
  * Register all sync-related IPC handlers
@@ -305,10 +306,21 @@ export async function initializePowerSync(): Promise<void> {
     }
   } catch (error) {
     // Non-fatal - app works offline without sync
-    console.log(
-      '[Sync] PowerSync initialization skipped:',
-      error instanceof Error ? error.message : 'Unknown error',
-    );
+    logger.info('[Sync] PowerSync initialization skipped:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+}
+
+/**
+ * Get PowerSync sync status (for internal use by HealthChecker)
+ */
+export function getPowerSyncStatus(): ShowStackSyncStatus | null {
+  try {
+    const service = getPowerSyncService();
+    return service.getSyncStatus();
+  } catch {
+    return null;
   }
 }
 

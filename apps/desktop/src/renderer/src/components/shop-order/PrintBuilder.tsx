@@ -6,6 +6,7 @@ import type {
   ShopOrderProject,
 } from '../../types/shopOrder';
 import { LayoutDesigner } from './layout/LayoutDesigner';
+import { logger } from '../../utils/logger';
 
 interface PrintBuilderProps {
   currentProject: ShopOrderProject;
@@ -389,7 +390,7 @@ export function PrintBuilder({
                     'Default page layouts created successfully! You can now edit layouts for each section.',
                   );
                 } catch (error) {
-                  console.error('Error seeding defaults:', error);
+                  logger.error('Error seeding defaults:', error);
                   alert('Failed to create default layouts.');
                 }
               }}

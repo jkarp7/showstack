@@ -10,16 +10,17 @@ import {
   getLayoutElementsByTemplateId,
 } from './queries/layoutTemplates';
 import { getAppDatabase, saveAppDatabase } from './index';
+import { logger } from '../utils/logger';
 
 export function resetPaperworkHeaderTemplate(): void {
-  console.log('🔄 Checking if paperwork header template needs reset...');
+  logger.info('🔄 Checking if paperwork header template needs reset...');
 
   try {
     // Check if the template exists
     const template = getLayoutTemplateById('default-paperwork-header');
 
     if (!template) {
-      console.log('✅ Default paperwork header template not found (will be seeded)');
+      logger.info('✅ Default paperwork header template not found (will be seeded)');
       return;
     }
 
@@ -104,7 +105,7 @@ export function resetPaperworkHeaderTemplate(): void {
     }
 
     if (needsReset) {
-      console.log(`🔄 Old layout detected (${resetReason}) - deleting to trigger re-seed...`);
+      logger.info(`🔄 Old layout detected (${resetReason}) - deleting to trigger re-seed...`);
 
       // First, clear foreign key references from paperwork_templates
       const db = getAppDatabase();
@@ -121,13 +122,13 @@ export function resetPaperworkHeaderTemplate(): void {
 
       // Now delete the template
       deleteLayoutTemplate('default-paperwork-header');
-      console.log('✅ Successfully deleted old paperwork header template and all elements');
-      console.log('   Template will be re-seeded with updated layout');
+      logger.info('✅ Successfully deleted old paperwork header template and all elements');
+      logger.info('   Template will be re-seeded with updated layout');
     } else {
-      console.log('✅ Paperwork header template already has new layout - no reset needed');
+      logger.info('✅ Paperwork header template already has new layout - no reset needed');
     }
   } catch (error) {
-    console.error('❌ Error checking/resetting paperwork header template:', error);
+    logger.error('❌ Error checking/resetting paperwork header template:', error);
     // Don't throw - continue with app startup
   }
 }

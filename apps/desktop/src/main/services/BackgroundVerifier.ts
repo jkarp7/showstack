@@ -1,4 +1,5 @@
 import { licenseService } from './LicenseService';
+import { logger } from '../utils/logger';
 
 /**
  * Background Verifier
@@ -15,11 +16,11 @@ export class BackgroundVerifier {
    */
   start(): void {
     if (this.checkInterval) {
-      console.log('Background verifier already running');
+      logger.info('Background verifier already running');
       return;
     }
 
-    console.log('Starting background license verifier (checks every 6 hours)');
+    logger.info('Starting background license verifier (checks every 6 hours)');
 
     // Run initial check after 1 minute
     setTimeout(() => {
@@ -39,7 +40,7 @@ export class BackgroundVerifier {
     if (this.checkInterval) {
       clearInterval(this.checkInterval);
       this.checkInterval = null;
-      console.log('Background license verifier stopped');
+      logger.info('Background license verifier stopped');
     }
   }
 
@@ -49,9 +50,9 @@ export class BackgroundVerifier {
   private async performCheck(): Promise<void> {
     try {
       await licenseService.checkAndVerifyIfNeeded();
-      console.log('Background license verification check completed');
+      logger.info('Background license verification check completed');
     } catch (error) {
-      console.error('Background license verification failed:', error);
+      logger.error('Background license verification failed:', error);
     }
   }
 

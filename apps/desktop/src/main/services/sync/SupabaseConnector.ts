@@ -17,6 +17,7 @@ import {
 } from '@powersync/web';
 import { createClient, SupabaseClient, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { getConfig } from '../../config/env';
+import { logger } from '../../utils/logger';
 
 /**
  * Result of fetching credentials
@@ -63,7 +64,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       this.notifySessionListeners(session);
 
       if (config.app.debugPowerSync) {
-        console.log('[SupabaseConnector] Auth state changed:', event);
+        logger.info('[SupabaseConnector] Auth state changed:', event);
       }
     });
 
@@ -81,7 +82,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       } = await this.supabase.auth.getSession();
       this.currentSession = session;
     } catch (error) {
-      console.error('[SupabaseConnector] Failed to get initial session:', error);
+      logger.error('[SupabaseConnector] Failed to get initial session:', error);
     }
   }
 
@@ -262,7 +263,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       // Mark transaction as complete
       await transaction.complete();
     } catch (error) {
-      console.error('[SupabaseConnector] Upload failed:', error);
+      logger.error('[SupabaseConnector] Upload failed:', error);
 
       // Don't mark as complete - PowerSync will retry
       throw error;

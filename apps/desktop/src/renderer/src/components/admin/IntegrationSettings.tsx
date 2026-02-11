@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link2, Cloud, FileText, Save, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { logger } from '../../utils/logger';
 
 export function IntegrationSettings() {
   const [cloudStorageEnabled, setCloudStorageEnabled] = useState(false);
@@ -12,7 +13,7 @@ export function IntegrationSettings() {
   const handleTestConnection = async () => {
     setConnectionStatus('testing');
     // TODO: Implement connection test
-    console.log('Testing connection...');
+    logger.info('Testing connection...');
     setTimeout(() => {
       setConnectionStatus('connected');
     }, 1500);
@@ -20,7 +21,7 @@ export function IntegrationSettings() {
 
   const handleSave = async () => {
     // TODO: Implement save
-    console.log('Saving integration settings...');
+    logger.info('Saving integration settings...');
   };
 
   return (

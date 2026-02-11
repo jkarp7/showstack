@@ -2,6 +2,7 @@ import { ipcMain } from 'electron';
 import { getPreference, setPreference, getAllPreferences } from '../database/queries/preferences';
 import { errorHandler } from '../errors';
 import { DatabaseError, ValidationError } from '../errors';
+import { logger } from '../utils/logger';
 
 export function registerPreferencesHandlers() {
   ipcMain.handle('preferences:get', async (_event, projectId: string, key: string) => {
@@ -16,7 +17,7 @@ export function registerPreferencesHandlers() {
         'preferences:get',
       );
     } catch (error) {
-      console.error('Failed to get preference:', {
+      logger.error('Failed to get preference:', {
         operation: 'preferences:get',
         projectId,
         key,
@@ -45,7 +46,7 @@ export function registerPreferencesHandlers() {
         'preferences:set',
       );
     } catch (error) {
-      console.error('Failed to set preference:', {
+      logger.error('Failed to set preference:', {
         operation: 'preferences:set',
         projectId,
         key,
@@ -70,7 +71,7 @@ export function registerPreferencesHandlers() {
         'preferences:getAll',
       );
     } catch (error) {
-      console.error('Failed to get all preferences:', {
+      logger.error('Failed to get all preferences:', {
         operation: 'preferences:getAll',
         projectId,
         error: error instanceof Error ? error.message : error,

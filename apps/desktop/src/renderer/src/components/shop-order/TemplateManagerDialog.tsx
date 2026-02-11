@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { ShopOrderNoteTemplate } from '../../types/shopOrder';
+import { logger } from '../../utils/logger';
 
 interface TemplateManagerDialogProps {
   isOpen: boolean;
@@ -29,7 +30,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
       const allTemplates = await window.api.prep.noteTemplates.getAll(selectedType);
       setTemplates(allTemplates);
     } catch (error) {
-      console.error('Failed to load templates:', error);
+      logger.error('Failed to load templates:', error);
     }
   };
 
@@ -81,7 +82,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
       setFormIsDefault(false);
       loadTemplates();
     } catch (error) {
-      console.error('Failed to save template:', error);
+      logger.error('Failed to save template:', error);
       alert('Failed to save template');
     }
   };
@@ -104,7 +105,7 @@ export function TemplateManagerDialog({ isOpen, onClose }: TemplateManagerDialog
         setFormIsDefault(false);
       }
     } catch (error) {
-      console.error('Failed to delete template:', error);
+      logger.error('Failed to delete template:', error);
       alert('Failed to delete template');
     }
   };

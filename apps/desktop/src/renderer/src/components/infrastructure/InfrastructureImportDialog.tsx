@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Upload, FileText, AlertCircle, CheckCircle } from 'lucide-react';
+import { logger } from '../../utils/logger';
 import { useProjectStore } from '../../store/projectStore';
 import { useInfrastructureStore } from '../../store/infrastructureStore';
 
@@ -100,7 +101,7 @@ export function InfrastructureImportDialog({ onClose }: InfrastructureImportDial
         setStep('map');
       }
     } catch (error) {
-      console.error('Error selecting file:', error);
+      logger.error('Error selecting file:', error);
       alert('Failed to read CSV file');
     }
   };
@@ -135,7 +136,7 @@ export function InfrastructureImportDialog({ onClose }: InfrastructureImportDial
         await refreshInfrastructure(currentProject.id);
       }
     } catch (error) {
-      console.error('Error importing infrastructure:', error);
+      logger.error('Error importing infrastructure:', error);
       setImportResult({
         success: false,
         imported: 0,

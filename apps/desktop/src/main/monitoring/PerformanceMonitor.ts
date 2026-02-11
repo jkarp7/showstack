@@ -3,6 +3,8 @@
  * Tracks application performance metrics and sends to PostHog
  */
 
+import { logger } from '../utils/logger';
+
 interface MemoryUsage {
   heap_used_mb: number;
   heap_total_mb: number;
@@ -23,9 +25,9 @@ export class PerformanceMonitor {
 
     // Log to console
     if (isSlow) {
-      console.warn(`⚠️ Slow query: ${operation} took ${duration}ms`);
+      logger.warn(`⚠️ Slow query: ${operation} took ${duration}ms`);
     } else {
-      console.debug(`Query: ${operation} (${duration}ms, ${rowCount || 0} rows)`);
+      logger.debug(`Query: ${operation} (${duration}ms, ${rowCount || 0} rows)`);
     }
 
     // TODO: Send to PostHog when implemented
@@ -51,9 +53,9 @@ export class PerformanceMonitor {
 
     // Warn if memory usage is high (>1GB heap)
     if (usage.heapUsed > 1024 * 1024 * 1024) {
-      console.warn('⚠️ High memory usage:', metrics.heap_used_mb, 'MB');
+      logger.warn('⚠️ High memory usage:', metrics.heap_used_mb, 'MB');
     } else {
-      console.debug('Memory usage:', metrics.heap_used_mb, 'MB heap');
+      logger.debug('Memory usage:', metrics.heap_used_mb, 'MB heap');
     }
 
     // TODO: Send to PostHog when implemented
@@ -67,9 +69,9 @@ export class PerformanceMonitor {
     const isSlow = duration > this.SLOW_IPC_THRESHOLD_MS;
 
     if (isSlow) {
-      console.warn(`⚠️ Slow IPC handler: ${channel} took ${duration}ms`);
+      logger.warn(`⚠️ Slow IPC handler: ${channel} took ${duration}ms`);
     } else {
-      console.debug(`IPC: ${channel} (${duration}ms)`);
+      logger.debug(`IPC: ${channel} (${duration}ms)`);
     }
 
     // TODO: Send to PostHog when implemented
@@ -87,7 +89,7 @@ export class PerformanceMonitor {
     const isSlow = duration > this.SLOW_RENDER_THRESHOLD_MS;
 
     if (isSlow) {
-      console.warn(
+      logger.warn(
         `⚠️ Slow render: ${componentName} took ${duration}ms (target: <${this.SLOW_RENDER_THRESHOLD_MS}ms)`,
       );
     }

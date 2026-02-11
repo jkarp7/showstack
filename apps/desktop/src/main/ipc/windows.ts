@@ -1,6 +1,7 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { windowManager } from '../services/WindowManager';
 import { ValidationError } from '../errors';
+import { logger } from '../utils/logger';
 
 /**
  * Register window operation IPC handlers
@@ -18,7 +19,7 @@ export function registerWindowHandlers(): void {
 
       windowManager.createOrFocusProjectWindow(projectId);
     } catch (error) {
-      console.error('Failed to open project window:', {
+      logger.error('Failed to open project window:', {
         operation: 'window:openProject',
         projectId,
         error: error instanceof Error ? error.message : error,
@@ -43,7 +44,7 @@ export function registerWindowHandlers(): void {
       const info = windowManager.getWindowInfo(window.id);
       return info?.projectId || null;
     } catch (error) {
-      console.error('Failed to get current project ID:', {
+      logger.error('Failed to get current project ID:', {
         operation: 'window:getCurrentProjectId',
         error: error instanceof Error ? error.message : error,
       });
@@ -51,5 +52,5 @@ export function registerWindowHandlers(): void {
     }
   });
 
-  console.log('✅ Window IPC handlers registered');
+  logger.info('✅ Window IPC handlers registered');
 }

@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AnalyticsDashboard } from '../AnalyticsDashboard';
 import { telemetry } from '../../../services/telemetry';
+import { logger } from '../../../utils/logger';
 
 /**
  * AnalyticsDashboard Component Tests
@@ -17,6 +18,16 @@ vi.mock('../../../services/telemetry', () => ({
     getStats: vi.fn(),
     exportData: vi.fn(),
     clearLocalData: vi.fn(),
+  },
+}));
+
+// Mock logger
+vi.mock('../../../utils/logger', () => ({
+  logger: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   },
 }));
 
@@ -635,20 +646,16 @@ describe('AnalyticsDashboard', () => {
         throw new Error('Export failed');
       });
 
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
       render(<AnalyticsDashboard />);
 
       const exportButton = screen.getByRole('button', { name: /export telemetry data/i });
       await user.click(exportButton);
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         'Failed to export telemetry data:',
         expect.any(Error),
       );
       expect(mockAlert).toHaveBeenCalledWith('Failed to export data. Please try again.');
-
-      consoleErrorSpy.mockRestore();
     });
 
     it('should include timestamp in exported filename', async () => {
@@ -759,22 +766,18 @@ describe('AnalyticsDashboard', () => {
       mockConfirm.mockReturnValue(true);
       vi.mocked(telemetry.clearLocalData).mockRejectedValue(new Error('Clear failed'));
 
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
       render(<AnalyticsDashboard />);
 
       const clearButton = screen.getByRole('button', { name: /clear all local telemetry data/i });
       await user.click(clearButton);
 
       await waitFor(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect(logger.error).toHaveBeenCalledWith(
           'Failed to clear telemetry data:',
           expect.any(Error),
         );
         expect(mockAlert).toHaveBeenCalledWith('Failed to clear data. Please try again.');
       });
-
-      consoleErrorSpy.mockRestore();
     });
   });
 

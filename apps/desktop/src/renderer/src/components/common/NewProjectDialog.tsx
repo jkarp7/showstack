@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { logger } from '../../utils/logger';
 
 interface NewProjectDialogProps {
   isOpen: boolean;
@@ -42,7 +43,7 @@ export function NewProjectDialog({ isOpen, onClose, onCreate }: NewProjectDialog
         setLogoPath(filePath);
       }
     } else {
-      console.warn('Dialog API not available');
+      logger.warn('Dialog API not available');
     }
   };
 

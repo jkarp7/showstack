@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '../../../utils/logger';
 
 interface ColorPickerProps {
   value: string; // Current color (hex format)
@@ -47,7 +48,7 @@ function loadCustomColors(): string[] {
     const data: CustomColorStorage = JSON.parse(stored);
     return data.colors || [];
   } catch (error) {
-    console.warn('Failed to load custom colors:', error);
+    logger.warn('Failed to load custom colors:', error);
     return [];
   }
 }
@@ -61,7 +62,7 @@ function saveCustomColors(colors: string[]): void {
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (error) {
-    console.error('Failed to save custom colors:', error);
+    logger.error('Failed to save custom colors:', error);
   }
 }
 

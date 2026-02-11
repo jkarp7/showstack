@@ -1,5 +1,6 @@
 import { getDatabase, saveDatabase } from '../index';
 import { v4 as uuidv4 } from 'uuid';
+import { logger } from '../../utils/logger';
 
 /**
  * Phase Distribution Template interface
@@ -177,11 +178,11 @@ export function seedSystemPhaseTemplates(projectId: string = 'default-project'):
     .get(projectId);
 
   if (existing && (existing as any).count > 0) {
-    console.log(`System phase templates already exist for project ${projectId}`);
+    logger.info(`System phase templates already exist for project ${projectId}`);
     return;
   }
 
-  console.log(`Seeding system phase templates for project ${projectId}`);
+  logger.info(`Seeding system phase templates for project ${projectId}`);
   const now = Date.now();
 
   // System templates (24 circuits by default, will be scaled when applied)
@@ -339,5 +340,5 @@ export function seedSystemPhaseTemplates(projectId: string = 'default-project'):
   });
 
   saveDatabase();
-  console.log(`Seeded ${systemTemplates.length} system phase templates for project ${projectId}`);
+  logger.info(`Seeded ${systemTemplates.length} system phase templates for project ${projectId}`);
 }

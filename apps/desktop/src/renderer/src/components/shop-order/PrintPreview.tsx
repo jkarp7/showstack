@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { PrintTemplate, ShopOrderProject } from '../../types/shopOrder';
 import { PrintBuilder } from './PrintBuilder';
 import { PageRenderer } from './PageRenderer';
+import { logger } from '../../utils/logger';
 
 interface PrintPreviewProps {
   currentProject: ShopOrderProject;
@@ -130,7 +131,7 @@ export function PrintPreview({
         alert(`PDF exported successfully to:\n${result.filePath}`);
       }
     } catch (error) {
-      console.error('Error exporting PDF:', error);
+      logger.error('Error exporting PDF:', error);
       alert('Failed to export PDF. Please try again.');
     }
   };
@@ -144,7 +145,7 @@ export function PrintPreview({
         // We don't need to show a success message since the OS print dialog handles that
       }
     } catch (error) {
-      console.error('Error printing:', error);
+      logger.error('Error printing:', error);
       alert('Failed to open print dialog. Please try again.');
     }
   };
