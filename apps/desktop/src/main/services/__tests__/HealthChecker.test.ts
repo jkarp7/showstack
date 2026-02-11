@@ -21,6 +21,13 @@ vi.mock('../../utils/logger', () => ({
   },
 }));
 
+// Mock child_process
+vi.mock('child_process', () => ({
+  execFile: vi.fn((_cmd: string, _args: string[], cb: (err: Error | null) => void) => {
+    cb(new Error('not available'));
+  }),
+}));
+
 // Mock fs/promises
 vi.mock('fs/promises', () => ({
   default: {
@@ -59,7 +66,7 @@ vi.mock('../../ipc/sync', () => ({
   getPowerSyncStatus: vi.fn(() => null),
 }));
 
-import { HealthCheckerService } from '../HealthChecker';
+import { HealthCheckerService, clearImportCache } from '../HealthChecker';
 import * as fs from 'fs/promises';
 import { getConfig } from '../../config/env';
 import { getPowerSyncStatus } from '../../ipc/sync';
@@ -80,6 +87,7 @@ describe('HealthChecker', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    clearImportCache();
     checker = new HealthCheckerService();
 
     // Default healthy mocks
@@ -247,6 +255,19 @@ describe('HealthChecker', () => {
 
       expect(report.checks.sync.status).toBe('degraded');
       expect(report.checks.sync.message).toContain('not initialized');
+    });
+  });
+
+  describe('clearImportCache', () => {
+    it('should allow re-importing modules after cache clear', async () => {
+      // First check caches modules
+      await checker.check();
+
+      // Clear and check again - should re-import
+      clearImportCache();
+      const report = await checker.check();
+
+      expect(report.status).toBe('healthy');
     });
   });
 });

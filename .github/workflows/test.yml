@@ -85,6 +85,9 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Run ESLint
+        # ESLint warning threshold tracks @typescript-eslint/no-explicit-any migration.
+        # Baseline: 1,559 (Phase 5) → 855 (Phase 6) → 853 (current).
+        # Target: reduce to 0 by end of Phase 8. Only lower this number, never raise it.
         run: npm run lint -- --max-warnings 855
 
       - name: Check formatting

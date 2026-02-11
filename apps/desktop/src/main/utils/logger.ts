@@ -17,8 +17,17 @@ export enum LogLevel {
   ERROR = 'ERROR',
 }
 
+type LogValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | LogValue[]
+  | { [key: string]: LogValue };
+
 interface LogContext {
-  [key: string]: unknown;
+  [key: string]: LogValue;
 }
 
 class Logger {

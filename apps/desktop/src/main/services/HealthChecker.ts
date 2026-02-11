@@ -3,14 +3,21 @@
  *
  * Performs health checks across application subsystems:
  * - Database connectivity (app and project databases)
- * - Filesystem access (project data directory)
+ * - Filesystem access and disk space (project data directory)
  * - Memory usage (heap and RSS thresholds)
  * - Cloud sync status (PowerSync connection)
+ *
+ * Note: Configuration changes (e.g., sync URL) require an app restart
+ * to take effect in health checks, since modules are cached on first load.
  */
 
 import * as fs from 'fs/promises';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import { app } from 'electron';
 import { logger } from '../utils/logger';
+
+const execFileAsync = promisify(execFile);
 
 export type HealthStatus = 'healthy' | 'degraded' | 'unhealthy';
 
@@ -31,13 +38,29 @@ export interface HealthReport {
   };
 }
 
-const MEMORY_WARN_MB = 512;
-const MEMORY_CRITICAL_MB = 1024;
+// Electron apps with large datasets routinely use 500MB+.
+// These thresholds are tuned to avoid false positives.
+const MEMORY_WARN_MB = 1024;
+const MEMORY_CRITICAL_MB = 2048;
 
-// Cached dynamic imports to avoid repeated import overhead
+const DISK_WARN_MB = 1024; // Warn below 1GB free
+
+// Cached dynamic imports to avoid repeated import overhead.
+// These are never invalidated at runtime; configuration changes
+// require an app restart. Use clearImportCache() in tests.
 let _databaseManager: typeof import('../database/core/DatabaseManager') | null = null;
 let _envModule: typeof import('../config/env') | null = null;
 let _syncModule: typeof import('../ipc/sync') | null = null;
+
+/**
+ * Clear cached dynamic imports.
+ * @internal Exposed for testing and potential future config-reload scenarios.
+ */
+export function clearImportCache(): void {
+  _databaseManager = null;
+  _envModule = null;
+  _syncModule = null;
+}
 
 class HealthCheckerService {
   /**
@@ -114,18 +137,34 @@ class HealthCheckerService {
   }
 
   /**
-   * Check filesystem access for the user data directory
+   * Check filesystem access and available disk space for the user data directory
    */
   private async checkFilesystem(): Promise<CheckResult> {
     try {
       const userDataPath = app.getPath('userData');
-      // Verify read+write permissions without creating temp files
+      // Verify read+write permissions
       await fs.access(userDataPath, fs.constants.R_OK | fs.constants.W_OK);
+
+      // Check available disk space
+      const freeMB = await this.getFreeDiskSpaceMB(userDataPath);
+      const details: Record<string, unknown> = { path: userDataPath };
+
+      if (freeMB !== null) {
+        details.freeSpaceMB = freeMB;
+
+        if (freeMB < DISK_WARN_MB) {
+          return {
+            status: 'degraded',
+            message: `Low disk space: ${freeMB}MB free`,
+            details,
+          };
+        }
+      }
 
       return {
         status: 'healthy',
         message: 'Filesystem accessible',
-        details: { path: userDataPath },
+        details,
       };
     } catch (error) {
       return {
@@ -133,6 +172,44 @@ class HealthCheckerService {
         message: `Filesystem error: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
+  }
+
+  /**
+   * Get free disk space in MB for the given path.
+   * Returns null if unable to determine (non-critical).
+   */
+  private async getFreeDiskSpaceMB(dirPath: string): Promise<number | null> {
+    try {
+      if (process.platform === 'win32') {
+        // Windows: use wmic or PowerShell
+        const { stdout } = await execFileAsync('wmic', [
+          'logicaldisk',
+          'where',
+          `DeviceID='${dirPath.charAt(0)}:'`,
+          'get',
+          'FreeSpace',
+          '/value',
+        ]);
+        const match = stdout.match(/FreeSpace=(\d+)/);
+        if (match) {
+          return Math.round(parseInt(match[1], 10) / 1024 / 1024);
+        }
+      } else {
+        // macOS/Linux: use df
+        const { stdout } = await execFileAsync('df', ['-k', dirPath]);
+        const lines = stdout.trim().split('\n');
+        if (lines.length >= 2) {
+          const parts = lines[1].split(/\s+/);
+          const availableKB = parseInt(parts[3], 10);
+          if (!isNaN(availableKB)) {
+            return Math.round(availableKB / 1024);
+          }
+        }
+      }
+    } catch {
+      // Non-critical: disk space check is best-effort
+    }
+    return null;
   }
 
   /**
