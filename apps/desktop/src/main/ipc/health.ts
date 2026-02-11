@@ -5,7 +5,7 @@
  */
 
 import { ipcMain } from 'electron';
-import { healthChecker } from '../services/HealthChecker';
+import { healthChecker, HealthReportSchema } from '../services/HealthChecker';
 import { logger } from '../utils/logger';
 
 /**
@@ -17,17 +17,20 @@ export function registerHealthHandlers(): void {
    */
   ipcMain.handle('health:check', async () => {
     try {
-      return await healthChecker.check();
+      const report = await healthChecker.check();
+      return HealthReportSchema.parse(report);
     } catch (error) {
       logger.error('Health check failed', error instanceof Error ? error : undefined);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const fallbackMessage = `Health check error: ${errorMessage}`;
       return {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         checks: {
-          database: { status: 'unhealthy', message: 'Health check error' },
-          filesystem: { status: 'unhealthy', message: 'Health check error' },
-          memory: { status: 'unhealthy', message: 'Health check error' },
-          sync: { status: 'unhealthy', message: 'Health check error' },
+          database: { status: 'unhealthy', message: fallbackMessage },
+          filesystem: { status: 'unhealthy', message: fallbackMessage },
+          memory: { status: 'unhealthy', message: fallbackMessage },
+          sync: { status: 'unhealthy', message: fallbackMessage },
         },
       };
     }

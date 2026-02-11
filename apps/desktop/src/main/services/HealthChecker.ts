@@ -15,6 +15,7 @@ import * as fs from 'fs/promises';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { app } from 'electron';
+import { z } from 'zod';
 import { logger } from '../utils/logger';
 
 const execFileAsync = promisify(execFile);
@@ -37,6 +38,25 @@ export interface HealthReport {
     sync: CheckResult;
   };
 }
+
+const HealthStatusSchema = z.enum(['healthy', 'degraded', 'unhealthy']);
+
+const CheckResultSchema = z.object({
+  status: HealthStatusSchema,
+  message: z.string(),
+  details: z.record(z.unknown()).optional(),
+});
+
+export const HealthReportSchema = z.object({
+  status: HealthStatusSchema,
+  timestamp: z.string(),
+  checks: z.object({
+    database: CheckResultSchema,
+    filesystem: CheckResultSchema,
+    memory: CheckResultSchema,
+    sync: CheckResultSchema,
+  }),
+});
 
 // Electron apps with large datasets routinely use 500MB+.
 // These thresholds are tuned to avoid false positives.
@@ -114,8 +134,10 @@ class HealthCheckerService {
           | { ok: number }
           | undefined;
         projectOk = projectResult?.ok === 1;
-      } catch {
-        // Project database may not be loaded yet
+      } catch (e) {
+        logger.debug('Project database not available', {
+          error: e instanceof Error ? e.message : String(e),
+        });
       }
 
       if (appResult?.ok === 1 && projectOk) {
@@ -181,7 +203,8 @@ class HealthCheckerService {
   private async getFreeDiskSpaceMB(dirPath: string): Promise<number | null> {
     try {
       if (process.platform === 'win32') {
-        // Windows: use wmic or PowerShell
+        // Security: dirPath.charAt(0) extracts only the drive letter (single char),
+        // preventing path injection into the wmic command.
         const { stdout } = await execFileAsync('wmic', [
           'logicaldisk',
           'where',

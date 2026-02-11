@@ -35,6 +35,8 @@ import { backgroundVerifier } from './services/BackgroundVerifier';
 import { licenseService } from './services/LicenseService';
 import { performanceMonitor } from './monitoring/PerformanceMonitor';
 
+const MEMORY_MONITOR_INTERVAL_MS = 5 * 60 * 1000;
+
 // Set app name for macOS menu bar
 app.setName('ShowStack');
 
@@ -101,13 +103,9 @@ app.on('ready', async () => {
   windowManager.createLandingWindow();
 
   // Start periodic performance monitoring
-  // Track memory usage every 5 minutes
-  setInterval(
-    () => {
-      performanceMonitor.trackMemoryUsage();
-    },
-    5 * 60 * 1000,
-  );
+  setInterval(() => {
+    performanceMonitor.trackMemoryUsage();
+  }, MEMORY_MONITOR_INTERVAL_MS);
 
   // Log initial memory baseline
   performanceMonitor.trackMemoryUsage();
