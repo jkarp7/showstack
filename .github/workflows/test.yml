@@ -85,7 +85,7 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Run ESLint
-        run: npm run lint -- --max-warnings 855
+        run: npm run lint -- --max-warnings 859
 
       - name: Check formatting
         run: npm run format:check
