@@ -31,7 +31,9 @@ import { registerPhaseTemplateHandlers } from './ipc/phaseTemplates';
 import { registerInfrastructureHandlers } from './ipc/infrastructure';
 import { registerSyncHandlers, initializePowerSync, disposePowerSync } from './ipc/sync';
 import { registerHealthHandlers } from './ipc/health';
+import { registerBackupHandlers } from './ipc/backup';
 import { backgroundVerifier } from './services/BackgroundVerifier';
+import { backupService } from './services/BackupService';
 import { licenseService } from './services/LicenseService';
 import { performanceMonitor } from './monitoring/PerformanceMonitor';
 
@@ -82,6 +84,7 @@ app.on('ready', async () => {
   registerInfrastructureHandlers();
   registerSyncHandlers();
   registerHealthHandlers();
+  registerBackupHandlers();
 
   // Initialize PowerSync (non-blocking, works offline)
   initializePowerSync().catch((err) => {
@@ -90,6 +93,11 @@ app.on('ready', async () => {
 
   // Start background license verification (non-blocking)
   backgroundVerifier.start();
+
+  // Start backup service (non-blocking)
+  backupService.start().catch((err) => {
+    logger.error('Failed to start backup service', err instanceof Error ? err : undefined);
+  });
 
   // Initial license check (non-blocking)
   licenseService.checkAndVerifyIfNeeded().catch(() => {
@@ -124,6 +132,9 @@ app.on('activate', () => {
 });
 
 app.on('before-quit', async () => {
+  // Stop backup service
+  backupService.stop();
+
   // Stop background verification
   backgroundVerifier.stop();
 

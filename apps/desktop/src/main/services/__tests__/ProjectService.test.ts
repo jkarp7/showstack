@@ -45,6 +45,12 @@ vi.mock('../../database/monitoring/DatabaseMonitor', () => ({
   },
 }));
 
+vi.mock('../BackupService', () => ({
+  backupService: {
+    performBackup: vi.fn().mockResolvedValue({ success: true }),
+  },
+}));
+
 // Import after mocking
 import { ProjectService } from '../ProjectService';
 import {

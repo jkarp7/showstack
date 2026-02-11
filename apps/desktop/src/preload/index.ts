@@ -342,6 +342,14 @@ contextBridge.exposeInMainWorld('api', {
     check: () => ipcRenderer.invoke('health:check'),
   },
 
+  // Backup operations
+  backup: {
+    create: (reason?: string) => ipcRenderer.invoke('backup:create', reason),
+    list: () => ipcRenderer.invoke('backup:list'),
+    restore: (backupDirName: string) => ipcRenderer.invoke('backup:restore', backupDirName),
+    delete: (backupDirName: string) => ipcRenderer.invoke('backup:delete', backupDirName),
+  },
+
   // Authentication operations
   auth: {
     signIn: (email: string, password: string) => ipcRenderer.invoke('auth:signIn', email, password),
@@ -623,6 +631,35 @@ export interface ElectronAPI {
       userId: string | null;
       email: string | null;
     }>;
+  };
+  backup: {
+    create: (reason?: string) => Promise<{
+      success: boolean;
+      backupDir?: string;
+      metadata?: {
+        timestamp: number;
+        reason?: string;
+        appDbSize: number;
+        projectDbSize: number;
+        version: string;
+      };
+      error?: string;
+    }>;
+    list: () => Promise<
+      Array<{
+        timestamp: number;
+        reason?: string;
+        appDbSize: number;
+        projectDbSize: number;
+        version: string;
+      }>
+    >;
+    restore: (backupDirName: string) => Promise<{
+      success: boolean;
+      restoredFrom?: string;
+      error?: string;
+    }>;
+    delete: (backupDirName: string) => Promise<{ success: boolean; error?: string }>;
   };
 }
 

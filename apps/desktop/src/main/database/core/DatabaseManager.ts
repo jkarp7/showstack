@@ -309,6 +309,10 @@ export class DatabaseManager {
     try {
       logger.info('Replacing project database with imported data');
 
+      // Backup before destructive operation
+      const { backupService } = await import('../../services/BackupService');
+      await backupService.performBackup('before-replace-project-database');
+
       // Validate that the imported data is a valid SQLite database
       this.validateSQLiteDatabase(importedData);
 
