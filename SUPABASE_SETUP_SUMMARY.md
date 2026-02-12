@@ -329,7 +329,7 @@ Use this checklist to verify all files are in place:
 
 - [Supabase Docs](https://supabase.com/docs)
 - [PowerSync Docs](https://docs.powersync.com)
-- [ShowStack Phase 3 Plan](./docs/renovation/Phase-3-Cloud-Collaboration.md)
+- [ShowStack Phase 3 Plan](./docs/archive/renovation/Phase-3-Cloud-Collaboration.md)
 
 **Troubleshooting:**
 
