@@ -4,7 +4,7 @@ Thank you for your interest in contributing to ShowStack!
 
 ## Development Status
 
-ShowStack is currently in **alpha development** undergoing a major renovation (Phases 0-7). The Production module's Shop Order tool is complete, and we're actively developing the Fixture Management features. We welcome contributions from experienced developers.
+ShowStack is currently in **alpha development**. A major renovation (Phases 0-7) is nearly complete — covering stabilization, database migration, validation, cloud sync, testing, CI/CD, security/monitoring, and disaster recovery. The Production module's Shop Order tool is complete, and we're actively developing the Fixture Management features. We welcome contributions from experienced developers.
 
 ## Getting Started
 
@@ -96,7 +96,7 @@ Pre-commit hooks (Husky + lint-staged) will automatically run ESLint and Prettie
 - **E2E tests** for user journeys (Playwright - planned)
 
 **Coverage targets:** 50% project / 60% patch (enforced via Codecov)
-**Current:** 70%+ coverage with 1,440+ tests across 47 files
+**Current:** 70%+ coverage with 1,520+ tests across 53 files
 
 ## Module Development
 
@@ -132,7 +132,6 @@ See [docs/development/ARCHITECTURE.md](docs/development/ARCHITECTURE.md) for det
 
 - ESLint
 - Prettier
-- TypeScript Vue Plugin (Volar)
 - Tailwind CSS IntelliSense
 - GitLens
 

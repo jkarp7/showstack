@@ -1,12 +1,12 @@
-# ShowStack:Production - Development Environment Setup
+# ShowStack - Development Environment Setup
 
 ## Getting Started with the Codebase
 
-**Last Updated:** November 16, 2025
+**Last Updated:** February 11, 2026
 
 ---
 
-## 📋 Prerequisites
+## Prerequisites
 
 ### Required Software
 
@@ -35,67 +35,62 @@ nvm use 20
 
 ---
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
-showstack-production/
+showstack/
 ├── .github/
-│   └── workflows/          # CI/CD pipelines
-├── src/
-│   ├── main/              # Electron main process (Node.js)
-│   │   ├── index.ts       # Main entry point
-│   │   ├── window.ts      # Window management
-│   │   ├── database/      # SQLite database layer
-│   │   │   ├── schema.ts  # Database schema
-│   │   │   ├── migrations/ # Database migrations
-│   │   │   └── queries.ts # SQL queries
-│   │   ├── integrations/  # External integrations
-│   │   │   ├── eos/       # ETC Eos OSC integration
-│   │   │   ├── vectorworks/ # VW file parsing
-│   │   │   └── printers/  # Label printer drivers
-│   │   └── ipc/           # IPC handlers
-│   ├── renderer/          # React app (Browser)
-│   │   ├── src/
-│   │   │   ├── App.tsx    # Main app component
-│   │   │   ├── components/ # React components
-│   │   │   │   ├── DataGrid/
-│   │   │   │   ├── PowerSystem/
-│   │   │   │   ├── LabelDesigner/
-│   │   │   │   ├── Reports/
-│   │   │   │   └── ...
-│   │   │   ├── hooks/     # Custom React hooks
-│   │   │   ├── stores/    # Zustand state management
-│   │   │   ├── lib/       # Utility libraries
-│   │   │   ├── types/     # TypeScript type definitions
-│   │   │   └── styles/    # Global styles, Tailwind config
-│   │   ├── index.html     # HTML entry point
-│   │   └── vite.config.ts # Vite configuration
-│   └── preload/           # Electron preload scripts
-│       └── index.ts       # Expose APIs to renderer
-├── resources/             # App resources (icons, assets)
-├── scripts/               # Build and utility scripts
-├── tests/                 # Test files
-│   ├── unit/
-│   ├── integration/
-│   └── e2e/
-├── docs/                  # Documentation
-├── .eslintrc.js          # ESLint configuration
-├── .prettierrc           # Prettier configuration
-├── tsconfig.json         # TypeScript configuration
-├── package.json          # Dependencies and scripts
-├── electron-builder.yml  # Electron builder config
-└── README.md             # Project overview
+│   └── workflows/            # CI/CD pipelines (GitHub Actions)
+├── apps/
+│   └── desktop/
+│       └── src/
+│           ├── main/         # Electron main process (Node.js)
+│           │   ├── index.ts  # Main entry point
+│           │   ├── database/ # SQLite database layer (two-database architecture)
+│           │   │   ├── appSchema.ts     # App database schema
+│           │   │   ├── projectSchema.ts # Project database schema
+│           │   │   └── index.ts         # Database initialization & migrations
+│           │   ├── ipc/      # IPC handlers (fixture, prep, files, settings, etc.)
+│           │   ├── services/ # Backend services (backup, crash recovery, sentry, etc.)
+│           │   ├── errors/   # Error handling (ErrorHandler, error types)
+│           │   └── utils/    # Utilities (logger, config, health checker)
+│           ├── renderer/     # React app (Browser)
+│           │   └── src/
+│           │       ├── App.tsx
+│           │       ├── components/  # React components by domain
+│           │       ├── hooks/       # Custom React hooks
+│           │       ├── store/       # Zustand state management
+│           │       ├── types/       # TypeScript type definitions
+│           │       ├── constants/   # Design tokens and theme
+│           │       └── utils/       # Shared utility functions
+│           └── preload/      # Electron preload scripts
+├── packages/
+│   └── shared/               # Shared types and Zod schemas
+│       └── src/
+│           └── schemas/      # Zod validation schemas
+├── resources/                # App resources (icons, assets)
+├── docs/                     # Documentation
+│   ├── development/          # Architecture and setup guides
+│   ├── renovation/           # Renovation phase docs
+│   └── features/             # Feature specifications
+├── eslint.config.js          # ESLint 9 flat config
+├── .prettierrc               # Prettier configuration
+├── tailwind.config.js        # Tailwind CSS configuration
+├── tsconfig.json             # TypeScript configuration
+├── electron-builder.yml      # Electron builder config
+├── electron.vite.config.ts   # electron-vite configuration
+└── package.json              # Dependencies and scripts
 ```
 
 ---
 
-## 🚀 Initial Setup
+## Initial Setup
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_ORG/showstack-production.git
-cd showstack-production
+git clone https://github.com/jkarp7/showstack.git
+cd showstack
 ```
 
 ### 2. Install Dependencies
@@ -106,13 +101,17 @@ npm install
 
 This will install:
 
-- Electron
-- React 18
-- TypeScript
+- Electron 39+
+- React 19
+- TypeScript 5.9+
+- electron-vite (build tool)
 - Tailwind CSS
 - Zustand (state management)
 - better-sqlite3 (database)
-- Vite (build tool)
+- PowerSync + Supabase (cloud sync)
+- Zod (runtime validation)
+- Sentry (error monitoring)
+- Husky + lint-staged (pre-commit hooks)
 - And all other dependencies
 
 ### 3. Set Up Environment Variables
@@ -126,23 +125,22 @@ Edit `.env`:
 ```env
 # Development
 NODE_ENV=development
-VITE_APP_NAME=ShowStack:Production
-VITE_APP_VERSION=1.0.0-alpha
 
-# Database
-DB_PATH=~/Documents/ShowStack/Projects/
+# Optional: Cloud Sync
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+VITE_POWERSYNC_URL=
 
-# Optional: Cloud Sync (for future)
-API_URL=http://localhost:3001
-API_KEY=
-
-# Optional: Crash Reporting
+# Optional: Error Monitoring
 SENTRY_DSN=
+
+# Optional: Telemetry
+VITE_POSTHOG_KEY=
 ```
 
 ---
 
-## 🛠️ Development Commands
+## Development Commands
 
 ### Start Development Server
 
@@ -152,34 +150,35 @@ npm run dev
 
 This starts:
 
-1. Vite dev server for React (hot reload)
+1. electron-vite dev server for React (hot reload)
 2. Electron app in development mode
-3. TypeScript compiler in watch mode
 
 ### Build for Production
 
 ```bash
-# Build renderer (React app)
-npm run build:renderer
-
-# Build main process
-npm run build:main
-
-# Package Electron app
+# Build with electron-vite
 npm run build
+
+# Create distributable
+npm run dist
+
+# Platform-specific builds
+npm run dist:mac
+npm run dist:win
+npm run dist:linux
 ```
 
 ### Run Tests
 
 ```bash
-# Unit tests
-npm run test
+# Run all tests (watch mode)
+npm test
 
-# Integration tests
-npm run test:integration
+# Run all tests once (CI mode)
+npm run test:run
 
-# E2E tests (requires built app)
-npm run test:e2e
+# Run tests with UI
+npm run test:ui
 
 # Test coverage
 npm run test:coverage
@@ -197,27 +196,32 @@ npm run format
 npm run format:check
 
 # TypeScript type checking
-npm run type-check
+npx tsc --noEmit
 ```
+
+Pre-commit hooks (Husky + lint-staged) automatically run ESLint and Prettier on staged files.
 
 ---
 
-## 📦 Key Dependencies
+## Key Dependencies
 
 ### Production Dependencies
 
 ```json
 {
-  "electron": "^27.0.0",
-  "react": "^18.2.0",
-  "react-dom": "^18.2.0",
-  "zustand": "^4.4.0",
-  "better-sqlite3": "^9.0.0",
-  "osc": "^2.4.4",
-  "uuid": "^9.0.0",
-  "@radix-ui/react-*": "^1.0.0",
-  "clsx": "^2.0.0",
-  "tailwind-merge": "^2.0.0"
+  "electron": "^39.2.1",
+  "react": "^19.2.0",
+  "react-dom": "^19.2.0",
+  "zustand": "^5.0.8",
+  "better-sqlite3": "^12.6.2",
+  "@powersync/web": "^1.32.0",
+  "@supabase/supabase-js": "^2.95.2",
+  "@sentry/electron": "^7.7.1",
+  "puppeteer": "^24.34.0",
+  "react-router-dom": "^6.28.0",
+  "lucide-react": "^0.460.0",
+  "clsx": "^2.1.1",
+  "uuid": "^13.0.0"
 }
 ```
 
@@ -225,66 +229,64 @@ npm run type-check
 
 ```json
 {
-  "typescript": "^5.2.0",
-  "vite": "^5.0.0",
-  "vite-plugin-electron": "^0.14.0",
-  "electron-builder": "^24.6.0",
-  "@types/react": "^18.2.0",
-  "@types/node": "^20.0.0",
-  "eslint": "^8.50.0",
-  "prettier": "^3.0.0",
-  "vitest": "^1.0.0",
-  "@testing-library/react": "^14.0.0"
+  "typescript": "^5.9.3",
+  "electron-vite": "^4.0.1",
+  "vite": "^7.2.2",
+  "electron-builder": "^26.0.12",
+  "eslint": "^9.39.2",
+  "typescript-eslint": "^8.54.0",
+  "prettier": "^3.8.1",
+  "vitest": "^3.2.4",
+  "@testing-library/react": "^16.3.1",
+  "husky": "^9.1.7",
+  "lint-staged": "^16.2.7",
+  "tailwindcss": "^3.4.1"
 }
 ```
 
 ---
 
-## 🗄️ Database Setup
+## Database
 
-The app uses SQLite for local storage. Schema is automatically initialized on first run.
+The app uses a **two-database architecture** with better-sqlite3 (WAL mode):
 
-### Manual Database Management
+- **App Database** (`showstack-app.db`): Licenses, settings, layout templates — never exported
+- **Project Database** (`showstack-projects.db`): All project data (fixtures, shop orders, infrastructure) — fully exportable
+
+### Schema Locations
+
+- App schema: `apps/desktop/src/main/database/appSchema.ts`
+- Project schema: `apps/desktop/src/main/database/projectSchema.ts`
+
+### Database Management
+
+Migrations run automatically on app startup. The database is initialized on first run — no manual setup required.
 
 ```bash
-# Open database in SQLite CLI
-sqlite3 ~/Documents/ShowStack/Projects/your-project.db
+# If you need to rebuild better-sqlite3 for Electron
+npx electron-rebuild -f -w better-sqlite3
 
-# Run migrations manually
-npm run db:migrate
-
-# Seed with sample data (development)
-npm run db:seed
-
-# Reset database (careful!)
-npm run db:reset
+# Rebuild for vitest (after electron-rebuild breaks it)
+npm rebuild better-sqlite3
 ```
-
-### Database Schema Location
-
-See `src/main/database/schema.ts` for the complete schema definition.
 
 ---
 
-## 🎨 UI Development with Tailwind
+## UI Development with Tailwind
 
 ### Tailwind Configuration
 
-Edit `src/renderer/src/styles/tailwind.config.js`:
+See `tailwind.config.js` at the project root:
 
 ```javascript
-module.exports = {
-  content: ['./src/renderer/**/*.{js,ts,jsx,tsx}'],
-  theme: {
-    extend: {
-      colors: {
-        primary: '#1E3A8A',
-        secondary: '#60A5FA',
-        accent: '#F59E0B',
-      },
-    },
-  },
-  plugins: [require('@tailwindcss/forms')],
+export default {
+  darkMode: 'class',
+  content: [
+    'apps/desktop/src/renderer/index.html',
+    'apps/desktop/src/renderer/src/**/*.{js,ts,jsx,tsx}',
+  ],
+  theme: { extend: {} },
+  plugins: [],
 };
 ```
 
@@ -302,73 +304,30 @@ Style with Tailwind classes.
 
 ---
 
-## 🧪 Testing Strategy
+## Testing Strategy
 
 ### Unit Tests (Vitest + React Testing Library)
 
 ```typescript
-// src/renderer/src/components/DataGrid/__tests__/DataGrid.test.tsx
+// apps/desktop/src/renderer/src/components/fixture/__tests__/example.test.tsx
 import { render, screen } from '@testing-library/react';
-import { DataGrid } from '../DataGrid';
+import { describe, it, expect } from 'vitest';
 
-describe('DataGrid', () => {
-  it('renders fixture data', () => {
-    const fixtures = [
-      { position: '1', type: 'Source Four 26°', channel: '101' },
-    ];
-
-    render(<DataGrid fixtures={fixtures} />);
-
-    expect(screen.getByText('Source Four 26°')).toBeInTheDocument();
+describe('Component', () => {
+  it('renders correctly', () => {
+    render(<Component />);
+    expect(screen.getByText('expected text')).toBeInTheDocument();
   });
 });
 ```
 
-### Integration Tests
+Tests are colocated with source code in `__tests__/` directories.
 
-Test main ↔ renderer IPC communication:
-
-```typescript
-// tests/integration/database.test.ts
-import { test, expect } from 'vitest';
-import { Database } from '../../src/main/database';
-
-test('create and retrieve fixture', async () => {
-  const db = new Database(':memory:');
-
-  const fixture = await db.fixtures.create({
-    position: '1',
-    type: 'Source Four 26°',
-    channel: '101',
-  });
-
-  const retrieved = await db.fixtures.findById(fixture.id);
-
-  expect(retrieved.position).toBe('1');
-});
-```
-
-### E2E Tests (Playwright)
-
-```typescript
-// tests/e2e/fixture-management.spec.ts
-import { test, expect } from '@playwright/test';
-
-test('add new fixture', async ({ page }) => {
-  await page.goto('app://');
-
-  await page.click('text=Add Fixture');
-  await page.fill('[name="position"]', '1');
-  await page.fill('[name="type"]', 'Source Four 26°');
-  await page.click('text=Save');
-
-  await expect(page.locator('text=Source Four 26°')).toBeVisible();
-});
-```
+**Current:** 1,520+ tests across 53 files, 70%+ coverage.
 
 ---
 
-## 🐛 Debugging
+## Debugging
 
 ### VSCode Launch Configuration
 
@@ -384,14 +343,14 @@ Create `.vscode/launch.json`:
       "request": "launch",
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
       "runtimeArgs": ["--inspect=5858", "."],
-      "preLaunchTask": "npm: build:main"
+      "preLaunchTask": "npm: build"
     },
     {
       "name": "Debug Renderer Process",
       "type": "chrome",
       "request": "attach",
       "port": 9222,
-      "webRoot": "${workspaceFolder}/src/renderer",
+      "webRoot": "${workspaceFolder}/apps/desktop/src/renderer",
       "timeout": 30000
     }
   ]
@@ -413,18 +372,13 @@ Then attach Chrome DevTools to `chrome://inspect`.
 
 ---
 
-## 📱 Platform-Specific Considerations
+## Platform-Specific Considerations
 
 ### macOS Development
 
 ```bash
 # Code signing (required for distribution)
-# Get certificate from Apple Developer account
 security find-identity -v -p codesigning
-
-# Set in electron-builder.yml
-mac:
-  identity: "Developer ID Application: Your Name (TEAM_ID)"
 ```
 
 ### Windows Development
@@ -445,7 +399,7 @@ sudo apt-get install build-essential libsqlite3-dev
 
 ---
 
-## 🚢 Building & Distribution
+## Building & Distribution
 
 ### Create Installer
 
@@ -458,103 +412,63 @@ npm run dist:mac
 npm run dist:win
 npm run dist:linux
 
-# Build for all platforms (requires macOS for .dmg)
+# Build for all platforms
 npm run dist:all
 ```
 
 Output: `dist/` folder with installers
 
-### Electron Builder Configuration
+---
 
-Edit `electron-builder.yml`:
+## Troubleshooting
 
-```yaml
-appId: com.lytrix.showstack-production
-productName: ShowStack Production
+### Common Issues
 
-directories:
-  output: dist
-  buildResources: resources
+**Issue:** `better-sqlite3` build fails
 
-files:
-  - '!**/.vscode/*'
-  - '!src/*'
-  - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+```bash
+# Rebuild for Electron
+npx electron-rebuild -f -w better-sqlite3
 
-mac:
-  category: public.app-category.productivity
-  hardenedRuntime: true
-  gatekeeperAssess: false
-  icon: resources/icon.icns
-
-win:
-  target: nsis
-  icon: resources/icon.ico
-
-linux:
-  target: AppImage
-  category: Utility
-  icon: resources/icon.png
+# Rebuild for vitest (if electron-rebuild broke it)
+npm rebuild better-sqlite3
 ```
 
-### Auto-Update Setup
+**Issue:** Hot reload not working
 
-```typescript
-// src/main/updater.ts
-import { autoUpdater } from 'electron-updater';
-
-autoUpdater.checkForUpdatesAndNotify();
+```bash
+# Clear Vite cache
+rm -rf node_modules/.vite
+npm run dev
 ```
 
-Configure update server in `electron-builder.yml`:
+**Issue:** Database locked
 
-```yaml
-publish:
-  provider: github
-  owner: YOUR_ORG
-  repo: showstack-production
+```bash
+# Check for orphaned Electron processes
+ps aux | grep electron
+kill -9 <PID>
 ```
 
 ---
 
-## 🔐 Code Signing & Notarization
+## Contributing
 
-### macOS
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for:
 
-```bash
-# 1. Get Apple Developer ID certificate
-# 2. Store credentials in environment
-
-export APPLE_ID="your@email.com"
-export APPLE_ID_PASSWORD="app-specific-password"
-export APPLE_TEAM_ID="YOUR_TEAM_ID"
-
-# 3. Build will automatically sign and notarize
-npm run dist:mac
-```
-
-### Windows
-
-```bash
-# Get code signing certificate (from DigiCert, Sectigo, etc.)
-# Store as .pfx file
-
-# Set in environment
-export CSC_LINK="path/to/certificate.pfx"
-export CSC_KEY_PASSWORD="certificate_password"
-
-# Build will automatically sign
-npm run dist:win
-```
+- Branch strategy and commit conventions
+- Code standards (TypeScript, React, testing)
+- Pull request process
+- Linting and formatting requirements
 
 ---
 
-## 📚 Learning Resources
+## Learning Resources
 
 ### Electron
 
 - [Electron Documentation](https://www.electronjs.org/docs)
+- [electron-vite](https://electron-vite.org/)
 - [Electron Builder](https://www.electron.build/)
 
 ### React & TypeScript
@@ -571,136 +485,16 @@ npm run dist:win
 
 - [Zustand](https://github.com/pmndrs/zustand)
 
-### SQLite
+### Database
 
 - [better-sqlite3](https://github.com/WiseLibs/better-sqlite3)
 - [SQLite Docs](https://www.sqlite.org/docs.html)
 
----
+### Cloud Sync
 
-## 🆘 Troubleshooting
-
-### Common Issues
-
-**Issue:** `better-sqlite3` build fails
-
-```bash
-# Solution: Rebuild for Electron
-npm rebuild better-sqlite3 --build-from-source
-```
-
-**Issue:** Hot reload not working
-
-```bash
-# Solution: Clear Vite cache
-rm -rf node_modules/.vite
-npm run dev
-```
-
-**Issue:** Database locked
-
-```bash
-# Solution: Close all connections
-# Check for orphaned processes
-ps aux | grep electron
-kill -9 <PID>
-```
-
-**Issue:** App won't launch in production
-
-```bash
-# Solution: Check console for errors
-# Run from terminal to see output
-./dist/mac/ShowStack\ Production.app/Contents/MacOS/ShowStack\ Production
-```
+- [PowerSync](https://www.powersync.com/)
+- [Supabase](https://supabase.com/)
 
 ---
 
-## 🤝 Contributing
-
-### Branch Strategy
-
-```
-main           - Production releases
-develop        - Development integration
-feature/*      - New features
-bugfix/*       - Bug fixes
-release/*      - Release preparation
-```
-
-### Commit Convention
-
-```
-feat: Add fixture import from CSV
-fix: Resolve DMX conflict detection bug
-docs: Update README with setup instructions
-style: Format code with Prettier
-refactor: Extract grid logic to hooks
-test: Add tests for power calculations
-chore: Update dependencies
-```
-
-### Pull Request Process
-
-1. Create feature branch from `develop`
-2. Write tests for new features
-3. Ensure all tests pass
-4. Update documentation
-5. Submit PR to `develop`
-6. Code review + approval
-7. Squash and merge
-
----
-
-## 📞 Support
-
-### Getting Help
-
-- **Discord:** [Join ShowStack Discord](#)
-- **GitHub Issues:** [Report bugs or request features](#)
-- **Email:** dev@showstack.app
-- **Docs:** [docs.showstack.app](#)
-
-### Reporting Bugs
-
-Include:
-
-1. Operating system and version
-2. Electron/Node.js version
-3. Steps to reproduce
-4. Expected vs actual behavior
-5. Screenshots/logs if applicable
-
----
-
-## ✅ Pre-Launch Checklist
-
-Before committing:
-
-- [ ] Code compiles without errors
-- [ ] All tests pass
-- [ ] Linter passes (no warnings)
-- [ ] Types are correct (no `any`)
-- [ ] Documentation updated
-- [ ] Manual testing completed
-
-Before creating PR:
-
-- [ ] Branch is up to date with `develop`
-- [ ] Conflicts resolved
-- [ ] Commit messages follow convention
-- [ ] PR description is clear
-- [ ] Reviewers assigned
-
-Before release:
-
-- [ ] Version number bumped
-- [ ] CHANGELOG updated
-- [ ] All features tested on all platforms
-- [ ] Installers built and signed
-- [ ] Release notes written
-- [ ] Marketing materials prepared
-
----
-
-**Ready to start building?** Run `npm run dev` and open `http://localhost:5173` in the Electron window!
+**Ready to start building?** Run `npm run dev` and the Electron app will launch with hot reload!
