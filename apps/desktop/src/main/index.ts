@@ -107,7 +107,9 @@ app.on('ready', async () => {
   });
 
   // Mark app as running for crash detection
-  crashRecoveryService.markRunning();
+  // Placed AFTER all critical services start so a crash during startup
+  // doesn't falsely trigger crash recovery on next launch
+  await crashRecoveryService.markRunning();
 
   // Initial license check (non-blocking)
   licenseService.checkAndVerifyIfNeeded().catch(() => {

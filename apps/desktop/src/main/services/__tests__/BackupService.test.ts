@@ -71,8 +71,25 @@ describe('BackupService', () => {
     vi.useFakeTimers();
     service = new BackupService();
 
-    // Default: stat returns valid sizes
-    mockStat.mockResolvedValue({ size: 1024 });
+    // Re-setup mocks after clearAllMocks resets them
+    mockBackup.mockResolvedValue(undefined);
+    mockMkdir.mockResolvedValue(undefined);
+    mockRm.mockResolvedValue(undefined);
+    mockWriteFile.mockResolvedValue(undefined);
+    mockCopyFile.mockResolvedValue(undefined);
+    vi.mocked(databaseManager.initialize).mockResolvedValue(undefined);
+
+    // Mock the private disk space check to avoid real execFile calls
+    vi.spyOn(service as never, 'getFreeDiskSpaceMB' as never).mockResolvedValue(50000 as never);
+
+    // Default: stat returns valid sizes (for backup file stats)
+    // WAL stat should return null (file not found) by default
+    mockStat.mockImplementation((path: string) => {
+      if (typeof path === 'string' && path.endsWith('-wal')) {
+        return Promise.reject(new Error('ENOENT'));
+      }
+      return Promise.resolve({ size: 1024 });
+    });
   });
 
   afterEach(() => {
@@ -109,17 +126,27 @@ describe('BackupService', () => {
     });
 
     it('should return early when backup is already in progress', async () => {
-      // Start a backup that takes a while
-      mockBackup.mockImplementationOnce(() => new Promise((resolve) => setTimeout(resolve, 1000)));
+      // Use a deferred promise to control backup timing without fake timers
+      let resolveBackup: () => void;
+      mockBackup.mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveBackup = resolve;
+          }),
+      );
 
       const first = service.performBackup('first');
+
+      // Allow microtasks to process so first backup reaches the await
+      await vi.advanceTimersByTimeAsync(0);
+
       const second = await service.performBackup('second');
 
       expect(second.success).toBe(false);
       expect(second.error).toBe('Backup already in progress');
 
       // Let the first backup complete
-      vi.advanceTimersByTime(1000);
+      resolveBackup!();
       await first;
     });
 
@@ -143,6 +170,24 @@ describe('BackupService', () => {
       expect(mockRm).toHaveBeenCalledWith(expect.stringContaining('backup-'), {
         recursive: true,
         force: true,
+      });
+    });
+
+    it('should warn when WAL checkpoint is incomplete', async () => {
+      // WAL file exists with large size
+      mockStat.mockImplementation((path: string) => {
+        if (path.endsWith('-wal')) {
+          return Promise.resolve({ size: 4096 });
+        }
+        return Promise.resolve({ size: 1024 });
+      });
+
+      const { logger } = await import('../../utils/logger');
+
+      await service.performBackup('test');
+
+      expect(logger.warn).toHaveBeenCalledWith('WAL checkpoint may be incomplete', {
+        walSize: 4096,
       });
     });
   });
@@ -232,9 +277,9 @@ describe('BackupService', () => {
         { name: 'backup-200', isDirectory: () => true },
       ]);
 
-      const meta100: any = { timestamp: 100, appDbSize: 100, projectDbSize: 200, version: '1.0.0' };
-      const meta200: any = { timestamp: 200, appDbSize: 100, projectDbSize: 200, version: '1.0.0' };
-      const meta300: any = { timestamp: 300, appDbSize: 100, projectDbSize: 200, version: '1.0.0' };
+      const meta100 = { timestamp: 100, appDbSize: 100, projectDbSize: 200, version: '1.0.0' };
+      const meta200 = { timestamp: 200, appDbSize: 100, projectDbSize: 200, version: '1.0.0' };
+      const meta300 = { timestamp: 300, appDbSize: 100, projectDbSize: 200, version: '1.0.0' };
 
       mockReadFile
         .mockResolvedValueOnce(JSON.stringify(meta100))
@@ -266,20 +311,70 @@ describe('BackupService', () => {
       expect(backups).toHaveLength(1);
       expect(backups[0].timestamp).toBe(100);
     });
+
+    it('should reject metadata with missing required fields (Zod validation)', async () => {
+      mockReaddir.mockResolvedValueOnce([{ name: 'backup-100', isDirectory: () => true }]);
+
+      // Missing required fields (no timestamp, version, projectDbSize)
+      mockReadFile.mockResolvedValueOnce(JSON.stringify({ appDbSize: 100 }));
+
+      const backups = await service.listBackups();
+
+      expect(backups).toHaveLength(0);
+    });
+
+    it('should reject metadata with wrong types (Zod validation)', async () => {
+      mockReaddir.mockResolvedValueOnce([{ name: 'backup-100', isDirectory: () => true }]);
+
+      // timestamp should be number, not string
+      mockReadFile.mockResolvedValueOnce(
+        JSON.stringify({
+          timestamp: 'not-a-number',
+          appDbSize: 100,
+          projectDbSize: 200,
+          version: '1.0.0',
+        }),
+      );
+
+      const backups = await service.listBackups();
+
+      expect(backups).toHaveLength(0);
+    });
   });
 
   describe('restoreFromBackup', () => {
-    it('should validate backup, close DBs, copy files, and reinitialize', async () => {
-      // Mock validation: all files exist with valid sizes
-      mockStat.mockResolvedValue({ size: 1024 });
-
+    it('should validate backup, save rollback files, close DBs, copy files, and reinitialize', async () => {
       const result = await service.restoreFromBackup('backup-12345');
 
       expect(result.success).toBe(true);
       expect(result.restoredFrom).toBe('backup-12345');
+
+      // Should save rollback copies before closing DBs
+      expect(mockMkdir).toHaveBeenCalledWith(expect.stringContaining('.restore-rollback'), {
+        recursive: true,
+      });
+      // 2 rollback copies + 2 restore copies = 4 copyFile calls
+      expect(mockCopyFile).toHaveBeenCalledTimes(4);
       expect(databaseManager.close).toHaveBeenCalled();
-      expect(mockCopyFile).toHaveBeenCalledTimes(2);
       expect(databaseManager.initialize).toHaveBeenCalled();
+      // Rollback dir should be cleaned up on success
+      expect(mockRm).toHaveBeenCalledWith(expect.stringContaining('.restore-rollback'), {
+        recursive: true,
+        force: true,
+      });
+    });
+
+    it('should rollback on initialize failure', async () => {
+      vi.mocked(databaseManager.initialize)
+        .mockRejectedValueOnce(new Error('DB corrupt'))
+        .mockResolvedValueOnce(undefined); // Second call succeeds (rollback)
+
+      const result = await service.restoreFromBackup('backup-12345');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('DB corrupt');
+      // Should have called initialize twice (failed restore + rollback)
+      expect(databaseManager.initialize).toHaveBeenCalledTimes(2);
     });
 
     it('should fail on invalid backup directory name', async () => {
@@ -351,6 +446,38 @@ describe('BackupService', () => {
       const result = await service.deleteBackup('../escape');
       expect(result.success).toBe(false);
       expect(result.error).toBe('Invalid backup directory name');
+    });
+  });
+
+  describe('disk space check', () => {
+    it('should skip backup when disk space check returns sufficient space', async () => {
+      // Default mock returns ~48GB free — backup should proceed
+      const result = await service.performBackup('test');
+
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('backup-crash-restore integration', () => {
+    it('should complete full backup → validate → restore cycle', async () => {
+      // Step 1: Create a backup
+      const backupResult = await service.performBackup('integration-test');
+      expect(backupResult.success).toBe(true);
+      const backupDirName = backupResult.backupDir!;
+
+      // Step 2: Validate the backup
+      const isValid = await service.validateBackup(backupDirName);
+      expect(isValid).toBe(true);
+
+      // Step 3: Restore from the backup
+      const restoreResult = await service.restoreFromBackup(backupDirName);
+      expect(restoreResult.success).toBe(true);
+      expect(restoreResult.restoredFrom).toBe(backupDirName);
+
+      // Verify the full sequence: checkpoint → backup → close → copy → initialize
+      expect(databaseManager.forceCheckpoint).toHaveBeenCalled();
+      expect(databaseManager.close).toHaveBeenCalled();
+      expect(databaseManager.initialize).toHaveBeenCalled();
     });
   });
 });
