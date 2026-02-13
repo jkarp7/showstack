@@ -1,15 +1,8 @@
-import { useState } from 'react';
-import { FileText, CheckCircle, Calendar, AlertCircle, Key } from 'lucide-react';
+import { FileText, CheckCircle, Calendar, AlertCircle } from 'lucide-react';
 import { useUser } from '../../hooks/useUser';
-import { useAuthStore } from '../../store/authStore';
 
 export function LicenseInfo() {
-  const { license, status, refreshStatus } = useUser();
-  const { isAuthenticated, activateLicense } = useAuthStore();
-  const [licenseKey, setLicenseKey] = useState('');
-  const [activating, setActivating] = useState(false);
-  const [activationError, setActivationError] = useState<string | null>(null);
-  const [activationSuccess, setActivationSuccess] = useState(false);
+  const { license, status } = useUser();
 
   const hasLicense = !!license;
   const licenseType = license?.tier || 'None';
@@ -18,26 +11,6 @@ export function LicenseInfo() {
     : 'N/A';
   const isMaintenanceExpired = status?.status === 'maintenance_expired';
   const isActive = status?.status === 'active';
-
-  const handleActivate = async () => {
-    if (!licenseKey.trim()) return;
-
-    setActivating(true);
-    setActivationError(null);
-    setActivationSuccess(false);
-
-    const result = await activateLicense(licenseKey.trim());
-
-    if (result.success) {
-      setActivationSuccess(true);
-      setLicenseKey('');
-      await refreshStatus();
-    } else {
-      setActivationError(result.error || 'Activation failed');
-    }
-
-    setActivating(false);
-  };
 
   return (
     <div className="space-y-6">
@@ -80,54 +53,6 @@ export function LicenseInfo() {
                 sync is disabled. Renew to get updates and sync.
               </p>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* License Activation — shown when no license or not authenticated */}
-      {(!hasLicense || !isAuthenticated) && (
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Key className="w-6 h-6 text-gray-400" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Activate License
-            </h3>
-          </div>
-
-          {!isAuthenticated && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              Sign in to your account first, then enter your license key below.
-            </p>
-          )}
-
-          {activationError && (
-            <div className="mb-4 p-3 bg-red-900/30 border border-red-700 rounded text-red-300 text-sm">
-              {activationError}
-            </div>
-          )}
-
-          {activationSuccess && (
-            <div className="mb-4 p-3 bg-green-900/30 border border-green-700 rounded text-green-300 text-sm">
-              License activated successfully!
-            </div>
-          )}
-
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={licenseKey}
-              onChange={(e) => setLicenseKey(e.target.value)}
-              placeholder="Enter your license key"
-              className="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:outline-none focus:border-blue-500"
-              disabled={activating || !isAuthenticated}
-            />
-            <button
-              onClick={handleActivate}
-              disabled={activating || !licenseKey.trim() || !isAuthenticated}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white rounded text-sm font-medium transition-colors"
-            >
-              {activating ? 'Activating...' : 'Activate'}
-            </button>
           </div>
         </div>
       )}
@@ -217,7 +142,8 @@ export function LicenseInfo() {
               No License Found
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Enter a license key above to activate your ShowStack license.
+              Sign in with the email associated with your purchase to activate your license
+              automatically.
             </p>
           </div>
         )}

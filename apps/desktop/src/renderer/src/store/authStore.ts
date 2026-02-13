@@ -66,7 +66,6 @@ export interface AuthState {
   refreshAuthState: () => Promise<void>;
   refreshSyncStatus: () => Promise<void>;
   refreshLicenseStatus: () => Promise<void>;
-  activateLicense: (key: string) => Promise<{ success: boolean; error?: string }>;
   initializeSync: () => Promise<void>;
 
   // UI actions
@@ -230,21 +229,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
     } catch (error) {
       logger.error('[AuthStore] Failed to refresh license status:', error);
-    }
-  },
-
-  // Activate a license key
-  activateLicense: async (key: string) => {
-    try {
-      const result = await window.api.license.activate(key);
-      if (result.success) {
-        await get().refreshLicenseStatus();
-      }
-      return result;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Activation failed';
-      logger.error('[AuthStore] Failed to activate license:', error);
-      return { success: false, error: errorMessage };
     }
   },
 

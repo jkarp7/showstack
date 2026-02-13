@@ -210,27 +210,14 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
   // ============================================
 
   /**
-   * Activate a license key via Supabase RPC
-   */
-  async activateLicense(key: string): Promise<{ success: boolean; error?: string; license?: any }> {
-    const { data, error } = await this.supabase.rpc('activate_license', {
-      p_license_key: key,
-    });
-
-    if (error) {
-      return { success: false, error: error.message };
-    }
-
-    return data as { success: boolean; error?: string; license?: any };
-  }
-
-  /**
-   * Fetch the current user's active license from Supabase
+   * Fetch the current user's active license from Supabase.
+   * First checks by user_id (already claimed), then falls back to email match.
    */
   async fetchUserLicense(): Promise<any | null> {
     const userId = this.getUserId();
     if (!userId) return null;
 
+    // Try by user_id first (already claimed)
     const { data, error } = await this.supabase
       .from('licenses')
       .select('*')
@@ -238,11 +225,43 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       .eq('status', 'active')
       .single();
 
-    if (error || !data) {
-      return null;
+    if (!error && data) {
+      return data;
     }
 
-    return data;
+    // Fall back to email match (unclaimed license visible via RLS)
+    const userEmail = this.currentSession?.user?.email;
+    if (!userEmail) return null;
+
+    const { data: emailMatch, error: emailError } = await this.supabase
+      .from('licenses')
+      .select('*')
+      .eq('email', userEmail)
+      .is('user_id', null)
+      .eq('status', 'active')
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .single();
+
+    if (!emailError && emailMatch) {
+      return emailMatch;
+    }
+
+    return null;
+  }
+
+  /**
+   * Claim an unclaimed license by email via Supabase RPC.
+   * Called automatically on sign-in when a license exists for the user's email.
+   */
+  async claimLicenseByEmail(): Promise<{ success: boolean; error?: string; license?: any }> {
+    const { data, error } = await this.supabase.rpc('claim_license_by_email');
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return data as { success: boolean; error?: string; license?: any };
   }
 
   // ============================================

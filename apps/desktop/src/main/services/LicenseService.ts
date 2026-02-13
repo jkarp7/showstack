@@ -1,9 +1,4 @@
-import {
-  getCurrentLicense,
-  getLicenseByKey,
-  createLicense,
-  updateLicense,
-} from '../database/queries/license';
+import { getCurrentLicense, createLicense, updateLicense } from '../database/queries/license';
 import { logger } from '../utils/logger';
 import type {
   UserLicense,
@@ -129,7 +124,8 @@ export class LicenseService {
   }
 
   /**
-   * Verify license via Supabase (replaces old API endpoint verification)
+   * Verify license via Supabase.
+   * First tries fetching by user_id (already claimed), then auto-claims by email.
    */
   async verifyLicenseViaSupabase(): Promise<boolean> {
     try {
@@ -141,7 +137,20 @@ export class LicenseService {
         return false;
       }
 
-      const serverLicense = await connector.fetchUserLicense();
+      let serverLicense = await connector.fetchUserLicense();
+
+      // If fetchUserLicense found an unclaimed email match, try to claim it
+      if (serverLicense && !serverLicense.user_id) {
+        logger.info('Found unclaimed license matching email, attempting auto-claim');
+        const claimResult = await connector.claimLicenseByEmail();
+        if (claimResult.success) {
+          // Re-fetch to get the updated record with user_id set
+          serverLicense = await connector.fetchUserLicense();
+        } else {
+          logger.warn(`Auto-claim failed: ${claimResult.error}`);
+        }
+      }
+
       if (!serverLicense) {
         logger.info('No license found on server for current user');
         return false;
@@ -177,65 +186,6 @@ export class LicenseService {
         error: error instanceof Error ? error.message : String(error),
       });
       return false;
-    }
-  }
-
-  /**
-   * Activate a license key via Supabase RPC
-   */
-  async activateLicenseKey(
-    licenseKey: string,
-  ): Promise<{ success: boolean; error?: string; license?: UserLicense }> {
-    try {
-      const { getSupabaseConnector } = await import('../services/sync/SupabaseConnector');
-      const connector = getSupabaseConnector();
-
-      if (!connector.isAuthenticated()) {
-        return { success: false, error: 'You must be signed in to activate a license' };
-      }
-
-      const result = await connector.activateLicense(licenseKey);
-
-      if (!result.success) {
-        return { success: false, error: result.error };
-      }
-
-      const serverLicense = result.license;
-
-      // Store license locally in SQLite
-      const existing = getLicenseByKey(licenseKey);
-      if (existing) {
-        const updated = updateLicense(existing.id, {
-          userId: connector.getUserId() || undefined,
-          tier: serverLicense.tier as LicenseTier,
-          modules: serverLicense.modules,
-          maintenanceEndDate: new Date(serverLicense.maintenanceEndDate).getTime(),
-          expirationDate: new Date(serverLicense.maintenanceEndDate).getTime(),
-          status: serverLicense.status as 'active' | 'expired' | 'suspended',
-          lastVerified: Date.now(),
-        });
-        return { success: true, license: updated };
-      }
-
-      const newLicense = createLicense({
-        email: connector.getSession()?.user?.email || '',
-        licenseKey: serverLicense.licenseKey,
-        tier: serverLicense.tier as LicenseTier,
-        modules: serverLicense.modules || [],
-        expirationDate: new Date(serverLicense.maintenanceEndDate).getTime(),
-        maintenanceEndDate: new Date(serverLicense.maintenanceEndDate).getTime(),
-        userId: connector.getUserId() || undefined,
-      });
-
-      return { success: true, license: newLicense };
-    } catch (error) {
-      logger.error('License activation failed', {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Activation failed',
-      };
     }
   }
 

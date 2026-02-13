@@ -2,12 +2,11 @@
  * Tests for LicenseService
  *
  * Tests the perpetual fallback licensing model:
- * - Build date before maintenance end → canRunApp true, canSync true
- * - Build date after maintenance end → canRunApp false (canEdit false)
- * - Maintenance expired but build date valid → canRunApp true, canSync false
+ * - Build date before maintenance end -> canRunApp true, canSync true
+ * - Build date after maintenance end -> canRunApp false (canEdit false)
+ * - Maintenance expired but build date valid -> canRunApp true, canSync false
  * - Offline grace period
- * - activateLicenseKey with mocked Supabase RPC
- * - verifyLicenseViaSupabase updates local SQLite
+ * - verifyLicenseViaSupabase with email-based auto-claim
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -16,7 +15,6 @@ import type { UserLicense, ModuleAccess } from '../../../shared/types/license.ty
 // Mock the database queries
 vi.mock('../../database/queries/license', () => ({
   getCurrentLicense: vi.fn(),
-  getLicenseByKey: vi.fn(),
   createLicense: vi.fn(),
   updateLicense: vi.fn(),
 }));
@@ -36,24 +34,18 @@ const mockConnector = {
   isAuthenticated: vi.fn(),
   getUserId: vi.fn(),
   getSession: vi.fn(),
-  activateLicense: vi.fn(),
   fetchUserLicense: vi.fn(),
+  claimLicenseByEmail: vi.fn(),
 };
 
 vi.mock('../../services/sync/SupabaseConnector', () => ({
   getSupabaseConnector: () => mockConnector,
 }));
 
-import {
-  getCurrentLicense,
-  getLicenseByKey,
-  createLicense,
-  updateLicense,
-} from '../../database/queries/license';
+import { getCurrentLicense, createLicense, updateLicense } from '../../database/queries/license';
 import { LicenseService } from '../LicenseService';
 
 const mockedGetCurrentLicense = vi.mocked(getCurrentLicense);
-const mockedGetLicenseByKey = vi.mocked(getLicenseByKey);
 const mockedCreateLicense = vi.mocked(createLicense);
 const mockedUpdateLicense = vi.mocked(updateLicense);
 
@@ -138,15 +130,8 @@ describe('LicenseService', () => {
     });
 
     it('returns maintenance_expired when maintenance expired but build date is valid', () => {
-      // Maintenance ended yesterday, but the build date (mocked as "now") is before that
-      // We need the build to have happened BEFORE maintenanceEndDate
-      // Since APP_BUILD_DATE defaults to new Date() at module load time, and we can't easily
-      // control it, we test with maintenance far in the past
       const pastDate = Date.now() - 30 * 24 * 60 * 60 * 1000; // 30 days ago
 
-      // The APP_BUILD_DATE was set at module import time — it's approximately "now"
-      // So for the perpetual fallback to work, maintenanceEndDate must be >= build time
-      // Since we can't control APP_BUILD_DATE in tests, we test the expired-but-can-view path
       const license = buildLicense({
         maintenanceEndDate: pastDate,
         expirationDate: pastDate,
@@ -296,95 +281,6 @@ describe('LicenseService', () => {
     });
   });
 
-  describe('activateLicenseKey', () => {
-    it('returns error if not authenticated', async () => {
-      mockConnector.isAuthenticated.mockReturnValue(false);
-
-      const result = await service.activateLicenseKey('TEST-KEY');
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('signed in');
-    });
-
-    it('returns error if Supabase RPC fails', async () => {
-      mockConnector.isAuthenticated.mockReturnValue(true);
-      mockConnector.activateLicense.mockResolvedValue({
-        success: false,
-        error: 'Invalid or inactive license key',
-      });
-
-      const result = await service.activateLicenseKey('BAD-KEY');
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('Invalid or inactive license key');
-    });
-
-    it('creates local license on successful activation', async () => {
-      mockConnector.isAuthenticated.mockReturnValue(true);
-      mockConnector.getUserId.mockReturnValue('user-123');
-      mockConnector.getSession.mockReturnValue({
-        user: { email: 'test@example.com' },
-      });
-
-      const serverLicense = {
-        id: 'srv-id',
-        licenseKey: 'VALID-KEY',
-        tier: 'professional',
-        modules: [],
-        maintenanceEndDate: '2027-01-01T00:00:00Z',
-        status: 'active',
-      };
-
-      mockConnector.activateLicense.mockResolvedValue({
-        success: true,
-        license: serverLicense,
-      });
-
-      mockedGetLicenseByKey.mockReturnValue(null);
-      mockedCreateLicense.mockReturnValue(buildLicense({ licenseKey: 'VALID-KEY' }));
-
-      const result = await service.activateLicenseKey('VALID-KEY');
-
-      expect(result.success).toBe(true);
-      expect(result.license).toBeDefined();
-      expect(mockedCreateLicense).toHaveBeenCalled();
-    });
-
-    it('updates existing local license on re-activation', async () => {
-      mockConnector.isAuthenticated.mockReturnValue(true);
-      mockConnector.getUserId.mockReturnValue('user-123');
-
-      const serverLicense = {
-        id: 'srv-id',
-        licenseKey: 'EXISTING-KEY',
-        tier: 'professional',
-        modules: [],
-        maintenanceEndDate: '2027-01-01T00:00:00Z',
-        status: 'active',
-      };
-
-      mockConnector.activateLicense.mockResolvedValue({
-        success: true,
-        license: serverLicense,
-      });
-
-      const existing = buildLicense({ id: 'local-id', licenseKey: 'EXISTING-KEY' });
-      mockedGetLicenseByKey.mockReturnValue(existing);
-      mockedUpdateLicense.mockReturnValue(existing);
-
-      const result = await service.activateLicenseKey('EXISTING-KEY');
-
-      expect(result.success).toBe(true);
-      expect(mockedUpdateLicense).toHaveBeenCalledWith(
-        'local-id',
-        expect.objectContaining({
-          userId: 'user-123',
-          tier: 'professional',
-        }),
-      );
-    });
-  });
-
   describe('verifyLicenseViaSupabase', () => {
     it('returns false if not authenticated', async () => {
       mockConnector.isAuthenticated.mockReturnValue(false);
@@ -457,6 +353,90 @@ describe('LicenseService', () => {
           email: 'new@example.com',
           licenseKey: 'NEW-KEY',
           tier: 'student',
+        }),
+      );
+    });
+
+    it('auto-claims unclaimed license matching email', async () => {
+      mockConnector.isAuthenticated.mockReturnValue(true);
+
+      // First call returns unclaimed license (no user_id)
+      const unclaimedLicense = {
+        id: 'srv-id',
+        license_key: 'AUTO-KEY',
+        user_id: null,
+        email: 'buyer@example.com',
+        tier: 'professional',
+        modules: [],
+        maintenance_end_date: '2027-06-01T00:00:00Z',
+        status: 'active',
+      };
+
+      // After claim, returns the same license with user_id set
+      const claimedLicense = {
+        ...unclaimedLicense,
+        user_id: 'user-456',
+      };
+
+      mockConnector.fetchUserLicense
+        .mockResolvedValueOnce(unclaimedLicense)
+        .mockResolvedValueOnce(claimedLicense);
+
+      mockConnector.claimLicenseByEmail.mockResolvedValue({
+        success: true,
+        license: claimedLicense,
+      });
+
+      mockedGetCurrentLicense.mockReturnValue(null);
+      mockedCreateLicense.mockReturnValue(buildLicense());
+
+      const result = await service.verifyLicenseViaSupabase();
+
+      expect(result).toBe(true);
+      expect(mockConnector.claimLicenseByEmail).toHaveBeenCalled();
+      expect(mockedCreateLicense).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: 'buyer@example.com',
+          licenseKey: 'AUTO-KEY',
+          userId: 'user-456',
+        }),
+      );
+    });
+
+    it('still uses unclaimed license data if auto-claim fails', async () => {
+      mockConnector.isAuthenticated.mockReturnValue(true);
+
+      const unclaimedLicense = {
+        id: 'srv-id',
+        license_key: 'AUTO-KEY',
+        user_id: null,
+        email: 'buyer@example.com',
+        tier: 'professional',
+        modules: [],
+        maintenance_end_date: '2027-06-01T00:00:00Z',
+        status: 'active',
+      };
+
+      // fetchUserLicense returns unclaimed license
+      mockConnector.fetchUserLicense.mockResolvedValueOnce(unclaimedLicense);
+
+      mockConnector.claimLicenseByEmail.mockResolvedValue({
+        success: false,
+        error: 'Claim failed',
+      });
+
+      mockedGetCurrentLicense.mockReturnValue(null);
+      mockedCreateLicense.mockReturnValue(buildLicense());
+
+      const result = await service.verifyLicenseViaSupabase();
+
+      // Claim failed but unclaimed license data is still used to create local record
+      expect(result).toBe(true);
+      expect(mockConnector.claimLicenseByEmail).toHaveBeenCalled();
+      expect(mockedCreateLicense).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: 'buyer@example.com',
+          licenseKey: 'AUTO-KEY',
         }),
       );
     });

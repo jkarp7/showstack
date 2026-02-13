@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { logger } from '../../../utils/logger';
 import { useUser } from '../../../hooks/useUser';
 import { useAuthStore } from '../../../store/authStore';
@@ -8,17 +8,14 @@ import { CheckCircle, XCircle, AlertCircle } from 'lucide-react';
  * License section of the Account dialog
  *
  * Shows:
- * - License activation form (if no license)
  * - License status, tier, and maintenance date
  * - Available modules
  * - Enabled features
+ * - Prompt to sign in if no license found
  */
 export function LicenseSection() {
-  const { license, loading, refreshStatus } = useUser();
-  const { isAuthenticated, activateLicense } = useAuthStore();
-  const [licenseKey, setLicenseKey] = useState('');
-  const [activating, setActivating] = useState(false);
-  const [error, setError] = useState('');
+  const { license, loading } = useUser();
+  const { isAuthenticated } = useAuthStore();
 
   // Debug logging
   React.useEffect(() => {
@@ -36,32 +33,11 @@ export function LicenseSection() {
     }
   }, [license, loading]);
 
-  async function handleActivate() {
-    if (!licenseKey) return;
-
-    setActivating(true);
-    setError('');
-    try {
-      const result = await activateLicense(licenseKey);
-      if (result.success) {
-        setLicenseKey('');
-        await refreshStatus();
-      } else {
-        setError(result.error || 'Activation failed. Please check your license key and try again.');
-      }
-    } catch (err) {
-      logger.error('Activation failed:', err);
-      setError('Activation failed. Please check your license key and try again.');
-    } finally {
-      setActivating(false);
-    }
-  }
-
   if (loading) {
     return <div className="text-gray-600">Loading...</div>;
   }
 
-  // Check if license is truly valid with all required fields
+  // No valid license — prompt to sign in
   if (
     !license ||
     !license.email ||
@@ -71,35 +47,15 @@ export function LicenseSection() {
   ) {
     return (
       <div className="space-y-6">
-        <h3 className="text-lg font-semibold text-gray-900">Activate License</h3>
+        <h3 className="text-lg font-semibold text-gray-900">License</h3>
 
-        {!isAuthenticated && (
-          <p className="text-sm text-gray-500">
-            Sign in to your account first, then enter your license key.
+        <div className="bg-gray-50 rounded-lg p-4">
+          <p className="text-sm text-gray-600">
+            {!isAuthenticated
+              ? 'Sign in with the email associated with your purchase to activate your license automatically.'
+              : 'No license found for your account. If you recently purchased, it may take a moment to sync.'}
           </p>
-        )}
-
-        <div>
-          <label className="block font-medium mb-2 text-gray-900">License Key</label>
-          <input
-            type="text"
-            value={licenseKey}
-            onChange={(e) => setLicenseKey(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded font-mono text-gray-900"
-            placeholder="XXXX-XXXX-XXXX-XXXX"
-            disabled={!isAuthenticated}
-          />
         </div>
-
-        {error && <div className="text-red-600 text-sm">{error}</div>}
-
-        <button
-          onClick={handleActivate}
-          disabled={activating || !licenseKey || !isAuthenticated}
-          className="px-4 py-2 bg-blue-500 text-gray-900 dark:text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {activating ? 'Activating...' : 'Activate License'}
-        </button>
       </div>
     );
   }
@@ -133,11 +89,6 @@ export function LicenseSection() {
           <span className="ml-2 font-medium text-gray-900">
             {new Date(license.maintenanceEndDate).toLocaleDateString()}
           </span>
-        </div>
-
-        <div>
-          <span className="text-sm text-gray-600">License Key:</span>
-          <span className="ml-2 font-mono text-sm text-gray-900">{license.licenseKey}</span>
         </div>
       </div>
 

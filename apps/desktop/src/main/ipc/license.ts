@@ -4,7 +4,6 @@ import { settingsService } from '../services/SettingsService';
 import type { ShowStackModule } from '../../shared/types/license.types';
 import type { AppSettings } from '../../shared/types/settings.types';
 import { errorHandler } from '../errors';
-import { ValidationError } from '../errors';
 import { logger } from '../utils/logger';
 
 /**
@@ -135,34 +134,6 @@ export function registerLicenseHandlers(): void {
       });
       throw new Error(
         `Unable to check feature access: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-    }
-  });
-
-  /**
-   * Activate a license key (user comes from Supabase session)
-   */
-  ipcMain.handle('license:activate', async (_, licenseKey: string) => {
-    try {
-      if (!licenseKey || licenseKey.trim().length === 0) {
-        throw new ValidationError('License key is required', 'licenseKey', licenseKey);
-      }
-
-      return await errorHandler.executeWithRetry(
-        async () => licenseService.activateLicenseKey(licenseKey),
-        'license:activate',
-      );
-    } catch (error) {
-      logger.error('Failed to activate license:', {
-        operation: 'license:activate',
-        error: error instanceof Error ? error.message : error,
-      });
-
-      if (error instanceof ValidationError) {
-        throw new Error(error.toUserMessage());
-      }
-      throw new Error(
-        `Unable to activate license: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   });
