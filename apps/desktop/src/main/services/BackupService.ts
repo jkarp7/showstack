@@ -141,8 +141,10 @@ export class BackupService {
           }
         }
       }
-    } catch {
-      // Non-critical: disk space check is best-effort
+    } catch (error) {
+      logger.warn('Unable to verify disk space before backup', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
     return null;
   }

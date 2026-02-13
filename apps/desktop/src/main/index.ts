@@ -65,6 +65,10 @@ app.on('ready', async () => {
     if (recoveryResult.crashDetected) {
       logger.warn('Previous crash detected', { ...recoveryResult });
     }
+
+    // Mark app as running immediately after recovery check completes.
+    // This minimizes the window where a crash would go undetected.
+    await crashRecoveryService.markRunning();
   } catch (err) {
     logger.error('Database initialization failed', err instanceof Error ? err : undefined);
   }
@@ -105,11 +109,6 @@ app.on('ready', async () => {
   backupService.start().catch((err) => {
     logger.error('Failed to start backup service', err instanceof Error ? err : undefined);
   });
-
-  // Mark app as running for crash detection
-  // Placed AFTER all critical services start so a crash during startup
-  // doesn't falsely trigger crash recovery on next launch
-  await crashRecoveryService.markRunning();
 
   // Initial license check (non-blocking)
   licenseService.checkAndVerifyIfNeeded().catch(() => {
