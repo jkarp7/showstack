@@ -55,7 +55,7 @@ function buildLicense(overrides: Partial<UserLicense> = {}): UserLicense {
 
   const defaultModules: ModuleAccess[] = [
     {
-      module: 'prep',
+      module: 'lighting',
       enabled: true,
       features: {
         maxRevisions: 5,
@@ -190,20 +190,20 @@ describe('LicenseService', () => {
   describe('hasModuleAccess', () => {
     it('returns false with no license', () => {
       mockedGetCurrentLicense.mockReturnValue(null);
-      expect(service.hasModuleAccess('prep')).toBe(false);
+      expect(service.hasModuleAccess('lighting')).toBe(false);
     });
 
     it('returns true for enabled module', () => {
       const license = buildLicense();
       mockedGetCurrentLicense.mockReturnValue(license);
-      expect(service.hasModuleAccess('prep')).toBe(true);
+      expect(service.hasModuleAccess('lighting')).toBe(true);
     });
 
     it('returns false for disabled module', () => {
       const license = buildLicense({
         modules: [
           {
-            module: 'prep',
+            module: 'lighting',
             enabled: false,
             features: {
               maxRevisions: 5,
@@ -216,27 +216,27 @@ describe('LicenseService', () => {
         ],
       });
       mockedGetCurrentLicense.mockReturnValue(license);
-      expect(service.hasModuleAccess('prep')).toBe(false);
+      expect(service.hasModuleAccess('lighting')).toBe(false);
     });
 
     it('returns false for suspended license', () => {
       const license = buildLicense({ status: 'suspended' });
       mockedGetCurrentLicense.mockReturnValue(license);
-      expect(service.hasModuleAccess('prep')).toBe(false);
+      expect(service.hasModuleAccess('lighting')).toBe(false);
     });
   });
 
   describe('getModuleFeatures', () => {
     it('returns null with no license', () => {
       mockedGetCurrentLicense.mockReturnValue(null);
-      expect(service.getModuleFeatures('prep')).toBeNull();
+      expect(service.getModuleFeatures('lighting')).toBeNull();
     });
 
     it('returns features for available module', () => {
       const license = buildLicense();
       mockedGetCurrentLicense.mockReturnValue(license);
 
-      const features = service.getModuleFeatures('prep');
+      const features = service.getModuleFeatures('lighting');
       expect(features).not.toBeNull();
       expect(features!.maxRevisions).toBe(5);
     });
@@ -252,7 +252,7 @@ describe('LicenseService', () => {
       const license = buildLicense({
         modules: [
           {
-            module: 'prep',
+            module: 'lighting',
             enabled: true,
             features: {
               maxRevisions: 5,
@@ -263,7 +263,7 @@ describe('LicenseService', () => {
             },
           },
           {
-            module: 'production',
+            module: 'sound',
             enabled: false,
             features: {
               maxRevisions: 5,
@@ -277,7 +277,7 @@ describe('LicenseService', () => {
       });
       mockedGetCurrentLicense.mockReturnValue(license);
 
-      expect(service.getAvailableModules()).toEqual(['prep']);
+      expect(service.getAvailableModules()).toEqual(['lighting']);
     });
   });
 
@@ -445,14 +445,14 @@ describe('LicenseService', () => {
   describe('canUseFeature', () => {
     it('returns false with no license', () => {
       mockedGetCurrentLicense.mockReturnValue(null);
-      expect(service.canUseFeature('prep', 'cloudSync')).toBe(false);
+      expect(service.canUseFeature('lighting', 'cloudSync')).toBe(false);
     });
 
     it('checks universal features', () => {
       const license = buildLicense();
       mockedGetCurrentLicense.mockReturnValue(license);
-      expect(service.canUseFeature('prep', 'cloudSync')).toBe(true);
-      expect(service.canUseFeature('prep', 'multiDiscipline')).toBe(true);
+      expect(service.canUseFeature('lighting', 'cloudSync')).toBe(true);
+      expect(service.canUseFeature('lighting', 'multiDiscipline')).toBe(true);
     });
   });
 
@@ -461,7 +461,7 @@ describe('LicenseService', () => {
       const newLicense = buildLicense();
       mockedCreateLicense.mockReturnValue(newLicense);
 
-      const result = service.activateLicenseLocally('KEY', 'test@test.com', ['prep']);
+      const result = service.activateLicenseLocally('KEY', 'test@test.com', ['lighting']);
 
       expect(mockedCreateLicense).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -473,15 +473,15 @@ describe('LicenseService', () => {
       expect(result).toEqual(newLicense);
     });
 
-    it('uses student tier for student module', () => {
-      const newLicense = buildLicense({ tier: 'student' });
+    it('creates license with multiple modules', () => {
+      const newLicense = buildLicense();
       mockedCreateLicense.mockReturnValue(newLicense);
 
-      service.activateLicenseLocally('KEY', 'student@test.com', ['student']);
+      service.activateLicenseLocally('KEY', 'test@test.com', ['lighting', 'sound']);
 
       expect(mockedCreateLicense).toHaveBeenCalledWith(
         expect.objectContaining({
-          tier: 'student',
+          tier: 'professional',
         }),
       );
     });

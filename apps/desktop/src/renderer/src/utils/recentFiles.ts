@@ -8,7 +8,7 @@ export interface RecentFile {
   moduleType?: string; // production, manager, design
 }
 
-type ModuleType = 'production' | 'manager' | 'design';
+type ModuleType = 'lighting' | 'sound' | 'video' | 'production_management' | 'touring' | 'producer';
 
 const RECENT_FILES_KEY_PREFIX = 'showstack_recentFiles';
 const MAX_RECENT_FILES = 10;
@@ -104,9 +104,12 @@ export async function clearRecentFiles(moduleType?: ModuleType): Promise<void> {
       localStorage.removeItem(storageKey);
     } else {
       // Clear all module-specific keys
-      localStorage.removeItem(getStorageKey('production'));
-      localStorage.removeItem(getStorageKey('manager'));
-      localStorage.removeItem(getStorageKey('design'));
+      localStorage.removeItem(getStorageKey('lighting'));
+      localStorage.removeItem(getStorageKey('sound'));
+      localStorage.removeItem(getStorageKey('video'));
+      localStorage.removeItem(getStorageKey('production_management'));
+      localStorage.removeItem(getStorageKey('touring'));
+      localStorage.removeItem(getStorageKey('producer'));
       localStorage.removeItem(RECENT_FILES_KEY_PREFIX); // Legacy key
     }
   } catch (error) {
@@ -122,9 +125,9 @@ export function getModuleTypeFromPath(filePath: string): ModuleType | undefined 
   if (filePath.endsWith('.ss')) return undefined;
 
   // Legacy formats
-  if (filePath.endsWith('.ssp')) return 'production';
-  if (filePath.endsWith('.ssm')) return 'manager';
-  if (filePath.endsWith('.ssd')) return 'design';
+  if (filePath.endsWith('.ssp')) return 'lighting';
+  if (filePath.endsWith('.ssm')) return 'production_management';
+  if (filePath.endsWith('.ssd')) return 'lighting';
   return undefined;
 }
 

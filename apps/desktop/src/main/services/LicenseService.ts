@@ -254,19 +254,6 @@ export class LicenseService {
       return !!(features as any)[feature];
     }
 
-    if (module === 'prep' && features.prepFeatures) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return !!(features.prepFeatures as any)[feature];
-    }
-    if (module === 'production' && features.productionFeatures) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return !!(features.productionFeatures as any)[feature];
-    }
-    if (module === 'manager' && features.managerFeatures) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return !!(features.managerFeatures as any)[feature];
-    }
-
     return false;
   }
 
@@ -307,7 +294,7 @@ export class LicenseService {
     });
   }
 
-  private getDefaultFeaturesForTier(tier: LicenseTier, module: ShowStackModule): ModuleFeatures {
+  private getDefaultFeaturesForTier(tier: LicenseTier, _module: ShowStackModule): ModuleFeatures {
     const tierFeatures = {
       professional: {
         maxRevisions: 5,
@@ -332,44 +319,10 @@ export class LicenseService {
       },
     };
 
-    const baseFeatures = tierFeatures[tier] || tierFeatures.student;
-    const moduleFeatures: ModuleFeatures = { ...baseFeatures };
-
-    if (module === 'prep') {
-      moduleFeatures.prepFeatures = {
-        maxProjects: tier === 'professional' ? -1 : 3,
-        logoIntegration: tier !== 'student',
-        vendorTemplates: tier !== 'student',
-        equipmentDatabase: true,
-        bulkOperations: tier !== 'student',
-      };
-    }
-
-    if (module === 'production') {
-      moduleFeatures.productionFeatures = {
-        vectorworksIntegration: tier !== 'student',
-        etcEosIntegration: tier !== 'student',
-        paperworkGeneration: true,
-        labelSystem: true,
-        powerManagement: tier !== 'student',
-      };
-    }
-
-    if (module === 'manager') {
-      moduleFeatures.managerFeatures = {
-        plaidIntegration: tier === 'professional',
-        multiShowManagement: true,
-        budgetTracking: true,
-        perDiemCalculation: tier !== 'student',
-        tourLogistics: tier !== 'student',
-      };
-    }
-
-    return moduleFeatures;
+    return tierFeatures[tier] || tierFeatures.student;
   }
 
-  private determineTierFromModules(modules: ShowStackModule[]): LicenseTier {
-    if (modules.includes('student')) return 'student';
+  private determineTierFromModules(_modules: ShowStackModule[]): LicenseTier {
     return 'professional';
   }
 

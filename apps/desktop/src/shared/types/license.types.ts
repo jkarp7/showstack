@@ -6,10 +6,12 @@
  */
 
 export type ShowStackModule =
-  | 'prep' // ShowStack:Prep (Shop Order Builder - current product)
-  | 'production' // ShowStack:Lighting (LightWright competitor)
-  | 'manager' // ShowStack:Manager (Production/Tour management)
-  | 'student'; // ShowStack:Student (Educational version)
+  | 'lighting' // ShowStack:Lighting (fixture management & paperwork)
+  | 'sound' // ShowStack:Sound (audio system design)
+  | 'video' // ShowStack:Video (video/projection planning)
+  | 'production_management' // ShowStack:Production Management (scheduling & logistics)
+  | 'touring' // ShowStack:Touring (tour management & per diems)
+  | 'producer'; // ShowStack:Producer (budgeting & financial tracking)
 
 export type LicenseTier =
   | 'professional' // Full access, all features
@@ -49,35 +51,6 @@ export interface ModuleFeatures {
   advancedExport: boolean;
   cloudSync: boolean;
   prioritySupport: boolean;
-
-  // Module-specific features
-  prepFeatures?: PrepModuleFeatures;
-  productionFeatures?: ProductionModuleFeatures;
-  managerFeatures?: ManagerModuleFeatures;
-}
-
-export interface PrepModuleFeatures {
-  maxProjects: number; // -1 for unlimited, 3 for student
-  logoIntegration: boolean;
-  vendorTemplates: boolean;
-  equipmentDatabase: boolean;
-  bulkOperations: boolean;
-}
-
-export interface ProductionModuleFeatures {
-  vectorworksIntegration: boolean;
-  etcEosIntegration: boolean;
-  paperworkGeneration: boolean;
-  labelSystem: boolean;
-  powerManagement: boolean;
-}
-
-export interface ManagerModuleFeatures {
-  plaidIntegration: boolean; // Financial tracking
-  multiShowManagement: boolean;
-  budgetTracking: boolean;
-  perDiemCalculation: boolean;
-  tourLogistics: boolean;
 }
 
 export interface LicenseValidation {

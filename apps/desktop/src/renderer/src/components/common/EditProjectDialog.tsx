@@ -65,7 +65,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
   const [closing, setClosing] = useState('');
   const [loadOut, setLoadOut] = useState('');
 
-  const [enabledModules, setEnabledModules] = useState<string[]>(['production']);
+  const [enabledModules, setEnabledModules] = useState<string[]>(['lighting']);
 
   // Initialize form when project changes
   useEffect(() => {
@@ -135,7 +135,7 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
       setClosing(project.show_dates?.closing || '');
       setLoadOut(project.show_dates?.load_out || '');
 
-      setEnabledModules(project.enabled_modules || ['production']);
+      setEnabledModules(project.enabled_modules || ['lighting']);
     }
   }, [project]);
 
@@ -980,14 +980,14 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                 <label className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-700 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-650">
                   <input
                     type="checkbox"
-                    checked={enabledModules.includes('production')}
-                    onChange={() => toggleModule('production')}
+                    checked={enabledModules.includes('lighting')}
+                    onChange={() => toggleModule('lighting')}
                     className="w-4 h-4"
                   />
                   <div className="flex-1">
                     <div className="font-medium">ShowStack:Lighting</div>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Fixture management & technical planning
+                      Fixture management & paperwork
                     </p>
                   </div>
                 </label>
@@ -995,20 +995,39 @@ export function EditProjectDialog({ isOpen, project, onClose, onSave }: EditProj
                 <label className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-700 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-650">
                   <input
                     type="checkbox"
-                    checked={enabledModules.includes('manager')}
-                    onChange={() => toggleModule('manager')}
+                    checked={enabledModules.includes('sound')}
+                    onChange={() => toggleModule('sound')}
                     disabled={true}
                     className="w-4 h-4"
                   />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">ShowStack:Manager</span>
+                      <span className="font-medium">ShowStack:Sound</span>
+                      <span className="px-2 py-0.5 bg-gray-400 dark:bg-gray-600 text-gray-900 dark:text-white text-xs rounded">
+                        Locked
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Audio system design</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-700 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-650">
+                  <input
+                    type="checkbox"
+                    checked={enabledModules.includes('video')}
+                    onChange={() => toggleModule('video')}
+                    disabled={true}
+                    className="w-4 h-4"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">ShowStack:Video</span>
                       <span className="px-2 py-0.5 bg-gray-400 dark:bg-gray-600 text-gray-900 dark:text-white text-xs rounded">
                         Locked
                       </span>
                     </div>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Tour scheduling & logistics
+                      Video & projection planning
                     </p>
                   </div>
                 </label>
