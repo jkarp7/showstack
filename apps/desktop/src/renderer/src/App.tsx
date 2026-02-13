@@ -19,7 +19,6 @@ import { SettingsDialog } from './components/common/SettingsDialog';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthModal } from './components/auth';
 import { OfflineBanner } from './components/sync';
-import { useUser } from './hooks/useUser';
 import { useSettingsStore } from './store/settingsStore';
 import { useUIStore } from './store/uiStore';
 import { useAuthStore } from './store/authStore';
@@ -30,7 +29,7 @@ import { useMenuHandlers } from './hooks/useMenuHandlers';
 import { useProjectMenuHandlers } from './hooks/useProjectMenuHandlers';
 
 function AppContent() {
-  const { status } = useUser();
+  const licenseStatus = useAuthStore((state) => state.licenseStatus);
   const navigate = useNavigate();
   const isSettingsDialogOpen = useUIStore((state) => state.isSettingsDialogOpen);
   const closeSettingsDialog = useUIStore((state) => state.closeSettingsDialog);
@@ -56,7 +55,7 @@ function AppContent() {
   return (
     <>
       {/* License Status Banner - shows warnings for expiration/offline */}
-      {status && <LicenseBanner status={status} />}
+      {licenseStatus && <LicenseBanner status={licenseStatus} />}
 
       {/* Offline Banner - shows when cloud sync is disconnected */}
       <OfflineBanner />

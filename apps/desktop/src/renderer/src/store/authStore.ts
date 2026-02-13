@@ -252,6 +252,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       // Refresh states
       await get().refreshAuthState();
+      await get().refreshLicenseStatus();
       await get().refreshSyncStatus();
 
       // Subscribe to status changes
