@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { logger } from '../../utils/logger';
 import {
   Activity,
@@ -67,6 +67,8 @@ const checkLabels = {
   sync: 'Cloud Sync',
 };
 
+const HEALTH_CHECK_COOLDOWN_MS = 5000;
+
 function StatusBadge({ status }: { status: 'healthy' | 'degraded' | 'unhealthy' }) {
   const config = statusConfig[status];
   const Icon = config.icon;
@@ -116,8 +118,14 @@ function CheckCard({
 export function HealthPanel() {
   const [report, setReport] = useState<HealthReport | null>(null);
   const [isChecking, setIsChecking] = useState(false);
+  const lastCheckRef = useRef<number>(0);
 
   const runHealthCheck = useCallback(async () => {
+    const now = Date.now();
+    if (now - lastCheckRef.current < HEALTH_CHECK_COOLDOWN_MS) {
+      return;
+    }
+    lastCheckRef.current = now;
     setIsChecking(true);
     try {
       const result = await window.api.health.check();

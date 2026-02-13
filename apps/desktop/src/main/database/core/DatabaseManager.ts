@@ -32,6 +32,17 @@ export interface WalStatus {
 /**
  * WAL checkpoint configuration options
  */
+/**
+ * Result of a forced WAL checkpoint indicating if databases were busy
+ */
+export interface CheckpointResult {
+  appBusy: boolean;
+  projectBusy: boolean;
+}
+
+/**
+ * WAL checkpoint configuration options
+ */
 export interface WalCheckpointConfig {
   /** Interval between automatic checkpoints in milliseconds (default: 300000 = 5 minutes) */
   checkpointIntervalMs: number;
@@ -309,6 +320,10 @@ export class DatabaseManager {
     try {
       logger.info('Replacing project database with imported data');
 
+      // Backup before destructive operation
+      const { backupService } = await import('../../services/BackupService');
+      await backupService.performBackup('before-replace-project-database');
+
       // Validate that the imported data is a valid SQLite database
       this.validateSQLiteDatabase(importedData);
 
@@ -407,8 +422,14 @@ export class DatabaseManager {
    *   - FULL: Blocks until complete, checkpoints entire WAL
    *   - RESTART: Like FULL, but also restarts WAL file
    *   - TRUNCATE: Like RESTART, but also truncates WAL file to zero bytes
+   * @returns CheckpointResult with busy flags for each database
    */
-  private performCheckpoint(mode: 'PASSIVE' | 'FULL' | 'RESTART' | 'TRUNCATE' = 'PASSIVE'): void {
+  private performCheckpoint(
+    mode: 'PASSIVE' | 'FULL' | 'RESTART' | 'TRUNCATE' = 'PASSIVE',
+  ): CheckpointResult {
+    let appBusy = false;
+    let projectBusy = false;
+
     // Checkpoint each database separately to identify failures
     if (this.appDb) {
       try {
@@ -417,6 +438,7 @@ export class DatabaseManager {
           log: number;
           checkpointed: number;
         }>;
+        appBusy = (appResult[0]?.busy ?? 0) > 0;
         if (appResult[0]?.log > this.walConfig.sizeWarningThreshold) {
           logger.warn('App database WAL file growing large', {
             database: 'app',
@@ -441,6 +463,7 @@ export class DatabaseManager {
           log: number;
           checkpointed: number;
         }>;
+        projectBusy = (projectResult[0]?.busy ?? 0) > 0;
         if (projectResult[0]?.log > this.walConfig.sizeWarningThreshold) {
           logger.warn('Project database WAL file growing large', {
             database: 'project',
@@ -458,17 +481,19 @@ export class DatabaseManager {
       }
     }
 
-    logger.debug('WAL checkpoint completed', { mode });
+    logger.debug('WAL checkpoint completed', { mode, appBusy, projectBusy });
+    return { appBusy, projectBusy };
   }
 
   /**
    * Force a full WAL checkpoint and truncate WAL files.
    * Use sparingly - this blocks until complete.
    * Recommended to call before app quit for clean shutdown.
+   * @returns CheckpointResult indicating if either database was busy
    */
-  forceCheckpoint(): void {
+  forceCheckpoint(): CheckpointResult {
     logger.info('Forcing WAL checkpoint (TRUNCATE mode)');
-    this.performCheckpoint('TRUNCATE');
+    return this.performCheckpoint('TRUNCATE');
   }
 
   /**

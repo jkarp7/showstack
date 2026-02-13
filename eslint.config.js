@@ -45,7 +45,7 @@ export default tseslint.config(
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/ban-ts-comment': 'warn',
       '@typescript-eslint/no-empty-object-type': 'warn',
-      'no-console': 'warn',
+      'no-console': 'error',
       'no-case-declarations': 'warn',
       'no-empty': 'warn',
     },
@@ -72,9 +72,22 @@ export default tseslint.config(
     },
   },
 
+  // Logging infrastructure — these files are the centralized console wrappers
+  {
+    files: [
+      '**/utils/logger.ts',
+      '**/services/sentry.ts',
+      '**/services/telemetry.ts',
+      '**/services/globalErrorHandler.ts',
+    ],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+
   // Test files - relax rules
   {
-    files: ['**/__tests__/**/*.{ts,tsx}', '**/*.test.{ts,tsx}'],
+    files: ['**/__tests__/**/*.{ts,tsx}', '**/*.test.{ts,tsx}', '**/test/setup.ts'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
       'no-console': 'off',

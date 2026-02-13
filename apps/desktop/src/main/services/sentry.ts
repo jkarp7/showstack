@@ -60,6 +60,8 @@ export function initSentry(): void {
     sentryModule.init({
       dsn,
       environment: process.env.NODE_ENV || 'development',
+      // Main process uses app.getVersion() from Electron's package.json.
+      // Renderer uses VITE_APP_VERSION env var — both are correct for their contexts.
       release: `showstack@${app.getVersion()}`,
       beforeSend(event: SentryEvent) {
         // Filter URL data from breadcrumbs

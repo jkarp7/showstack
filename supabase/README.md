@@ -163,7 +163,7 @@ POWERSYNC_TOKEN=eyJhbGc...
 
 - [Supabase Documentation](https://supabase.com/docs)
 - [PowerSync Documentation](https://docs.powersync.com)
-- [ShowStack Phase 3 Plan](../docs/renovation/Phase-3-Cloud-Collaboration.md)
+- [ShowStack Phase 3 Plan](../docs/archive/renovation/Phase-3-Cloud-Collaboration.md)
 - [Supabase RLS Guide](https://supabase.com/docs/guides/auth/row-level-security)
 - [PowerSync Sync Rules Reference](https://docs.powersync.com/usage/sync-rules)
 

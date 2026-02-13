@@ -31,9 +31,14 @@ import { registerPhaseTemplateHandlers } from './ipc/phaseTemplates';
 import { registerInfrastructureHandlers } from './ipc/infrastructure';
 import { registerSyncHandlers, initializePowerSync, disposePowerSync } from './ipc/sync';
 import { registerHealthHandlers } from './ipc/health';
+import { registerBackupHandlers } from './ipc/backup';
 import { backgroundVerifier } from './services/BackgroundVerifier';
+import { backupService } from './services/BackupService';
+import { crashRecoveryService } from './services/CrashRecoveryService';
 import { licenseService } from './services/LicenseService';
 import { performanceMonitor } from './monitoring/PerformanceMonitor';
+
+const MEMORY_MONITOR_INTERVAL_MS = 5 * 60 * 1000;
 
 // Set app name for macOS menu bar
 app.setName('ShowStack');
@@ -54,6 +59,16 @@ app.on('ready', async () => {
   try {
     // Initialize database
     await initDatabase();
+
+    // Check for crash and recover if needed
+    const recoveryResult = await crashRecoveryService.checkAndRecover();
+    if (recoveryResult.crashDetected) {
+      logger.warn('Previous crash detected', { ...recoveryResult });
+    }
+
+    // Mark app as running immediately after recovery check completes.
+    // This minimizes the window where a crash would go undetected.
+    await crashRecoveryService.markRunning();
   } catch (err) {
     logger.error('Database initialization failed', err instanceof Error ? err : undefined);
   }
@@ -80,6 +95,7 @@ app.on('ready', async () => {
   registerInfrastructureHandlers();
   registerSyncHandlers();
   registerHealthHandlers();
+  registerBackupHandlers();
 
   // Initialize PowerSync (non-blocking, works offline)
   initializePowerSync().catch((err) => {
@@ -88,6 +104,11 @@ app.on('ready', async () => {
 
   // Start background license verification (non-blocking)
   backgroundVerifier.start();
+
+  // Start backup service (non-blocking)
+  backupService.start().catch((err) => {
+    logger.error('Failed to start backup service', err instanceof Error ? err : undefined);
+  });
 
   // Initial license check (non-blocking)
   licenseService.checkAndVerifyIfNeeded().catch(() => {
@@ -101,13 +122,9 @@ app.on('ready', async () => {
   windowManager.createLandingWindow();
 
   // Start periodic performance monitoring
-  // Track memory usage every 5 minutes
-  setInterval(
-    () => {
-      performanceMonitor.trackMemoryUsage();
-    },
-    5 * 60 * 1000,
-  );
+  setInterval(() => {
+    performanceMonitor.trackMemoryUsage();
+  }, MEMORY_MONITOR_INTERVAL_MS);
 
   // Log initial memory baseline
   performanceMonitor.trackMemoryUsage();
@@ -126,6 +143,12 @@ app.on('activate', () => {
 });
 
 app.on('before-quit', async () => {
+  // Mark clean shutdown for crash detection
+  await crashRecoveryService.markCleanShutdown();
+
+  // Stop backup service
+  backupService.stop();
+
   // Stop background verification
   backgroundVerifier.stop();
 

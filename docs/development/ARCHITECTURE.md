@@ -291,24 +291,25 @@ const filteredData = useMemo(() => {
 
 ## Testing Strategy
 
-(To be implemented)
+**Framework:** Vitest + React Testing Library
+**Current:** 1,520+ tests across 53 files, 70%+ coverage
+**Coverage enforcement:** Codecov (50% project / 60% patch thresholds)
 
-- Unit tests for utility functions
-- Component tests for common components
-- Integration tests for critical user flows
-- E2E tests for cross-module functionality
+- **Unit tests** for utility functions and services (Vitest)
+- **Component tests** with React Testing Library
+- **Integration tests** for database, service layer, and sync
+- Tests colocated with source in `__tests__/` directories
+- E2E tests with Playwright (planned)
 
 ## Future Enhancements
 
 ### Planned Modules
 
 - **Focus Chart**: Focus point visualization and management
-- **Label Maker**: Custom label generation and printing
 - **Work Notes**: Collaborative notes and task tracking
 - **Console Integration**: Console programming and synchronization
 - **Vectorworks Integration**: CAD file import/export
 - **System Drawings**: Rack elevations and system diagrams
-- **Shop Orders**: Equipment ordering and tracking
 
 ### Architectural Improvements
 

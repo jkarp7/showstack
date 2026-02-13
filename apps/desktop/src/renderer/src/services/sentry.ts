@@ -59,6 +59,8 @@ export async function initSentry(): Promise<void> {
     sentryModule.init({
       dsn,
       environment: import.meta.env.MODE,
+      // Renderer uses VITE_APP_VERSION env var (set at build time by Vite).
+      // Main process uses app.getVersion() from Electron — both are correct for their contexts.
       release: `showstack@${import.meta.env.VITE_APP_VERSION || '0.0.0'}`,
       beforeSend(event: SentryEvent) {
         // Filter URL data from breadcrumbs

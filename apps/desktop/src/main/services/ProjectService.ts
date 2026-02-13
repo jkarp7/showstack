@@ -92,6 +92,10 @@ export class ProjectService extends BaseService {
   async delete(id: string): Promise<void> {
     this.validateId(id, 'Project');
 
+    // Backup before destructive operation
+    const { backupService } = await import('./BackupService');
+    await backupService.performBackup(`before-delete-project-${id}`);
+
     return await this.executeWithRetry(async () => deleteProject(id), 'projects:delete');
   }
 
