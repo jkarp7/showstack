@@ -85,18 +85,21 @@ export function createLicense(data: {
   tier: LicenseTier;
   modules: ModuleAccess[];
   expirationDate: number;
+  maintenanceEndDate?: number;
+  userId?: string;
 }): UserLicense {
   const db = getAppDatabase();
   const now = Date.now();
   const id = uuidv4();
+  const maintenanceEndDate = data.maintenanceEndDate ?? data.expirationDate;
 
   db.prepare(
     `
     INSERT INTO licenses (
       id, email, name, license_key, tier, status, modules,
-      expiration_date, last_verified, created_at, updated_at
+      expiration_date, maintenance_end_date, user_id, last_verified, created_at, updated_at
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
   ).run(
     id,
@@ -107,6 +110,8 @@ export function createLicense(data: {
     'active',
     JSON.stringify(data.modules),
     data.expirationDate,
+    maintenanceEndDate,
+    data.userId || null,
     now,
     now,
     now,
@@ -129,6 +134,8 @@ export function updateLicense(
     status: 'active' | 'expired' | 'suspended';
     modules: ModuleAccess[];
     expirationDate: number;
+    maintenanceEndDate: number;
+    userId: string;
     lastVerified: number;
   }>,
 ): UserLicense {
@@ -161,6 +168,14 @@ export function updateLicense(
   if (updates.expirationDate !== undefined) {
     fields.push('expiration_date = ?');
     values.push(updates.expirationDate);
+  }
+  if (updates.maintenanceEndDate !== undefined) {
+    fields.push('maintenance_end_date = ?');
+    values.push(updates.maintenanceEndDate);
+  }
+  if (updates.userId !== undefined) {
+    fields.push('user_id = ?');
+    values.push(updates.userId);
   }
   if (updates.lastVerified !== undefined) {
     fields.push('last_verified = ?');
@@ -205,6 +220,8 @@ export function deleteLicense(id: string): void {
  * Helper function to convert database row object to UserLicense
  */
 function rowObjectToLicense(obj: Record<string, unknown>): UserLicense {
+  const expirationDate = obj.expiration_date as number;
+  const maintenanceEndDate = (obj.maintenance_end_date as number) ?? expirationDate;
   return {
     id: obj.id as string,
     email: obj.email as string,
@@ -212,8 +229,10 @@ function rowObjectToLicense(obj: Record<string, unknown>): UserLicense {
     licenseKey: obj.license_key as string,
     tier: obj.tier as LicenseTier,
     status: obj.status as 'active' | 'expired' | 'suspended',
+    userId: (obj.user_id as string) || undefined,
     modules: JSON.parse(obj.modules as string) as ModuleAccess[],
-    expirationDate: obj.expiration_date as number,
+    expirationDate,
+    maintenanceEndDate,
     lastVerified: obj.last_verified as number,
     createdAt: obj.created_at as number,
     updatedAt: obj.updated_at as number,

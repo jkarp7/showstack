@@ -22,6 +22,20 @@ export interface SyncStatus {
 }
 
 /**
+ * License status from main process
+ */
+export interface LicenseStatus {
+  status: 'active' | 'grace' | 'expired' | 'suspended' | 'maintenance_expired';
+  message: string;
+  canView: boolean;
+  canEdit: boolean;
+  canSync: boolean;
+  warningLevel?: 'low' | 'medium' | 'high';
+  daysUntilExpiration?: number;
+  daysSinceVerification?: number;
+}
+
+/**
  * Auth state
  */
 export interface AuthState {
@@ -31,6 +45,10 @@ export interface AuthState {
   email: string | null;
   isLoading: boolean;
   error: string | null;
+
+  // License
+  hasLicense: boolean;
+  licenseStatus: LicenseStatus | null;
 
   // Sync status
   syncStatus: SyncStatus;
@@ -47,6 +65,8 @@ export interface AuthState {
   resetPassword: (email: string) => Promise<boolean>;
   refreshAuthState: () => Promise<void>;
   refreshSyncStatus: () => Promise<void>;
+  refreshLicenseStatus: () => Promise<void>;
+  activateLicense: (key: string) => Promise<{ success: boolean; error?: string }>;
   initializeSync: () => Promise<void>;
 
   // UI actions
@@ -73,6 +93,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   email: null,
   isLoading: false,
   error: null,
+  hasLicense: false,
+  licenseStatus: null,
   syncStatus: defaultSyncStatus,
   isCloudConfigured: false,
   showAuthModal: false,
@@ -88,6 +110,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (result.success) {
         // Refresh auth state after successful sign in
         await get().refreshAuthState();
+        await get().refreshLicenseStatus();
         await get().refreshSyncStatus();
         set({ isLoading: false, showAuthModal: false });
         return true;
@@ -194,6 +217,34 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ syncStatus: status });
     } catch (error) {
       logger.error('[AuthStore] Failed to refresh sync status:', error);
+    }
+  },
+
+  // Refresh license status
+  refreshLicenseStatus: async () => {
+    try {
+      const status = await window.api.license.getStatus();
+      set({
+        licenseStatus: status,
+        hasLicense: status.status !== 'expired' || status.canView,
+      });
+    } catch (error) {
+      logger.error('[AuthStore] Failed to refresh license status:', error);
+    }
+  },
+
+  // Activate a license key
+  activateLicense: async (key: string) => {
+    try {
+      const result = await window.api.license.activate(key);
+      if (result.success) {
+        await get().refreshLicenseStatus();
+      }
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Activation failed';
+      logger.error('[AuthStore] Failed to activate license:', error);
+      return { success: false, error: errorMessage };
     }
   },
 

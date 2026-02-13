@@ -140,40 +140,52 @@ export function registerLicenseHandlers(): void {
   });
 
   /**
-   * Activate a new license
+   * Activate a license key (user comes from Supabase session)
    */
-  ipcMain.handle(
-    'license:activate',
-    async (_, licenseKey: string, email: string, modules: ShowStackModule[]) => {
-      try {
-        // Validation
-        if (!licenseKey || licenseKey.trim().length === 0) {
-          throw new ValidationError('License key is required', 'licenseKey', licenseKey);
-        }
-        if (!email || email.trim().length === 0) {
-          throw new ValidationError('Email is required', 'email', email);
-        }
-
-        return await errorHandler.executeWithRetry(
-          async () => licenseService.activateLicense(licenseKey, email, modules),
-          'license:activate',
-        );
-      } catch (error) {
-        logger.error('Failed to activate license:', {
-          operation: 'license:activate',
-          email,
-          error: error instanceof Error ? error.message : error,
-        });
-
-        if (error instanceof ValidationError) {
-          throw new Error(error.toUserMessage());
-        }
-        throw new Error(
-          `Unable to activate license: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        );
+  ipcMain.handle('license:activate', async (_, licenseKey: string) => {
+    try {
+      if (!licenseKey || licenseKey.trim().length === 0) {
+        throw new ValidationError('License key is required', 'licenseKey', licenseKey);
       }
-    },
-  );
+
+      return await errorHandler.executeWithRetry(
+        async () => licenseService.activateLicenseKey(licenseKey),
+        'license:activate',
+      );
+    } catch (error) {
+      logger.error('Failed to activate license:', {
+        operation: 'license:activate',
+        error: error instanceof Error ? error.message : error,
+      });
+
+      if (error instanceof ValidationError) {
+        throw new Error(error.toUserMessage());
+      }
+      throw new Error(
+        `Unable to activate license: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  });
+
+  /**
+   * Refresh license from Supabase
+   */
+  ipcMain.handle('license:refresh', async () => {
+    try {
+      return await errorHandler.executeWithRetry(async () => {
+        const success = await licenseService.verifyLicenseViaSupabase();
+        return { success, license: licenseService.getCurrentLicense() };
+      }, 'license:refresh');
+    } catch (error) {
+      logger.error('Failed to refresh license:', {
+        operation: 'license:refresh',
+        error: error instanceof Error ? error.message : error,
+      });
+      throw new Error(
+        `Unable to refresh license: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  });
 
   /**
    * Verify license online (manual trigger)
@@ -181,9 +193,7 @@ export function registerLicenseHandlers(): void {
   ipcMain.handle('license:verifyOnline', async () => {
     try {
       return await errorHandler.executeWithRetry(async () => {
-        const license = licenseService.getCurrentLicense();
-        if (!license) return false;
-        return await licenseService.verifyLicenseOnline(license.licenseKey);
+        return await licenseService.verifyLicenseViaSupabase();
       }, 'license:verifyOnline');
     } catch (error) {
       logger.error('Failed to verify license online:', {

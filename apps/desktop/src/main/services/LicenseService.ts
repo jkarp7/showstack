@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   getCurrentLicense,
   getLicenseByKey,
@@ -16,19 +15,25 @@ import type {
 } from '../../shared/types/license.types';
 
 /**
+ * Build date used for perpetual fallback licensing.
+ * If the app was built before maintenance_end_date, it can still run.
+ */
+const APP_BUILD_DATE = new Date(process.env.BUILD_DATE || new Date().toISOString());
+
+/**
  * License Service
  *
  * Handles license validation, verification, and feature access control.
- * Uses offline-first approach with 14-day grace period.
+ * Uses perpetual fallback model: app runs if built before maintenance_end_date.
+ * Cloud sync requires active maintenance.
  */
 export class LicenseService {
-  // Grace period constants
   private readonly OFFLINE_GRACE_DAYS = 14;
   private readonly EXPIRATION_WARNING_DAYS = 7;
   private readonly VERIFICATION_INTERVAL_HOURS = 24;
 
   /**
-   * Get current license validation status
+   * Get current license validation status with perpetual fallback model
    */
   getLicenseStatus(): LicenseValidation {
     const license = getCurrentLicense();
@@ -39,97 +44,198 @@ export class LicenseService {
         message: 'No license found. Please activate.',
         canView: false,
         canEdit: false,
+        canSync: false,
       };
     }
 
     const now = Date.now();
+    const maintenanceEnd = license.maintenanceEndDate;
+    const buildTime = APP_BUILD_DATE.getTime();
     const daysSinceVerification = this.daysBetween(license.lastVerified, now);
-    const daysUntilExpiration = this.daysBetween(now, license.expirationDate);
+    const daysUntilMaintenance = this.daysBetween(now, maintenanceEnd);
 
-    // Check if subscription is expired
-    if (now > license.expirationDate) {
-      if (daysSinceVerification <= this.OFFLINE_GRACE_DAYS) {
-        return {
-          status: 'expired',
-          message: 'Subscription expired. Please renew to continue editing.',
-          canView: true,
-          canEdit: false,
-        };
-      }
-
+    // Suspended license — no access
+    if (license.status === 'suspended') {
       return {
-        status: 'grace',
-        message: `Unable to verify license. Please connect to internet. (${daysSinceVerification} days offline)`,
-        canView: true,
-        canEdit: true,
-        warningLevel: 'high',
-        daysSinceVerification,
+        status: 'suspended',
+        message: 'License suspended. Please contact support.',
+        canView: false,
+        canEdit: false,
+        canSync: false,
       };
     }
 
-    // Check if verification is stale
+    // Check verification staleness (offline grace period)
     if (daysSinceVerification > this.OFFLINE_GRACE_DAYS) {
       return {
         status: 'grace',
         message: `License verification needed. Please connect to internet. (${daysSinceVerification} days offline)`,
         canView: true,
         canEdit: true,
-        warningLevel: 'medium',
+        canSync: false,
+        warningLevel: daysSinceVerification > this.OFFLINE_GRACE_DAYS * 2 ? 'high' : 'medium',
         daysSinceVerification,
       };
     }
 
-    // Check if approaching expiration
-    if (daysUntilExpiration <= this.EXPIRATION_WARNING_DAYS) {
+    // Maintenance expired
+    if (now > maintenanceEnd) {
+      // Perpetual fallback: app built before maintenance end can still run
+      const canRun = buildTime <= maintenanceEnd;
+
+      if (canRun) {
+        return {
+          status: 'maintenance_expired',
+          message:
+            'Maintenance expired. App continues to work, but cloud sync is disabled. Renew to get updates and sync.',
+          canView: true,
+          canEdit: true,
+          canSync: false,
+        };
+      }
+
+      // Build is newer than maintenance end — cannot run
       return {
-        status: 'active',
-        message: `License expires in ${daysUntilExpiration} days. Please renew soon.`,
+        status: 'expired',
+        message:
+          'This version of ShowStack requires an active maintenance plan. Please renew your license.',
         canView: true,
-        canEdit: true,
-        warningLevel: 'low',
-        daysUntilExpiration,
+        canEdit: false,
+        canSync: false,
       };
     }
 
+    // Active maintenance — approaching expiration warning
+    if (daysUntilMaintenance <= this.EXPIRATION_WARNING_DAYS) {
+      return {
+        status: 'active',
+        message: `Maintenance expires in ${daysUntilMaintenance} days. Renew to continue receiving updates and cloud sync.`,
+        canView: true,
+        canEdit: true,
+        canSync: true,
+        warningLevel: 'low',
+        daysUntilExpiration: daysUntilMaintenance,
+      };
+    }
+
+    // Fully active
     return {
       status: 'active',
       message: 'License active',
       canView: true,
       canEdit: true,
+      canSync: true,
     };
   }
 
   /**
-   * Verify license against online server
+   * Verify license via Supabase (replaces old API endpoint verification)
    */
-  async verifyLicenseOnline(licenseKey: string): Promise<boolean> {
+  async verifyLicenseViaSupabase(): Promise<boolean> {
     try {
-      // TODO: Replace with your actual API endpoint
-      const response = await fetch('https://api.showstack.app/verify-license', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ licenseKey }),
-        signal: AbortSignal.timeout(5000), // 5 second timeout
-      });
+      const { getSupabaseConnector } = await import('../services/sync/SupabaseConnector');
+      const connector = getSupabaseConnector();
 
-      if (!response.ok) return false;
+      if (!connector.isAuthenticated()) {
+        logger.info('License verification skipped: not authenticated');
+        return false;
+      }
 
-      const data = await response.json();
+      const serverLicense = await connector.fetchUserLicense();
+      if (!serverLicense) {
+        logger.info('No license found on server for current user');
+        return false;
+      }
 
-      const license = getLicenseByKey(licenseKey);
-      if (!license) return false;
+      // Update local SQLite with server data
+      const localLicense = getCurrentLicense();
+      if (localLicense) {
+        updateLicense(localLicense.id, {
+          status: serverLicense.status as 'active' | 'expired' | 'suspended',
+          maintenanceEndDate: new Date(serverLicense.maintenance_end_date).getTime(),
+          expirationDate: new Date(serverLicense.maintenance_end_date).getTime(),
+          modules: serverLicense.modules,
+          tier: serverLicense.tier,
+          lastVerified: Date.now(),
+        });
+      } else {
+        // Create local license from server data
+        createLicense({
+          email: serverLicense.email,
+          licenseKey: serverLicense.license_key,
+          tier: serverLicense.tier as LicenseTier,
+          modules: serverLicense.modules,
+          expirationDate: new Date(serverLicense.maintenance_end_date).getTime(),
+          maintenanceEndDate: new Date(serverLicense.maintenance_end_date).getTime(),
+          userId: serverLicense.user_id,
+        });
+      }
 
-      updateLicense(license.id, {
-        status: data.status,
-        expirationDate: new Date(data.expirationDate).getTime(),
-        lastVerified: Date.now(),
-        modules: data.modules,
-      });
-
-      return data.status === 'active';
+      return serverLicense.status === 'active';
     } catch (error) {
-      logger.error('License verification failed (offline):', error);
+      logger.error('License verification via Supabase failed', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return false;
+    }
+  }
+
+  /**
+   * Activate a license key via Supabase RPC
+   */
+  async activateLicenseKey(
+    licenseKey: string,
+  ): Promise<{ success: boolean; error?: string; license?: UserLicense }> {
+    try {
+      const { getSupabaseConnector } = await import('../services/sync/SupabaseConnector');
+      const connector = getSupabaseConnector();
+
+      if (!connector.isAuthenticated()) {
+        return { success: false, error: 'You must be signed in to activate a license' };
+      }
+
+      const result = await connector.activateLicense(licenseKey);
+
+      if (!result.success) {
+        return { success: false, error: result.error };
+      }
+
+      const serverLicense = result.license;
+
+      // Store license locally in SQLite
+      const existing = getLicenseByKey(licenseKey);
+      if (existing) {
+        const updated = updateLicense(existing.id, {
+          userId: connector.getUserId() || undefined,
+          tier: serverLicense.tier as LicenseTier,
+          modules: serverLicense.modules,
+          maintenanceEndDate: new Date(serverLicense.maintenanceEndDate).getTime(),
+          expirationDate: new Date(serverLicense.maintenanceEndDate).getTime(),
+          status: serverLicense.status as 'active' | 'expired' | 'suspended',
+          lastVerified: Date.now(),
+        });
+        return { success: true, license: updated };
+      }
+
+      const newLicense = createLicense({
+        email: connector.getSession()?.user?.email || '',
+        licenseKey: serverLicense.licenseKey,
+        tier: serverLicense.tier as LicenseTier,
+        modules: serverLicense.modules || [],
+        expirationDate: new Date(serverLicense.maintenanceEndDate).getTime(),
+        maintenanceEndDate: new Date(serverLicense.maintenanceEndDate).getTime(),
+        userId: connector.getUserId() || undefined,
+      });
+
+      return { success: true, license: newLicense };
+    } catch (error) {
+      logger.error('License activation failed', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Activation failed',
+      };
     }
   }
 
@@ -143,7 +249,7 @@ export class LicenseService {
     const hoursSinceCheck = this.hoursBetween(license.lastVerified, Date.now());
 
     if (hoursSinceCheck >= this.VERIFICATION_INTERVAL_HOURS) {
-      await this.verifyLicenseOnline(license.licenseKey);
+      await this.verifyLicenseViaSupabase();
     }
   }
 
@@ -159,7 +265,7 @@ export class LicenseService {
       return false;
     }
 
-    const moduleAccess = license.modules.find((m) => m.module === module);
+    const moduleAccess = license.modules.find((m: ModuleAccess) => m.module === module);
     return moduleAccess?.enabled ?? false;
   }
 
@@ -170,7 +276,7 @@ export class LicenseService {
     const license = getCurrentLicense();
     if (!license) return null;
 
-    const moduleAccess = license.modules.find((m) => m.module === module);
+    const moduleAccess = license.modules.find((m: ModuleAccess) => m.module === module);
     return moduleAccess?.features ?? null;
   }
 
@@ -181,7 +287,9 @@ export class LicenseService {
     const license = getCurrentLicense();
     if (!license) return [];
 
-    return license.modules.filter((m) => m.enabled).map((m) => m.module);
+    return license.modules
+      .filter((m: ModuleAccess) => m.enabled)
+      .map((m: ModuleAccess) => m.module);
   }
 
   /**
@@ -191,19 +299,21 @@ export class LicenseService {
     const features = this.getModuleFeatures(module);
     if (!features) return false;
 
-    // Check universal features
     if (feature in features) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return !!(features as any)[feature];
     }
 
-    // Check module-specific features
     if (module === 'prep' && features.prepFeatures) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return !!(features.prepFeatures as any)[feature];
     }
     if (module === 'production' && features.productionFeatures) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return !!(features.productionFeatures as any)[feature];
     }
     if (module === 'manager' && features.managerFeatures) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return !!(features.managerFeatures as any)[feature];
     }
 
@@ -218,9 +328,10 @@ export class LicenseService {
   }
 
   /**
-   * Activate a new license
+   * Legacy: activate a license locally without Supabase
+   * Kept for backwards compatibility and offline-first scenarios
    */
-  activateLicense(
+  activateLicenseLocally(
     licenseKey: string,
     email: string,
     purchasedModules: ShowStackModule[],
@@ -233,19 +344,19 @@ export class LicenseService {
       features: this.getDefaultFeaturesForTier(tier, module),
     }));
 
+    const maintenanceEndDate = Date.now() + 365 * 24 * 60 * 60 * 1000; // 1 year
+
     return createLicense({
       email,
       name: '',
       licenseKey,
       tier,
       modules,
-      expirationDate: Date.now() + 365 * 24 * 60 * 60 * 1000, // 1 year
+      expirationDate: maintenanceEndDate,
+      maintenanceEndDate,
     });
   }
 
-  /**
-   * Get default features for a tier and module
-   */
   private getDefaultFeaturesForTier(tier: LicenseTier, module: ShowStackModule): ModuleFeatures {
     const tierFeatures = {
       professional: {
@@ -307,24 +418,15 @@ export class LicenseService {
     return moduleFeatures;
   }
 
-  /**
-   * Determine tier from purchased modules
-   */
   private determineTierFromModules(modules: ShowStackModule[]): LicenseTier {
     if (modules.includes('student')) return 'student';
     return 'professional';
   }
 
-  /**
-   * Calculate days between two timestamps
-   */
   private daysBetween(timestamp1: number, timestamp2: number): number {
     return Math.floor((timestamp2 - timestamp1) / (1000 * 60 * 60 * 24));
   }
 
-  /**
-   * Calculate hours between two timestamps
-   */
   private hoursBetween(timestamp1: number, timestamp2: number): number {
     return Math.floor((timestamp2 - timestamp1) / (1000 * 60 * 60));
   }

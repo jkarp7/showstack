@@ -11,6 +11,7 @@ import {
   getSupabaseConnector,
   type ShowStackSyncStatus,
 } from '../services/sync';
+import { licenseService } from '../services/LicenseService';
 import { logger } from '../utils/logger';
 
 /**
@@ -67,6 +68,15 @@ export function registerSyncHandlers(): void {
       const result = await connector.signIn(email, password);
 
       if (result.success) {
+        // Refresh license data from Supabase after sign-in
+        try {
+          await licenseService.verifyLicenseViaSupabase();
+        } catch (licenseError) {
+          logger.info('[Sync] License refresh after sign-in failed (non-fatal)', {
+            error: licenseError instanceof Error ? licenseError.message : 'Unknown',
+          });
+        }
+
         // Start syncing after successful sign in
         const service = getPowerSyncService();
         if (service.isReady()) {

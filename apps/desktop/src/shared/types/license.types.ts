@@ -23,11 +23,13 @@ export interface UserLicense {
   licenseKey: string;
   tier: LicenseTier;
   status: 'active' | 'expired' | 'suspended';
+  userId?: string;
 
   // Module access control
   modules: ModuleAccess[];
 
-  expirationDate: number; // Unix timestamp
+  expirationDate: number; // Unix timestamp (legacy, maps to maintenanceEndDate)
+  maintenanceEndDate: number; // Unix timestamp — perpetual fallback pivot date
   lastVerified: number; // Unix timestamp
   createdAt: number; // Unix timestamp
   updatedAt: number; // Unix timestamp
@@ -79,10 +81,11 @@ export interface ManagerModuleFeatures {
 }
 
 export interface LicenseValidation {
-  status: 'active' | 'grace' | 'expired' | 'suspended';
+  status: 'active' | 'grace' | 'expired' | 'suspended' | 'maintenance_expired';
   message: string;
   canView: boolean;
   canEdit: boolean;
+  canSync: boolean;
   warningLevel?: 'low' | 'medium' | 'high';
   daysUntilExpiration?: number;
   daysSinceVerification?: number;

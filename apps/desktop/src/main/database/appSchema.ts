@@ -32,6 +32,8 @@ export const APP_SCHEMA = `
     status TEXT NOT NULL CHECK(status IN ('active', 'expired', 'suspended', 'deleted')),
     modules TEXT NOT NULL, -- JSON stringified ModuleAccess[]
     expiration_date INTEGER NOT NULL,
+    maintenance_end_date INTEGER, -- Unix timestamp, defaults to expiration_date if null
+    user_id TEXT,
     last_verified INTEGER NOT NULL,
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { logger } from '../../../utils/logger';
 import { useUser } from '../../../hooks/useUser';
+import { useAuthStore } from '../../../store/authStore';
 import { CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 /**
@@ -8,14 +9,14 @@ import { CheckCircle, XCircle, AlertCircle } from 'lucide-react';
  *
  * Shows:
  * - License activation form (if no license)
- * - License status, tier, and expiration
+ * - License status, tier, and maintenance date
  * - Available modules
  * - Enabled features
  */
 export function LicenseSection() {
-  const { license, loading, activateLicense } = useUser();
+  const { license, loading, refreshStatus } = useUser();
+  const { isAuthenticated, activateLicense } = useAuthStore();
   const [licenseKey, setLicenseKey] = useState('');
-  const [email, setEmail] = useState('');
   const [activating, setActivating] = useState(false);
   const [error, setError] = useState('');
 
@@ -27,7 +28,7 @@ export function LicenseSection() {
       logger.info('License properties:', {
         tier: license.tier,
         status: license.status,
-        expirationDate: license.expirationDate,
+        maintenanceEndDate: license.maintenanceEndDate,
         licenseKey: license.licenseKey,
         email: license.email,
         modules: license.modules,
@@ -36,15 +37,18 @@ export function LicenseSection() {
   }, [license, loading]);
 
   async function handleActivate() {
-    if (!licenseKey || !email) return;
+    if (!licenseKey) return;
 
     setActivating(true);
     setError('');
     try {
-      // For now, default to 'prep' module - this would come from purchase
-      await activateLicense(licenseKey, email, ['prep']);
-      setLicenseKey('');
-      setEmail('');
+      const result = await activateLicense(licenseKey);
+      if (result.success) {
+        setLicenseKey('');
+        await refreshStatus();
+      } else {
+        setError(result.error || 'Activation failed. Please check your license key and try again.');
+      }
     } catch (err) {
       logger.error('Activation failed:', err);
       setError('Activation failed. Please check your license key and try again.');
@@ -69,16 +73,11 @@ export function LicenseSection() {
       <div className="space-y-6">
         <h3 className="text-lg font-semibold text-gray-900">Activate License</h3>
 
-        <div>
-          <label className="block font-medium mb-2 text-gray-900">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-            placeholder="your@email.com"
-          />
-        </div>
+        {!isAuthenticated && (
+          <p className="text-sm text-gray-500">
+            Sign in to your account first, then enter your license key.
+          </p>
+        )}
 
         <div>
           <label className="block font-medium mb-2 text-gray-900">License Key</label>
@@ -88,6 +87,7 @@ export function LicenseSection() {
             onChange={(e) => setLicenseKey(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded font-mono text-gray-900"
             placeholder="XXXX-XXXX-XXXX-XXXX"
+            disabled={!isAuthenticated}
           />
         </div>
 
@@ -95,7 +95,7 @@ export function LicenseSection() {
 
         <button
           onClick={handleActivate}
-          disabled={activating || !licenseKey || !email}
+          disabled={activating || !licenseKey || !isAuthenticated}
           className="px-4 py-2 bg-blue-500 text-gray-900 dark:text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {activating ? 'Activating...' : 'Activate License'}
@@ -129,9 +129,9 @@ export function LicenseSection() {
         </div>
 
         <div>
-          <span className="text-sm text-gray-600">Expires:</span>
+          <span className="text-sm text-gray-600">Maintenance Until:</span>
           <span className="ml-2 font-medium text-gray-900">
-            {new Date(license.expirationDate).toLocaleDateString()}
+            {new Date(license.maintenanceEndDate).toLocaleDateString()}
           </span>
         </div>
 

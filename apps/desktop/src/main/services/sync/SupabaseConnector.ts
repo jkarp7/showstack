@@ -206,6 +206,46 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
   }
 
   // ============================================
+  // License Operations
+  // ============================================
+
+  /**
+   * Activate a license key via Supabase RPC
+   */
+  async activateLicense(key: string): Promise<{ success: boolean; error?: string; license?: any }> {
+    const { data, error } = await this.supabase.rpc('activate_license', {
+      p_license_key: key,
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return data as { success: boolean; error?: string; license?: any };
+  }
+
+  /**
+   * Fetch the current user's active license from Supabase
+   */
+  async fetchUserLicense(): Promise<any | null> {
+    const userId = this.getUserId();
+    if (!userId) return null;
+
+    const { data, error } = await this.supabase
+      .from('licenses')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return data;
+  }
+
+  // ============================================
   // PowerSyncBackendConnector Interface
   // ============================================
 
