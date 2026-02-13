@@ -17,6 +17,7 @@ vi.mock('../../database/queries/license', () => ({
   getCurrentLicense: vi.fn(),
   createLicense: vi.fn(),
   updateLicense: vi.fn(),
+  deleteLicense: vi.fn(),
 }));
 
 // Mock the logger
@@ -42,12 +43,18 @@ vi.mock('../../services/sync/SupabaseConnector', () => ({
   getSupabaseConnector: () => mockConnector,
 }));
 
-import { getCurrentLicense, createLicense, updateLicense } from '../../database/queries/license';
+import {
+  getCurrentLicense,
+  createLicense,
+  updateLicense,
+  deleteLicense,
+} from '../../database/queries/license';
 import { LicenseService } from '../LicenseService';
 
 const mockedGetCurrentLicense = vi.mocked(getCurrentLicense);
 const mockedCreateLicense = vi.mocked(createLicense);
 const mockedUpdateLicense = vi.mocked(updateLicense);
+const mockedDeleteLicense = vi.mocked(deleteLicense);
 
 function buildLicense(overrides: Partial<UserLicense> = {}): UserLicense {
   const now = Date.now();
@@ -59,6 +66,7 @@ function buildLicense(overrides: Partial<UserLicense> = {}): UserLicense {
       enabled: true,
       features: {
         maxRevisions: 5,
+        maxFixtures: -1,
         multiDiscipline: true,
         advancedExport: true,
         cloudSync: true,
@@ -207,6 +215,7 @@ describe('LicenseService', () => {
             enabled: false,
             features: {
               maxRevisions: 5,
+              maxFixtures: -1,
               multiDiscipline: true,
               advancedExport: true,
               cloudSync: true,
@@ -256,6 +265,7 @@ describe('LicenseService', () => {
             enabled: true,
             features: {
               maxRevisions: 5,
+              maxFixtures: -1,
               multiDiscipline: true,
               advancedExport: true,
               cloudSync: true,
@@ -267,6 +277,7 @@ describe('LicenseService', () => {
             enabled: false,
             features: {
               maxRevisions: 5,
+              maxFixtures: -1,
               multiDiscipline: true,
               advancedExport: true,
               cloudSync: true,
@@ -482,6 +493,111 @@ describe('LicenseService', () => {
       expect(mockedCreateLicense).toHaveBeenCalledWith(
         expect.objectContaining({
           tier: 'professional',
+        }),
+      );
+    });
+  });
+
+  describe('createDemoLicense', () => {
+    it('creates a demo license with all 6 modules enabled', () => {
+      mockedGetCurrentLicense.mockReturnValue(null);
+      const demoLicense = buildLicense({ tier: 'demo' });
+      mockedCreateLicense.mockReturnValue(demoLicense);
+
+      service.createDemoLicense();
+
+      expect(mockedCreateLicense).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: 'demo@local',
+          tier: 'demo',
+          modules: expect.arrayContaining([
+            expect.objectContaining({ module: 'lighting', enabled: true }),
+            expect.objectContaining({ module: 'sound', enabled: true }),
+            expect.objectContaining({ module: 'video', enabled: true }),
+            expect.objectContaining({ module: 'production_management', enabled: true }),
+            expect.objectContaining({ module: 'touring', enabled: true }),
+            expect.objectContaining({ module: 'producer', enabled: true }),
+          ]),
+        }),
+      );
+    });
+
+    it('creates demo license with correct feature restrictions', () => {
+      mockedGetCurrentLicense.mockReturnValue(null);
+      const demoLicense = buildLicense({ tier: 'demo' });
+      mockedCreateLicense.mockReturnValue(demoLicense);
+
+      service.createDemoLicense();
+
+      const createCall = mockedCreateLicense.mock.calls[0][0];
+      const lightingModule = createCall.modules.find((m: ModuleAccess) => m.module === 'lighting');
+      expect(lightingModule?.features).toEqual({
+        maxRevisions: 0,
+        maxFixtures: 25,
+        multiDiscipline: false,
+        advancedExport: false,
+        cloudSync: false,
+        prioritySupport: false,
+      });
+    });
+
+    it('deletes existing demo license before creating new one', () => {
+      const existingDemo = buildLicense({ id: 'old-demo', tier: 'demo' });
+      mockedGetCurrentLicense.mockReturnValue(existingDemo);
+      mockedCreateLicense.mockReturnValue(buildLicense({ tier: 'demo' }));
+
+      service.createDemoLicense();
+
+      expect(mockedDeleteLicense).toHaveBeenCalledWith('old-demo');
+      expect(mockedCreateLicense).toHaveBeenCalled();
+    });
+  });
+
+  describe('getLicenseStatus — demo tier', () => {
+    it('returns active with demo message for demo license', () => {
+      const license = buildLicense({ tier: 'demo' });
+      mockedGetCurrentLicense.mockReturnValue(license);
+
+      const status = service.getLicenseStatus();
+
+      expect(status.status).toBe('active');
+      expect(status.message).toContain('Demo mode');
+      expect(status.canView).toBe(true);
+      expect(status.canEdit).toBe(true);
+      expect(status.canSync).toBe(false);
+    });
+  });
+
+  describe('verifyLicenseViaSupabase — demo replacement', () => {
+    it('replaces demo license with server license', async () => {
+      mockConnector.isAuthenticated.mockReturnValue(true);
+      mockConnector.fetchUserLicense.mockResolvedValue({
+        id: 'srv-id',
+        license_key: 'REAL-KEY',
+        user_id: 'user-123',
+        email: 'real@example.com',
+        name: 'Real User',
+        tier: 'professional',
+        modules: [],
+        maintenance_end_date: '2027-06-01T00:00:00Z',
+        status: 'active',
+      });
+
+      const demoLicense = buildLicense({ id: 'demo-id', tier: 'demo' });
+      mockedGetCurrentLicense.mockReturnValue(demoLicense);
+      mockedCreateLicense.mockReturnValue(buildLicense());
+
+      const result = await service.verifyLicenseViaSupabase();
+
+      expect(result).toBe(true);
+      expect(mockedDeleteLicense).toHaveBeenCalledWith('demo-id');
+      expect(mockedCreateLicense).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: 'real@example.com',
+          name: 'Real User',
+          licenseKey: 'REAL-KEY',
+          tier: 'professional',
+          userId: 'user-123',
         }),
       );
     });

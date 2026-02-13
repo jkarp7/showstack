@@ -16,7 +16,8 @@ export type ShowStackModule =
 export type LicenseTier =
   | 'professional' // Full access, all features
   | 'student' // Limited features, educational pricing
-  | 'institutional'; // Multi-seat, institutional pricing
+  | 'institutional' // Multi-seat, institutional pricing
+  | 'demo'; // Demo mode — restricted local-only access
 
 export interface UserLicense {
   id: string;
@@ -47,6 +48,7 @@ export interface ModuleAccess {
 export interface ModuleFeatures {
   // Universal features (apply to all modules)
   maxRevisions: number;
+  maxFixtures: number; // -1 = unlimited
   multiDiscipline: boolean;
   advancedExport: boolean;
   cloudSync: boolean;

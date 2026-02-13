@@ -57,6 +57,7 @@ export interface AuthState {
   // UI state
   showAuthModal: boolean;
   authModalView: 'login' | 'signup' | 'reset';
+  isFirstLaunchPrompt: boolean;
 
   // Actions
   signIn: (email: string, password: string) => Promise<boolean>;
@@ -68,10 +69,14 @@ export interface AuthState {
   refreshLicenseStatus: () => Promise<void>;
   initializeSync: () => Promise<void>;
 
+  // Demo mode
+  activateDemoMode: () => Promise<void>;
+
   // UI actions
   openAuthModal: (view?: 'login' | 'signup' | 'reset') => void;
   closeAuthModal: () => void;
   setAuthModalView: (view: 'login' | 'signup' | 'reset') => void;
+  setFirstLaunchPrompt: (value: boolean) => void;
   clearError: () => void;
 }
 
@@ -98,6 +103,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isCloudConfigured: false,
   showAuthModal: false,
   authModalView: 'login',
+  isFirstLaunchPrompt: false,
 
   // Sign in
   signIn: async (email: string, password: string) => {
@@ -111,7 +117,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         await get().refreshAuthState();
         await get().refreshLicenseStatus();
         await get().refreshSyncStatus();
-        set({ isLoading: false, showAuthModal: false });
+        // Mark auth as prompted so first-launch prompt won't show again
+        localStorage.setItem('showstack-auth-prompted', 'true');
+        set({ isLoading: false, showAuthModal: false, isFirstLaunchPrompt: false });
         return true;
       } else {
         set({ isLoading: false, error: result.error || 'Sign in failed' });
@@ -265,17 +273,34 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
+  // Demo mode
+  activateDemoMode: async () => {
+    try {
+      await window.api.license.createDemo();
+      await get().refreshLicenseStatus();
+      set({ isFirstLaunchPrompt: false, showAuthModal: false });
+    } catch (error) {
+      logger.error('[AuthStore] Failed to activate demo mode', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  },
+
   // UI actions
   openAuthModal: (view = 'login') => {
     set({ showAuthModal: true, authModalView: view, error: null });
   },
 
   closeAuthModal: () => {
-    set({ showAuthModal: false, error: null });
+    set({ showAuthModal: false, error: null, isFirstLaunchPrompt: false });
   },
 
   setAuthModalView: (view) => {
     set({ authModalView: view, error: null });
+  },
+
+  setFirstLaunchPrompt: (value) => {
+    set({ isFirstLaunchPrompt: value });
   },
 
   clearError: () => {

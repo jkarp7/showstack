@@ -177,6 +177,16 @@ export default function App() {
     setShowSplash(false);
     // Mark splash as shown for this session
     sessionStorage.setItem('splashShown', 'true');
+
+    // First-launch auth prompt: if not authenticated and never prompted
+    const authPrompted = localStorage.getItem('showstack-auth-prompted');
+    if (!authPrompted) {
+      const authState = useAuthStore.getState();
+      if (!authState.isAuthenticated) {
+        authState.setFirstLaunchPrompt(true);
+        authState.openAuthModal('login');
+      }
+    }
   };
 
   const handleConsentClose = () => {

@@ -6,15 +6,22 @@
  */
 
 import { useEffect } from 'react';
-import { X, Cloud } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { LoginForm } from './LoginForm';
 import { SignUpForm } from './SignUpForm';
 import { PasswordResetForm } from './PasswordResetForm';
 
 export function AuthModal() {
-  const { showAuthModal, authModalView, closeAuthModal, setAuthModalView, isLoading } =
-    useAuthStore();
+  const {
+    showAuthModal,
+    authModalView,
+    closeAuthModal,
+    setAuthModalView,
+    isLoading,
+    isFirstLaunchPrompt,
+    activateDemoMode,
+  } = useAuthStore();
 
   // Handle escape key to close modal
   useEffect(() => {
@@ -45,6 +52,11 @@ export function AuthModal() {
     return null;
   }
 
+  const handleDemoMode = async () => {
+    await activateDemoMode();
+    localStorage.setItem('showstack-auth-prompted', 'true');
+  };
+
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget && !isLoading) {
       closeAuthModal();
@@ -73,8 +85,7 @@ export function AuthModal() {
         {/* Header with Logo */}
         <div className="pt-6 pb-2 px-6 text-center">
           <div className="flex items-center justify-center gap-2 text-blue-600 mb-2">
-            <Cloud className="h-8 w-8" />
-            <span className="text-xl font-bold">ShowStack Cloud</span>
+            <span className="text-xl font-bold">ShowStack</span>
           </div>
         </div>
 
@@ -95,6 +106,26 @@ export function AuthModal() {
             <PasswordResetForm onSwitchToLogin={() => setAuthModalView('login')} />
           )}
         </div>
+
+        {/* Demo Mode Button (first-launch only) */}
+        {isFirstLaunchPrompt && (
+          <div className="px-6 pb-4">
+            <div className="relative flex items-center justify-center my-2">
+              <div className="border-t border-gray-200 w-full" />
+              <span className="bg-white px-3 text-xs text-gray-400 absolute">or</span>
+            </div>
+            <button
+              onClick={handleDemoMode}
+              disabled={isLoading}
+              className="w-full py-2 px-4 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors disabled:opacity-50"
+            >
+              Continue in Demo Mode
+            </button>
+            <p className="text-xs text-gray-400 text-center mt-1">
+              25 fixtures, no cloud sync, no exports
+            </p>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="px-6 py-4 bg-gray-50 text-center text-xs text-gray-500 border-t">

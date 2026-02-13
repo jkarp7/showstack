@@ -159,6 +159,26 @@ export function registerLicenseHandlers(): void {
   });
 
   /**
+   * Create a demo license (for first-launch skip)
+   */
+  ipcMain.handle('license:createDemo', async () => {
+    try {
+      return await errorHandler.executeWithRetry(async () => {
+        const license = licenseService.createDemoLicense();
+        return { success: true, license };
+      }, 'license:createDemo');
+    } catch (error) {
+      logger.error('Failed to create demo license', {
+        operation: 'license:createDemo',
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw new Error(
+        `Unable to create demo license: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  });
+
+  /**
    * Verify license online (manual trigger)
    */
   ipcMain.handle('license:verifyOnline', async () => {

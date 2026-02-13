@@ -1,4 +1,9 @@
-import { getCurrentLicense, createLicense, updateLicense } from '../database/queries/license';
+import {
+  getCurrentLicense,
+  createLicense,
+  updateLicense,
+  deleteLicense,
+} from '../database/queries/license';
 import { logger } from '../utils/logger';
 import type {
   UserLicense,
@@ -39,6 +44,17 @@ export class LicenseService {
         message: 'No license found. Please activate.',
         canView: false,
         canEdit: false,
+        canSync: false,
+      };
+    }
+
+    // Demo tier — local-only with restrictions
+    if (license.tier === 'demo') {
+      return {
+        status: 'active',
+        message: 'Demo mode — sign in for full access',
+        canView: true,
+        canEdit: true,
         canSync: false,
       };
     }
@@ -158,9 +174,25 @@ export class LicenseService {
 
       // Update local SQLite with server data
       const localLicense = getCurrentLicense();
-      if (localLicense) {
+
+      // If existing license is a demo, delete it so we create a fresh real one
+      if (localLicense && localLicense.tier === 'demo') {
+        deleteLicense(localLicense.id);
+        // Create local license from server data
+        createLicense({
+          email: serverLicense.email,
+          name: serverLicense.name || '',
+          licenseKey: serverLicense.license_key,
+          tier: serverLicense.tier as LicenseTier,
+          modules: serverLicense.modules,
+          expirationDate: new Date(serverLicense.maintenance_end_date).getTime(),
+          maintenanceEndDate: new Date(serverLicense.maintenance_end_date).getTime(),
+          userId: serverLicense.user_id,
+        });
+      } else if (localLicense) {
         updateLicense(localLicense.id, {
           status: serverLicense.status as 'active' | 'expired' | 'suspended',
+          name: serverLicense.name || localLicense.name,
           maintenanceEndDate: new Date(serverLicense.maintenance_end_date).getTime(),
           expirationDate: new Date(serverLicense.maintenance_end_date).getTime(),
           modules: serverLicense.modules,
@@ -171,6 +203,7 @@ export class LicenseService {
         // Create local license from server data
         createLicense({
           email: serverLicense.email,
+          name: serverLicense.name || '',
           licenseKey: serverLicense.license_key,
           tier: serverLicense.tier as LicenseTier,
           modules: serverLicense.modules,
@@ -265,6 +298,46 @@ export class LicenseService {
   }
 
   /**
+   * Create a demo license with restricted features.
+   * All 6 modules enabled at demo tier.
+   */
+  createDemoLicense(): UserLicense {
+    // Remove any existing demo license first
+    const existing = getCurrentLicense();
+    if (existing && existing.tier === 'demo') {
+      deleteLicense(existing.id);
+    }
+
+    const allModules: ShowStackModule[] = [
+      'lighting',
+      'sound',
+      'video',
+      'production_management',
+      'touring',
+      'producer',
+    ];
+
+    const modules: ModuleAccess[] = allModules.map((module) => ({
+      module,
+      enabled: true,
+      features: this.getDefaultFeaturesForTier('demo', module),
+    }));
+
+    // Demo licenses don't expire — they're replaced when a real license is found
+    const farFuture = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
+
+    return createLicense({
+      email: 'demo@local',
+      name: 'Demo User',
+      licenseKey: `DEMO-${Date.now()}`,
+      tier: 'demo',
+      modules,
+      expirationDate: farFuture,
+      maintenanceEndDate: farFuture,
+    });
+  }
+
+  /**
    * Legacy: activate a license locally without Supabase
    * Kept for backwards compatibility and offline-first scenarios
    */
@@ -295,9 +368,10 @@ export class LicenseService {
   }
 
   private getDefaultFeaturesForTier(tier: LicenseTier, _module: ShowStackModule): ModuleFeatures {
-    const tierFeatures = {
+    const tierFeatures: Record<LicenseTier, ModuleFeatures> = {
       professional: {
         maxRevisions: 5,
+        maxFixtures: -1,
         multiDiscipline: true,
         advancedExport: true,
         cloudSync: true,
@@ -305,6 +379,7 @@ export class LicenseService {
       },
       student: {
         maxRevisions: 2,
+        maxFixtures: 100,
         multiDiscipline: false,
         advancedExport: false,
         cloudSync: false,
@@ -312,10 +387,19 @@ export class LicenseService {
       },
       institutional: {
         maxRevisions: 3,
+        maxFixtures: -1,
         multiDiscipline: true,
         advancedExport: true,
         cloudSync: true,
         prioritySupport: true,
+      },
+      demo: {
+        maxRevisions: 0,
+        maxFixtures: 25,
+        multiDiscipline: false,
+        advancedExport: false,
+        cloudSync: false,
+        prioritySupport: false,
       },
     };
 

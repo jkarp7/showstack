@@ -28,7 +28,7 @@ export const APP_SCHEMA = `
     email TEXT NOT NULL,
     name TEXT,
     license_key TEXT UNIQUE NOT NULL,
-    tier TEXT NOT NULL CHECK(tier IN ('professional', 'student', 'institutional')),
+    tier TEXT NOT NULL CHECK(tier IN ('professional', 'student', 'institutional', 'demo')),
     status TEXT NOT NULL CHECK(status IN ('active', 'expired', 'suspended', 'deleted')),
     modules TEXT NOT NULL, -- JSON stringified ModuleAccess[]
     expiration_date INTEGER NOT NULL,
