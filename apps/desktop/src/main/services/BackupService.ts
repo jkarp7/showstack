@@ -36,8 +36,8 @@ const BACKUP_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
 const MAX_BACKUPS = 10;
 const INITIAL_BACKUP_DELAY_MS = 60 * 1000; // 1 minute
 const BACKUP_DIR_PREFIX = 'backup-';
-const BACKUP_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
-const MIN_DISK_SPACE_MB = 500; // Require at least 500MB free
+const BACKUP_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
+const MIN_DISK_SPACE_MB = 500; // Minimum floor for disk space check (MB)
 
 export class BackupService {
   private backupInterval: NodeJS.Timeout | null = null;
@@ -185,16 +185,24 @@ export class BackupService {
     const backupDir = join(this.backupsDir, backupDirName);
 
     try {
-      // Check disk space before starting
+      // Calculate required disk space based on source DB sizes
+      const { appDbPath, projectDbPath } = databaseManager.getPaths();
+      const sourceAppStat = await stat(appDbPath).catch(() => null);
+      const sourceProjectStat = await stat(projectDbPath).catch(() => null);
+      const totalDbSizeMB = Math.ceil(
+        ((sourceAppStat?.size ?? 0) + (sourceProjectStat?.size ?? 0)) / (1024 * 1024),
+      );
+      const requiredMB = Math.max(totalDbSizeMB * 2, MIN_DISK_SPACE_MB);
+
       const freeMB = await this.getFreeDiskSpaceMB();
-      if (freeMB !== null && freeMB < MIN_DISK_SPACE_MB) {
+      if (freeMB !== null && freeMB < requiredMB) {
         logger.warn('Skipping backup — insufficient disk space', {
           freeSpaceMB: freeMB,
-          requiredMB: MIN_DISK_SPACE_MB,
+          requiredMB,
         });
         return {
           success: false,
-          error: `Insufficient disk space: ${freeMB}MB free, ${MIN_DISK_SPACE_MB}MB required`,
+          error: `Insufficient disk space: ${freeMB}MB free, ${requiredMB}MB required`,
         };
       }
 
@@ -203,34 +211,44 @@ export class BackupService {
       // Create backup directory
       await mkdir(backupDir, { recursive: true });
 
-      // Force WAL checkpoint before backup
-      databaseManager.forceCheckpoint();
-
-      // Verify WAL checkpoint completed (WAL file should be minimal)
-      const { appDbPath } = databaseManager.getPaths();
-      const walStat = await stat(appDbPath + '-wal').catch(() => null);
-      if (walStat && walStat.size > 1024) {
-        logger.warn('WAL checkpoint may be incomplete', { walSize: walStat.size });
+      // Force WAL checkpoint before backup, retry once if busy
+      let checkpointResult = databaseManager.forceCheckpoint();
+      if (checkpointResult.appBusy || checkpointResult.projectBusy) {
+        logger.info('WAL checkpoint found busy database, retrying after 1s', {
+          appBusy: checkpointResult.appBusy,
+          projectBusy: checkpointResult.projectBusy,
+        });
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        checkpointResult = databaseManager.forceCheckpoint();
+        if (checkpointResult.appBusy || checkpointResult.projectBusy) {
+          logger.warn('WAL checkpoint still busy after retry, proceeding with best-effort backup', {
+            appBusy: checkpointResult.appBusy,
+            projectBusy: checkpointResult.projectBusy,
+          });
+        }
       }
 
       // Backup both databases using better-sqlite3's backup API (with timeout)
       const appDb = databaseManager.getAppDatabase();
       const projectDb = databaseManager.getProjectDatabase();
 
+      const appBackupPath = join(backupDir, 'showstack-app.db');
+      const projectBackupPath = join(backupDir, 'showstack-projects.db');
+
+      await this.withTimeout(appDb.backup(appBackupPath), BACKUP_TIMEOUT_MS, 'App database backup');
       await this.withTimeout(
-        appDb.backup(join(backupDir, 'showstack-app.db')),
-        BACKUP_TIMEOUT_MS,
-        'App database backup',
-      );
-      await this.withTimeout(
-        projectDb.backup(join(backupDir, 'showstack-projects.db')),
+        projectDb.backup(projectBackupPath),
         BACKUP_TIMEOUT_MS,
         'Project database backup',
       );
 
+      // Verify backup integrity with quick_check
+      await this.verifyBackupIntegrity(appBackupPath, 'app');
+      await this.verifyBackupIntegrity(projectBackupPath, 'project');
+
       // Get file sizes
-      const appDbStat = await stat(join(backupDir, 'showstack-app.db'));
-      const projectDbStat = await stat(join(backupDir, 'showstack-projects.db'));
+      const appDbStat = await stat(appBackupPath);
+      const projectDbStat = await stat(projectBackupPath);
 
       // Write metadata last — if missing, backup is incomplete
       const metadata: BackupMetadata = {
@@ -272,6 +290,27 @@ export class BackupService {
       };
     } finally {
       this.isBackupInProgress = false;
+    }
+  }
+
+  /**
+   * Verify a backup database file's integrity using PRAGMA quick_check.
+   * Opens the file in read-only mode, runs the check, and closes immediately.
+   */
+  private async verifyBackupIntegrity(dbPath: string, dbName: string): Promise<void> {
+    const Database = (await import('better-sqlite3')).default;
+    let db: InstanceType<typeof Database> | null = null;
+    try {
+      db = new Database(dbPath, { readonly: true });
+      const result = db.pragma('quick_check') as Array<{ quick_check: string }>;
+      if (result[0]?.quick_check !== 'ok') {
+        throw new Error(`Integrity check failed for ${dbName} backup: ${result[0]?.quick_check}`);
+      }
+      logger.debug(`Backup integrity verified`, { database: dbName });
+    } finally {
+      if (db) {
+        db.close();
+      }
     }
   }
 
@@ -405,6 +444,18 @@ export class BackupService {
     const tempDir = join(this.backupsDir, '.restore-rollback');
 
     try {
+      // Check version compatibility
+      const metadataContent = await readFile(join(backupDir, 'metadata.json'), 'utf-8');
+      const metadata = BackupMetadataSchema.parse(JSON.parse(metadataContent));
+      const currentMajor = app.getVersion().split('.')[0];
+      const backupMajor = metadata.version.split('.')[0];
+      if (currentMajor !== backupMajor) {
+        return {
+          success: false,
+          error: `Version mismatch: backup is v${metadata.version} (major ${backupMajor}), current app is v${app.getVersion()} (major ${currentMajor})`,
+        };
+      }
+
       logger.info(`Restoring from backup`, { backupDir: backupDirName });
 
       // Save current DB files for rollback before overwriting

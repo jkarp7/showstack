@@ -4,6 +4,44 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
+const {
+  mockMkdir,
+  mockReaddir,
+  mockRm,
+  mockReadFile,
+  mockWriteFile,
+  mockStat,
+  mockCopyFile,
+  mockPragma,
+  mockCloseDb,
+  mockBetterSqlite3,
+  mockBackup,
+  mockAppDb,
+  mockProjectDb,
+} = vi.hoisted(() => {
+  const mockBackup = vi.fn().mockResolvedValue(undefined);
+  const mockPragma = vi.fn().mockReturnValue([{ quick_check: 'ok' }]);
+  const mockCloseDb = vi.fn();
+  return {
+    mockMkdir: vi.fn().mockResolvedValue(undefined),
+    mockReaddir: vi.fn().mockResolvedValue([]),
+    mockRm: vi.fn().mockResolvedValue(undefined),
+    mockReadFile: vi.fn(),
+    mockWriteFile: vi.fn().mockResolvedValue(undefined),
+    mockStat: vi.fn(),
+    mockCopyFile: vi.fn().mockResolvedValue(undefined),
+    mockPragma,
+    mockCloseDb,
+    mockBetterSqlite3: vi.fn().mockReturnValue({
+      pragma: mockPragma,
+      close: mockCloseDb,
+    }),
+    mockBackup,
+    mockAppDb: { backup: mockBackup },
+    mockProjectDb: { backup: mockBackup },
+  };
+});
+
 // Mock electron
 vi.mock('electron', () => ({
   app: {
@@ -23,14 +61,6 @@ vi.mock('../../utils/logger', () => ({
 }));
 
 // Mock fs/promises
-const mockMkdir = vi.fn().mockResolvedValue(undefined);
-const mockReaddir = vi.fn().mockResolvedValue([]);
-const mockRm = vi.fn().mockResolvedValue(undefined);
-const mockReadFile = vi.fn();
-const mockWriteFile = vi.fn().mockResolvedValue(undefined);
-const mockStat = vi.fn();
-const mockCopyFile = vi.fn().mockResolvedValue(undefined);
-
 vi.mock('fs/promises', () => ({
   mkdir: (...args: unknown[]) => mockMkdir(...args),
   readdir: (...args: unknown[]) => mockReaddir(...args),
@@ -41,14 +71,15 @@ vi.mock('fs/promises', () => ({
   copyFile: (...args: unknown[]) => mockCopyFile(...args),
 }));
 
-// Mock database manager
-const mockBackup = vi.fn().mockResolvedValue(undefined);
-const mockAppDb = { backup: mockBackup };
-const mockProjectDb = { backup: mockBackup };
+// Mock better-sqlite3 for integrity verification
+vi.mock('better-sqlite3', () => ({
+  default: mockBetterSqlite3,
+}));
 
+// Mock database manager
 vi.mock('../../database/core/DatabaseManager', () => ({
   databaseManager: {
-    forceCheckpoint: vi.fn(),
+    forceCheckpoint: vi.fn(() => ({ appBusy: false, projectBusy: false })),
     getPaths: vi.fn(() => ({
       appDbPath: '/tmp/test-userdata/showstack-app.db',
       projectDbPath: '/tmp/test-userdata/showstack-projects.db',
@@ -78,17 +109,40 @@ describe('BackupService', () => {
     mockWriteFile.mockResolvedValue(undefined);
     mockCopyFile.mockResolvedValue(undefined);
     vi.mocked(databaseManager.initialize).mockResolvedValue(undefined);
+    vi.mocked(databaseManager.forceCheckpoint).mockReturnValue({
+      appBusy: false,
+      projectBusy: false,
+    });
+
+    // Mock better-sqlite3 for integrity check
+    mockPragma.mockReturnValue([{ quick_check: 'ok' }]);
+    mockCloseDb.mockReturnValue(undefined);
+    mockBetterSqlite3.mockReturnValue({
+      pragma: mockPragma,
+      close: mockCloseDb,
+    });
 
     // Mock the private disk space check to avoid real execFile calls
     vi.spyOn(service as never, 'getFreeDiskSpaceMB' as never).mockResolvedValue(50000 as never);
 
-    // Default: stat returns valid sizes (for backup file stats)
-    // WAL stat should return null (file not found) by default
-    mockStat.mockImplementation((path: string) => {
-      if (typeof path === 'string' && path.endsWith('-wal')) {
-        return Promise.reject(new Error('ENOENT'));
-      }
+    // Default: stat returns valid sizes for all paths
+    mockStat.mockImplementation(() => {
       return Promise.resolve({ size: 1024 });
+    });
+
+    // Default: readFile returns valid metadata for restore tests
+    mockReadFile.mockImplementation((path: string) => {
+      if (typeof path === 'string' && path.includes('metadata.json')) {
+        return Promise.resolve(
+          JSON.stringify({
+            timestamp: 12345,
+            appDbSize: 1024,
+            projectDbSize: 1024,
+            version: '1.0.0',
+          }),
+        );
+      }
+      return Promise.reject(new Error('ENOENT'));
     });
   });
 
@@ -172,23 +226,124 @@ describe('BackupService', () => {
         force: true,
       });
     });
+  });
 
-    it('should warn when WAL checkpoint is incomplete', async () => {
-      // WAL file exists with large size
+  describe('WAL checkpoint retry', () => {
+    it('should retry checkpoint once when database is busy', async () => {
+      vi.mocked(databaseManager.forceCheckpoint)
+        .mockReturnValueOnce({ appBusy: true, projectBusy: false })
+        .mockReturnValueOnce({ appBusy: false, projectBusy: false });
+
+      const backupPromise = service.performBackup('test');
+      await vi.advanceTimersByTimeAsync(1000);
+      const result = await backupPromise;
+
+      expect(result.success).toBe(true);
+      expect(databaseManager.forceCheckpoint).toHaveBeenCalledTimes(2);
+    });
+
+    it('should warn but proceed when checkpoint is still busy after retry', async () => {
+      const { logger } = await import('../../utils/logger');
+
+      vi.mocked(databaseManager.forceCheckpoint)
+        .mockReturnValueOnce({ appBusy: false, projectBusy: true })
+        .mockReturnValueOnce({ appBusy: false, projectBusy: true });
+
+      const backupPromise = service.performBackup('test');
+      await vi.advanceTimersByTimeAsync(1000);
+      const result = await backupPromise;
+
+      expect(result.success).toBe(true);
+      expect(databaseManager.forceCheckpoint).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'WAL checkpoint still busy after retry, proceeding with best-effort backup',
+        expect.objectContaining({ projectBusy: true }),
+      );
+    });
+
+    it('should not retry when checkpoint is not busy', async () => {
+      vi.mocked(databaseManager.forceCheckpoint).mockReturnValue({
+        appBusy: false,
+        projectBusy: false,
+      });
+
+      await service.performBackup('test');
+
+      expect(databaseManager.forceCheckpoint).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('backup integrity verification', () => {
+    it('should verify backup integrity with quick_check after backup', async () => {
+      await service.performBackup('test');
+
+      // better-sqlite3 constructor should be called twice (once per backup file)
+      expect(mockBetterSqlite3).toHaveBeenCalledTimes(2);
+      expect(mockBetterSqlite3).toHaveBeenCalledWith(expect.stringContaining('showstack-app.db'), {
+        readonly: true,
+      });
+      expect(mockBetterSqlite3).toHaveBeenCalledWith(
+        expect.stringContaining('showstack-projects.db'),
+        { readonly: true },
+      );
+
+      // quick_check should be called on each backup
+      expect(mockPragma).toHaveBeenCalledWith('quick_check');
+      expect(mockCloseDb).toHaveBeenCalledTimes(2);
+    });
+
+    it('should fail backup when integrity check fails', async () => {
+      mockPragma
+        .mockReturnValueOnce([{ quick_check: 'ok' }])
+        .mockReturnValueOnce([{ quick_check: 'corruption detected on page 42' }]);
+
+      const result = await service.performBackup('test');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Integrity check failed');
+      // Should clean up the failed backup directory
+      expect(mockRm).toHaveBeenCalledWith(expect.stringContaining('backup-'), {
+        recursive: true,
+        force: true,
+      });
+    });
+  });
+
+  describe('dynamic disk space calculation', () => {
+    it('should calculate required space as 2x total DB size', async () => {
+      // Source DBs: 300MB each = 600MB total, 2x = 1200MB required
       mockStat.mockImplementation((path: string) => {
-        if (path.endsWith('-wal')) {
-          return Promise.resolve({ size: 4096 });
+        if (path === '/tmp/test-userdata/showstack-app.db') {
+          return Promise.resolve({ size: 300 * 1024 * 1024 });
+        }
+        if (path === '/tmp/test-userdata/showstack-projects.db') {
+          return Promise.resolve({ size: 300 * 1024 * 1024 });
         }
         return Promise.resolve({ size: 1024 });
       });
 
-      const { logger } = await import('../../utils/logger');
+      // Only 1000MB free — less than 1200MB required
+      vi.spyOn(service as never, 'getFreeDiskSpaceMB' as never).mockResolvedValue(1000 as never);
 
-      await service.performBackup('test');
+      const result = await service.performBackup('test');
 
-      expect(logger.warn).toHaveBeenCalledWith('WAL checkpoint may be incomplete', {
-        walSize: 4096,
-      });
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('1000MB free');
+      expect(result.error).toContain('1200MB required');
+    });
+
+    it('should use MIN_DISK_SPACE_MB floor when DBs are small', async () => {
+      // Source DBs: 1KB each = small, so floor of 500MB should apply
+      mockStat.mockImplementation(() => Promise.resolve({ size: 1024 }));
+
+      // Only 400MB free — less than 500MB floor
+      vi.spyOn(service as never, 'getFreeDiskSpaceMB' as never).mockResolvedValue(400 as never);
+
+      const result = await service.performBackup('test');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('400MB free');
+      expect(result.error).toContain('500MB required');
     });
   });
 
@@ -398,6 +553,55 @@ describe('BackupService', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Backup is invalid or incomplete');
+    });
+  });
+
+  describe('version compatibility check', () => {
+    it('should block restore when major version differs', async () => {
+      // Backup is from v2.x, current app is v1.x
+      mockReadFile.mockImplementation((path: string) => {
+        if (typeof path === 'string' && path.includes('metadata.json')) {
+          return Promise.resolve(
+            JSON.stringify({
+              timestamp: 12345,
+              appDbSize: 1024,
+              projectDbSize: 1024,
+              version: '2.3.0',
+            }),
+          );
+        }
+        return Promise.reject(new Error('ENOENT'));
+      });
+
+      const result = await service.restoreFromBackup('backup-12345');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Version mismatch');
+      expect(result.error).toContain('major 2');
+      expect(result.error).toContain('major 1');
+      // Should NOT have closed databases or attempted restore
+      expect(databaseManager.close).not.toHaveBeenCalled();
+    });
+
+    it('should allow restore when major version matches', async () => {
+      // Same major version (1.x), different minor
+      mockReadFile.mockImplementation((path: string) => {
+        if (typeof path === 'string' && path.includes('metadata.json')) {
+          return Promise.resolve(
+            JSON.stringify({
+              timestamp: 12345,
+              appDbSize: 1024,
+              projectDbSize: 1024,
+              version: '1.5.0',
+            }),
+          );
+        }
+        return Promise.reject(new Error('ENOENT'));
+      });
+
+      const result = await service.restoreFromBackup('backup-12345');
+
+      expect(result.success).toBe(true);
     });
   });
 
