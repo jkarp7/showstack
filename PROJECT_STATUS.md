@@ -1,10 +1,10 @@
 # ShowStack Project Status
 
 **Created:** December 18, 2025
-**Last Updated:** February 11, 2026
+**Last Updated:** February 13, 2026
 **Current Version:** 0.1.0-alpha
 **Development Phase:** Alpha (Renovation ~90% complete)
-**Active Branch:** `develop`
+**Active Branch:** `feature/user-accounts-licensing`
 
 This document tracks the development status of all ShowStack feature domains and editions. It serves as the central source of truth for what's completed, in progress, and planned.
 
@@ -26,9 +26,22 @@ This document tracks the development status of all ShowStack feature domains and
 
 ## 🎯 Current Development Priorities
 
-### ✅ Recently Completed (December 2025 - January 2026)
+### ✅ Recently Completed (December 2025 - February 2026)
 
-**Latest (January 2026):** 9. ✅ Shop Order Table Migration (PR #63) - COMPLETED (January 20, 2026)
+**Latest (February 2026):** 10. ✅ User Accounts, Licensing & Demo Mode (PR on feature/user-accounts-licensing) - COMPLETED (February 13, 2026)
+
+- Supabase Auth integration (sign in, sign up, sign out, password reset)
+- Email-based license auto-claim (no manual key entry)
+- Perpetual fallback licensing model (app works if built before maintenance end)
+- Demo mode for unauthenticated users (25 fixtures, no cloud sync, no exports)
+- First-launch auth prompt with "Continue in Demo Mode" option
+- Account page shows auth status, demo badge, and upgrade prompts
+- License verification via Supabase with auto-claim flow
+- Cloud sync flag (`cloud_sync` column) on Supabase licenses table
+- `maxFixtures` feature limit per tier (demo: 25, student: 100, pro/institutional: unlimited)
+- Comprehensive test coverage (5 new test cases for demo mode)
+
+9. ✅ Shop Order Table Migration (PR #63) - COMPLETED (January 20, 2026)
 
 - Migrated from dialog-based to spreadsheet-like table interface
 - Inline cell editing (double-click to edit, single-click to select)
@@ -1322,6 +1335,7 @@ Privacy-first telemetry system with full PostHog SDK integration.
   - Tier-based features (Professional, Student, Institutional)
   - Background verification (non-blocking)
   - Graceful degradation (read-only on expiration)
+  - Demo mode for unauthenticated users (restricted local-only license)
 
 - ✅ **License Database** - `src/main/database/appSchema.ts:licenses`
   - License storage in app database
@@ -1332,6 +1346,8 @@ Privacy-first telemetry system with full PostHog SDK integration.
   - License status banners
   - Edition selector
   - Upgrade prompts
+  - First-launch auth prompt with demo mode fallback
+  - Auth status section on Account page (signed in / demo / not signed in)
   - Account dialog with license section
 
 - ✅ **License Hooks** - `src/renderer/src/hooks/`
@@ -1559,21 +1575,18 @@ Full developer mode implementation with DevTools integration.
 
 ### User Authentication
 
-**Status:** UI placeholder only (2% complete) - Login page bypasses auth
+**Status:** ✅ Complete (Supabase Auth)
 
-- ⬜ **JWT Authentication** - jsonwebtoken package not installed
-- ⬜ **Authentication Service** - No auth backend
-- ⬜ **Session Management** - No session tracking
-- ⬜ **Password Hashing** - For user credentials (bcryptjs only used for admin password)
-- ⬜ **User Registration** - No registration flow
-- ⬜ **Password Reset** - No reset functionality
+- ✅ **Supabase Auth** - Email/password authentication via Supabase
+- ✅ **Sign In / Sign Up / Sign Out** - Full auth flows via IPC
+- ✅ **Password Reset** - Email-based password reset
+- ✅ **Auth State Management** - Zustand authStore with IPC bridge
+- ✅ **Auth Modal** - Login, signup, and password reset forms
+- ✅ **First-Launch Prompt** - Auth modal on first launch with demo mode fallback
+- ✅ **Demo Mode** - Restricted local-only license for unauthenticated users
+- ✅ **License Auto-Link** - Email-based auto-claim when signing in
 
-**Existing UI (Non-functional):**
-
-- `Login.tsx` - Login form with "Skip login (development)" that bypasses everything
-- handleLogin() just navigates to /modules without validation
-
-**Note:** License system (LicenseService.ts) handles feature access control but is NOT user authentication
+**Architecture:** Supabase Auth (managed service) — no custom JWT or session management needed
 
 ---
 
@@ -1816,7 +1829,7 @@ Incorporated into **Lighting Edition → Planned** section above.
 - **Team collaboration**: Multi-user permissions not yet implemented (sync is device-level)
 - **E2E tests**: Playwright tests not yet implemented
 - **Fixture management**: ~80% complete, some advanced features remaining
-- **ESLint warnings**: ~826 warnings (0 errors) - gradual reduction planned
+- **ESLint warnings**: ~821 warnings (0 errors) - gradual reduction planned
 
 ### Breaking Changes Log
 
@@ -1843,4 +1856,4 @@ Incorporated into **Lighting Edition → Planned** section above.
 
 ---
 
-**Last Updated:** February 11, 2026
+**Last Updated:** February 13, 2026

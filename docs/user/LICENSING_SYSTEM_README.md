@@ -19,7 +19,8 @@ The licensing system provides:
 
 - **Offline-First**: 14-day grace period, non-blocking verification
 - **Module-Based**: Lighting, Sound, Video, Production Management, Touring, Producer modules
-- **Tier-Based Features**: Professional, Student, Institutional tiers
+- **Tier-Based Features**: Professional, Student, Institutional, Demo tiers
+- **Demo Mode**: Restricted local-only access for unauthenticated users
 - **Graceful Degradation**: Read-only mode on expiration (not lockout)
 - **Smart Warnings**: 7-day expiration alerts
 
@@ -33,7 +34,7 @@ The licensing system is integrated into the main ShowStack application. To ensur
    npm install lucide-react
    ```
 
-2. **Database is auto-initialized** on first run (sql.js)
+2. **Database is auto-initialized** on first run (better-sqlite3)
 
 3. **No additional setup required** - the system is ready to use!
 
@@ -289,13 +290,14 @@ function SoundModule() {
 
 ### Universal Features
 
-| Feature          | Professional | Student | Institutional |
-| ---------------- | ------------ | ------- | ------------- |
-| Max Revisions    | 5            | 2       | 3             |
-| Multi-Discipline | Yes          | No      | Yes           |
-| Advanced Export  | Yes          | No      | Yes           |
-| Cloud Sync       | Yes          | No      | Yes           |
-| Priority Support | Yes          | No      | Yes           |
+| Feature          | Professional | Student | Institutional | Demo |
+| ---------------- | ------------ | ------- | ------------- | ---- |
+| Max Revisions    | 5            | 2       | 3             | 0    |
+| Max Fixtures     | Unlimited    | 100     | Unlimited     | 25   |
+| Multi-Discipline | Yes          | No      | Yes           | No   |
+| Advanced Export  | Yes          | No      | Yes           | No   |
+| Cloud Sync       | Yes          | No      | Yes           | No   |
+| Priority Support | Yes          | No      | Yes           | No   |
 
 ### Modules
 
@@ -318,6 +320,7 @@ To test different license states during development:
 2. **Expired License**: Set `maintenanceEndDate` to past date
 3. **Offline Mode**: Set `lastVerified` to 15+ days ago
 4. **Approaching Expiration**: Set `maintenanceEndDate` to 5 days from now
+5. **Demo Mode**: Call `licenseService.createDemoLicense()` or use the "Continue in Demo Mode" button on first launch
 
 ### Adding New Features
 
@@ -341,6 +344,7 @@ The license verification endpoint should return:
       "enabled": true,
       "features": {
         "maxRevisions": 5,
+        "maxFixtures": -1,
         "multiDiscipline": true,
         "advancedExport": true,
         "cloudSync": true,

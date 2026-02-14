@@ -1,35 +1,54 @@
 # Next Steps - ShowStack Development
 
-**Branch:** `develop`
-**Last Updated:** February 11, 2026
-**Status:** Renovation ~90% complete (Phases 0-7.2 done), Phase 7.3 in progress
+**Branch:** `feature/user-accounts-licensing`
+**Last Updated:** February 13, 2026
+**Status:** Renovation ~95% complete (Phases 0-7.2 done), Phase 7.3 in progress
 
 ---
 
 ## Quick Start (Resuming Work)
 
 ```bash
-# 1. Ensure you're on develop branch
-git checkout develop
+# 1. Ensure you're on the correct branch
+git checkout feature/user-accounts-licensing
 
 # 2. Pull latest changes
-git pull origin develop
+git pull origin feature/user-accounts-licensing
 
 # 3. Install dependencies (sets up Husky hooks)
 npm install
 
-# 4. Start dev server
+# 4. Rebuild better-sqlite3 for Electron
+npx electron-rebuild -f -w better-sqlite3
+
+# 5. Start dev server
 npm run dev
 
-# 5. Run tests
+# 6. Run tests
 npm run test:run
 
-# 6. Run linter
+# 7. Run linter
 npm run lint
 
-# 7. Check formatting
+# 8. Check formatting
 npm run format:check
 ```
+
+---
+
+## Recently Completed
+
+### User Accounts, Licensing & Demo Mode (February 2026)
+
+- Supabase Auth integration (sign in, sign up, sign out, password reset)
+- Email-based license auto-claim (no manual key entry)
+- Perpetual fallback licensing model
+- Demo mode for unauthenticated users (25 fixtures, no cloud sync, no exports)
+- First-launch auth prompt with "Continue in Demo Mode" option
+- Account page shows auth status with demo badge and upgrade prompts
+- `maxFixtures` feature limit per tier
+- Cloud sync flag on Supabase licenses table
+- 5 new test cases for demo mode licensing
 
 ---
 
@@ -41,13 +60,12 @@ npm run format:check
 - **Phase 1: Database Migration** - better-sqlite3 with WAL mode, transactions
 - **Phase 2: Validation & Services** - Zod validation, service layer
 - **Phase 3: Cloud Collaboration** - PowerSync + Supabase, offline-first sync
-- **Phase 4: Testing & QA** - 1,520+ tests, 70%+ coverage, Vitest + RTL
+- **Phase 4: Testing & QA** - 1,576+ tests, 70%+ coverage, Vitest + RTL
 - **Phase 5: CI/CD & DevOps** - ESLint 9, Prettier, Husky, GitHub Actions
 
 ### Completed: Phase 6 - Security & Monitoring
 
 - [x] Code quality hardening (PR #76 review items)
-  - `no-explicit-any`: warn, ESLint caching, `--max-warnings`, CodeQL/SAST
 - [x] Logger utility (replace ~1,000 console statements)
 - [x] Sentry integration
 - [x] Health check system
@@ -90,6 +108,7 @@ See `docs/archive/renovation/README.md` for the full renovation plan.
 - `docs/archive/renovation/README.md` - Renovation plan overview
 - `docs/archive/renovation/Phase-6-Security-Monitoring.md` - Phase 6 details
 - `docs/archive/renovation/Phase-7-Disaster-Recovery.md` - Phase 7 disaster recovery details
+- `docs/user/LICENSING_SYSTEM_README.md` - Licensing system documentation
 - `PROJECT_STATUS.md` - Overall project status
 - `CONTRIBUTING.md` - Contribution guidelines and code standards
 - `docs/development/ARCHITECTURE.md` - Architecture guide
@@ -102,8 +121,9 @@ See `docs/archive/renovation/README.md` for the full renovation plan.
 2. **Review renovation status** - See `docs/archive/renovation/README.md`
 3. **Run test suite** - Ensure all tests passing: `npm run test:run`
 4. **Run lint** - Ensure no errors: `npm run lint`
-5. **Check CI** - Ensure GitHub Actions are green on develop
+5. **Check CI** - Ensure GitHub Actions are green
+6. **Rebuild native modules** - `npx electron-rebuild -f -w better-sqlite3` for Electron, `npm rebuild better-sqlite3` for vitest
 
 ---
 
-**Current Focus:** Phase 7.3 - Documentation updates (renovation ~90% complete)
+**Current Focus:** Phase 7.3 - Documentation updates, then merge feature branch to main
