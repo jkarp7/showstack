@@ -446,7 +446,7 @@ describe('LicenseService', () => {
       );
     });
 
-    it('still uses unclaimed license data if auto-claim fails', async () => {
+    it('returns false if auto-claim fails (does not use unclaimed license)', async () => {
       mockConnector.isAuthenticated.mockReturnValue(true);
 
       const unclaimedLicense = {
@@ -469,20 +469,12 @@ describe('LicenseService', () => {
         error: 'Claim failed',
       });
 
-      mockedGetCurrentLicense.mockReturnValue(null);
-      mockedCreateLicense.mockReturnValue(buildLicense());
-
       const result = await service.verifyLicenseViaSupabase();
 
-      // Claim failed but unclaimed license data is still used to create local record
-      expect(result).toBe(true);
+      // Claim failed — should NOT proceed with unclaimed license
+      expect(result).toBe(false);
       expect(mockConnector.claimLicenseByEmail).toHaveBeenCalled();
-      expect(mockedCreateLicense).toHaveBeenCalledWith(
-        expect.objectContaining({
-          email: 'buyer@example.com',
-          licenseKey: 'AUTO-KEY',
-        }),
-      );
+      expect(mockedCreateLicense).not.toHaveBeenCalled();
     });
   });
 

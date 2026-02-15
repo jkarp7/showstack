@@ -209,6 +209,9 @@ export class LicenseService {
           serverLicense = await connector.fetchUserLicense();
         } else {
           logger.warn(`Auto-claim failed: ${claimResult.error}`);
+          // Don't proceed with an unclaimed license — would create a local record
+          // with null user_id. The claim can be retried on next verification cycle.
+          return false;
         }
       }
 
@@ -228,9 +231,9 @@ export class LicenseService {
         const demoId = localLicense.id;
         try {
           const db = getAppDatabase();
-          const now = Date.now();
-          const newId = uuidv4();
           const replaceLicense = db.transaction(() => {
+            const now = Date.now();
+            const newId = uuidv4();
             db.prepare(
               `INSERT INTO licenses (
                 id, email, name, license_key, tier, status, modules,

@@ -88,6 +88,9 @@ export function registerSyncHandlers(): void {
    * Sign in with email and password
    */
   ipcMain.handle('auth:signIn', async (_, email: string, password: string) => {
+    if (isRateLimited('signIn')) {
+      return { success: false, error: 'Too many attempts. Please wait.' };
+    }
     // Input validation
     if (!email || typeof email !== 'string' || !isValidEmail(email)) {
       return { success: false, error: 'Invalid email address' };
@@ -133,6 +136,9 @@ export function registerSyncHandlers(): void {
    * Sign up with email and password
    */
   ipcMain.handle('auth:signUp', async (_, email: string, password: string) => {
+    if (isRateLimited('signUp')) {
+      return { success: false, error: 'Too many attempts. Please wait.' };
+    }
     // Input validation
     if (!email || typeof email !== 'string' || !isValidEmail(email)) {
       return { success: false, error: 'Invalid email address' };

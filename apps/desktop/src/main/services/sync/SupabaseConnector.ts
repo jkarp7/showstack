@@ -69,13 +69,13 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       );
     }
 
-    // Enforce HTTPS in production to prevent credential leakage
-    if (
-      process.env.NODE_ENV === 'production' &&
-      config.supabase.url &&
-      !config.supabase.url.startsWith('https://')
-    ) {
-      throw new Error('Supabase URL must use HTTPS in production');
+    // Enforce HTTPS to prevent credential leakage
+    if (config.supabase.url && !config.supabase.url.startsWith('https://')) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('Supabase URL must use HTTPS in production');
+      } else {
+        logger.warn('[Security] Supabase URL is not using HTTPS — credentials may be exposed');
+      }
     }
 
     this.supabase = createClient(config.supabase.url, config.supabase.anonKey, {
@@ -296,7 +296,12 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
     if (!data || typeof data !== 'object' || typeof data.success !== 'boolean') {
       return { success: false, error: 'Invalid response from license claim' };
     }
-    return data as { success: boolean; error?: string; license?: SupabaseLicense };
+    // Return only known fields — don't pass through unexpected data from RPC
+    return {
+      success: data.success,
+      error: data.error,
+      license: data.license,
+    };
   }
 
   // ============================================

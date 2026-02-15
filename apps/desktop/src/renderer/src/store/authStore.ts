@@ -121,6 +121,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   // Sign in
   signIn: async (email: string, password: string) => {
+    if (!email?.trim()) {
+      set({ error: 'Email is required' });
+      return false;
+    }
+    if (password.length < 8) {
+      set({ error: 'Password must be at least 8 characters' });
+      return false;
+    }
     set({ isLoading: true, error: null });
 
     try {
@@ -163,6 +171,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   // Sign up
   signUp: async (email: string, password: string) => {
+    if (!email?.trim()) {
+      set({ error: 'Email is required' });
+      return false;
+    }
+    if (password.length < 8) {
+      set({ error: 'Password must be at least 8 characters' });
+      return false;
+    }
     set({ isLoading: true, error: null });
 
     try {
