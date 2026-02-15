@@ -14,6 +14,11 @@ import {
 import { licenseService } from '../services/LicenseService';
 import { logger } from '../utils/logger';
 
+/** Basic email format validation */
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
 /**
  * Register all sync-related IPC handlers
  */
@@ -63,9 +68,17 @@ export function registerSyncHandlers(): void {
    * Sign in with email and password
    */
   ipcMain.handle('auth:signIn', async (_, email: string, password: string) => {
+    // Input validation
+    if (!email || typeof email !== 'string' || !isValidEmail(email)) {
+      return { success: false, error: 'Invalid email address' };
+    }
+    if (!password || typeof password !== 'string' || password.length < 8) {
+      return { success: false, error: 'Password must be at least 8 characters' };
+    }
+
     try {
       const connector = getSupabaseConnector();
-      const result = await connector.signIn(email, password);
+      const result = await connector.signIn(email.trim(), password);
 
       if (result.success) {
         // Refresh license data from Supabase after sign-in
@@ -97,9 +110,17 @@ export function registerSyncHandlers(): void {
    * Sign up with email and password
    */
   ipcMain.handle('auth:signUp', async (_, email: string, password: string) => {
+    // Input validation
+    if (!email || typeof email !== 'string' || !isValidEmail(email)) {
+      return { success: false, error: 'Invalid email address' };
+    }
+    if (!password || typeof password !== 'string' || password.length < 8) {
+      return { success: false, error: 'Password must be at least 8 characters' };
+    }
+
     try {
       const connector = getSupabaseConnector();
-      return await connector.signUp(email, password);
+      return await connector.signUp(email.trim(), password);
     } catch (error) {
       return {
         success: false,
@@ -134,9 +155,13 @@ export function registerSyncHandlers(): void {
    * Request password reset
    */
   ipcMain.handle('auth:resetPassword', async (_, email: string) => {
+    if (!email || typeof email !== 'string' || !isValidEmail(email)) {
+      return { success: false, error: 'Invalid email address' };
+    }
+
     try {
       const connector = getSupabaseConnector();
-      return await connector.resetPassword(email);
+      return await connector.resetPassword(email.trim());
     } catch (error) {
       return {
         success: false,
@@ -158,7 +183,10 @@ export function registerSyncHandlers(): void {
         userId: connector.getUserId(),
         email: session?.user?.email ?? null,
       };
-    } catch {
+    } catch (error) {
+      logger.warn('Failed to get auth state', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return {
         isAuthenticated: false,
         userId: null,

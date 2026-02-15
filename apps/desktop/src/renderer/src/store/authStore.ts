@@ -113,10 +113,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const result = await window.api.auth.signIn(email, password);
 
       if (result.success) {
-        // Refresh auth state after successful sign in
-        await get().refreshAuthState();
-        await get().refreshLicenseStatus();
-        await get().refreshSyncStatus();
+        // Refresh all state in parallel to avoid sequential re-renders
+        await Promise.all([
+          get().refreshAuthState(),
+          get().refreshLicenseStatus(),
+          get().refreshSyncStatus(),
+        ]);
         // Mark auth as prompted so first-launch prompt won't show again
         localStorage.setItem('showstack-auth-prompted', 'true');
         set({ isLoading: false, showAuthModal: false, isFirstLaunchPrompt: false });

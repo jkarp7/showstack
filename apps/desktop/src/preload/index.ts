@@ -474,7 +474,7 @@ export interface ElectronAPI {
     canUseFeature: (module: string, feature: string) => Promise<boolean>;
     refresh: () => Promise<{ success: boolean; license?: any }>;
     verifyOnline: () => Promise<boolean>;
-    createDemo: () => Promise<{ success: boolean; license?: any }>;
+    createDemo: () => Promise<{ success: boolean; license?: Record<string, unknown> }>;
   };
   settings: {
     get: () => Promise<any>;

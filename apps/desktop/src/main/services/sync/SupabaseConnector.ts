@@ -18,6 +18,25 @@ import {
 import { createClient, SupabaseClient, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { getConfig } from '../../config/env';
 import { logger } from '../../utils/logger';
+import type { ModuleAccess, LicenseTier } from '../../../shared/types/license.types';
+
+/**
+ * License record as stored in Supabase
+ */
+export interface SupabaseLicense {
+  id: string;
+  license_key: string;
+  user_id: string | null;
+  email: string;
+  name: string | null;
+  tier: LicenseTier;
+  modules: ModuleAccess[];
+  maintenance_end_date: string;
+  status: 'active' | 'suspended' | 'revoked';
+  cloud_sync: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 /**
  * Result of fetching credentials
@@ -48,6 +67,11 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       throw new Error(
         'Supabase configuration missing. Ensure SUPABASE_URL and SUPABASE_ANON_KEY are set.',
       );
+    }
+
+    // Enforce HTTPS in production to prevent credential leakage
+    if (process.env.NODE_ENV === 'production' && !config.supabase.url.startsWith('https://')) {
+      throw new Error('Supabase URL must use HTTPS in production');
     }
 
     this.supabase = createClient(config.supabase.url, config.supabase.anonKey, {
@@ -213,7 +237,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
    * Fetch the current user's active license from Supabase.
    * First checks by user_id (already claimed), then falls back to email match.
    */
-  async fetchUserLicense(): Promise<any | null> {
+  async fetchUserLicense(): Promise<SupabaseLicense | null> {
     const userId = this.getUserId();
     if (!userId) return null;
 
@@ -254,14 +278,18 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
    * Claim an unclaimed license by email via Supabase RPC.
    * Called automatically on sign-in when a license exists for the user's email.
    */
-  async claimLicenseByEmail(): Promise<{ success: boolean; error?: string; license?: any }> {
+  async claimLicenseByEmail(): Promise<{
+    success: boolean;
+    error?: string;
+    license?: SupabaseLicense;
+  }> {
     const { data, error } = await this.supabase.rpc('claim_license_by_email');
 
     if (error) {
       return { success: false, error: error.message };
     }
 
-    return data as { success: boolean; error?: string; license?: any };
+    return data as { success: boolean; error?: string; license?: SupabaseLicense };
   }
 
   // ============================================

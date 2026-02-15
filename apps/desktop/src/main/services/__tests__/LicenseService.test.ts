@@ -603,6 +603,81 @@ describe('LicenseService', () => {
     });
   });
 
+  describe('verifyLicenseViaSupabase — edge cases', () => {
+    it('creates real license before deleting demo (no gap)', async () => {
+      mockConnector.isAuthenticated.mockReturnValue(true);
+      mockConnector.fetchUserLicense.mockResolvedValue({
+        id: 'srv-id',
+        license_key: 'REAL-KEY',
+        user_id: 'user-123',
+        email: 'real@example.com',
+        name: 'Real User',
+        tier: 'professional',
+        modules: [],
+        maintenance_end_date: '2027-06-01T00:00:00Z',
+        status: 'active',
+      });
+
+      const demoLicense = buildLicense({ id: 'demo-id', tier: 'demo' });
+      mockedGetCurrentLicense.mockReturnValue(demoLicense);
+      mockedCreateLicense.mockReturnValue(buildLicense());
+
+      await service.verifyLicenseViaSupabase();
+
+      // Verify create happens before delete (create-before-delete pattern)
+      const createCallOrder = mockedCreateLicense.mock.invocationCallOrder[0];
+      const deleteCallOrder = mockedDeleteLicense.mock.invocationCallOrder[0];
+      expect(createCallOrder).toBeLessThan(deleteCallOrder);
+    });
+
+    it('handles network error during verification gracefully', async () => {
+      mockConnector.isAuthenticated.mockReturnValue(true);
+      mockConnector.fetchUserLicense.mockRejectedValue(new Error('Network timeout'));
+
+      const result = await service.verifyLicenseViaSupabase();
+
+      expect(result).toBe(false);
+    });
+
+    it('does not replace non-demo license with demo-like server data', async () => {
+      mockConnector.isAuthenticated.mockReturnValue(true);
+      mockConnector.fetchUserLicense.mockResolvedValue({
+        id: 'srv-id',
+        license_key: 'SRV-KEY',
+        user_id: 'user-123',
+        email: 'test@example.com',
+        tier: 'professional',
+        modules: [],
+        maintenance_end_date: '2027-06-01T00:00:00Z',
+        status: 'active',
+      });
+
+      const professionalLicense = buildLicense({ id: 'pro-id', tier: 'professional' });
+      mockedGetCurrentLicense.mockReturnValue(professionalLicense);
+      mockedUpdateLicense.mockReturnValue(professionalLicense);
+
+      await service.verifyLicenseViaSupabase();
+
+      // Should update, not delete+create
+      expect(mockedDeleteLicense).not.toHaveBeenCalled();
+      expect(mockedUpdateLicense).toHaveBeenCalled();
+    });
+  });
+
+  describe('createDemoLicense — edge cases', () => {
+    it('does not delete non-demo existing license', () => {
+      const existingPro = buildLicense({ id: 'pro-id', tier: 'professional' });
+      mockedGetCurrentLicense.mockReturnValue(existingPro);
+      mockedCreateLicense.mockReturnValue(buildLicense({ tier: 'demo' }));
+
+      service.createDemoLicense();
+
+      // Should not delete a professional license
+      expect(mockedDeleteLicense).not.toHaveBeenCalled();
+      expect(mockedCreateLicense).toHaveBeenCalled();
+    });
+  });
+
   describe('checkAndVerifyIfNeeded', () => {
     it('skips verification when no license exists', async () => {
       mockedGetCurrentLicense.mockReturnValue(null);

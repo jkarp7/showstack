@@ -17,8 +17,24 @@ import type {
 /**
  * Build date used for perpetual fallback licensing.
  * If the app was built before maintenance_end_date, it can still run.
+ * In production, BUILD_DATE must be set at build time. In development,
+ * we fall back to the current date so the app can run without a build step.
  */
-const APP_BUILD_DATE = new Date(process.env.BUILD_DATE || new Date().toISOString());
+function getAppBuildDate(): Date {
+  if (process.env.BUILD_DATE) {
+    return new Date(process.env.BUILD_DATE);
+  }
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'BUILD_DATE environment variable must be set in production builds. ' +
+        'This is required for perpetual fallback licensing.',
+    );
+  }
+  // Development fallback — current date means maintenance checks behave as "just built"
+  return new Date();
+}
+
+const APP_BUILD_DATE = getAppBuildDate();
 
 /**
  * License Service
@@ -175,23 +191,24 @@ export class LicenseService {
       // Update local SQLite with server data
       const localLicense = getCurrentLicense();
 
-      // If existing license is a demo, delete it so we create a fresh real one
+      // If existing license is a demo, create real license first, then delete demo
+      // (create-before-delete avoids a window where no license exists)
       if (localLicense && localLicense.tier === 'demo') {
-        deleteLicense(localLicense.id);
-        // Create local license from server data
+        const demoId = localLicense.id;
         createLicense({
           email: serverLicense.email,
           name: serverLicense.name || '',
           licenseKey: serverLicense.license_key,
-          tier: serverLicense.tier as LicenseTier,
+          tier: serverLicense.tier,
           modules: serverLicense.modules,
           expirationDate: new Date(serverLicense.maintenance_end_date).getTime(),
           maintenanceEndDate: new Date(serverLicense.maintenance_end_date).getTime(),
-          userId: serverLicense.user_id,
+          userId: serverLicense.user_id ?? undefined,
         });
+        deleteLicense(demoId);
       } else if (localLicense) {
         updateLicense(localLicense.id, {
-          status: serverLicense.status as 'active' | 'expired' | 'suspended',
+          status: serverLicense.status === 'revoked' ? 'suspended' : serverLicense.status,
           name: serverLicense.name || localLicense.name,
           maintenanceEndDate: new Date(serverLicense.maintenance_end_date).getTime(),
           expirationDate: new Date(serverLicense.maintenance_end_date).getTime(),
@@ -205,11 +222,11 @@ export class LicenseService {
           email: serverLicense.email,
           name: serverLicense.name || '',
           licenseKey: serverLicense.license_key,
-          tier: serverLicense.tier as LicenseTier,
+          tier: serverLicense.tier,
           modules: serverLicense.modules,
           expirationDate: new Date(serverLicense.maintenance_end_date).getTime(),
           maintenanceEndDate: new Date(serverLicense.maintenance_end_date).getTime(),
-          userId: serverLicense.user_id,
+          userId: serverLicense.user_id ?? undefined,
         });
       }
 
