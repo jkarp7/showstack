@@ -32,10 +32,13 @@ CREATE POLICY "Users can read licenses matching their email"
     AND email = (SELECT email FROM auth.users WHERE id = auth.uid())
   );
 
--- Users can claim unclaimed licenses (set user_id to their own)
+-- Users can claim unclaimed licenses matching their verified email
 CREATE POLICY "Users can claim unclaimed licenses"
   ON public.licenses FOR UPDATE
-  USING (user_id IS NULL)
+  USING (
+    user_id IS NULL
+    AND email = (SELECT email FROM auth.users WHERE id = auth.uid())
+  )
   WITH CHECK (auth.uid() = user_id);
 
 -- Audit table for license claim events

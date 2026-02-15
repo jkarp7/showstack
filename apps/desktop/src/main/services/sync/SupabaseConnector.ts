@@ -70,7 +70,11 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
     }
 
     // Enforce HTTPS in production to prevent credential leakage
-    if (process.env.NODE_ENV === 'production' && !config.supabase.url.startsWith('https://')) {
+    if (
+      process.env.NODE_ENV === 'production' &&
+      config.supabase.url &&
+      !config.supabase.url.startsWith('https://')
+    ) {
       throw new Error('Supabase URL must use HTTPS in production');
     }
 

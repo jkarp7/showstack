@@ -195,17 +195,25 @@ export class LicenseService {
       // (create-before-delete avoids a window where no license exists)
       if (localLicense && localLicense.tier === 'demo') {
         const demoId = localLicense.id;
-        createLicense({
-          email: serverLicense.email,
-          name: serverLicense.name || '',
-          licenseKey: serverLicense.license_key,
-          tier: serverLicense.tier,
-          modules: serverLicense.modules,
-          expirationDate: new Date(serverLicense.maintenance_end_date).getTime(),
-          maintenanceEndDate: new Date(serverLicense.maintenance_end_date).getTime(),
-          userId: serverLicense.user_id ?? undefined,
-        });
-        deleteLicense(demoId);
+        try {
+          createLicense({
+            email: serverLicense.email,
+            name: serverLicense.name || '',
+            licenseKey: serverLicense.license_key,
+            tier: serverLicense.tier,
+            modules: serverLicense.modules,
+            expirationDate: new Date(serverLicense.maintenance_end_date).getTime(),
+            maintenanceEndDate: new Date(serverLicense.maintenance_end_date).getTime(),
+            userId: serverLicense.user_id ?? undefined,
+          });
+          deleteLicense(demoId);
+        } catch (replaceError) {
+          logger.error('Failed to replace demo license with real license', {
+            error: replaceError instanceof Error ? replaceError.message : String(replaceError),
+          });
+          // Demo license remains — user still has access, verification will retry
+          return false;
+        }
       } else if (localLicense) {
         updateLicense(localLicense.id, {
           status: serverLicense.status === 'revoked' ? 'suspended' : serverLicense.status,
@@ -295,16 +303,11 @@ export class LicenseService {
   /**
    * Check if user can use a specific feature
    */
-  canUseFeature(module: ShowStackModule, feature: string): boolean {
+  canUseFeature(module: ShowStackModule, feature: keyof ModuleFeatures): boolean {
     const features = this.getModuleFeatures(module);
     if (!features) return false;
 
-    if (feature in features) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return !!(features as any)[feature];
-    }
-
-    return false;
+    return !!features[feature];
   }
 
   /**

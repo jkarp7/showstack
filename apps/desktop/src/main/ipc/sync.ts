@@ -19,6 +19,20 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
+/** Simple rate limiter — tracks last call time per action */
+const rateLimitTimestamps = new Map<string, number>();
+const RATE_LIMIT_MS = 10_000; // 10 seconds between calls
+
+function isRateLimited(action: string): boolean {
+  const now = Date.now();
+  const lastCall = rateLimitTimestamps.get(action);
+  if (lastCall && now - lastCall < RATE_LIMIT_MS) {
+    return true;
+  }
+  rateLimitTimestamps.set(action, now);
+  return false;
+}
+
 /**
  * Register all sync-related IPC handlers
  */
@@ -157,6 +171,9 @@ export function registerSyncHandlers(): void {
   ipcMain.handle('auth:resetPassword', async (_, email: string) => {
     if (!email || typeof email !== 'string' || !isValidEmail(email)) {
       return { success: false, error: 'Invalid email address' };
+    }
+    if (isRateLimited('resetPassword')) {
+      return { success: false, error: 'Please wait before requesting another reset' };
     }
 
     try {

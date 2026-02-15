@@ -85,7 +85,7 @@ export function Login() {
                 className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
                 placeholder="••••••••"
                 required
-                minLength={6}
+                minLength={8}
                 disabled={isLoading}
               />
             </div>

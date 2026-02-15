@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import { licenseService } from '../services/LicenseService';
 import { settingsService } from '../services/SettingsService';
-import type { ShowStackModule } from '../../shared/types/license.types';
+import type { ShowStackModule, ModuleFeatures } from '../../shared/types/license.types';
 import type { AppSettings } from '../../shared/types/settings.types';
 import { errorHandler } from '../errors';
 import { logger } from '../utils/logger';
@@ -119,24 +119,27 @@ export function registerLicenseHandlers(): void {
   /**
    * Check if user can use a specific feature
    */
-  ipcMain.handle('license:canUseFeature', async (_, module: ShowStackModule, feature: string) => {
-    try {
-      return await errorHandler.executeWithRetry(
-        async () => licenseService.canUseFeature(module, feature),
-        'license:canUseFeature',
-      );
-    } catch (error) {
-      logger.error('Failed to check feature access:', {
-        operation: 'license:canUseFeature',
-        module,
-        feature,
-        error: error instanceof Error ? error.message : error,
-      });
-      throw new Error(
-        `Unable to check feature access: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-    }
-  });
+  ipcMain.handle(
+    'license:canUseFeature',
+    async (_, module: ShowStackModule, feature: keyof ModuleFeatures) => {
+      try {
+        return await errorHandler.executeWithRetry(
+          async () => licenseService.canUseFeature(module, feature),
+          'license:canUseFeature',
+        );
+      } catch (error) {
+        logger.error('Failed to check feature access:', {
+          operation: 'license:canUseFeature',
+          module,
+          feature,
+          error: error instanceof Error ? error.message : error,
+        });
+        throw new Error(
+          `Unable to check feature access: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
+    },
+  );
 
   /**
    * Refresh license from Supabase
