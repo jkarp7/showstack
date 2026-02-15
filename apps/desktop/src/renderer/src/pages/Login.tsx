@@ -141,14 +141,16 @@ export function Login() {
           )}
         </div>
 
-        <div className="mt-8 pt-6 border-t border-gray-700 text-center">
-          <button
-            onClick={() => navigate('/modules')}
-            className="text-sm text-gray-500 hover:text-gray-400"
-          >
-            Continue without account
-          </button>
-        </div>
+        {mode !== 'reset' && (
+          <div className="mt-8 pt-6 border-t border-gray-700 text-center">
+            <button
+              onClick={() => navigate('/modules')}
+              className="text-sm text-gray-500 hover:text-gray-400"
+            >
+              Continue without account
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

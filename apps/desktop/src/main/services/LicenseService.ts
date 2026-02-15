@@ -56,7 +56,9 @@ const APP_BUILD_DATE = getAppBuildDate();
  */
 /** Time constants */
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
-const DEMO_EXPIRY_MS = 100 * ONE_YEAR_MS; // effectively never
+// Demo licenses never expire on their own — they're replaced when a real license is found.
+// 100 years is a sentinel value that ensures demo licenses never hit expiration logic.
+const DEMO_EXPIRY_MS = 100 * ONE_YEAR_MS;
 
 /** Demo tier feature limits */
 export const DEMO_FIXTURE_LIMIT = 25;
@@ -217,6 +219,17 @@ export class LicenseService {
 
       if (!serverLicense) {
         logger.info('No license found on server for current user');
+        return false;
+      }
+
+      // Validate server license data before writing to local database
+      if (
+        !serverLicense.email ||
+        !serverLicense.license_key ||
+        !serverLicense.tier ||
+        !serverLicense.maintenance_end_date
+      ) {
+        logger.warn('Server license missing required fields, skipping update');
         return false;
       }
 

@@ -101,7 +101,7 @@ export function registerSyncHandlers(): void {
 
     try {
       const connector = getSupabaseConnector();
-      const result = await connector.signIn(email.trim(), password);
+      const result = await connector.signIn(email.trim().toLowerCase(), password);
 
       if (result.success) {
         // Refresh license data from Supabase after sign-in
@@ -149,7 +149,7 @@ export function registerSyncHandlers(): void {
 
     try {
       const connector = getSupabaseConnector();
-      return await connector.signUp(email.trim(), password);
+      return await connector.signUp(email.trim().toLowerCase(), password);
     } catch (error) {
       return {
         success: false,
@@ -193,7 +193,7 @@ export function registerSyncHandlers(): void {
 
     try {
       const connector = getSupabaseConnector();
-      return await connector.resetPassword(email.trim());
+      return await connector.resetPassword(email.trim().toLowerCase());
     } catch (error) {
       return {
         success: false,

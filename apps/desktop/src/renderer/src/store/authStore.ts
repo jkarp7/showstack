@@ -81,7 +81,7 @@ export interface AuthState {
   clearError: () => void;
 }
 
-/** Safe localStorage wrapper — no-ops if storage is unavailable */
+/** Safe localStorage wrapper — logs warning if storage is unavailable */
 function safeLocalStorage(key: string, value?: string): string | null {
   try {
     if (value !== undefined) {
@@ -89,7 +89,10 @@ function safeLocalStorage(key: string, value?: string): string | null {
       return value;
     }
     return localStorage.getItem(key);
-  } catch {
+  } catch (e) {
+    logger.warn(`[AuthStore] localStorage unavailable for key "${key}"`, {
+      error: e instanceof Error ? e.message : String(e),
+    });
     return null;
   }
 }

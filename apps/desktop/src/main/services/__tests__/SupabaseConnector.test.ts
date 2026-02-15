@@ -86,28 +86,28 @@ describe('SupabaseConnector', () => {
       expect(connector.isAuthenticated()).toBe(true);
     });
 
-    it('signIn returns error on failure', async () => {
+    it('signIn returns user-friendly error on failure', async () => {
       mockAuth.signInWithPassword.mockResolvedValue({
         data: { session: null },
-        error: { message: 'Invalid credentials' },
+        error: { message: 'Invalid login credentials' },
       });
 
       const result = await connector.signIn('bad@example.com', 'wrong');
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Invalid credentials');
+      expect(result.error).toBe('Invalid email or password');
     });
 
-    it('signUp returns error on failure', async () => {
+    it('signUp returns user-friendly error on failure', async () => {
       mockAuth.signUp.mockResolvedValue({
         data: { session: null },
-        error: { message: 'Email already in use' },
+        error: { message: 'User already registered' },
       });
 
       const result = await connector.signUp('taken@example.com', 'password123');
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Email already in use');
+      expect(result.error).toBe('An account with this email already exists');
     });
 
     it('signOut clears session', async () => {

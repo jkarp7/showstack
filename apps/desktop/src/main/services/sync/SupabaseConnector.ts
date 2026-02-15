@@ -21,6 +21,21 @@ import { logger } from '../../utils/logger';
 import type { ModuleAccess, LicenseTier } from '../../../shared/types/license.types';
 
 /**
+ * Map Supabase auth error messages to user-friendly strings.
+ * Prevents leaking implementation details (e.g., "JWT expired", database errors).
+ */
+function mapAuthError(message: string): string {
+  const lower = message.toLowerCase();
+  if (lower.includes('invalid login credentials')) return 'Invalid email or password';
+  if (lower.includes('email not confirmed')) return 'Please confirm your email before signing in';
+  if (lower.includes('user already registered')) return 'An account with this email already exists';
+  if (lower.includes('password')) return 'Password does not meet requirements';
+  if (lower.includes('rate limit') || lower.includes('too many'))
+    return 'Too many attempts. Please wait and try again.';
+  return 'Authentication failed. Please try again.';
+}
+
+/**
  * License record as stored in Supabase
  */
 export interface SupabaseLicense {
@@ -153,7 +168,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       });
 
       if (error) {
-        return { success: false, error: error.message };
+        return { success: false, error: mapAuthError(error.message) };
       }
 
       this.currentSession = data.session;
@@ -161,7 +176,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Sign in failed',
+        error: 'Sign in failed. Please try again.',
       };
     }
   }
@@ -177,7 +192,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       });
 
       if (error) {
-        return { success: false, error: error.message };
+        return { success: false, error: mapAuthError(error.message) };
       }
 
       // Note: Session may be null if email confirmation is required
@@ -186,7 +201,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Sign up failed',
+        error: 'Sign up failed. Please try again.',
       };
     }
   }
