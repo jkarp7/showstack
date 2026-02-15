@@ -5,6 +5,7 @@ import {
   deleteLicense,
 } from '../database/queries/license';
 import { getAppDatabase } from '../database';
+import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../utils/logger';
 import type {
   UserLicense,
@@ -74,6 +75,7 @@ export class LicenseService {
     if (!license) {
       return {
         status: 'expired',
+        tier: null,
         message: 'No license found. Please activate.',
         canView: false,
         canEdit: false,
@@ -85,6 +87,7 @@ export class LicenseService {
     if (license.tier === 'demo') {
       return {
         status: 'active',
+        tier: 'demo',
         message: 'Demo mode — sign in for full access',
         canView: true,
         canEdit: true,
@@ -98,10 +101,14 @@ export class LicenseService {
     const daysSinceVerification = this.daysBetween(license.lastVerified, now);
     const daysUntilMaintenance = this.daysBetween(now, maintenanceEnd);
 
+    // Cloud sync requires both active maintenance AND the cloud_sync flag from Supabase
+    const cloudSyncEnabled = license.cloudSync;
+
     // Suspended license — no access
     if (license.status === 'suspended') {
       return {
         status: 'suspended',
+        tier: license.tier,
         message: 'License suspended. Please contact support.',
         canView: false,
         canEdit: false,
@@ -113,6 +120,7 @@ export class LicenseService {
     if (daysSinceVerification > this.OFFLINE_GRACE_DAYS) {
       return {
         status: 'grace',
+        tier: license.tier,
         message: `License verification needed. Please connect to internet. (${daysSinceVerification} days offline)`,
         canView: true,
         canEdit: true,
@@ -130,6 +138,7 @@ export class LicenseService {
       if (canRun) {
         return {
           status: 'maintenance_expired',
+          tier: license.tier,
           message:
             'Maintenance expired. App continues to work, but cloud sync is disabled. Renew to get updates and sync.',
           canView: true,
@@ -141,6 +150,7 @@ export class LicenseService {
       // Build is newer than maintenance end — cannot run
       return {
         status: 'expired',
+        tier: license.tier,
         message:
           'This version of ShowStack requires an active maintenance plan. Please renew your license.',
         canView: true,
@@ -153,10 +163,11 @@ export class LicenseService {
     if (daysUntilMaintenance <= this.EXPIRATION_WARNING_DAYS) {
       return {
         status: 'active',
+        tier: license.tier,
         message: `Maintenance expires in ${daysUntilMaintenance} days. Renew to continue receiving updates and cloud sync.`,
         canView: true,
         canEdit: true,
-        canSync: true,
+        canSync: cloudSyncEnabled,
         warningLevel: 'low',
         daysUntilExpiration: daysUntilMaintenance,
       };
@@ -165,10 +176,11 @@ export class LicenseService {
     // Fully active
     return {
       status: 'active',
+      tier: license.tier,
       message: 'License active',
       canView: true,
       canEdit: true,
-      canSync: true,
+      canSync: cloudSyncEnabled,
     };
   }
 
@@ -207,26 +219,44 @@ export class LicenseService {
 
       // Update local SQLite with server data
       const localLicense = getCurrentLicense();
+      const maintenanceEndDate = new Date(serverLicense.maintenance_end_date).getTime();
 
-      // If existing license is a demo, atomically replace it with the real license.
-      // Note: createLicense/deleteLicense call saveAppDatabase() internally, but that's
-      // a no-op under WAL mode, so it doesn't break transaction atomicity.
       if (localLicense && localLicense.tier === 'demo') {
+        // Atomically replace demo license with real license using raw SQL.
+        // Raw SQL avoids calling saveAppDatabase() inside the transaction body,
+        // keeping the transaction purely database operations.
         const demoId = localLicense.id;
         try {
           const db = getAppDatabase();
+          const now = Date.now();
+          const newId = uuidv4();
           const replaceLicense = db.transaction(() => {
-            createLicense({
-              email: serverLicense.email,
-              name: serverLicense.name || '',
-              licenseKey: serverLicense.license_key,
-              tier: serverLicense.tier,
-              modules: serverLicense.modules,
-              expirationDate: new Date(serverLicense.maintenance_end_date).getTime(),
-              maintenanceEndDate: new Date(serverLicense.maintenance_end_date).getTime(),
-              userId: serverLicense.user_id ?? undefined,
-            });
-            deleteLicense(demoId);
+            db.prepare(
+              `INSERT INTO licenses (
+                id, email, name, license_key, tier, status, modules,
+                expiration_date, maintenance_end_date, user_id, cloud_sync,
+                last_verified, created_at, updated_at
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ).run(
+              newId,
+              serverLicense.email,
+              serverLicense.name || '',
+              serverLicense.license_key,
+              serverLicense.tier,
+              'active',
+              JSON.stringify(serverLicense.modules),
+              maintenanceEndDate,
+              maintenanceEndDate,
+              serverLicense.user_id ?? null,
+              serverLicense.cloud_sync ? 1 : 0,
+              now,
+              now,
+              now,
+            );
+            db.prepare(`UPDATE licenses SET status = 'deleted', updated_at = ? WHERE id = ?`).run(
+              now,
+              demoId,
+            );
           });
           replaceLicense();
         } catch (replaceError) {
@@ -240,10 +270,11 @@ export class LicenseService {
         updateLicense(localLicense.id, {
           status: serverLicense.status === 'revoked' ? 'suspended' : serverLicense.status,
           name: serverLicense.name || localLicense.name,
-          maintenanceEndDate: new Date(serverLicense.maintenance_end_date).getTime(),
-          expirationDate: new Date(serverLicense.maintenance_end_date).getTime(),
+          maintenanceEndDate,
+          expirationDate: maintenanceEndDate,
           modules: serverLicense.modules,
           tier: serverLicense.tier,
+          cloudSync: serverLicense.cloud_sync,
           lastVerified: Date.now(),
         });
       } else {
@@ -254,9 +285,10 @@ export class LicenseService {
           licenseKey: serverLicense.license_key,
           tier: serverLicense.tier,
           modules: serverLicense.modules,
-          expirationDate: new Date(serverLicense.maintenance_end_date).getTime(),
-          maintenanceEndDate: new Date(serverLicense.maintenance_end_date).getTime(),
+          expirationDate: maintenanceEndDate,
+          maintenanceEndDate,
           userId: serverLicense.user_id ?? undefined,
+          cloudSync: serverLicense.cloud_sync,
         });
       }
 

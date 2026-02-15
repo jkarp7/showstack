@@ -87,6 +87,7 @@ export function createLicense(data: {
   expirationDate: number;
   maintenanceEndDate?: number;
   userId?: string;
+  cloudSync?: boolean;
 }): UserLicense {
   const db = getAppDatabase();
   const now = Date.now();
@@ -97,9 +98,9 @@ export function createLicense(data: {
     `
     INSERT INTO licenses (
       id, email, name, license_key, tier, status, modules,
-      expiration_date, maintenance_end_date, user_id, last_verified, created_at, updated_at
+      expiration_date, maintenance_end_date, user_id, cloud_sync, last_verified, created_at, updated_at
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
   ).run(
     id,
@@ -112,6 +113,7 @@ export function createLicense(data: {
     data.expirationDate,
     maintenanceEndDate,
     data.userId || null,
+    data.cloudSync === false ? 0 : 1,
     now,
     now,
     now,
@@ -132,6 +134,7 @@ const LICENSE_UPDATE_COLUMNS: Record<string, string> = {
   expirationDate: 'expiration_date',
   maintenanceEndDate: 'maintenance_end_date',
   userId: 'user_id',
+  cloudSync: 'cloud_sync',
   lastVerified: 'last_verified',
 };
 
@@ -149,6 +152,7 @@ export function updateLicense(
     expirationDate: number;
     maintenanceEndDate: number;
     userId: string;
+    cloudSync: boolean;
     lastVerified: number;
   }>,
 ): UserLicense {
@@ -163,7 +167,13 @@ export function updateLicense(
     const column = LICENSE_UPDATE_COLUMNS[key];
     if (!column) continue; // Skip unknown keys — whitelist only
     fields.push(`${column} = ?`);
-    values.push(key === 'modules' ? JSON.stringify(value) : (value as string | number | null));
+    if (key === 'modules') {
+      values.push(JSON.stringify(value));
+    } else if (key === 'cloudSync') {
+      values.push(value ? 1 : 0);
+    } else {
+      values.push(value as string | number | null);
+    }
   }
 
   fields.push('updated_at = ?');
@@ -223,6 +233,7 @@ function rowObjectToLicense(obj: Record<string, unknown>): UserLicense {
     tier: obj.tier as LicenseTier,
     status: obj.status as 'active' | 'expired' | 'suspended',
     userId: (obj.user_id as string) || undefined,
+    cloudSync: obj.cloud_sync !== 0, // Default true for backwards compat (column DEFAULT 1)
     modules: parseModules(obj.modules),
     expirationDate,
     maintenanceEndDate,

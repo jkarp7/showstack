@@ -25,7 +25,7 @@ export function UserProfile() {
   const signOut = useAuthStore((state) => state.signOut);
   const openAuthModal = useAuthStore((state) => state.openAuthModal);
   // Check if current license is demo tier
-  const isDemoMode = licenseStatus?.message?.includes('Demo mode');
+  const isDemoMode = licenseStatus?.tier === 'demo';
 
   // Local state for form inputs
   const [name, setName] = useState(userProfile.name);

@@ -20,13 +20,15 @@ vi.mock('../../database/queries/license', () => ({
   deleteLicense: vi.fn(),
 }));
 
-// Mock getAppDatabase for transaction support
+// Mock getAppDatabase for transaction support and raw SQL
+const mockPrepare = vi.fn(() => ({ run: vi.fn() }));
 vi.mock('../../database', () => ({
   getAppDatabase: () => ({
     transaction: (fn: () => void) => {
       // Return a callable that executes the callback (mimics better-sqlite3 transaction)
       return () => fn();
     },
+    prepare: mockPrepare,
   }),
 }));
 
@@ -92,6 +94,7 @@ function buildLicense(overrides: Partial<UserLicense> = {}): UserLicense {
     licenseKey: 'TEST-KEY-1234',
     tier: 'professional',
     status: 'active',
+    cloudSync: true,
     modules: defaultModules,
     expirationDate: now + oneYear,
     maintenanceEndDate: now + oneYear,
@@ -107,16 +110,18 @@ describe('LicenseService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockPrepare.mockReturnValue({ run: vi.fn() });
     service = new LicenseService();
   });
 
   describe('getLicenseStatus', () => {
-    it('returns expired with no license', () => {
+    it('returns expired with no license and null tier', () => {
       mockedGetCurrentLicense.mockReturnValue(null);
 
       const status = service.getLicenseStatus();
 
       expect(status.status).toBe('expired');
+      expect(status.tier).toBeNull();
       expect(status.canView).toBe(false);
       expect(status.canEdit).toBe(false);
       expect(status.canSync).toBe(false);
@@ -129,9 +134,22 @@ describe('LicenseService', () => {
       const status = service.getLicenseStatus();
 
       expect(status.status).toBe('active');
+      expect(status.tier).toBe('professional');
       expect(status.canView).toBe(true);
       expect(status.canEdit).toBe(true);
       expect(status.canSync).toBe(true);
+    });
+
+    it('returns canSync false when cloud_sync is disabled on license', () => {
+      const license = buildLicense({ cloudSync: false });
+      mockedGetCurrentLicense.mockReturnValue(license);
+
+      const status = service.getLicenseStatus();
+
+      expect(status.status).toBe('active');
+      expect(status.canView).toBe(true);
+      expect(status.canEdit).toBe(true);
+      expect(status.canSync).toBe(false);
     });
 
     it('returns active with warning when approaching expiration', () => {
@@ -331,6 +349,7 @@ describe('LicenseService', () => {
         modules: [],
         maintenance_end_date: '2027-06-01T00:00:00Z',
         status: 'active',
+        cloud_sync: true,
       });
 
       const localLicense = buildLicense({ id: 'local-id' });
@@ -361,6 +380,7 @@ describe('LicenseService', () => {
         modules: [],
         maintenance_end_date: '2027-06-01T00:00:00Z',
         status: 'active',
+        cloud_sync: false,
       });
 
       mockedGetCurrentLicense.mockReturnValue(null);
@@ -374,6 +394,7 @@ describe('LicenseService', () => {
           email: 'new@example.com',
           licenseKey: 'NEW-KEY',
           tier: 'student',
+          cloudSync: false,
         }),
       );
     });
@@ -391,6 +412,7 @@ describe('LicenseService', () => {
         modules: [],
         maintenance_end_date: '2027-06-01T00:00:00Z',
         status: 'active',
+        cloud_sync: true,
       };
 
       // After claim, returns the same license with user_id set
@@ -436,6 +458,7 @@ describe('LicenseService', () => {
         modules: [],
         maintenance_end_date: '2027-06-01T00:00:00Z',
         status: 'active',
+        cloud_sync: true,
       };
 
       // fetchUserLicense returns unclaimed license
@@ -564,13 +587,14 @@ describe('LicenseService', () => {
   });
 
   describe('getLicenseStatus — demo tier', () => {
-    it('returns active with demo message for demo license', () => {
+    it('returns active with demo tier for demo license', () => {
       const license = buildLicense({ tier: 'demo' });
       mockedGetCurrentLicense.mockReturnValue(license);
 
       const status = service.getLicenseStatus();
 
       expect(status.status).toBe('active');
+      expect(status.tier).toBe('demo');
       expect(status.message).toContain('Demo mode');
       expect(status.canView).toBe(true);
       expect(status.canEdit).toBe(true);
@@ -579,7 +603,7 @@ describe('LicenseService', () => {
   });
 
   describe('verifyLicenseViaSupabase — demo replacement', () => {
-    it('replaces demo license with server license', async () => {
+    it('replaces demo license with server license via raw SQL transaction', async () => {
       mockConnector.isAuthenticated.mockReturnValue(true);
       mockConnector.fetchUserLicense.mockResolvedValue({
         id: 'srv-id',
@@ -591,30 +615,25 @@ describe('LicenseService', () => {
         modules: [],
         maintenance_end_date: '2027-06-01T00:00:00Z',
         status: 'active',
+        cloud_sync: true,
       });
 
       const demoLicense = buildLicense({ id: 'demo-id', tier: 'demo' });
       mockedGetCurrentLicense.mockReturnValue(demoLicense);
-      mockedCreateLicense.mockReturnValue(buildLicense());
 
       const result = await service.verifyLicenseViaSupabase();
 
       expect(result).toBe(true);
-      expect(mockedDeleteLicense).toHaveBeenCalledWith('demo-id');
-      expect(mockedCreateLicense).toHaveBeenCalledWith(
-        expect.objectContaining({
-          email: 'real@example.com',
-          name: 'Real User',
-          licenseKey: 'REAL-KEY',
-          tier: 'professional',
-          userId: 'user-123',
-        }),
+      // Uses raw SQL in transaction, not wrapper functions
+      expect(mockPrepare).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO licenses'));
+      expect(mockPrepare).toHaveBeenCalledWith(
+        expect.stringContaining("UPDATE licenses SET status = 'deleted'"),
       );
     });
   });
 
   describe('verifyLicenseViaSupabase — edge cases', () => {
-    it('creates real license before deleting demo (no gap)', async () => {
+    it('uses raw SQL in transaction for demo replacement (no wrapper side effects)', async () => {
       mockConnector.isAuthenticated.mockReturnValue(true);
       mockConnector.fetchUserLicense.mockResolvedValue({
         id: 'srv-id',
@@ -626,18 +645,22 @@ describe('LicenseService', () => {
         modules: [],
         maintenance_end_date: '2027-06-01T00:00:00Z',
         status: 'active',
+        cloud_sync: true,
       });
 
       const demoLicense = buildLicense({ id: 'demo-id', tier: 'demo' });
       mockedGetCurrentLicense.mockReturnValue(demoLicense);
-      mockedCreateLicense.mockReturnValue(buildLicense());
 
       await service.verifyLicenseViaSupabase();
 
-      // Verify create happens before delete (create-before-delete pattern)
-      const createCallOrder = mockedCreateLicense.mock.invocationCallOrder[0];
-      const deleteCallOrder = mockedDeleteLicense.mock.invocationCallOrder[0];
-      expect(createCallOrder).toBeLessThan(deleteCallOrder);
+      // Transaction uses raw db.prepare() — NOT createLicense/deleteLicense wrappers
+      expect(mockedCreateLicense).not.toHaveBeenCalled();
+      expect(mockedDeleteLicense).not.toHaveBeenCalled();
+      // Raw SQL was used via db.prepare()
+      expect(mockPrepare).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO licenses'));
+      expect(mockPrepare).toHaveBeenCalledWith(
+        expect.stringContaining("UPDATE licenses SET status = 'deleted'"),
+      );
     });
 
     it('handles network error during verification gracefully', async () => {
@@ -660,6 +683,7 @@ describe('LicenseService', () => {
         modules: [],
         maintenance_end_date: '2027-06-01T00:00:00Z',
         status: 'active',
+        cloud_sync: true,
       });
 
       const professionalLicense = buildLicense({ id: 'pro-id', tier: 'professional' });

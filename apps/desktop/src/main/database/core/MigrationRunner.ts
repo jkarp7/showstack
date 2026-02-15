@@ -56,6 +56,9 @@ export class MigrationRunner {
     logger.info('Running app database migrations');
 
     try {
+      // Migration: Add cloud_sync column to licenses table
+      this.migrateLicensesTable();
+
       // Seed default page layouts if none exist
       const layoutResult = this.db
         .prepare('SELECT COUNT(*) as count FROM page_layout_templates')
@@ -171,6 +174,23 @@ export class MigrationRunner {
         error instanceof Error ? error : new Error(String(error)),
       );
       // Continue anyway - don't block app startup
+    }
+  }
+
+  /**
+   * Migrate licenses table schema
+   */
+  private migrateLicensesTable(): void {
+    const tableInfo = this.db.prepare('PRAGMA table_info(licenses)').all() as Array<{
+      name: string;
+    }>;
+    const columns = tableInfo.map((row) => row.name);
+
+    if (!columns.includes('cloud_sync')) {
+      logger.info('Running migration: Adding cloud_sync to licenses');
+      this.db
+        .prepare('ALTER TABLE licenses ADD COLUMN cloud_sync INTEGER NOT NULL DEFAULT 1')
+        .run();
     }
   }
 

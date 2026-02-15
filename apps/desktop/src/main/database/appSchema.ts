@@ -34,6 +34,7 @@ export const APP_SCHEMA = `
     expiration_date INTEGER NOT NULL,
     maintenance_end_date INTEGER, -- Unix timestamp, defaults to expiration_date if null
     user_id TEXT,
+    cloud_sync INTEGER NOT NULL DEFAULT 1, -- 1=enabled, 0=disabled; default true for backwards compat
     last_verified INTEGER NOT NULL,
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL

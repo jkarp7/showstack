@@ -26,6 +26,7 @@ export interface SyncStatus {
  */
 export interface LicenseStatus {
   status: 'active' | 'grace' | 'expired' | 'suspended' | 'maintenance_expired';
+  tier: 'professional' | 'student' | 'institutional' | 'demo' | null;
   message: string;
   canView: boolean;
   canEdit: boolean;
@@ -134,7 +135,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         ]);
         // Mark auth as prompted so first-launch prompt won't show again
         safeLocalStorage('showstack-auth-prompted', 'true');
-        set({ isLoading: false, showAuthModal: false, isFirstLaunchPrompt: false });
+        // Surface license verification failure to the user
+        if (result.licenseVerified === false) {
+          set({
+            isLoading: false,
+            showAuthModal: false,
+            isFirstLaunchPrompt: false,
+            error:
+              'Signed in, but no license found for this account. Some features may be limited.',
+          });
+        } else {
+          set({ isLoading: false, showAuthModal: false, isFirstLaunchPrompt: false });
+        }
         return true;
       } else {
         set({ isLoading: false, error: result.error || 'Sign in failed' });

@@ -27,6 +27,7 @@ export interface UserLicense {
   tier: LicenseTier;
   status: 'active' | 'expired' | 'suspended';
   userId?: string;
+  cloudSync: boolean; // Whether cloud sync is enabled for this license (Supabase flag)
 
   // Module access control
   modules: ModuleAccess[];
@@ -57,6 +58,7 @@ export interface ModuleFeatures {
 
 export interface LicenseValidation {
   status: 'active' | 'grace' | 'expired' | 'suspended' | 'maintenance_expired';
+  tier: LicenseTier | null; // Current license tier, null if no license
   message: string;
   canView: boolean;
   canEdit: boolean;

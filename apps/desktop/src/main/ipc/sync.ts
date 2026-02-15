@@ -102,8 +102,9 @@ export function registerSyncHandlers(): void {
 
       if (result.success) {
         // Refresh license data from Supabase after sign-in
+        let licenseVerified = false;
         try {
-          await licenseService.verifyLicenseViaSupabase();
+          licenseVerified = await licenseService.verifyLicenseViaSupabase();
         } catch (licenseError) {
           logger.warn('[Sync] License refresh after sign-in failed (non-fatal)', {
             error: licenseError instanceof Error ? licenseError.message : 'Unknown',
@@ -115,6 +116,8 @@ export function registerSyncHandlers(): void {
         if (service.isReady()) {
           await service.connect();
         }
+
+        return { ...result, licenseVerified };
       }
 
       return result;
