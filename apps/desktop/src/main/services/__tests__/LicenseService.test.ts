@@ -20,6 +20,16 @@ vi.mock('../../database/queries/license', () => ({
   deleteLicense: vi.fn(),
 }));
 
+// Mock getAppDatabase for transaction support
+vi.mock('../../database', () => ({
+  getAppDatabase: () => ({
+    transaction: (fn: () => void) => {
+      // Return a callable that executes the callback (mimics better-sqlite3 transaction)
+      return () => fn();
+    },
+  }),
+}));
+
 // Mock the logger
 vi.mock('../../utils/logger', () => ({
   logger: {

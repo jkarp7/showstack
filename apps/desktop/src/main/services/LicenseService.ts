@@ -4,6 +4,7 @@ import {
   updateLicense,
   deleteLicense,
 } from '../database/queries/license';
+import { getAppDatabase } from '../database';
 import { logger } from '../utils/logger';
 import type {
   UserLicense,
@@ -19,6 +20,9 @@ import type {
  * If the app was built before maintenance_end_date, it can still run.
  * In production, BUILD_DATE must be set at build time. In development,
  * we fall back to the current date so the app can run without a build step.
+ *
+ * To test expired maintenance scenarios in development, set:
+ *   BUILD_DATE=2020-01-01 npm run dev
  */
 function getAppBuildDate(): Date {
   if (process.env.BUILD_DATE) {
@@ -191,27 +195,30 @@ export class LicenseService {
       // Update local SQLite with server data
       const localLicense = getCurrentLicense();
 
-      // If existing license is a demo, create real license first, then delete demo
-      // (create-before-delete avoids a window where no license exists)
+      // If existing license is a demo, atomically replace it with the real license
       if (localLicense && localLicense.tier === 'demo') {
         const demoId = localLicense.id;
         try {
-          createLicense({
-            email: serverLicense.email,
-            name: serverLicense.name || '',
-            licenseKey: serverLicense.license_key,
-            tier: serverLicense.tier,
-            modules: serverLicense.modules,
-            expirationDate: new Date(serverLicense.maintenance_end_date).getTime(),
-            maintenanceEndDate: new Date(serverLicense.maintenance_end_date).getTime(),
-            userId: serverLicense.user_id ?? undefined,
+          const db = getAppDatabase();
+          const replaceLicense = db.transaction(() => {
+            createLicense({
+              email: serverLicense.email,
+              name: serverLicense.name || '',
+              licenseKey: serverLicense.license_key,
+              tier: serverLicense.tier,
+              modules: serverLicense.modules,
+              expirationDate: new Date(serverLicense.maintenance_end_date).getTime(),
+              maintenanceEndDate: new Date(serverLicense.maintenance_end_date).getTime(),
+              userId: serverLicense.user_id ?? undefined,
+            });
+            deleteLicense(demoId);
           });
-          deleteLicense(demoId);
+          replaceLicense();
         } catch (replaceError) {
           logger.error('Failed to replace demo license with real license', {
             error: replaceError instanceof Error ? replaceError.message : String(replaceError),
           });
-          // Demo license remains — user still has access, verification will retry
+          // Transaction rolled back — demo license remains, verification will retry
           return false;
         }
       } else if (localLicense) {
@@ -240,9 +247,9 @@ export class LicenseService {
 
       return serverLicense.status === 'active';
     } catch (error) {
-      logger.error('License verification via Supabase failed', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      // Only log error message — avoid leaking license keys or user IDs
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('License verification via Supabase failed', { error: message });
       return false;
     }
   }

@@ -80,6 +80,19 @@ export interface AuthState {
   clearError: () => void;
 }
 
+/** Safe localStorage wrapper — no-ops if storage is unavailable */
+function safeLocalStorage(key: string, value?: string): string | null {
+  try {
+    if (value !== undefined) {
+      localStorage.setItem(key, value);
+      return value;
+    }
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
 const defaultSyncStatus: SyncStatus = {
   state: 'disconnected',
   connected: false,
@@ -120,7 +133,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           get().refreshSyncStatus(),
         ]);
         // Mark auth as prompted so first-launch prompt won't show again
-        localStorage.setItem('showstack-auth-prompted', 'true');
+        safeLocalStorage('showstack-auth-prompted', 'true');
         set({ isLoading: false, showAuthModal: false, isFirstLaunchPrompt: false });
         return true;
       } else {

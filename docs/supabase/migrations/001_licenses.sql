@@ -6,6 +6,7 @@ CREATE TABLE public.licenses (
   license_key TEXT UNIQUE NOT NULL DEFAULT gen_random_uuid()::text,
   user_id UUID REFERENCES auth.users(id),
   email TEXT NOT NULL,
+  name TEXT,
   tier TEXT NOT NULL CHECK(tier IN ('professional', 'student', 'institutional')),
   modules JSONB NOT NULL DEFAULT '[]',
   maintenance_end_date TIMESTAMPTZ NOT NULL,

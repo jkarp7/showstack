@@ -122,6 +122,19 @@ export function createLicense(data: {
   return getLicenseById(id)!;
 }
 
+/** Allowed column mappings for license updates — prevents SQL injection */
+const LICENSE_UPDATE_COLUMNS: Record<string, string> = {
+  email: 'email',
+  name: 'name',
+  tier: 'tier',
+  status: 'status',
+  modules: 'modules',
+  expirationDate: 'expiration_date',
+  maintenanceEndDate: 'maintenance_end_date',
+  userId: 'user_id',
+  lastVerified: 'last_verified',
+};
+
 /**
  * Update license
  */
@@ -143,43 +156,14 @@ export function updateLicense(
   const now = Date.now();
 
   const fields: string[] = [];
-  const values: any[] = [];
+  const values: (string | number | null)[] = [];
 
-  if (updates.email !== undefined) {
-    fields.push('email = ?');
-    values.push(updates.email);
-  }
-  if (updates.name !== undefined) {
-    fields.push('name = ?');
-    values.push(updates.name);
-  }
-  if (updates.tier !== undefined) {
-    fields.push('tier = ?');
-    values.push(updates.tier);
-  }
-  if (updates.status !== undefined) {
-    fields.push('status = ?');
-    values.push(updates.status);
-  }
-  if (updates.modules !== undefined) {
-    fields.push('modules = ?');
-    values.push(JSON.stringify(updates.modules));
-  }
-  if (updates.expirationDate !== undefined) {
-    fields.push('expiration_date = ?');
-    values.push(updates.expirationDate);
-  }
-  if (updates.maintenanceEndDate !== undefined) {
-    fields.push('maintenance_end_date = ?');
-    values.push(updates.maintenanceEndDate);
-  }
-  if (updates.userId !== undefined) {
-    fields.push('user_id = ?');
-    values.push(updates.userId);
-  }
-  if (updates.lastVerified !== undefined) {
-    fields.push('last_verified = ?');
-    values.push(updates.lastVerified);
+  for (const [key, value] of Object.entries(updates)) {
+    if (value === undefined) continue;
+    const column = LICENSE_UPDATE_COLUMNS[key];
+    if (!column) continue; // Skip unknown keys — whitelist only
+    fields.push(`${column} = ?`);
+    values.push(key === 'modules' ? JSON.stringify(value) : (value as string | number | null));
   }
 
   fields.push('updated_at = ?');

@@ -28,6 +28,22 @@ import { logger } from './utils/logger';
 import { useMenuHandlers } from './hooks/useMenuHandlers';
 import { useProjectMenuHandlers } from './hooks/useProjectMenuHandlers';
 
+/** Safe localStorage wrapper — no-ops if storage is unavailable */
+function safeGetItem(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+function safeSetItem(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Storage unavailable — non-fatal
+  }
+}
+
 function AppContent() {
   const licenseStatus = useAuthStore((state) => state.licenseStatus);
   const navigate = useNavigate();
@@ -169,7 +185,7 @@ export default function App() {
   // Show consent dialog on first launch
   const [showConsent, setShowConsent] = useState(() => {
     // Check if consent was already given (check if user has made a choice)
-    const consentShown = localStorage.getItem('showstack-consent-shown');
+    const consentShown = safeGetItem('showstack-consent-shown');
     return !consentShown;
   });
 
@@ -179,7 +195,7 @@ export default function App() {
     sessionStorage.setItem('splashShown', 'true');
 
     // First-launch auth prompt: if not authenticated and never prompted
-    const authPrompted = localStorage.getItem('showstack-auth-prompted');
+    const authPrompted = safeGetItem('showstack-auth-prompted');
     if (!authPrompted) {
       const authState = useAuthStore.getState();
       if (!authState.isAuthenticated) {
@@ -192,7 +208,7 @@ export default function App() {
   const handleConsentClose = () => {
     setShowConsent(false);
     // Mark consent dialog as shown
-    localStorage.setItem('showstack-consent-shown', 'true');
+    safeSetItem('showstack-consent-shown', 'true');
   };
 
   // Initialize global error handlers
@@ -260,7 +276,9 @@ export default function App() {
               {/* Show consent dialog on first launch after splash */}
               {showConsent && <ConsentDialog onClose={handleConsentClose} />}
               {/* Auth Modal for cloud sync login/signup */}
-              <AuthModal />
+              <ErrorBoundary>
+                <AuthModal />
+              </ErrorBoundary>
             </>
           )}
         </Router>

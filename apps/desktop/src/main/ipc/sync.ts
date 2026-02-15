@@ -19,7 +19,13 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
-/** Simple rate limiter — tracks last call time per action */
+/**
+ * Simple in-memory rate limiter — tracks last call time per action.
+ * This is a client-side courtesy limit only. The authoritative rate limiting
+ * is enforced server-side by Supabase (e.g., email rate limits for password reset,
+ * auth attempt limits for sign-in). This resets on app restart by design —
+ * Supabase's persistent server-side limits are the security boundary.
+ */
 const rateLimitTimestamps = new Map<string, number>();
 const RATE_LIMIT_MS = 10_000; // 10 seconds between calls
 
