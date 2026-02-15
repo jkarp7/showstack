@@ -105,7 +105,7 @@ export function registerSyncHandlers(): void {
         try {
           await licenseService.verifyLicenseViaSupabase();
         } catch (licenseError) {
-          logger.info('[Sync] License refresh after sign-in failed (non-fatal)', {
+          logger.warn('[Sync] License refresh after sign-in failed (non-fatal)', {
             error: licenseError instanceof Error ? licenseError.message : 'Unknown',
           });
         }

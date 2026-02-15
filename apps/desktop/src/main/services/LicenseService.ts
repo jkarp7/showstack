@@ -26,7 +26,13 @@ import type {
  */
 function getAppBuildDate(): Date {
   if (process.env.BUILD_DATE) {
-    return new Date(process.env.BUILD_DATE);
+    const date = new Date(process.env.BUILD_DATE);
+    if (isNaN(date.getTime())) {
+      throw new Error(
+        `BUILD_DATE environment variable is not a valid date: "${process.env.BUILD_DATE}"`,
+      );
+    }
+    return date;
   }
   if (process.env.NODE_ENV === 'production') {
     throw new Error(
@@ -47,6 +53,13 @@ const APP_BUILD_DATE = getAppBuildDate();
  * Uses perpetual fallback model: app runs if built before maintenance_end_date.
  * Cloud sync requires active maintenance.
  */
+/** Time constants */
+const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+const DEMO_EXPIRY_MS = 100 * ONE_YEAR_MS; // effectively never
+
+/** Demo tier feature limits */
+export const DEMO_FIXTURE_LIMIT = 25;
+
 export class LicenseService {
   private readonly OFFLINE_GRACE_DAYS = 14;
   private readonly EXPIRATION_WARNING_DAYS = 7;
@@ -195,7 +208,9 @@ export class LicenseService {
       // Update local SQLite with server data
       const localLicense = getCurrentLicense();
 
-      // If existing license is a demo, atomically replace it with the real license
+      // If existing license is a demo, atomically replace it with the real license.
+      // Note: createLicense/deleteLicense call saveAppDatabase() internally, but that's
+      // a no-op under WAL mode, so it doesn't break transaction atomicity.
       if (localLicense && localLicense.tier === 'demo') {
         const demoId = localLicense.id;
         try {
@@ -329,8 +344,13 @@ export class LicenseService {
    * All 6 modules enabled at demo tier.
    */
   createDemoLicense(): UserLicense {
-    // Remove any existing demo license first
     const existing = getCurrentLicense();
+    // Never downgrade a real license to demo
+    if (existing && existing.tier !== 'demo') {
+      logger.warn('Cannot create demo license: user already has a real license');
+      return existing;
+    }
+    // Remove any existing demo license first
     if (existing && existing.tier === 'demo') {
       deleteLicense(existing.id);
     }
@@ -351,7 +371,7 @@ export class LicenseService {
     }));
 
     // Demo licenses don't expire — they're replaced when a real license is found
-    const farFuture = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
+    const farFuture = Date.now() + DEMO_EXPIRY_MS;
 
     return createLicense({
       email: 'demo@local',
@@ -381,7 +401,7 @@ export class LicenseService {
       features: this.getDefaultFeaturesForTier(tier, module),
     }));
 
-    const maintenanceEndDate = Date.now() + 365 * 24 * 60 * 60 * 1000; // 1 year
+    const maintenanceEndDate = Date.now() + ONE_YEAR_MS;
 
     return createLicense({
       email,
@@ -422,7 +442,7 @@ export class LicenseService {
       },
       demo: {
         maxRevisions: 0,
-        maxFixtures: 25,
+        maxFixtures: DEMO_FIXTURE_LIMIT,
         multiDiscipline: false,
         advancedExport: false,
         cloudSync: false,

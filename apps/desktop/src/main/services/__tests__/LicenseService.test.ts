@@ -59,7 +59,7 @@ import {
   updateLicense,
   deleteLicense,
 } from '../../database/queries/license';
-import { LicenseService } from '../LicenseService';
+import { LicenseService, DEMO_FIXTURE_LIMIT } from '../LicenseService';
 
 const mockedGetCurrentLicense = vi.mocked(getCurrentLicense);
 const mockedCreateLicense = vi.mocked(createLicense);
@@ -543,7 +543,7 @@ describe('LicenseService', () => {
       const lightingModule = createCall.modules.find((m: ModuleAccess) => m.module === 'lighting');
       expect(lightingModule?.features).toEqual({
         maxRevisions: 0,
-        maxFixtures: 25,
+        maxFixtures: DEMO_FIXTURE_LIMIT,
         multiDiscipline: false,
         advancedExport: false,
         cloudSync: false,
@@ -675,16 +675,17 @@ describe('LicenseService', () => {
   });
 
   describe('createDemoLicense — edge cases', () => {
-    it('does not delete non-demo existing license', () => {
+    it('returns existing license without creating demo if user has a real license', () => {
       const existingPro = buildLicense({ id: 'pro-id', tier: 'professional' });
       mockedGetCurrentLicense.mockReturnValue(existingPro);
-      mockedCreateLicense.mockReturnValue(buildLicense({ tier: 'demo' }));
 
-      service.createDemoLicense();
+      const result = service.createDemoLicense();
 
-      // Should not delete a professional license
+      // Should not delete or create — just return the existing license
       expect(mockedDeleteLicense).not.toHaveBeenCalled();
-      expect(mockedCreateLicense).toHaveBeenCalled();
+      expect(mockedCreateLicense).not.toHaveBeenCalled();
+      expect(result.id).toBe('pro-id');
+      expect(result.tier).toBe('professional');
     });
   });
 

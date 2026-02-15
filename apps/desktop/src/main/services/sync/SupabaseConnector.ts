@@ -293,6 +293,9 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       return { success: false, error: error.message };
     }
 
+    if (!data || typeof data !== 'object' || typeof data.success !== 'boolean') {
+      return { success: false, error: 'Invalid response from license claim' };
+    }
     return data as { success: boolean; error?: string; license?: SupabaseLicense };
   }
 

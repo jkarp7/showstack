@@ -203,6 +203,15 @@ export function deleteLicense(id: string): void {
 /**
  * Helper function to convert database row object to UserLicense
  */
+function parseModules(raw: unknown): ModuleAccess[] {
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function rowObjectToLicense(obj: Record<string, unknown>): UserLicense {
   const expirationDate = obj.expiration_date as number;
   const maintenanceEndDate = (obj.maintenance_end_date as number) ?? expirationDate;
@@ -214,7 +223,7 @@ function rowObjectToLicense(obj: Record<string, unknown>): UserLicense {
     tier: obj.tier as LicenseTier,
     status: obj.status as 'active' | 'expired' | 'suspended',
     userId: (obj.user_id as string) || undefined,
-    modules: JSON.parse(obj.modules as string) as ModuleAccess[],
+    modules: parseModules(obj.modules),
     expirationDate,
     maintenanceEndDate,
     lastVerified: obj.last_verified as number,

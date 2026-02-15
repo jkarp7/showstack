@@ -158,7 +158,7 @@ export function UserProfile() {
                 Demo Mode
               </span>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                25 fixtures, no cloud sync, no PDF/Excel export
+                Limited fixtures, no cloud sync, no PDF/Excel export
               </p>
             </div>
             <button
