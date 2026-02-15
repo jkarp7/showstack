@@ -11,7 +11,33 @@ import {
   getSupabaseConnector,
   type ShowStackSyncStatus,
 } from '../services/sync';
+import { licenseService } from '../services/LicenseService';
 import { logger } from '../utils/logger';
+
+/** Basic email format validation */
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+/**
+ * Simple in-memory rate limiter — tracks last call time per action.
+ * This is a client-side courtesy limit only. The authoritative rate limiting
+ * is enforced server-side by Supabase (e.g., email rate limits for password reset,
+ * auth attempt limits for sign-in). This resets on app restart by design —
+ * Supabase's persistent server-side limits are the security boundary.
+ */
+const rateLimitTimestamps = new Map<string, number>();
+const RATE_LIMIT_MS = 10_000; // 10 seconds between calls
+
+function isRateLimited(action: string): boolean {
+  const now = Date.now();
+  const lastCall = rateLimitTimestamps.get(action);
+  if (lastCall && now - lastCall < RATE_LIMIT_MS) {
+    return true;
+  }
+  rateLimitTimestamps.set(action, now);
+  return false;
+}
 
 /**
  * Register all sync-related IPC handlers
@@ -62,16 +88,39 @@ export function registerSyncHandlers(): void {
    * Sign in with email and password
    */
   ipcMain.handle('auth:signIn', async (_, email: string, password: string) => {
+    if (isRateLimited('signIn')) {
+      return { success: false, error: 'Too many attempts. Please wait.' };
+    }
+    // Input validation
+    if (!email || typeof email !== 'string' || !isValidEmail(email)) {
+      return { success: false, error: 'Invalid email address' };
+    }
+    if (!password || typeof password !== 'string' || password.length < 8) {
+      return { success: false, error: 'Password must be at least 8 characters' };
+    }
+
     try {
       const connector = getSupabaseConnector();
-      const result = await connector.signIn(email, password);
+      const result = await connector.signIn(email.trim().toLowerCase(), password);
 
       if (result.success) {
+        // Refresh license data from Supabase after sign-in
+        let licenseVerified = false;
+        try {
+          licenseVerified = await licenseService.verifyLicenseViaSupabase();
+        } catch (licenseError) {
+          logger.warn('[Sync] License refresh after sign-in failed (non-fatal)', {
+            error: licenseError instanceof Error ? licenseError.message : 'Unknown',
+          });
+        }
+
         // Start syncing after successful sign in
         const service = getPowerSyncService();
         if (service.isReady()) {
           await service.connect();
         }
+
+        return { ...result, licenseVerified };
       }
 
       return result;
@@ -87,9 +136,20 @@ export function registerSyncHandlers(): void {
    * Sign up with email and password
    */
   ipcMain.handle('auth:signUp', async (_, email: string, password: string) => {
+    if (isRateLimited('signUp')) {
+      return { success: false, error: 'Too many attempts. Please wait.' };
+    }
+    // Input validation
+    if (!email || typeof email !== 'string' || !isValidEmail(email)) {
+      return { success: false, error: 'Invalid email address' };
+    }
+    if (!password || typeof password !== 'string' || password.length < 8) {
+      return { success: false, error: 'Password must be at least 8 characters' };
+    }
+
     try {
       const connector = getSupabaseConnector();
-      return await connector.signUp(email, password);
+      return await connector.signUp(email.trim().toLowerCase(), password);
     } catch (error) {
       return {
         success: false,
@@ -124,9 +184,16 @@ export function registerSyncHandlers(): void {
    * Request password reset
    */
   ipcMain.handle('auth:resetPassword', async (_, email: string) => {
+    if (!email || typeof email !== 'string' || !isValidEmail(email)) {
+      return { success: false, error: 'Invalid email address' };
+    }
+    if (isRateLimited('resetPassword')) {
+      return { success: false, error: 'Please wait before requesting another reset' };
+    }
+
     try {
       const connector = getSupabaseConnector();
-      return await connector.resetPassword(email);
+      return await connector.resetPassword(email.trim().toLowerCase());
     } catch (error) {
       return {
         success: false,
@@ -148,7 +215,10 @@ export function registerSyncHandlers(): void {
         userId: connector.getUserId(),
         email: session?.user?.email ?? null,
       };
-    } catch {
+    } catch (error) {
+      logger.warn('Failed to get auth state', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return {
         isAuthenticated: false,
         userId: null,

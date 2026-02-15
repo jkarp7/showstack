@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { logger } from '../../utils/logger';
-import { Package, Wrench, Briefcase, GraduationCap, Lock } from 'lucide-react';
+import { Lightbulb, Speaker, Monitor, ClipboardList, Bus, DollarSign, Lock } from 'lucide-react';
 import type { ShowStackModule } from '../../../../shared/types/license.types';
 
 interface ModuleSelectorProps {
@@ -11,7 +11,7 @@ interface ModuleSelectorProps {
 /**
  * Module selector component for switching between ShowStack modules
  *
- * Displays all available modules (Prep, Production, Manager, Student) and shows
+ * Displays all available modules (Lighting, Sound, Video, etc.) and shows
  * locked state for modules the user doesn't have access to.
  *
  * Features:
@@ -22,7 +22,7 @@ interface ModuleSelectorProps {
  *
  * @example
  * ```tsx
- * const [currentModule, setCurrentModule] = useState<ShowStackModule>('prep');
+ * const [currentModule, setCurrentModule] = useState<ShowStackModule>('lighting');
  *
  * return (
  *   <ModuleSelector
@@ -52,25 +52,35 @@ export function ModuleSelector({ currentModule, onModuleChange }: ModuleSelector
   }
 
   const moduleConfig = {
-    prep: {
-      icon: Package,
-      label: 'Prep',
-      description: 'Shop orders & equipment tracking',
+    lighting: {
+      icon: Lightbulb,
+      label: 'Lighting',
+      description: 'Fixture management & paperwork',
     },
-    production: {
-      icon: Wrench,
-      label: 'Production',
-      description: 'Production management & paperwork',
+    sound: {
+      icon: Speaker,
+      label: 'Sound',
+      description: 'Audio system design',
     },
-    manager: {
-      icon: Briefcase,
-      label: 'Manager',
-      description: 'Tour & financial management',
+    video: {
+      icon: Monitor,
+      label: 'Video',
+      description: 'Video & projection planning',
     },
-    student: {
-      icon: GraduationCap,
-      label: 'Student',
-      description: 'Educational version',
+    production_management: {
+      icon: ClipboardList,
+      label: 'Production Mgmt',
+      description: 'Scheduling & logistics',
+    },
+    touring: {
+      icon: Bus,
+      label: 'Touring',
+      description: 'Tour management & per diems',
+    },
+    producer: {
+      icon: DollarSign,
+      label: 'Producer',
+      description: 'Budgeting & financial tracking',
     },
   };
 

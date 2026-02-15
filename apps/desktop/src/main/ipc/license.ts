@@ -1,10 +1,9 @@
 import { ipcMain } from 'electron';
 import { licenseService } from '../services/LicenseService';
 import { settingsService } from '../services/SettingsService';
-import type { ShowStackModule } from '../../shared/types/license.types';
+import type { ShowStackModule, ModuleFeatures } from '../../shared/types/license.types';
 import type { AppSettings } from '../../shared/types/settings.types';
 import { errorHandler } from '../errors';
-import { ValidationError } from '../errors';
 import { logger } from '../utils/logger';
 
 /**
@@ -120,60 +119,67 @@ export function registerLicenseHandlers(): void {
   /**
    * Check if user can use a specific feature
    */
-  ipcMain.handle('license:canUseFeature', async (_, module: ShowStackModule, feature: string) => {
+  ipcMain.handle(
+    'license:canUseFeature',
+    async (_, module: ShowStackModule, feature: keyof ModuleFeatures) => {
+      try {
+        return await errorHandler.executeWithRetry(
+          async () => licenseService.canUseFeature(module, feature),
+          'license:canUseFeature',
+        );
+      } catch (error) {
+        logger.error('Failed to check feature access:', {
+          operation: 'license:canUseFeature',
+          module,
+          feature,
+          error: error instanceof Error ? error.message : error,
+        });
+        throw new Error(
+          `Unable to check feature access: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
+    },
+  );
+
+  /**
+   * Refresh license from Supabase
+   */
+  ipcMain.handle('license:refresh', async () => {
     try {
-      return await errorHandler.executeWithRetry(
-        async () => licenseService.canUseFeature(module, feature),
-        'license:canUseFeature',
-      );
+      return await errorHandler.executeWithRetry(async () => {
+        const success = await licenseService.verifyLicenseViaSupabase();
+        return { success, license: licenseService.getCurrentLicense() };
+      }, 'license:refresh');
     } catch (error) {
-      logger.error('Failed to check feature access:', {
-        operation: 'license:canUseFeature',
-        module,
-        feature,
+      logger.error('Failed to refresh license:', {
+        operation: 'license:refresh',
         error: error instanceof Error ? error.message : error,
       });
       throw new Error(
-        `Unable to check feature access: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Unable to refresh license: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   });
 
   /**
-   * Activate a new license
+   * Create a demo license (for first-launch skip)
    */
-  ipcMain.handle(
-    'license:activate',
-    async (_, licenseKey: string, email: string, modules: ShowStackModule[]) => {
-      try {
-        // Validation
-        if (!licenseKey || licenseKey.trim().length === 0) {
-          throw new ValidationError('License key is required', 'licenseKey', licenseKey);
-        }
-        if (!email || email.trim().length === 0) {
-          throw new ValidationError('Email is required', 'email', email);
-        }
-
-        return await errorHandler.executeWithRetry(
-          async () => licenseService.activateLicense(licenseKey, email, modules),
-          'license:activate',
-        );
-      } catch (error) {
-        logger.error('Failed to activate license:', {
-          operation: 'license:activate',
-          email,
-          error: error instanceof Error ? error.message : error,
-        });
-
-        if (error instanceof ValidationError) {
-          throw new Error(error.toUserMessage());
-        }
-        throw new Error(
-          `Unable to activate license: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        );
-      }
-    },
-  );
+  ipcMain.handle('license:createDemo', async () => {
+    try {
+      return await errorHandler.executeWithRetry(async () => {
+        const license = licenseService.createDemoLicense();
+        return { success: true, license };
+      }, 'license:createDemo');
+    } catch (error) {
+      logger.error('Failed to create demo license', {
+        operation: 'license:createDemo',
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw new Error(
+        `Unable to create demo license: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  });
 
   /**
    * Verify license online (manual trigger)
@@ -181,9 +187,7 @@ export function registerLicenseHandlers(): void {
   ipcMain.handle('license:verifyOnline', async () => {
     try {
       return await errorHandler.executeWithRetry(async () => {
-        const license = licenseService.getCurrentLicense();
-        if (!license) return false;
-        return await licenseService.verifyLicenseOnline(license.licenseKey);
+        return await licenseService.verifyLicenseViaSupabase();
       }, 'license:verifyOnline');
     } catch (error) {
       logger.error('Failed to verify license online:', {

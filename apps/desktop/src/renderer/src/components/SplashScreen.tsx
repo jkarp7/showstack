@@ -1,15 +1,21 @@
 import { useEffect, useState } from 'react';
 import { Layers, CheckCircle, AlertCircle, Loader } from 'lucide-react';
-import { useUser } from '../hooks/useUser';
+import { useAuthStore } from '../store/authStore';
 
 interface SplashScreenProps {
   onComplete: () => void;
 }
 
 export function SplashScreen({ onComplete }: SplashScreenProps) {
-  const { license, status, loading } = useUser();
+  const licenseStatus = useAuthStore((state) => state.licenseStatus);
+  const hasLicense = useAuthStore((state) => state.hasLicense);
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState('Initializing...');
+
+  // Load license status during splash
+  useEffect(() => {
+    useAuthStore.getState().refreshLicenseStatus();
+  }, []);
 
   useEffect(() => {
     // Simulate initialization steps
@@ -42,7 +48,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
 
   // Determine license display
   const getLicenseDisplay = () => {
-    if (loading) {
+    if (!licenseStatus) {
       return (
         <div className="flex items-center gap-2 text-gray-400">
           <Loader className="w-4 h-4 animate-spin" />
@@ -51,7 +57,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       );
     }
 
-    if (!status || !status.isValid) {
+    if (!hasLicense) {
       return (
         <div className="flex items-center gap-2 text-amber-400">
           <AlertCircle className="w-4 h-4" />
@@ -61,12 +67,9 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
     }
 
     return (
-      <div className="flex flex-col items-center gap-1 text-green-400">
-        <div className="flex items-center gap-2">
-          <CheckCircle className="w-4 h-4" />
-          <span className="text-sm font-medium">{license?.name}</span>
-        </div>
-        <span className="text-xs text-gray-400">{license?.tier} License</span>
+      <div className="flex items-center gap-2 text-green-400">
+        <CheckCircle className="w-4 h-4" />
+        <span className="text-sm font-medium">License Active</span>
       </div>
     );
   };

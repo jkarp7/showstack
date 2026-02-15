@@ -1,26 +1,22 @@
 import { useState, useEffect } from 'react';
 import { logger } from '../utils/logger';
-import type {
-  UserLicense,
-  LicenseValidation,
-  ShowStackModule,
-} from '../../../shared/types/license.types';
+import type { UserLicense, LicenseValidation } from '../../../shared/types/license.types';
 
 /**
  * Hook for accessing user license information and status
  *
- * Provides current license, validation status, and activation functionality.
- * Automatically loads on mount and provides methods to activate new licenses.
+ * Provides current license, validation status, and refresh functionality.
+ * Automatically loads on mount.
  *
  * @returns {object} License data and methods
  * @returns {UserLicense | null} license - Current user license
  * @returns {LicenseValidation | null} status - Current license validation status
  * @returns {boolean} loading - Loading state
- * @returns {function} activateLicense - Function to activate a new license
+ * @returns {function} refreshStatus - Function to refresh license status
  *
  * @example
  * ```tsx
- * const { license, status, loading, activateLicense } = useUser();
+ * const { license, status, loading, refreshStatus } = useUser();
  *
  * if (loading) return <div>Loading...</div>;
  *
@@ -62,19 +58,8 @@ export function useUser() {
     }
   }
 
-  async function activateLicense(licenseKey: string, email: string, modules: ShowStackModule[]) {
-    try {
-      const data = await window.api.license.activate(licenseKey, email, modules);
-      setLicense(data);
-      await loadStatus();
-      return data;
-    } catch (error) {
-      logger.error('Failed to activate license:', error);
-      throw error;
-    }
-  }
-
   async function refreshStatus() {
+    await loadLicense();
     await loadStatus();
   }
 
@@ -82,7 +67,6 @@ export function useUser() {
     license,
     status,
     loading,
-    activateLicense,
     refreshStatus,
   };
 }

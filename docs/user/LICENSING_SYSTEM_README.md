@@ -2,7 +2,7 @@
 
 Complete module-based licensing system for ShowStack with offline-first validation, tier-based feature differentiation, and graceful degradation.
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [Installation](#installation)
@@ -18,8 +18,9 @@ Complete module-based licensing system for ShowStack with offline-first validati
 The licensing system provides:
 
 - **Offline-First**: 14-day grace period, non-blocking verification
-- **Module-Based**: Prep, Production, Manager, Student modules
-- **Tier-Based Features**: Professional, Student, Institutional tiers
+- **Module-Based**: Lighting, Sound, Video, Production Management, Touring, Producer modules
+- **Tier-Based Features**: Professional, Student, Institutional, Demo tiers
+- **Demo Mode**: Restricted local-only access for unauthenticated users
 - **Graceful Degradation**: Read-only mode on expiration (not lockout)
 - **Smart Warnings**: 7-day expiration alerts
 
@@ -33,7 +34,7 @@ The licensing system is integrated into the main ShowStack application. To ensur
    npm install lucide-react
    ```
 
-2. **Database is auto-initialized** on first run (sql.js)
+2. **Database is auto-initialized** on first run (better-sqlite3)
 
 3. **No additional setup required** - the system is ready to use!
 
@@ -63,13 +64,13 @@ function App() {
 import { useModuleAccess } from './hooks/useUser';
 import { UpgradePrompt } from './components/License/UpgradePrompt';
 
-function ProductionModule() {
-  const { hasAccess, loading } = useModuleAccess('production');
+function LightingModule() {
+  const { hasAccess, loading } = useModuleAccess('lighting');
 
   if (loading) return <div>Loading...</div>;
-  if (!hasAccess) return <UpgradePrompt module="production" />;
+  if (!hasAccess) return <UpgradePrompt module="lighting" />;
 
-  return <ProductionApp />;
+  return <LightingApp />;
 }
 ```
 
@@ -78,12 +79,12 @@ function ProductionModule() {
 ```tsx
 import { useFeature } from './hooks/useFeature';
 
-function EquipmentList() {
-  const { enabled } = useFeature('prep', 'bulkOperations');
+function ExportPanel() {
+  const { enabled } = useFeature('lighting', 'advancedExport');
 
   return (
     <div>
-      {enabled ? <BulkOperationsToolbar /> : <p>Bulk operations available in Professional plan</p>}
+      {enabled ? <AdvancedExportToolbar /> : <p>Advanced export available in Professional plan</p>}
     </div>
   );
 }
@@ -150,8 +151,8 @@ src/
 ### Data Flow
 
 ```
-1. App starts → Database initialized → Background verifier starts
-2. Renderer requests license status → IPC → LicenseService → Database
+1. App starts -> Database initialized -> Background verifier starts
+2. Renderer requests license status -> IPC -> LicenseService -> Database
 3. LicenseService checks:
    - Is license expired?
    - Is verification stale (>14 days offline)?
@@ -182,7 +183,7 @@ const { license, status, loading, activateLicense } = useUser();
 Check if user has access to a specific module.
 
 ```tsx
-const { hasAccess, features, loading } = useModuleAccess('prep');
+const { hasAccess, features, loading } = useModuleAccess('lighting');
 
 // hasAccess: boolean
 // features: ModuleFeatures | null
@@ -194,7 +195,7 @@ const { hasAccess, features, loading } = useModuleAccess('prep');
 Check if a specific feature is enabled.
 
 ```tsx
-const { enabled, loading } = useFeature('prep', 'bulkOperations');
+const { enabled, loading } = useFeature('lighting', 'advancedExport');
 
 // enabled: boolean
 // loading: boolean
@@ -243,94 +244,45 @@ Full account management UI with tabs.
 
 ## Usage Examples
 
-### Example 1: Gate Bulk Operations
+### Example 1: Gate Advanced Export
 
 ```tsx
-function EquipmentList() {
-  const { enabled } = useFeature('prep', 'bulkOperations');
+function ExportPanel() {
+  const { enabled } = useFeature('lighting', 'advancedExport');
 
   return (
     <div>
-      <EquipmentTable />
-      {enabled ? <BulkOperationsToolbar /> : <UpgradePrompt feature="Bulk Operations" />}
+      <BasicExport />
+      {enabled ? <AdvancedExportToolbar /> : <UpgradePrompt feature="Advanced Export" />}
     </div>
   );
 }
 ```
 
-### Example 2: Disable Logo Upload for Students
+### Example 2: Check Cloud Sync Access
 
 ```tsx
-function LogoUpload() {
-  const { enabled } = useFeature('prep', 'logoIntegration');
+function SyncButton() {
+  const { enabled } = useFeature('lighting', 'cloudSync');
 
   return (
-    <div>
-      <label>Company Logo</label>
-      <input
-        type="file"
-        disabled={!enabled}
-        className={!enabled ? 'opacity-50 cursor-not-allowed' : ''}
-      />
-      {!enabled && (
-        <p className="text-sm text-gray-500">Logo integration available in Professional plan</p>
-      )}
-    </div>
+    <button disabled={!enabled}>
+      {enabled ? 'Sync to Cloud' : 'Cloud Sync (Professional plan)'}
+    </button>
   );
 }
 ```
 
-### Example 3: Project Limits
+### Example 3: Module Access Gate
 
 ```tsx
-function ProjectCreation() {
-  const { features } = useModuleAccess('prep');
-  const [projectCount, setProjectCount] = useState(2);
+function SoundModule() {
+  const { hasAccess, loading } = useModuleAccess('sound');
 
-  const maxProjects = features?.prepFeatures?.maxProjects ?? 3;
-  const canCreate = maxProjects === -1 || projectCount < maxProjects;
+  if (loading) return <div>Loading...</div>;
+  if (!hasAccess) return <UpgradePrompt module="sound" />;
 
-  return (
-    <div>
-      <h2>
-        Projects ({projectCount}/{maxProjects === -1 ? '∞' : maxProjects})
-      </h2>
-      <button onClick={() => setProjectCount(projectCount + 1)} disabled={!canCreate}>
-        Create New Project
-      </button>
-      {!canCreate && <UpgradePrompt feature="Unlimited Projects" />}
-    </div>
-  );
-}
-```
-
-### Example 4: Conditional Integration Buttons
-
-```tsx
-function IntegrationButtons() {
-  const { features } = useModuleAccess('production');
-
-  return (
-    <div className="flex gap-2">
-      <button>Import CSV</button>
-
-      {features?.productionFeatures?.vectorworksIntegration && (
-        <button>Import from Vectorworks</button>
-      )}
-
-      {features?.productionFeatures?.etcEosIntegration && <button>Sync with ETC Eos</button>}
-
-      {!features?.productionFeatures?.vectorworksIntegration && (
-        <button
-          onClick={() => {
-            /* Show upgrade modal */
-          }}
-        >
-          🔒 Unlock Vectorworks
-        </button>
-      )}
-    </div>
-  );
+  return <SoundApp />;
 }
 ```
 
@@ -338,33 +290,25 @@ function IntegrationButtons() {
 
 ### Universal Features
 
-| Feature          | Professional | Student | Institutional |
-| ---------------- | ------------ | ------- | ------------- |
-| Max Revisions    | 5            | 2       | 3             |
-| Multi-Discipline | ✅           | ❌      | ✅            |
-| Advanced Export  | ✅           | ❌      | ✅            |
-| Cloud Sync       | ✅           | ❌      | ✅            |
-| Priority Support | ✅           | ❌      | ✅            |
+| Feature          | Professional | Student | Institutional | Demo |
+| ---------------- | ------------ | ------- | ------------- | ---- |
+| Max Revisions    | 5            | 2       | 3             | 0    |
+| Max Fixtures     | Unlimited    | 100     | Unlimited     | 25   |
+| Multi-Discipline | Yes          | No      | Yes           | No   |
+| Advanced Export  | Yes          | No      | Yes           | No   |
+| Cloud Sync       | Yes          | No      | Yes           | No   |
+| Priority Support | Yes          | No      | Yes           | No   |
 
-### Production Module Features
+### Modules
 
-| Feature                 | Professional | Student | Institutional |
-| ----------------------- | ------------ | ------- | ------------- |
-| Vectorworks Integration | ✅           | ❌      | ✅            |
-| ETC Eos Integration     | ✅           | ❌      | ✅            |
-| Paperwork Generation    | ✅           | ✅      | ✅            |
-| Label System            | ✅           | ✅      | ✅            |
-| Power Management        | ✅           | ❌      | ✅            |
-
-### Manager Module Features
-
-| Feature               | Professional | Student | Institutional |
-| --------------------- | ------------ | ------- | ------------- |
-| Plaid Integration     | ✅           | ❌      | ❌            |
-| Multi-Show Management | ✅           | ✅      | ✅            |
-| Budget Tracking       | ✅           | ✅      | ✅            |
-| Per Diem Calculation  | ✅           | ❌      | ✅            |
-| Tour Logistics        | ✅           | ❌      | ✅            |
+| Module                | Description                    |
+| --------------------- | ------------------------------ |
+| Lighting              | Fixture management & paperwork |
+| Sound                 | Audio system design            |
+| Video                 | Video & projection planning    |
+| Production Management | Scheduling & logistics         |
+| Touring               | Tour management & per diems    |
+| Producer              | Budgeting & financial tracking |
 
 ## Development
 
@@ -373,13 +317,14 @@ function IntegrationButtons() {
 To test different license states during development:
 
 1. **No License**: Delete from database manually
-2. **Expired License**: Set `expirationDate` to past date
+2. **Expired License**: Set `maintenanceEndDate` to past date
 3. **Offline Mode**: Set `lastVerified` to 15+ days ago
-4. **Approaching Expiration**: Set `expirationDate` to 5 days from now
+4. **Approaching Expiration**: Set `maintenanceEndDate` to 5 days from now
+5. **Demo Mode**: Call `licenseService.createDemoLicense()` or use the "Continue in Demo Mode" button on first launch
 
 ### Adding New Features
 
-1. Add feature to appropriate `ModuleFeatures` interface in `license.types.ts`
+1. Add feature to `ModuleFeatures` interface in `license.types.ts`
 2. Update `getDefaultFeaturesForTier()` in `LicenseService.ts`
 3. Use `useFeature()` hook in components
 4. Update documentation
@@ -392,20 +337,25 @@ The license verification endpoint should return:
 {
   "status": "active",
   "tier": "professional",
-  "expirationDate": "2025-12-31T00:00:00Z",
+  "maintenance_end_date": "2026-12-31T00:00:00Z",
   "modules": [
     {
-      "module": "prep",
+      "module": "lighting",
       "enabled": true,
       "features": {
-        /* ... */
+        "maxRevisions": 5,
+        "maxFixtures": -1,
+        "multiDiscipline": true,
+        "advancedExport": true,
+        "cloudSync": true,
+        "prioritySupport": true
       }
     }
   ]
 }
 ```
 
-See `LicenseService.ts:verifyLicenseOnline()` for implementation details.
+See `LicenseService.ts:verifyLicenseViaSupabase()` for implementation details.
 
 ## Support
 
@@ -415,6 +365,6 @@ See `LicenseService.ts:verifyLicenseOnline()` for implementation details.
 
 ---
 
-**Version**: 1.0.0
-**Last Updated**: November 2025
+**Version**: 2.0.0
+**Last Updated**: February 2026
 **Author**: ShowStack Development Team

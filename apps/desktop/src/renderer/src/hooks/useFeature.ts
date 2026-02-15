@@ -6,12 +6,12 @@ import type { ShowStackModule } from '../../../shared/types/license.types';
  * Hook for checking if a specific feature is enabled for the user's license
  *
  * @param module - The ShowStack module the feature belongs to
- * @param feature - The feature name to check (e.g., 'bulkOperations', 'logoIntegration')
+ * @param feature - The feature name to check (e.g., 'cloudSync', 'advancedExport')
  * @returns Object with enabled boolean and loading state
  *
  * @example
  * ```tsx
- * const { enabled, loading } = useFeature('prep', 'bulkOperations');
+ * const { enabled, loading } = useFeature('lighting', 'advancedExport');
  *
  * return (
  *   <div>

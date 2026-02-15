@@ -18,6 +18,40 @@ import {
 import { createClient, SupabaseClient, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { getConfig } from '../../config/env';
 import { logger } from '../../utils/logger';
+import type { ModuleAccess, LicenseTier } from '../../../shared/types/license.types';
+
+/**
+ * Map Supabase auth error messages to user-friendly strings.
+ * Prevents leaking implementation details (e.g., "JWT expired", database errors).
+ */
+function mapAuthError(message: string): string {
+  const lower = message.toLowerCase();
+  if (lower.includes('invalid login credentials')) return 'Invalid email or password';
+  if (lower.includes('email not confirmed')) return 'Please confirm your email before signing in';
+  if (lower.includes('user already registered')) return 'An account with this email already exists';
+  if (lower.includes('password')) return 'Password does not meet requirements';
+  if (lower.includes('rate limit') || lower.includes('too many'))
+    return 'Too many attempts. Please wait and try again.';
+  return 'Authentication failed. Please try again.';
+}
+
+/**
+ * License record as stored in Supabase
+ */
+export interface SupabaseLicense {
+  id: string;
+  license_key: string;
+  user_id: string | null;
+  email: string;
+  name: string | null;
+  tier: LicenseTier;
+  modules: ModuleAccess[];
+  maintenance_end_date: string;
+  status: 'active' | 'suspended' | 'revoked';
+  cloud_sync: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 /**
  * Result of fetching credentials
@@ -48,6 +82,15 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       throw new Error(
         'Supabase configuration missing. Ensure SUPABASE_URL and SUPABASE_ANON_KEY are set.',
       );
+    }
+
+    // Enforce HTTPS to prevent credential leakage
+    if (config.supabase.url && !config.supabase.url.startsWith('https://')) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('Supabase URL must use HTTPS in production');
+      } else {
+        logger.warn('[Security] Supabase URL is not using HTTPS — credentials may be exposed');
+      }
     }
 
     this.supabase = createClient(config.supabase.url, config.supabase.anonKey, {
@@ -125,7 +168,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       });
 
       if (error) {
-        return { success: false, error: error.message };
+        return { success: false, error: mapAuthError(error.message) };
       }
 
       this.currentSession = data.session;
@@ -133,7 +176,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Sign in failed',
+        error: 'Sign in failed. Please try again.',
       };
     }
   }
@@ -149,7 +192,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       });
 
       if (error) {
-        return { success: false, error: error.message };
+        return { success: false, error: mapAuthError(error.message) };
       }
 
       // Note: Session may be null if email confirmation is required
@@ -158,7 +201,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Sign up failed',
+        error: 'Sign up failed. Please try again.',
       };
     }
   }
@@ -203,6 +246,77 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
 
   private notifySessionListeners(session: Session | null): void {
     this.sessionListeners.forEach((listener) => listener(session));
+  }
+
+  // ============================================
+  // License Operations
+  // ============================================
+
+  /**
+   * Fetch the current user's active license from Supabase.
+   * First checks by user_id (already claimed), then falls back to email match.
+   */
+  async fetchUserLicense(): Promise<SupabaseLicense | null> {
+    const userId = this.getUserId();
+    if (!userId) return null;
+
+    // Try by user_id first (already claimed)
+    const { data, error } = await this.supabase
+      .from('licenses')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .single();
+
+    if (!error && data) {
+      return data;
+    }
+
+    // Fall back to email match (unclaimed license visible via RLS)
+    const userEmail = this.currentSession?.user?.email;
+    if (!userEmail) return null;
+
+    const { data: emailMatch, error: emailError } = await this.supabase
+      .from('licenses')
+      .select('*')
+      .eq('email', userEmail)
+      .is('user_id', null)
+      .eq('status', 'active')
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .single();
+
+    if (!emailError && emailMatch) {
+      return emailMatch;
+    }
+
+    return null;
+  }
+
+  /**
+   * Claim an unclaimed license by email via Supabase RPC.
+   * Called automatically on sign-in when a license exists for the user's email.
+   */
+  async claimLicenseByEmail(): Promise<{
+    success: boolean;
+    error?: string;
+    license?: SupabaseLicense;
+  }> {
+    const { data, error } = await this.supabase.rpc('claim_license_by_email');
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    if (!data || typeof data !== 'object' || typeof data.success !== 'boolean') {
+      return { success: false, error: 'Invalid response from license claim' };
+    }
+    // Return only known fields — don't pass through unexpected data from RPC
+    return {
+      success: data.success,
+      error: data.error,
+      license: data.license,
+    };
   }
 
   // ============================================

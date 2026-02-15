@@ -1,12 +1,31 @@
 import { useState } from 'react';
-import { UserCircle, Mail, Building, Phone, Save, Camera, Check } from 'lucide-react';
+import {
+  UserCircle,
+  Mail,
+  Building,
+  Phone,
+  Save,
+  Camera,
+  Check,
+  LogOut,
+  Shield,
+} from 'lucide-react';
 import { logger } from '../../utils/logger';
 import { useSettingsStore } from '../../store/settingsStore';
+import { useAuthStore } from '../../store/authStore';
 
 export function UserProfile() {
   const userProfile = useSettingsStore((state) => state.userProfile);
   const updateUserProfile = useSettingsStore((state) => state.updateUserProfile);
   const [saved, setSaved] = useState(false);
+
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const authEmail = useAuthStore((state) => state.email);
+  const licenseStatus = useAuthStore((state) => state.licenseStatus);
+  const signOut = useAuthStore((state) => state.signOut);
+  const openAuthModal = useAuthStore((state) => state.openAuthModal);
+  // Check if current license is demo tier
+  const isDemoMode = licenseStatus?.tier === 'demo';
 
   // Local state for form inputs
   const [name, setName] = useState(userProfile.name);
@@ -104,6 +123,64 @@ export function UserProfile() {
         <p className="text-gray-600 dark:text-gray-400">
           Manage your personal information and designer credits
         </p>
+      </div>
+
+      {/* Auth Status */}
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <Shield className="w-5 h-5 text-blue-600 dark:text-blue-500" />
+          <span>Account Status</span>
+        </h3>
+
+        {isAuthenticated ? (
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Signed in as</p>
+              <p className="text-base font-medium text-gray-900 dark:text-white">{authEmail}</p>
+              {licenseStatus && (
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                  {licenseStatus.message}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => signOut()}
+              className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        ) : isDemoMode ? (
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="inline-block px-2 py-1 text-xs font-semibold text-amber-700 bg-amber-100 dark:text-amber-300 dark:bg-amber-900/30 rounded-full">
+                Demo Mode
+              </span>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                Limited fixtures, no cloud sync, no PDF/Excel export
+              </p>
+            </div>
+            <button
+              onClick={() => openAuthModal('login')}
+              className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+            >
+              Sign in for full access
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Sign in to unlock cloud sync and full features
+            </p>
+            <button
+              onClick={() => openAuthModal('login')}
+              className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+            >
+              Sign In
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Avatar */}

@@ -173,9 +173,9 @@ contextBridge.exposeInMainWorld('api', {
     getAvailableModules: () => ipcRenderer.invoke('license:getAvailableModules'),
     canUseFeature: (module: string, feature: string) =>
       ipcRenderer.invoke('license:canUseFeature', module, feature),
-    activate: (licenseKey: string, email: string, modules: string[]) =>
-      ipcRenderer.invoke('license:activate', licenseKey, email, modules),
+    refresh: () => ipcRenderer.invoke('license:refresh'),
     verifyOnline: () => ipcRenderer.invoke('license:verifyOnline'),
+    createDemo: () => ipcRenderer.invoke('license:createDemo'),
   },
 
   // Settings operations
@@ -472,8 +472,9 @@ export interface ElectronAPI {
     getModuleFeatures: (module: string) => Promise<any>;
     getAvailableModules: () => Promise<string[]>;
     canUseFeature: (module: string, feature: string) => Promise<boolean>;
-    activate: (licenseKey: string, email: string, modules: string[]) => Promise<any>;
+    refresh: () => Promise<{ success: boolean; license?: any }>;
     verifyOnline: () => Promise<boolean>;
+    createDemo: () => Promise<{ success: boolean; license?: Record<string, unknown> }>;
   };
   settings: {
     get: () => Promise<any>;

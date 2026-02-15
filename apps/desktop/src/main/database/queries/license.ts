@@ -85,18 +85,22 @@ export function createLicense(data: {
   tier: LicenseTier;
   modules: ModuleAccess[];
   expirationDate: number;
+  maintenanceEndDate?: number;
+  userId?: string;
+  cloudSync?: boolean;
 }): UserLicense {
   const db = getAppDatabase();
   const now = Date.now();
   const id = uuidv4();
+  const maintenanceEndDate = data.maintenanceEndDate ?? data.expirationDate;
 
   db.prepare(
     `
     INSERT INTO licenses (
       id, email, name, license_key, tier, status, modules,
-      expiration_date, last_verified, created_at, updated_at
+      expiration_date, maintenance_end_date, user_id, cloud_sync, last_verified, created_at, updated_at
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
   ).run(
     id,
@@ -107,6 +111,9 @@ export function createLicense(data: {
     'active',
     JSON.stringify(data.modules),
     data.expirationDate,
+    maintenanceEndDate,
+    data.userId || null,
+    data.cloudSync === false ? 0 : 1,
     now,
     now,
     now,
@@ -116,6 +123,20 @@ export function createLicense(data: {
 
   return getLicenseById(id)!;
 }
+
+/** Allowed column mappings for license updates — prevents SQL injection */
+const LICENSE_UPDATE_COLUMNS: Record<string, string> = {
+  email: 'email',
+  name: 'name',
+  tier: 'tier',
+  status: 'status',
+  modules: 'modules',
+  expirationDate: 'expiration_date',
+  maintenanceEndDate: 'maintenance_end_date',
+  userId: 'user_id',
+  cloudSync: 'cloud_sync',
+  lastVerified: 'last_verified',
+};
 
 /**
  * Update license
@@ -129,6 +150,9 @@ export function updateLicense(
     status: 'active' | 'expired' | 'suspended';
     modules: ModuleAccess[];
     expirationDate: number;
+    maintenanceEndDate: number;
+    userId: string;
+    cloudSync: boolean;
     lastVerified: number;
   }>,
 ): UserLicense {
@@ -136,35 +160,20 @@ export function updateLicense(
   const now = Date.now();
 
   const fields: string[] = [];
-  const values: any[] = [];
+  const values: (string | number | null)[] = [];
 
-  if (updates.email !== undefined) {
-    fields.push('email = ?');
-    values.push(updates.email);
-  }
-  if (updates.name !== undefined) {
-    fields.push('name = ?');
-    values.push(updates.name);
-  }
-  if (updates.tier !== undefined) {
-    fields.push('tier = ?');
-    values.push(updates.tier);
-  }
-  if (updates.status !== undefined) {
-    fields.push('status = ?');
-    values.push(updates.status);
-  }
-  if (updates.modules !== undefined) {
-    fields.push('modules = ?');
-    values.push(JSON.stringify(updates.modules));
-  }
-  if (updates.expirationDate !== undefined) {
-    fields.push('expiration_date = ?');
-    values.push(updates.expirationDate);
-  }
-  if (updates.lastVerified !== undefined) {
-    fields.push('last_verified = ?');
-    values.push(updates.lastVerified);
+  for (const [key, value] of Object.entries(updates)) {
+    if (value === undefined) continue;
+    const column = LICENSE_UPDATE_COLUMNS[key];
+    if (!column) continue; // Skip unknown keys — whitelist only
+    fields.push(`${column} = ?`);
+    if (key === 'modules') {
+      values.push(JSON.stringify(value));
+    } else if (key === 'cloudSync') {
+      values.push(value ? 1 : 0);
+    } else {
+      values.push(value as string | number | null);
+    }
   }
 
   fields.push('updated_at = ?');
@@ -204,7 +213,18 @@ export function deleteLicense(id: string): void {
 /**
  * Helper function to convert database row object to UserLicense
  */
+function parseModules(raw: unknown): ModuleAccess[] {
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function rowObjectToLicense(obj: Record<string, unknown>): UserLicense {
+  const expirationDate = obj.expiration_date as number;
+  const maintenanceEndDate = (obj.maintenance_end_date as number) ?? expirationDate;
   return {
     id: obj.id as string,
     email: obj.email as string,
@@ -212,8 +232,11 @@ function rowObjectToLicense(obj: Record<string, unknown>): UserLicense {
     licenseKey: obj.license_key as string,
     tier: obj.tier as LicenseTier,
     status: obj.status as 'active' | 'expired' | 'suspended',
-    modules: JSON.parse(obj.modules as string) as ModuleAccess[],
-    expirationDate: obj.expiration_date as number,
+    userId: (obj.user_id as string) || undefined,
+    cloudSync: obj.cloud_sync !== 0, // Default true for backwards compat (column DEFAULT 1)
+    modules: parseModules(obj.modules),
+    expirationDate,
+    maintenanceEndDate,
     lastVerified: obj.last_verified as number,
     createdAt: obj.created_at as number,
     updatedAt: obj.updated_at as number,

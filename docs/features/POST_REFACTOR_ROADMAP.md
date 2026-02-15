@@ -165,12 +165,14 @@ autoUpdater.on('update-available', (info) => {
 
 ### Phase 2: The Gateway (Supabase)
 
-- [ ] Create `public.licenses` table in Supabase.
+- [x] Create `public.licenses` table in Supabase.
 - [ ] Deploy `purchase-webhook` Edge Function.
 - [ ] Connect Stripe/Shopify webhooks to the function URL.
 
 ### Phase 3: The Client Logic (Electron)
 
-- [ ] Update `LicenseService` to check dates, not version numbers.
+- [x] Update `LicenseService` to check dates, not version numbers.
 - [ ] Implement `UpdateService` to gate downloads based on maintenance expiry.
 - [ ] Verify the "Offline Fallback" works by setting your system clock forward 2 years.
+
+**Status Update (February 2026):** LicenseService now implements perpetual fallback licensing with `APP_BUILD_DATE` vs `maintenanceEndDate` comparison. Supabase Auth replaces the "Dual Activation" flow — users sign in with email/password and licenses are auto-claimed by email. Demo mode provides restricted access for unauthenticated users. The e-commerce webhook (Phase 2) and auto-updater gate (Phase 4) are still pending.

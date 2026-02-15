@@ -28,10 +28,13 @@ export const APP_SCHEMA = `
     email TEXT NOT NULL,
     name TEXT,
     license_key TEXT UNIQUE NOT NULL,
-    tier TEXT NOT NULL CHECK(tier IN ('professional', 'student', 'institutional')),
+    tier TEXT NOT NULL CHECK(tier IN ('professional', 'student', 'institutional', 'demo')),
     status TEXT NOT NULL CHECK(status IN ('active', 'expired', 'suspended', 'deleted')),
     modules TEXT NOT NULL, -- JSON stringified ModuleAccess[]
     expiration_date INTEGER NOT NULL,
+    maintenance_end_date INTEGER, -- Unix timestamp, defaults to expiration_date if null
+    user_id TEXT,
+    cloud_sync INTEGER NOT NULL DEFAULT 1, -- 1=enabled, 0=disabled; default true for backwards compat
     last_verified INTEGER NOT NULL,
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL

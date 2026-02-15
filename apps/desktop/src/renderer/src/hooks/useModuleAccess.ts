@@ -5,15 +5,15 @@ import type { ShowStackModule, ModuleFeatures } from '../../../shared/types/lice
 /**
  * Hook for checking if user has access to a specific ShowStack module
  *
- * @param module - The module to check access for ('prep', 'production', 'manager', 'student')
+ * @param module - The module to check access for ('lighting', 'sound', 'video', etc.)
  * @returns Object with hasAccess boolean, module features, and loading state
  *
  * @example
  * ```tsx
- * const { hasAccess, features, loading } = useModuleAccess('production');
+ * const { hasAccess, features, loading } = useModuleAccess('lighting');
  *
  * if (loading) return <div>Loading...</div>;
- * if (!hasAccess) return <UpgradePrompt module="production" />;
+ * if (!hasAccess) return <UpgradePrompt module="lighting" />;
  *
  * return <ProductionApp features={features} />;
  * ```
