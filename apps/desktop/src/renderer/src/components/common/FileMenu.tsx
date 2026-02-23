@@ -1,13 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFileStore } from '../../store/fileStore';
+import { logger } from '../../utils/logger';
 
 interface FileMenuProps {
   className?: string;
   onDataReload?: () => Promise<void>;
   projectName?: string;
+  currentProjectId?: string;
 }
 
-export function FileMenu({ className = '', onDataReload, projectName }: FileMenuProps) {
+export function FileMenu({ className = '', onDataReload, projectName, currentProjectId }: FileMenuProps) {
   const {
     isDirty,
     isSaving,
@@ -18,6 +20,8 @@ export function FileMenu({ className = '', onDataReload, projectName }: FileMenu
     saveFile,
     saveFileAs,
   } = useFileStore();
+  const [isCopying, setIsCopying] = useState(false);
+  const [copyMessage, setCopyMessage] = useState<string | null>(null);
 
   // Use projectName prop if provided, otherwise fall back to file store
   const currentFileName = projectName || getCurrentFileName();
@@ -37,6 +41,28 @@ export function FileMenu({ className = '', onDataReload, projectName }: FileMenu
 
   const handleSaveAs = async () => {
     await saveFileAs(projectName, onDataReload);
+  };
+
+  const handleSaveAsCopy = async () => {
+    if (!currentProjectId || isCopying) return;
+
+    try {
+      setIsCopying(true);
+      setCopyMessage(null);
+      const copy = await window.api.projects.createCopy(currentProjectId);
+      setCopyMessage(`Copy created: "${copy.name}"`);
+      // Auto-dismiss after 4 seconds
+      setTimeout(() => setCopyMessage(null), 4000);
+      if (onDataReload) {
+        await onDataReload();
+      }
+    } catch (error) {
+      logger.error('Failed to save as copy:', error);
+      setCopyMessage('Failed to create copy');
+      setTimeout(() => setCopyMessage(null), 3000);
+    } finally {
+      setIsCopying(false);
+    }
   };
 
   // Keyboard shortcuts
@@ -116,7 +142,26 @@ export function FileMenu({ className = '', onDataReload, projectName }: FileMenu
         >
           Save As...
         </button>
+
+        {currentProjectId && (
+          <button
+            onClick={handleSaveAsCopy}
+            disabled={isLoading || isCopying}
+            title="Save as Copy — creates a new timestamped version in the same family"
+            className="px-3 py-1.5 text-sm bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isCopying ? 'Copying...' : 'Save as Copy'}
+          </button>
+        )}
       </div>
+
+      {/* Copy status message */}
+      {copyMessage && (
+        <div className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+          <span>✓</span>
+          <span>{copyMessage}</span>
+        </div>
+      )}
 
       {/* Status indicator */}
       {isSaving && (

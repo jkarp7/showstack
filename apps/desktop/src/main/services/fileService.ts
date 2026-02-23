@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, basename } from 'path';
 import initSqlJs, { Database } from 'sql.js';
 import { getDatabase, saveDatabase, replaceProjectDatabase } from '../database';
+import { formatCopyTimestamp } from '../database/queries/projects';
 import { logger } from '../utils/logger';
 
 export interface ProjectImportResult {
@@ -12,6 +13,7 @@ export interface ProjectImportResult {
   projectName?: string;
   error?: string;
   warnings?: string[];
+  autoStacked?: boolean; // true when a same-ID import was automatically added to the family stack
   conflict?: {
     exists: boolean;
     existingProject?: {
@@ -273,20 +275,25 @@ class FileService {
         // Ignore errors checking for existing project
       }
 
-      // If project exists, return conflict info instead of importing
+      // If project exists, auto-stack the import into the same family (no conflict dialog)
       if (existingProject) {
-        logger.info('⚠️ Project conflict detected:', projectId);
+        logger.info('📚 Same-ID import detected — auto-stacking into family:', projectId);
+        const { v4: uuidv4 } = await import('uuid');
+        const newProjectId = uuidv4();
+        const rootId = existingProject.id;
+        const timestampedName = `${projectName} \u2014 ${formatCopyTimestamp(Date.now())}`;
+
+        const importResult = await this.mergeImportedProject(
+          buffer,
+          newProjectId,
+          timestampedName,
+          projectId, // originalProjectId for column remapping
+          rootId,    // rootProjectId to inject
+        );
+
         return {
-          success: false,
-          conflict: {
-            exists: true,
-            existingProject,
-            importedProject: {
-              id: projectId,
-              name: projectName,
-              updated_at: importedUpdatedAt,
-            },
-          },
+          ...importResult,
+          autoStacked: true,
         };
       }
 
@@ -404,6 +411,7 @@ class FileService {
    * @param targetProjectId ID to use for the imported project
    * @param targetProjectName Name to use for the imported project
    * @param originalProjectId Original project ID (if different from target, for ID remapping)
+   * @param rootProjectId root_project_id to assign (for auto-stacking into a family)
    * @returns Import result
    */
   private async mergeImportedProject(
@@ -411,6 +419,7 @@ class FileService {
     targetProjectId: string,
     targetProjectName: string,
     originalProjectId?: string,
+    rootProjectId?: string,
   ): Promise<ProjectImportResult> {
     try {
       const SQL = await initSqlJs();
@@ -443,6 +452,7 @@ class FileService {
           targetProjectId,
           targetProjectName,
           needsIdRemapping,
+          rootProjectId,
         );
       }
 
@@ -515,6 +525,7 @@ class FileService {
     targetProjectId: string,
     targetProjectName: string,
     needsIdRemapping: boolean,
+    rootProjectId?: string,
   ): Promise<void> {
     // Get project data
     const projectResult = importedDb.exec('SELECT * FROM projects WHERE id = ?', [sourceProjectId]);
@@ -533,6 +544,9 @@ class FileService {
     projectData.id = targetProjectId;
     projectData.name = targetProjectName;
     projectData.updated_at = Date.now();
+
+    // Inject root_project_id for family stacking (overrides whatever was in the imported file)
+    projectData.root_project_id = rootProjectId ?? projectData.root_project_id ?? null;
 
     // Insert project
     const cols = Object.keys(projectData).join(', ');

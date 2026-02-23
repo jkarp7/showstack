@@ -58,9 +58,12 @@ export const PROJECT_SCHEMA = `
     phase_label_c TEXT DEFAULT 'C',
 
     enabled_modules TEXT, -- JSON array of module names
+    root_project_id TEXT, -- NULL = root project; non-NULL = member of a family stack (points to root's id)
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL
   );
+
+  CREATE INDEX IF NOT EXISTS idx_projects_root ON projects(root_project_id);
 
   -- ============================================
   -- PRODUCTION MODULE TABLES

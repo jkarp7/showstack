@@ -164,5 +164,25 @@ export function registerProjectHandlers(): void {
     }
   });
 
+  ipcMain.handle(
+    'projects:createCopy',
+    async (_event, originalProjectId: string, copyName?: string) => {
+      try {
+        return await projectService.createCopy(originalProjectId, copyName);
+      } catch (error) {
+        logger.error('Failed to create project copy:', {
+          operation: 'projects:createCopy',
+          originalProjectId,
+          error: error instanceof Error ? error.message : error,
+        });
+
+        if (error instanceof DatabaseError) {
+          throw new Error(`Unable to create project copy: ${error.message}`);
+        }
+        throw error;
+      }
+    },
+  );
+
   logger.info('✅ Project IPC handlers registered');
 }

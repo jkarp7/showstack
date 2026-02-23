@@ -91,6 +91,9 @@ export const ProjectSchema = extendBaseEntity({
   venue_city: z.string().optional(),
   venue_state: z.string().optional(),
   show_dates: JSONStringArraySchema,
+
+  // Family / version stacking (Eos-style project families)
+  root_project_id: z.string().nullable().optional(),
 });
 
 /**

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { logger } from '../utils/logger';
 import { ModuleCard } from '../components/common/ModuleCard';
@@ -15,6 +15,8 @@ export function ProjectPage() {
   const [project, setProject] = useState(projects.find((p) => p.id === projectId) || null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
+  const [isCopying, setIsCopying] = useState(false);
+  const [copyMessage, setCopyMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!projects.length) {
@@ -89,6 +91,34 @@ export function ProjectPage() {
     }
   };
 
+  const handleSaveAsCopy = useCallback(async () => {
+    if (!projectId || isCopying) return;
+    try {
+      setIsCopying(true);
+      setCopyMessage(null);
+      const copy = await window.api.projects.createCopy(projectId);
+      setCopyMessage(`Copy created: "${copy.name}"`);
+      setTimeout(() => setCopyMessage(null), 4000);
+    } catch (error) {
+      logger.error('Failed to create project copy:', error);
+      setCopyMessage('Failed to create copy');
+      setTimeout(() => setCopyMessage(null), 3000);
+    } finally {
+      setIsCopying(false);
+    }
+  }, [projectId, isCopying]);
+
+  // Listen for copy events dispatched by the native menu handler
+  useEffect(() => {
+    const handleCopyCreated = (e: Event) => {
+      const { copyName } = (e as CustomEvent).detail;
+      setCopyMessage(`Copy created: "${copyName}"`);
+      setTimeout(() => setCopyMessage(null), 4000);
+    };
+    window.addEventListener('project:copyCreated', handleCopyCreated);
+    return () => window.removeEventListener('project:copyCreated', handleCopyCreated);
+  }, []);
+
   if (!project) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
@@ -119,6 +149,20 @@ export function ProjectPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-end gap-4 mb-4">
             <SyncStatusIndicator />
+            {copyMessage && (
+              <span className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+                <span>&#10003;</span>
+                <span>{copyMessage}</span>
+              </span>
+            )}
+            <button
+              onClick={handleSaveAsCopy}
+              disabled={isCopying}
+              title="Save as Copy — creates a new timestamped version in the same family"
+              className="px-4 py-2 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isCopying ? 'Copying...' : 'Save as Copy'}
+            </button>
             <button
               onClick={() => setIsEditDialogOpen(true)}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium transition"

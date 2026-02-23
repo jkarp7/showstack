@@ -63,6 +63,7 @@ export interface Project {
   phase_label_c?: string; // Default: 'C'
 
   enabled_modules?: string[]; // ['production', 'manager', 'design']
+  root_project_id?: string | null; // NULL = root project; non-NULL = member of a family stack
   created_at: number;
   updated_at: number;
 }
@@ -77,6 +78,7 @@ interface ProjectStore {
     logoPath?: string,
     enabledModules?: string[],
   ) => Promise<Project>;
+  createCopy: (originalProjectId: string, copyName?: string) => Promise<Project>;
   updateProject: (projectId: string, updates: Partial<Project>) => Promise<void>;
   deleteProject: (projectId: string) => Promise<void>;
   setCurrentProject: (projectId: string) => void;
@@ -126,6 +128,23 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       return project;
     } catch (error) {
       logger.error('Failed to create project:', error);
+      throw error;
+    }
+  },
+
+  createCopy: async (originalProjectId: string, copyName?: string) => {
+    if (!hasAPI()) {
+      logger.warn('API not available');
+      throw new Error('API not available');
+    }
+
+    try {
+      const copy = await window.api.projects.createCopy(originalProjectId, copyName);
+      const allProjects = await window.api.projects.getAll();
+      set({ projects: allProjects });
+      return copy;
+    } catch (error) {
+      logger.error('Failed to create project copy:', error);
       throw error;
     }
   },

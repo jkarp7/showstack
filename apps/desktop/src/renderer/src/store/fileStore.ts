@@ -25,6 +25,7 @@ interface FileStore {
   error: string | null;
   conflictInfo: ConflictInfo | null;
   conflictFilePath: string | null;
+  importMessage: string | null; // set when a file is auto-stacked into a family
 
   // Actions
   setFilePath: (path: string | null) => void;
@@ -33,6 +34,7 @@ interface FileStore {
   setOpening: (opening: boolean) => void;
   setError: (error: string | null) => void;
   setConflict: (conflict: ConflictInfo | null, filePath: string | null) => void;
+  clearImportMessage: () => void;
   openFile: (onSuccess?: () => Promise<void>) => Promise<boolean>;
   openFileByPath: (filePath: string, onSuccess?: () => Promise<void>) => Promise<boolean>;
   resolveConflict: (
@@ -55,6 +57,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
   error: null,
   conflictInfo: null,
   conflictFilePath: null,
+  importMessage: null,
 
   // Set file path
   setFilePath: (path) => set({ currentFilePath: path }),
@@ -73,6 +76,9 @@ export const useFileStore = create<FileStore>((set, get) => ({
 
   // Set conflict
   setConflict: (conflict, filePath) => set({ conflictInfo: conflict, conflictFilePath: filePath }),
+
+  // Clear import message
+  clearImportMessage: () => set({ importMessage: null }),
 
   // Get current filename (without path and extension)
   getCurrentFileName: () => {
@@ -155,6 +161,9 @@ export const useFileStore = create<FileStore>((set, get) => ({
         isDirty: false,
         isOpening: false,
         lastSavedAt: Date.now(),
+        importMessage: result.autoStacked
+          ? `"${result.projectName}" was imported and added to its version stack.`
+          : null,
       });
 
       // Add to recent files
@@ -238,6 +247,9 @@ export const useFileStore = create<FileStore>((set, get) => ({
         isDirty: false,
         isOpening: false,
         lastSavedAt: Date.now(),
+        importMessage: result.autoStacked
+          ? `"${result.projectName}" was imported and added to its version stack.`
+          : null,
       });
 
       // Add to recent files

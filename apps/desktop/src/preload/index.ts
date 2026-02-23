@@ -40,6 +40,8 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.invoke('projects:create', name, description, logoPath, enabledModules),
     update: (id: string, updates: any) => ipcRenderer.invoke('projects:update', id, updates),
     delete: (id: string) => ipcRenderer.invoke('projects:delete', id),
+    createCopy: (originalProjectId: string, copyName?: string) =>
+      ipcRenderer.invoke('projects:createCopy', originalProjectId, copyName),
   },
 
   // Dialog operations
