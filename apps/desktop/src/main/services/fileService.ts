@@ -520,26 +520,45 @@ class FileService {
       const isPrepProject =
         importedDb.exec('SELECT id FROM prep_projects LIMIT 1')[0]?.values.length > 0;
 
-      if (isPrepProject) {
-        // Import prep project
-        await this.importPrepProject(
-          importedDb,
-          currentDb,
-          sourceProjectId,
-          targetProjectId,
-          targetProjectName,
-          needsIdRemapping,
-        );
-      } else {
-        // Import regular project
-        await this.importRegularProject(
-          importedDb,
-          currentDb,
-          sourceProjectId,
-          targetProjectId,
-          targetProjectName,
-          needsIdRemapping,
-          rootProjectId,
+      // Wrap the entire import in a transaction so it's atomic
+      const doImport = currentDb.transaction(() => {
+        if (isPrepProject) {
+          // Import prep project (sync — transaction callback must be sync)
+          this.importPrepProjectSync(
+            importedDb,
+            currentDb,
+            sourceProjectId,
+            targetProjectId,
+            targetProjectName,
+            needsIdRemapping,
+          );
+        } else {
+          // Import regular project
+          this.importRegularProjectSync(
+            importedDb,
+            currentDb,
+            sourceProjectId,
+            targetProjectId,
+            targetProjectName,
+            needsIdRemapping,
+            rootProjectId,
+          );
+        }
+      });
+
+      doImport();
+
+      // Verify the project was actually written
+      const written = currentDb
+        .prepare('SELECT id, name, root_project_id FROM projects WHERE id = ?')
+        .get(targetProjectId) as
+        | { id: string; name: string; root_project_id: string | null }
+        | undefined;
+      logger.info('✅ Project merge verification:', JSON.stringify(written));
+
+      if (!written) {
+        throw new Error(
+          `Project INSERT silently failed — id ${targetProjectId} not found after merge`,
         );
       }
 
@@ -559,16 +578,16 @@ class FileService {
   }
 
   /**
-   * Import a prep project from imported database
+   * Import a prep project from imported database (sync, for use inside a transaction)
    */
-  private async importPrepProject(
+  private importPrepProjectSync(
     importedDb: Database,
     currentDb: Database,
     sourceProjectId: string,
     targetProjectId: string,
     targetProjectName: string,
     needsIdRemapping: boolean,
-  ): Promise<void> {
+  ): void {
     // Get prep project data
     const projectResult = importedDb.exec('SELECT * FROM prep_projects WHERE id = ?', [
       sourceProjectId,
@@ -603,9 +622,9 @@ class FileService {
   }
 
   /**
-   * Import a regular project from imported database
+   * Import a regular project from imported database (sync, for use inside a transaction)
    */
-  private async importRegularProject(
+  private importRegularProjectSync(
     importedDb: Database,
     currentDb: Database,
     sourceProjectId: string,
@@ -613,7 +632,7 @@ class FileService {
     targetProjectName: string,
     needsIdRemapping: boolean,
     rootProjectId?: string,
-  ): Promise<void> {
+  ): void {
     // Get project data
     const projectResult = importedDb.exec('SELECT * FROM projects WHERE id = ?', [sourceProjectId]);
     if (!projectResult[0] || projectResult[0].values.length === 0) {

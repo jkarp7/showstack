@@ -93,9 +93,11 @@ export function LandingPage() {
     });
   }, []);
 
-  // Auto-dismiss import message after 4 seconds
+  // When an auto-stack import message appears, reload projects to show the new stack member,
+  // then auto-dismiss after 4 seconds.
   useEffect(() => {
     if (!importMessage) return;
+    loadProjects(); // ensure grid is up-to-date immediately
     const timer = setTimeout(() => clearImportMessage(), 4000);
     return () => clearTimeout(timer);
   }, [importMessage]);
