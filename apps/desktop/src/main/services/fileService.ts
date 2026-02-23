@@ -140,22 +140,22 @@ class FileService {
       const db = getDatabase(); // Gets project database only
 
       // Update project's updated_at timestamp - try both table types
+      // Uses better-sqlite3 API: prepare().get() / prepare().run()
       try {
-        // Check if there's a prep project
-        const isPrepProject = db.exec('SELECT id FROM prep_projects LIMIT 1')[0]?.values[0]?.[0];
+        const prepRow = db.prepare('SELECT id FROM prep_projects LIMIT 1').get() as
+          | { id: string }
+          | undefined;
 
-        if (isPrepProject) {
-          // Update prep_projects table
-          db.run('UPDATE prep_projects SET updated_at = ? WHERE id = ?', [
+        if (prepRow?.id) {
+          db.prepare('UPDATE prep_projects SET updated_at = ? WHERE id = ?').run(
             Date.now(),
-            isPrepProject,
-          ]);
+            prepRow.id,
+          );
         } else {
-          // Update projects table
-          db.run('UPDATE projects SET updated_at = ? WHERE id = ?', [
+          db.prepare('UPDATE projects SET updated_at = ? WHERE id = ?').run(
             Date.now(),
             'default-project',
-          ]);
+          );
         }
       } catch (error) {
         // Ignore update errors, continue with export
@@ -325,29 +325,23 @@ class FileService {
       let existingProject = null;
 
       try {
-        // Check projects table first
-        const existingResult = currentDb.exec(
-          'SELECT id, name, updated_at FROM projects WHERE id = ?',
-          [projectId],
-        );
-        if (existingResult[0]?.values[0]) {
-          existingProject = {
-            id: existingResult[0].values[0][0] as string,
-            name: existingResult[0].values[0][1] as string,
-            updated_at: existingResult[0].values[0][2] as number,
-          };
+        // Use better-sqlite3 API: prepare().get() returns a plain object or undefined
+        const existingRow = currentDb
+          .prepare('SELECT id, name, updated_at FROM projects WHERE id = ?')
+          .get(projectId) as { id: string; name: string; updated_at: number } | undefined;
+
+        if (existingRow) {
+          existingProject = existingRow;
         } else {
           // Check prep_projects table
-          const existingPrepResult = currentDb.exec(
-            'SELECT id, production_name, updated_at FROM prep_projects WHERE id = ?',
-            [projectId],
-          );
-          if (existingPrepResult[0]?.values[0]) {
-            existingProject = {
-              id: existingPrepResult[0].values[0][0] as string,
-              name: existingPrepResult[0].values[0][1] as string,
-              updated_at: existingPrepResult[0].values[0][2] as number,
-            };
+          const existingPrepRow = currentDb
+            .prepare(
+              'SELECT id, production_name AS name, updated_at FROM prep_projects WHERE id = ?',
+            )
+            .get(projectId) as { id: string; name: string; updated_at: number } | undefined;
+
+          if (existingPrepRow) {
+            existingProject = existingPrepRow;
           }
         }
       } catch (error) {
@@ -469,16 +463,16 @@ class FileService {
   private async deleteExistingProject(projectId: string): Promise<void> {
     const db = getDatabase();
 
-    // Check if it's a prep project or regular project
+    // Check if it's a prep project or regular project (better-sqlite3 API)
     const isPrepProject =
-      db.exec('SELECT id FROM prep_projects WHERE id = ?', [projectId])[0]?.values.length > 0;
+      db.prepare('SELECT id FROM prep_projects WHERE id = ?').get(projectId) != null;
 
     if (isPrepProject) {
       // Delete prep project (foreign keys will cascade)
-      db.run('DELETE FROM prep_projects WHERE id = ?', [projectId]);
+      db.prepare('DELETE FROM prep_projects WHERE id = ?').run(projectId);
     } else {
       // Delete regular project (foreign keys will cascade)
-      db.run('DELETE FROM projects WHERE id = ?', [projectId]);
+      db.prepare('DELETE FROM projects WHERE id = ?').run(projectId);
     }
 
     saveDatabase();
@@ -581,13 +575,13 @@ class FileService {
     projectData.production_name = targetProjectName;
     projectData.updated_at = Date.now();
 
-    // Insert prep project
+    // Insert prep project (better-sqlite3 API: prepare().run())
     const cols = Object.keys(projectData).join(', ');
     const placeholders = Object.keys(projectData)
       .map(() => '?')
       .join(', ');
     const vals = Object.values(projectData);
-    currentDb.run(`INSERT INTO prep_projects (${cols}) VALUES (${placeholders})`, vals);
+    currentDb.prepare(`INSERT INTO prep_projects (${cols}) VALUES (${placeholders})`).run(vals);
 
     // Import related data (sections, items, revisions, notes)
     // TODO: Implement full data import with ID remapping
@@ -627,59 +621,59 @@ class FileService {
     // Inject root_project_id for family stacking (overrides whatever was in the imported file)
     projectData.root_project_id = rootProjectId ?? projectData.root_project_id ?? null;
 
-    // Insert project
+    // Insert project row (better-sqlite3 API: prepare().run())
     const cols = Object.keys(projectData).join(', ');
     const placeholders = Object.keys(projectData)
       .map(() => '?')
       .join(', ');
     const vals = Object.values(projectData);
-    currentDb.run(`INSERT INTO projects (${cols}) VALUES (${placeholders})`, vals);
+    currentDb.prepare(`INSERT INTO projects (${cols}) VALUES (${placeholders})`).run(vals);
 
-    // Import fixtures
-    const fixturesResult = importedDb.exec('SELECT * FROM fixtures WHERE project_id = ?', [
-      sourceProjectId,
-    ]);
-    if (fixturesResult[0] && fixturesResult[0].values.length > 0) {
-      const fixtureCols = fixturesResult[0].columns;
-      for (const fixtureValues of fixturesResult[0].values) {
-        const fixtureData: any = {};
-        fixtureCols.forEach((col, idx) => {
-          fixtureData[col] = fixtureValues[idx];
+    // Dynamically import all tables that have a project_id column.
+    // This covers fixtures, user_preferences, dimmer_racks, pd_racks,
+    // infrastructure_equipment, shop_order_*, etc. without hard-coding each one.
+    const importedTables: Array<{ name: string }> = importedDb
+      .exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+      .flatMap((res) => res.values.map((v) => ({ name: v[0] as string })));
+
+    for (const { name: table } of importedTables) {
+      if (table === 'projects') continue; // already inserted
+
+      // Check if the table has a project_id column in the imported DB
+      const colInfo = importedDb.exec(`PRAGMA table_info("${table}")`);
+      if (!colInfo[0]) continue;
+      const colNames = colInfo[0].values.map((v) => v[1] as string);
+      if (!colNames.includes('project_id')) continue;
+
+      // Fetch all rows belonging to this project from the imported DB
+      const rowsResult = importedDb.exec(`SELECT * FROM "${table}" WHERE project_id = ?`, [
+        sourceProjectId,
+      ]);
+      if (!rowsResult[0] || rowsResult[0].values.length === 0) continue;
+
+      const rowCols = rowsResult[0].columns;
+      for (const rowValues of rowsResult[0].values) {
+        const rowData: any = {};
+        rowCols.forEach((col, idx) => {
+          rowData[col] = rowValues[idx];
         });
 
-        // Remap project_id if needed
-        fixtureData.project_id = targetProjectId;
+        // Remap project_id to the target
+        rowData.project_id = targetProjectId;
 
-        const cols = Object.keys(fixtureData).join(', ');
-        const placeholders = Object.keys(fixtureData)
+        const rCols = Object.keys(rowData).join(', ');
+        const rPlaceholders = Object.keys(rowData)
           .map(() => '?')
           .join(', ');
-        const vals = Object.values(fixtureData);
-        currentDb.run(`INSERT INTO fixtures (${cols}) VALUES (${placeholders})`, vals);
-      }
-    }
+        const rVals = Object.values(rowData);
 
-    // Import user preferences
-    const prefsResult = importedDb.exec('SELECT * FROM user_preferences WHERE project_id = ?', [
-      sourceProjectId,
-    ]);
-    if (prefsResult[0] && prefsResult[0].values.length > 0) {
-      const prefCols = prefsResult[0].columns;
-      for (const prefValues of prefsResult[0].values) {
-        const prefData: any = {};
-        prefCols.forEach((col, idx) => {
-          prefData[col] = prefValues[idx];
-        });
-
-        // Remap project_id if needed
-        prefData.project_id = targetProjectId;
-
-        const cols = Object.keys(prefData).join(', ');
-        const placeholders = Object.keys(prefData)
-          .map(() => '?')
-          .join(', ');
-        const vals = Object.values(prefData);
-        currentDb.run(`INSERT INTO user_preferences (${cols}) VALUES (${placeholders})`, vals);
+        try {
+          currentDb
+            .prepare(`INSERT OR IGNORE INTO "${table}" (${rCols}) VALUES (${rPlaceholders})`)
+            .run(rVals);
+        } catch (err) {
+          logger.warn(`⚠️ Could not import row into "${table}":`, err);
+        }
       }
     }
   }
@@ -694,30 +688,36 @@ class FileService {
       const db = getDatabase(); // Gets project database only
 
       // Clear all PROJECT data (app data is in separate database)
-      db.run('DELETE FROM fixtures');
-      db.run('DELETE FROM user_preferences');
-      db.run('DELETE FROM projects');
+      // Use better-sqlite3 API: prepare().run()
+      db.prepare('DELETE FROM fixtures').run();
+      db.prepare('DELETE FROM user_preferences').run();
+      db.prepare('DELETE FROM projects').run();
 
       // Also clear prep module data if it exists
-      try {
-        db.run('DELETE FROM prep_equipment_items');
-        db.run('DELETE FROM prep_revisions');
-        db.run('DELETE FROM prep_notes');
-        db.run('DELETE FROM prep_sections');
-        db.run('DELETE FROM prep_projects');
-        db.run('DELETE FROM prep_note_templates');
-      } catch (error) {
-        // Ignore errors if prep tables don't exist
+      const prepTables = [
+        'prep_equipment_items',
+        'prep_revisions',
+        'prep_notes',
+        'prep_sections',
+        'prep_projects',
+        'prep_note_templates',
+      ];
+      for (const table of prepTables) {
+        try {
+          db.prepare(`DELETE FROM "${table}"`).run();
+        } catch (_) {
+          // Ignore errors if prep tables don't exist
+        }
       }
 
       // Create new default project
       const projectId = 'default-project';
-      db.run('INSERT INTO projects (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)', [
+      db.prepare('INSERT INTO projects (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)').run(
         projectId,
         'Untitled Project',
         Date.now(),
         Date.now(),
-      ]);
+      );
 
       // Save to disk
       saveDatabase();
