@@ -353,7 +353,19 @@ class FileService {
         logger.info('📚 Same-ID import detected — auto-stacking into family:', projectId);
         const { v4: uuidv4 } = await import('uuid');
         const newProjectId = uuidv4();
-        const rootId = existingProject.id;
+
+        // Enforce flat-tree invariant: root_project_id must always point to a root
+        // (a project with root_project_id = NULL). If the existing project is itself
+        // a copy, walk up to find its root.
+        const existingFull = currentDb
+          .prepare('SELECT root_project_id FROM projects WHERE id = ?')
+          .get(existingProject.id) as { root_project_id: string | null } | undefined;
+        const rootId = existingFull?.root_project_id ?? existingProject.id;
+
+        logger.info(
+          `📚 Stacking under root: ${rootId} (existing.root_project_id: ${existingFull?.root_project_id ?? 'null'})`,
+        );
+
         const timestampedName = `${projectName} \u2014 ${formatCopyTimestamp(Date.now())}`;
 
         const importResult = await this.mergeImportedProject(
@@ -363,6 +375,8 @@ class FileService {
           projectId, // originalProjectId for column remapping
           rootId, // rootProjectId to inject
         );
+
+        logger.info('📚 Auto-stack result:', JSON.stringify(importResult));
 
         return {
           ...importResult,
@@ -581,7 +595,7 @@ class FileService {
       .map(() => '?')
       .join(', ');
     const vals = Object.values(projectData);
-    currentDb.prepare(`INSERT INTO prep_projects (${cols}) VALUES (${placeholders})`).run(vals);
+    currentDb.prepare(`INSERT INTO prep_projects (${cols}) VALUES (${placeholders})`).run(...vals);
 
     // Import related data (sections, items, revisions, notes)
     // TODO: Implement full data import with ID remapping
@@ -621,13 +635,25 @@ class FileService {
     // Inject root_project_id for family stacking (overrides whatever was in the imported file)
     projectData.root_project_id = rootProjectId ?? projectData.root_project_id ?? null;
 
-    // Insert project row (better-sqlite3 API: prepare().run())
+    // Filter projectData to only columns that exist in the live DB's projects table.
+    // This prevents "no such column" errors when importing files from newer/older schema versions.
+    const liveProjectCols = new Set<string>(
+      (currentDb.pragma('table_info(projects)') as Array<{ name: string }>).map((c) => c.name),
+    );
+    for (const key of Object.keys(projectData)) {
+      if (!liveProjectCols.has(key)) {
+        logger.warn(`⚠️ Skipping unknown projects column during import: ${key}`);
+        delete projectData[key];
+      }
+    }
+
+    // Insert project row (better-sqlite3 API: prepare().run(...spreadArray))
     const cols = Object.keys(projectData).join(', ');
     const placeholders = Object.keys(projectData)
       .map(() => '?')
       .join(', ');
     const vals = Object.values(projectData);
-    currentDb.prepare(`INSERT INTO projects (${cols}) VALUES (${placeholders})`).run(vals);
+    currentDb.prepare(`INSERT INTO projects (${cols}) VALUES (${placeholders})`).run(...vals);
 
     // Dynamically import all tables that have a project_id column.
     // This covers fixtures, user_preferences, dimmer_racks, pd_racks,
@@ -670,7 +696,7 @@ class FileService {
         try {
           currentDb
             .prepare(`INSERT OR IGNORE INTO "${table}" (${rCols}) VALUES (${rPlaceholders})`)
-            .run(rVals);
+            .run(...rVals);
         } catch (err) {
           logger.warn(`⚠️ Could not import row into "${table}":`, err);
         }
