@@ -16,8 +16,8 @@ export function useProjectMenuHandlers() {
     if (!window.api?.menu) return;
 
     const handleEditProject = () => {
-      // Get current project ID from menu state or params
-      const currentPath = window.location.pathname;
+      // HashRouter puts the path in window.location.hash (e.g. "#/project/some-uuid")
+      const currentPath = window.location.hash;
       const projectIdMatch = currentPath.match(/\/project\/([^/]+)/);
 
       if (projectIdMatch) {
@@ -35,7 +35,8 @@ export function useProjectMenuHandlers() {
     };
 
     const handleSaveAsCopy = async () => {
-      const currentPath = window.location.pathname;
+      // HashRouter puts the path in window.location.hash (e.g. "#/project/some-uuid")
+      const currentPath = window.location.hash;
       const projectIdMatch = currentPath.match(/\/project\/([^/]+)/);
 
       if (!projectIdMatch) {
