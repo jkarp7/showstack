@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { dialog, app } from 'electron';
-import { readFileSync, writeFileSync, existsSync, unlinkSync, copyFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, unlinkSync, copyFileSync, renameSync } from 'fs';
+import BetterSQLite from 'better-sqlite3';
 import { join, basename } from 'path';
 import initSqlJs, { Database } from 'sql.js';
 import { getDatabase, saveDatabase, replaceProjectDatabase, databaseManager } from '../database';
@@ -211,7 +212,6 @@ class FileService {
       copyFileSync(projectDbPath, tmpPath);
 
       // Open the copy with better-sqlite3 and strip all other projects' data
-      const BetterSQLite = require('better-sqlite3');
       const backupDb = new BetterSQLite(tmpPath);
 
       // Disable FK enforcement so we can delete in any order
@@ -265,10 +265,8 @@ class FileService {
       backupDb.exec('VACUUM');
       backupDb.close();
 
-      // Rename tmp → final destination
-      if (existsSync(filePath)) unlinkSync(filePath);
-      copyFileSync(tmpPath, filePath);
-      unlinkSync(tmpPath);
+      // Atomically rename tmp → final destination (same filesystem, no double-copy)
+      renameSync(tmpPath, filePath);
 
       logger.info(`✅ Project ${projectId} exported to ${filePath}`);
       return filePath;

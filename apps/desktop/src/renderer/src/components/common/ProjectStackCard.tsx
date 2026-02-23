@@ -24,9 +24,7 @@ export function ProjectStackCard({
 }: ProjectStackCardProps) {
   const allMembers = [family.root, ...family.children];
   // Cover: most recently updated member
-  const cover = allMembers.reduce((latest, p) =>
-    p.updated_at > latest.updated_at ? p : latest,
-  );
+  const cover = allMembers.reduce((latest, p) => (p.updated_at > latest.updated_at ? p : latest));
   const versionCount = allMembers.length;
   const coverLogo = logoDataUrls.get(cover.id);
 
@@ -41,7 +39,7 @@ export function ProjectStackCard({
       )}
       {versionCount >= 2 && (
         <div
-          className="absolute inset-0 bg-white dark:bg-gray-750 rounded-lg border border-gray-200 dark:border-gray-600"
+          className="absolute inset-0 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600"
           style={{ transform: 'translate(3px, 3px)' }}
         />
       )}

@@ -160,7 +160,7 @@ autoUpdater.on('update-available', (info) => {
 ### Phase 1: The Foundation (Post-Refactor)
 
 - [x] Add `root_project_id` to database schema (SQLite migration + Supabase migration 004).
-- [ ] Build `<ProjectStackCard>` component.
+- [x] Build `<ProjectStackCard>` component.
 - [ ] Implement "Save as Copy" inheritance logic (grouping in LandingPage.tsx).
 
 ### Phase 2: The Gateway (Supabase)

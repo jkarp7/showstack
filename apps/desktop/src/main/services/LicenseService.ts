@@ -63,6 +63,9 @@ const DEMO_EXPIRY_MS = 100 * ONE_YEAR_MS;
 /** Demo tier feature limits */
 export const DEMO_FIXTURE_LIMIT = 25;
 
+/** Valid server-provided license tiers — any other value is rejected before DB write */
+const VALID_TIERS: LicenseTier[] = ['professional', 'student', 'institutional'];
+
 export class LicenseService {
   private readonly OFFLINE_GRACE_DAYS = 14;
   private readonly EXPIRATION_WARNING_DAYS = 7;
@@ -223,7 +226,6 @@ export class LicenseService {
       }
 
       // Validate server license data before writing to local database
-      const VALID_TIERS: LicenseTier[] = ['professional', 'student', 'institutional'];
       if (
         !serverLicense.email ||
         !serverLicense.license_key ||

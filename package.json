@@ -38,6 +38,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "test:run": "vitest run",
+    "test:rebuild": "npm rebuild better-sqlite3",
     "test:supabase": "npx tsx scripts/test-supabase.ts",
     "test:powersync": "npx tsx scripts/test-powersync.ts",
     "lint": "eslint --cache .",

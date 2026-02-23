@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { logger } from '../utils/logger';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUIStore } from '../store/uiStore';
+import { useProjectStore } from '../store/projectStore';
 
 /**
  * Project menu event handlers
@@ -11,6 +12,7 @@ export function useProjectMenuHandlers() {
   const navigate = useNavigate();
   const params = useParams();
   const openSettingsDialog = useUIStore((state) => state.openSettingsDialog);
+  const currentProjectName = useProjectStore((state) => state.currentProject?.name);
 
   useEffect(() => {
     if (!window.api?.menu) return;
@@ -46,9 +48,8 @@ export function useProjectMenuHandlers() {
 
       const projectId = projectIdMatch[1];
       try {
-        // Get project name from the store so we can suggest a filename
-        const projectName =
-          document.title || window.location.hash.split('/').pop() || 'ShowStack Project';
+        // Read project name from the store so we can suggest a meaningful filename
+        const projectName = currentProjectName || 'ShowStack Project';
         const filePath = await window.api.files.exportProject(projectId, projectName);
         if (filePath) {
           logger.info('Project exported to:', filePath);
@@ -95,5 +96,5 @@ export function useProjectMenuHandlers() {
       window.api.menu.off('menu:saveAsCopy', handleSaveAsCopy);
       window.api.menu.off('menu:exportProject', handleExportProject);
     };
-  }, [navigate, params, openSettingsDialog]);
+  }, [navigate, params, openSettingsDialog, currentProjectName]);
 }
