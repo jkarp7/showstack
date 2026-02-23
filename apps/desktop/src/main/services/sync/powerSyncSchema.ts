@@ -14,7 +14,7 @@
  * Note: UUID columns are stored as TEXT
  */
 
-import { column, Schema, Table } from '@powersync/web';
+import { column, Schema, Table } from '@powersync/node';
 
 // ============================================
 // PROJECTS TABLE

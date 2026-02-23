@@ -81,20 +81,50 @@ export interface AuthState {
   clearError: () => void;
 }
 
-/** Safe localStorage wrapper — logs warning if storage is unavailable */
+/**
+ * In-memory fallback for when localStorage is unavailable (e.g. private browsing).
+ * Ensures the first-launch prompt doesn't re-appear every page load in the same session.
+ */
+const memoryStorage = new Map<string, string>();
+
+/**
+ * Safe localStorage wrapper with in-memory session fallback.
+ * Falls back to sessionStorage first, then an in-memory Map.
+ * Guarantees callers never see the first-launch prompt again within the same session,
+ * even if persistent storage is blocked.
+ */
 function safeLocalStorage(key: string, value?: string): string | null {
+  // Primary: persistent localStorage
   try {
     if (value !== undefined) {
       localStorage.setItem(key, value);
       return value;
     }
     return localStorage.getItem(key);
-  } catch (e) {
-    logger.warn(`[AuthStore] localStorage unavailable for key "${key}"`, {
-      error: e instanceof Error ? e.message : String(e),
-    });
-    return null;
+  } catch {
+    // Fall through to sessionStorage
   }
+
+  // Secondary: sessionStorage (survives page reloads within the same tab)
+  try {
+    if (value !== undefined) {
+      sessionStorage.setItem(key, value);
+      return value;
+    }
+    return sessionStorage.getItem(key);
+  } catch {
+    // Fall through to in-memory
+  }
+
+  // Tertiary: in-memory (lost on page reload, but prevents prompt re-appearing in session)
+  logger.warn(
+    `[AuthStore] localStorage/sessionStorage unavailable for key "${key}", using memory fallback`,
+  );
+  if (value !== undefined) {
+    memoryStorage.set(key, value);
+    return value;
+  }
+  return memoryStorage.get(key) ?? null;
 }
 
 const defaultSyncStatus: SyncStatus = {
@@ -138,8 +168,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const result = await window.api.auth.signIn(email, password);
 
       if (result.success) {
-        // Refresh all state in parallel to avoid sequential re-renders
-        await Promise.all([
+        // Refresh all state in parallel. Use allSettled so a failure in one
+        // (e.g. sync status unreachable) doesn't leave auth/license state un-updated.
+        await Promise.allSettled([
           get().refreshAuthState(),
           get().refreshLicenseStatus(),
           get().refreshSyncStatus(),

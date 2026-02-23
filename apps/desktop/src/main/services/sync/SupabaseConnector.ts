@@ -14,7 +14,7 @@ import {
   CrudEntry,
   PowerSyncBackendConnector,
   UpdateType,
-} from '@powersync/web';
+} from '@powersync/node';
 import { createClient, SupabaseClient, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { getConfig } from '../../config/env';
 import { logger } from '../../utils/logger';
@@ -51,6 +51,16 @@ export interface SupabaseLicense {
   cloud_sync: boolean;
   created_at: string;
   updated_at: string;
+}
+
+/**
+ * Typed result from the claim_license_by_email RPC.
+ * Prevents callers from coupling to raw Supabase RPC shapes.
+ */
+export interface ClaimLicenseResponse {
+  success: boolean;
+  error?: string;
+  license?: SupabaseLicense;
 }
 
 /**
@@ -297,11 +307,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
    * Claim an unclaimed license by email via Supabase RPC.
    * Called automatically on sign-in when a license exists for the user's email.
    */
-  async claimLicenseByEmail(): Promise<{
-    success: boolean;
-    error?: string;
-    license?: SupabaseLicense;
-  }> {
+  async claimLicenseByEmail(): Promise<ClaimLicenseResponse> {
     const { data, error } = await this.supabase.rpc('claim_license_by_email');
 
     if (error) {
@@ -385,6 +391,30 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
   }
 
   /**
+   * Map a raw Supabase CRUD error to a sanitized message.
+   * Preserves enough context for debugging while stripping raw DB error text
+   * (e.g. constraint names, column names) that could leak schema details.
+   */
+  private sanitizeCrudError(op: string, table: string, rawMessage: string): string {
+    // Recognise common categories and return a safe generic message
+    const lower = rawMessage.toLowerCase();
+    if (lower.includes('permission') || lower.includes('rls') || lower.includes('policy')) {
+      return `Permission denied on ${op} ${table}`;
+    }
+    if (lower.includes('not found') || lower.includes('pgrst116')) {
+      return `Record not found on ${op} ${table}`;
+    }
+    if (lower.includes('duplicate') || lower.includes('unique') || lower.includes('23505')) {
+      return `Duplicate record on ${op} ${table}`;
+    }
+    if (lower.includes('foreign key') || lower.includes('23503')) {
+      return `Foreign key violation on ${op} ${table}`;
+    }
+    // Generic fallback — include op/table but not the raw DB message
+    return `Sync ${op} failed for ${table}`;
+  }
+
+  /**
    * Upload a single CRUD operation to Supabase
    */
   private async uploadCrudEntry(entry: CrudEntry): Promise<void> {
@@ -401,7 +431,8 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
         });
 
         if (error) {
-          throw new Error(`Failed to upsert ${table}/${id}: ${error.message}`);
+          logger.error(`[SupabaseConnector] PUT failed ${table}/${id}:`, error.message);
+          throw new Error(this.sanitizeCrudError('PUT', table, error.message));
         }
         break;
       }
@@ -411,7 +442,8 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
         const { error } = await this.supabase.from(table).update(data).eq('id', id);
 
         if (error) {
-          throw new Error(`Failed to update ${table}/${id}: ${error.message}`);
+          logger.error(`[SupabaseConnector] PATCH failed ${table}/${id}:`, error.message);
+          throw new Error(this.sanitizeCrudError('PATCH', table, error.message));
         }
         break;
       }
@@ -421,7 +453,8 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
         const { error } = await this.supabase.from(table).delete().eq('id', id);
 
         if (error) {
-          throw new Error(`Failed to delete ${table}/${id}: ${error.message}`);
+          logger.error(`[SupabaseConnector] DELETE failed ${table}/${id}:`, error.message);
+          throw new Error(this.sanitizeCrudError('DELETE', table, error.message));
         }
         break;
       }

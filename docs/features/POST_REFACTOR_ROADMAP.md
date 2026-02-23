@@ -159,9 +159,9 @@ autoUpdater.on('update-available', (info) => {
 
 ### Phase 1: The Foundation (Post-Refactor)
 
-- [ ] Add `root_project_id` to database schema.
+- [x] Add `root_project_id` to database schema (SQLite migration + Supabase migration 004).
 - [ ] Build `<ProjectStackCard>` component.
-- [ ] Implement "Save as Copy" inheritance logic.
+- [ ] Implement "Save as Copy" inheritance logic (grouping in LandingPage.tsx).
 
 ### Phase 2: The Gateway (Supabase)
 
@@ -172,7 +172,10 @@ autoUpdater.on('update-available', (info) => {
 ### Phase 3: The Client Logic (Electron)
 
 - [x] Update `LicenseService` to check dates, not version numbers.
+- [x] Fix cloud sync: migrate PowerSync from `@powersync/web` → `@powersync/node`.
 - [ ] Implement `UpdateService` to gate downloads based on maintenance expiry.
 - [ ] Verify the "Offline Fallback" works by setting your system clock forward 2 years.
 
 **Status Update (February 2026):** LicenseService now implements perpetual fallback licensing with `APP_BUILD_DATE` vs `maintenanceEndDate` comparison. Supabase Auth replaces the "Dual Activation" flow — users sign in with email/password and licenses are auto-claimed by email. Demo mode provides restricted access for unauthenticated users. The e-commerce webhook (Phase 2) and auto-updater gate (Phase 4) are still pending.
+
+**Status Update (February 23, 2026):** Cloud sync is now functional end-to-end. PowerSync was migrated from `@powersync/web` to `@powersync/node` (the correct package for Electron main process). The IPC bridge pattern (main process holds PowerSync, renderer calls via `window.api.sync.*`) was confirmed correct and is unchanged. After sign-in, the sync status now correctly transitions from "offline" → "connected". Project Families (versioning stack) foundation is in place: `root_project_id` schema column added, `.ss` export/import fixed end-to-end.

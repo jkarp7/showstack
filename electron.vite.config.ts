@@ -12,7 +12,13 @@ export default defineConfig({
         formats: ['cjs'],
       },
       rollupOptions: {
-        external: ['sql.js', 'puppeteer', 'better-sqlite3'],
+        external: [
+          'sql.js',
+          'puppeteer',
+          'better-sqlite3',
+          '@powersync/node',
+          '@journeyapps/node-sqlite3',
+        ],
         output: {
           entryFileNames: '[name].cjs',
         },

@@ -8,7 +8,7 @@
  * This is the main entry point for cloud sync functionality.
  */
 
-import { PowerSyncDatabase, SyncStatus, SyncStatusOptions } from '@powersync/web';
+import { PowerSyncDatabase, SyncStatus } from '@powersync/node';
 import { AppSchema } from './powerSyncSchema';
 import { SupabaseConnector, getSupabaseConnector } from './SupabaseConnector';
 import { getConfig } from '../../config/env';
@@ -291,7 +291,11 @@ export class PowerSyncService {
     this.statusListeners.push(listener);
 
     // Immediately notify with current status
-    listener(this.getSyncStatus());
+    try {
+      listener(this.getSyncStatus());
+    } catch (error) {
+      logger.error('[PowerSyncService] Status listener error on subscribe:', error);
+    }
 
     return () => {
       this.statusListeners = this.statusListeners.filter((l) => l !== listener);

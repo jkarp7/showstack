@@ -1,10 +1,10 @@
 # ShowStack Project Status
 
 **Created:** December 18, 2025
-**Last Updated:** February 13, 2026
+**Last Updated:** February 23, 2026
 **Current Version:** 0.1.0-alpha
-**Development Phase:** Alpha (Renovation ~90% complete)
-**Active Branch:** `feature/user-accounts-licensing`
+**Development Phase:** Alpha (Renovation ~95% complete)
+**Active Branch:** `feature/project-families`
 
 This document tracks the development status of all ShowStack feature domains and editions. It serves as the central source of truth for what's completed, in progress, and planned.
 
@@ -28,7 +28,26 @@ This document tracks the development status of all ShowStack feature domains and
 
 ### ✅ Recently Completed (December 2025 - February 2026)
 
-**Latest (February 2026):** 10. ✅ User Accounts, Licensing & Demo Mode (PR on feature/user-accounts-licensing) - COMPLETED (February 13, 2026)
+**Latest (February 2026):** 12. ✅ Cloud Sync Fix — PowerSync Node Migration (feature/project-families) - COMPLETED (February 23, 2026)
+
+- Migrated PowerSync from `@powersync/web` (browser-only) to `@powersync/node` (Node.js/Electron main process)
+- Root cause: `@powersync/web` requires WASM/IndexedDB/Web Workers — none available in Electron main process
+- Fix: 3-line import swap across `PowerSyncService.ts`, `powerSyncSchema.ts`, `SupabaseConnector.ts`
+- Added `@powersync/node` + `@journeyapps/node-sqlite3` to vite externals
+- Result: cloud sync now initializes correctly and transitions to "connected" after sign-in
+- Bug fixed in `onStatusChange`: initial listener notification was not wrapped in try/catch (now consistent with `notifyStatusListeners`)
+- New test file: `PowerSyncService.test.ts` (43 tests, 100% passing) — covers all lifecycle states, status machine, listener fanout, singleton pattern
+- Updated `SupabaseConnector.test.ts` mock from `@powersync/web` → `@powersync/node`
+
+11. ✅ Project Families / Version Stacking (feature/project-families) - COMPLETED (February 23, 2026)
+
+- `root_project_id` column added to projects table (SQLite local DB + Supabase migration 004)
+- `.ss` export/import flow fixed end-to-end: exported files now correctly re-import as version stacks
+- Fixed `isPrepProject` detection (was using `LIMIT 1` instead of `WHERE id = ?` — misrouted production projects)
+- Fixed `exportProjectById` to explicitly clean `prep_projects` and shop-order tables (no `project_id` FK column)
+- Moved `db.pragma('table_info(projects)')` outside transaction callback (PRAGMA unreliable inside better-sqlite3 transactions)
+
+10. ✅ User Accounts, Licensing & Demo Mode (PR on feature/user-accounts-licensing) - COMPLETED (February 13, 2026)
 
 - Supabase Auth integration (sign in, sign up, sign out, password reset)
 - Email-based license auto-claim (no manual key entry)

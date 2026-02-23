@@ -47,7 +47,7 @@ vi.mock('@supabase/supabase-js', () => ({
   }),
 }));
 
-vi.mock('@powersync/web', () => ({
+vi.mock('@powersync/node', () => ({
   AbstractPowerSyncDatabase: class {},
   PowerSyncBackendConnector: class {},
   UpdateType: { PUT: 'PUT', PATCH: 'PATCH', DELETE: 'DELETE' },
@@ -284,6 +284,163 @@ describe('SupabaseConnector', () => {
       authCallback('SIGNED_OUT', null);
 
       expect(listener).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── Issue #81: CRUD upload error sanitization ──────────────────────────────
+
+  describe('uploadData (CRUD error handling)', () => {
+    // Helper: set up an authenticated session
+    async function signInConnector() {
+      const mockSession = {
+        user: { id: 'user-123', email: 'test@example.com' },
+        access_token: 'token',
+      };
+      mockAuth.signInWithPassword.mockResolvedValue({
+        data: { session: mockSession },
+        error: null,
+      });
+      await connector.signIn('test@example.com', 'password123');
+    }
+
+    // Minimal mock of the AbstractPowerSyncDatabase interface used by uploadData
+    function makeDb(crud: object[], complete = vi.fn().mockResolvedValue(undefined)) {
+      return {
+        getNextCrudTransaction: vi.fn().mockResolvedValue({ crud, complete }),
+      };
+    }
+
+    it('returns early when there are no pending CRUD transactions', async () => {
+      const db = { getNextCrudTransaction: vi.fn().mockResolvedValue(null) };
+      await connector.uploadData(db as never);
+      expect(db.getNextCrudTransaction).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls complete() after all operations succeed', async () => {
+      const complete = vi.fn().mockResolvedValue(undefined);
+      const crud = [{ op: 'PUT', table: 'fixtures', id: 'fix-1', opData: { name: 'SR Special' } }];
+      const db = makeDb(crud, complete);
+
+      const mockChain = { upsert: vi.fn().mockResolvedValue({ error: null }) };
+      mockFrom.mockReturnValue(mockChain);
+
+      await connector.uploadData(db as never);
+
+      expect(complete).toHaveBeenCalledTimes(1);
+    });
+
+    it('does NOT call complete() when a CRUD operation fails (allows retry)', async () => {
+      const complete = vi.fn().mockResolvedValue(undefined);
+      const crud = [{ op: 'PUT', table: 'fixtures', id: 'fix-1', opData: {} }];
+      const db = makeDb(crud, complete);
+
+      const mockChain = {
+        upsert: vi
+          .fn()
+          .mockResolvedValue({ error: { message: 'permission denied for table fixtures' } }),
+      };
+      mockFrom.mockReturnValue(mockChain);
+
+      await expect(connector.uploadData(db as never)).rejects.toThrow();
+      expect(complete).not.toHaveBeenCalled();
+    });
+
+    it('sanitizes permission errors — does not expose raw DB error text', async () => {
+      const complete = vi.fn().mockResolvedValue(undefined);
+      const crud = [{ op: 'PUT', table: 'fixtures', id: 'fix-1', opData: {} }];
+      const db = makeDb(crud, complete);
+
+      const mockChain = {
+        upsert: vi
+          .fn()
+          .mockResolvedValue({ error: { message: 'permission denied for table fixtures' } }),
+      };
+      mockFrom.mockReturnValue(mockChain);
+
+      await expect(connector.uploadData(db as never)).rejects.toThrow(
+        'Permission denied on PUT fixtures',
+      );
+    });
+
+    it('sanitizes duplicate key errors', async () => {
+      const crud = [{ op: 'PATCH', table: 'projects', id: 'proj-1', opData: { name: 'X' } }];
+      const db = makeDb(crud);
+
+      const mockChain = {
+        update: vi.fn().mockReturnThis(),
+        eq: vi
+          .fn()
+          .mockResolvedValue({
+            error: { message: '23505 duplicate key value violates unique constraint' },
+          }),
+      };
+      mockFrom.mockReturnValue(mockChain);
+
+      await expect(connector.uploadData(db as never)).rejects.toThrow(
+        'Duplicate record on PATCH projects',
+      );
+    });
+
+    it('sanitizes record-not-found errors', async () => {
+      const crud = [{ op: 'DELETE', table: 'fixtures', id: 'gone-1', opData: {} }];
+      const db = makeDb(crud);
+
+      const mockChain = {
+        delete: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockResolvedValue({ error: { message: 'PGRST116: not found' } }),
+      };
+      mockFrom.mockReturnValue(mockChain);
+
+      await expect(connector.uploadData(db as never)).rejects.toThrow(
+        'Record not found on DELETE fixtures',
+      );
+    });
+
+    it('throws generic sanitized message for unknown errors', async () => {
+      const crud = [{ op: 'PUT', table: 'fixtures', id: 'fix-1', opData: {} }];
+      const db = makeDb(crud);
+
+      const mockChain = {
+        upsert: vi
+          .fn()
+          .mockResolvedValue({
+            error: { message: 'some internal pg error with schema details column_x' },
+          }),
+      };
+      mockFrom.mockReturnValue(mockChain);
+
+      await expect(connector.uploadData(db as never)).rejects.toThrow(
+        'Sync PUT failed for fixtures',
+      );
+    });
+  });
+
+  // ── Issue #81: ClaimLicenseResponse type ────────────────────────────────────
+
+  describe('claimLicenseByEmail (typed response)', () => {
+    it('returns typed ClaimLicenseResponse on success', async () => {
+      mockRpc.mockResolvedValue({
+        data: { success: true, license: { id: 'lic-1', license_key: 'KEY-1' } },
+        error: null,
+      });
+
+      const result = await connector.claimLicenseByEmail();
+
+      // Type check — result has the ClaimLicenseResponse shape
+      expect(result).toHaveProperty('success', true);
+      expect(result).toHaveProperty('license');
+    });
+
+    it('returns typed error response on malformed RPC reply', async () => {
+      mockRpc.mockResolvedValue({
+        data: 'unexpected string',
+        error: null,
+      });
+
+      const result = await connector.claimLicenseByEmail();
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Invalid response from license claim');
     });
   });
 });

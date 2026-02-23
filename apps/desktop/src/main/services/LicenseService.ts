@@ -223,6 +223,7 @@ export class LicenseService {
       }
 
       // Validate server license data before writing to local database
+      const VALID_TIERS: LicenseTier[] = ['professional', 'student', 'institutional'];
       if (
         !serverLicense.email ||
         !serverLicense.license_key ||
@@ -230,6 +231,14 @@ export class LicenseService {
         !serverLicense.maintenance_end_date
       ) {
         logger.warn('Server license missing required fields, skipping update');
+        return false;
+      }
+      if (!VALID_TIERS.includes(serverLicense.tier)) {
+        logger.warn(`Server license has unknown tier "${serverLicense.tier}", skipping update`);
+        return false;
+      }
+      if (!Array.isArray(serverLicense.modules)) {
+        logger.warn('Server license modules is not an array, skipping update');
         return false;
       }
 
