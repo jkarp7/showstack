@@ -234,6 +234,33 @@ class FileService {
         }
       }
 
+      // Also purge all prep module data — prep_projects and its child tables use their own
+      // id/prep_project_id FKs (not project_id), so they aren't caught by the loop above.
+      // A regular production-project export should never contain prep data from other projects.
+      const prepTables = [
+        'prep_equipment_items',
+        'prep_revisions',
+        'prep_notes',
+        'prep_sections',
+        'prep_projects',
+        'prep_note_templates',
+        'shop_order_items',
+        'shop_order_revisions',
+        'shop_order_notes',
+        'shop_order_sections',
+        'shop_order_projects',
+        'shop_order_note_templates',
+      ];
+      for (const table of prepTables) {
+        // Only delete if the table exists in this backup
+        const exists = backupDb
+          .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
+          .get(table);
+        if (exists) {
+          backupDb.prepare(`DELETE FROM "${table}"`).run();
+        }
+      }
+
       // VACUUM to compact the file (removes deleted rows from disk)
       backupDb.exec('VACUUM');
       backupDb.close();
@@ -513,12 +540,30 @@ class FileService {
       const importedDb = new SQL.Database(buffer);
       const currentDb = getDatabase();
 
+      // Determine whether this is a prep project or a regular production project.
+      // We must check using the specific sourceProjectId — NOT just "any prep row exists" —
+      // because exported .ss files may contain stale prep_projects rows from other projects
+      // that weren't cleaned up during export (they don't have a project_id FK column).
       const sourceProjectId = originalProjectId || targetProjectId;
       const needsIdRemapping = sourceProjectId !== targetProjectId;
+      let isPrepProject = false;
+      try {
+        const prepCheck = importedDb.exec('SELECT id FROM prep_projects WHERE id = ?', [
+          sourceProjectId,
+        ]);
+        isPrepProject = (prepCheck[0]?.values.length ?? 0) > 0;
+      } catch (_) {
+        // prep_projects table doesn't exist in this file — definitely not a prep project
+        isPrepProject = false;
+      }
 
-      // Check if this is a prep project or regular project
-      const isPrepProject =
-        importedDb.exec('SELECT id FROM prep_projects LIMIT 1')[0]?.values.length > 0;
+      // Pre-compute the live schema OUTSIDE of the transaction.
+      // Calling db.pragma() inside a transaction callback is unreliable in better-sqlite3
+      // (pragmas are not transactional in SQLite) and can return an empty result set,
+      // which would cause all columns to be filtered out and the INSERT to silently fail.
+      const liveProjectCols = new Set<string>(
+        (currentDb.pragma('table_info(projects)') as Array<{ name: string }>).map((c) => c.name),
+      );
 
       // Wrap the entire import in a transaction so it's atomic
       const doImport = currentDb.transaction(() => {
@@ -542,25 +587,12 @@ class FileService {
             targetProjectName,
             needsIdRemapping,
             rootProjectId,
+            liveProjectCols,
           );
         }
       });
 
       doImport();
-
-      // Verify the project was actually written
-      const written = currentDb
-        .prepare('SELECT id, name, root_project_id FROM projects WHERE id = ?')
-        .get(targetProjectId) as
-        | { id: string; name: string; root_project_id: string | null }
-        | undefined;
-      logger.info('✅ Project merge verification:', JSON.stringify(written));
-
-      if (!written) {
-        throw new Error(
-          `Project INSERT silently failed — id ${targetProjectId} not found after merge`,
-        );
-      }
 
       importedDb.close();
       saveDatabase();
@@ -632,6 +664,7 @@ class FileService {
     targetProjectName: string,
     needsIdRemapping: boolean,
     rootProjectId?: string,
+    liveProjectCols?: Set<string>,
   ): void {
     // Get project data
     const projectResult = importedDb.exec('SELECT * FROM projects WHERE id = ?', [sourceProjectId]);
@@ -655,14 +688,14 @@ class FileService {
     projectData.root_project_id = rootProjectId ?? projectData.root_project_id ?? null;
 
     // Filter projectData to only columns that exist in the live DB's projects table.
-    // This prevents "no such column" errors when importing files from newer/older schema versions.
-    const liveProjectCols = new Set<string>(
-      (currentDb.pragma('table_info(projects)') as Array<{ name: string }>).map((c) => c.name),
-    );
-    for (const key of Object.keys(projectData)) {
-      if (!liveProjectCols.has(key)) {
-        logger.warn(`⚠️ Skipping unknown projects column during import: ${key}`);
-        delete projectData[key];
+    // liveProjectCols is pre-computed OUTSIDE the transaction in mergeImportedProject.
+    // If not provided (shouldn't happen), skip filtering rather than calling pragma here.
+    if (liveProjectCols && liveProjectCols.size > 0) {
+      for (const key of Object.keys(projectData)) {
+        if (!liveProjectCols.has(key)) {
+          logger.warn(`⚠️ Skipping unknown projects column during import: ${key}`);
+          delete projectData[key];
+        }
       }
     }
 
@@ -717,7 +750,13 @@ class FileService {
             .prepare(`INSERT OR IGNORE INTO "${table}" (${rCols}) VALUES (${rPlaceholders})`)
             .run(...rVals);
         } catch (err) {
-          logger.warn(`⚠️ Could not import row into "${table}":`, err);
+          // Catch both .prepare() errors (table doesn't exist in live DB) and
+          // .run() errors (constraint violations, type mismatches, etc.)
+          // These must NOT propagate — a child-table failure should never roll back
+          // the parent project row that was already successfully inserted.
+          logger.warn(
+            `⚠️ Could not import row into "${table}" (skipping): ${(err as Error)?.message}`,
+          );
         }
       }
     }
