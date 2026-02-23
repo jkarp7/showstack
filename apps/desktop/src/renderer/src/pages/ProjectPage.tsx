@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { logger } from '../utils/logger';
 import { ModuleCard } from '../components/common/ModuleCard';
@@ -17,6 +17,8 @@ export function ProjectPage() {
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const [isCopying, setIsCopying] = useState(false);
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
+  const isCopyingRef = useRef(false);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!projects.length) {
@@ -92,40 +94,53 @@ export function ProjectPage() {
   };
 
   const handleSaveAsCopy = useCallback(async () => {
-    if (!projectId || isCopying) return;
+    if (!projectId || isCopyingRef.current) return;
     try {
+      isCopyingRef.current = true;
       setIsCopying(true);
       setCopyMessage(null);
       const copy = await window.api.projects.createCopy(projectId);
       setCopyMessage(`Copy created: "${copy.name}"`);
-      setTimeout(() => setCopyMessage(null), 4000);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopyMessage(null), 4000);
     } catch (error) {
       logger.error('Failed to create project copy:', error);
       setCopyMessage('Failed to create copy');
-      setTimeout(() => setCopyMessage(null), 3000);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopyMessage(null), 3000);
     } finally {
+      isCopyingRef.current = false;
       setIsCopying(false);
     }
-  }, [projectId, isCopying]);
+  }, [projectId]);
 
   // Listen for copy events dispatched by the native menu handler
   useEffect(() => {
     const handleCopyCreated = (e: Event) => {
       const { copyName } = (e as CustomEvent).detail;
       setCopyMessage(`Copy created: "${copyName}"`);
-      setTimeout(() => setCopyMessage(null), 4000);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopyMessage(null), 4000);
     };
     const handleExported = (e: Event) => {
       const { filePath } = (e as CustomEvent).detail;
       const fileName = filePath.replace(/\\/g, '/').split('/').pop() || 'file';
       setCopyMessage(`Exported: "${fileName}"`);
-      setTimeout(() => setCopyMessage(null), 4000);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopyMessage(null), 4000);
     };
     window.addEventListener('project:copyCreated', handleCopyCreated);
     window.addEventListener('project:exported', handleExported);
     return () => {
       window.removeEventListener('project:copyCreated', handleCopyCreated);
       window.removeEventListener('project:exported', handleExported);
+    };
+  }, []);
+
+  // Cleanup copy message timer on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
     };
   }, []);
 

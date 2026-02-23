@@ -99,7 +99,10 @@ export function LandingPage() {
     if (!importMessage) return;
     loadProjects(); // ensure grid is up-to-date immediately
     const timer = setTimeout(() => clearImportMessage(), 4000);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearImportMessage();
+    };
   }, [importMessage]);
 
   // Load logos as data URLs for all projects

@@ -431,7 +431,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
         });
 
         if (error) {
-          logger.error(`[SupabaseConnector] PUT failed ${table}/${id}:`, error.message);
+          logger.error(`[SupabaseConnector] PUT failed ${table}/${id}:`, error);
           throw new Error(this.sanitizeCrudError('PUT', table, error.message));
         }
         break;
@@ -442,7 +442,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
         const { error } = await this.supabase.from(table).update(data).eq('id', id);
 
         if (error) {
-          logger.error(`[SupabaseConnector] PATCH failed ${table}/${id}:`, error.message);
+          logger.error(`[SupabaseConnector] PATCH failed ${table}/${id}:`, error);
           throw new Error(this.sanitizeCrudError('PATCH', table, error.message));
         }
         break;
@@ -453,7 +453,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
         const { error } = await this.supabase.from(table).delete().eq('id', id);
 
         if (error) {
-          logger.error(`[SupabaseConnector] DELETE failed ${table}/${id}:`, error.message);
+          logger.error(`[SupabaseConnector] DELETE failed ${table}/${id}:`, error);
           throw new Error(this.sanitizeCrudError('DELETE', table, error.message));
         }
         break;

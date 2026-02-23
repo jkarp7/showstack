@@ -161,7 +161,7 @@ autoUpdater.on('update-available', (info) => {
 
 - [x] Add `root_project_id` to database schema (SQLite migration + Supabase migration 004).
 - [x] Build `<ProjectStackCard>` component.
-- [ ] Implement "Save as Copy" inheritance logic (grouping in LandingPage.tsx).
+- [x] Implement "Save as Copy" inheritance logic (grouping in LandingPage.tsx).
 
 ### Phase 2: The Gateway (Supabase)
 

@@ -202,6 +202,12 @@ class FileService {
     try {
       const db = getDatabase();
 
+      // Guard: verify the project exists before doing any work or showing the save dialog
+      const projectExists = db.prepare('SELECT id FROM projects WHERE id = ?').get(projectId);
+      if (!projectExists) {
+        throw new Error(`Project ${projectId} not found in database`);
+      }
+
       // Checkpoint WAL so the physical .db file is fully up to date before we copy it
       db.pragma('wal_checkpoint(FULL)');
 
@@ -639,7 +645,9 @@ class FileService {
     projectData.updated_at = Date.now();
 
     // Insert prep project (better-sqlite3 API: prepare().run())
-    const cols = Object.keys(projectData).join(', ');
+    const cols = Object.keys(projectData)
+      .map((c) => `"${c}"`)
+      .join(', ');
     const placeholders = Object.keys(projectData)
       .map(() => '?')
       .join(', ');
@@ -698,7 +706,9 @@ class FileService {
     }
 
     // Insert project row (better-sqlite3 API: prepare().run(...spreadArray))
-    const cols = Object.keys(projectData).join(', ');
+    const cols = Object.keys(projectData)
+      .map((c) => `"${c}"`)
+      .join(', ');
     const placeholders = Object.keys(projectData)
       .map(() => '?')
       .join(', ');
@@ -737,7 +747,9 @@ class FileService {
         // Remap project_id to the target
         rowData.project_id = targetProjectId;
 
-        const rCols = Object.keys(rowData).join(', ');
+        const rCols = Object.keys(rowData)
+          .map((c) => `"${c}"`)
+          .join(', ');
         const rPlaceholders = Object.keys(rowData)
           .map(() => '?')
           .join(', ');

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useFileStore } from '../../store/fileStore';
 import { logger } from '../../utils/logger';
 
@@ -9,7 +9,12 @@ interface FileMenuProps {
   currentProjectId?: string;
 }
 
-export function FileMenu({ className = '', onDataReload, projectName, currentProjectId }: FileMenuProps) {
+export function FileMenu({
+  className = '',
+  onDataReload,
+  projectName,
+  currentProjectId,
+}: FileMenuProps) {
   const {
     isDirty,
     isSaving,
@@ -22,6 +27,7 @@ export function FileMenu({ className = '', onDataReload, projectName, currentPro
   } = useFileStore();
   const [isCopying, setIsCopying] = useState(false);
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Use projectName prop if provided, otherwise fall back to file store
   const currentFileName = projectName || getCurrentFileName();
@@ -52,18 +58,27 @@ export function FileMenu({ className = '', onDataReload, projectName, currentPro
       const copy = await window.api.projects.createCopy(currentProjectId);
       setCopyMessage(`Copy created: "${copy.name}"`);
       // Auto-dismiss after 4 seconds
-      setTimeout(() => setCopyMessage(null), 4000);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopyMessage(null), 4000);
       if (onDataReload) {
         await onDataReload();
       }
     } catch (error) {
       logger.error('Failed to save as copy:', error);
       setCopyMessage('Failed to create copy');
-      setTimeout(() => setCopyMessage(null), 3000);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopyMessage(null), 3000);
     } finally {
       setIsCopying(false);
     }
   };
+
+  // Cleanup copy message timer on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
 
   // Keyboard shortcuts
   useEffect(() => {

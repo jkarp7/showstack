@@ -21,7 +21,7 @@ vi.mock('../../database/queries/license', () => ({
 }));
 
 // Mock getAppDatabase for transaction support and raw SQL
-const mockPrepare = vi.fn(() => ({ run: vi.fn() }));
+const mockPrepare = vi.fn((_sql?: string) => ({ run: vi.fn() }));
 vi.mock('../../database', () => ({
   getAppDatabase: () => ({
     transaction: (fn: () => void) => {
