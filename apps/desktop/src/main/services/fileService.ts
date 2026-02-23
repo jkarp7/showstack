@@ -3,7 +3,7 @@ import { dialog, app } from 'electron';
 import { readFileSync, writeFileSync, existsSync, unlinkSync, copyFileSync } from 'fs';
 import { join, basename } from 'path';
 import initSqlJs, { Database } from 'sql.js';
-import { getDatabase, saveDatabase, replaceProjectDatabase } from '../database';
+import { getDatabase, saveDatabase, replaceProjectDatabase, databaseManager } from '../database';
 import { formatCopyTimestamp } from '../database/queries/projects';
 import { logger } from '../utils/logger';
 
@@ -192,48 +192,53 @@ class FileService {
    * @returns The path written to, or null if the user cancelled
    */
   async exportProjectById(projectId: string, projectName: string): Promise<string | null> {
-    // Show save dialog
+    // Show save dialog first so user can cancel before we do any work
     const filePath = await this.showSaveDialog(projectName);
     if (!filePath) return null;
 
     const tmpPath = `${filePath}.tmp`;
 
     try {
-      // Checkpoint WAL so the backup is complete
       const db = getDatabase();
+
+      // Checkpoint WAL so the physical .db file is fully up to date before we copy it
       db.pragma('wal_checkpoint(FULL)');
 
-      // backup() is synchronous in better-sqlite3 when called with a path string
-      db.backup(tmpPath);
+      // Get the path to the physical project database file
+      const { projectDbPath } = databaseManager.getPaths();
 
-      // Open the backup and strip every project that isn't the one we want
-      const Database = (await import('better-sqlite3')).default;
-      const backupDb = new Database(tmpPath);
+      // Copy the physical file to a temp path (never touching the live DB)
+      copyFileSync(projectDbPath, tmpPath);
 
-      // Find all tables that reference a project by its id column
-      // We only need to clean the `projects` table — related tables (fixtures, etc.)
-      // already scope to the project via their own project_id FK, so simply deleting
-      // the other root rows is sufficient for a well-formed export.
+      // Open the copy with better-sqlite3 and strip all other projects' data
+      const BetterSQLite = require('better-sqlite3');
+      const backupDb = new BetterSQLite(tmpPath);
+
+      // Disable FK enforcement so we can delete in any order
+      backupDb.pragma('foreign_keys = OFF');
+
+      // Remove all projects except the one being exported
       backupDb.prepare('DELETE FROM projects WHERE id != ?').run(projectId);
 
-      // Also clean any orphaned child data for removed projects if tables exist
-      const tables = backupDb
-        .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+      // Remove orphaned rows from any table with a project_id FK column
+      const tables: string[] = backupDb
+        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
         .all()
-        .map((r: any) => r.name as string);
+        .map((r: any) => r.name);
 
       for (const table of tables) {
-        if (table === 'projects' || table === 'sqlite_sequence') continue;
-        // Check if the table has a project_id column
-        const cols = backupDb.pragma(`table_info(${table})`).map((c: any) => c.name as string);
+        if (table === 'projects') continue;
+        const cols: string[] = backupDb.pragma(`table_info(${table})`).map((c: any) => c.name);
         if (cols.includes('project_id')) {
-          backupDb.prepare(`DELETE FROM ${table} WHERE project_id != ?`).run(projectId);
+          backupDb.prepare(`DELETE FROM "${table}" WHERE project_id != ?`).run(projectId);
         }
       }
 
+      // VACUUM to compact the file (removes deleted rows from disk)
+      backupDb.exec('VACUUM');
       backupDb.close();
 
-      // Move tmp → final path (atomic on same filesystem)
+      // Rename tmp → final destination
       if (existsSync(filePath)) unlinkSync(filePath);
       copyFileSync(tmpPath, filePath);
       unlinkSync(tmpPath);
@@ -241,11 +246,10 @@ class FileService {
       logger.info(`✅ Project ${projectId} exported to ${filePath}`);
       return filePath;
     } catch (error) {
-      // Clean up tmp file on failure
       try {
         if (existsSync(tmpPath)) unlinkSync(tmpPath);
       } catch (_) {
-        /* ignore */
+        /* ignore cleanup error */
       }
       logger.error('Error exporting project by ID:', error);
       throw new Error(
