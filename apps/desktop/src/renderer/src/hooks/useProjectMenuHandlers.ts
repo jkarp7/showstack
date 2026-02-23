@@ -34,6 +34,31 @@ export function useProjectMenuHandlers() {
       openSettingsDialog();
     };
 
+    const handleExportProject = async () => {
+      // HashRouter puts the path in window.location.hash (e.g. "#/project/some-uuid")
+      const currentPath = window.location.hash;
+      const projectIdMatch = currentPath.match(/\/project\/([^/]+)/);
+
+      if (!projectIdMatch) {
+        logger.info('No project context for Export Project');
+        return;
+      }
+
+      const projectId = projectIdMatch[1];
+      try {
+        // Get project name from the store so we can suggest a filename
+        const projectName =
+          document.title || window.location.hash.split('/').pop() || 'ShowStack Project';
+        const filePath = await window.api.files.exportProject(projectId, projectName);
+        if (filePath) {
+          logger.info('Project exported to:', filePath);
+          window.dispatchEvent(new CustomEvent('project:exported', { detail: { filePath } }));
+        }
+      } catch (error) {
+        logger.error('Failed to export project:', error);
+      }
+    };
+
     const handleSaveAsCopy = async () => {
       // HashRouter puts the path in window.location.hash (e.g. "#/project/some-uuid")
       const currentPath = window.location.hash;
@@ -61,12 +86,14 @@ export function useProjectMenuHandlers() {
     window.api.menu.on('menu:editProject', handleEditProject);
     window.api.menu.on('menu:projectSettings', handleProjectSettings);
     window.api.menu.on('menu:saveAsCopy', handleSaveAsCopy);
+    window.api.menu.on('menu:exportProject', handleExportProject);
 
     // Cleanup on unmount
     return () => {
       window.api.menu.off('menu:editProject', handleEditProject);
       window.api.menu.off('menu:projectSettings', handleProjectSettings);
       window.api.menu.off('menu:saveAsCopy', handleSaveAsCopy);
+      window.api.menu.off('menu:exportProject', handleExportProject);
     };
   }, [navigate, params, openSettingsDialog]);
 }

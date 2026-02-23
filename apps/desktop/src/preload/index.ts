@@ -68,6 +68,8 @@ contextBridge.exposeInMainWorld('api', {
     saveAs: (defaultName?: string, module?: string) =>
       ipcRenderer.invoke('file:saveAs', defaultName, module),
     new: () => ipcRenderer.invoke('file:new'),
+    exportProject: (projectId: string, projectName: string) =>
+      ipcRenderer.invoke('file:exportProject', projectId, projectName),
     validate: (filePath: string) => ipcRenderer.invoke('file:validate', filePath),
     getFileName: (filePath: string) => ipcRenderer.invoke('file:getFileName', filePath),
     readImageAsDataUrl: (imagePath: string) =>
@@ -400,6 +402,7 @@ export interface ElectronAPI {
     save: (filePath?: string) => Promise<string | null>;
     saveAs: (defaultName?: string, module?: string) => Promise<string | null>;
     new: () => Promise<string>;
+    exportProject: (projectId: string, projectName: string) => Promise<string | null>;
     validate: (filePath: string) => Promise<any>;
     getFileName: (filePath: string) => Promise<string>;
     readImageAsDataUrl: (imagePath: string) => Promise<string | null>;

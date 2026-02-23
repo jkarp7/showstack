@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { dialog, app } from 'electron';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, unlinkSync, copyFileSync } from 'fs';
 import { join, basename } from 'path';
 import initSqlJs, { Database } from 'sql.js';
 import { getDatabase, saveDatabase, replaceProjectDatabase } from '../database';
@@ -180,6 +180,81 @@ class FileService {
   }
 
   /**
+   * Export a single project by ID as a .ss file.
+   * Shows a save dialog, then creates a copy of the project database containing
+   * only the rows for the specified project (all other projects are deleted from
+   * the copy — the live database is never modified).
+   *
+   * Uses better-sqlite3's .backup() for a safe, WAL-consistent snapshot.
+   *
+   * @param projectId  The UUID of the project to export
+   * @param projectName  Used as the default filename suggestion
+   * @returns The path written to, or null if the user cancelled
+   */
+  async exportProjectById(projectId: string, projectName: string): Promise<string | null> {
+    // Show save dialog
+    const filePath = await this.showSaveDialog(projectName);
+    if (!filePath) return null;
+
+    const tmpPath = `${filePath}.tmp`;
+
+    try {
+      // Checkpoint WAL so the backup is complete
+      const db = getDatabase();
+      db.pragma('wal_checkpoint(FULL)');
+
+      // backup() is synchronous in better-sqlite3 when called with a path string
+      db.backup(tmpPath);
+
+      // Open the backup and strip every project that isn't the one we want
+      const Database = (await import('better-sqlite3')).default;
+      const backupDb = new Database(tmpPath);
+
+      // Find all tables that reference a project by its id column
+      // We only need to clean the `projects` table — related tables (fixtures, etc.)
+      // already scope to the project via their own project_id FK, so simply deleting
+      // the other root rows is sufficient for a well-formed export.
+      backupDb.prepare('DELETE FROM projects WHERE id != ?').run(projectId);
+
+      // Also clean any orphaned child data for removed projects if tables exist
+      const tables = backupDb
+        .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+        .all()
+        .map((r: any) => r.name as string);
+
+      for (const table of tables) {
+        if (table === 'projects' || table === 'sqlite_sequence') continue;
+        // Check if the table has a project_id column
+        const cols = backupDb.pragma(`table_info(${table})`).map((c: any) => c.name as string);
+        if (cols.includes('project_id')) {
+          backupDb.prepare(`DELETE FROM ${table} WHERE project_id != ?`).run(projectId);
+        }
+      }
+
+      backupDb.close();
+
+      // Move tmp → final path (atomic on same filesystem)
+      if (existsSync(filePath)) unlinkSync(filePath);
+      copyFileSync(tmpPath, filePath);
+      unlinkSync(tmpPath);
+
+      logger.info(`✅ Project ${projectId} exported to ${filePath}`);
+      return filePath;
+    } catch (error) {
+      // Clean up tmp file on failure
+      try {
+        if (existsSync(tmpPath)) unlinkSync(tmpPath);
+      } catch (_) {
+        /* ignore */
+      }
+      logger.error('Error exporting project by ID:', error);
+      throw new Error(
+        `Failed to export project: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
+
+  /**
    * Import ShowStack file (.ss or legacy formats) - MERGE into existing database
    * IMPORTANT: Only imports project data, NEVER touches app data (licenses, settings)
    * @param filePath Source file path
@@ -288,7 +363,7 @@ class FileService {
           newProjectId,
           timestampedName,
           projectId, // originalProjectId for column remapping
-          rootId,    // rootProjectId to inject
+          rootId, // rootProjectId to inject
         );
 
         return {

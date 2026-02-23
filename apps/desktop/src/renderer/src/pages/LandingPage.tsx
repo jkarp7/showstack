@@ -41,9 +41,7 @@ function groupProjectsIntoFamilies(projects: Project[]): {
   const standalones: Project[] = [];
 
   for (const [rootId, root] of rootMap) {
-    const children = (childrenMap.get(rootId) || []).sort(
-      (a, b) => b.updated_at - a.updated_at,
-    );
+    const children = (childrenMap.get(rootId) || []).sort((a, b) => b.updated_at - a.updated_at);
     if (children.length > 0) {
       families.push({ root, children });
     } else {
@@ -188,15 +186,22 @@ export function LandingPage() {
     : null;
 
   // All members of expanded family for display
-  const expandedMembers = expandedFamily
-    ? [expandedFamily.root, ...expandedFamily.children]
-    : [];
+  const expandedMembers = expandedFamily ? [expandedFamily.root, ...expandedFamily.children] : [];
 
   const totalItems = families.length + standalones.length;
 
   // ---------------------------------------------------------------------------
   // Shared project card renderer (for standalones and expanded family members)
   // ---------------------------------------------------------------------------
+  const handleExportProject = async (e: React.MouseEvent, project: Project) => {
+    e.stopPropagation();
+    try {
+      await window.api.files.exportProject(project.id, project.name);
+    } catch (error) {
+      logger.error('Failed to export project:', error);
+    }
+  };
+
   const renderProjectCard = (project: Project) => (
     <div
       key={project.id}
@@ -215,16 +220,25 @@ export function LandingPage() {
             📁
           </div>
         )}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setProjectToDelete(project);
-          }}
-          className="text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-500 transition opacity-0 group-hover:opacity-100"
-          title="Delete project"
-        >
-          ×
-        </button>
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+          <button
+            onClick={(e) => handleExportProject(e, project)}
+            className="text-gray-400 dark:text-gray-500 hover:text-blue-500 dark:hover:text-blue-400 transition text-sm px-1"
+            title="Export project as .ss file"
+          >
+            ↑
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setProjectToDelete(project);
+            }}
+            className="text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-500 transition"
+            title="Delete project"
+          >
+            ×
+          </button>
+        </div>
       </div>
       <h3 className="text-lg font-semibold mb-2 truncate">{project.name}</h3>
       {project.description && (

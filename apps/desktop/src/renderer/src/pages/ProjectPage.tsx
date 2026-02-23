@@ -115,8 +115,18 @@ export function ProjectPage() {
       setCopyMessage(`Copy created: "${copyName}"`);
       setTimeout(() => setCopyMessage(null), 4000);
     };
+    const handleExported = (e: Event) => {
+      const { filePath } = (e as CustomEvent).detail;
+      const fileName = filePath.replace(/\\/g, '/').split('/').pop() || 'file';
+      setCopyMessage(`Exported: "${fileName}"`);
+      setTimeout(() => setCopyMessage(null), 4000);
+    };
     window.addEventListener('project:copyCreated', handleCopyCreated);
-    return () => window.removeEventListener('project:copyCreated', handleCopyCreated);
+    window.addEventListener('project:exported', handleExported);
+    return () => {
+      window.removeEventListener('project:copyCreated', handleCopyCreated);
+      window.removeEventListener('project:exported', handleExported);
+    };
   }, []);
 
   if (!project) {
