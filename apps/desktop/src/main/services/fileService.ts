@@ -143,6 +143,9 @@ class FileService {
       // Update project's updated_at timestamp - try both table types
       // Uses better-sqlite3 API: prepare().get() / prepare().run()
       try {
+        // Each project DB contains exactly one project, so LIMIT 1 without WHERE
+        // is intentional here — we're detecting whether the file is a prep-project
+        // or a regular project, not selecting a specific row by ID.
         const prepRow = db.prepare('SELECT id FROM prep_projects LIMIT 1').get() as
           | { id: string }
           | undefined;
@@ -186,7 +189,9 @@ class FileService {
    * only the rows for the specified project (all other projects are deleted from
    * the copy — the live database is never modified).
    *
-   * Uses better-sqlite3's .backup() for a safe, WAL-consistent snapshot.
+   * Checkpoints the WAL, copies the physical database file to a temp path,
+   * strips all other projects' rows from the copy, then atomically renames it
+   * to the final destination. The live database is never modified.
    *
    * @param projectId  The UUID of the project to export
    * @param projectName  Used as the default filename suggestion
@@ -724,6 +729,15 @@ class FileService {
 
     for (const { name: table } of importedTables) {
       if (table === 'projects') continue; // already inserted
+
+      // Skip tables that don't exist in the live DB (schema version skew or future tables)
+      const liveTableExists = currentDb
+        .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
+        .get(table);
+      if (!liveTableExists) {
+        logger.warn(`⚠️ Skipping unknown table during import: ${table}`);
+        continue;
+      }
 
       // Check if the table has a project_id column in the imported DB
       const colInfo = importedDb.exec(`PRAGMA table_info("${table}")`);

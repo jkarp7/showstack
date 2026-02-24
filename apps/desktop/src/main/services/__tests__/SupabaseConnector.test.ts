@@ -368,11 +368,9 @@ describe('SupabaseConnector', () => {
 
       const mockChain = {
         update: vi.fn().mockReturnThis(),
-        eq: vi
-          .fn()
-          .mockResolvedValue({
-            error: { message: '23505 duplicate key value violates unique constraint' },
-          }),
+        eq: vi.fn().mockResolvedValue({
+          error: { message: '23505 duplicate key value violates unique constraint' },
+        }),
       };
       mockFrom.mockReturnValue(mockChain);
 
@@ -401,11 +399,9 @@ describe('SupabaseConnector', () => {
       const db = makeDb(crud);
 
       const mockChain = {
-        upsert: vi
-          .fn()
-          .mockResolvedValue({
-            error: { message: 'some internal pg error with schema details column_x' },
-          }),
+        upsert: vi.fn().mockResolvedValue({
+          error: { message: 'some internal pg error with schema details column_x' },
+        }),
       };
       mockFrom.mockReturnValue(mockChain);
 

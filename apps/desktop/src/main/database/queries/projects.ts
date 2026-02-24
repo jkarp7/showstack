@@ -119,7 +119,14 @@ export function createProjectCopy(originalProjectId: string, copyName?: string):
   const newName = copyName || `${row.name} \u2014 ${formatCopyTimestamp(now)}`;
 
   // Build the new row from the original, overriding key fields
-  const { id: _id, name: _name, root_project_id: _rpi, created_at: _ca, updated_at: _ua, ...rest } = row;
+  const {
+    id: _id,
+    name: _name,
+    root_project_id: _rpi,
+    created_at: _ca,
+    updated_at: _ua,
+    ...rest
+  } = row;
 
   const extraColumns = Object.keys(rest);
   const allColumns = ['id', 'name', 'root_project_id', 'created_at', 'updated_at', ...extraColumns];

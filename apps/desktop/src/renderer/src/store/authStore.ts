@@ -84,6 +84,13 @@ export interface AuthState {
 /**
  * In-memory fallback for when localStorage is unavailable (e.g. private browsing).
  * Ensures the first-launch prompt doesn't re-appear every page load in the same session.
+ *
+ * Intentional trade-off: this Map lives at module scope for the entire renderer-process
+ * lifetime. Keys written during one sign-in session persist across sign-out / sign-in
+ * within the same renderer process (i.e. without an app restart). For the first-launch
+ * prompt use case this is the desired behaviour — once dismissed it should stay dismissed.
+ * If a key needs to be cleared on sign-out, call safeLocalStorage(key) with an explicit
+ * remove step in the signOut action instead of relying on process restart.
  */
 const memoryStorage = new Map<string, string>();
 

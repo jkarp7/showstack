@@ -14,6 +14,7 @@ import type {
   ModuleAccess,
   ModuleFeatures,
   LicenseTier,
+  ServerLicenseTier,
 } from '../../shared/types/license.types';
 
 /**
@@ -63,8 +64,18 @@ const DEMO_EXPIRY_MS = 100 * ONE_YEAR_MS;
 /** Demo tier feature limits */
 export const DEMO_FIXTURE_LIMIT = 25;
 
-/** Valid server-provided license tiers — any other value is rejected before DB write */
-const VALID_TIERS: LicenseTier[] = ['professional', 'student', 'institutional'];
+/**
+ * Valid server-provided license tiers — any other value is rejected before DB write.
+ * Uses ServerLicenseTier (= LicenseTier minus 'demo') because demo is local-only and
+ * is never granted by the server.  The `satisfies` check ensures this list stays in
+ * sync with ServerLicenseTier; if a new server tier is added to the type but forgotten
+ * here, TypeScript will error at compile time.
+ */
+const VALID_TIERS = [
+  'professional',
+  'student',
+  'institutional',
+] as const satisfies readonly ServerLicenseTier[];
 
 export class LicenseService {
   private readonly OFFLINE_GRACE_DAYS = 14;
@@ -235,7 +246,7 @@ export class LicenseService {
         logger.warn('Server license missing required fields, skipping update');
         return false;
       }
-      if (!VALID_TIERS.includes(serverLicense.tier)) {
+      if (!VALID_TIERS.includes(serverLicense.tier as ServerLicenseTier)) {
         logger.warn(`Server license has unknown tier "${serverLicense.tier}", skipping update`);
         return false;
       }
