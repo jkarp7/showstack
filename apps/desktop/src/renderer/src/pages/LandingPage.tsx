@@ -6,67 +6,10 @@ import { DeleteProjectDialog } from '../components/common/DeleteProjectDialog';
 import { ImportConflictDialog } from '../components/common/ImportConflictDialog';
 import { AccountDialog } from '../components/License/Account/AccountDialog';
 import { SyncStatusIndicator } from '../components/sync';
-import { ProjectStackCard, ProjectFamily } from '../components/common/ProjectStackCard';
+import { ProjectStackCard } from '../components/common/ProjectStackCard';
+import { ProjectFamily, groupProjectsIntoFamilies } from '../utils/projectFamilies';
 import { useProjectStore, Project } from '../store/projectStore';
 import { useFileStore } from '../store/fileStore';
-
-// ---------------------------------------------------------------------------
-// Grouping helpers
-// ---------------------------------------------------------------------------
-
-function groupProjectsIntoFamilies(projects: Project[]): {
-  families: ProjectFamily[];
-  standalones: Project[];
-} {
-  const rootMap = new Map<string, Project>();
-  const childrenMap = new Map<string, Project[]>();
-
-  // First pass: collect roots
-  for (const p of projects) {
-    if (!p.root_project_id) {
-      rootMap.set(p.id, p);
-    }
-  }
-
-  // Second pass: group children
-  for (const p of projects) {
-    if (p.root_project_id) {
-      const siblings = childrenMap.get(p.root_project_id) || [];
-      siblings.push(p);
-      childrenMap.set(p.root_project_id, siblings);
-    }
-  }
-
-  const families: ProjectFamily[] = [];
-  const standalones: Project[] = [];
-
-  for (const [rootId, root] of rootMap) {
-    const children = (childrenMap.get(rootId) || []).sort((a, b) => b.updated_at - a.updated_at);
-    if (children.length > 0) {
-      families.push({ root, children });
-    } else {
-      standalones.push(root);
-    }
-  }
-
-  // Handle orphan children (root was deleted — treat as standalones)
-  for (const p of projects) {
-    if (p.root_project_id && !rootMap.has(p.root_project_id)) {
-      standalones.push(p);
-    }
-  }
-
-  // Sort families by most recently updated member
-  families.sort((a, b) => {
-    const aLatest = Math.max(a.root.updated_at, ...a.children.map((c) => c.updated_at));
-    const bLatest = Math.max(b.root.updated_at, ...b.children.map((c) => c.updated_at));
-    return bLatest - aLatest;
-  });
-
-  standalones.sort((a, b) => b.updated_at - a.updated_at);
-
-  return { families, standalones };
-}
 
 // ---------------------------------------------------------------------------
 // Component

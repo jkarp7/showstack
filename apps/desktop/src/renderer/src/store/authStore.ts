@@ -89,8 +89,12 @@ export interface AuthState {
  * lifetime. Keys written during one sign-in session persist across sign-out / sign-in
  * within the same renderer process (i.e. without an app restart). For the first-launch
  * prompt use case this is the desired behaviour — once dismissed it should stay dismissed.
- * If a key needs to be cleared on sign-out, call safeLocalStorage(key) with an explicit
- * remove step in the signOut action instead of relying on process restart.
+ *
+ * Cross-account note: a user who signs out and signs back in as a *different* account
+ * inherits any in-memory keys written by the previous session. This is harmless for the
+ * first-launch prompt (both users benefit from it being dismissed), but callers adding
+ * new per-user keys should call safeLocalStorage(key, null) in the signOut action to
+ * clear them explicitly rather than relying on process restart.
  */
 const memoryStorage = new Map<string, string>();
 

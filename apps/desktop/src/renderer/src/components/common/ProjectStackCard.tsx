@@ -1,9 +1,7 @@
 import { Project } from '../../store/projectStore';
+import { ProjectFamily } from '../../utils/projectFamilies';
 
-export interface ProjectFamily {
-  root: Project;
-  children: Project[]; // sorted by updated_at DESC
-}
+export type { ProjectFamily };
 
 interface ProjectStackCardProps {
   family: ProjectFamily;

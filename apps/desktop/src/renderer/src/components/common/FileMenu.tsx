@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { useFileStore } from '../../store/fileStore';
-import { logger } from '../../utils/logger';
+import { useSaveAsCopy } from '../../hooks/useSaveAsCopy';
 
 interface FileMenuProps {
   className?: string;
@@ -25,9 +25,10 @@ export function FileMenu({
     saveFile,
     saveFileAs,
   } = useFileStore();
-  const [isCopying, setIsCopying] = useState(false);
-  const [copyMessage, setCopyMessage] = useState<string | null>(null);
-  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { isCopying, copyMessage, handleSaveAsCopy } = useSaveAsCopy(
+    currentProjectId,
+    onDataReload,
+  );
 
   // Use projectName prop if provided, otherwise fall back to file store
   const currentFileName = projectName || getCurrentFileName();
@@ -48,37 +49,6 @@ export function FileMenu({
   const handleSaveAs = async () => {
     await saveFileAs(projectName, onDataReload);
   };
-
-  const handleSaveAsCopy = async () => {
-    if (!currentProjectId || isCopying) return;
-
-    try {
-      setIsCopying(true);
-      setCopyMessage(null);
-      const copy = await window.api.projects.createCopy(currentProjectId);
-      setCopyMessage(`Copy created: "${copy.name}"`);
-      // Auto-dismiss after 4 seconds
-      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
-      copyTimerRef.current = setTimeout(() => setCopyMessage(null), 4000);
-      if (onDataReload) {
-        await onDataReload();
-      }
-    } catch (error) {
-      logger.error('Failed to save as copy:', error);
-      setCopyMessage('Failed to create copy');
-      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
-      copyTimerRef.current = setTimeout(() => setCopyMessage(null), 3000);
-    } finally {
-      setIsCopying(false);
-    }
-  };
-
-  // Cleanup copy message timer on unmount
-  useEffect(() => {
-    return () => {
-      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
-    };
-  }, []);
 
   // Keyboard shortcuts
   useEffect(() => {

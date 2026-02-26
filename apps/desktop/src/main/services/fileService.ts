@@ -216,7 +216,8 @@ class FileService {
     try {
       const db = getDatabase();
 
-      // Guard: verify the project exists before doing any work or showing the save dialog
+      // Paranoid check: verify the project still exists after the dialog returned.
+      // The user may have deleted it in another window while the save dialog was open.
       const projectExists = db.prepare('SELECT id FROM projects WHERE id = ?').get(projectId);
       if (!projectExists) {
         throw new Error(`Project ${projectId} not found in database`);
@@ -779,9 +780,17 @@ class FileService {
         const rVals = Object.values(rowData);
 
         try {
-          currentDb
+          const result = currentDb
             .prepare(`INSERT OR IGNORE INTO "${table}" (${rCols}) VALUES (${rPlaceholders})`)
             .run(...rVals);
+          // INSERT OR IGNORE silently drops the row on any constraint violation.
+          // Since we just generated a fresh project UUID, a PK conflict on a child
+          // row indicates a real problem (duplicate IDs) and should not go unnoticed.
+          if (result.changes === 0) {
+            logger.warn(
+              `⚠️ Row silently ignored during import into "${table}" — possible duplicate ID`,
+            );
+          }
         } catch (err) {
           // Catch both .prepare() errors (table doesn't exist in live DB) and
           // .run() errors (constraint violations, type mismatches, etc.)

@@ -130,12 +130,11 @@ export function createProjectCopy(originalProjectId: string, copyName?: string):
 
   const extraColumns = Object.keys(rest);
   const allColumns = ['id', 'name', 'root_project_id', 'created_at', 'updated_at', ...extraColumns];
+  const colList = allColumns.map((c) => `"${c}"`).join(', ');
   const placeholders = allColumns.map(() => '?').join(', ');
   const values = [newId, newName, rootId, now, now, ...extraColumns.map((c) => rest[c])];
 
-  db.prepare(`INSERT INTO projects (${allColumns.join(', ')}) VALUES (${placeholders})`).run(
-    ...values,
-  );
+  db.prepare(`INSERT INTO projects (${colList}) VALUES (${placeholders})`).run(...values);
 
   saveDatabase();
 
