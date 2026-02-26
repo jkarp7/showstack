@@ -2,6 +2,29 @@ import { create } from 'zustand';
 import { logger } from '../utils/logger';
 import { addRecentFile, getModuleTypeFromPath } from '../utils/recentFiles';
 
+/**
+ * Build the import toast message shown to the user after a successful import.
+ * Returns null when there is nothing noteworthy to show.
+ */
+function buildImportMessage(
+  projectName?: string,
+  autoStacked?: boolean,
+  warnings?: string[],
+): string | null {
+  const hasWarnings = warnings && warnings.length > 0;
+  const warningsSuffix = hasWarnings
+    ? ` (${warnings.length} row${warnings.length === 1 ? '' : 's'} skipped — data may be partial)`
+    : '';
+
+  if (autoStacked && projectName) {
+    return `"${projectName}" was imported and added to its version stack.${warningsSuffix}`;
+  }
+  if (hasWarnings && projectName) {
+    return `"${projectName}" was imported with partial data — ${warnings.length} row${warnings.length === 1 ? '' : 's'} skipped.`;
+  }
+  return null;
+}
+
 export interface ConflictInfo {
   existingProject: {
     id: string;
@@ -25,7 +48,7 @@ interface FileStore {
   error: string | null;
   conflictInfo: ConflictInfo | null;
   conflictFilePath: string | null;
-  importMessage: string | null; // set when a file is auto-stacked into a family
+  importMessage: string | null; // set when a file is auto-stacked or imported with warnings
 
   // Actions
   setFilePath: (path: string | null) => void;
@@ -161,9 +184,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
         isDirty: false,
         isOpening: false,
         lastSavedAt: Date.now(),
-        importMessage: result.autoStacked
-          ? `"${result.projectName}" was imported and added to its version stack.`
-          : null,
+        importMessage: buildImportMessage(result.projectName, result.autoStacked, result.warnings),
       });
 
       // Add to recent files
@@ -247,9 +268,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
         isDirty: false,
         isOpening: false,
         lastSavedAt: Date.now(),
-        importMessage: result.autoStacked
-          ? `"${result.projectName}" was imported and added to its version stack.`
-          : null,
+        importMessage: buildImportMessage(result.projectName, result.autoStacked, result.warnings),
       });
 
       // Add to recent files
@@ -308,6 +327,7 @@ export const useFileStore = create<FileStore>((set, get) => ({
         isDirty: false,
         isOpening: false,
         lastSavedAt: Date.now(),
+        importMessage: buildImportMessage(result.projectName, result.autoStacked, result.warnings),
       });
 
       // Add to recent files

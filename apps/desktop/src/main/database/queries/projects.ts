@@ -81,6 +81,11 @@ export function getProjectById(id: string): Project | null {
 
 /**
  * Format a Unix ms timestamp as "YYYY-MM-DD HH:mm" for copy naming.
+ *
+ * NOTE: Uses the local system time (via `new Date()`), NOT UTC.
+ * The resulting string is locale-sensitive — the same timestamp will produce
+ * different values on machines in different time zones. This is intentional:
+ * copy names are user-facing labels, not sortable identifiers.
  */
 export function formatCopyTimestamp(ms: number): string {
   const d = new Date(ms);
@@ -286,10 +291,14 @@ export function updateProject(id: string, updates: Partial<Project>): Project {
 
 export function deleteProject(id: string): void {
   const db = getDatabase();
-  // Null out root_project_id on any children before deleting the root,
-  // so they become standalones rather than orphans with a dangling FK.
-  db.prepare('UPDATE projects SET root_project_id = NULL WHERE root_project_id = ?').run(id);
-  db.prepare('DELETE FROM projects WHERE id = ?').run(id);
+  // Wrap in a transaction so the child-nulling and the DELETE are atomic.
+  // Without this, a crash between the two statements would leave children
+  // with a dangling root_project_id pointing at a deleted project.
+  const doDelete = db.transaction(() => {
+    db.prepare('UPDATE projects SET root_project_id = NULL WHERE root_project_id = ?').run(id);
+    db.prepare('DELETE FROM projects WHERE id = ?').run(id);
+  });
+  doDelete();
   saveDatabase();
 }
 

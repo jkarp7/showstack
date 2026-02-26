@@ -183,7 +183,7 @@ class FileService {
       // Save to current working project database as well
       saveDatabase();
 
-      logger.info('✅ Project exported successfully (app data preserved separately)');
+      logger.info('Project exported successfully (app data preserved separately)');
     } catch (error) {
       logger.error('Error exporting project:', error);
       throw new Error(
@@ -289,7 +289,7 @@ class FileService {
       // Atomically rename tmp → final destination (same filesystem, no double-copy)
       renameSync(tmpPath, filePath);
 
-      logger.info(`✅ Project ${projectId} exported to ${filePath}`);
+      logger.info(`Project ${projectId} exported to ${filePath}`);
       return filePath;
     } catch (error) {
       try {
@@ -435,7 +435,7 @@ class FileService {
 
       return importResult;
     } catch (error) {
-      logger.error('❌ Error importing project:', error);
+      logger.error('Error importing project:', error);
       return {
         success: false,
         error: `Failed to import project: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -508,7 +508,7 @@ class FileService {
         error: 'Invalid resolution action',
       };
     } catch (error) {
-      logger.error('❌ Error resolving import conflict:', error);
+      logger.error('Error resolving import conflict:', error);
       return {
         success: false,
         error: `Failed to resolve conflict: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -617,7 +617,7 @@ class FileService {
       importedDb.close();
       saveDatabase();
 
-      logger.info('✅ Project merged successfully:', targetProjectId);
+      logger.info('Project merged successfully:', targetProjectId);
       return {
         success: true,
         projectId: targetProjectId,
@@ -625,7 +625,7 @@ class FileService {
         ...(importWarnings.length > 0 && { warnings: importWarnings }),
       };
     } catch (error) {
-      logger.error('❌ Error merging project:', error);
+      logger.error('Error merging project:', error);
       throw error;
     }
   }
@@ -671,9 +671,15 @@ class FileService {
     const vals = Object.values(projectData);
     currentDb.prepare(`INSERT INTO prep_projects (${cols}) VALUES (${placeholders})`).run(...vals);
 
-    // Import related data (sections, items, revisions, notes)
-    // TODO: Implement full data import with ID remapping
-    // For now, this is a basic implementation
+    // TODO: Implement full prep-project child-table import with ID remapping.
+    // Currently only the prep_projects row itself is imported; the following
+    // related tables are intentionally skipped until this is implemented:
+    //   • prep_sections    (section definitions)
+    //   • prep_equipment_items  (line items per section)
+    //   • prep_revisions   (revision snapshots)
+    //   • prep_notes       (freeform notes)
+    // Callers importing a prep project will receive the project shell but
+    // none of its child data. Tracked for a dedicated prep-import pass.
   }
 
   /**
@@ -717,7 +723,7 @@ class FileService {
     if (liveProjectCols && liveProjectCols.size > 0) {
       for (const key of Object.keys(projectData)) {
         if (!liveProjectCols.has(key)) {
-          logger.warn(`⚠️ Skipping unknown projects column during import: ${key}`);
+          logger.warn(`Skipping unknown projects column during import: ${key}`);
           delete projectData[key];
         }
       }
@@ -749,7 +755,7 @@ class FileService {
         .get(table);
       if (!liveTableExists) {
         const msg = `Skipped unknown table during import: "${table}"`;
-        logger.warn(`⚠️ ${msg}`);
+        logger.warn(msg);
         warnings.push(msg);
         continue;
       }
@@ -793,7 +799,7 @@ class FileService {
           // row indicates a real problem (duplicate IDs) and should not go unnoticed.
           if (result.changes === 0) {
             const msg = `Row silently ignored during import into "${table}" — possible duplicate ID`;
-            logger.warn(`⚠️ ${msg}`);
+            logger.warn(msg);
             warnings.push(msg);
           }
         } catch (err) {
@@ -802,7 +808,7 @@ class FileService {
           // These must NOT propagate — a child-table failure should never roll back
           // the parent project row that was already successfully inserted.
           const msg = `Could not import row into "${table}" (skipping): ${(err as Error)?.message}`;
-          logger.warn(`⚠️ ${msg}`);
+          logger.warn(msg);
           warnings.push(msg);
         }
       }
@@ -855,7 +861,7 @@ class FileService {
       // Save to disk
       saveDatabase();
 
-      logger.info('✅ New project created (app data preserved)');
+      logger.info('New project created (app data preserved)');
 
       return projectId;
     } catch (error) {

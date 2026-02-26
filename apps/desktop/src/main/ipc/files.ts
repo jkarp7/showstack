@@ -215,5 +215,5 @@ export function registerFileHandlers(): void {
     },
   );
 
-  logger.info('✅ File IPC handlers registered');
+  logger.info('File IPC handlers registered');
 }
