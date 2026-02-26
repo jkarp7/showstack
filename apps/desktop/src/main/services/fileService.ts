@@ -1,4 +1,7 @@
 // @ts-nocheck
+// TODO: Remove @ts-nocheck — this file predates strict typing and has widespread `any` usage.
+// Tracked for cleanup in a dedicated refactor pass; removing it now would require typing
+// all sql.js result shapes, better-sqlite3 pragma returns, and dynamic import helpers.
 import { dialog, app } from 'electron';
 import { readFileSync, writeFileSync, existsSync, unlinkSync, copyFileSync, renameSync } from 'fs';
 import BetterSQLite from 'better-sqlite3';
@@ -44,6 +47,10 @@ export interface FileValidationResult {
 
 // Unified file extension for all ShowStack projects
 export const FILE_EXTENSION = 'ss';
+
+// Well-known project ID used for single-file (legacy) project databases.
+// Kept as a named constant so it can be grepped and updated consistently.
+const DEFAULT_PROJECT_ID = 'default-project';
 
 // Legacy file extensions (for backward compatibility)
 export const LEGACY_EXTENSIONS = {
@@ -146,9 +153,11 @@ class FileService {
         // Each project DB contains exactly one project, so LIMIT 1 without WHERE
         // is intentional here — we're detecting whether the file is a prep-project
         // or a regular project, not selecting a specific row by ID.
-        const prepRow = db.prepare('SELECT id FROM prep_projects LIMIT 1').get() as
-          | { id: string }
-          | undefined;
+        // ORDER BY updated_at DESC is defensive: ensures deterministic results if
+        // a file ever contains more than one prep row (e.g. from a bad migration).
+        const prepRow = db
+          .prepare('SELECT id FROM prep_projects ORDER BY updated_at DESC LIMIT 1')
+          .get() as { id: string } | undefined;
 
         if (prepRow?.id) {
           db.prepare('UPDATE prep_projects SET updated_at = ? WHERE id = ?').run(
@@ -158,7 +167,7 @@ class FileService {
         } else {
           db.prepare('UPDATE projects SET updated_at = ? WHERE id = ?').run(
             Date.now(),
-            'default-project',
+            DEFAULT_PROJECT_ID,
           );
         }
       } catch (error) {
@@ -327,7 +336,7 @@ class FileService {
       const importedDb = new SQL.Database(buffer);
 
       // Query project info - try both prep_projects and projects tables
-      let projectId = 'default-project';
+      let projectId = DEFAULT_PROJECT_ID;
       let projectName = 'Untitled Project';
       let importedUpdatedAt = Date.now();
 
@@ -345,7 +354,7 @@ class FileService {
           const projectResult = importedDb.exec(
             'SELECT id, name, updated_at FROM projects LIMIT 1',
           );
-          projectId = (projectResult[0]?.values[0]?.[0] as string) || 'default-project';
+          projectId = (projectResult[0]?.values[0]?.[0] as string) || DEFAULT_PROJECT_ID;
           projectName = (projectResult[0]?.values[0]?.[1] as string) || 'Untitled Project';
           importedUpdatedAt = (projectResult[0]?.values[0]?.[2] as number) || Date.now();
         }
@@ -819,7 +828,7 @@ class FileService {
       }
 
       // Create new default project
-      const projectId = 'default-project';
+      const projectId = DEFAULT_PROJECT_ID;
       db.prepare('INSERT INTO projects (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)').run(
         projectId,
         'Untitled Project',

@@ -99,10 +99,19 @@ const memoryStorage = new Map<string, string>();
  * Falls back to sessionStorage first, then an in-memory Map.
  * Guarantees callers never see the first-launch prompt again within the same session,
  * even if persistent storage is blocked.
+ *
+ * Pass `null` as the value to remove the key from all storage tiers.
  */
-function safeLocalStorage(key: string, value?: string): string | null {
+function safeLocalStorage(key: string, value?: string | null): string | null {
+  const isRemoval = value === null;
+
   // Primary: persistent localStorage
   try {
+    if (isRemoval) {
+      localStorage.removeItem(key);
+      memoryStorage.delete(key);
+      return null;
+    }
     if (value !== undefined) {
       localStorage.setItem(key, value);
       return value;
@@ -114,6 +123,11 @@ function safeLocalStorage(key: string, value?: string): string | null {
 
   // Secondary: sessionStorage (survives page reloads within the same tab)
   try {
+    if (isRemoval) {
+      sessionStorage.removeItem(key);
+      memoryStorage.delete(key);
+      return null;
+    }
     if (value !== undefined) {
       sessionStorage.setItem(key, value);
       return value;
@@ -127,6 +141,10 @@ function safeLocalStorage(key: string, value?: string): string | null {
   logger.warn(
     `[AuthStore] localStorage/sessionStorage unavailable for key "${key}", using memory fallback`,
   );
+  if (isRemoval) {
+    memoryStorage.delete(key);
+    return null;
+  }
   if (value !== undefined) {
     memoryStorage.set(key, value);
     return value;
@@ -177,11 +195,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (result.success) {
         // Refresh all state in parallel. Use allSettled so a failure in one
         // (e.g. sync status unreachable) doesn't leave auth/license state un-updated.
-        await Promise.allSettled([
+        const refreshResults = await Promise.allSettled([
           get().refreshAuthState(),
           get().refreshLicenseStatus(),
           get().refreshSyncStatus(),
         ]);
+        refreshResults.forEach((r) => {
+          if (r.status === 'rejected') {
+            logger.warn('[AuthStore] signIn refresh failed', {
+              reason: r.reason instanceof Error ? r.reason.message : String(r.reason),
+            });
+          }
+        });
         // Mark auth as prompted so first-launch prompt won't show again
         safeLocalStorage('showstack-auth-prompted', 'true');
         // Surface license verification failure to the user
