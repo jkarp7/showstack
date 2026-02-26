@@ -46,7 +46,7 @@ export function LandingPage() {
       clearTimeout(timer);
       clearImportMessage();
     };
-  }, [importMessage]);
+  }, [importMessage, loadProjects, clearImportMessage]);
 
   // Load logos as data URLs for all projects
   useEffect(() => {

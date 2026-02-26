@@ -585,7 +585,7 @@ class FileService {
       );
 
       // Wrap the entire import in a transaction so it's atomic
-      const doImport = currentDb.transaction(() => {
+      const doImport = currentDb.transaction((): string[] => {
         if (isPrepProject) {
           // Import prep project (sync — transaction callback must be sync)
           this.importPrepProjectSync(
@@ -596,9 +596,10 @@ class FileService {
             targetProjectName,
             needsIdRemapping,
           );
+          return [];
         } else {
-          // Import regular project
-          this.importRegularProjectSync(
+          // Import regular project; collect and return any row-skip warnings
+          return this.importRegularProjectSync(
             importedDb,
             currentDb,
             sourceProjectId,
@@ -611,7 +612,7 @@ class FileService {
         }
       });
 
-      doImport();
+      const importWarnings = doImport();
 
       importedDb.close();
       saveDatabase();
@@ -621,6 +622,7 @@ class FileService {
         success: true,
         projectId: targetProjectId,
         projectName: targetProjectName,
+        ...(importWarnings.length > 0 && { warnings: importWarnings }),
       };
     } catch (error) {
       logger.error('❌ Error merging project:', error);
@@ -686,7 +688,8 @@ class FileService {
     needsIdRemapping: boolean,
     rootProjectId?: string,
     liveProjectCols?: Set<string>,
-  ): void {
+  ): string[] {
+    const warnings: string[] = [];
     // Get project data
     const projectResult = importedDb.exec('SELECT * FROM projects WHERE id = ?', [sourceProjectId]);
     if (!projectResult[0] || projectResult[0].values.length === 0) {
@@ -745,7 +748,9 @@ class FileService {
         .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
         .get(table);
       if (!liveTableExists) {
-        logger.warn(`⚠️ Skipping unknown table during import: ${table}`);
+        const msg = `Skipped unknown table during import: "${table}"`;
+        logger.warn(`⚠️ ${msg}`);
+        warnings.push(msg);
         continue;
       }
 
@@ -787,21 +792,23 @@ class FileService {
           // Since we just generated a fresh project UUID, a PK conflict on a child
           // row indicates a real problem (duplicate IDs) and should not go unnoticed.
           if (result.changes === 0) {
-            logger.warn(
-              `⚠️ Row silently ignored during import into "${table}" — possible duplicate ID`,
-            );
+            const msg = `Row silently ignored during import into "${table}" — possible duplicate ID`;
+            logger.warn(`⚠️ ${msg}`);
+            warnings.push(msg);
           }
         } catch (err) {
           // Catch both .prepare() errors (table doesn't exist in live DB) and
           // .run() errors (constraint violations, type mismatches, etc.)
           // These must NOT propagate — a child-table failure should never roll back
           // the parent project row that was already successfully inserted.
-          logger.warn(
-            `⚠️ Could not import row into "${table}" (skipping): ${(err as Error)?.message}`,
-          );
+          const msg = `Could not import row into "${table}" (skipping): ${(err as Error)?.message}`;
+          logger.warn(`⚠️ ${msg}`);
+          warnings.push(msg);
         }
       }
     }
+
+    return warnings;
   }
 
   /**

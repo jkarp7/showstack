@@ -26,15 +26,18 @@ export function useSaveAsCopy(
   const isCopyingRef = useRef(false);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const scheduleMessageDismiss = (delayMs: number) => {
+  const scheduleMessageDismiss = useCallback((delayMs: number) => {
     if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
     copyTimerRef.current = setTimeout(() => setCopyMessage(null), delayMs);
-  };
-
-  const showCopyMessage = useCallback((message: string, durationMs = 4000) => {
-    setCopyMessage(message);
-    scheduleMessageDismiss(durationMs);
   }, []);
+
+  const showCopyMessage = useCallback(
+    (message: string, durationMs = 4000) => {
+      setCopyMessage(message);
+      scheduleMessageDismiss(durationMs);
+    },
+    [scheduleMessageDismiss],
+  );
 
   const handleSaveAsCopy = useCallback(async () => {
     if (!projectId || isCopyingRef.current) return;
@@ -59,7 +62,7 @@ export function useSaveAsCopy(
       isCopyingRef.current = false;
       setIsCopying(false);
     }
-  }, [projectId, onSuccess]);
+  }, [projectId, onSuccess, scheduleMessageDismiss]);
 
   // Cleanup timer on unmount
   useEffect(() => {

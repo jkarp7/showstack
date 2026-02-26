@@ -286,6 +286,9 @@ export function updateProject(id: string, updates: Partial<Project>): Project {
 
 export function deleteProject(id: string): void {
   const db = getDatabase();
+  // Null out root_project_id on any children before deleting the root,
+  // so they become standalones rather than orphans with a dangling FK.
+  db.prepare('UPDATE projects SET root_project_id = NULL WHERE root_project_id = ?').run(id);
   db.prepare('DELETE FROM projects WHERE id = ?').run(id);
   saveDatabase();
 }

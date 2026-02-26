@@ -57,10 +57,23 @@ export function ProjectStackCard({
             </div>
           )}
 
-          {/* Version count badge */}
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
-            {versionCount} versions
-          </span>
+          <div className="flex items-center gap-1">
+            {/* Version count badge */}
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+              {versionCount} versions
+            </span>
+            {/* Delete cover button — visible on hover */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteMember(cover);
+              }}
+              className="opacity-0 group-hover:opacity-100 transition text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-500 ml-1"
+              title="Delete latest version"
+            >
+              ×
+            </button>
+          </div>
         </div>
 
         <h3 className="text-lg font-semibold mb-1 truncate">{family.root.name}</h3>
