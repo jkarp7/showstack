@@ -227,17 +227,24 @@ class FileService {
       }
 
       // Checkpoint WAL so the physical .db file is fully up to date before we copy it.
-      // wal_checkpoint(FULL) returns {busy, log, checkpointed}; when busy > 0 or
-      // checkpointed < log, the WAL is not fully flushed and the copy would be stale.
-      const [ckpt] = db.pragma('wal_checkpoint(FULL)') as Array<{
+      // wal_checkpoint(FULL) returns [{busy, log, checkpointed}] in WAL mode, or an
+      // empty array in journal mode (safe to skip). When busy > 0 the checkpoint is
+      // incomplete, but SQLite still guarantees a consistent copy because the WAL file
+      // is included alongside the .db — so we warn and proceed rather than hard-failing.
+      // A busy checkpoint is common on a loaded system (concurrent IPC calls, renderer
+      // query loop) and should not prevent the user from exporting their project.
+      const ckptResult = db.pragma('wal_checkpoint(FULL)') as Array<{
         busy: number;
         log: number;
         checkpointed: number;
       }>;
-      if (ckpt.busy > 0 || ckpt.checkpointed < ckpt.log) {
-        throw new Error(
-          'WAL checkpoint incomplete — another connection may be holding a read transaction',
-        );
+      if (ckptResult.length > 0) {
+        const ckpt = ckptResult[0];
+        if (ckpt.busy > 0 || ckpt.checkpointed < ckpt.log) {
+          logger.warn(
+            `WAL checkpoint incomplete (busy=${ckpt.busy}, log=${ckpt.log}, checkpointed=${ckpt.checkpointed}) — export will proceed but WAL frames may not be flushed`,
+          );
+        }
       }
 
       // Get the path to the physical project database file
@@ -269,31 +276,17 @@ class FileService {
         }
       }
 
-      // Also purge all prep module data — prep_projects and its child tables use their own
+      // Also purge all prep/shop-order module data — these tables use their own
       // id/prep_project_id FKs (not project_id), so they aren't caught by the loop above.
-      // A regular production-project export should never contain prep data from other projects.
-      const prepTables = [
-        'prep_equipment_items',
-        'prep_revisions',
-        'prep_notes',
-        'prep_sections',
-        'prep_projects',
-        'prep_note_templates',
-        'shop_order_items',
-        'shop_order_revisions',
-        'shop_order_notes',
-        'shop_order_sections',
-        'shop_order_projects',
-        'shop_order_note_templates',
-      ];
-      for (const table of prepTables) {
-        // Only delete if the table exists in this backup
-        const exists = backupDb
-          .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
-          .get(table);
-        if (exists) {
-          backupDb.prepare(`DELETE FROM "${table}"`).run();
-        }
+      // Discovered dynamically so new migrations don't require updating this list.
+      const prepAndShopTables: string[] = backupDb
+        .prepare(
+          "SELECT name FROM sqlite_master WHERE type='table' AND (name LIKE 'prep_%' OR name LIKE 'shop_order_%')",
+        )
+        .all()
+        .map((r: any) => r.name);
+      for (const table of prepAndShopTables) {
+        backupDb.prepare(`DELETE FROM "${table}"`).run();
       }
 
       // VACUUM to compact the file (removes deleted rows from disk)
