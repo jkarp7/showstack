@@ -6,6 +6,7 @@ import { EditProjectDialog } from '../components/common/EditProjectDialog';
 import { Breadcrumbs } from '../components/common/Breadcrumbs';
 import { SyncStatusIndicator } from '../components/sync';
 import { useProjectStore, Project } from '../store/projectStore';
+import { useSaveAsCopy } from '../hooks/useSaveAsCopy';
 
 export function ProjectPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -15,6 +16,7 @@ export function ProjectPage() {
   const [project, setProject] = useState(projects.find((p) => p.id === projectId) || null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
+  const { isCopying, copyMessage, handleSaveAsCopy, showCopyMessage } = useSaveAsCopy(projectId);
 
   useEffect(() => {
     if (!projects.length) {
@@ -89,6 +91,25 @@ export function ProjectPage() {
     }
   };
 
+  // Listen for copy/export events dispatched by the native menu handler
+  useEffect(() => {
+    const handleCopyCreated = (e: Event) => {
+      const { copyName } = (e as CustomEvent).detail;
+      showCopyMessage(`Copy created: "${copyName}"`);
+    };
+    const handleExported = (e: Event) => {
+      const { filePath } = (e as CustomEvent).detail;
+      const fileName = filePath.replace(/\\/g, '/').split('/').pop() || 'file';
+      showCopyMessage(`Exported: "${fileName}"`);
+    };
+    window.addEventListener('project:copyCreated', handleCopyCreated);
+    window.addEventListener('project:exported', handleExported);
+    return () => {
+      window.removeEventListener('project:copyCreated', handleCopyCreated);
+      window.removeEventListener('project:exported', handleExported);
+    };
+  }, [showCopyMessage]);
+
   if (!project) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
@@ -119,6 +140,20 @@ export function ProjectPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-end gap-4 mb-4">
             <SyncStatusIndicator />
+            {copyMessage && (
+              <span className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+                <span>&#10003;</span>
+                <span>{copyMessage}</span>
+              </span>
+            )}
+            <button
+              onClick={handleSaveAsCopy}
+              disabled={isCopying}
+              title="Save as Copy — creates a new timestamped version in the same family"
+              className="px-4 py-2 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isCopying ? 'Copying...' : 'Save as Copy'}
+            </button>
             <button
               onClick={() => setIsEditDialogOpen(true)}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium transition"

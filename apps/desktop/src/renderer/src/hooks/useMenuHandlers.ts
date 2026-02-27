@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { logger } from '../utils/logger';
 import { useNavigate } from 'react-router-dom';
 import { useThemeStore } from '../store/themeStore';
+import { useFileStore } from '../store/fileStore';
+import { useProjectStore } from '../store/projectStore';
 
 /**
  * Global menu event handlers
@@ -25,6 +27,18 @@ export function useMenuHandlers() {
       // Toggle between light and dark (don't use system mode for toggle)
       const newMode = mode === 'dark' ? 'light' : 'dark';
       setMode(newMode);
+    };
+
+    // Open file handler — works from any page, navigates to landing after import
+    const handleOpen = async () => {
+      const { openFile } = useFileStore.getState();
+      const { loadProjects } = useProjectStore.getState();
+      const imported = await openFile(async () => {
+        await loadProjects();
+      });
+      if (imported) {
+        navigate('/');
+      }
     };
 
     // Help handlers
@@ -54,6 +68,7 @@ export function useMenuHandlers() {
     };
 
     // Register all handlers
+    window.api.menu.on('menu:open', handleOpen);
     window.api.menu.on('menu:home', handleHome);
     window.api.menu.on('menu:account', handleAccount);
     window.api.menu.on('menu:settings', handleSettings);
@@ -67,6 +82,7 @@ export function useMenuHandlers() {
 
     // Cleanup
     return () => {
+      window.api.menu.off('menu:open', handleOpen);
       window.api.menu.off('menu:home', handleHome);
       window.api.menu.off('menu:account', handleAccount);
       window.api.menu.off('menu:settings', handleSettings);

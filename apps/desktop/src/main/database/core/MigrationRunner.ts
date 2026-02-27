@@ -310,6 +310,15 @@ export class MigrationRunner {
       logger.info('Running migration: Adding show_dates to projects');
       this.db.prepare('ALTER TABLE projects ADD COLUMN show_dates TEXT').run();
     }
+
+    // Family / version stacking (Eos-style project families)
+    if (!projectsColumns.includes('root_project_id')) {
+      logger.info('Running migration: Adding root_project_id to projects');
+      this.db.prepare('ALTER TABLE projects ADD COLUMN root_project_id TEXT').run();
+      this.db
+        .prepare('CREATE INDEX IF NOT EXISTS idx_projects_root ON projects(root_project_id)')
+        .run();
+    }
   }
 
   /**

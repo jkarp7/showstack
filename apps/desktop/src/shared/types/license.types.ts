@@ -19,6 +19,9 @@ export type LicenseTier =
   | 'institutional' // Multi-seat, institutional pricing
   | 'demo'; // Demo mode — restricted local-only access
 
+/** Tiers that can be granted by the licensing server (demo is local-only). */
+export type ServerLicenseTier = Exclude<LicenseTier, 'demo'>;
+
 export interface UserLicense {
   id: string;
   email: string;

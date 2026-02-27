@@ -101,6 +101,7 @@ function createTables(): void {
       venue_city TEXT,
       venue_state TEXT,
       show_dates TEXT,
+      root_project_id TEXT,
       created_at INTEGER,
       updated_at INTEGER
     );

@@ -81,20 +81,79 @@ export interface AuthState {
   clearError: () => void;
 }
 
-/** Safe localStorage wrapper — logs warning if storage is unavailable */
-function safeLocalStorage(key: string, value?: string): string | null {
+/**
+ * In-memory fallback for when localStorage is unavailable (e.g. private browsing).
+ * Ensures the first-launch prompt doesn't re-appear every page load in the same session.
+ *
+ * Intentional trade-off: this Map lives at module scope for the entire renderer-process
+ * lifetime. Keys written during one sign-in session persist across sign-out / sign-in
+ * within the same renderer process (i.e. without an app restart). For the first-launch
+ * prompt use case this is the desired behaviour — once dismissed it should stay dismissed.
+ *
+ * Cross-account note: a user who signs out and signs back in as a *different* account
+ * inherits any in-memory keys written by the previous session. This is harmless for the
+ * first-launch prompt (both users benefit from it being dismissed), but callers adding
+ * new per-user keys should call safeLocalStorage(key, null) in the signOut action to
+ * clear them explicitly rather than relying on process restart.
+ */
+const memoryStorage = new Map<string, string>();
+
+/**
+ * Safe localStorage wrapper with in-memory session fallback.
+ * Falls back to sessionStorage first, then an in-memory Map.
+ * Guarantees callers never see the first-launch prompt again within the same session,
+ * even if persistent storage is blocked.
+ *
+ * Pass `null` as the value to remove the key from all storage tiers.
+ */
+function safeLocalStorage(key: string, value?: string | null): string | null {
+  const isRemoval = value === null;
+
+  // Primary: persistent localStorage
   try {
+    if (isRemoval) {
+      localStorage.removeItem(key);
+      memoryStorage.delete(key);
+      return null;
+    }
     if (value !== undefined) {
       localStorage.setItem(key, value);
       return value;
     }
     return localStorage.getItem(key);
-  } catch (e) {
-    logger.warn(`[AuthStore] localStorage unavailable for key "${key}"`, {
-      error: e instanceof Error ? e.message : String(e),
-    });
+  } catch {
+    // Fall through to sessionStorage
+  }
+
+  // Secondary: sessionStorage (survives page reloads within the same tab)
+  try {
+    if (isRemoval) {
+      sessionStorage.removeItem(key);
+      memoryStorage.delete(key);
+      return null;
+    }
+    if (value !== undefined) {
+      sessionStorage.setItem(key, value);
+      return value;
+    }
+    return sessionStorage.getItem(key);
+  } catch {
+    // Fall through to in-memory
+  }
+
+  // Tertiary: in-memory (lost on page reload, but prevents prompt re-appearing in session)
+  logger.warn(
+    `[AuthStore] localStorage/sessionStorage unavailable for key "${key}", using memory fallback`,
+  );
+  if (isRemoval) {
+    memoryStorage.delete(key);
     return null;
   }
+  if (value !== undefined) {
+    memoryStorage.set(key, value);
+    return value;
+  }
+  return memoryStorage.get(key) ?? null;
 }
 
 const defaultSyncStatus: SyncStatus = {
@@ -138,12 +197,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const result = await window.api.auth.signIn(email, password);
 
       if (result.success) {
-        // Refresh all state in parallel to avoid sequential re-renders
-        await Promise.all([
+        // Refresh all state in parallel. Use allSettled so a failure in one
+        // (e.g. sync status unreachable) doesn't leave auth/license state un-updated.
+        const refreshResults = await Promise.allSettled([
           get().refreshAuthState(),
           get().refreshLicenseStatus(),
           get().refreshSyncStatus(),
         ]);
+        refreshResults.forEach((r) => {
+          if (r.status === 'rejected') {
+            logger.warn('[AuthStore] signIn refresh failed', {
+              reason: r.reason instanceof Error ? r.reason.message : String(r.reason),
+            });
+          }
+        });
         // Mark auth as prompted so first-launch prompt won't show again
         safeLocalStorage('showstack-auth-prompted', 'true');
         // Surface license verification failure to the user

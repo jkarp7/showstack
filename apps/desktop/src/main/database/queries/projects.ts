@@ -10,6 +10,7 @@ export interface Project {
   designer?: string;
   logo_path?: string;
   enabled_modules?: string; // JSON string of array
+  root_project_id?: string | null; // NULL = root; non-NULL = member of a family stack
   created_at: number;
   updated_at: number;
 }
@@ -78,24 +79,96 @@ export function getProjectById(id: string): Project | null {
   return project as Project;
 }
 
+/**
+ * Format a Unix ms timestamp as "YYYY-MM-DD HH:mm" for copy naming.
+ *
+ * NOTE: Uses the local system time (via `new Date()`), NOT UTC.
+ * The resulting string is locale-sensitive — the same timestamp will produce
+ * different values on machines in different time zones. This is intentional:
+ * copy names are user-facing labels, not sortable identifiers.
+ */
+export function formatCopyTimestamp(ms: number): string {
+  const d = new Date(ms);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}`;
+}
+
+/**
+ * Create a copy of an existing project, linked to the same family stack.
+ *
+ * The copy gets a new UUID. root_project_id is set to:
+ *   - the original's root_project_id (if it is already a child), OR
+ *   - the original's own id (if it is a root)
+ * This ensures all family members always point to the true root (flat tree).
+ *
+ * @param originalProjectId  ID of the project to copy
+ * @param copyName           Optional name override; defaults to "Original Name — YYYY-MM-DD HH:mm"
+ */
+export function createProjectCopy(originalProjectId: string, copyName?: string): Project {
+  const db = getDatabase();
+
+  const row = db.prepare('SELECT * FROM projects WHERE id = ?').get(originalProjectId) as any;
+  if (!row) {
+    throw new Error(`Project with id ${originalProjectId} not found`);
+  }
+
+  const now = Date.now();
+  const newId = uuidv4();
+
+  // Flat tree invariant: always point to the true root, never chain child->child
+  const rootId = row.root_project_id || row.id;
+  const newName = copyName || `${row.name} \u2014 ${formatCopyTimestamp(now)}`;
+
+  // Build the new row from the original, overriding key fields
+  const {
+    id: _id,
+    name: _name,
+    root_project_id: _rpi,
+    created_at: _ca,
+    updated_at: _ua,
+    ...rest
+  } = row;
+
+  const extraColumns = Object.keys(rest);
+  const allColumns = ['id', 'name', 'root_project_id', 'created_at', 'updated_at', ...extraColumns];
+  const colList = allColumns.map((c) => `"${c}"`).join(', ');
+  const placeholders = allColumns.map(() => '?').join(', ');
+  const values = [newId, newName, rootId, now, now, ...extraColumns.map((c) => rest[c])];
+
+  db.prepare(`INSERT INTO projects (${colList}) VALUES (${placeholders})`).run(...values);
+
+  saveDatabase();
+
+  const created = getProjectById(newId);
+  if (!created) {
+    throw new Error('Failed to create project copy');
+  }
+  return created;
+}
 export function createProject(
   name: string,
   description?: string,
   logoPath?: string,
   enabledModules?: string[],
+  rootProjectId?: string | null,
 ): Project {
   const db = getDatabase();
   const id = uuidv4();
   const now = Date.now();
 
   db.prepare(
-    'INSERT INTO projects (id, name, description, logo_path, enabled_modules, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    'INSERT INTO projects (id, name, description, logo_path, enabled_modules, root_project_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
   ).run(
     id,
     name,
     description || null,
     logoPath || null,
     enabledModules ? JSON.stringify(enabledModules) : null,
+    rootProjectId || null,
     now,
     now,
   );
@@ -156,6 +229,8 @@ const PROJECT_ALLOWED_FIELDS = Object.freeze([
   'general_manager_company',
   // Show dates
   'show_dates',
+  // Family / version stacking
+  'root_project_id',
 ] as const);
 
 type ProjectAllowedField = (typeof PROJECT_ALLOWED_FIELDS)[number];
@@ -216,7 +291,14 @@ export function updateProject(id: string, updates: Partial<Project>): Project {
 
 export function deleteProject(id: string): void {
   const db = getDatabase();
-  db.prepare('DELETE FROM projects WHERE id = ?').run(id);
+  // Wrap in a transaction so the child-nulling and the DELETE are atomic.
+  // Without this, a crash between the two statements would leave children
+  // with a dangling root_project_id pointing at a deleted project.
+  const doDelete = db.transaction(() => {
+    db.prepare('UPDATE projects SET root_project_id = NULL WHERE root_project_id = ?').run(id);
+    db.prepare('DELETE FROM projects WHERE id = ?').run(id);
+  });
+  doDelete();
   saveDatabase();
 }
 

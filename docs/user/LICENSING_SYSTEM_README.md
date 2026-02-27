@@ -11,6 +11,7 @@ Complete module-based licensing system for ShowStack with offline-first validati
 - [API Reference](#api-reference)
 - [Usage Examples](#usage-examples)
 - [Tier Comparison](#tier-comparison)
+- [Security](#security)
 - [Development](#development)
 
 ## Overview
@@ -309,6 +310,48 @@ function SoundModule() {
 | Production Management | Scheduling & logistics         |
 | Touring               | Tour management & per diems    |
 | Producer              | Budgeting & financial tracking |
+
+## Security
+
+### Email Verification
+
+Licenses are scoped to a verified email address in Supabase Auth. An unclaimed license (where `user_id IS NULL`) is only visible to the authenticated user whose email matches the license record, enforced by Supabase Row-Level Security (RLS) policies.
+
+Auto-claiming an unclaimed license uses a server-side RPC (`claim_license_by_email`) that runs in a transaction under the authenticated user's context. Client code cannot claim a license for a different user's email.
+
+### CRUD Upload Error Sanitization
+
+PowerSync CRUD upload errors are sanitized before being surfaced to callers or logs that might be visible in the renderer. Raw PostgreSQL error messages can leak schema details (constraint names, column names, table structure). `SupabaseConnector.sanitizeCrudError()` maps errors into safe generic messages:
+
+| Error pattern                        | Safe message                            |
+| ------------------------------------ | --------------------------------------- |
+| `permission denied`, `rls`, `policy` | `Permission denied on <op> <table>`     |
+| `not found`, `PGRST116`              | `Record not found on <op> <table>`      |
+| `duplicate`, `unique`, `23505`       | `Duplicate record on <op> <table>`      |
+| `foreign key`, `23503`               | `Foreign key violation on <op> <table>` |
+| anything else                        | `Sync <op> failed for <table>`          |
+
+The raw error is still logged at `logger.error` level (main-process only) for debugging, but it is never thrown or forwarded to the renderer.
+
+### Server License Data Validation
+
+Before writing Supabase license data to the local SQLite database, `LicenseService.verifyLicenseViaSupabase()` validates:
+
+- Required fields (`email`, `license_key`, `tier`, `maintenance_end_date`) are present and non-empty.
+- `tier` is one of the known values: `professional`, `student`, `institutional`. Unknown tiers are rejected and logged as warnings.
+- `modules` is an array (not a string, null, or other unexpected type).
+
+If any check fails, the local database is **not updated** and verification returns `false`. The existing local license (including a demo license) remains intact until a valid server response is received.
+
+### Rate Limiting & Offline Grace
+
+- License verification is throttled to once every **24 hours** by the background verifier.
+- A **14-day offline grace period** allows the app to function without network access. After 14 days the license enters `grace` status (read/write still allowed; sync disabled). After 28 days the warning level escalates to `high`.
+- A suspended license (`status: 'suspended'`) disables all access immediately, regardless of offline grace.
+
+### Supabase HTTPS Enforcement
+
+The `SupabaseConnector` constructor validates that the configured Supabase URL uses HTTPS. In production builds this throws an error; in development it logs a warning. This prevents credential leakage over plaintext connections.
 
 ## Development
 

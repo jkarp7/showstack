@@ -21,7 +21,7 @@ vi.mock('../../database/queries/license', () => ({
 }));
 
 // Mock getAppDatabase for transaction support and raw SQL
-const mockPrepare = vi.fn(() => ({ run: vi.fn() }));
+const mockPrepare = vi.fn((_sql?: string) => ({ run: vi.fn() }));
 vi.mock('../../database', () => ({
   getAppDatabase: () => ({
     transaction: (fn: () => void) => {
@@ -724,6 +724,159 @@ describe('LicenseService', () => {
 
       // Should not attempt Supabase verification
       expect(mockConnector.isAuthenticated).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── Issue #81 additional scenarios ──────────────────────────────────────────
+
+  describe('verifyLicenseViaSupabase — transaction rollback', () => {
+    it('returns false and leaves demo license intact when raw SQL transaction throws', async () => {
+      mockConnector.isAuthenticated.mockReturnValue(true);
+      mockConnector.fetchUserLicense.mockResolvedValue({
+        id: 'srv-id',
+        license_key: 'REAL-KEY',
+        user_id: 'user-123',
+        email: 'real@example.com',
+        name: 'Real User',
+        tier: 'professional',
+        modules: [],
+        maintenance_end_date: '2027-06-01T00:00:00Z',
+        status: 'active',
+        cloud_sync: true,
+      });
+
+      const demoLicense = buildLicense({ id: 'demo-id', tier: 'demo' });
+      mockedGetCurrentLicense.mockReturnValue(demoLicense);
+
+      // Make the INSERT inside the transaction throw (simulates a constraint error)
+      mockPrepare.mockImplementation((sql: string) => {
+        if (sql.includes('INSERT INTO licenses')) {
+          return {
+            run: vi.fn().mockImplementation(() => {
+              throw new Error('UNIQUE constraint failed: licenses.license_key');
+            }),
+          };
+        }
+        return { run: vi.fn() };
+      });
+
+      const result = await service.verifyLicenseViaSupabase();
+
+      // Transaction rolled back — demo license still present, returns false
+      expect(result).toBe(false);
+      // createLicense wrapper should NOT have been called (we use raw SQL only)
+      expect(mockedCreateLicense).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('verifyLicenseViaSupabase — server data validation', () => {
+    function baseServerLicense() {
+      return {
+        id: 'srv-id',
+        license_key: 'KEY-1',
+        user_id: 'user-123',
+        email: 'user@example.com',
+        name: 'User',
+        tier: 'professional' as const,
+        modules: [] as ModuleAccess[],
+        maintenance_end_date: '2027-01-01T00:00:00Z',
+        status: 'active' as const,
+        cloud_sync: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+    }
+
+    beforeEach(() => {
+      mockConnector.isAuthenticated.mockReturnValue(true);
+      mockedGetCurrentLicense.mockReturnValue(null);
+    });
+
+    it('rejects server license with unknown tier', async () => {
+      mockConnector.fetchUserLicense.mockResolvedValue({
+        ...baseServerLicense(),
+        tier: 'enterprise' as unknown as 'professional',
+      });
+
+      const result = await service.verifyLicenseViaSupabase();
+
+      expect(result).toBe(false);
+      expect(mockedCreateLicense).not.toHaveBeenCalled();
+    });
+
+    it('rejects server license when modules is not an array', async () => {
+      mockConnector.fetchUserLicense.mockResolvedValue({
+        ...baseServerLicense(),
+        modules: null as unknown as ModuleAccess[],
+      });
+
+      const result = await service.verifyLicenseViaSupabase();
+
+      expect(result).toBe(false);
+      expect(mockedCreateLicense).not.toHaveBeenCalled();
+    });
+
+    it('rejects server license with missing email', async () => {
+      mockConnector.fetchUserLicense.mockResolvedValue({
+        ...baseServerLicense(),
+        email: '',
+      });
+
+      const result = await service.verifyLicenseViaSupabase();
+
+      expect(result).toBe(false);
+      expect(mockedCreateLicense).not.toHaveBeenCalled();
+    });
+
+    it('accepts all valid tiers: student, institutional', async () => {
+      for (const tier of ['student', 'institutional'] as const) {
+        vi.clearAllMocks();
+        mockConnector.isAuthenticated.mockReturnValue(true);
+        mockedGetCurrentLicense.mockReturnValue(null);
+        mockConnector.fetchUserLicense.mockResolvedValue({
+          ...baseServerLicense(),
+          tier,
+        });
+        mockedCreateLicense.mockReturnValue(buildLicense({ tier }));
+
+        const result = await service.verifyLicenseViaSupabase();
+
+        expect(result).toBe(true);
+        expect(mockedCreateLicense).toHaveBeenCalled();
+      }
+    });
+  });
+
+  describe('verifyLicenseViaSupabase — concurrent claim prevention', () => {
+    it('does not create a local license if claimLicenseByEmail succeeds but re-fetch returns null', async () => {
+      // Simulates a race where another device claimed the license between the
+      // auto-claim RPC and the re-fetch (edge case — should not write partial state)
+      mockConnector.isAuthenticated.mockReturnValue(true);
+      // First fetch: unclaimed license (user_id null)
+      mockConnector.fetchUserLicense
+        .mockResolvedValueOnce({
+          id: 'lic-id',
+          license_key: 'KEY-1',
+          user_id: null,
+          email: 'user@example.com',
+          name: null,
+          tier: 'professional',
+          modules: [],
+          maintenance_end_date: '2027-01-01T00:00:00Z',
+          status: 'active',
+          cloud_sync: true,
+        })
+        // Second fetch (after claim): returns null — claimed by another device concurrently
+        .mockResolvedValueOnce(null);
+
+      mockConnector.claimLicenseByEmail.mockResolvedValue({ success: true });
+      mockedGetCurrentLicense.mockReturnValue(null);
+
+      const result = await service.verifyLicenseViaSupabase();
+
+      // No local license should be created with a null/incomplete state
+      expect(result).toBe(false);
+      expect(mockedCreateLicense).not.toHaveBeenCalled();
     });
   });
 });

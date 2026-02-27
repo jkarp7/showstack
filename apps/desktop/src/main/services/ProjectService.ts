@@ -2,6 +2,7 @@ import {
   getAllProjects,
   getProjectById,
   createProject,
+  createProjectCopy,
   updateProject,
   deleteProject,
   Project,
@@ -97,6 +98,22 @@ export class ProjectService extends BaseService {
     await backupService.performBackup(`before-delete-project-${id}`);
 
     return await this.executeWithRetry(async () => deleteProject(id), 'projects:delete');
+  }
+
+  /**
+   * Create a copy of an existing project in the same family stack.
+   * The copy is named "Original Name — YYYY-MM-DD HH:mm" unless overridden.
+   *
+   * @param originalProjectId  ID of the project to copy
+   * @param copyName           Optional name override
+   */
+  async createCopy(originalProjectId: string, copyName?: string): Promise<Project> {
+    this.validateId(originalProjectId, 'Project');
+
+    return await this.executeWithRetry(
+      async () => createProjectCopy(originalProjectId, copyName),
+      'projects:createCopy',
+    );
   }
 
   /**

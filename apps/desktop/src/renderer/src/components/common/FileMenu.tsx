@@ -1,13 +1,20 @@
 import { useEffect } from 'react';
 import { useFileStore } from '../../store/fileStore';
+import { useSaveAsCopy } from '../../hooks/useSaveAsCopy';
 
 interface FileMenuProps {
   className?: string;
   onDataReload?: () => Promise<void>;
   projectName?: string;
+  currentProjectId?: string;
 }
 
-export function FileMenu({ className = '', onDataReload, projectName }: FileMenuProps) {
+export function FileMenu({
+  className = '',
+  onDataReload,
+  projectName,
+  currentProjectId,
+}: FileMenuProps) {
   const {
     isDirty,
     isSaving,
@@ -18,6 +25,10 @@ export function FileMenu({ className = '', onDataReload, projectName }: FileMenu
     saveFile,
     saveFileAs,
   } = useFileStore();
+  const { isCopying, copyMessage, handleSaveAsCopy } = useSaveAsCopy(
+    currentProjectId,
+    onDataReload,
+  );
 
   // Use projectName prop if provided, otherwise fall back to file store
   const currentFileName = projectName || getCurrentFileName();
@@ -116,7 +127,26 @@ export function FileMenu({ className = '', onDataReload, projectName }: FileMenu
         >
           Save As...
         </button>
+
+        {currentProjectId && (
+          <button
+            onClick={handleSaveAsCopy}
+            disabled={isLoading || isCopying}
+            title="Save as Copy — creates a new timestamped version in the same family"
+            className="px-3 py-1.5 text-sm bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isCopying ? 'Copying...' : 'Save as Copy'}
+          </button>
+        )}
       </div>
+
+      {/* Copy status message */}
+      {copyMessage && (
+        <div className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+          <span>✓</span>
+          <span>{copyMessage}</span>
+        </div>
+      )}
 
       {/* Status indicator */}
       {isSaving && (

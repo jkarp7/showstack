@@ -38,6 +38,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "test:run": "vitest run",
+    "test:rebuild": "npm rebuild better-sqlite3",
     "test:supabase": "npx tsx scripts/test-supabase.ts",
     "test:powersync": "npx tsx scripts/test-powersync.ts",
     "lint": "eslint --cache .",
@@ -93,7 +94,7 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "@powersync/web": "^1.32.0",
+    "@powersync/node": "^0.17.1",
     "@sentry/electron": "^7.7.1",
     "@showstack/shared": "workspace:*",
     "@supabase/supabase-js": "^2.95.2",
@@ -112,6 +113,9 @@
     "sql.js": "^1.10.3",
     "uuid": "^13.0.0",
     "zustand": "^5.0.8"
+  },
+  "overrides": {
+    "minimatch": ">=10.2.1"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

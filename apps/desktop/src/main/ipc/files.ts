@@ -133,6 +133,21 @@ export function registerFileHandlers(): void {
   );
 
   /**
+   * Export a single project as a .ss file (shows save dialog)
+   */
+  ipcMain.handle(
+    'file:exportProject',
+    async (_, projectId: string, projectName: string): Promise<string | null> => {
+      try {
+        return await fileService.exportProjectById(projectId, projectName);
+      } catch (error) {
+        logger.error('Error in file:exportProject handler:', error);
+        throw new Error(error instanceof Error ? error.message : 'Failed to export project');
+      }
+    },
+  );
+
+  /**
    * Create new project (clears current data)
    */
   ipcMain.handle('file:new', async (): Promise<string> => {
@@ -200,5 +215,5 @@ export function registerFileHandlers(): void {
     },
   );
 
-  logger.info('✅ File IPC handlers registered');
+  logger.info('File IPC handlers registered');
 }
