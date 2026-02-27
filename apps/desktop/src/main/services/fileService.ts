@@ -212,6 +212,9 @@ class FileService {
     if (!filePath) return null;
 
     const tmpPath = `${filePath}.tmp`;
+    // Declared outside the try block so the catch block can close it before
+    // unlinking — on Windows, deleting an open file handle throws EBUSY.
+    let backupDb: BetterSQLite.Database | null = null;
 
     try {
       const db = getDatabase();
@@ -223,8 +226,19 @@ class FileService {
         throw new Error(`Project ${projectId} not found in database`);
       }
 
-      // Checkpoint WAL so the physical .db file is fully up to date before we copy it
-      db.pragma('wal_checkpoint(FULL)');
+      // Checkpoint WAL so the physical .db file is fully up to date before we copy it.
+      // wal_checkpoint(FULL) returns {busy, log, checkpointed}; when busy > 0 or
+      // checkpointed < log, the WAL is not fully flushed and the copy would be stale.
+      const [ckpt] = db.pragma('wal_checkpoint(FULL)') as Array<{
+        busy: number;
+        log: number;
+        checkpointed: number;
+      }>;
+      if (ckpt.busy > 0 || ckpt.checkpointed < ckpt.log) {
+        throw new Error(
+          'WAL checkpoint incomplete — another connection may be holding a read transaction',
+        );
+      }
 
       // Get the path to the physical project database file
       const { projectDbPath } = databaseManager.getPaths();
@@ -233,7 +247,7 @@ class FileService {
       copyFileSync(projectDbPath, tmpPath);
 
       // Open the copy with better-sqlite3 and strip all other projects' data
-      const backupDb = new BetterSQLite(tmpPath);
+      backupDb = new BetterSQLite(tmpPath);
 
       // Disable FK enforcement so we can delete in any order
       backupDb.pragma('foreign_keys = OFF');
@@ -285,6 +299,7 @@ class FileService {
       // VACUUM to compact the file (removes deleted rows from disk)
       backupDb.exec('VACUUM');
       backupDb.close();
+      backupDb = null;
 
       // Atomically rename tmp → final destination (same filesystem, no double-copy)
       renameSync(tmpPath, filePath);
@@ -293,6 +308,8 @@ class FileService {
       return filePath;
     } catch (error) {
       try {
+        // Close backupDb before unlinking — on Windows an open handle causes EBUSY
+        backupDb?.close();
         if (existsSync(tmpPath)) unlinkSync(tmpPath);
       } catch (_) {
         /* ignore cleanup error */
