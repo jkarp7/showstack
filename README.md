@@ -5,110 +5,120 @@
 [![Test Suite](https://github.com/jkarp7/showstack/actions/workflows/test.yml/badge.svg)](https://github.com/jkarp7/showstack/actions/workflows/test.yml)
 [![Coverage](https://codecov.io/gh/jkarp7/showstack/branch/main/graph/badge.svg)](https://codecov.io/gh/jkarp7/showstack)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
-[![Electron](https://img.shields.io/badge/Electron-28-47848F.svg)](https://www.electronjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
+[![Electron](https://img.shields.io/badge/Electron-39-47848F.svg)](https://www.electronjs.org/)
 
-ShowStack is a comprehensive suite of tools designed for lighting designers, production electricians, and entertainment professionals. This repository contains the ShowStack:Production module - a modern alternative to LightWright 6.
+ShowStack is a comprehensive suite of tools designed for lighting designers, production electricians, and entertainment professionals. This repository contains the **ShowStack:Production** module — a modern alternative to LightWright 6.
 
 ---
 
-## 🎯 Project Overview
+## Project Overview
 
-**ShowStack** is a comprehensive desktop application suite for live entertainment production management. Built with modern web technologies (Electron + React), it provides professional tools for lighting designers, production electricians, and tour managers.
+**ShowStack** is a unified desktop application for live entertainment production management. Built with Electron + React, it provides professional tools for lighting designers, production electricians, and tour managers. Features are activated via a license-based edition system — one app, multiple editions.
 
 ### Current Modules
 
-**ShowStack:Manager** - Tour & Venue Management _(coming soon)_
+**ShowStack:Lighting** — Equipment & Documentation _(Alpha — ~85% complete)_
 
-- Tour scheduling and calendar
-- Venue information database
-- Crew and personnel tracking
+- Fixture Manager with virtual grid (10,000+ fixtures at 60 FPS)
+- Shop Order builder with spreadsheet-like table interface and revision tracking
+- Paperwork generation with 13 customizable report types
+- Power distribution tracking, phase balancing, and rack management
+- Label designer with 5 Avery templates and batch PDF printing
+- Infrastructure equipment tracking with port assignment management
 
-**ShowStack:Production** - Equipment & Documentation _(70% complete)_
-
-- Equipment Manager for fixture tracking with power management
-- Shop Order tool with multi-discipline support
-- Professional paperwork generation
-- Power distribution tracking and analysis
-- Label design and printing
-
-### Key Features (Alpha)
-
-- ✅ **Offline-first** - Works without internet, 14-day grace period
-- ✅ **Module-based licensing** - Pay only for what you need
-- ✅ **Dark mode** - Full light/dark theme support
-- ✅ **Privacy-first analytics** - Anonymous, opt-in telemetry with PostHog
-- ✅ **Developer mode** - Advanced debugging and feature flags
-- ✅ **Multi-window support** - Open multiple projects simultaneously
-- ✅ **Auto-save** - Never lose your work
-- ✅ **Export flexibility** - PDF, CSV, JSON formats
+**ShowStack:Sound / Video / Production / Tour** _(planned — Year 2+)_
 
 ---
 
-## 📁 Repository Structure
+## Key Features
+
+- **Offline-first** — Works without internet; perpetual license fallback keeps the app running on versions built during your active maintenance window
+- **User accounts** — Supabase Auth (sign in/up, password reset); licenses auto-claimed by email
+- **Cloud sync** — PowerSync integration for project sync across devices (enabled per license tier)
+- **Demo mode** — Restricted access for unauthenticated users (25 fixtures, no exports)
+- **Module-based licensing** — Pay only for what you need; tier-based feature limits
+- **Dark mode** — Full light/dark theme support
+- **Privacy-first analytics** — Anonymous, opt-in telemetry with PostHog
+- **Developer mode** — Advanced debugging, feature flags (13 experimental features), DevTools
+- **Multi-window support** — Open multiple projects simultaneously
+- **Auto-save** — Never lose your work
+- **Export flexibility** — PDF, CSV, JSON formats
+
+---
+
+## Repository Structure
 
 ```
 showstack/
+├── apps/
+│   └── desktop/            # Electron desktop app
+│       └── src/
+│           ├── main/       # Main process (IPC, database, services)
+│           ├── renderer/   # React application (UI, stores, components)
+│           └── preload/    # Preload scripts
+│
+├── packages/
+│   └── shared/             # Shared types and utilities
+│
+├── supabase/               # Supabase Edge Functions and schema
+│
 ├── docs/                   # Documentation
-│   ├── technical-spec.md   # Complete technical specification
-│   ├── pricing.md          # Pricing strategy & competitive analysis
-│   └── dev-setup.md        # Development environment setup
+│   ├── development/        # Developer guides and architecture
+│   ├── features/           # Feature specifications and roadmaps
+│   ├── architecture/       # Licensing and edition strategy
+│   ├── business/           # Pricing, market analysis
+│   ├── user/               # End-user documentation
+│   ├── testing/            # Testing guides and patterns
+│   ├── releases/           # Release checklists
+│   └── archive/            # Completed plans and historical docs
 │
-├── proof-of-concept/       # Working POC of virtual data grid
-│   ├── src/
-│   ├── package.json
-│   └── README.md
+├── proof-of-concept/       # Original virtual grid POC (reference only)
+├── scripts/                # Build and utility scripts
+├── resources/              # App icons and static assets
 │
-├── src/                    # Main application (TBD - Phase 1)
-│   ├── main/              # Electron main process
-│   ├── renderer/          # React application
-│   └── preload/           # Preload scripts
-│
-├── .github/
-│   └── workflows/         # CI/CD pipelines
-│
-├── LICENSE
-├── README.md              # This file
-└── package.json           # Root package.json
+├── PROJECT_STATUS.md       # Comprehensive feature tracking
+├── README.md               # This file
+└── package.json
 ```
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
-### Quick Start - Test the Proof of Concept
+### Prerequisites
 
-The POC demonstrates the core virtual data grid:
+- Node.js 20+
+- npm
+
+### Development Setup
 
 ```bash
-cd proof-of-concept
+# Install dependencies
 npm install
+
+# Start the app in development mode
 npm run dev
+
+# Type-check the codebase
+npx tsc --noEmit
+
+# Run linter
+npm run lint
 ```
 
-Opens at `http://localhost:5173` with 1,000 fixtures loaded.
-
-**What to try:**
-
-- Scroll performance (60 FPS with 10k+ fixtures)
-- In-cell editing (click, type, Tab, Enter)
-- Multi-select (Click, Shift+Click, Cmd/Ctrl+Click)
-- Add/delete fixtures
-
-### Full App Development (Phase 1+)
-
-Coming soon! See [docs/dev-setup.md](docs/dev-setup.md) for environment setup.
+See [docs/development/dev-setup.md](docs/development/dev-setup.md) for full environment setup including Supabase and PowerSync configuration.
 
 ---
 
-## 🧪 Testing
+## Testing
 
-ShowStack has comprehensive test coverage with **235+ tests** across utilities, components, and IPC handlers.
+ShowStack has comprehensive test coverage with **1,500+ tests** across 50+ test files.
 
 ### Running Tests
 
 ```bash
-# Watch mode - auto-runs on changes
+# Watch mode — auto-runs on changes
 npm test
 
 # Run tests once (CI mode)
@@ -119,9 +129,6 @@ npm run test:coverage
 
 # Visual UI with coverage
 npm run test:ui
-
-# Run specific test file
-npm test powerCalculations
 ```
 
 ### Coverage Requirements
@@ -136,144 +143,109 @@ npm test powerCalculations
 
 **Tested Modules:**
 
-- ✅ Power calculations (98% coverage)
-- ✅ Circuit parsing & rack linking (95% coverage)
-- ✅ Label grid calculations (100% coverage)
-- ✅ Fixture data mapping (100% coverage)
-- ✅ Component logic (bug fixes verified)
-- ✅ File security validation (43 tests)
+- Power calculations (98% coverage)
+- Circuit parsing & rack linking (95% coverage)
+- Label grid calculations (100% coverage)
+- Fixture data mapping (100% coverage)
+- Auth flow, demo mode, license verification (comprehensive)
+- File security validation (43 tests)
 
 ### Testing Documentation
 
-- **[Testing Guide](docs/testing/TESTING_GUIDE.md)** - Comprehensive guide with examples
-- **[Quick Reference](docs/testing/QUICK_REFERENCE.md)** - Common patterns and commands
-- **[Mocking Strategy](docs/testing/MOCKING_STRATEGY.md)** - Mock patterns and best practices
+- **[Testing Guide](docs/testing/TESTING_GUIDE.md)** — Comprehensive guide with examples
+- **[Quick Reference](docs/testing/QUICK_REFERENCE.md)** — Common patterns and commands
+- **[Mocking Strategy](docs/testing/MOCKING_STRATEGY.md)** — Mock patterns and best practices
 
 ### CI/CD
 
 All tests run automatically on:
 
-- ✅ **Ubuntu Latest** - Primary CI environment
-- ✅ **macOS Latest** - macOS compatibility
-- ✅ **Windows Latest** - Windows compatibility
+- **Ubuntu Latest** — Primary CI environment
+- **macOS Latest** — macOS compatibility
+- **Windows Latest** — Windows compatibility
 
 Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstack) on every push.
 
 ---
 
-## 📊 Status
+## Status
 
 **Current Phase:** Alpha
 **Version:** 0.1.0-alpha
-**Status:** Ready for testing and feedback
+**Status:** User accounts, licensing, and demo mode implemented; core lighting feature set ~85% complete
 
-### ✅ Completed Features
+### Completed
 
 **Core Infrastructure:**
 
-- ✅ Electron application with multi-window support
-- ✅ Two-database architecture (app.db + projects.db)
-- ✅ sql.js (SQLite compiled to WebAssembly)
-- ✅ Offline-first with 14-day grace period
-- ✅ Module-based licensing system
-- ✅ Dark mode support
-- ✅ Settings page with 8 configuration tabs
-- ✅ Admin panel for template management
+- Electron app with multi-window support
+- Two-database architecture (app.db + projects.db via better-sqlite3)
+- PowerSync schema for offline-first cloud sync
+- Supabase Auth — sign in, sign up, password reset
+- Supabase license auto-claim by email with perpetual fallback model
+- Demo mode for unauthenticated users
+- Module-based licensing with tier-based feature limits
+- Dark mode support
+- Settings page with 8 configuration tabs
+- Admin panel with analytics dashboard
+- Privacy-first telemetry with PostHog (opt-in)
 
-**Modules:**
+**Lighting Features:**
 
-- ✅ **Manager Module** (placeholder - tour/venue management coming)
-- ✅ **Production Module** (~70% complete)
-  - Equipment Manager (fixture CRUD, power management)
-  - Shop Order tool with revisions
-  - Paperwork generation
-  - Power distribution tracking
-  - Labels designer
-- ✅ **Shop Order Tool** (~90% complete)
-  - Multi-discipline support
-  - Section-based equipment lists
-  - Revision management with notes
-  - PDF/CSV export
-  - Print builder with page layout
-- ✅ **Power Management** (~100% complete)
-  - Dimmer rack and PD rack configuration
-  - Module-based capacity calculations
-  - Auto-linking fixtures to racks
-  - Real-time utilization tracking
-  - Phase balance monitoring
+- Fixture Manager — virtual grid, 68+ columns, LightWright parity
+- Shop Order builder — spreadsheet-like table with revision tracking, clipboard paste, CSV export
+- Paperwork Generator — 13 report types with customizable headers and visual layout designer
+- Power Management — rack configuration, phase balancing, port linking
+- Label Designer — grid-based visual editor, 5 Avery templates, batch PDF printing
+- Infrastructure tracking — network equipment, port assignments, CSV import/export
+- Color flags, conditional row highlighting, auto-complete from project data
 
-**Privacy & Analytics:**
+### In Progress / Near-term
 
-- ✅ Privacy-first telemetry with PostHog SDK integration
-- ✅ User consent dialog with opt-in controls
-- ✅ Anonymous analytics (opt-in only)
-- ✅ Comprehensive event tracking (fixtures, infrastructure, power, shop orders)
-- ✅ Global error tracking with stack traces
-- ✅ Performance metrics (grid render, PDF export, app startup)
-- ✅ Analytics dashboard in Admin Panel
-- ✅ Data retention controls
-- ✅ Export/delete personal data
+- MVR / Vectorworks export support
+- Enhanced error checking (DMX conflicts, power overloads)
+- Basic ETC Eos console integration (OSC)
+- E-commerce → Supabase webhook (auto-fulfill purchases)
+- Auto-updater maintenance gate
 
-**Developer Tools:**
+### Planned (Post-Alpha)
 
-- ✅ Developer mode with DevTools
-- ✅ Feature flags system (13 experimental features)
-- ✅ Debug panels in all modules
-- ✅ F12 keyboard shortcut
-- ✅ Comprehensive documentation
-
-**Testing Infrastructure:**
-
-- ✅ Vitest + React Testing Library setup
-- ✅ 235+ comprehensive tests (95-100% coverage on critical code)
-- ✅ CI/CD with GitHub Actions (Ubuntu, macOS, Windows)
-- ✅ Codecov integration for coverage tracking
-- ✅ Testing guides and reference documentation
-
-### 🚧 In Progress
-
-- 🚧 Equipment Manager fixture list UI (~30% remaining)
-- 🚧 Customizable paperwork export headers
-- 🚧 Fixture library with manufacturers
-- 🚧 Auto-complete system for fixture fields
-
-### ⬜ Planned (Post-Alpha)
-
-- ⬜ Eos integration (OSC)
-- ⬜ Vectorworks import/export
-- ⬜ Label printing (Dymo, Brother, Zebra)
-- ⬜ Cloud collaboration features
-- ⬜ Advanced reporting engine
+- Eos integration (OSC bidirectional sync)
+- Vectorworks XML import/export
+- Roll label printer support (Dymo, Brother, Zebra)
+- Sound Edition (Year 2)
+- Video Edition (Year 3+)
+- Production / Tour Edition (Year 3+)
 
 ---
 
-## 💰 Competitive Positioning
+## Competitive Positioning
 
 **vs LightWright 6:**
 
-| Feature       | LightWright 6        | ShowStack:Production  |
+| Feature       | LightWright 6        | ShowStack:Lighting    |
 | ------------- | -------------------- | --------------------- |
 | Price         | $845 one-time        | $249/year             |
 | Updates       | $625 every 3-5 years | Continuous (included) |
-| Collaboration | ❌                   | ✅ Real-time          |
-| Cloud Sync    | ❌                   | ✅ Optional           |
-| Modern UI     | ❌ (1990s)           | ✅ (2025)             |
-| Offline Mode  | ✅                   | ✅                    |
+| Collaboration | No                   | Cloud sync (optional) |
+| Cloud Sync    | No                   | Yes (optional)        |
+| Modern UI     | No (1990s)           | Yes (2025)            |
+| Offline Mode  | Yes                  | Yes                   |
+| Demo Mode     | No                   | Yes                   |
 
-**Year 1:** 71% cheaper ($249 vs $845)  
+**Year 1:** 71% cheaper ($249 vs $845)
 **3 Years:** 49% cheaper ($747 vs $1,470)
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 ### Desktop App (Electron)
 
 - **Runtime:** Node.js 20+
-- **Framework:** Electron 39.2+
-- **Database:** sql.js (SQLite → WebAssembly)
+- **Framework:** Electron 39+
+- **Database:** better-sqlite3 (main process) + PowerSync schema (offline-first sync)
 - **Analytics:** PostHog (privacy-first, opt-in)
-- **Hardware:** electron-printer, osc-js
 
 ### Frontend (React)
 
@@ -281,119 +253,66 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
 - **Language:** TypeScript 5.9+
 - **State:** Zustand (9 stores)
 - **UI:** Tailwind CSS + Radix UI
-- **Build:** Vite
+- **Build:** Vite (via electron-vite)
 - **Routing:** React Router v6
 
-### Backend (Optional Cloud Sync)
+### Cloud Services
 
-- **API:** Express.js + PostgreSQL
-- **Auth:** JWT
-- **Realtime:** Socket.io
-- **Storage:** AWS S3 / Cloudflare R2
+- **Auth:** Supabase Auth (email/password)
+- **Database:** Supabase (PostgreSQL) — licenses, user accounts
+- **Sync:** PowerSync — offline-first project sync across devices
+- **Analytics:** PostHog
 
 ---
 
-## 📖 Documentation
+## Documentation
 
 ### User Documentation
 
-- **[Project Status](PROJECT_STATUS.md)** - Complete feature tracking and development roadmap
+- **[Project Status](PROJECT_STATUS.md)** — Complete feature tracking and development roadmap
+- **[Licensing System](docs/user/LICENSING_SYSTEM_README.md)** — License management and demo mode guide
+- **[Admin Panel Guide](docs/user/ADMIN_PANEL_USER_GUIDE.md)** — Admin panel user guide
 
 ### Developer Documentation
 
-- **[Developer Mode Guide](DEVELOPER_MODE.md)** - Enable debugging, feature flags, and DevTools
-- **[Telemetry Implementation](TELEMETRY_IMPLEMENTATION_SUMMARY.md)** - Privacy-first analytics system
-- **[PostHog Setup](POSTHOG_SETUP.md)** - Analytics configuration and monitoring
+- **[Architecture](docs/development/ARCHITECTURE.md)** — System architecture overview
+- **[Dev Setup](docs/development/dev-setup.md)** — Environment setup, Supabase, PowerSync
+- **[Claude Code Quickstart](docs/development/CLAUDE_CODE_QUICKSTART.md)** — AI-assisted development guide
+- **[Testing Guide](docs/testing/TESTING_GUIDE.md)** — Testing patterns and coverage requirements
 
 ### Project Planning
 
-- **[Technical Specification](docs/technical-spec.md)** - Complete feature specs, database schema, architecture
-- **[Pricing Strategy](docs/pricing.md)** - Market analysis, revenue model, go-to-market plan
-- **[Development Setup](docs/dev-setup.md)** - Environment setup, testing, building
-- **[POC README](proof-of-concept/README.md)** - Proof-of-concept documentation
+- **[Edition Strategy](docs/architecture/naming-and-editions.md)** — Edition structure and pricing
+- **[Licensing Architecture](docs/architecture/migration-unified-licensing.md)** — License-based feature access
+- **[Pricing Strategy](docs/business/pricing.md)** — Market analysis and revenue model
+- **[Post-Refactor Roadmap](docs/features/POST_REFACTOR_ROADMAP.md)** — E-commerce pipeline, update distribution
 
 ---
 
-## 🗺️ Roadmap
-
-### Phase 1: Foundation (Months 1-2)
-
-- [x] Proof-of-concept (virtual grid)
-- [ ] Electron app shell
-- [ ] SQLite database
-- [ ] CRUD operations
-- [ ] Sorting & filtering
-- [ ] Auto-complete
-
-### Phase 2: Power & Control (Months 3-4)
-
-- [ ] Dimmer rack configuration
-- [ ] Circuit management
-- [ ] DMX map visualization
-- [ ] Error checking
-- [ ] Multi-cable tracking
-
-### Phase 3-7: See [docs/technical-spec.md](docs/technical-spec.md)
-
----
-
-## 🤝 Contributing
-
-This is currently a private project in early development. Contributions will be welcomed once we reach beta.
-
-### Development Workflow
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📊 Performance Targets
+## Performance Targets
 
 - **Load time:** <2 seconds for 5,000 fixture project
 - **Grid rendering:** 60 FPS with virtual scrolling
 - **PDF generation:** <5 seconds for 50-page report
-- **Sync time:** <10 seconds for typical project
 
 ---
 
-## 📄 License
+## License
 
-Copyright © 2025 Lytrix / Josh Karp Designs
+Copyright © 2025–2026 Lytrix / Josh Karp Designs
 
-License TBD - Currently proprietary during development.
-
----
-
-## 🎯 Success Metrics
-
-### Month 3 Target
-
-- ✅ Core spreadsheet interface complete
-- ✅ 10 beta testers
-- ✅ 60 FPS performance
-- ✅ Positive UX feedback
-
-### Month 12 Target (Launch)
-
-- 100+ paying customers
-- $10k+ MRR
-- NPS >50
-- Public launch at USITT or LDI
+Proprietary — all rights reserved during development. License terms TBD at public launch.
 
 ---
 
-## 📞 Contact
+## Contact
 
-**Josh Karp**  
-Lytrix / Josh Karp Designs  
+**Josh Karp**
+Lytrix / Josh Karp Designs
 [jkarp.com](https://jkarp.com)
 
 ---
 
-**Built with ❤️ for the live entertainment industry**
+**Built for the live entertainment industry**
 
-🎭 Theater • 🎵 Concert • 📺 Broadcast • 🎬 Film/TV
+Theater • Concert • Broadcast • Film/TV

@@ -1,9 +1,14 @@
 # Shop Order Builder: Table-Based Redesign Migration Plan
 
+> **ARCHIVED — January 20, 2026**
+> This migration is complete. The Shop Order table redesign shipped in PR #63.
+> All planned phases (database changes, ShopOrderTable component, print view, clipboard paste, CSV export) are implemented and in production.
+> See `project_status.md` → "Shop Order Tool" for the current feature status.
+
 **Created:** December 30, 2024
-**Last Updated:** December 30, 2024
-**Status:** Planned
-**Target Release:** TBD
+**Last Updated:** January 20, 2026
+**Status:** ✅ Complete (PR #63)
+**Target Release:** v0.1.0-alpha.2
 **Purpose:** Migrate Shop Order builder from dialog-based "insert item" methodology to spreadsheet-like table format
 
 ---

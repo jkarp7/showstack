@@ -1,10 +1,10 @@
 # ShowStack Project Status
 
 **Created:** December 18, 2025
-**Last Updated:** February 23, 2026
+**Last Updated:** March 2026
 **Current Version:** 0.1.0-alpha
-**Development Phase:** Alpha (Renovation ~95% complete)
-**Active Branch:** `feature/project-families`
+**Development Phase:** Alpha (Renovation complete, Supabase/PowerSync cloud services integrated)
+**Active Branch:** `develop`
 
 This document tracks the development status of all ShowStack feature domains and editions. It serves as the central source of truth for what's completed, in progress, and planned.
 
@@ -88,19 +88,24 @@ This document tracks the development status of all ShowStack feature domains and
 
 ---
 
-### 📋 On Hold / Future Planning
+### 📋 Cloud Services — Implemented via Supabase + PowerSync
 
-**Cloud-Native Architecture (Issues #34 + #33):**
+The original cloud-native architecture plan (Issues #33 + #34) called for a custom Express.js + PostgreSQL + Socket.io backend. That plan was archived in favor of Supabase and PowerSync, which provide the same capabilities with significantly less infrastructure to maintain.
 
-- Comprehensive 15-16 week implementation plan created
-- Backend server (Express.js + PostgreSQL + Socket.io)
-- Real-time collaboration using Operational Transform (OT)
-- WebSocket integration for instant updates
-- JWT authentication with server-side sessions
-- Bi-directional sync engine with conflict resolution
-- Plan saved to: `docs/CLOUD_NATIVE_ARCHITECTURE_PLAN.md`
-- **Status**: On hold until core feature set is complete
-- **Decision**: Focus on finishing existing features before major architectural overhaul
+**Implemented (February 2026, PR #80):**
+
+- **Supabase Auth** — sign in/up, password reset, session management
+- **Supabase Licenses table** — auto-claim by email, perpetual fallback model, cloud sync flag, tier-based feature limits
+- **PowerSync** — offline-first sync architecture; sync enabled per license tier via `cloud_sync` flag
+- **Demo Mode** — restricted access for unauthenticated users (25 fixtures, no exports, no cloud sync)
+
+**Still Pending:**
+
+- E-commerce webhook → Supabase Edge Function (auto-fulfill purchases from Stripe/Shopify)
+- Auto-updater maintenance gate (block updates released after `maintenanceEndDate`)
+
+See `docs/features/POST_REFACTOR_ROADMAP.md` for detailed specs on pending items.
+The original cloud architecture plan is archived at `docs/archive/CLOUD_NATIVE_ARCHITECTURE_PLAN.md`.
 
 ---
 

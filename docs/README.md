@@ -2,7 +2,7 @@
 
 Welcome to the ShowStack documentation! This directory contains all project documentation organized by category.
 
-**Last Updated:** December 28, 2024
+**Last Updated:** March 2026
 
 ---
 
@@ -17,10 +17,18 @@ Strategic architecture decisions and implementation guides for the unified appli
 
 ### `/features` - Feature Specifications
 
-Detailed specifications and analysis for specific features and integrations.
+Detailed specifications and roadmaps for features in development or planned.
 
+- **`POST_REFACTOR_ROADMAP.md`** - Outstanding work: e-commerce pipeline, auto-updater gate
 - **`migration-sound-features.md`** - Complete specification for Sound Edition features
-- **`minotaur-parity-analysis.md`** - Analysis of Minotaur competitor for sound features
+- **`migration-production-features.md`** - Production edition feature specs
+- **`console-integration-plan.md`** - ETC Eos / GrandMA console integration plan
+- **`vectorworks-integration-plan.md`** - Vectorworks XML import/export plan
+- **`maintenance-menu-system-plan.md`** - LightWright parity: maintenance menu / fixture categories
+- **`BLUEPRINT_TOOL_PLAN.md`** - Blueprint tool planning
+- **`ROLL_LABEL_PRINTER_PLAN.md`** - Roll label printer support
+
+> Completed feature migration plans are in `/archive`.
 
 ### `/business` - Business Documentation
 
@@ -203,4 +211,4 @@ If you can't find what you're looking for:
 ---
 
 **Documentation maintained by the ShowStack team**
-**Last major reorganization:** December 28, 2024
+**Last major reorganization:** March 2026
