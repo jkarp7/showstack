@@ -60,6 +60,17 @@ export function useProjectMenuHandlers() {
       }
     };
 
+    const handleGeneratePaperwork = () => {
+      const currentPath = window.location.hash;
+      const projectIdMatch = currentPath.match(/\/project\/([^/]+)/);
+      if (projectIdMatch) {
+        const projectId = projectIdMatch[1];
+        navigate(`/project/${projectId}/module/production/system-docs`);
+      } else {
+        navigate('/module/production/system-docs');
+      }
+    };
+
     const handleSaveAsCopy = async () => {
       // HashRouter puts the path in window.location.hash (e.g. "#/project/some-uuid")
       const currentPath = window.location.hash;
@@ -88,6 +99,7 @@ export function useProjectMenuHandlers() {
     window.api.menu.on('menu:projectSettings', handleProjectSettings);
     window.api.menu.on('menu:saveAsCopy', handleSaveAsCopy);
     window.api.menu.on('menu:exportProject', handleExportProject);
+    window.api.menu.on('menu:generatePaperwork', handleGeneratePaperwork);
 
     // Cleanup on unmount
     return () => {
@@ -95,6 +107,7 @@ export function useProjectMenuHandlers() {
       window.api.menu.off('menu:projectSettings', handleProjectSettings);
       window.api.menu.off('menu:saveAsCopy', handleSaveAsCopy);
       window.api.menu.off('menu:exportProject', handleExportProject);
+      window.api.menu.off('menu:generatePaperwork', handleGeneratePaperwork);
     };
   }, [navigate, params, openSettingsDialog, currentProjectName]);
 }

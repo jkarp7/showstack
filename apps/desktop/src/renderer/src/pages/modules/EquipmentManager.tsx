@@ -932,12 +932,20 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     setSelectedRows(new Set());
   };
 
+  // Duplicate selected fixtures
+  const handleDuplicate = () => {
+    const selectedFixtures = fixtures.filter((f) => selectedRows.has(f.id));
+    const copies = selectedFixtures.map(({ id: _id, ...rest }) => rest);
+    addMultipleFixtures(copies);
+  };
+
   // Register menu handlers
   useEquipmentMenuHandlers({
     selectedRows,
     fixtures: processedFixtures,
     onAddFixture: () => setIsAddFixtureDialogOpen(true),
     onBulkEdit: () => setIsBulkEditDialogOpen(true),
+    onDuplicate: handleDuplicate,
     onSelectAll: handleSelectAll,
     onDeselectAll: handleDeselectAll,
     onUndo: undo,
@@ -948,6 +956,38 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     onExportGrandMA2: handleExportGrandMA2,
     onExportGrandMA3: handleExportGrandMA3,
   });
+
+  // Update menu context when active tab changes
+  useEffect(() => {
+    const contextMap = {
+      fixtures: 'equipment',
+      infrastructure: 'infrastructure',
+      power: 'power',
+    } as const;
+    window.api?.menu?.setState({ context: contextMap[activeTab] });
+  }, [activeTab]);
+
+  // Handle menu events for infrastructure and conditional formatting
+  useEffect(() => {
+    if (!window.api?.menu) return;
+
+    const handleAddInfrastructureMenu = () => {
+      setActiveTab('infrastructure');
+      setIsAddInfrastructureDialogOpen(true);
+    };
+
+    const handleConditionalFormattingMenu = () => {
+      setIsConditionalFormattingOpen(true);
+    };
+
+    window.api.menu.on('menu:addInfrastructure', handleAddInfrastructureMenu);
+    window.api.menu.on('menu:conditionalFormatting', handleConditionalFormattingMenu);
+
+    return () => {
+      window.api.menu.off('menu:addInfrastructure', handleAddInfrastructureMenu);
+      window.api.menu.off('menu:conditionalFormatting', handleConditionalFormattingMenu);
+    };
+  }, []);
 
   return (
     <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
@@ -1041,8 +1081,9 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
               onDeselectAll={() => setSelectedRows(new Set())}
               onHideSelected={handleHideSelected}
               onUnhideSelected={handleUnhideSelected}
+              onDuplicate={handleDuplicate}
+              onExportCSV={handleExportCSV}
               onUserColumnSettings={() => setIsUserColumnSettingsOpen(true)}
-              onConditionalFormatting={() => setIsConditionalFormattingOpen(true)}
               columnVisibility={columnVisibility}
               onColumnVisibilityChange={handleColumnVisibilityChange}
               userColumnDefinitions={userColumnDefinitions}

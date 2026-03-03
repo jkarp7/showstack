@@ -180,7 +180,9 @@ function buildFileMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
 function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructorOptions {
   const isToolContext = ['equipment', 'shop-order'].includes(state.context);
   const isEquipment = state.context === 'equipment';
+  const isInfrastructure = state.context === 'infrastructure';
   const isShopOrder = state.context === 'shop-order';
+  const isSelectableContext = isToolContext || isInfrastructure;
 
   return {
     label: 'Edit',
@@ -213,6 +215,12 @@ function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
         click: () => sendToRenderer('menu:addFixture'),
       },
       {
+        label: 'Add Infrastructure',
+        accelerator: 'CmdOrCtrl+Shift+I',
+        enabled: isInfrastructure,
+        click: () => sendToRenderer('menu:addInfrastructure'),
+      },
+      {
         label: 'Add Section',
         enabled: isShopOrder,
         click: () => sendToRenderer('menu:addSection'),
@@ -225,7 +233,7 @@ function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
       {
         label: 'Duplicate',
         accelerator: 'CmdOrCtrl+D',
-        enabled: isToolContext && state.hasSelection,
+        enabled: isEquipment && state.hasSelection,
         click: () => sendToRenderer('menu:duplicate'),
       },
       { type: 'separator' },
@@ -233,13 +241,13 @@ function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
       {
         label: 'Select All',
         accelerator: 'CmdOrCtrl+A',
-        enabled: isToolContext,
+        enabled: isSelectableContext,
         click: () => sendToRenderer('menu:selectAll'),
       },
       {
         label: 'Deselect All',
         accelerator: 'Escape',
-        enabled: isToolContext && state.hasSelection,
+        enabled: isSelectableContext && state.hasSelection,
         click: () => sendToRenderer('menu:deselectAll'),
       },
     ],
@@ -267,6 +275,11 @@ function buildViewMenu(state: MenuStateData): MenuItemConstructorOptions {
           {
             label: 'User Columns...',
             click: () => sendToRenderer('menu:userColumns'),
+          },
+          { type: 'separator' },
+          {
+            label: 'Conditional Formatting...',
+            click: () => sendToRenderer('menu:conditionalFormatting'),
           },
         ],
       },
@@ -354,6 +367,11 @@ function buildProjectMenu(state: MenuStateData): MenuItemConstructorOptions {
       {
         label: 'Project Settings...',
         click: () => sendToRenderer('menu:projectSettings'),
+      },
+      { type: 'separator' },
+      {
+        label: 'Generate Paperwork...',
+        click: () => sendToRenderer('menu:generatePaperwork'),
       },
       { type: 'separator' },
       {
