@@ -178,11 +178,14 @@ function buildFileMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
  * Edit Menu
  */
 function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructorOptions {
+  // isToolContext: contexts with undo/redo and save semantics (grid-based tools with dirty state)
   const isToolContext = ['equipment', 'shop-order'].includes(state.context);
   const isEquipment = state.context === 'equipment';
   const isInfrastructure = state.context === 'infrastructure';
   const isShopOrder = state.context === 'shop-order';
   const isPower = state.context === 'power';
+  // isSelectableContext: all grid contexts support Select All / Deselect All;
+  // shop-order is included via isToolContext; infrastructure and power are separate tabs
   const isSelectableContext = isToolContext || isInfrastructure || isPower;
 
   return {

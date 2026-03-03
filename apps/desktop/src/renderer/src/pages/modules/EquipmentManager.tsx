@@ -968,7 +968,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     },
   });
 
-  // Update menu context when active tab changes
+  // Update menu context when active tab changes; reset on unmount
   useEffect(() => {
     const contextMap = {
       fixtures: 'equipment',
@@ -976,6 +976,9 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
       power: 'power',
     } as const;
     window.api?.menu?.setState({ context: contextMap[activeTab] });
+    return () => {
+      window.api?.menu?.setState({ context: 'module' });
+    };
   }, [activeTab]);
 
   return (
@@ -1070,7 +1073,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
               onDeselectAll={() => setSelectedRows(new Set())}
               onHideSelected={handleHideSelected}
               onUnhideSelected={handleUnhideSelected}
-              onDuplicate={handleDuplicate}
+              onDuplicate={activeTab === 'fixtures' ? handleDuplicate : undefined}
               onExportCSV={handleExportCSV}
               onUserColumnSettings={() => setIsUserColumnSettingsOpen(true)}
               columnVisibility={columnVisibility}
