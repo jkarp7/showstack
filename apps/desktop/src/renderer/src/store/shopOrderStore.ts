@@ -183,8 +183,9 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
             parentData = {
               parent_project_id: data.parent_project_id,
               venue: parentProject.venue,
-              // Map logo
-              logo_url: parentProject.logo_path,
+              // logo_path is a local file path, not a URL — pass as storage path only;
+              // logo_url must be a valid URL or empty string per schema validation
+              logo_url: '',
               logo_storage_path: parentProject.logo_path,
               // Map designers
               ld_name: parentProject.lighting_designer,
@@ -212,7 +213,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       const project = await window.api.prep.projects.create({
         production_name: data.production_name,
         venue: data.venue,
-        disciplines: JSON.stringify(data.disciplines || ['lighting']),
+        disciplines: data.disciplines || ['lighting'],
         order_date: Date.now(),
         current_revision: 0,
         ...parentData, // Merge in parent project data

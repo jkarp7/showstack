@@ -86,6 +86,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = useState(false);
   const [isUserColumnSettingsOpen, setIsUserColumnSettingsOpen] = useState(false);
   const [isConditionalFormattingOpen, setIsConditionalFormattingOpen] = useState(false);
+  const [isColumnVisibilityMenuOpen, setIsColumnVisibilityMenuOpen] = useState(false);
 
   // Power features state
   const [isRackManagerOpen, setIsRackManagerOpen] = useState(false);
@@ -955,6 +956,10 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     onExportEos: handleExportEos,
     onExportGrandMA2: handleExportGrandMA2,
     onExportGrandMA3: handleExportGrandMA3,
+    onColumnVisibility: () => setIsColumnVisibilityMenuOpen(true),
+    onUserColumns: () => setIsUserColumnSettingsOpen(true),
+    onClearSort: () => setSortConfigs([]),
+    onClearFilters: handleClearFilters,
   });
 
   // Update menu context when active tab changes
@@ -1087,6 +1092,8 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
               columnVisibility={columnVisibility}
               onColumnVisibilityChange={handleColumnVisibilityChange}
               userColumnDefinitions={userColumnDefinitions}
+              isColumnVisibilityMenuOpen={isColumnVisibilityMenuOpen}
+              onColumnVisibilityMenuOpenChange={setIsColumnVisibilityMenuOpen}
             />
           </div>
 

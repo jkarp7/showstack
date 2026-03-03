@@ -15,6 +15,8 @@ interface ToolbarProps {
   columnVisibility: ColumnVisibility;
   onColumnVisibilityChange: (visibility: ColumnVisibility) => void;
   userColumnDefinitions?: Record<string, string>;
+  isColumnVisibilityMenuOpen?: boolean;
+  onColumnVisibilityMenuOpenChange?: (open: boolean) => void;
 }
 
 export function Toolbar({
@@ -31,6 +33,8 @@ export function Toolbar({
   columnVisibility,
   onColumnVisibilityChange,
   userColumnDefinitions,
+  isColumnVisibilityMenuOpen,
+  onColumnVisibilityMenuOpenChange,
 }: ToolbarProps) {
   return (
     <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center gap-2">
@@ -120,6 +124,8 @@ export function Toolbar({
           visibility={columnVisibility}
           onVisibilityChange={onColumnVisibilityChange}
           userColumnDefinitions={userColumnDefinitions}
+          isOpen={isColumnVisibilityMenuOpen}
+          onOpenChange={onColumnVisibilityMenuOpenChange}
         />
       </div>
     </div>

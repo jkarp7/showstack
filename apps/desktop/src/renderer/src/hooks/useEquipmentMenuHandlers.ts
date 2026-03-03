@@ -16,6 +16,11 @@ interface EquipmentMenuHandlersProps {
   onExportEos?: () => void;
   onExportGrandMA2?: () => void;
   onExportGrandMA3?: () => void;
+  // View menu handlers
+  onColumnVisibility?: () => void;
+  onUserColumns?: () => void;
+  onClearSort?: () => void;
+  onClearFilters?: () => void;
 }
 
 /**
@@ -147,6 +152,45 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       }
     };
 
+    // View handlers
+    const handleColumnVisibility = () => {
+      const { onColumnVisibility } = propsRef.current;
+      if (onColumnVisibility) {
+        onColumnVisibility();
+      }
+    };
+
+    const handleUserColumns = () => {
+      const { onUserColumns } = propsRef.current;
+      if (onUserColumns) {
+        onUserColumns();
+      }
+    };
+
+    const handleSort = () => {
+      // Sort Options — SortBar is always visible inline; no dialog to open
+      logger.info('Sort options: use the Sort By bar in the Equipment Manager');
+    };
+
+    const handleClearSort = () => {
+      const { onClearSort } = propsRef.current;
+      if (onClearSort) {
+        onClearSort();
+      }
+    };
+
+    const handleFilters = () => {
+      // Filter Options — FilterBar is always visible inline; no dialog to open
+      logger.info('Filter options: use the Filter bar in the Equipment Manager');
+    };
+
+    const handleClearFilters = () => {
+      const { onClearFilters } = propsRef.current;
+      if (onClearFilters) {
+        onClearFilters();
+      }
+    };
+
     // Register all handlers
     window.api.menu.on('menu:print', handlePrint);
     window.api.menu.on('menu:export:csv', handleExportCSV);
@@ -160,6 +204,12 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
     window.api.menu.on('menu:deselectAll', handleDeselectAll);
     window.api.menu.on('menu:undo', handleUndo);
     window.api.menu.on('menu:redo', handleRedo);
+    window.api.menu.on('menu:columns', handleColumnVisibility);
+    window.api.menu.on('menu:userColumns', handleUserColumns);
+    window.api.menu.on('menu:sort', handleSort);
+    window.api.menu.on('menu:clearSort', handleClearSort);
+    window.api.menu.on('menu:filters', handleFilters);
+    window.api.menu.on('menu:clearFilters', handleClearFilters);
 
     // Cleanup on unmount
     return () => {
@@ -175,6 +225,12 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       window.api.menu.off('menu:deselectAll', handleDeselectAll);
       window.api.menu.off('menu:undo', handleUndo);
       window.api.menu.off('menu:redo', handleRedo);
+      window.api.menu.off('menu:columns', handleColumnVisibility);
+      window.api.menu.off('menu:userColumns', handleUserColumns);
+      window.api.menu.off('menu:sort', handleSort);
+      window.api.menu.off('menu:clearSort', handleClearSort);
+      window.api.menu.off('menu:filters', handleFilters);
+      window.api.menu.off('menu:clearFilters', handleClearFilters);
     };
     // Empty dependency array - only register listeners once on mount
     // Handlers read from propsRef.current to get latest values

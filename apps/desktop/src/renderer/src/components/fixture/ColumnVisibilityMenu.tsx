@@ -5,14 +5,23 @@ interface ColumnVisibilityMenuProps {
   visibility: ColumnVisibility;
   onVisibilityChange: (visibility: ColumnVisibility) => void;
   userColumnDefinitions?: Record<string, string>;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function ColumnVisibilityMenu({
   visibility,
   onVisibilityChange,
   userColumnDefinitions = {},
+  isOpen: isOpenProp,
+  onOpenChange,
 }: ColumnVisibilityMenuProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenInternal, setIsOpenInternal] = useState(false);
+  const isOpen = isOpenProp !== undefined ? isOpenProp : isOpenInternal;
+  const setIsOpen = (open: boolean) => {
+    setIsOpenInternal(open);
+    onOpenChange?.(open);
+  };
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const menuRef = useRef<HTMLDivElement>(null);
 
