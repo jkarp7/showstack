@@ -182,7 +182,8 @@ function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
   const isEquipment = state.context === 'equipment';
   const isInfrastructure = state.context === 'infrastructure';
   const isShopOrder = state.context === 'shop-order';
-  const isSelectableContext = isToolContext || isInfrastructure;
+  const isPower = state.context === 'power';
+  const isSelectableContext = isToolContext || isInfrastructure || isPower;
 
   return {
     label: 'Edit',
@@ -279,6 +280,7 @@ function buildViewMenu(state: MenuStateData): MenuItemConstructorOptions {
           { type: 'separator' },
           {
             label: 'Conditional Formatting...',
+            enabled: isEquipment,
             click: () => sendToRenderer('menu:conditionalFormatting'),
           },
         ],
@@ -289,6 +291,7 @@ function buildViewMenu(state: MenuStateData): MenuItemConstructorOptions {
         submenu: [
           {
             label: 'Sort Options...',
+            enabled: false, // SortBar is always visible inline; no dialog
             click: () => sendToRenderer('menu:sort'),
           },
           {
@@ -303,6 +306,7 @@ function buildViewMenu(state: MenuStateData): MenuItemConstructorOptions {
         submenu: [
           {
             label: 'Filter Options...',
+            enabled: false, // FilterBar is always visible inline; no dialog
             click: () => sendToRenderer('menu:filters'),
           },
           {

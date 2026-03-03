@@ -21,6 +21,9 @@ interface EquipmentMenuHandlersProps {
   onUserColumns?: () => void;
   onClearSort?: () => void;
   onClearFilters?: () => void;
+  onConditionalFormatting?: () => void;
+  // Edit menu handlers for non-fixture contexts
+  onAddInfrastructure?: () => void;
 }
 
 /**
@@ -191,6 +194,20 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       }
     };
 
+    const handleConditionalFormatting = () => {
+      const { onConditionalFormatting } = propsRef.current;
+      if (onConditionalFormatting) {
+        onConditionalFormatting();
+      }
+    };
+
+    const handleAddInfrastructure = () => {
+      const { onAddInfrastructure } = propsRef.current;
+      if (onAddInfrastructure) {
+        onAddInfrastructure();
+      }
+    };
+
     // Register all handlers
     window.api.menu.on('menu:print', handlePrint);
     window.api.menu.on('menu:export:csv', handleExportCSV);
@@ -210,6 +227,8 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
     window.api.menu.on('menu:clearSort', handleClearSort);
     window.api.menu.on('menu:filters', handleFilters);
     window.api.menu.on('menu:clearFilters', handleClearFilters);
+    window.api.menu.on('menu:conditionalFormatting', handleConditionalFormatting);
+    window.api.menu.on('menu:addInfrastructure', handleAddInfrastructure);
 
     // Cleanup on unmount
     return () => {
@@ -231,6 +250,8 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       window.api.menu.off('menu:clearSort', handleClearSort);
       window.api.menu.off('menu:filters', handleFilters);
       window.api.menu.off('menu:clearFilters', handleClearFilters);
+      window.api.menu.off('menu:conditionalFormatting', handleConditionalFormatting);
+      window.api.menu.off('menu:addInfrastructure', handleAddInfrastructure);
     };
     // Empty dependency array - only register listeners once on mount
     // Handlers read from propsRef.current to get latest values

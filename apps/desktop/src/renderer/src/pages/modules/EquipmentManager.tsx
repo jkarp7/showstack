@@ -936,6 +936,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   // Duplicate selected fixtures
   const handleDuplicate = () => {
     const selectedFixtures = fixtures.filter((f) => selectedRows.has(f.id));
+    if (selectedFixtures.length === 0) return;
     const copies = selectedFixtures.map(({ id: _id, ...rest }) => rest);
     addMultipleFixtures(copies);
   };
@@ -960,6 +961,11 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     onUserColumns: () => setIsUserColumnSettingsOpen(true),
     onClearSort: () => setSortConfigs([]),
     onClearFilters: handleClearFilters,
+    onConditionalFormatting: () => setIsConditionalFormattingOpen(true),
+    onAddInfrastructure: () => {
+      setActiveTab('infrastructure');
+      setIsAddInfrastructureDialogOpen(true);
+    },
   });
 
   // Update menu context when active tab changes
@@ -971,28 +977,6 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     } as const;
     window.api?.menu?.setState({ context: contextMap[activeTab] });
   }, [activeTab]);
-
-  // Handle menu events for infrastructure and conditional formatting
-  useEffect(() => {
-    if (!window.api?.menu) return;
-
-    const handleAddInfrastructureMenu = () => {
-      setActiveTab('infrastructure');
-      setIsAddInfrastructureDialogOpen(true);
-    };
-
-    const handleConditionalFormattingMenu = () => {
-      setIsConditionalFormattingOpen(true);
-    };
-
-    window.api.menu.on('menu:addInfrastructure', handleAddInfrastructureMenu);
-    window.api.menu.on('menu:conditionalFormatting', handleConditionalFormattingMenu);
-
-    return () => {
-      window.api.menu.off('menu:addInfrastructure', handleAddInfrastructureMenu);
-      window.api.menu.off('menu:conditionalFormatting', handleConditionalFormattingMenu);
-    };
-  }, []);
 
   return (
     <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">

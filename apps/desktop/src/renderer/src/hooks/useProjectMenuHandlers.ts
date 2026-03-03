@@ -67,6 +67,7 @@ export function useProjectMenuHandlers() {
         const projectId = projectIdMatch[1];
         navigate(`/project/${projectId}/module/production/system-docs`);
       } else {
+        logger.info('No project context for Generate Paperwork');
         navigate('/module/production/system-docs');
       }
     };

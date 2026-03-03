@@ -19,7 +19,7 @@ export function ColumnVisibilityMenu({
   const [isOpenInternal, setIsOpenInternal] = useState(false);
   const isOpen = isOpenProp !== undefined ? isOpenProp : isOpenInternal;
   const setIsOpen = (open: boolean) => {
-    setIsOpenInternal(open);
+    if (isOpenProp === undefined) setIsOpenInternal(open);
     onOpenChange?.(open);
   };
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
