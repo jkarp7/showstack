@@ -64,7 +64,7 @@ export function useProjectMenuHandlers() {
       if (params.projectId) {
         navigate(`/project/${params.projectId}/module/production/system-docs`);
       } else {
-        logger.info('No project context for Generate Paperwork');
+        logger.debug('No project context for Generate Paperwork — navigating to standalone path');
         navigate('/module/production/system-docs');
       }
     };
