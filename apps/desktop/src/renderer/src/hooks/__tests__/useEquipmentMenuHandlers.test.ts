@@ -167,17 +167,23 @@ describe('useEquipmentMenuHandlers', () => {
     });
   });
 
-  describe('menu:sort and menu:filters handlers', () => {
-    it('should register but not throw for stub menu:sort handler', () => {
+  describe('menu:sort and menu:filters not registered', () => {
+    it('should not register menu:sort (removed — SortBar is inline)', () => {
       renderHook(() => useEquipmentMenuHandlers(defaultProps));
 
-      expect(() => registeredHandlers['menu:sort']?.()).not.toThrow();
+      const registeredEvents = (window.api.menu.on as ReturnType<typeof vi.fn>).mock.calls.map(
+        (call: any[]) => call[0],
+      );
+      expect(registeredEvents).not.toContain('menu:sort');
     });
 
-    it('should register but not throw for stub menu:filters handler', () => {
+    it('should not register menu:filters (removed — FilterBar is inline)', () => {
       renderHook(() => useEquipmentMenuHandlers(defaultProps));
 
-      expect(() => registeredHandlers['menu:filters']?.()).not.toThrow();
+      const registeredEvents = (window.api.menu.on as ReturnType<typeof vi.fn>).mock.calls.map(
+        (call: any[]) => call[0],
+      );
+      expect(registeredEvents).not.toContain('menu:filters');
     });
   });
 

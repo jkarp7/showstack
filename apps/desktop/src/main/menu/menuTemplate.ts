@@ -293,11 +293,6 @@ function buildViewMenu(state: MenuStateData): MenuItemConstructorOptions {
         enabled: isEquipment,
         submenu: [
           {
-            label: 'Sort Options...',
-            enabled: false, // SortBar is always visible inline; no dialog
-            click: () => sendToRenderer('menu:sort'),
-          },
-          {
             label: 'Clear Sort',
             click: () => sendToRenderer('menu:clearSort'),
           },
@@ -307,11 +302,6 @@ function buildViewMenu(state: MenuStateData): MenuItemConstructorOptions {
         label: 'Filters',
         enabled: isEquipment,
         submenu: [
-          {
-            label: 'Filter Options...',
-            enabled: false, // FilterBar is always visible inline; no dialog
-            click: () => sendToRenderer('menu:filters'),
-          },
           {
             label: 'Clear Filters',
             click: () => sendToRenderer('menu:clearFilters'),

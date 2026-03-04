@@ -170,21 +170,11 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       }
     };
 
-    const handleSort = () => {
-      // Sort Options — SortBar is always visible inline; no dialog to open
-      logger.info('Sort options: use the Sort By bar in the Equipment Manager');
-    };
-
     const handleClearSort = () => {
       const { onClearSort } = propsRef.current;
       if (onClearSort) {
         onClearSort();
       }
-    };
-
-    const handleFilters = () => {
-      // Filter Options — FilterBar is always visible inline; no dialog to open
-      logger.info('Filter options: use the Filter bar in the Equipment Manager');
     };
 
     const handleClearFilters = () => {
@@ -223,9 +213,7 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
     window.api.menu.on('menu:redo', handleRedo);
     window.api.menu.on('menu:columns', handleColumnVisibility);
     window.api.menu.on('menu:userColumns', handleUserColumns);
-    window.api.menu.on('menu:sort', handleSort);
     window.api.menu.on('menu:clearSort', handleClearSort);
-    window.api.menu.on('menu:filters', handleFilters);
     window.api.menu.on('menu:clearFilters', handleClearFilters);
     window.api.menu.on('menu:conditionalFormatting', handleConditionalFormatting);
     window.api.menu.on('menu:addInfrastructure', handleAddInfrastructure);
@@ -246,9 +234,7 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       window.api.menu.off('menu:redo', handleRedo);
       window.api.menu.off('menu:columns', handleColumnVisibility);
       window.api.menu.off('menu:userColumns', handleUserColumns);
-      window.api.menu.off('menu:sort', handleSort);
       window.api.menu.off('menu:clearSort', handleClearSort);
-      window.api.menu.off('menu:filters', handleFilters);
       window.api.menu.off('menu:clearFilters', handleClearFilters);
       window.api.menu.off('menu:conditionalFormatting', handleConditionalFormatting);
       window.api.menu.off('menu:addInfrastructure', handleAddInfrastructure);
