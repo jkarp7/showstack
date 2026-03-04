@@ -27,10 +27,13 @@ describe('MenuContext type', () => {
       'settings',
     ];
 
-    // All should be valid MenuContext values — TypeScript compilation confirms this
-    expect(contexts).toHaveLength(13);
+    // TypeScript compilation confirms all values are valid MenuContext members.
+    // Presence checks are used here rather than a length assertion so adding a
+    // new context doesn't require updating this test.
     expect(contexts).toContain('infrastructure');
     expect(contexts).toContain('power');
+    expect(contexts).toContain('equipment');
+    expect(contexts).toContain('landing');
   });
 });
 

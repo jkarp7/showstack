@@ -10,11 +10,12 @@ import { useProjectMenuHandlers } from '../useProjectMenuHandlers';
  * that navigates to the system-docs (paperwork) module.
  */
 
-// Mock react-router-dom
+// Mock react-router-dom — mockParams is mutated per-test to simulate different route contexts
 const mockNavigate = vi.fn();
+let mockParams: Record<string, string> = {};
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
-  useParams: () => ({}),
+  useParams: () => mockParams,
 }));
 
 // Mock stores
@@ -32,6 +33,7 @@ describe('useProjectMenuHandlers', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockParams = {};
     registeredHandlers = {};
 
     // Capture registered handlers by event name
@@ -77,17 +79,10 @@ describe('useProjectMenuHandlers', () => {
   });
 
   describe('menu:generatePaperwork handler', () => {
-    it('should navigate to system-docs when inside a project context', () => {
-      // Simulate being on a project page
-      Object.defineProperty(window, 'location', {
-        configurable: true,
-        value: { hash: '#/project/proj-abc123/module/production/system-docs' },
-        writable: true,
-      });
+    it('should navigate to project system-docs when projectId is in route params', () => {
+      mockParams = { projectId: 'proj-abc123' };
 
       renderHook(() => useProjectMenuHandlers());
-
-      // Trigger the handler
       registeredHandlers['menu:generatePaperwork']?.();
 
       expect(mockNavigate).toHaveBeenCalledWith(
@@ -95,29 +90,19 @@ describe('useProjectMenuHandlers', () => {
       );
     });
 
-    it('should navigate to standalone system-docs when no project in URL', () => {
-      Object.defineProperty(window, 'location', {
-        configurable: true,
-        value: { hash: '#/' },
-        writable: true,
-      });
+    it('should navigate to standalone system-docs when no projectId in params', () => {
+      mockParams = {};
 
       renderHook(() => useProjectMenuHandlers());
-
       registeredHandlers['menu:generatePaperwork']?.();
 
       expect(mockNavigate).toHaveBeenCalledWith('/module/production/system-docs');
     });
 
-    it('should extract project ID correctly from nested route', () => {
-      Object.defineProperty(window, 'location', {
-        configurable: true,
-        value: { hash: '#/project/my-project-id/module/production/equipment' },
-        writable: true,
-      });
+    it('should use the projectId from params verbatim', () => {
+      mockParams = { projectId: 'my-project-id' };
 
       renderHook(() => useProjectMenuHandlers());
-
       registeredHandlers['menu:generatePaperwork']?.();
 
       expect(mockNavigate).toHaveBeenCalledWith(

@@ -61,10 +61,8 @@ export function useProjectMenuHandlers() {
     };
 
     const handleGeneratePaperwork = () => {
-      // Prefer router params when mounted inside a project route; fall back to hash parsing
-      const projectId = params.projectId ?? window.location.hash.match(/\/project\/([^/]+)/)?.[1];
-      if (projectId) {
-        navigate(`/project/${projectId}/module/production/system-docs`);
+      if (params.projectId) {
+        navigate(`/project/${params.projectId}/module/production/system-docs`);
       } else {
         logger.info('No project context for Generate Paperwork');
         navigate('/module/production/system-docs');

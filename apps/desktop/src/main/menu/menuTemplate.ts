@@ -282,6 +282,7 @@ function buildViewMenu(state: MenuStateData): MenuItemConstructorOptions {
           },
           { type: 'separator' },
           {
+            // Fixture-specific feature; disabled on other tabs for discoverability
             label: 'Conditional Formatting...',
             enabled: isEquipment,
             click: () => sendToRenderer('menu:conditionalFormatting'),

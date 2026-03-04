@@ -937,11 +937,11 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   // Only `id` is stripped — addMultipleFixtures assigns a new UUID and leaves all other
   // fields (circuit, patch, timestamps, etc.) to be overwritten by the caller or left as-is.
   // If the duplication contract changes (e.g. clear circuit assignments on copy), update here.
-  const handleDuplicate = () => {
+  const handleDuplicate = async () => {
     const selectedFixtures = fixtures.filter((f) => selectedRows.has(f.id));
     if (selectedFixtures.length === 0) return;
     const copies = selectedFixtures.map(({ id: _id, ...rest }) => rest);
-    addMultipleFixtures(copies);
+    await addMultipleFixtures(copies);
   };
 
   // Register menu handlers
