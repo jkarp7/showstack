@@ -934,14 +934,22 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   };
 
   // Duplicate selected fixtures
-  // Only `id` is stripped — addMultipleFixtures assigns a new UUID and leaves all other
-  // fields (circuit, patch, timestamps, etc.) to be overwritten by the caller or left as-is.
-  // If the duplication contract changes (e.g. clear circuit assignments on copy), update here.
+  // `id` is stripped so addMultipleFixtures assigns a fresh UUID to each copy.
+  // Uniqueness-sensitive patch fields are also cleared — duplicated fixtures should
+  // not inherit circuit/dimmer/universe assignments from the original, as that would
+  // create conflicting address data that must be resolved manually anyway.
   const handleDuplicate = async () => {
     const selectedFixtures = fixtures.filter((f) => selectedRows.has(f.id));
     if (selectedFixtures.length === 0) return;
-    const copies = selectedFixtures.map(({ id: _id, ...rest }) => rest);
-    await addMultipleFixtures(copies);
+    const copies = selectedFixtures.map(
+      ({ id: _id, circuit, circuit_number, dimmer, universe, dmx_address, address, ...rest }) =>
+        rest,
+    );
+    try {
+      await addMultipleFixtures(copies);
+    } catch (error) {
+      logger.error('Failed to duplicate fixtures', { error: String(error) });
+    }
   };
 
   // Register menu handlers

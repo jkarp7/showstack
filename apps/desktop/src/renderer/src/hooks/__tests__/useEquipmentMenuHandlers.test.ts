@@ -6,8 +6,8 @@ import { useEquipmentMenuHandlers } from '../useEquipmentMenuHandlers';
  * useEquipmentMenuHandlers Hook Tests
  *
  * Target: 70%+ coverage
- * Tests: view menu handlers (menu:columns, menu:userColumns, menu:clearSort,
- * menu:clearFilters, menu:conditionalFormatting, menu:addInfrastructure)
+ * Tests: view menu handlers (menu:columns, menu:userColumns, menu:sort, menu:filters,
+ * menu:clearSort, menu:clearFilters, menu:conditionalFormatting, menu:addInfrastructure)
  * plus registration/cleanup of the full handler set.
  */
 
@@ -43,6 +43,8 @@ describe('useEquipmentMenuHandlers', () => {
       );
       expect(registeredEvents).toContain('menu:columns');
       expect(registeredEvents).toContain('menu:userColumns');
+      expect(registeredEvents).toContain('menu:sort');
+      expect(registeredEvents).toContain('menu:filters');
       expect(registeredEvents).toContain('menu:clearSort');
       expect(registeredEvents).toContain('menu:clearFilters');
       expect(registeredEvents).toContain('menu:conditionalFormatting');
@@ -58,6 +60,8 @@ describe('useEquipmentMenuHandlers', () => {
       );
       expect(unregisteredEvents).toContain('menu:columns');
       expect(unregisteredEvents).toContain('menu:userColumns');
+      expect(unregisteredEvents).toContain('menu:sort');
+      expect(unregisteredEvents).toContain('menu:filters');
       expect(unregisteredEvents).toContain('menu:clearSort');
       expect(unregisteredEvents).toContain('menu:clearFilters');
       expect(unregisteredEvents).toContain('menu:conditionalFormatting');
@@ -167,23 +171,37 @@ describe('useEquipmentMenuHandlers', () => {
     });
   });
 
-  describe('menu:sort and menu:filters not registered', () => {
-    it('should not register menu:sort (removed — SortBar is inline)', () => {
-      renderHook(() => useEquipmentMenuHandlers(defaultProps));
+  describe('menu:sort handler', () => {
+    it('should call onSort when menu:sort fires', () => {
+      const onSort = vi.fn();
+      renderHook(() => useEquipmentMenuHandlers({ ...defaultProps, onSort }));
 
-      const registeredEvents = (window.api.menu.on as ReturnType<typeof vi.fn>).mock.calls.map(
-        (call: any[]) => call[0],
-      );
-      expect(registeredEvents).not.toContain('menu:sort');
+      registeredHandlers['menu:sort']?.();
+
+      expect(onSort).toHaveBeenCalledTimes(1);
     });
 
-    it('should not register menu:filters (removed — FilterBar is inline)', () => {
+    it('should not throw when onSort is not provided', () => {
       renderHook(() => useEquipmentMenuHandlers(defaultProps));
 
-      const registeredEvents = (window.api.menu.on as ReturnType<typeof vi.fn>).mock.calls.map(
-        (call: any[]) => call[0],
-      );
-      expect(registeredEvents).not.toContain('menu:filters');
+      expect(() => registeredHandlers['menu:sort']?.()).not.toThrow();
+    });
+  });
+
+  describe('menu:filters handler', () => {
+    it('should call onFilters when menu:filters fires', () => {
+      const onFilters = vi.fn();
+      renderHook(() => useEquipmentMenuHandlers({ ...defaultProps, onFilters }));
+
+      registeredHandlers['menu:filters']?.();
+
+      expect(onFilters).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not throw when onFilters is not provided', () => {
+      renderHook(() => useEquipmentMenuHandlers(defaultProps));
+
+      expect(() => registeredHandlers['menu:filters']?.()).not.toThrow();
     });
   });
 

@@ -45,42 +45,94 @@ describe('Tab → menu context mapping', () => {
   });
 });
 
-// ─── 2. Duplicate id-stripping transformation ─────────────────────────────────
+// ─── 2. Duplicate transformation ──────────────────────────────────────────────
 
-// The handleDuplicate function strips `id` before passing fixtures to
-// addMultipleFixtures so each copy receives a fresh UUID from the store.
-// All other fields (circuit, patch, position, etc.) are preserved verbatim.
-const stripId = <T extends { id: string }>(fixture: T): Omit<T, 'id'> => {
-  const { id: _id, ...rest } = fixture;
+// The handleDuplicate function strips `id` AND clears uniqueness-sensitive patch
+// fields before passing fixtures to addMultipleFixtures. This mirrors the exact
+// destructuring used in EquipmentManager:
+//   ({ id: _id, circuit, circuit_number, dimmer, universe, dmx_address, address, ...rest }) => rest
+//
+// Non-patch fields (name, position, color, purpose, etc.) are preserved verbatim.
+const stripForDuplicate = <
+  T extends {
+    id: string;
+    circuit?: unknown;
+    circuit_number?: unknown;
+    dimmer?: unknown;
+    universe?: unknown;
+    dmx_address?: unknown;
+    address?: unknown;
+  },
+>(
+  fixture: T,
+): Omit<
+  T,
+  'id' | 'circuit' | 'circuit_number' | 'dimmer' | 'universe' | 'dmx_address' | 'address'
+> => {
+  const {
+    id: _id,
+    circuit,
+    circuit_number,
+    dimmer,
+    universe,
+    dmx_address,
+    address,
+    ...rest
+  } = fixture;
   return rest;
 };
 
-describe('handleDuplicate id-stripping transformation', () => {
+describe('handleDuplicate transformation', () => {
   it('strips id from a single fixture', () => {
     const fixture = { id: 'abc-123', name: 'Spot 1', circuit: '1/1' };
-    const copy = stripId(fixture);
+    const copy = stripForDuplicate(fixture);
 
     expect(copy).not.toHaveProperty('id');
     expect(copy.name).toBe('Spot 1');
-    expect(copy.circuit).toBe('1/1');
   });
 
-  it('preserves all non-id fields verbatim', () => {
+  it('clears all uniqueness-sensitive patch fields', () => {
     const fixture = {
       id: 'xyz',
       name: 'Follow Spot',
       circuit: '2/5',
-      dimmer_address: 42,
+      circuit_number: '5',
+      dimmer: 'Rack A',
+      universe: 1,
+      dmx_address: 42,
+      address: '1/42',
       position: 'Balcony Rail',
       color: 'R27',
       purpose: 'Key Light',
     };
-    const copy = stripId(fixture);
+    const copy = stripForDuplicate(fixture);
+
+    expect(copy).not.toHaveProperty('id');
+    expect(copy).not.toHaveProperty('circuit');
+    expect(copy).not.toHaveProperty('circuit_number');
+    expect(copy).not.toHaveProperty('dimmer');
+    expect(copy).not.toHaveProperty('universe');
+    expect(copy).not.toHaveProperty('dmx_address');
+    expect(copy).not.toHaveProperty('address');
+  });
+
+  it('preserves all non-patch fields verbatim', () => {
+    const fixture = {
+      id: 'xyz',
+      name: 'Follow Spot',
+      circuit: '2/5',
+      dimmer: 'Rack A',
+      universe: 1,
+      dmx_address: 42,
+      address: '1/42',
+      position: 'Balcony Rail',
+      color: 'R27',
+      purpose: 'Key Light',
+    };
+    const copy = stripForDuplicate(fixture);
 
     expect(copy).toEqual({
       name: 'Follow Spot',
-      circuit: '2/5',
-      dimmer_address: 42,
       position: 'Balcony Rail',
       color: 'R27',
       purpose: 'Key Light',
@@ -89,13 +141,18 @@ describe('handleDuplicate id-stripping transformation', () => {
 
   it('produces independent copies for multiple fixtures', () => {
     const fixtures = [
-      { id: 'id-1', name: 'Spot A', circuit: '1/1' },
-      { id: 'id-2', name: 'Spot B', circuit: '1/2' },
+      { id: 'id-1', name: 'Spot A', circuit: '1/1', universe: 1, dmx_address: 1 },
+      { id: 'id-2', name: 'Spot B', circuit: '1/2', universe: 1, dmx_address: 2 },
     ];
-    const copies = fixtures.map(stripId);
+    const copies = fixtures.map(stripForDuplicate);
 
     expect(copies).toHaveLength(2);
-    copies.forEach((copy) => expect(copy).not.toHaveProperty('id'));
+    copies.forEach((copy) => {
+      expect(copy).not.toHaveProperty('id');
+      expect(copy).not.toHaveProperty('circuit');
+      expect(copy).not.toHaveProperty('universe');
+      expect(copy).not.toHaveProperty('dmx_address');
+    });
     expect(copies[0].name).toBe('Spot A');
     expect(copies[1].name).toBe('Spot B');
   });
@@ -107,7 +164,7 @@ describe('handleDuplicate id-stripping transformation', () => {
 
     // handleDuplicate returns early here; no copies should be produced
     expect(selected).toHaveLength(0);
-    const copies = selected.map(stripId);
+    const copies = selected.map(stripForDuplicate);
     expect(copies).toHaveLength(0);
   });
 
@@ -117,9 +174,10 @@ describe('handleDuplicate id-stripping transformation', () => {
       { id: 'id-1', name: 'Selected Spot', circuit: '1/1' },
       { id: 'id-2', name: 'Unselected Spot', circuit: '1/2' },
     ];
-    const copies = fixtures.filter((f) => selectedIds.has(f.id)).map(stripId);
+    const copies = fixtures.filter((f) => selectedIds.has(f.id)).map(stripForDuplicate);
 
     expect(copies).toHaveLength(1);
     expect(copies[0].name).toBe('Selected Spot');
+    expect(copies[0]).not.toHaveProperty('circuit');
   });
 });

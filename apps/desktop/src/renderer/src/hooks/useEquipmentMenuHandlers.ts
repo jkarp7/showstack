@@ -19,6 +19,8 @@ interface EquipmentMenuHandlersProps {
   // View menu handlers
   onColumnVisibility?: () => void;
   onUserColumns?: () => void;
+  onSort?: () => void;
+  onFilters?: () => void;
   onClearSort?: () => void;
   onClearFilters?: () => void;
   onConditionalFormatting?: () => void;
@@ -158,6 +160,8 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
     // View handlers
     const handleColumnVisibility = () => propsRef.current.onColumnVisibility?.();
     const handleUserColumns = () => propsRef.current.onUserColumns?.();
+    const handleSort = () => propsRef.current.onSort?.();
+    const handleFilters = () => propsRef.current.onFilters?.();
     const handleClearSort = () => propsRef.current.onClearSort?.();
     const handleClearFilters = () => propsRef.current.onClearFilters?.();
     const handleConditionalFormatting = () => propsRef.current.onConditionalFormatting?.();
@@ -178,6 +182,8 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
     window.api.menu.on('menu:redo', handleRedo);
     window.api.menu.on('menu:columns', handleColumnVisibility);
     window.api.menu.on('menu:userColumns', handleUserColumns);
+    window.api.menu.on('menu:sort', handleSort);
+    window.api.menu.on('menu:filters', handleFilters);
     window.api.menu.on('menu:clearSort', handleClearSort);
     window.api.menu.on('menu:clearFilters', handleClearFilters);
     window.api.menu.on('menu:conditionalFormatting', handleConditionalFormatting);
@@ -199,6 +205,8 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       window.api.menu.off('menu:redo', handleRedo);
       window.api.menu.off('menu:columns', handleColumnVisibility);
       window.api.menu.off('menu:userColumns', handleUserColumns);
+      window.api.menu.off('menu:sort', handleSort);
+      window.api.menu.off('menu:filters', handleFilters);
       window.api.menu.off('menu:clearSort', handleClearSort);
       window.api.menu.off('menu:clearFilters', handleClearFilters);
       window.api.menu.off('menu:conditionalFormatting', handleConditionalFormatting);
