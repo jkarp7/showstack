@@ -934,6 +934,9 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   };
 
   // Duplicate selected fixtures
+  // Only `id` is stripped — addMultipleFixtures assigns a new UUID and leaves all other
+  // fields (circuit, patch, timestamps, etc.) to be overwritten by the caller or left as-is.
+  // If the duplication contract changes (e.g. clear circuit assignments on copy), update here.
   const handleDuplicate = () => {
     const selectedFixtures = fixtures.filter((f) => selectedRows.has(f.id));
     if (selectedFixtures.length === 0) return;
@@ -968,7 +971,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     },
   });
 
-  // Update menu context when active tab changes; reset on unmount
+  // Update menu context when active tab changes
   useEffect(() => {
     const contextMap = {
       fixtures: 'equipment',
@@ -976,10 +979,15 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
       power: 'power',
     } as const;
     window.api?.menu?.setState({ context: contextMap[activeTab] });
+  }, [activeTab]);
+
+  // Reset menu context to 'module' on unmount (separate effect so tab switches
+  // don't briefly flash through 'module' between cleanup and re-run)
+  useEffect(() => {
     return () => {
       window.api?.menu?.setState({ context: 'module' });
     };
-  }, [activeTab]);
+  }, []);
 
   return (
     <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
@@ -1074,7 +1082,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
               onHideSelected={handleHideSelected}
               onUnhideSelected={handleUnhideSelected}
               onDuplicate={activeTab === 'fixtures' ? handleDuplicate : undefined}
-              onExportCSV={handleExportCSV}
+              onExportCSV={activeTab === 'fixtures' ? handleExportCSV : undefined}
               onUserColumnSettings={() => setIsUserColumnSettingsOpen(true)}
               columnVisibility={columnVisibility}
               onColumnVisibilityChange={handleColumnVisibilityChange}

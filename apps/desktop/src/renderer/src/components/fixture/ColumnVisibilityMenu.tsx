@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { COLUMN_CONFIGS, ColumnVisibility, applyUserColumnLabels } from '../../types/columns';
 
 interface ColumnVisibilityMenuProps {
@@ -18,10 +18,13 @@ export function ColumnVisibilityMenu({
 }: ColumnVisibilityMenuProps) {
   const [isOpenInternal, setIsOpenInternal] = useState(false);
   const isOpen = isOpenProp !== undefined ? isOpenProp : isOpenInternal;
-  const setIsOpen = (open: boolean) => {
-    if (isOpenProp === undefined) setIsOpenInternal(open);
-    onOpenChange?.(open);
-  };
+  const setIsOpen = useCallback(
+    (open: boolean) => {
+      if (isOpenProp === undefined) setIsOpenInternal(open);
+      onOpenChange?.(open);
+    },
+    [isOpenProp, onOpenChange],
+  );
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const menuRef = useRef<HTMLDivElement>(null);
 

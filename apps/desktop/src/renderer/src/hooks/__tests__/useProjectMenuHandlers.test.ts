@@ -80,6 +80,7 @@ describe('useProjectMenuHandlers', () => {
     it('should navigate to system-docs when inside a project context', () => {
       // Simulate being on a project page
       Object.defineProperty(window, 'location', {
+        configurable: true,
         value: { hash: '#/project/proj-abc123/module/production/system-docs' },
         writable: true,
       });
@@ -96,6 +97,7 @@ describe('useProjectMenuHandlers', () => {
 
     it('should navigate to standalone system-docs when no project in URL', () => {
       Object.defineProperty(window, 'location', {
+        configurable: true,
         value: { hash: '#/' },
         writable: true,
       });
@@ -109,6 +111,7 @@ describe('useProjectMenuHandlers', () => {
 
     it('should extract project ID correctly from nested route', () => {
       Object.defineProperty(window, 'location', {
+        configurable: true,
         value: { hash: '#/project/my-project-id/module/production/equipment' },
         writable: true,
       });
