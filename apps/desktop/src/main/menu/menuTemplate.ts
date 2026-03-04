@@ -368,6 +368,7 @@ function buildProjectMenu(state: MenuStateData): MenuItemConstructorOptions {
       { type: 'separator' },
       {
         label: 'Generate Paperwork...',
+        enabled: !!state.projectId,
         click: () => sendToRenderer('menu:generatePaperwork'),
       },
       { type: 'separator' },

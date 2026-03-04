@@ -156,47 +156,12 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
     };
 
     // View handlers
-    const handleColumnVisibility = () => {
-      const { onColumnVisibility } = propsRef.current;
-      if (onColumnVisibility) {
-        onColumnVisibility();
-      }
-    };
-
-    const handleUserColumns = () => {
-      const { onUserColumns } = propsRef.current;
-      if (onUserColumns) {
-        onUserColumns();
-      }
-    };
-
-    const handleClearSort = () => {
-      const { onClearSort } = propsRef.current;
-      if (onClearSort) {
-        onClearSort();
-      }
-    };
-
-    const handleClearFilters = () => {
-      const { onClearFilters } = propsRef.current;
-      if (onClearFilters) {
-        onClearFilters();
-      }
-    };
-
-    const handleConditionalFormatting = () => {
-      const { onConditionalFormatting } = propsRef.current;
-      if (onConditionalFormatting) {
-        onConditionalFormatting();
-      }
-    };
-
-    const handleAddInfrastructure = () => {
-      const { onAddInfrastructure } = propsRef.current;
-      if (onAddInfrastructure) {
-        onAddInfrastructure();
-      }
-    };
+    const handleColumnVisibility = () => propsRef.current.onColumnVisibility?.();
+    const handleUserColumns = () => propsRef.current.onUserColumns?.();
+    const handleClearSort = () => propsRef.current.onClearSort?.();
+    const handleClearFilters = () => propsRef.current.onClearFilters?.();
+    const handleConditionalFormatting = () => propsRef.current.onConditionalFormatting?.();
+    const handleAddInfrastructure = () => propsRef.current.onAddInfrastructure?.();
 
     // Register all handlers
     window.api.menu.on('menu:print', handlePrint);
