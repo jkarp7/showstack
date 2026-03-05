@@ -178,7 +178,9 @@ function buildFileMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
  * Edit Menu
  */
 function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructorOptions {
-  // isToolContext: contexts with undo/redo and save semantics (grid-based tools with dirty state)
+  // isToolContext: contexts with undo/redo and save semantics (grid-based tools with dirty state).
+  // infrastructure and power are intentionally excluded — those grids do not implement
+  // undo/redo, so Undo/Redo remain disabled when those tabs are active.
   const isToolContext = ['equipment', 'shop-order'].includes(state.context);
   const isEquipment = state.context === 'equipment';
   const isInfrastructure = state.context === 'infrastructure';

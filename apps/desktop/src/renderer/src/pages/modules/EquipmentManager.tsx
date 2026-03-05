@@ -42,6 +42,7 @@ import {
 } from '../../types/infrastructureColumns';
 import { InfrastructureColumnVisibility } from '../../components/infrastructure/InfrastructureColumnVisibilityMenu';
 import { useEquipmentMenuHandlers } from '../../hooks/useEquipmentMenuHandlers';
+import { stripFixtureForDuplicate } from '../../utils/fixtureUtils';
 import { autoLinkCircuit } from '../../utils/circuitParser';
 import {
   Project,
@@ -934,17 +935,12 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   };
 
   // Duplicate selected fixtures
-  // `id` is stripped so addMultipleFixtures assigns a fresh UUID to each copy.
-  // Uniqueness-sensitive patch fields are also cleared — duplicated fixtures should
-  // not inherit circuit/dimmer/universe assignments from the original, as that would
-  // create conflicting address data that must be resolved manually anyway.
+  // Strips `id` and uniqueness-sensitive patch fields via stripFixtureForDuplicate
+  // so each copy receives a fresh UUID and doesn't inherit conflicting addresses.
   const handleDuplicate = async () => {
     const selectedFixtures = fixtures.filter((f) => selectedRows.has(f.id));
     if (selectedFixtures.length === 0) return;
-    const copies = selectedFixtures.map(
-      ({ id: _id, circuit, circuit_number, dimmer, universe, dmx_address, address, ...rest }) =>
-        rest,
-    );
+    const copies = selectedFixtures.map(stripFixtureForDuplicate);
     try {
       await addMultipleFixtures(copies);
     } catch (error) {
@@ -970,6 +966,11 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     onExportGrandMA3: handleExportGrandMA3,
     onColumnVisibility: () => setIsColumnVisibilityMenuOpen(true),
     onUserColumns: () => setIsUserColumnSettingsOpen(true),
+    // Sort/Filter controls are inline in the fixture tab header (SortBar / FilterBar).
+    // These stubs satisfy the menu:sort / menu:filters IPC events; a dedicated sort/filter
+    // dialog can be wired here when implemented.
+    onSort: () => logger.debug('Sort Options: sort bar is inline in the fixture tab'),
+    onFilters: () => logger.debug('Filter Options: filter bar is inline in the fixture tab'),
     onClearSort: () => setSortConfigs([]),
     onClearFilters: handleClearFilters,
     onConditionalFormatting: () => setIsConditionalFormattingOpen(true),

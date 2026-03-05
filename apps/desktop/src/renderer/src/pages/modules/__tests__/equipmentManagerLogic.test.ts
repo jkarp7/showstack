@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { stripFixtureForDuplicate } from '../../../utils/fixtureUtils';
+import { Fixture } from '../../../types';
 
 /**
  * EquipmentManager — logic unit tests
@@ -8,7 +10,7 @@ import { describe, it, expect } from 'vitest';
  * Full integration coverage is tracked as a follow-up.
  *
  * 1. Tab → menu context mapping (the contextMap inside the tab useEffect)
- * 2. handleDuplicate id-stripping transformation
+ * 2. handleDuplicate transformation (via the real stripFixtureForDuplicate utility)
  */
 
 // ─── 1. Tab context map ───────────────────────────────────────────────────────
@@ -47,65 +49,38 @@ describe('Tab → menu context mapping', () => {
 
 // ─── 2. Duplicate transformation ──────────────────────────────────────────────
 
-// The handleDuplicate function strips `id` AND clears uniqueness-sensitive patch
-// fields before passing fixtures to addMultipleFixtures. This mirrors the exact
-// destructuring used in EquipmentManager:
-//   ({ id: _id, circuit, circuit_number, dimmer, universe, dmx_address, address, ...rest }) => rest
-//
+// Tests the real stripFixtureForDuplicate utility used by handleDuplicate.
 // Non-patch fields (name, position, color, purpose, etc.) are preserved verbatim.
-const stripForDuplicate = <
-  T extends {
-    id: string;
-    circuit?: unknown;
-    circuit_number?: unknown;
-    dimmer?: unknown;
-    universe?: unknown;
-    dmx_address?: unknown;
-    address?: unknown;
-  },
->(
-  fixture: T,
-): Omit<
-  T,
-  'id' | 'circuit' | 'circuit_number' | 'dimmer' | 'universe' | 'dmx_address' | 'address'
-> => {
-  const {
-    id: _id,
-    circuit,
-    circuit_number,
-    dimmer,
-    universe,
-    dmx_address,
-    address,
-    ...rest
-  } = fixture;
-  return rest;
-};
 
-describe('handleDuplicate transformation', () => {
+describe('handleDuplicate transformation (stripFixtureForDuplicate)', () => {
   it('strips id from a single fixture', () => {
-    const fixture = { id: 'abc-123', name: 'Spot 1', circuit: '1/1' };
-    const copy = stripForDuplicate(fixture);
+    const fixture = {
+      id: 'abc-123',
+      position: 'Balcony Rail',
+      type: 'Source Four',
+      circuit: '1/1',
+    } as Fixture;
+    const copy = stripFixtureForDuplicate(fixture);
 
     expect(copy).not.toHaveProperty('id');
-    expect(copy.name).toBe('Spot 1');
+    expect(copy.position).toBe('Balcony Rail');
   });
 
   it('clears all uniqueness-sensitive patch fields', () => {
     const fixture = {
       id: 'xyz',
-      name: 'Follow Spot',
+      position: 'Balcony Rail',
+      type: 'Source Four',
       circuit: '2/5',
       circuit_number: '5',
       dimmer: 'Rack A',
       universe: 1,
       dmx_address: 42,
       address: '1/42',
-      position: 'Balcony Rail',
       color: 'R27',
       purpose: 'Key Light',
-    };
-    const copy = stripForDuplicate(fixture);
+    } as Fixture;
+    const copy = stripFixtureForDuplicate(fixture);
 
     expect(copy).not.toHaveProperty('id');
     expect(copy).not.toHaveProperty('circuit');
@@ -119,32 +94,44 @@ describe('handleDuplicate transformation', () => {
   it('preserves all non-patch fields verbatim', () => {
     const fixture = {
       id: 'xyz',
-      name: 'Follow Spot',
+      position: 'Balcony Rail',
+      type: 'Source Four',
       circuit: '2/5',
       dimmer: 'Rack A',
       universe: 1,
       dmx_address: 42,
       address: '1/42',
-      position: 'Balcony Rail',
       color: 'R27',
       purpose: 'Key Light',
-    };
-    const copy = stripForDuplicate(fixture);
+    } as Fixture;
+    const copy = stripFixtureForDuplicate(fixture);
 
-    expect(copy).toEqual({
-      name: 'Follow Spot',
-      position: 'Balcony Rail',
-      color: 'R27',
-      purpose: 'Key Light',
-    });
+    expect(copy.position).toBe('Balcony Rail');
+    expect(copy.type).toBe('Source Four');
+    expect(copy.color).toBe('R27');
+    expect(copy.purpose).toBe('Key Light');
   });
 
   it('produces independent copies for multiple fixtures', () => {
-    const fixtures = [
-      { id: 'id-1', name: 'Spot A', circuit: '1/1', universe: 1, dmx_address: 1 },
-      { id: 'id-2', name: 'Spot B', circuit: '1/2', universe: 1, dmx_address: 2 },
+    const fixtures: Fixture[] = [
+      {
+        id: 'id-1',
+        position: 'Box Boom L',
+        type: 'Source Four',
+        circuit: '1/1',
+        universe: 1,
+        dmx_address: 1,
+      } as Fixture,
+      {
+        id: 'id-2',
+        position: 'Box Boom R',
+        type: 'Source Four',
+        circuit: '1/2',
+        universe: 1,
+        dmx_address: 2,
+      } as Fixture,
     ];
-    const copies = fixtures.map(stripForDuplicate);
+    const copies = fixtures.map(stripFixtureForDuplicate);
 
     expect(copies).toHaveLength(2);
     copies.forEach((copy) => {
@@ -153,31 +140,33 @@ describe('handleDuplicate transformation', () => {
       expect(copy).not.toHaveProperty('universe');
       expect(copy).not.toHaveProperty('dmx_address');
     });
-    expect(copies[0].name).toBe('Spot A');
-    expect(copies[1].name).toBe('Spot B');
+    expect(copies[0].position).toBe('Box Boom L');
+    expect(copies[1].position).toBe('Box Boom R');
   });
 
   it('empty selection produces no copies (guard in handleDuplicate)', () => {
     const selectedIds = new Set<string>();
-    const fixtures = [{ id: 'abc', name: 'Spot 1', circuit: '1/1' }];
+    const fixtures: Fixture[] = [
+      { id: 'abc', position: 'Balcony Rail', type: 'Source Four', circuit: '1/1' } as Fixture,
+    ];
     const selected = fixtures.filter((f) => selectedIds.has(f.id));
 
     // handleDuplicate returns early here; no copies should be produced
     expect(selected).toHaveLength(0);
-    const copies = selected.map(stripForDuplicate);
+    const copies = selected.map(stripFixtureForDuplicate);
     expect(copies).toHaveLength(0);
   });
 
   it('only duplicates fixtures whose id is in selectedRows', () => {
     const selectedIds = new Set(['id-1']);
-    const fixtures = [
-      { id: 'id-1', name: 'Selected Spot', circuit: '1/1' },
-      { id: 'id-2', name: 'Unselected Spot', circuit: '1/2' },
+    const fixtures: Fixture[] = [
+      { id: 'id-1', position: 'Balcony Rail', type: 'Source Four', circuit: '1/1' } as Fixture,
+      { id: 'id-2', position: 'Box Boom L', type: 'Source Four', circuit: '1/2' } as Fixture,
     ];
-    const copies = fixtures.filter((f) => selectedIds.has(f.id)).map(stripForDuplicate);
+    const copies = fixtures.filter((f) => selectedIds.has(f.id)).map(stripFixtureForDuplicate);
 
     expect(copies).toHaveLength(1);
-    expect(copies[0].name).toBe('Selected Spot');
+    expect(copies[0].position).toBe('Balcony Rail');
     expect(copies[0]).not.toHaveProperty('circuit');
   });
 });

@@ -5,7 +5,14 @@ interface ColumnVisibilityMenuProps {
   visibility: ColumnVisibility;
   onVisibilityChange: (visibility: ColumnVisibility) => void;
   userColumnDefinitions?: Record<string, string>;
+  /** When provided, switches the component into controlled mode — the consumer owns open state. */
   isOpen?: boolean;
+  /**
+   * Called whenever the open state changes, in both controlled and uncontrolled modes.
+   * In uncontrolled mode (no `isOpen` prop) this is a notification only; the component
+   * manages its own open state internally. In controlled mode the consumer must update
+   * `isOpen` in response to this callback to actually open/close the menu.
+   */
   onOpenChange?: (open: boolean) => void;
 }
 
