@@ -237,6 +237,9 @@ function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
         click: () => sendToRenderer('menu:bulkEdit'),
       },
       {
+        // Intentionally gated on isEquipment: infrastructure and power rows do not
+        // support duplication. If that changes, add an isInfrastructure / isPower
+        // branch here rather than widening isEquipment.
         label: 'Duplicate',
         accelerator: 'CmdOrCtrl+D',
         enabled: isEquipment && state.hasSelection,

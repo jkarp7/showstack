@@ -12,6 +12,11 @@ import { Fixture } from '../types';
  *   - address                 — computed composite address string
  *
  * Non-patch fields (name, position, color, purpose, notes, etc.) are preserved verbatim.
+ *
+ * ⚠️  DENYLIST APPROACH: this function strips known unique fields and spreads the rest.
+ * If a new uniqueness-sensitive field is added to the Fixture type (e.g. a second
+ * address field or a rack assignment), it will silently pass through to the copy.
+ * When adding fields to Fixture, check whether they should be listed here too.
  */
 export function stripFixtureForDuplicate(
   fixture: Fixture,
@@ -19,15 +24,14 @@ export function stripFixtureForDuplicate(
   Fixture,
   'id' | 'circuit' | 'circuit_number' | 'dimmer' | 'universe' | 'dmx_address' | 'address'
 > {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {
     id: _id,
-    circuit,
-    circuit_number,
-    dimmer,
-    universe,
-    dmx_address,
-    address,
+    circuit: _circuit,
+    circuit_number: _circuit_number,
+    dimmer: _dimmer,
+    universe: _universe,
+    dmx_address: _dmx_address,
+    address: _address,
     ...rest
   } = fixture;
   return rest;

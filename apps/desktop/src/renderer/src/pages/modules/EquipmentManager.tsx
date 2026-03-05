@@ -966,11 +966,10 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     onExportGrandMA3: handleExportGrandMA3,
     onColumnVisibility: () => setIsColumnVisibilityMenuOpen(true),
     onUserColumns: () => setIsUserColumnSettingsOpen(true),
-    // Sort/Filter controls are inline in the fixture tab header (SortBar / FilterBar).
-    // These stubs satisfy the menu:sort / menu:filters IPC events; a dedicated sort/filter
-    // dialog can be wired here when implemented.
-    onSort: () => logger.debug('Sort Options: sort bar is inline in the fixture tab'),
-    onFilters: () => logger.debug('Filter Options: filter bar is inline in the fixture tab'),
+    // TODO: Sort/Filter controls are currently inline (SortBar / FilterBar always visible
+    // in the fixture tab header). Wire these to open a dedicated dialog when one is built.
+    onSort: () => {},
+    onFilters: () => {},
     onClearSort: () => setSortConfigs([]),
     onClearFilters: handleClearFilters,
     onConditionalFormatting: () => setIsConditionalFormattingOpen(true),
@@ -990,8 +989,11 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     window.api?.menu?.setState({ context: contextMap[activeTab] });
   }, [activeTab]);
 
-  // Reset menu context to 'module' on unmount (separate effect so tab switches
-  // don't briefly flash through 'module' between cleanup and re-run)
+  // Reset menu context to 'module' on unmount. This is intentionally a SEPARATE effect
+  // from the tab-context effect above. If they were combined into one effect with [activeTab]
+  // deps, the cleanup would run on every tab switch and briefly set context to 'module'
+  // before the next render sets the correct tab context — a visible flash. The empty-dep
+  // effect runs its cleanup only once, on actual component unmount.
   useEffect(() => {
     return () => {
       window.api?.menu?.setState({ context: 'module' });

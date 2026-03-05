@@ -4,6 +4,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useUIStore } from '../store/uiStore';
 import { useProjectStore } from '../store/projectStore';
 
+/** Shared route segment for the system-docs (paperwork) module. */
+const SYSTEM_DOCS_PATH = '/module/production/system-docs';
+
 /**
  * Project menu event handlers
  * Registers handlers globally - navigates to project page to perform actions
@@ -62,10 +65,10 @@ export function useProjectMenuHandlers() {
 
     const handleGeneratePaperwork = () => {
       if (params.projectId) {
-        navigate(`/project/${params.projectId}/module/production/system-docs`);
+        navigate(`/project/${params.projectId}${SYSTEM_DOCS_PATH}`);
       } else {
         logger.debug('No project context for Generate Paperwork — navigating to standalone path');
-        navigate('/module/production/system-docs');
+        navigate(SYSTEM_DOCS_PATH);
       }
     };
 

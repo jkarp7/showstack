@@ -5,12 +5,16 @@ import { Fixture } from '../../../types';
 /**
  * EquipmentManager — logic unit tests
  *
- * Tests the two key pure-logic behaviors introduced in PR #83 without
- * rendering the full component (which has many store/router dependencies).
- * Full integration coverage is tracked as a follow-up.
+ * Tests pure-logic behaviors extracted from PR #83 without rendering the full
+ * component (which depends on 10+ stores and router context).
  *
  * 1. Tab → menu context mapping (the contextMap inside the tab useEffect)
  * 2. handleDuplicate transformation (via the real stripFixtureForDuplicate utility)
+ *
+ * Known gap: the unmount context reset (the `useEffect([], cleanup)` that calls
+ * `window.api.menu.setState({ context: 'module' })`) is not unit-tested here.
+ * Testing it requires rendering EquipmentManager with all stores mocked, which
+ * is an integration-test concern. Track as a follow-up E2E or integration test.
  */
 
 // ─── 1. Tab context map ───────────────────────────────────────────────────────

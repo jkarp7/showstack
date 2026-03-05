@@ -24,9 +24,11 @@ export function ColumnVisibilityMenu({
   onOpenChange,
 }: ColumnVisibilityMenuProps) {
   const [isOpenInternal, setIsOpenInternal] = useState(false);
-  const isOpen = isOpenProp !== undefined ? isOpenProp : isOpenInternal;
+  const isControlled = isOpenProp !== undefined;
+  const isOpen = isControlled ? isOpenProp : isOpenInternal;
   const setIsOpen = useCallback(
     (open: boolean) => {
+      // Use isOpenProp directly (not isControlled) so the dep array stays correct
       if (isOpenProp === undefined) setIsOpenInternal(open);
       onOpenChange?.(open);
     },
