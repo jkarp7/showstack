@@ -73,18 +73,13 @@ export function useProjectMenuHandlers() {
     };
 
     const handleSaveAsCopy = async () => {
-      // HashRouter puts the path in window.location.hash (e.g. "#/project/some-uuid")
-      const currentPath = window.location.hash;
-      const projectIdMatch = currentPath.match(/\/project\/([^/]+)/);
-
-      if (!projectIdMatch) {
+      if (!params.projectId) {
         logger.info('No project context for Save as Copy');
         return;
       }
 
-      const projectId = projectIdMatch[1];
       try {
-        const copy = await window.api.projects.createCopy(projectId);
+        const copy = await window.api.projects.createCopy(params.projectId);
         logger.info('Project copy created:', copy.name);
         // Dispatch a custom event so any listening component can show a toast
         window.dispatchEvent(

@@ -268,6 +268,9 @@ function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
  */
 function buildViewMenu(state: MenuStateData): MenuItemConstructorOptions {
   const isEquipment = state.context === 'equipment';
+  const isInfrastructure = state.context === 'infrastructure';
+  // Sort/Filter are available on equipment and infrastructure; power has no grid sort/filter UI.
+  const isSortFilterContext = isEquipment || isInfrastructure;
 
   return {
     label: 'View',
@@ -296,11 +299,11 @@ function buildViewMenu(state: MenuStateData): MenuItemConstructorOptions {
       },
       {
         label: 'Sort By',
-        enabled: isEquipment,
+        enabled: isSortFilterContext,
         submenu: [
           {
             label: 'Sort Options...',
-            enabled: isEquipment,
+            enabled: isSortFilterContext,
             click: () => sendToRenderer('menu:sort'),
           },
           {
@@ -311,11 +314,11 @@ function buildViewMenu(state: MenuStateData): MenuItemConstructorOptions {
       },
       {
         label: 'Filters',
-        enabled: isEquipment,
+        enabled: isSortFilterContext,
         submenu: [
           {
             label: 'Filter Options...',
-            enabled: isEquipment,
+            enabled: isSortFilterContext,
             click: () => sendToRenderer('menu:filters'),
           },
           {

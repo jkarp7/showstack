@@ -87,6 +87,12 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = useState(false);
   const [isUserColumnSettingsOpen, setIsUserColumnSettingsOpen] = useState(false);
   const [isConditionalFormattingOpen, setIsConditionalFormattingOpen] = useState(false);
+  const [duplicateError, setDuplicateError] = useState<string | null>(null);
+  const duplicateErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Refs for keyboard-accessible focus targets used by menu Sort/Filter actions
+  const sortBarRef = useRef<HTMLDivElement>(null);
+  const filterBarRef = useRef<HTMLDivElement>(null);
   const [isColumnVisibilityMenuOpen, setIsColumnVisibilityMenuOpen] = useState(false);
 
   // Power features state
@@ -945,6 +951,9 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
       await addMultipleFixtures(copies);
     } catch (error) {
       logger.error('Failed to duplicate fixtures', { error: String(error) });
+      if (duplicateErrorTimerRef.current) clearTimeout(duplicateErrorTimerRef.current);
+      setDuplicateError('Duplication failed — please try again.');
+      duplicateErrorTimerRef.current = setTimeout(() => setDuplicateError(null), 4000);
     }
   };
 
@@ -966,10 +975,19 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     onExportGrandMA3: handleExportGrandMA3,
     onColumnVisibility: () => setIsColumnVisibilityMenuOpen(true),
     onUserColumns: () => setIsUserColumnSettingsOpen(true),
-    // TODO: Sort/Filter controls are currently inline (SortBar / FilterBar always visible
-    // in the fixture tab header). Wire these to open a dedicated dialog when one is built.
-    onSort: () => {},
-    onFilters: () => {},
+    // Sort/Filter: focus the first interactive element in the respective bar so the
+    // native menu action has an observable effect. Infrastructure has no sort/filter
+    // UI yet; those branches are a TODO for a future iteration.
+    onSort: () => {
+      if (activeTab === 'fixtures') {
+        sortBarRef.current?.querySelector<HTMLElement>('button, select, input')?.focus();
+      }
+    },
+    onFilters: () => {
+      if (activeTab === 'fixtures') {
+        filterBarRef.current?.querySelector<HTMLInputElement>('input')?.focus();
+      }
+    },
     onClearSort: () => setSortConfigs([]),
     onClearFilters: handleClearFilters,
     onConditionalFormatting: () => setIsConditionalFormattingOpen(true),
@@ -1076,6 +1094,13 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
         </div>
       </div>
 
+      {/* Duplicate error banner — auto-dismisses after 4 s */}
+      {duplicateError && (
+        <div className="flex-shrink-0 px-4 py-2 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-700 text-sm text-red-700 dark:text-red-300">
+          {duplicateError}
+        </div>
+      )}
+
       {/* Fixtures Tab */}
       {activeTab === 'fixtures' && (
         <>
@@ -1104,7 +1129,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
           </div>
 
           {/* Sort Bar */}
-          <div className="flex-shrink-0">
+          <div ref={sortBarRef} className="flex-shrink-0">
             <SortBar
               sortConfigs={sortConfigs}
               onSort={handleSort}
@@ -1113,7 +1138,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
           </div>
 
           {/* Filter Bar */}
-          <div className="flex-shrink-0">
+          <div ref={filterBarRef} className="flex-shrink-0">
             <FilterBar
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
