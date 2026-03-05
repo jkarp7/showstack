@@ -1,18 +1,39 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { COLUMN_CONFIGS, ColumnVisibility, applyUserColumnLabels } from '../../types/columns';
 
 interface ColumnVisibilityMenuProps {
   visibility: ColumnVisibility;
   onVisibilityChange: (visibility: ColumnVisibility) => void;
   userColumnDefinitions?: Record<string, string>;
+  /** When provided, switches the component into controlled mode — the consumer owns open state. */
+  isOpen?: boolean;
+  /**
+   * Called whenever the open state changes, in both controlled and uncontrolled modes.
+   * In uncontrolled mode (no `isOpen` prop) this is a notification only; the component
+   * manages its own open state internally. In controlled mode the consumer must update
+   * `isOpen` in response to this callback to actually open/close the menu.
+   */
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function ColumnVisibilityMenu({
   visibility,
   onVisibilityChange,
   userColumnDefinitions = {},
+  isOpen: isOpenProp,
+  onOpenChange,
 }: ColumnVisibilityMenuProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenInternal, setIsOpenInternal] = useState(false);
+  const isControlled = isOpenProp !== undefined;
+  const isOpen = isControlled ? isOpenProp : isOpenInternal;
+  const setIsOpen = useCallback(
+    (open: boolean) => {
+      // Use isOpenProp directly (not isControlled) so the dep array stays correct
+      if (isOpenProp === undefined) setIsOpenInternal(open);
+      onOpenChange?.(open);
+    },
+    [isOpenProp, onOpenChange],
+  );
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const menuRef = useRef<HTMLDivElement>(null);
 

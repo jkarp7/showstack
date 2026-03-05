@@ -4,6 +4,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useUIStore } from '../store/uiStore';
 import { useProjectStore } from '../store/projectStore';
 
+/** Shared route segment for the system-docs (paperwork) module. */
+const SYSTEM_DOCS_PATH = '/module/production/system-docs';
+
 /**
  * Project menu event handlers
  * Registers handlers globally - navigates to project page to perform actions
@@ -60,19 +63,23 @@ export function useProjectMenuHandlers() {
       }
     };
 
-    const handleSaveAsCopy = async () => {
-      // HashRouter puts the path in window.location.hash (e.g. "#/project/some-uuid")
-      const currentPath = window.location.hash;
-      const projectIdMatch = currentPath.match(/\/project\/([^/]+)/);
+    const handleGeneratePaperwork = () => {
+      if (params.projectId) {
+        navigate(`/project/${params.projectId}${SYSTEM_DOCS_PATH}`);
+      } else {
+        logger.debug('No project context for Generate Paperwork — navigating to standalone path');
+        navigate(SYSTEM_DOCS_PATH);
+      }
+    };
 
-      if (!projectIdMatch) {
+    const handleSaveAsCopy = async () => {
+      if (!params.projectId) {
         logger.info('No project context for Save as Copy');
         return;
       }
 
-      const projectId = projectIdMatch[1];
       try {
-        const copy = await window.api.projects.createCopy(projectId);
+        const copy = await window.api.projects.createCopy(params.projectId);
         logger.info('Project copy created:', copy.name);
         // Dispatch a custom event so any listening component can show a toast
         window.dispatchEvent(
@@ -88,6 +95,7 @@ export function useProjectMenuHandlers() {
     window.api.menu.on('menu:projectSettings', handleProjectSettings);
     window.api.menu.on('menu:saveAsCopy', handleSaveAsCopy);
     window.api.menu.on('menu:exportProject', handleExportProject);
+    window.api.menu.on('menu:generatePaperwork', handleGeneratePaperwork);
 
     // Cleanup on unmount
     return () => {
@@ -95,6 +103,7 @@ export function useProjectMenuHandlers() {
       window.api.menu.off('menu:projectSettings', handleProjectSettings);
       window.api.menu.off('menu:saveAsCopy', handleSaveAsCopy);
       window.api.menu.off('menu:exportProject', handleExportProject);
+      window.api.menu.off('menu:generatePaperwork', handleGeneratePaperwork);
     };
   }, [navigate, params, openSettingsDialog, currentProjectName]);
 }

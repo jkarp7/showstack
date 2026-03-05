@@ -178,9 +178,17 @@ function buildFileMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
  * Edit Menu
  */
 function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructorOptions {
+  // isToolContext: contexts with undo/redo and save semantics (grid-based tools with dirty state).
+  // infrastructure and power are intentionally excluded — those grids do not implement
+  // undo/redo, so Undo/Redo remain disabled when those tabs are active.
   const isToolContext = ['equipment', 'shop-order'].includes(state.context);
   const isEquipment = state.context === 'equipment';
+  const isInfrastructure = state.context === 'infrastructure';
   const isShopOrder = state.context === 'shop-order';
+  const isPower = state.context === 'power';
+  // isSelectableContext: all grid contexts support Select All / Deselect All;
+  // shop-order is included via isToolContext; infrastructure and power are separate tabs
+  const isSelectableContext = isToolContext || isInfrastructure || isPower;
 
   return {
     label: 'Edit',
@@ -213,6 +221,12 @@ function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
         click: () => sendToRenderer('menu:addFixture'),
       },
       {
+        label: 'Add Infrastructure',
+        accelerator: 'CmdOrCtrl+Shift+I',
+        enabled: isInfrastructure,
+        click: () => sendToRenderer('menu:addInfrastructure'),
+      },
+      {
         label: 'Add Section',
         enabled: isShopOrder,
         click: () => sendToRenderer('menu:addSection'),
@@ -223,9 +237,12 @@ function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
         click: () => sendToRenderer('menu:bulkEdit'),
       },
       {
+        // Intentionally gated on isEquipment: infrastructure and power rows do not
+        // support duplication. If that changes, add an isInfrastructure / isPower
+        // branch here rather than widening isEquipment.
         label: 'Duplicate',
         accelerator: 'CmdOrCtrl+D',
-        enabled: isToolContext && state.hasSelection,
+        enabled: isEquipment && state.hasSelection,
         click: () => sendToRenderer('menu:duplicate'),
       },
       { type: 'separator' },
@@ -233,13 +250,13 @@ function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
       {
         label: 'Select All',
         accelerator: 'CmdOrCtrl+A',
-        enabled: isToolContext,
+        enabled: isSelectableContext,
         click: () => sendToRenderer('menu:selectAll'),
       },
       {
         label: 'Deselect All',
         accelerator: 'Escape',
-        enabled: isToolContext && state.hasSelection,
+        enabled: isSelectableContext && state.hasSelection,
         click: () => sendToRenderer('menu:deselectAll'),
       },
     ],
@@ -251,6 +268,9 @@ function buildEditMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
  */
 function buildViewMenu(state: MenuStateData): MenuItemConstructorOptions {
   const isEquipment = state.context === 'equipment';
+  const isInfrastructure = state.context === 'infrastructure';
+  // Sort/Filter are available on equipment and infrastructure; power has no grid sort/filter UI.
+  const isSortFilterContext = isEquipment || isInfrastructure;
 
   return {
     label: 'View',
@@ -268,14 +288,22 @@ function buildViewMenu(state: MenuStateData): MenuItemConstructorOptions {
             label: 'User Columns...',
             click: () => sendToRenderer('menu:userColumns'),
           },
+          { type: 'separator' },
+          {
+            // Fixture-specific feature; disabled on other tabs for discoverability
+            label: 'Conditional Formatting...',
+            enabled: isEquipment,
+            click: () => sendToRenderer('menu:conditionalFormatting'),
+          },
         ],
       },
       {
         label: 'Sort By',
-        enabled: isEquipment,
+        enabled: isSortFilterContext,
         submenu: [
           {
             label: 'Sort Options...',
+            enabled: isSortFilterContext,
             click: () => sendToRenderer('menu:sort'),
           },
           {
@@ -286,10 +314,11 @@ function buildViewMenu(state: MenuStateData): MenuItemConstructorOptions {
       },
       {
         label: 'Filters',
-        enabled: isEquipment,
+        enabled: isSortFilterContext,
         submenu: [
           {
             label: 'Filter Options...',
+            enabled: isSortFilterContext,
             click: () => sendToRenderer('menu:filters'),
           },
           {
@@ -354,6 +383,12 @@ function buildProjectMenu(state: MenuStateData): MenuItemConstructorOptions {
       {
         label: 'Project Settings...',
         click: () => sendToRenderer('menu:projectSettings'),
+      },
+      { type: 'separator' },
+      {
+        label: 'Generate Paperwork...',
+        enabled: !!state.projectId,
+        click: () => sendToRenderer('menu:generatePaperwork'),
       },
       { type: 'separator' },
       {

@@ -9,11 +9,14 @@ interface ToolbarProps {
   onDeselectAll: () => void;
   onHideSelected?: () => void;
   onUnhideSelected?: () => void;
+  onDuplicate?: () => void;
+  onExportCSV?: () => void;
   onUserColumnSettings: () => void;
-  onConditionalFormatting?: () => void;
   columnVisibility: ColumnVisibility;
   onColumnVisibilityChange: (visibility: ColumnVisibility) => void;
   userColumnDefinitions?: Record<string, string>;
+  isColumnVisibilityMenuOpen?: boolean;
+  onColumnVisibilityMenuOpenChange?: (open: boolean) => void;
 }
 
 export function Toolbar({
@@ -24,11 +27,14 @@ export function Toolbar({
   onDeselectAll,
   onHideSelected,
   onUnhideSelected,
+  onDuplicate,
+  onExportCSV,
   onUserColumnSettings,
-  onConditionalFormatting,
   columnVisibility,
   onColumnVisibilityChange,
   userColumnDefinitions,
+  isColumnVisibilityMenuOpen,
+  onColumnVisibilityMenuOpenChange,
 }: ToolbarProps) {
   return (
     <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center gap-2">
@@ -84,28 +90,28 @@ export function Toolbar({
             </button>
           )}
 
-          <button className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm font-medium transition">
-            Duplicate
-          </button>
+          {onDuplicate && (
+            <button
+              onClick={onDuplicate}
+              className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm font-medium transition"
+            >
+              Duplicate
+            </button>
+          )}
 
-          <button className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm font-medium transition">
-            Export CSV
-          </button>
+          {onExportCSV && (
+            <button
+              onClick={onExportCSV}
+              className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm font-medium transition"
+            >
+              Export CSV
+            </button>
+          )}
         </>
       )}
 
       {/* Right side buttons */}
       <div className="ml-auto flex items-center gap-2">
-        {onConditionalFormatting && (
-          <button
-            onClick={onConditionalFormatting}
-            className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition"
-            title="Manage Row Highlighting Rules"
-          >
-            Conditional Formatting...
-          </button>
-        )}
-
         <button
           onClick={onUserColumnSettings}
           className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition"
@@ -118,6 +124,8 @@ export function Toolbar({
           visibility={columnVisibility}
           onVisibilityChange={onColumnVisibilityChange}
           userColumnDefinitions={userColumnDefinitions}
+          isOpen={isColumnVisibilityMenuOpen}
+          onOpenChange={onColumnVisibilityMenuOpenChange}
         />
       </div>
     </div>

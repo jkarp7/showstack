@@ -42,6 +42,7 @@ import {
 } from '../../types/infrastructureColumns';
 import { InfrastructureColumnVisibility } from '../../components/infrastructure/InfrastructureColumnVisibilityMenu';
 import { useEquipmentMenuHandlers } from '../../hooks/useEquipmentMenuHandlers';
+import { stripFixtureForDuplicate } from '../../utils/fixtureUtils';
 import { autoLinkCircuit } from '../../utils/circuitParser';
 import {
   Project,
@@ -86,6 +87,13 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = useState(false);
   const [isUserColumnSettingsOpen, setIsUserColumnSettingsOpen] = useState(false);
   const [isConditionalFormattingOpen, setIsConditionalFormattingOpen] = useState(false);
+  const [duplicateError, setDuplicateError] = useState<string | null>(null);
+  const duplicateErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Refs for keyboard-accessible focus targets used by menu Sort/Filter actions
+  const sortBarRef = useRef<HTMLDivElement>(null);
+  const filterBarRef = useRef<HTMLDivElement>(null);
+  const [isColumnVisibilityMenuOpen, setIsColumnVisibilityMenuOpen] = useState(false);
 
   // Power features state
   const [isRackManagerOpen, setIsRackManagerOpen] = useState(false);
@@ -932,12 +940,30 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     setSelectedRows(new Set());
   };
 
+  // Duplicate selected fixtures
+  // Strips `id` and uniqueness-sensitive patch fields via stripFixtureForDuplicate
+  // so each copy receives a fresh UUID and doesn't inherit conflicting addresses.
+  const handleDuplicate = async () => {
+    const selectedFixtures = fixtures.filter((f) => selectedRows.has(f.id));
+    if (selectedFixtures.length === 0) return;
+    const copies = selectedFixtures.map(stripFixtureForDuplicate);
+    try {
+      await addMultipleFixtures(copies);
+    } catch (error) {
+      logger.error('Failed to duplicate fixtures', { error: String(error) });
+      if (duplicateErrorTimerRef.current) clearTimeout(duplicateErrorTimerRef.current);
+      setDuplicateError('Duplication failed — please try again.');
+      duplicateErrorTimerRef.current = setTimeout(() => setDuplicateError(null), 4000);
+    }
+  };
+
   // Register menu handlers
   useEquipmentMenuHandlers({
     selectedRows,
     fixtures: processedFixtures,
     onAddFixture: () => setIsAddFixtureDialogOpen(true),
     onBulkEdit: () => setIsBulkEditDialogOpen(true),
+    onDuplicate: handleDuplicate,
     onSelectAll: handleSelectAll,
     onDeselectAll: handleDeselectAll,
     onUndo: undo,
@@ -947,7 +973,50 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     onExportEos: handleExportEos,
     onExportGrandMA2: handleExportGrandMA2,
     onExportGrandMA3: handleExportGrandMA3,
+    onColumnVisibility: () => setIsColumnVisibilityMenuOpen(true),
+    onUserColumns: () => setIsUserColumnSettingsOpen(true),
+    // Sort/Filter: focus the first interactive element in the respective bar so the
+    // native menu action has an observable effect. Infrastructure has no sort/filter
+    // UI yet; those branches are a TODO for a future iteration.
+    onSort: () => {
+      if (activeTab === 'fixtures') {
+        sortBarRef.current?.querySelector<HTMLElement>('button, select, input')?.focus();
+      }
+    },
+    onFilters: () => {
+      if (activeTab === 'fixtures') {
+        filterBarRef.current?.querySelector<HTMLInputElement>('input')?.focus();
+      }
+    },
+    onClearSort: () => setSortConfigs([]),
+    onClearFilters: handleClearFilters,
+    onConditionalFormatting: () => setIsConditionalFormattingOpen(true),
+    onAddInfrastructure: () => {
+      setActiveTab('infrastructure');
+      setIsAddInfrastructureDialogOpen(true);
+    },
   });
+
+  // Update menu context when active tab changes
+  useEffect(() => {
+    const contextMap = {
+      fixtures: 'equipment',
+      infrastructure: 'infrastructure',
+      power: 'power',
+    } as const;
+    window.api?.menu?.setState({ context: contextMap[activeTab] });
+  }, [activeTab]);
+
+  // Reset menu context to 'module' on unmount. This is intentionally a SEPARATE effect
+  // from the tab-context effect above. If they were combined into one effect with [activeTab]
+  // deps, the cleanup would run on every tab switch and briefly set context to 'module'
+  // before the next render sets the correct tab context — a visible flash. The empty-dep
+  // effect runs its cleanup only once, on actual component unmount.
+  useEffect(() => {
+    return () => {
+      window.api?.menu?.setState({ context: 'module' });
+    };
+  }, []);
 
   return (
     <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
@@ -1025,6 +1094,13 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
         </div>
       </div>
 
+      {/* Duplicate error banner — auto-dismisses after 4 s */}
+      {duplicateError && (
+        <div className="flex-shrink-0 px-4 py-2 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-700 text-sm text-red-700 dark:text-red-300">
+          {duplicateError}
+        </div>
+      )}
+
       {/* Fixtures Tab */}
       {activeTab === 'fixtures' && (
         <>
@@ -1041,16 +1117,19 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
               onDeselectAll={() => setSelectedRows(new Set())}
               onHideSelected={handleHideSelected}
               onUnhideSelected={handleUnhideSelected}
+              onDuplicate={activeTab === 'fixtures' ? handleDuplicate : undefined}
+              onExportCSV={activeTab === 'fixtures' ? handleExportCSV : undefined}
               onUserColumnSettings={() => setIsUserColumnSettingsOpen(true)}
-              onConditionalFormatting={() => setIsConditionalFormattingOpen(true)}
               columnVisibility={columnVisibility}
               onColumnVisibilityChange={handleColumnVisibilityChange}
               userColumnDefinitions={userColumnDefinitions}
+              isColumnVisibilityMenuOpen={isColumnVisibilityMenuOpen}
+              onColumnVisibilityMenuOpenChange={setIsColumnVisibilityMenuOpen}
             />
           </div>
 
           {/* Sort Bar */}
-          <div className="flex-shrink-0">
+          <div ref={sortBarRef} className="flex-shrink-0">
             <SortBar
               sortConfigs={sortConfigs}
               onSort={handleSort}
@@ -1059,7 +1138,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
           </div>
 
           {/* Filter Bar */}
-          <div className="flex-shrink-0">
+          <div ref={filterBarRef} className="flex-shrink-0">
             <FilterBar
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}

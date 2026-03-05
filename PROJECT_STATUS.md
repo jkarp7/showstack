@@ -4,7 +4,7 @@
 **Last Updated:** March 2026
 **Current Version:** 0.1.0-alpha
 **Development Phase:** Alpha (Renovation complete, Supabase/PowerSync cloud services integrated)
-**Active Branch:** `develop`
+**Active Branch:** `feature/menu-bar-toolbar-evaluation` (PR open → develop)
 
 This document tracks the development status of all ShowStack feature domains and editions. It serves as the central source of truth for what's completed, in progress, and planned.
 
@@ -26,9 +26,19 @@ This document tracks the development status of all ShowStack feature domains and
 
 ## 🎯 Current Development Priorities
 
-### ✅ Recently Completed (December 2025 - February 2026)
+### ✅ Recently Completed (December 2025 - March 2026)
 
-**Latest (February 2026):** 12. ✅ Cloud Sync Fix — PowerSync Node Migration (feature/project-families) - COMPLETED (February 23, 2026)
+**Latest (March 2026):** 13. ✅ Menu Bar & Toolbar Reorganization (feature/menu-bar-toolbar-evaluation) - COMPLETED (March 2, 2026)
+
+- **Bug fix:** Wired Duplicate and Export CSV toolbar buttons that previously had no `onClick` handlers and silently did nothing when clicked
+- **New menu items:** Edit > Add Infrastructure (⌘⇧I), View > Columns > Conditional Formatting..., Project > Generate Paperwork...
+- **Context-aware menu:** Added `'infrastructure'` and `'power'` to `MenuContext`; EquipmentManager now updates the native menu context on tab switch (Fixtures → `equipment`, Infrastructure → `infrastructure`, Power → `power`) so Edit menu items are correctly enabled per tab
+- **Toolbar cleanup:** Removed Conditional Formatting button from toolbar right side (moved to View menu); toolbar is narrower and more focused
+- **Duplicate implementation:** `handleDuplicate` copies selected fixtures (strips ID) and inserts via `addMultipleFixtures`; wired to both toolbar button and native menu ⌘D shortcut
+- **Generate Paperwork navigation:** `menu:generatePaperwork` handler navigates to the system-docs module with project context preserved
+- **Tests:** 53 new tests across 3 new files — `Toolbar.test.tsx` (23), `menuState.test.ts` (24), `useProjectMenuHandlers.test.ts` (6)
+
+**Previous (February 2026):** 12. ✅ Cloud Sync Fix — PowerSync Node Migration (feature/project-families) - COMPLETED (February 23, 2026)
 
 - Migrated PowerSync from `@powersync/web` (browser-only) to `@powersync/node` (Node.js/Electron main process)
 - Root cause: `@powersync/web` requires WASM/IndexedDB/Web Workers — none available in Electron main process
@@ -248,10 +258,11 @@ Core fixture database and virtual grid for managing lighting plots.
   - In-cell editing
 
 - ✅ **Equipment Manager Page** - `src/renderer/src/pages/modules/EquipmentManager.tsx`
-  - Full fixture CRUD operations
+  - Full fixture CRUD operations including working Duplicate (copies selected fixtures)
   - Power rack management
   - Auto-linking on page load
-  - Export functionality (CSV, EOS, GrandMA)
+  - Export functionality (CSV, EOS, GrandMA) — accessible from toolbar and native File > Export menu
+  - Context-aware native menu: switches between `equipment`, `infrastructure`, and `power` contexts on tab change
 
 - ✅ **Fixture Database** - `src/main/database/projectSchema.ts:fixtures`
   - 68+ columns including power rack assignments
@@ -313,7 +324,7 @@ Core fixture database and virtual grid for managing lighting plots.
   - Rules support operators: equals, contains, starts_with, ends_with, is_empty, etc.
   - Default rules included for Spare Circuits (yellow) and Practicals (blue)
   - Rules are priority-based and stored per-project in preferences
-  - Dedicated Conditional Formatting dialog accessible from Equipment Manager toolbar
+  - Dedicated Conditional Formatting dialog accessible from View > Columns > Conditional Formatting... (native menu)
   - Automatic text color calculation (WCAG luminance formula) ensures readability on all backgrounds
 - Context menu uses React Portal for correct positioning outside virtual scroll transforms
 - Column visibility preferences stored per-project using preferences API
@@ -673,15 +684,13 @@ Lightwright 6 parity feature - custom categorization system for grouping fixture
 
 #### UI/UX Improvements
 
-**Menu Bar Reorganization:**
+**Menu Bar Reorganization:** ✅ Completed (March 2, 2026)
 
-- ⬜ **Evaluate menu bar access** - Move common functions to menu for easier access
-  - Add fixture/infrastructure
-  - Generate paperwork
-  - Export options
-  - Settings access
-
-**Estimated Total:** 2-3 days
+- ✅ **Add fixture/infrastructure via native menu** — Edit > Add Fixture (⌘⇧N), Edit > Add Infrastructure (⌘⇧I); enabled based on active tab context
+- ✅ **Generate Paperwork via native menu** — Project > Generate Paperwork... navigates to system-docs module
+- ✅ **Export options** — File > Export submenu (CSV, Eos, GrandMA2/3) already present; wired to toolbar Export CSV button
+- ✅ **Conditional Formatting moved to View menu** — View > Columns > Conditional Formatting...; removed from toolbar right side
+- ✅ **Context-aware Edit menu** — Fixtures tab enables fixture actions; Infrastructure tab enables infrastructure actions
 
 ---
 

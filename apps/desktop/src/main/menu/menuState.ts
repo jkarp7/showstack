@@ -7,7 +7,9 @@ export type MenuContext =
   | 'landing' // LandingPage (projects list)
   | 'project' // ProjectPage (project details)
   | 'module' // ModuleLanding (tool selection)
-  | 'equipment' // Equipment Manager
+  | 'equipment' // Equipment Manager — Fixtures tab
+  | 'infrastructure' // Equipment Manager — Infrastructure tab
+  | 'power' // Equipment Manager — Power tab
   | 'shop-order' // Shop Order Builder tool
   | 'systemdocs' // System Docs container
   | 'paperwork' // Paperwork generator

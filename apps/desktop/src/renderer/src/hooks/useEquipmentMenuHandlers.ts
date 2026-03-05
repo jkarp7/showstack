@@ -16,6 +16,16 @@ interface EquipmentMenuHandlersProps {
   onExportEos?: () => void;
   onExportGrandMA2?: () => void;
   onExportGrandMA3?: () => void;
+  // View menu handlers
+  onColumnVisibility?: () => void;
+  onUserColumns?: () => void;
+  onSort?: () => void;
+  onFilters?: () => void;
+  onClearSort?: () => void;
+  onClearFilters?: () => void;
+  onConditionalFormatting?: () => void;
+  // Edit menu handlers for non-fixture contexts
+  onAddInfrastructure?: () => void;
 }
 
 /**
@@ -147,6 +157,16 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       }
     };
 
+    // View handlers
+    const handleColumnVisibility = () => propsRef.current.onColumnVisibility?.();
+    const handleUserColumns = () => propsRef.current.onUserColumns?.();
+    const handleSort = () => propsRef.current.onSort?.();
+    const handleFilters = () => propsRef.current.onFilters?.();
+    const handleClearSort = () => propsRef.current.onClearSort?.();
+    const handleClearFilters = () => propsRef.current.onClearFilters?.();
+    const handleConditionalFormatting = () => propsRef.current.onConditionalFormatting?.();
+    const handleAddInfrastructure = () => propsRef.current.onAddInfrastructure?.();
+
     // Register all handlers
     window.api.menu.on('menu:print', handlePrint);
     window.api.menu.on('menu:export:csv', handleExportCSV);
@@ -160,6 +180,14 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
     window.api.menu.on('menu:deselectAll', handleDeselectAll);
     window.api.menu.on('menu:undo', handleUndo);
     window.api.menu.on('menu:redo', handleRedo);
+    window.api.menu.on('menu:columns', handleColumnVisibility);
+    window.api.menu.on('menu:userColumns', handleUserColumns);
+    window.api.menu.on('menu:sort', handleSort);
+    window.api.menu.on('menu:filters', handleFilters);
+    window.api.menu.on('menu:clearSort', handleClearSort);
+    window.api.menu.on('menu:clearFilters', handleClearFilters);
+    window.api.menu.on('menu:conditionalFormatting', handleConditionalFormatting);
+    window.api.menu.on('menu:addInfrastructure', handleAddInfrastructure);
 
     // Cleanup on unmount
     return () => {
@@ -175,6 +203,14 @@ export function useEquipmentMenuHandlers(props: EquipmentMenuHandlersProps) {
       window.api.menu.off('menu:deselectAll', handleDeselectAll);
       window.api.menu.off('menu:undo', handleUndo);
       window.api.menu.off('menu:redo', handleRedo);
+      window.api.menu.off('menu:columns', handleColumnVisibility);
+      window.api.menu.off('menu:userColumns', handleUserColumns);
+      window.api.menu.off('menu:sort', handleSort);
+      window.api.menu.off('menu:filters', handleFilters);
+      window.api.menu.off('menu:clearSort', handleClearSort);
+      window.api.menu.off('menu:clearFilters', handleClearFilters);
+      window.api.menu.off('menu:conditionalFormatting', handleConditionalFormatting);
+      window.api.menu.off('menu:addInfrastructure', handleAddInfrastructure);
     };
     // Empty dependency array - only register listeners once on mount
     // Handlers read from propsRef.current to get latest values
