@@ -7,6 +7,9 @@ import { Breadcrumbs } from '../components/common/Breadcrumbs';
 import { SyncStatusIndicator } from '../components/sync';
 import { useProjectStore, Project } from '../store/projectStore';
 import { useSaveAsCopy } from '../hooks/useSaveAsCopy';
+import { ProjectSharingDialog } from '../components/collaboration/ProjectSharingDialog';
+import { useFeatureFlag } from '../config/featureFlags';
+import { useAuthStore } from '../store/authStore';
 
 export function ProjectPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -15,8 +18,11 @@ export function ProjectPage() {
   const { projects, loadProjects, updateProject, setCurrentProject } = useProjectStore();
   const [project, setProject] = useState(projects.find((p) => p.id === projectId) || null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isSharingOpen, setIsSharingOpen] = useState(false);
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const { isCopying, copyMessage, handleSaveAsCopy, showCopyMessage } = useSaveAsCopy(projectId);
+  const collaborationEnabled = useFeatureFlag('collaboration');
+  const { userId, licenseStatus } = useAuthStore();
 
   useEffect(() => {
     if (!projects.length) {
@@ -154,6 +160,14 @@ export function ProjectPage() {
             >
               {isCopying ? 'Copying...' : 'Save as Copy'}
             </button>
+            {collaborationEnabled && licenseStatus?.canCollaborate && (
+              <button
+                onClick={() => setIsSharingOpen(true)}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded font-medium transition"
+              >
+                Share
+              </button>
+            )}
             <button
               onClick={() => setIsEditDialogOpen(true)}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium transition"
@@ -656,6 +670,16 @@ export function ProjectPage() {
         onClose={() => setIsEditDialogOpen(false)}
         onSave={handleUpdateProject}
       />
+
+      {/* Project Sharing Dialog */}
+      {collaborationEnabled && isSharingOpen && projectId && userId && (
+        <ProjectSharingDialog
+          projectId={projectId}
+          currentUserId={userId}
+          open={isSharingOpen}
+          onClose={() => setIsSharingOpen(false)}
+        />
+      )}
     </div>
   );
 }

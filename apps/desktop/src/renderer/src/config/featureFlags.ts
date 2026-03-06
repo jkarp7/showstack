@@ -36,8 +36,8 @@ export interface FeatureFlags {
  * Set to true to enable a feature for all users
  */
 const defaultFlags: FeatureFlags = {
-  // Collaboration (not yet implemented)
-  collaboration: false,
+  // Collaboration
+  collaboration: true,
   realTimeSync: false,
   teamComments: false,
 

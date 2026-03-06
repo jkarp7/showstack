@@ -96,6 +96,7 @@ export class LicenseService {
         canView: false,
         canEdit: false,
         canSync: false,
+        canCollaborate: false,
       };
     }
 
@@ -108,6 +109,7 @@ export class LicenseService {
         canView: true,
         canEdit: true,
         canSync: false,
+        canCollaborate: false,
       };
     }
 
@@ -129,6 +131,7 @@ export class LicenseService {
         canView: false,
         canEdit: false,
         canSync: false,
+        canCollaborate: false,
       };
     }
 
@@ -141,6 +144,7 @@ export class LicenseService {
         canView: true,
         canEdit: true,
         canSync: false,
+        canCollaborate: false, // Collaboration requires active sync
         warningLevel: daysSinceVerification > this.OFFLINE_GRACE_DAYS * 2 ? 'high' : 'medium',
         daysSinceVerification,
       };
@@ -160,6 +164,7 @@ export class LicenseService {
           canView: true,
           canEdit: true,
           canSync: false,
+          canCollaborate: false, // Collaboration requires active sync
         };
       }
 
@@ -172,8 +177,12 @@ export class LicenseService {
         canView: true,
         canEdit: false,
         canSync: false,
+        canCollaborate: false,
       };
     }
+
+    const canCollaborate =
+      cloudSyncEnabled && (license.tier === 'professional' || license.tier === 'institutional');
 
     // Active maintenance — approaching expiration warning
     if (daysUntilMaintenance <= this.EXPIRATION_WARNING_DAYS) {
@@ -184,6 +193,7 @@ export class LicenseService {
         canView: true,
         canEdit: true,
         canSync: cloudSyncEnabled,
+        canCollaborate,
         warningLevel: 'low',
         daysUntilExpiration: daysUntilMaintenance,
       };
@@ -197,6 +207,7 @@ export class LicenseService {
       canView: true,
       canEdit: true,
       canSync: cloudSyncEnabled,
+      canCollaborate,
     };
   }
 

@@ -362,6 +362,52 @@ contextBridge.exposeInMainWorld('api', {
     resetPassword: (email: string) => ipcRenderer.invoke('auth:resetPassword', email),
     getState: () => ipcRenderer.invoke('auth:getState'),
   },
+
+  // Collaboration operations (project & shop order sharing, presence)
+  collaboration: {
+    // Project members
+    inviteToProject: (projectId: string, email: string, role: string) =>
+      ipcRenderer.invoke('collaboration:invite-to-project', projectId, email, role),
+    removeProjectMember: (projectId: string, userId: string) =>
+      ipcRenderer.invoke('collaboration:remove-project-member', projectId, userId),
+    getProjectMembers: (projectId: string) =>
+      ipcRenderer.invoke('collaboration:get-project-members', projectId),
+    acceptProjectInvitation: (projectId: string) =>
+      ipcRenderer.invoke('collaboration:accept-project-invitation', projectId),
+    checkPendingProjectInvitations: () =>
+      ipcRenderer.invoke('collaboration:check-pending-project-invitations'),
+
+    // Shop order members
+    inviteToShopOrder: (shopOrderId: string, email: string, role: string) =>
+      ipcRenderer.invoke('collaboration:invite-to-shop-order', shopOrderId, email, role),
+    removeShopOrderMember: (shopOrderId: string, userId: string) =>
+      ipcRenderer.invoke('collaboration:remove-shop-order-member', shopOrderId, userId),
+    getShopOrderMembers: (shopOrderId: string) =>
+      ipcRenderer.invoke('collaboration:get-shop-order-members', shopOrderId),
+    acceptShopOrderInvitation: (shopOrderId: string) =>
+      ipcRenderer.invoke('collaboration:accept-shop-order-invitation', shopOrderId),
+    checkPendingShopOrderInvitations: () =>
+      ipcRenderer.invoke('collaboration:check-pending-shop-order-invitations'),
+
+    // Presence
+    joinPresence: (projectId: string, activeView?: string) =>
+      ipcRenderer.invoke('collaboration:join-presence', projectId, activeView),
+    leavePresence: (projectId: string) =>
+      ipcRenderer.invoke('collaboration:leave-presence', projectId),
+    getPresence: (projectId: string) => ipcRenderer.invoke('collaboration:get-presence', projectId),
+    subscribePresence: (projectId: string) =>
+      ipcRenderer.invoke('collaboration:subscribe-presence', projectId),
+    unsubscribePresence: (projectId: string) =>
+      ipcRenderer.invoke('collaboration:unsubscribe-presence', projectId),
+    onPresenceChanged: (callback: (projectId: string, members: any[]) => void) => {
+      ipcRenderer.on('collaboration:presenceChanged', (_, projectId, members) =>
+        callback(projectId, members),
+      );
+    },
+    offPresenceChanged: (callback: (projectId: string, members: any[]) => void) => {
+      ipcRenderer.removeListener('collaboration:presenceChanged', callback as any);
+    },
+  },
 });
 
 // TypeScript declaration
@@ -666,6 +712,44 @@ export interface ElectronAPI {
       error?: string;
     }>;
     delete: (backupDirName: string) => Promise<{ success: boolean; error?: string }>;
+  };
+  collaboration: {
+    inviteToProject: (
+      projectId: string,
+      email: string,
+      role: string,
+    ) => Promise<{ success: boolean; error?: string; memberId?: string }>;
+    removeProjectMember: (
+      projectId: string,
+      userId: string,
+    ) => Promise<{ success: boolean; error?: string }>;
+    getProjectMembers: (projectId: string) => Promise<any[]>;
+    acceptProjectInvitation: (projectId: string) => Promise<{ success: boolean; error?: string }>;
+    checkPendingProjectInvitations: () => Promise<any[]>;
+    inviteToShopOrder: (
+      shopOrderId: string,
+      email: string,
+      role: string,
+    ) => Promise<{ success: boolean; error?: string; memberId?: string }>;
+    removeShopOrderMember: (
+      shopOrderId: string,
+      userId: string,
+    ) => Promise<{ success: boolean; error?: string }>;
+    getShopOrderMembers: (shopOrderId: string) => Promise<any[]>;
+    acceptShopOrderInvitation: (
+      shopOrderId: string,
+    ) => Promise<{ success: boolean; error?: string }>;
+    checkPendingShopOrderInvitations: () => Promise<any[]>;
+    joinPresence: (
+      projectId: string,
+      activeView?: string,
+    ) => Promise<{ success: boolean; error?: string }>;
+    leavePresence: (projectId: string) => Promise<{ success: boolean; error?: string }>;
+    getPresence: (projectId: string) => Promise<any[]>;
+    subscribePresence: (projectId: string) => Promise<{ success: boolean; error?: string }>;
+    unsubscribePresence: (projectId: string) => Promise<{ success: boolean }>;
+    onPresenceChanged: (callback: (projectId: string, members: any[]) => void) => void;
+    offPresenceChanged: (callback: (projectId: string, members: any[]) => void) => void;
   };
 }
 

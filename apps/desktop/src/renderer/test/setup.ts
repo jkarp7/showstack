@@ -86,6 +86,27 @@ if (isJsdom) {
       on: vi.fn(),
       off: vi.fn(),
     },
+
+    // Collaboration
+    collaboration: {
+      inviteToProject: vi.fn().mockResolvedValue({ success: true }),
+      removeProjectMember: vi.fn().mockResolvedValue({ success: true }),
+      getProjectMembers: vi.fn().mockResolvedValue([]),
+      acceptProjectInvitation: vi.fn().mockResolvedValue({ success: true }),
+      checkPendingProjectInvitations: vi.fn().mockResolvedValue([]),
+      inviteToShopOrder: vi.fn().mockResolvedValue({ success: true }),
+      removeShopOrderMember: vi.fn().mockResolvedValue({ success: true }),
+      getShopOrderMembers: vi.fn().mockResolvedValue([]),
+      acceptShopOrderInvitation: vi.fn().mockResolvedValue({ success: true }),
+      checkPendingShopOrderInvitations: vi.fn().mockResolvedValue([]),
+      joinPresence: vi.fn().mockResolvedValue({ success: true }),
+      leavePresence: vi.fn().mockResolvedValue({ success: true }),
+      getPresence: vi.fn().mockResolvedValue([]),
+      subscribePresence: vi.fn().mockResolvedValue({ success: true }),
+      unsubscribePresence: vi.fn().mockResolvedValue({ success: true }),
+      onPresenceChanged: vi.fn(),
+      offPresenceChanged: vi.fn(),
+    },
   };
 
   // Mock lucide-react icons (to avoid SVG rendering issues)
