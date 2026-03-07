@@ -3,194 +3,161 @@
 # ============================================
 # See: https://docs.powersync.com/usage/sync-rules
 #
-# Format notes:
-# - parameters: SQL SELECT that extracts values from the JWT (token_parameters)
-# - data: SQL SELECT that filters rows; reference parameter values as bucket.<name>
-# - No top-level parameters block; no description field on buckets (not valid)
+# Key constraint: each data query must SELECT from exactly one table (no JOINs).
+#
+# Pattern used throughout:
+#   parameters: SELECT id as <key> FROM <parent_table> WHERE <user filter>
+#   data: SELECT * FROM <child_table> WHERE <key> = bucket.<key>
+#
+# This creates one bucket instance per parent row, so child rows can be
+# filtered by a column they already carry (project_id, rack_id, etc.)
+# without requiring a JOIN back to the parent.
 # ============================================
 
 bucket_definitions:
   # ============================================
-  # USER PROJECTS BUCKET
+  # OWNED PROJECTS
+  # One bucket instance per project owned by the current user.
   # ============================================
-  # Projects owned by the current user, plus all child data.
-  user_projects:
-    parameters: SELECT token_parameters.user_id as user_id
+  by_owned_project:
+    parameters: SELECT id as project_id FROM projects WHERE user_id = token_parameters.user_id
 
     data:
-      - SELECT * FROM projects WHERE user_id = bucket.user_id
-
-      - SELECT fixtures.* FROM fixtures
-        INNER JOIN projects ON projects.id = fixtures.project_id
-        WHERE projects.user_id = bucket.user_id
-
-      - SELECT dimmer_racks.* FROM dimmer_racks
-        INNER JOIN projects ON projects.id = dimmer_racks.project_id
-        WHERE projects.user_id = bucket.user_id
-
-      - SELECT dimmer_rack_modules.* FROM dimmer_rack_modules
-        INNER JOIN dimmer_racks ON dimmer_racks.id = dimmer_rack_modules.rack_id
-        INNER JOIN projects ON projects.id = dimmer_racks.project_id
-        WHERE projects.user_id = bucket.user_id
-
-      - SELECT pd_racks.* FROM pd_racks
-        INNER JOIN projects ON projects.id = pd_racks.project_id
-        WHERE projects.user_id = bucket.user_id
-
-      - SELECT phase_distribution_templates.* FROM phase_distribution_templates
-        INNER JOIN projects ON projects.id = phase_distribution_templates.project_id
-        WHERE projects.user_id = bucket.user_id
-
-      - SELECT infrastructure_equipment.* FROM infrastructure_equipment
-        INNER JOIN projects ON projects.id = infrastructure_equipment.project_id
-        WHERE projects.user_id = bucket.user_id
-
-      # user_preferences: scoped to both project ownership AND user_id
-      # (migration 005 added user_id column to user_preferences)
-      - SELECT user_preferences.* FROM user_preferences
-        INNER JOIN projects ON projects.id = user_preferences.project_id
-        WHERE projects.user_id = bucket.user_id
-        AND user_preferences.user_id = bucket.user_id
-
-      # project_members: sync so owners can see who they've invited
-      - SELECT project_members.* FROM project_members
-        INNER JOIN projects ON projects.id = project_members.project_id
-        WHERE projects.user_id = bucket.user_id
+      - SELECT * FROM projects WHERE id = bucket.project_id
+      - SELECT * FROM fixtures WHERE project_id = bucket.project_id
+      - SELECT * FROM dimmer_racks WHERE project_id = bucket.project_id
+      - SELECT * FROM pd_racks WHERE project_id = bucket.project_id
+      - SELECT * FROM phase_distribution_templates WHERE project_id = bucket.project_id
+      - SELECT * FROM infrastructure_equipment WHERE project_id = bucket.project_id
+      # user_preferences: project_id column added in migration 005
+      - SELECT * FROM user_preferences WHERE project_id = bucket.project_id
+      # project_members: owner sees all invited/accepted members
+      - SELECT * FROM project_members WHERE project_id = bucket.project_id
 
   # ============================================
-  # SHARED PROJECTS BUCKET
+  # DIMMER RACK MODULES (owned projects)
+  # dimmer_rack_modules has no project_id — parameterize by rack_id instead.
+  # Subquery in WHERE resolves which racks belong to the current user's projects.
   # ============================================
-  # Projects (and their data) where the user is an accepted member, not the owner.
-  shared_projects:
-    parameters: SELECT token_parameters.user_id as user_id
+  by_dimmer_rack_owned:
+    parameters: SELECT id as rack_id FROM dimmer_racks
+      WHERE project_id IN (SELECT id FROM projects WHERE user_id = token_parameters.user_id)
 
     data:
-      - SELECT projects.* FROM projects
-        INNER JOIN project_members ON project_members.project_id = projects.id
-        WHERE project_members.user_id = bucket.user_id
-        AND project_members.status = 'accepted'
-
-      - SELECT fixtures.* FROM fixtures
-        INNER JOIN project_members ON project_members.project_id = fixtures.project_id
-        WHERE project_members.user_id = bucket.user_id
-        AND project_members.status = 'accepted'
-
-      - SELECT dimmer_racks.* FROM dimmer_racks
-        INNER JOIN project_members ON project_members.project_id = dimmer_racks.project_id
-        WHERE project_members.user_id = bucket.user_id
-        AND project_members.status = 'accepted'
-
-      - SELECT dimmer_rack_modules.* FROM dimmer_rack_modules
-        INNER JOIN dimmer_racks ON dimmer_racks.id = dimmer_rack_modules.rack_id
-        INNER JOIN project_members ON project_members.project_id = dimmer_racks.project_id
-        WHERE project_members.user_id = bucket.user_id
-        AND project_members.status = 'accepted'
-
-      - SELECT pd_racks.* FROM pd_racks
-        INNER JOIN project_members ON project_members.project_id = pd_racks.project_id
-        WHERE project_members.user_id = bucket.user_id
-        AND project_members.status = 'accepted'
-
-      - SELECT phase_distribution_templates.* FROM phase_distribution_templates
-        INNER JOIN project_members ON project_members.project_id = phase_distribution_templates.project_id
-        WHERE project_members.user_id = bucket.user_id
-        AND project_members.status = 'accepted'
-
-      - SELECT infrastructure_equipment.* FROM infrastructure_equipment
-        INNER JOIN project_members ON project_members.project_id = infrastructure_equipment.project_id
-        WHERE project_members.user_id = bucket.user_id
-        AND project_members.status = 'accepted'
-
-      # user_preferences: each collaborator only sees their own prefs
-      - SELECT user_preferences.* FROM user_preferences
-        INNER JOIN project_members ON project_members.project_id = user_preferences.project_id
-        WHERE project_members.user_id = bucket.user_id
-        AND project_members.status = 'accepted'
-        AND user_preferences.user_id = bucket.user_id
-
-      # project_members: sync so the member can see their own membership record
-      - SELECT project_members.* FROM project_members
-        WHERE project_members.user_id = bucket.user_id
-        AND project_members.status = 'accepted'
+      - SELECT * FROM dimmer_rack_modules WHERE rack_id = bucket.rack_id
 
   # ============================================
-  # SHOP ORDERS BUCKET
+  # SHARED PROJECTS
+  # One bucket instance per project where the user is an accepted member.
+  # project_members.project_id is a direct column — no JOIN needed.
   # ============================================
-  shop_orders:
-    parameters: SELECT token_parameters.user_id as user_id
+  by_shared_project:
+    parameters: SELECT project_id FROM project_members
+      WHERE user_id = token_parameters.user_id
+      AND status = 'accepted'
 
     data:
-      - SELECT * FROM shop_order_projects WHERE user_id = bucket.user_id
-
-      - SELECT shop_order_sections.* FROM shop_order_sections
-        INNER JOIN shop_order_projects ON shop_order_projects.id = shop_order_sections.prep_project_id
-        WHERE shop_order_projects.user_id = bucket.user_id
-
-      - SELECT shop_order_items.* FROM shop_order_items
-        INNER JOIN shop_order_sections ON shop_order_sections.id = shop_order_items.section_id
-        INNER JOIN shop_order_projects ON shop_order_projects.id = shop_order_sections.prep_project_id
-        WHERE shop_order_projects.user_id = bucket.user_id
-
-      - SELECT shop_order_revisions.* FROM shop_order_revisions
-        INNER JOIN shop_order_projects ON shop_order_projects.id = shop_order_revisions.prep_project_id
-        WHERE shop_order_projects.user_id = bucket.user_id
-
-      - SELECT shop_order_notes.* FROM shop_order_notes
-        INNER JOIN shop_order_projects ON shop_order_projects.id = shop_order_notes.prep_project_id
-        WHERE shop_order_projects.user_id = bucket.user_id
+      - SELECT * FROM projects WHERE id = bucket.project_id
+      - SELECT * FROM fixtures WHERE project_id = bucket.project_id
+      - SELECT * FROM dimmer_racks WHERE project_id = bucket.project_id
+      - SELECT * FROM pd_racks WHERE project_id = bucket.project_id
+      - SELECT * FROM phase_distribution_templates WHERE project_id = bucket.project_id
+      - SELECT * FROM infrastructure_equipment WHERE project_id = bucket.project_id
+      # user_preferences: RLS ensures each user only reads their own rows
+      - SELECT * FROM user_preferences WHERE project_id = bucket.project_id
+      # project_members: collaborator sees only their own membership row
+      - SELECT * FROM project_members WHERE project_id = bucket.project_id
+        AND user_id = token_parameters.user_id
 
   # ============================================
-  # USER TEMPLATES BUCKET
+  # DIMMER RACK MODULES (shared projects)
+  # ============================================
+  by_dimmer_rack_shared:
+    parameters: SELECT id as rack_id FROM dimmer_racks
+      WHERE project_id IN (SELECT project_id FROM project_members
+      WHERE user_id = token_parameters.user_id
+      AND status = 'accepted')
+
+    data:
+      - SELECT * FROM dimmer_rack_modules WHERE rack_id = bucket.rack_id
+
+  # ============================================
+  # OWNED SHOP ORDERS
+  # One bucket instance per shop order owned by the current user.
+  # ============================================
+  by_owned_shop_order:
+    parameters: SELECT id as shop_order_id FROM shop_order_projects
+      WHERE user_id = token_parameters.user_id
+
+    data:
+      - SELECT * FROM shop_order_projects WHERE id = bucket.shop_order_id
+      - SELECT * FROM shop_order_sections WHERE prep_project_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_revisions WHERE prep_project_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_notes WHERE prep_project_id = bucket.shop_order_id
+      # shop_order_members: owner sees all invited/accepted members
+      - SELECT * FROM shop_order_members WHERE shop_order_id = bucket.shop_order_id
+
+  # ============================================
+  # SHOP ORDER ITEMS (owned)
+  # shop_order_items has no shop_order_id — parameterize by section_id.
+  # ============================================
+  by_shop_order_section_owned:
+    parameters: SELECT id as section_id FROM shop_order_sections
+      WHERE prep_project_id IN (SELECT id FROM shop_order_projects
+      WHERE user_id = token_parameters.user_id)
+
+    data:
+      - SELECT * FROM shop_order_items WHERE section_id = bucket.section_id
+
+  # ============================================
+  # SHARED SHOP ORDERS
+  # One bucket instance per shop order where the user is an accepted member.
+  # ============================================
+  by_shared_shop_order:
+    parameters: SELECT shop_order_id FROM shop_order_members
+      WHERE user_id = token_parameters.user_id
+      AND status = 'accepted'
+
+    data:
+      - SELECT * FROM shop_order_projects WHERE id = bucket.shop_order_id
+      - SELECT * FROM shop_order_sections WHERE prep_project_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_revisions WHERE prep_project_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_notes WHERE prep_project_id = bucket.shop_order_id
+      # shop_order_members: member sees only their own membership row
+      - SELECT * FROM shop_order_members WHERE shop_order_id = bucket.shop_order_id
+        AND user_id = token_parameters.user_id
+
+  # ============================================
+  # SHOP ORDER ITEMS (shared)
+  # ============================================
+  by_shop_order_section_shared:
+    parameters: SELECT id as section_id FROM shop_order_sections
+      WHERE prep_project_id IN (SELECT shop_order_id FROM shop_order_members
+      WHERE user_id = token_parameters.user_id
+      AND status = 'accepted')
+
+    data:
+      - SELECT * FROM shop_order_items WHERE section_id = bucket.section_id
+
+  # ============================================
+  # USER TEMPLATES
+  # Templates are owned directly (user_id on each table).
   # ============================================
   user_templates:
     parameters: SELECT token_parameters.user_id as user_id
 
     data:
       - SELECT * FROM page_layout_templates WHERE user_id = bucket.user_id
-
-      - SELECT page_layout_elements.* FROM page_layout_elements
-        INNER JOIN page_layout_templates ON page_layout_templates.id = page_layout_elements.template_id
-        WHERE page_layout_templates.user_id = bucket.user_id
-
       - SELECT * FROM paperwork_templates WHERE user_id = bucket.user_id
-
       - SELECT * FROM shop_order_note_templates WHERE user_id = bucket.user_id
 
   # ============================================
-  # SHARED SHOP ORDERS BUCKET
+  # PAGE LAYOUT ELEMENTS
+  # page_layout_elements has no user_id — parameterize by template_id.
   # ============================================
-  # Shop orders where the user is an accepted member, not the owner.
-  shared_shop_orders:
-    parameters: SELECT token_parameters.user_id as user_id
+  by_page_layout_template:
+    parameters: SELECT id as template_id FROM page_layout_templates
+      WHERE user_id = token_parameters.user_id
 
     data:
-      - SELECT shop_order_projects.* FROM shop_order_projects
-        INNER JOIN shop_order_members ON shop_order_members.shop_order_id = shop_order_projects.id
-        WHERE shop_order_members.user_id = bucket.user_id
-        AND shop_order_members.status = 'accepted'
-
-      - SELECT shop_order_sections.* FROM shop_order_sections
-        INNER JOIN shop_order_members ON shop_order_members.shop_order_id = shop_order_sections.prep_project_id
-        WHERE shop_order_members.user_id = bucket.user_id
-        AND shop_order_members.status = 'accepted'
-
-      - SELECT shop_order_items.* FROM shop_order_items
-        INNER JOIN shop_order_sections ON shop_order_sections.id = shop_order_items.section_id
-        INNER JOIN shop_order_members ON shop_order_members.shop_order_id = shop_order_sections.prep_project_id
-        WHERE shop_order_members.user_id = bucket.user_id
-        AND shop_order_members.status = 'accepted'
-
-      - SELECT shop_order_revisions.* FROM shop_order_revisions
-        INNER JOIN shop_order_members ON shop_order_members.shop_order_id = shop_order_revisions.prep_project_id
-        WHERE shop_order_members.user_id = bucket.user_id
-        AND shop_order_members.status = 'accepted'
-
-      - SELECT shop_order_notes.* FROM shop_order_notes
-        INNER JOIN shop_order_members ON shop_order_members.shop_order_id = shop_order_notes.prep_project_id
-        WHERE shop_order_members.user_id = bucket.user_id
-        AND shop_order_members.status = 'accepted'
-
-      # shop_order_members: sync so the member can see their own membership record
-      - SELECT shop_order_members.* FROM shop_order_members
-        WHERE shop_order_members.user_id = bucket.user_id
-        AND shop_order_members.status = 'accepted'
+      - SELECT * FROM page_layout_elements WHERE template_id = bucket.template_id
