@@ -1,8 +1,7 @@
 # Next Steps - ShowStack Development
 
-**Branch:** `feature/user-accounts-licensing`
-**Last Updated:** February 13, 2026
-**Status:** Renovation ~95% complete (Phases 0-7.2 done), Phase 7.3 in progress
+**Last Updated:** March 2026
+**Status:** Multi-user collaboration shipped; PowerSync project-sync gap documented below
 
 ---
 
@@ -37,6 +36,17 @@ npm run format:check
 ---
 
 ## Recently Completed
+
+### Multi-User Collaboration (March 2026)
+
+- Project and shop-order sharing: invite by email with editor/viewer roles
+- `CollaborationService` — invite/remove/accept/decline via Supabase RPCs (migrations 005–011)
+- `PresenceService` — real-time collaborator presence via Supabase Realtime channels
+- `ProjectSharingDialog` — Share button on project pages; member list with remove support
+- `PendingInvitationsBanner` — app-top banner surfacing pending invitations on login
+- Collaboration settings tab — Accept/Decline UI with project name and inviter email
+- PowerSync sync rules rewritten — parameterized buckets, no JOINs anywhere (migration 008 denormalizes `project_id` onto `dimmer_rack_modules` and `shop_order_id` onto `shop_order_items`)
+- Feature-flagged behind `collaboration`; license-gated to Professional/Institutional tiers
 
 ### User Accounts, Licensing & Demo Mode (February 2026)
 
@@ -78,6 +88,24 @@ npm run format:check
 - [ ] Phase 7.3: Documentation updates (in progress)
 
 See `docs/archive/renovation/README.md` for the full renovation plan.
+
+---
+
+## Known Issues / Next Steps
+
+### PowerSync: Projects Not Written to Supabase on Creation
+
+**Context:** ShowStack stores project data in a local SQLite file (`showstack-projects.db`). Supabase has a separate `projects` table used by PowerSync sync rules and the collaboration RPCs. These two are currently not kept in sync automatically.
+
+**Workaround in place:** The `invite_to_project` RPC (migration 010) upserts a minimal project stub (`id`, `user_id`, `name`) into Supabase's `projects` table on first invite. This allows the ownership check and `project_members` insert to succeed. Only `name` is populated; all other columns remain NULL in Supabase.
+
+**Full fix needed:** One of the following approaches:
+
+1. **PowerSync write path** — Write project creates/updates/deletes to the PowerSync SQLite instead of (or in addition to) the local project DB. PowerSync's `uploadData` connector will then sync them to Supabase automatically.
+2. **Direct Supabase writes** — On every project create/update/delete in `ProjectService`, also call Supabase directly (upsert the full row). Simpler to implement but duplicates the write path.
+3. **Migrate primary store to PowerSync** — Make the PowerSync SQLite the single source of truth for project data (replace `showstack-projects.db`). Larger refactor but eliminates the two-DB split entirely.
+
+Until this is resolved, project metadata visible to collaborators in Supabase will only include `name`. Fixtures, racks, and other project data still live exclusively in the local SQLite and are not accessible to collaborators.
 
 ---
 
