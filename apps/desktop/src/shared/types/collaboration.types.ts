@@ -7,6 +7,8 @@
  */
 
 export type MemberRole = 'owner' | 'editor' | 'viewer';
+/** Roles that can be assigned when inviting — owners are never in the members table. */
+export type InviteRole = 'editor' | 'viewer';
 export type MemberStatus = 'pending' | 'accepted' | 'declined';
 
 export interface ProjectMember {

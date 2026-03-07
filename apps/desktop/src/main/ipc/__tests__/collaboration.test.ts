@@ -13,6 +13,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const {
   mockHandle,
+  mockRemoveHandler,
   mockInviteToProject,
   mockRemoveProjectMember,
   mockGetProjectMembers,
@@ -34,6 +35,7 @@ const {
   mockFromWebContents,
 } = vi.hoisted(() => ({
   mockHandle: vi.fn(),
+  mockRemoveHandler: vi.fn(),
   mockInviteToProject: vi.fn(),
   mockRemoveProjectMember: vi.fn(),
   mockGetProjectMembers: vi.fn(),
@@ -56,7 +58,7 @@ const {
 }));
 
 vi.mock('electron', () => ({
-  ipcMain: { handle: mockHandle },
+  ipcMain: { handle: mockHandle, removeHandler: mockRemoveHandler },
   BrowserWindow: { fromWebContents: mockFromWebContents },
 }));
 

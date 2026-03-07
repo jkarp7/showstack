@@ -9,7 +9,7 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { collaborationService } from '../services/CollaborationService';
 import { presenceService } from '../services/PresenceService';
-import type { MemberRole } from '../services/CollaborationService';
+import type { InviteRole } from '../services/CollaborationService';
 import { logger } from '../utils/logger';
 
 /** Basic email format validation */
@@ -17,7 +17,7 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
-const VALID_INVITE_ROLES: MemberRole[] = ['editor', 'viewer'];
+const VALID_INVITE_ROLES: InviteRole[] = ['editor', 'viewer'];
 
 // Module-scoped so state survives across registerCollaborationHandlers() calls
 // (e.g. hot-reload in development, repeated calls in tests).
@@ -30,13 +30,41 @@ export function _resetPresenceStateForTesting(): void {
 }
 
 export function registerCollaborationHandlers(): void {
+  // Remove any previously registered handlers so this function is idempotent.
+  // ipcMain.handle() throws if a handler is already registered for the channel,
+  // which would happen on hot-reload or if called more than once.
+  const channels = [
+    'collaboration:invite-to-project',
+    'collaboration:remove-project-member',
+    'collaboration:get-project-members',
+    'collaboration:accept-project-invitation',
+    'collaboration:check-pending-project-invitations',
+    'collaboration:decline-project-invitation',
+    'collaboration:cancel-project-invitation',
+    'collaboration:invite-to-shop-order',
+    'collaboration:remove-shop-order-member',
+    'collaboration:get-shop-order-members',
+    'collaboration:accept-shop-order-invitation',
+    'collaboration:check-pending-shop-order-invitations',
+    'collaboration:decline-shop-order-invitation',
+    'collaboration:cancel-shop-order-invitation',
+    'collaboration:join-presence',
+    'collaboration:leave-presence',
+    'collaboration:get-presence',
+    'collaboration:subscribe-presence',
+    'collaboration:unsubscribe-presence',
+  ] as const;
+  for (const channel of channels) {
+    ipcMain.removeHandler(channel);
+  }
+
   // ============================================
   // PROJECT MEMBERS
   // ============================================
 
   ipcMain.handle(
     'collaboration:invite-to-project',
-    async (_, projectId: string, projectName: string, email: string, role: MemberRole) => {
+    async (_, projectId: string, projectName: string, email: string, role: InviteRole) => {
       if (!projectId || typeof projectId !== 'string') {
         return { success: false, error: 'Invalid project ID' };
       }
@@ -115,7 +143,7 @@ export function registerCollaborationHandlers(): void {
 
   ipcMain.handle(
     'collaboration:invite-to-shop-order',
-    async (_, shopOrderId: string, email: string, role: MemberRole) => {
+    async (_, shopOrderId: string, email: string, role: InviteRole) => {
       if (!shopOrderId || typeof shopOrderId !== 'string') {
         return { success: false, error: 'Invalid shop order ID' };
       }

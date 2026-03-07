@@ -16,13 +16,21 @@ import { licenseService } from './LicenseService';
 import { logger } from '../utils/logger';
 import type {
   MemberRole,
+  InviteRole,
   MemberStatus,
   ProjectMember,
   ShopOrderMember,
   CollaborationResult,
 } from '../../shared/types/collaboration.types';
 
-export type { MemberRole, MemberStatus, ProjectMember, ShopOrderMember, CollaborationResult };
+export type {
+  MemberRole,
+  InviteRole,
+  MemberStatus,
+  ProjectMember,
+  ShopOrderMember,
+  CollaborationResult,
+};
 
 export class CollaborationService {
   // ============================================
@@ -37,7 +45,7 @@ export class CollaborationService {
     projectId: string,
     projectName: string,
     email: string,
-    role: MemberRole,
+    role: InviteRole,
   ): Promise<CollaborationResult> {
     const licenseStatus = licenseService.getLicenseStatus();
     if (!licenseStatus.canCollaborate) {
@@ -244,8 +252,11 @@ export class CollaborationService {
    * to the invitee's local PowerSync database (sync rules only cover accepted members).
    */
   async checkPendingProjectInvitations(): Promise<ProjectMember[]> {
+    const connector = getSupabaseConnector();
+    if (!connector.isAuthenticated()) return [];
+
     try {
-      const { data, error } = await getSupabaseConnector()
+      const { data, error } = await connector
         .getSupabaseClient()
         .rpc('get_pending_project_invitations');
 
@@ -276,7 +287,7 @@ export class CollaborationService {
   async inviteToShopOrder(
     shopOrderId: string,
     email: string,
-    role: MemberRole,
+    role: InviteRole,
   ): Promise<CollaborationResult> {
     const licenseStatus = licenseService.getLicenseStatus();
     if (!licenseStatus.canCollaborate) {
@@ -480,8 +491,11 @@ export class CollaborationService {
    * Queries Supabase directly via RPC — same reason as checkPendingProjectInvitations.
    */
   async checkPendingShopOrderInvitations(): Promise<ShopOrderMember[]> {
+    const connector = getSupabaseConnector();
+    if (!connector.isAuthenticated()) return [];
+
     try {
-      const { data, error } = await getSupabaseConnector()
+      const { data, error } = await connector
         .getSupabaseClient()
         .rpc('get_pending_shop_order_invitations');
 

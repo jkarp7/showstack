@@ -26,6 +26,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { X, Users, UserPlus, Trash2, AlertCircle, Crown, Edit3, Eye } from 'lucide-react';
 import type {
   MemberRole,
+  InviteRole,
   MemberStatus,
   ProjectMember,
 } from '../../../../shared/types/collaboration.types';
@@ -64,7 +65,7 @@ export function ProjectSharingDialog({
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [loading, setLoading] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState<MemberRole>('editor');
+  const [inviteRole, setInviteRole] = useState<InviteRole>('editor');
   const [inviting, setInviting] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
@@ -126,7 +127,10 @@ export function ProjectSharingDialog({
   };
 
   const handleRemove = async (member: ProjectMember) => {
-    if (!member.user_id) return;
+    if (!member.user_id) {
+      setRemoveError('Cannot remove a pending invitation — use Cancel instead.');
+      return;
+    }
     setRemoveError(null);
 
     const result = await window.api.collaboration.removeProjectMember(projectId, member.user_id);
@@ -194,7 +198,7 @@ export function ProjectSharingDialog({
                   />
                   <select
                     value={inviteRole}
-                    onChange={(e) => setInviteRole(e.target.value as MemberRole)}
+                    onChange={(e) => setInviteRole(e.target.value as InviteRole)}
                     className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="editor">Editor</option>

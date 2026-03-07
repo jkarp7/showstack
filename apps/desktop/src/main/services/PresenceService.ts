@@ -36,6 +36,7 @@ export class PresenceService {
     if (!connector.isAuthenticated()) return;
 
     const userId = connector.getUserId();
+    if (!userId) return; // guard: isAuthenticated() should guarantee this, but be explicit
     // getSession() is a public method on SupabaseConnector (SupabaseConnector.ts:152)
     const session = connector.getSession();
     const email = session?.user?.email ?? '';

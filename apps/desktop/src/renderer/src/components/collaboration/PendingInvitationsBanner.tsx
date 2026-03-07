@@ -24,17 +24,31 @@ export function PendingInvitationsBanner({ canCollaborate }: PendingInvitationsB
     if (!canCollaborate) return;
 
     const check = () => {
-      window.api.collaboration.checkPendingProjectInvitations().then((invites) => {
-        setCount(invites.length);
+      Promise.all([
+        window.api.collaboration.checkPendingProjectInvitations(),
+        window.api.collaboration.checkPendingShopOrderInvitations(),
+      ]).then(([projectInvites, shopOrderInvites]) => {
+        setCount(projectInvites.length + shopOrderInvites.length);
       });
     };
 
     check();
 
+    // Debounce focus re-checks — the user may trigger multiple focus events
+    // in rapid succession (e.g. alt-tab back) but a single RPC call is enough.
+    let debounceTimer: ReturnType<typeof setTimeout>;
+    const debouncedCheck = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(check, 500);
+    };
+
     // Re-check when the app window regains focus so the count stays current after
     // the user accepts or declines an invitation in the Settings tab.
-    window.addEventListener('focus', check);
-    return () => window.removeEventListener('focus', check);
+    window.addEventListener('focus', debouncedCheck);
+    return () => {
+      window.removeEventListener('focus', debouncedCheck);
+      clearTimeout(debounceTimer);
+    };
   }, [canCollaborate]);
 
   if (!canCollaborate || count === 0 || dismissed) return null;
@@ -44,7 +58,7 @@ export function PendingInvitationsBanner({ canCollaborate }: PendingInvitationsB
       <div className="flex items-center gap-2">
         <Users className="w-4 h-4" />
         <span>
-          You have {count} pending project invitation{count !== 1 ? 's' : ''}.
+          You have {count} pending collaboration invitation{count !== 1 ? 's' : ''}.
         </span>
       </div>
       <div className="flex items-center gap-3">

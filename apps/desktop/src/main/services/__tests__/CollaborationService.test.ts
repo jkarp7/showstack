@@ -243,6 +243,7 @@ describe('CollaborationService', () => {
 
   describe('checkPendingProjectInvitations', () => {
     it('returns pending invitations from RPC', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
       const invites = [{ id: 'i1', project_id: 'proj-1', status: 'pending' }];
       mockRpc.mockResolvedValue({ data: invites, error: null });
 
@@ -397,6 +398,7 @@ describe('CollaborationService', () => {
 
   describe('checkPendingShopOrderInvitations', () => {
     it('returns pending shop order invitations from RPC', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
       const invites = [{ id: 'i2', shop_order_id: 'order-1', status: 'pending' }];
       mockRpc.mockResolvedValue({ data: invites, error: null });
 
