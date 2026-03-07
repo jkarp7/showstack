@@ -18,6 +18,10 @@ interface Fixture {
   [key: string]: any;
 }
 
+// Maps original callbacks to their IPC wrapper functions so removeListener works by reference
+type PresenceCallback = (projectId: string, members: unknown[]) => void;
+const presenceChangeWrappers = new WeakMap<PresenceCallback, PresenceCallback>();
+
 // Expose APIs to renderer
 contextBridge.exposeInMainWorld('api', {
   // Fixture operations
@@ -378,6 +382,8 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.invoke('collaboration:check-pending-project-invitations'),
     declineProjectInvitation: (projectId: string) =>
       ipcRenderer.invoke('collaboration:decline-project-invitation', projectId),
+    cancelProjectInvitation: (memberId: string) =>
+      ipcRenderer.invoke('collaboration:cancel-project-invitation', memberId),
 
     // Shop order members
     inviteToShopOrder: (shopOrderId: string, email: string, role: string) =>
@@ -392,6 +398,8 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.invoke('collaboration:check-pending-shop-order-invitations'),
     declineShopOrderInvitation: (shopOrderId: string) =>
       ipcRenderer.invoke('collaboration:decline-shop-order-invitation', shopOrderId),
+    cancelShopOrderInvitation: (memberId: string) =>
+      ipcRenderer.invoke('collaboration:cancel-shop-order-invitation', memberId),
 
     // Presence
     joinPresence: (projectId: string, activeView?: string) =>
@@ -404,12 +412,18 @@ contextBridge.exposeInMainWorld('api', {
     unsubscribePresence: (projectId: string) =>
       ipcRenderer.invoke('collaboration:unsubscribe-presence', projectId),
     onPresenceChanged: (callback: (projectId: string, members: any[]) => void) => {
-      ipcRenderer.on('collaboration:presenceChanged', (_, projectId, members) =>
-        callback(projectId, members),
-      );
+      // Store the wrapper so offPresenceChanged can remove it by reference
+      const wrapper = (_: unknown, projectId: string, members: any[]) =>
+        callback(projectId, members);
+      presenceChangeWrappers.set(callback, wrapper);
+      ipcRenderer.on('collaboration:presenceChanged', wrapper as any);
     },
     offPresenceChanged: (callback: (projectId: string, members: any[]) => void) => {
-      ipcRenderer.removeListener('collaboration:presenceChanged', callback as any);
+      const wrapper = presenceChangeWrappers.get(callback);
+      if (wrapper) {
+        ipcRenderer.removeListener('collaboration:presenceChanged', wrapper as any);
+        presenceChangeWrappers.delete(callback);
+      }
     },
   },
 });
@@ -732,6 +746,7 @@ export interface ElectronAPI {
     acceptProjectInvitation: (projectId: string) => Promise<{ success: boolean; error?: string }>;
     checkPendingProjectInvitations: () => Promise<any[]>;
     declineProjectInvitation: (projectId: string) => Promise<{ success: boolean; error?: string }>;
+    cancelProjectInvitation: (memberId: string) => Promise<{ success: boolean; error?: string }>;
     inviteToShopOrder: (
       shopOrderId: string,
       email: string,
@@ -749,6 +764,7 @@ export interface ElectronAPI {
     declineShopOrderInvitation: (
       shopOrderId: string,
     ) => Promise<{ success: boolean; error?: string }>;
+    cancelShopOrderInvitation: (memberId: string) => Promise<{ success: boolean; error?: string }>;
     joinPresence: (
       projectId: string,
       activeView?: string,

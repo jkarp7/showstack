@@ -19,12 +19,14 @@ const {
   mockAcceptProjectInvitation,
   mockCheckPendingProjectInvitations,
   mockDeclineProjectInvitation,
+  mockCancelProjectInvitation,
   mockInviteToShopOrder,
   mockRemoveShopOrderMember,
   mockGetShopOrderMembers,
   mockAcceptShopOrderInvitation,
   mockCheckPendingShopOrderInvitations,
   mockDeclineShopOrderInvitation,
+  mockCancelShopOrderInvitation,
   mockJoinProjectPresence,
   mockLeaveProjectPresence,
   mockGetPresenceMembers,
@@ -37,12 +39,14 @@ const {
   mockAcceptProjectInvitation: vi.fn(),
   mockCheckPendingProjectInvitations: vi.fn(),
   mockDeclineProjectInvitation: vi.fn(),
+  mockCancelProjectInvitation: vi.fn(),
   mockInviteToShopOrder: vi.fn(),
   mockRemoveShopOrderMember: vi.fn(),
   mockGetShopOrderMembers: vi.fn(),
   mockAcceptShopOrderInvitation: vi.fn(),
   mockCheckPendingShopOrderInvitations: vi.fn(),
   mockDeclineShopOrderInvitation: vi.fn(),
+  mockCancelShopOrderInvitation: vi.fn(),
   mockJoinProjectPresence: vi.fn(),
   mockLeaveProjectPresence: vi.fn(),
   mockGetPresenceMembers: vi.fn(),
@@ -71,12 +75,14 @@ vi.mock('../../services/CollaborationService', () => ({
     acceptProjectInvitation: mockAcceptProjectInvitation,
     checkPendingProjectInvitations: mockCheckPendingProjectInvitations,
     declineProjectInvitation: mockDeclineProjectInvitation,
+    cancelProjectInvitation: mockCancelProjectInvitation,
     inviteToShopOrder: mockInviteToShopOrder,
     removeShopOrderMember: mockRemoveShopOrderMember,
     getShopOrderMembers: mockGetShopOrderMembers,
     acceptShopOrderInvitation: mockAcceptShopOrderInvitation,
     checkPendingShopOrderInvitations: mockCheckPendingShopOrderInvitations,
     declineShopOrderInvitation: mockDeclineShopOrderInvitation,
+    cancelShopOrderInvitation: mockCancelShopOrderInvitation,
   },
 }));
 
@@ -305,6 +311,28 @@ describe('Collaboration IPC handlers', () => {
   });
 
   // ==========================================
+  // collaboration:cancel-project-invitation
+  // ==========================================
+
+  describe('collaboration:cancel-project-invitation', () => {
+    it('returns error for invalid member ID', async () => {
+      const handler = getHandler('collaboration:cancel-project-invitation');
+      const result = await handler(fakeEvent, '');
+      expect(result).toMatchObject({ success: false, error: 'Invalid member ID' });
+    });
+
+    it('delegates to collaborationService.cancelProjectInvitation', async () => {
+      mockCancelProjectInvitation.mockResolvedValue({ success: true });
+      const handler = getHandler('collaboration:cancel-project-invitation');
+
+      const result = await handler(fakeEvent, 'member-uuid');
+
+      expect(mockCancelProjectInvitation).toHaveBeenCalledWith('member-uuid');
+      expect(result).toMatchObject({ success: true });
+    });
+  });
+
+  // ==========================================
   // collaboration:decline-shop-order-invitation
   // ==========================================
 
@@ -322,6 +350,28 @@ describe('Collaboration IPC handlers', () => {
       const result = await handler(fakeEvent, 'order-1');
 
       expect(mockDeclineShopOrderInvitation).toHaveBeenCalledWith('order-1');
+      expect(result).toMatchObject({ success: true });
+    });
+  });
+
+  // ==========================================
+  // collaboration:cancel-shop-order-invitation
+  // ==========================================
+
+  describe('collaboration:cancel-shop-order-invitation', () => {
+    it('returns error for invalid member ID', async () => {
+      const handler = getHandler('collaboration:cancel-shop-order-invitation');
+      const result = await handler(fakeEvent, '');
+      expect(result).toMatchObject({ success: false, error: 'Invalid member ID' });
+    });
+
+    it('delegates to collaborationService.cancelShopOrderInvitation', async () => {
+      mockCancelShopOrderInvitation.mockResolvedValue({ success: true });
+      const handler = getHandler('collaboration:cancel-shop-order-invitation');
+
+      const result = await handler(fakeEvent, 'member-uuid');
+
+      expect(mockCancelShopOrderInvitation).toHaveBeenCalledWith('member-uuid');
       expect(result).toMatchObject({ success: true });
     });
   });

@@ -231,6 +231,42 @@ export class CollaborationService {
   }
 
   /**
+   * Cancel a pending project invitation (owner cancelling an invite they sent).
+   * Uses the project_members row ID so it works before the invitee accepts
+   * (when user_id is still null on the pending row).
+   */
+  async cancelProjectInvitation(memberId: string): Promise<CollaborationResult> {
+    const connector = getSupabaseConnector();
+    if (!connector.isAuthenticated()) {
+      return { success: false, error: 'You must be signed in.' };
+    }
+
+    try {
+      const { data, error } = await connector
+        .getSupabaseClient()
+        .rpc('cancel_project_invitation', { p_member_id: memberId });
+
+      if (error) {
+        logger.warn('[CollaborationService] cancel_project_invitation RPC error', {
+          error: error.message,
+        });
+        return { success: false, error: error.message };
+      }
+
+      const result = data as { success: boolean; error?: string };
+      if (!result?.success) {
+        return { success: false, error: result?.error ?? 'Cancel failed' };
+      }
+
+      return { success: true };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      logger.error('[CollaborationService] cancelProjectInvitation failed', { error: message });
+      return { success: false, error: message };
+    }
+  }
+
+  /**
    * Check for pending project invitations for the current user's email.
    * Queries Supabase directly via RPC — pending invitations are never synced
    * to the invitee's local PowerSync database (sync rules only cover accepted members).
@@ -362,6 +398,40 @@ export class CollaborationService {
         error: err instanceof Error ? err.message : String(err),
       });
       return [];
+    }
+  }
+
+  /**
+   * Cancel a pending shop order invitation (owner cancelling an invite they sent).
+   */
+  async cancelShopOrderInvitation(memberId: string): Promise<CollaborationResult> {
+    const connector = getSupabaseConnector();
+    if (!connector.isAuthenticated()) {
+      return { success: false, error: 'You must be signed in.' };
+    }
+
+    try {
+      const { data, error } = await connector
+        .getSupabaseClient()
+        .rpc('cancel_shop_order_invitation', { p_member_id: memberId });
+
+      if (error) {
+        logger.warn('[CollaborationService] cancel_shop_order_invitation RPC error', {
+          error: error.message,
+        });
+        return { success: false, error: error.message };
+      }
+
+      const result = data as { success: boolean; error?: string };
+      if (!result?.success) {
+        return { success: false, error: result?.error ?? 'Cancel failed' };
+      }
+
+      return { success: true };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      logger.error('[CollaborationService] cancelShopOrderInvitation failed', { error: message });
+      return { success: false, error: message };
     }
   }
 

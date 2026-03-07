@@ -91,6 +91,14 @@ export function registerCollaborationHandlers(): void {
     return collaborationService.declineProjectInvitation(projectId);
   });
 
+  ipcMain.handle('collaboration:cancel-project-invitation', async (_, memberId: string) => {
+    if (!memberId || typeof memberId !== 'string') {
+      return { success: false, error: 'Invalid member ID' };
+    }
+
+    return collaborationService.cancelProjectInvitation(memberId);
+  });
+
   // ============================================
   // SHOP ORDER MEMBERS
   // ============================================
@@ -152,6 +160,14 @@ export function registerCollaborationHandlers(): void {
     }
 
     return collaborationService.declineShopOrderInvitation(shopOrderId);
+  });
+
+  ipcMain.handle('collaboration:cancel-shop-order-invitation', async (_, memberId: string) => {
+    if (!memberId || typeof memberId !== 'string') {
+      return { success: false, error: 'Invalid member ID' };
+    }
+
+    return collaborationService.cancelShopOrderInvitation(memberId);
   });
 
   // ============================================

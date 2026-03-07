@@ -676,6 +676,10 @@ export function ProjectPage() {
         <ProjectSharingDialog
           projectId={projectId}
           projectName={project.name}
+          // Local SQLite projects have no user_id column — all projects in
+          // showstack-projects.db are created by the current user, so userId is
+          // always correct here. Update to project.user_id when PowerSync becomes
+          // the primary store.
           projectOwnerId={userId}
           currentUserId={userId}
           open={isSharingOpen}

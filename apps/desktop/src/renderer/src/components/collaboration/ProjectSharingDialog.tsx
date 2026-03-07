@@ -8,11 +8,18 @@
  * Usage:
  *   <ProjectSharingDialog
  *     projectId={project.id}
- *     projectOwnerId={project.user_id}
+ *     projectName={project.name}
+ *     projectOwnerId={project.user_id ?? userId}
  *     currentUserId={userId}
  *     open={sharingOpen}
  *     onClose={() => setSharingOpen(false)}
  *   />
+ *
+ * Note: local SQLite projects do not store user_id (that column lives only in
+ * the Supabase projects stub). All projects in showstack-projects.db are created
+ * by the authenticated user, so passing userId as projectOwnerId is correct for
+ * the current architecture. When the primary store migrates to PowerSync, pass
+ * project.user_id directly.
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -137,6 +144,17 @@ export function ProjectSharingDialog({
       await loadMembers();
     } else {
       setRemoveError(result.error ?? 'Failed to remove member.');
+    }
+  };
+
+  const handleCancelInvitation = async (member: ProjectMember) => {
+    setRemoveError(null);
+
+    const result = await window.api.collaboration.cancelProjectInvitation(member.id);
+    if (result.success) {
+      await loadMembers();
+    } else {
+      setRemoveError(result.error ?? 'Failed to cancel invitation.');
     }
   };
 
@@ -283,7 +301,7 @@ export function ProjectSharingDialog({
                     </div>
                     {isOwner && (
                       <button
-                        onClick={() => handleRemove(member)}
+                        onClick={() => handleCancelInvitation(member)}
                         className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors ml-2 flex-shrink-0"
                         title="Cancel invitation"
                       >

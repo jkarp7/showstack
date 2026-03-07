@@ -307,6 +307,43 @@ describe('CollaborationService', () => {
   });
 
   // ==========================================
+  // PROJECT: cancelProjectInvitation
+  // ==========================================
+
+  describe('cancelProjectInvitation', () => {
+    it('returns error when not authenticated', async () => {
+      mockIsAuthenticated.mockReturnValue(false);
+
+      const result = await service.cancelProjectInvitation('member-uuid');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('signed in');
+    });
+
+    it('returns success on successful cancellation', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
+      mockRpc.mockResolvedValue({ data: { success: true }, error: null });
+
+      const result = await service.cancelProjectInvitation('member-uuid');
+
+      expect(result.success).toBe(true);
+      expect(mockRpc).toHaveBeenCalledWith('cancel_project_invitation', {
+        p_member_id: 'member-uuid',
+      });
+    });
+
+    it('returns RPC error', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
+      mockRpc.mockResolvedValue({ error: { message: 'Not found' } });
+
+      const result = await service.cancelProjectInvitation('member-uuid');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Not found');
+    });
+  });
+
+  // ==========================================
   // SHOP ORDER: inviteToShopOrder
   // ==========================================
 
@@ -381,6 +418,33 @@ describe('CollaborationService', () => {
   // ==========================================
   // SHOP ORDER: declineShopOrderInvitation
   // ==========================================
+
+  // ==========================================
+  // SHOP ORDER: cancelShopOrderInvitation
+  // ==========================================
+
+  describe('cancelShopOrderInvitation', () => {
+    it('returns error when not authenticated', async () => {
+      mockIsAuthenticated.mockReturnValue(false);
+
+      const result = await service.cancelShopOrderInvitation('member-uuid');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('signed in');
+    });
+
+    it('returns success on successful cancellation', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
+      mockRpc.mockResolvedValue({ data: { success: true }, error: null });
+
+      const result = await service.cancelShopOrderInvitation('member-uuid');
+
+      expect(result.success).toBe(true);
+      expect(mockRpc).toHaveBeenCalledWith('cancel_shop_order_invitation', {
+        p_member_id: 'member-uuid',
+      });
+    });
+  });
 
   describe('declineShopOrderInvitation', () => {
     it('returns error when not authenticated', async () => {
