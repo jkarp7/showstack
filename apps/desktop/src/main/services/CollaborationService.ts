@@ -21,10 +21,12 @@ export type MemberStatus = 'pending' | 'accepted' | 'declined';
 export interface ProjectMember {
   id: string;
   project_id: string;
+  project_name?: string;
   user_id: string | null;
   email: string;
   role: MemberRole;
   invited_by: string;
+  invited_by_email?: string;
   status: MemberStatus;
   invited_at: number;
   accepted_at: number | null;
@@ -33,10 +35,12 @@ export interface ProjectMember {
 export interface ShopOrderMember {
   id: string;
   shop_order_id: string;
+  shop_order_name?: string;
   user_id: string | null;
   email: string;
   role: MemberRole;
   invited_by: string;
+  invited_by_email?: string;
   status: MemberStatus;
   invited_at: number;
   accepted_at: number | null;
@@ -188,6 +192,40 @@ export class CollaborationService {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       logger.error('[CollaborationService] acceptProjectInvitation failed', { error: message });
+      return { success: false, error: message };
+    }
+  }
+
+  /**
+   * Decline a pending project invitation.
+   */
+  async declineProjectInvitation(projectId: string): Promise<CollaborationResult> {
+    const connector = getSupabaseConnector();
+    if (!connector.isAuthenticated()) {
+      return { success: false, error: 'You must be signed in.' };
+    }
+
+    try {
+      const { data, error } = await connector
+        .getSupabaseClient()
+        .rpc('decline_project_invitation', { p_project_id: projectId });
+
+      if (error) {
+        logger.warn('[CollaborationService] decline_project_invitation RPC error', {
+          error: error.message,
+        });
+        return { success: false, error: error.message };
+      }
+
+      const result = data as { success: boolean; error?: string };
+      if (!result?.success) {
+        return { success: false, error: result?.error ?? 'Decline failed' };
+      }
+
+      return { success: true };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      logger.error('[CollaborationService] declineProjectInvitation failed', { error: message });
       return { success: false, error: message };
     }
   }
@@ -360,6 +398,40 @@ export class CollaborationService {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       logger.error('[CollaborationService] acceptShopOrderInvitation failed', { error: message });
+      return { success: false, error: message };
+    }
+  }
+
+  /**
+   * Decline a pending shop order invitation.
+   */
+  async declineShopOrderInvitation(shopOrderId: string): Promise<CollaborationResult> {
+    const connector = getSupabaseConnector();
+    if (!connector.isAuthenticated()) {
+      return { success: false, error: 'You must be signed in.' };
+    }
+
+    try {
+      const { data, error } = await connector
+        .getSupabaseClient()
+        .rpc('decline_shop_order_invitation', { p_shop_order_id: shopOrderId });
+
+      if (error) {
+        logger.warn('[CollaborationService] decline_shop_order_invitation RPC error', {
+          error: error.message,
+        });
+        return { success: false, error: error.message };
+      }
+
+      const result = data as { success: boolean; error?: string };
+      if (!result?.success) {
+        return { success: false, error: result?.error ?? 'Decline failed' };
+      }
+
+      return { success: true };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      logger.error('[CollaborationService] declineShopOrderInvitation failed', { error: message });
       return { success: false, error: message };
     }
   }

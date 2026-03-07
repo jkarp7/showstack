@@ -6,17 +6,17 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Users, Crown, Edit3, Eye, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import { Users, Crown, Edit3, Eye, AlertCircle, CheckCircle2, Clock, X } from 'lucide-react';
 
 type MemberRole = 'owner' | 'editor' | 'viewer';
-type MemberStatus = 'pending' | 'accepted' | 'declined';
 
-interface ProjectMember {
+interface PendingInvitation {
   id: string;
   project_id: string;
+  project_name: string;
   email: string;
   role: MemberRole;
-  status: MemberStatus;
+  invited_by_email: string;
   invited_at: number;
 }
 
@@ -37,8 +37,8 @@ export function Collaboration() {
     canCollaborate: boolean;
     tier: string | null;
   } | null>(null);
-  const [pendingInvitations, setPendingInvitations] = useState<ProjectMember[]>([]);
-  const [accepting, setAccepting] = useState<string | null>(null);
+  const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
+  const [acting, setActing] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<{
     type: 'success' | 'error';
     text: string;
@@ -49,26 +49,41 @@ export function Collaboration() {
       setLicenseStatus(status);
     });
     window.api.collaboration.checkPendingProjectInvitations().then((invites) => {
-      setPendingInvitations(invites as ProjectMember[]);
+      setPendingInvitations(invites as PendingInvitation[]);
     });
   }, []);
 
-  const handleAccept = async (invitation: ProjectMember) => {
-    setAccepting(invitation.project_id);
+  const handleAccept = async (invitation: PendingInvitation) => {
+    setActing(invitation.project_id);
     setActionMessage(null);
     try {
       const result = await window.api.collaboration.acceptProjectInvitation(invitation.project_id);
       if (result.success) {
         setActionMessage({
           type: 'success',
-          text: 'Invitation accepted! The project will appear in your project list.',
+          text: `You've joined "${invitation.project_name}". It will appear in your project list.`,
         });
         setPendingInvitations((prev) => prev.filter((i) => i.id !== invitation.id));
       } else {
         setActionMessage({ type: 'error', text: result.error ?? 'Failed to accept invitation.' });
       }
     } finally {
-      setAccepting(null);
+      setActing(null);
+    }
+  };
+
+  const handleDecline = async (invitation: PendingInvitation) => {
+    setActing(`decline-${invitation.project_id}`);
+    setActionMessage(null);
+    try {
+      const result = await window.api.collaboration.declineProjectInvitation(invitation.project_id);
+      if (result.success) {
+        setPendingInvitations((prev) => prev.filter((i) => i.id !== invitation.id));
+      } else {
+        setActionMessage({ type: 'error', text: result.error ?? 'Failed to decline invitation.' });
+      }
+    } finally {
+      setActing(null);
     }
   };
 
@@ -110,7 +125,7 @@ export function Collaboration() {
         <section className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            Pending Invitations
+            Pending Invitations ({pendingInvitations.length})
           </h3>
 
           {actionMessage && (
@@ -133,27 +148,42 @@ export function Collaboration() {
           <ul className="space-y-3">
             {pendingInvitations.map((invitation) => {
               const RoleIcon = ROLE_ICONS[invitation.role];
+              const isActing = acting === invitation.project_id;
+              const isDeclining = acting === `decline-${invitation.project_id}`;
               return (
                 <li
                   key={invitation.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                  className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg gap-4"
                 >
-                  <div>
-                    <div className="text-sm font-medium text-gray-900 dark:text-white">
-                      Project invitation
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                      Invitation to join &ldquo;{invitation.project_name}&rdquo;
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-0.5">
-                      <RoleIcon className="w-3 h-3" />
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-1">
+                      <RoleIcon className="w-3 h-3 flex-shrink-0" />
                       {ROLE_LABELS[invitation.role]}
+                      {invitation.invited_by_email && (
+                        <span className="ml-1">· Invited by {invitation.invited_by_email}</span>
+                      )}
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleAccept(invitation)}
-                    disabled={accepting === invitation.project_id}
-                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-xs font-medium rounded-md transition-colors"
-                  >
-                    {accepting === invitation.project_id ? 'Accepting…' : 'Accept'}
-                  </button>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => handleAccept(invitation)}
+                      disabled={isActing || isDeclining}
+                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-xs font-medium rounded-md transition-colors"
+                    >
+                      {isActing ? 'Accepting…' : 'Accept'}
+                    </button>
+                    <button
+                      onClick={() => handleDecline(invitation)}
+                      disabled={isActing || isDeclining}
+                      className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 disabled:opacity-50 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-md transition-colors flex items-center gap-1"
+                    >
+                      <X className="w-3 h-3" />
+                      {isDeclining ? 'Declining…' : 'Decline'}
+                    </button>
+                  </div>
                 </li>
               );
             })}

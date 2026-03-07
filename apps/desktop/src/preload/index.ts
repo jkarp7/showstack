@@ -376,6 +376,8 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.invoke('collaboration:accept-project-invitation', projectId),
     checkPendingProjectInvitations: () =>
       ipcRenderer.invoke('collaboration:check-pending-project-invitations'),
+    declineProjectInvitation: (projectId: string) =>
+      ipcRenderer.invoke('collaboration:decline-project-invitation', projectId),
 
     // Shop order members
     inviteToShopOrder: (shopOrderId: string, email: string, role: string) =>
@@ -388,6 +390,8 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.invoke('collaboration:accept-shop-order-invitation', shopOrderId),
     checkPendingShopOrderInvitations: () =>
       ipcRenderer.invoke('collaboration:check-pending-shop-order-invitations'),
+    declineShopOrderInvitation: (shopOrderId: string) =>
+      ipcRenderer.invoke('collaboration:decline-shop-order-invitation', shopOrderId),
 
     // Presence
     joinPresence: (projectId: string, activeView?: string) =>
@@ -727,6 +731,7 @@ export interface ElectronAPI {
     getProjectMembers: (projectId: string) => Promise<any[]>;
     acceptProjectInvitation: (projectId: string) => Promise<{ success: boolean; error?: string }>;
     checkPendingProjectInvitations: () => Promise<any[]>;
+    declineProjectInvitation: (projectId: string) => Promise<{ success: boolean; error?: string }>;
     inviteToShopOrder: (
       shopOrderId: string,
       email: string,
@@ -741,6 +746,9 @@ export interface ElectronAPI {
       shopOrderId: string,
     ) => Promise<{ success: boolean; error?: string }>;
     checkPendingShopOrderInvitations: () => Promise<any[]>;
+    declineShopOrderInvitation: (
+      shopOrderId: string,
+    ) => Promise<{ success: boolean; error?: string }>;
     joinPresence: (
       projectId: string,
       activeView?: string,

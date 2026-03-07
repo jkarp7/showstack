@@ -83,6 +83,14 @@ export function registerCollaborationHandlers(): void {
     return collaborationService.checkPendingProjectInvitations();
   });
 
+  ipcMain.handle('collaboration:decline-project-invitation', async (_, projectId: string) => {
+    if (!projectId || typeof projectId !== 'string') {
+      return { success: false, error: 'Invalid project ID' };
+    }
+
+    return collaborationService.declineProjectInvitation(projectId);
+  });
+
   // ============================================
   // SHOP ORDER MEMBERS
   // ============================================
@@ -136,6 +144,14 @@ export function registerCollaborationHandlers(): void {
 
   ipcMain.handle('collaboration:check-pending-shop-order-invitations', async () => {
     return collaborationService.checkPendingShopOrderInvitations();
+  });
+
+  ipcMain.handle('collaboration:decline-shop-order-invitation', async (_, shopOrderId: string) => {
+    if (!shopOrderId || typeof shopOrderId !== 'string') {
+      return { success: false, error: 'Invalid shop order ID' };
+    }
+
+    return collaborationService.declineShopOrderInvitation(shopOrderId);
   });
 
   // ============================================
