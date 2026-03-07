@@ -146,3 +146,8 @@ vite.config.ts.timestamp-*
 .env.local
 release/
 html/
+
+# PowerSync local sync database
+showstack-sync.db
+showstack-sync.db-shm
+showstack-sync.db-wal
