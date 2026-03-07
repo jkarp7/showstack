@@ -366,8 +366,8 @@ contextBridge.exposeInMainWorld('api', {
   // Collaboration operations (project & shop order sharing, presence)
   collaboration: {
     // Project members
-    inviteToProject: (projectId: string, email: string, role: string) =>
-      ipcRenderer.invoke('collaboration:invite-to-project', projectId, email, role),
+    inviteToProject: (projectId: string, projectName: string, email: string, role: string) =>
+      ipcRenderer.invoke('collaboration:invite-to-project', projectId, projectName, email, role),
     removeProjectMember: (projectId: string, userId: string) =>
       ipcRenderer.invoke('collaboration:remove-project-member', projectId, userId),
     getProjectMembers: (projectId: string) =>
@@ -716,6 +716,7 @@ export interface ElectronAPI {
   collaboration: {
     inviteToProject: (
       projectId: string,
+      projectName: string,
       email: string,
       role: string,
     ) => Promise<{ success: boolean; error?: string; memberId?: string }>;

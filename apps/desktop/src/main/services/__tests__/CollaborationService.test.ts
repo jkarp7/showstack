@@ -83,7 +83,7 @@ describe('CollaborationService', () => {
     it('returns error when canCollaborate is false', async () => {
       denyCollaborate();
 
-      const result = await service.inviteToProject('proj-1', 'a@b.com', 'editor');
+      const result = await service.inviteToProject('proj-1', 'Test Project', 'a@b.com', 'editor');
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('Professional or Institutional');
@@ -94,7 +94,7 @@ describe('CollaborationService', () => {
       mockGetLicenseStatus.mockReturnValue({ canCollaborate: true });
       mockIsAuthenticated.mockReturnValue(false);
 
-      const result = await service.inviteToProject('proj-1', 'a@b.com', 'editor');
+      const result = await service.inviteToProject('proj-1', 'Test Project', 'a@b.com', 'editor');
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('signed in');
@@ -104,12 +104,13 @@ describe('CollaborationService', () => {
       allowCollaborate();
       mockRpc.mockResolvedValue({ data: { success: true, member_id: 'member-uuid' }, error: null });
 
-      const result = await service.inviteToProject('proj-1', 'a@b.com', 'editor');
+      const result = await service.inviteToProject('proj-1', 'Test Project', 'a@b.com', 'editor');
 
       expect(result.success).toBe(true);
       expect(result.memberId).toBe('member-uuid');
       expect(mockRpc).toHaveBeenCalledWith('invite_to_project', {
         p_project_id: 'proj-1',
+        p_project_name: 'Test Project',
         p_email: 'a@b.com',
         p_role: 'editor',
       });
@@ -119,7 +120,7 @@ describe('CollaborationService', () => {
       allowCollaborate();
       mockRpc.mockResolvedValue({ data: null, error: { message: 'Already invited' } });
 
-      const result = await service.inviteToProject('proj-1', 'a@b.com', 'editor');
+      const result = await service.inviteToProject('proj-1', 'Test Project', 'a@b.com', 'editor');
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Already invited');
@@ -129,7 +130,7 @@ describe('CollaborationService', () => {
       allowCollaborate();
       mockRpc.mockRejectedValue(new Error('Network failure'));
 
-      const result = await service.inviteToProject('proj-1', 'a@b.com', 'editor');
+      const result = await service.inviteToProject('proj-1', 'Test Project', 'a@b.com', 'editor');
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Network failure');

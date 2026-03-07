@@ -35,6 +35,7 @@ interface ProjectMember {
 
 interface ProjectSharingDialogProps {
   projectId: string;
+  projectName: string;
   /** The user_id of the project owner — determines if the current user can invite/remove. */
   projectOwnerId: string;
   /** The current signed-in user's ID. */
@@ -57,6 +58,7 @@ const ROLE_LABELS: Record<MemberRole, string> = {
 
 export function ProjectSharingDialog({
   projectId,
+  projectName,
   projectOwnerId,
   currentUserId,
   open,
@@ -110,6 +112,7 @@ export function ProjectSharingDialog({
     try {
       const result = await window.api.collaboration.inviteToProject(
         projectId,
+        projectName,
         inviteEmail.trim(),
         inviteRole,
       );

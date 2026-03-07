@@ -59,6 +59,7 @@ export class CollaborationService {
    */
   async inviteToProject(
     projectId: string,
+    projectName: string,
     email: string,
     role: MemberRole,
   ): Promise<CollaborationResult> {
@@ -76,9 +77,12 @@ export class CollaborationService {
     }
 
     try {
-      const { data, error } = await connector
-        .getSupabaseClient()
-        .rpc('invite_to_project', { p_project_id: projectId, p_email: email, p_role: role });
+      const { data, error } = await connector.getSupabaseClient().rpc('invite_to_project', {
+        p_project_id: projectId,
+        p_project_name: projectName,
+        p_email: email,
+        p_role: role,
+      });
 
       if (error) {
         logger.warn('[CollaborationService] invite_to_project RPC error', { error: error.message });

@@ -26,9 +26,12 @@ export function registerCollaborationHandlers(): void {
 
   ipcMain.handle(
     'collaboration:invite-to-project',
-    async (_, projectId: string, email: string, role: MemberRole) => {
+    async (_, projectId: string, projectName: string, email: string, role: MemberRole) => {
       if (!projectId || typeof projectId !== 'string') {
         return { success: false, error: 'Invalid project ID' };
+      }
+      if (!projectName || typeof projectName !== 'string') {
+        return { success: false, error: 'Invalid project name' };
       }
       if (!email || !isValidEmail(email)) {
         return { success: false, error: 'Invalid email address' };
@@ -37,7 +40,12 @@ export function registerCollaborationHandlers(): void {
         return { success: false, error: 'Invalid role. Must be owner, editor, or viewer.' };
       }
 
-      return collaborationService.inviteToProject(projectId, email.trim().toLowerCase(), role);
+      return collaborationService.inviteToProject(
+        projectId,
+        projectName,
+        email.trim().toLowerCase(),
+        role,
+      );
     },
   );
 
