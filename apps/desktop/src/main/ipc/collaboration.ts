@@ -19,6 +19,16 @@ function isValidEmail(email: string): boolean {
 
 const VALID_INVITE_ROLES: MemberRole[] = ['editor', 'viewer'];
 
+// Module-scoped so state survives across registerCollaborationHandlers() calls
+// (e.g. hot-reload in development, repeated calls in tests).
+// windowId → Map<projectId, unsubscribe fn>
+const presenceSubscriptions = new Map<number, Map<string, () => void>>();
+
+/** Reset module-level presence state. Only for use in tests. */
+export function _resetPresenceStateForTesting(): void {
+  presenceSubscriptions.clear();
+}
+
 export function registerCollaborationHandlers(): void {
   // ============================================
   // PROJECT MEMBERS
@@ -214,11 +224,6 @@ export function registerCollaborationHandlers(): void {
   // PRESENCE SUBSCRIPTIONS (push to renderer)
   // ============================================
 
-  // Track per-window presence subscriptions: windowId → Map<projectId, unsubscribe>
-  const presenceSubscriptions = new Map<number, Map<string, () => void>>();
-  // Track which windows already have a 'closed' cleanup listener registered
-  const windowsWithCloseListener = new Set<number>();
-
   ipcMain.handle('collaboration:subscribe-presence', (event, projectId: string) => {
     if (!projectId || typeof projectId !== 'string') {
       return { success: false, error: 'Invalid project ID' };
@@ -230,13 +235,23 @@ export function registerCollaborationHandlers(): void {
       return { success: false, error: 'Window not found' };
     }
 
-    // Initialize window subscription map
-    if (!presenceSubscriptions.has(windowId)) {
+    // First subscription for this window — initialize its Map and register the
+    // 'closed' cleanup listener. presenceSubscriptions.has() serves as the guard
+    // so the listener is registered at most once per window lifetime.
+    const isNewWindow = !presenceSubscriptions.has(windowId);
+    if (isNewWindow) {
       presenceSubscriptions.set(windowId, new Map());
+      window.once('closed', () => {
+        const subs = presenceSubscriptions.get(windowId);
+        if (subs) {
+          for (const unsub of subs.values()) unsub();
+          presenceSubscriptions.delete(windowId);
+        }
+      });
     }
     const windowSubs = presenceSubscriptions.get(windowId)!;
 
-    // Unsubscribe existing subscription for this project+window
+    // Unsubscribe existing subscription for this project+window before replacing
     windowSubs.get(projectId)?.();
 
     const unsubscribe = presenceService.onPresenceChange(projectId, (members) => {
@@ -246,19 +261,6 @@ export function registerCollaborationHandlers(): void {
     });
 
     windowSubs.set(projectId, unsubscribe);
-
-    // Register 'closed' cleanup listener only once per window
-    if (!windowsWithCloseListener.has(windowId)) {
-      windowsWithCloseListener.add(windowId);
-      window.once('closed', () => {
-        windowsWithCloseListener.delete(windowId);
-        const subs = presenceSubscriptions.get(windowId);
-        if (subs) {
-          for (const unsub of subs.values()) unsub();
-          presenceSubscriptions.delete(windowId);
-        }
-      });
-    }
 
     return { success: true };
   });

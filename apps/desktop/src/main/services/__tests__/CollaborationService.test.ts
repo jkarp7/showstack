@@ -416,10 +416,6 @@ describe('CollaborationService', () => {
   });
 
   // ==========================================
-  // SHOP ORDER: declineShopOrderInvitation
-  // ==========================================
-
-  // ==========================================
   // SHOP ORDER: cancelShopOrderInvitation
   // ==========================================
 

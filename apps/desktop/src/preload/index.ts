@@ -18,9 +18,11 @@ interface Fixture {
   [key: string]: any;
 }
 
-// Maps original callbacks to their IPC wrapper functions so removeListener works by reference
-type PresenceCallback = (projectId: string, members: unknown[]) => void;
-const presenceChangeWrappers = new WeakMap<PresenceCallback, PresenceCallback>();
+// Maps original callbacks to their IPC wrapper functions so removeListener works by reference.
+// The user callback takes (projectId, members); the IPC wrapper takes (event, projectId, members).
+type UserPresenceCallback = (projectId: string, members: unknown[]) => void;
+type IpcPresenceWrapper = (_event: unknown, projectId: string, members: unknown[]) => void;
+const presenceChangeWrappers = new WeakMap<UserPresenceCallback, IpcPresenceWrapper>();
 
 // Expose APIs to renderer
 contextBridge.exposeInMainWorld('api', {
@@ -411,17 +413,24 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.invoke('collaboration:subscribe-presence', projectId),
     unsubscribePresence: (projectId: string) =>
       ipcRenderer.invoke('collaboration:unsubscribe-presence', projectId),
-    onPresenceChanged: (callback: (projectId: string, members: any[]) => void) => {
-      // Store the wrapper so offPresenceChanged can remove it by reference
-      const wrapper = (_: unknown, projectId: string, members: any[]) =>
+    onPresenceChanged: (callback: UserPresenceCallback) => {
+      // Store the IPC wrapper so offPresenceChanged can remove it by reference.
+      // ipcRenderer delivers (event, ...args); the user callback receives only (projectId, members).
+      const wrapper: IpcPresenceWrapper = (_event, projectId, members) =>
         callback(projectId, members);
       presenceChangeWrappers.set(callback, wrapper);
-      ipcRenderer.on('collaboration:presenceChanged', wrapper as any);
+      ipcRenderer.on(
+        'collaboration:presenceChanged',
+        wrapper as Parameters<typeof ipcRenderer.on>[1],
+      );
     },
-    offPresenceChanged: (callback: (projectId: string, members: any[]) => void) => {
+    offPresenceChanged: (callback: UserPresenceCallback) => {
       const wrapper = presenceChangeWrappers.get(callback);
       if (wrapper) {
-        ipcRenderer.removeListener('collaboration:presenceChanged', wrapper as any);
+        ipcRenderer.removeListener(
+          'collaboration:presenceChanged',
+          wrapper as Parameters<typeof ipcRenderer.removeListener>[1],
+        );
         presenceChangeWrappers.delete(callback);
       }
     },

@@ -31,6 +31,7 @@ const {
   mockLeaveProjectPresence,
   mockGetPresenceMembers,
   mockOnPresenceChange,
+  mockFromWebContents,
 } = vi.hoisted(() => ({
   mockHandle: vi.fn(),
   mockInviteToProject: vi.fn(),
@@ -51,11 +52,12 @@ const {
   mockLeaveProjectPresence: vi.fn(),
   mockGetPresenceMembers: vi.fn(),
   mockOnPresenceChange: vi.fn(),
+  mockFromWebContents: vi.fn(),
 }));
 
 vi.mock('electron', () => ({
   ipcMain: { handle: mockHandle },
-  BrowserWindow: { fromWebContents: vi.fn() },
+  BrowserWindow: { fromWebContents: mockFromWebContents },
 }));
 
 vi.mock('../../utils/logger', () => ({
@@ -95,7 +97,7 @@ vi.mock('../../services/PresenceService', () => ({
   },
 }));
 
-import { registerCollaborationHandlers } from '../collaboration';
+import { registerCollaborationHandlers, _resetPresenceStateForTesting } from '../collaboration';
 
 // ============================================
 // Helper: get a registered handler by channel name
@@ -116,6 +118,7 @@ const fakeEvent = { sender: { id: 1 } };
 describe('Collaboration IPC handlers', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    _resetPresenceStateForTesting();
     registerCollaborationHandlers();
   });
 
@@ -447,6 +450,100 @@ describe('Collaboration IPC handlers', () => {
 
       expect(mockGetPresenceMembers).toHaveBeenCalledWith('proj-1');
       expect(result).toEqual(members);
+    });
+  });
+
+  // ==========================================
+  // collaboration:subscribe-presence
+  // ==========================================
+
+  describe('collaboration:subscribe-presence', () => {
+    const makeMockWindow = () => ({
+      isDestroyed: vi.fn().mockReturnValue(false),
+      webContents: { send: vi.fn() },
+      once: vi.fn(),
+    });
+
+    it('returns error for invalid project ID', async () => {
+      const handler = getHandler('collaboration:subscribe-presence');
+      const result = await handler(fakeEvent, '');
+      expect(result).toMatchObject({ success: false, error: 'Invalid project ID' });
+    });
+
+    it('returns error if window not found', async () => {
+      mockFromWebContents.mockReturnValue(null);
+      const handler = getHandler('collaboration:subscribe-presence');
+      const result = await handler(fakeEvent, 'proj-1');
+      expect(result).toMatchObject({ success: false, error: 'Window not found' });
+    });
+
+    it('registers a presence subscription and returns success', async () => {
+      mockFromWebContents.mockReturnValue(makeMockWindow());
+      mockOnPresenceChange.mockReturnValue(vi.fn());
+      const handler = getHandler('collaboration:subscribe-presence');
+
+      const result = await handler(fakeEvent, 'proj-1');
+
+      expect(mockOnPresenceChange).toHaveBeenCalledWith('proj-1', expect.any(Function));
+      expect(result).toMatchObject({ success: true });
+    });
+
+    it('replaces existing subscription when called again for same project+window', async () => {
+      const firstUnsub = vi.fn();
+      mockFromWebContents.mockReturnValue(makeMockWindow());
+      mockOnPresenceChange.mockReturnValueOnce(firstUnsub).mockReturnValue(vi.fn());
+      const handler = getHandler('collaboration:subscribe-presence');
+
+      await handler(fakeEvent, 'proj-1');
+      await handler(fakeEvent, 'proj-1');
+
+      expect(firstUnsub).toHaveBeenCalled();
+    });
+
+    it('registers window close listener only once per window across multiple subscriptions', async () => {
+      const mockWin = makeMockWindow();
+      mockFromWebContents.mockReturnValue(mockWin);
+      mockOnPresenceChange.mockReturnValue(vi.fn());
+      const handler = getHandler('collaboration:subscribe-presence');
+
+      await handler(fakeEvent, 'proj-1');
+      await handler(fakeEvent, 'proj-2');
+
+      expect(mockWin.once).toHaveBeenCalledTimes(1);
+      expect(mockWin.once).toHaveBeenCalledWith('closed', expect.any(Function));
+    });
+  });
+
+  // ==========================================
+  // collaboration:unsubscribe-presence
+  // ==========================================
+
+  describe('collaboration:unsubscribe-presence', () => {
+    it('calls the stored unsubscribe function and returns success', async () => {
+      const unsub = vi.fn();
+      const mockWin = {
+        isDestroyed: vi.fn(),
+        webContents: { send: vi.fn() },
+        once: vi.fn(),
+      };
+      mockFromWebContents.mockReturnValue(mockWin);
+      mockOnPresenceChange.mockReturnValue(unsub);
+
+      // Subscribe first so there is something to unsubscribe
+      const subHandler = getHandler('collaboration:subscribe-presence');
+      await subHandler(fakeEvent, 'proj-1');
+
+      const unsubHandler = getHandler('collaboration:unsubscribe-presence');
+      const result = await unsubHandler(fakeEvent, 'proj-1');
+
+      expect(unsub).toHaveBeenCalled();
+      expect(result).toMatchObject({ success: true });
+    });
+
+    it('returns success even when no subscription exists for the project', async () => {
+      const handler = getHandler('collaboration:unsubscribe-presence');
+      const result = await handler(fakeEvent, 'no-such-project');
+      expect(result).toMatchObject({ success: true });
     });
   });
 });

@@ -23,9 +23,18 @@ export function PendingInvitationsBanner({ canCollaborate }: PendingInvitationsB
   useEffect(() => {
     if (!canCollaborate) return;
 
-    window.api.collaboration.checkPendingProjectInvitations().then((invites) => {
-      setCount(invites.length);
-    });
+    const check = () => {
+      window.api.collaboration.checkPendingProjectInvitations().then((invites) => {
+        setCount(invites.length);
+      });
+    };
+
+    check();
+
+    // Re-check when the app window regains focus so the count stays current after
+    // the user accepts or declines an invitation in the Settings tab.
+    window.addEventListener('focus', check);
+    return () => window.removeEventListener('focus', check);
   }, [canCollaborate]);
 
   if (!canCollaborate || count === 0 || dismissed) return null;

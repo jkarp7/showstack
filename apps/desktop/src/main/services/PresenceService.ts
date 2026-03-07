@@ -41,6 +41,7 @@ export class PresenceService {
     if (!connector.isAuthenticated()) return;
 
     const userId = connector.getUserId();
+    // getSession() is a public method on SupabaseConnector (SupabaseConnector.ts:152)
     const session = connector.getSession();
     const email = session?.user?.email ?? '';
     const displayName = email.split('@')[0] ?? email;
