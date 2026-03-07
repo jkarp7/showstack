@@ -10,6 +10,11 @@
 -- ============================================
 
 
+-- Drop existing functions first — their return types changed, which
+-- PostgreSQL does not allow with CREATE OR REPLACE.
+DROP FUNCTION IF EXISTS get_pending_project_invitations();
+DROP FUNCTION IF EXISTS get_pending_shop_order_invitations();
+
 -- ============================================
 -- get_pending_project_invitations (enriched)
 -- ============================================
