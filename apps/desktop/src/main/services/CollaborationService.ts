@@ -85,7 +85,12 @@ export class CollaborationService {
         return { success: false, error: error.message };
       }
 
-      return { success: true, memberId: (data as { member_id?: string })?.member_id };
+      const result = data as { success: boolean; error?: string; member_id?: string };
+      if (!result?.success) {
+        return { success: false, error: result?.error ?? 'Invite failed' };
+      }
+
+      return { success: true, memberId: result.member_id };
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       logger.error('[CollaborationService] inviteToProject failed', { error: message });
@@ -103,7 +108,7 @@ export class CollaborationService {
     }
 
     try {
-      const { error } = await connector
+      const { data, error } = await connector
         .getSupabaseClient()
         .rpc('remove_project_member', { p_project_id: projectId, p_user_id: userId });
 
@@ -112,6 +117,11 @@ export class CollaborationService {
           error: error.message,
         });
         return { success: false, error: error.message };
+      }
+
+      const result = data as { success: boolean; error?: string };
+      if (!result?.success) {
+        return { success: false, error: result?.error ?? 'Remove failed' };
       }
 
       return { success: true };
@@ -154,7 +164,7 @@ export class CollaborationService {
     }
 
     try {
-      const { error } = await connector
+      const { data, error } = await connector
         .getSupabaseClient()
         .rpc('accept_project_invitation', { p_project_id: projectId });
 
@@ -163,6 +173,11 @@ export class CollaborationService {
           error: error.message,
         });
         return { success: false, error: error.message };
+      }
+
+      const result = data as { success: boolean; error?: string };
+      if (!result?.success) {
+        return { success: false, error: result?.error ?? 'Accept failed' };
       }
 
       return { success: true };
@@ -243,7 +258,12 @@ export class CollaborationService {
         return { success: false, error: error.message };
       }
 
-      return { success: true, memberId: (data as { member_id?: string })?.member_id };
+      const result = data as { success: boolean; error?: string; member_id?: string };
+      if (!result?.success) {
+        return { success: false, error: result?.error ?? 'Invite failed' };
+      }
+
+      return { success: true, memberId: result.member_id };
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       logger.error('[CollaborationService] inviteToShopOrder failed', { error: message });
@@ -261,7 +281,7 @@ export class CollaborationService {
     }
 
     try {
-      const { error } = await connector
+      const { data, error } = await connector
         .getSupabaseClient()
         .rpc('remove_shop_order_member', { p_shop_order_id: shopOrderId, p_user_id: userId });
 
@@ -270,6 +290,11 @@ export class CollaborationService {
           error: error.message,
         });
         return { success: false, error: error.message };
+      }
+
+      const result = data as { success: boolean; error?: string };
+      if (!result?.success) {
+        return { success: false, error: result?.error ?? 'Remove failed' };
       }
 
       return { success: true };
@@ -311,7 +336,7 @@ export class CollaborationService {
     }
 
     try {
-      const { error } = await connector
+      const { data, error } = await connector
         .getSupabaseClient()
         .rpc('accept_shop_order_invitation', { p_shop_order_id: shopOrderId });
 
@@ -320,6 +345,11 @@ export class CollaborationService {
           error: error.message,
         });
         return { success: false, error: error.message };
+      }
+
+      const result = data as { success: boolean; error?: string };
+      if (!result?.success) {
+        return { success: false, error: result?.error ?? 'Accept failed' };
       }
 
       return { success: true };
