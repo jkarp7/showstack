@@ -3,9 +3,14 @@
 # ============================================
 # See: https://docs.powersync.com/usage/sync-rules
 #
-# Rules:
-# - parameters queries: use request.user_id() for the JWT user; JOINs are allowed
-# - data queries:       use bucket.<name> for parameter values; no JOINs allowed
+# Constraints (learned from validation errors):
+# - parameters queries: use request.user_id(); no JOINs; no subqueries
+# - data queries:       use bucket.<name>; no JOINs; no subqueries
+#
+# All tables must have a direct filtering column on them.
+# dimmer_rack_modules.project_id and shop_order_items.shop_order_id were
+# added in migration 008 (denormalized, kept in sync via triggers) to satisfy
+# this constraint.
 # ============================================
 
 bucket_definitions:
@@ -20,6 +25,7 @@ bucket_definitions:
       - SELECT * FROM projects WHERE id = bucket.project_id
       - SELECT * FROM fixtures WHERE project_id = bucket.project_id
       - SELECT * FROM dimmer_racks WHERE project_id = bucket.project_id
+      - SELECT * FROM dimmer_rack_modules WHERE project_id = bucket.project_id
       - SELECT * FROM pd_racks WHERE project_id = bucket.project_id
       - SELECT * FROM phase_distribution_templates WHERE project_id = bucket.project_id
       - SELECT * FROM infrastructure_equipment WHERE project_id = bucket.project_id
@@ -27,21 +33,9 @@ bucket_definitions:
       - SELECT * FROM project_members WHERE project_id = bucket.project_id
 
   # ============================================
-  # DIMMER RACK MODULES (owned projects)
-  # dimmer_rack_modules has no project_id — parameterize by rack_id.
-  # JOIN in parameters is allowed; JOIN in data is not.
-  # ============================================
-  by_dimmer_rack_owned:
-    parameters: SELECT dimmer_racks.id as rack_id FROM dimmer_racks
-      INNER JOIN projects ON projects.id = dimmer_racks.project_id
-      WHERE projects.user_id = request.user_id()
-
-    data:
-      - SELECT * FROM dimmer_rack_modules WHERE rack_id = bucket.rack_id
-
-  # ============================================
   # SHARED PROJECTS
   # One bucket instance per project where the user is an accepted member.
+  # project_members.project_id is a direct column — no JOIN needed.
   # ============================================
   by_shared_project:
     parameters: SELECT project_id FROM project_members
@@ -52,23 +46,12 @@ bucket_definitions:
       - SELECT * FROM projects WHERE id = bucket.project_id
       - SELECT * FROM fixtures WHERE project_id = bucket.project_id
       - SELECT * FROM dimmer_racks WHERE project_id = bucket.project_id
+      - SELECT * FROM dimmer_rack_modules WHERE project_id = bucket.project_id
       - SELECT * FROM pd_racks WHERE project_id = bucket.project_id
       - SELECT * FROM phase_distribution_templates WHERE project_id = bucket.project_id
       - SELECT * FROM infrastructure_equipment WHERE project_id = bucket.project_id
       - SELECT * FROM user_preferences WHERE project_id = bucket.project_id
       - SELECT * FROM project_members WHERE project_id = bucket.project_id
-
-  # ============================================
-  # DIMMER RACK MODULES (shared projects)
-  # ============================================
-  by_dimmer_rack_shared:
-    parameters: SELECT dimmer_racks.id as rack_id FROM dimmer_racks
-      INNER JOIN project_members ON project_members.project_id = dimmer_racks.project_id
-      WHERE project_members.user_id = request.user_id()
-      AND project_members.status = 'accepted'
-
-    data:
-      - SELECT * FROM dimmer_rack_modules WHERE rack_id = bucket.rack_id
 
   # ============================================
   # OWNED SHOP ORDERS
@@ -81,21 +64,10 @@ bucket_definitions:
     data:
       - SELECT * FROM shop_order_projects WHERE id = bucket.shop_order_id
       - SELECT * FROM shop_order_sections WHERE prep_project_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_items WHERE shop_order_id = bucket.shop_order_id
       - SELECT * FROM shop_order_revisions WHERE prep_project_id = bucket.shop_order_id
       - SELECT * FROM shop_order_notes WHERE prep_project_id = bucket.shop_order_id
       - SELECT * FROM shop_order_members WHERE shop_order_id = bucket.shop_order_id
-
-  # ============================================
-  # SHOP ORDER ITEMS (owned)
-  # shop_order_items has no shop_order_id — parameterize by section_id.
-  # ============================================
-  by_shop_order_section_owned:
-    parameters: SELECT shop_order_sections.id as section_id FROM shop_order_sections
-      INNER JOIN shop_order_projects ON shop_order_projects.id = shop_order_sections.prep_project_id
-      WHERE shop_order_projects.user_id = request.user_id()
-
-    data:
-      - SELECT * FROM shop_order_items WHERE section_id = bucket.section_id
 
   # ============================================
   # SHARED SHOP ORDERS
@@ -109,24 +81,14 @@ bucket_definitions:
     data:
       - SELECT * FROM shop_order_projects WHERE id = bucket.shop_order_id
       - SELECT * FROM shop_order_sections WHERE prep_project_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_items WHERE shop_order_id = bucket.shop_order_id
       - SELECT * FROM shop_order_revisions WHERE prep_project_id = bucket.shop_order_id
       - SELECT * FROM shop_order_notes WHERE prep_project_id = bucket.shop_order_id
       - SELECT * FROM shop_order_members WHERE shop_order_id = bucket.shop_order_id
 
   # ============================================
-  # SHOP ORDER ITEMS (shared)
-  # ============================================
-  by_shop_order_section_shared:
-    parameters: SELECT shop_order_sections.id as section_id FROM shop_order_sections
-      INNER JOIN shop_order_members ON shop_order_members.shop_order_id = shop_order_sections.prep_project_id
-      WHERE shop_order_members.user_id = request.user_id()
-      AND shop_order_members.status = 'accepted'
-
-    data:
-      - SELECT * FROM shop_order_items WHERE section_id = bucket.section_id
-
-  # ============================================
   # USER TEMPLATES
+  # Templates are owned directly (user_id on each table).
   # ============================================
   user_templates:
     parameters: SELECT request.user_id() as user_id
@@ -139,6 +101,7 @@ bucket_definitions:
   # ============================================
   # PAGE LAYOUT ELEMENTS
   # page_layout_elements has no user_id — parameterize by template_id.
+  # page_layout_templates.user_id is a direct column, so no JOIN needed.
   # ============================================
   by_page_layout_template:
     parameters: SELECT id as template_id FROM page_layout_templates

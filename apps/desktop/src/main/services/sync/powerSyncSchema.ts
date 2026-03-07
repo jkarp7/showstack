@@ -224,6 +224,7 @@ const dimmer_racks = new Table({
 
 const dimmer_rack_modules = new Table({
   rack_id: column.text,
+  project_id: column.text, // denormalized from dimmer_racks; added in migration 008
   start_circuit: column.integer,
   end_circuit: column.integer,
   module_type: column.text,
@@ -453,6 +454,7 @@ const shop_order_sections = new Table({
 
 const shop_order_items = new Table({
   section_id: column.text,
+  shop_order_id: column.text, // denormalized from shop_order_sections; added in migration 008
   description: column.text,
   active_qty: column.integer,
   spare_qty: column.integer,
