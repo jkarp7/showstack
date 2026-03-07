@@ -17,7 +17,7 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
-const VALID_ROLES: MemberRole[] = ['owner', 'editor', 'viewer'];
+const VALID_INVITE_ROLES: MemberRole[] = ['editor', 'viewer'];
 
 export function registerCollaborationHandlers(): void {
   // ============================================
@@ -36,8 +36,8 @@ export function registerCollaborationHandlers(): void {
       if (!email || !isValidEmail(email)) {
         return { success: false, error: 'Invalid email address' };
       }
-      if (!VALID_ROLES.includes(role)) {
-        return { success: false, error: 'Invalid role. Must be owner, editor, or viewer.' };
+      if (!VALID_INVITE_ROLES.includes(role)) {
+        return { success: false, error: 'Invalid role. Must be editor or viewer.' };
       }
 
       return collaborationService.inviteToProject(
@@ -104,8 +104,8 @@ export function registerCollaborationHandlers(): void {
       if (!email || !isValidEmail(email)) {
         return { success: false, error: 'Invalid email address' };
       }
-      if (!VALID_ROLES.includes(role)) {
-        return { success: false, error: 'Invalid role. Must be owner, editor, or viewer.' };
+      if (!VALID_INVITE_ROLES.includes(role)) {
+        return { success: false, error: 'Invalid role. Must be editor or viewer.' };
       }
 
       return collaborationService.inviteToShopOrder(shopOrderId, email.trim().toLowerCase(), role);
@@ -200,6 +200,8 @@ export function registerCollaborationHandlers(): void {
 
   // Track per-window presence subscriptions: windowId → Map<projectId, unsubscribe>
   const presenceSubscriptions = new Map<number, Map<string, () => void>>();
+  // Track which windows already have a 'closed' cleanup listener registered
+  const windowsWithCloseListener = new Set<number>();
 
   ipcMain.handle('collaboration:subscribe-presence', (event, projectId: string) => {
     if (!projectId || typeof projectId !== 'string') {
@@ -229,14 +231,18 @@ export function registerCollaborationHandlers(): void {
 
     windowSubs.set(projectId, unsubscribe);
 
-    // Clean up on window close
-    window.on('closed', () => {
-      const subs = presenceSubscriptions.get(windowId);
-      if (subs) {
-        for (const unsub of subs.values()) unsub();
-        presenceSubscriptions.delete(windowId);
-      }
-    });
+    // Register 'closed' cleanup listener only once per window
+    if (!windowsWithCloseListener.has(windowId)) {
+      windowsWithCloseListener.add(windowId);
+      window.once('closed', () => {
+        windowsWithCloseListener.delete(windowId);
+        const subs = presenceSubscriptions.get(windowId);
+        if (subs) {
+          for (const unsub of subs.values()) unsub();
+          presenceSubscriptions.delete(windowId);
+        }
+      });
+    }
 
     return { success: true };
   });

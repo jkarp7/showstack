@@ -153,7 +153,7 @@ describe('CollaborationService', () => {
 
     it('returns success on successful removal', async () => {
       mockIsAuthenticated.mockReturnValue(true);
-      mockRpc.mockResolvedValue({ error: null });
+      mockRpc.mockResolvedValue({ data: { success: true }, error: null });
 
       const result = await service.removeProjectMember('proj-1', 'user-uuid');
 
@@ -216,7 +216,7 @@ describe('CollaborationService', () => {
 
     it('returns success on accepted invitation', async () => {
       mockIsAuthenticated.mockReturnValue(true);
-      mockRpc.mockResolvedValue({ error: null });
+      mockRpc.mockResolvedValue({ data: { success: true }, error: null });
 
       const result = await service.acceptProjectInvitation('proj-1');
 
@@ -242,22 +242,67 @@ describe('CollaborationService', () => {
   // ==========================================
 
   describe('checkPendingProjectInvitations', () => {
-    it('returns pending invitations', async () => {
+    it('returns pending invitations from RPC', async () => {
       const invites = [{ id: 'i1', project_id: 'proj-1', status: 'pending' }];
-      mockGetAll.mockResolvedValue(invites);
+      mockRpc.mockResolvedValue({ data: invites, error: null });
 
       const result = await service.checkPendingProjectInvitations();
 
       expect(result).toEqual(invites);
-      expect(mockGetAll).toHaveBeenCalledWith(expect.stringContaining("status = 'pending'"));
+      expect(mockRpc).toHaveBeenCalledWith('get_pending_project_invitations');
     });
 
-    it('returns empty array if database throws', async () => {
-      mockGetAll.mockRejectedValue(new Error('DB error'));
+    it('returns empty array if RPC returns error', async () => {
+      mockRpc.mockResolvedValue({ data: null, error: { message: 'RPC error' } });
 
       const result = await service.checkPendingProjectInvitations();
 
       expect(result).toEqual([]);
+    });
+
+    it('returns empty array if RPC throws', async () => {
+      mockRpc.mockRejectedValue(new Error('Network error'));
+
+      const result = await service.checkPendingProjectInvitations();
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  // ==========================================
+  // PROJECT: declineProjectInvitation
+  // ==========================================
+
+  describe('declineProjectInvitation', () => {
+    it('returns error when not authenticated', async () => {
+      mockIsAuthenticated.mockReturnValue(false);
+
+      const result = await service.declineProjectInvitation('proj-1');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('signed in');
+    });
+
+    it('returns success on successful decline', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
+      mockRpc.mockResolvedValue({ data: { success: true }, error: null });
+
+      const result = await service.declineProjectInvitation('proj-1');
+
+      expect(result.success).toBe(true);
+      expect(mockRpc).toHaveBeenCalledWith('decline_project_invitation', {
+        p_project_id: 'proj-1',
+      });
+    });
+
+    it('returns RPC error', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
+      mockRpc.mockResolvedValue({ error: { message: 'No pending invitation' } });
+
+      const result = await service.declineProjectInvitation('proj-1');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('No pending invitation');
     });
   });
 
@@ -314,13 +359,59 @@ describe('CollaborationService', () => {
   // ==========================================
 
   describe('checkPendingShopOrderInvitations', () => {
-    it('returns pending shop order invitations', async () => {
+    it('returns pending shop order invitations from RPC', async () => {
       const invites = [{ id: 'i2', shop_order_id: 'order-1', status: 'pending' }];
-      mockGetAll.mockResolvedValue(invites);
+      mockRpc.mockResolvedValue({ data: invites, error: null });
 
       const result = await service.checkPendingShopOrderInvitations();
 
       expect(result).toEqual(invites);
+      expect(mockRpc).toHaveBeenCalledWith('get_pending_shop_order_invitations');
+    });
+
+    it('returns empty array if RPC throws', async () => {
+      mockRpc.mockRejectedValue(new Error('Network error'));
+
+      const result = await service.checkPendingShopOrderInvitations();
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  // ==========================================
+  // SHOP ORDER: declineShopOrderInvitation
+  // ==========================================
+
+  describe('declineShopOrderInvitation', () => {
+    it('returns error when not authenticated', async () => {
+      mockIsAuthenticated.mockReturnValue(false);
+
+      const result = await service.declineShopOrderInvitation('order-1');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('signed in');
+    });
+
+    it('returns success on successful decline', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
+      mockRpc.mockResolvedValue({ data: { success: true }, error: null });
+
+      const result = await service.declineShopOrderInvitation('order-1');
+
+      expect(result.success).toBe(true);
+      expect(mockRpc).toHaveBeenCalledWith('decline_shop_order_invitation', {
+        p_shop_order_id: 'order-1',
+      });
+    });
+
+    it('returns RPC error', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
+      mockRpc.mockResolvedValue({ error: { message: 'No pending invitation' } });
+
+      const result = await service.declineShopOrderInvitation('order-1');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('No pending invitation');
     });
   });
 });

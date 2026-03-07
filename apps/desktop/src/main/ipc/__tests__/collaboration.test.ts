@@ -18,11 +18,13 @@ const {
   mockGetProjectMembers,
   mockAcceptProjectInvitation,
   mockCheckPendingProjectInvitations,
+  mockDeclineProjectInvitation,
   mockInviteToShopOrder,
   mockRemoveShopOrderMember,
   mockGetShopOrderMembers,
   mockAcceptShopOrderInvitation,
   mockCheckPendingShopOrderInvitations,
+  mockDeclineShopOrderInvitation,
   mockJoinProjectPresence,
   mockLeaveProjectPresence,
   mockGetPresenceMembers,
@@ -34,11 +36,13 @@ const {
   mockGetProjectMembers: vi.fn(),
   mockAcceptProjectInvitation: vi.fn(),
   mockCheckPendingProjectInvitations: vi.fn(),
+  mockDeclineProjectInvitation: vi.fn(),
   mockInviteToShopOrder: vi.fn(),
   mockRemoveShopOrderMember: vi.fn(),
   mockGetShopOrderMembers: vi.fn(),
   mockAcceptShopOrderInvitation: vi.fn(),
   mockCheckPendingShopOrderInvitations: vi.fn(),
+  mockDeclineShopOrderInvitation: vi.fn(),
   mockJoinProjectPresence: vi.fn(),
   mockLeaveProjectPresence: vi.fn(),
   mockGetPresenceMembers: vi.fn(),
@@ -66,11 +70,13 @@ vi.mock('../../services/CollaborationService', () => ({
     getProjectMembers: mockGetProjectMembers,
     acceptProjectInvitation: mockAcceptProjectInvitation,
     checkPendingProjectInvitations: mockCheckPendingProjectInvitations,
+    declineProjectInvitation: mockDeclineProjectInvitation,
     inviteToShopOrder: mockInviteToShopOrder,
     removeShopOrderMember: mockRemoveShopOrderMember,
     getShopOrderMembers: mockGetShopOrderMembers,
     acceptShopOrderInvitation: mockAcceptShopOrderInvitation,
     checkPendingShopOrderInvitations: mockCheckPendingShopOrderInvitations,
+    declineShopOrderInvitation: mockDeclineShopOrderInvitation,
   },
 }));
 
@@ -114,19 +120,31 @@ describe('Collaboration IPC handlers', () => {
   describe('collaboration:invite-to-project', () => {
     it('returns error for invalid project ID', async () => {
       const handler = getHandler('collaboration:invite-to-project');
-      const result = await handler(fakeEvent, '', 'a@b.com', 'editor');
+      const result = await handler(fakeEvent, '', 'Test Project', 'a@b.com', 'editor');
       expect(result).toMatchObject({ success: false, error: 'Invalid project ID' });
+    });
+
+    it('returns error for invalid project name', async () => {
+      const handler = getHandler('collaboration:invite-to-project');
+      const result = await handler(fakeEvent, 'proj-1', '', 'a@b.com', 'editor');
+      expect(result).toMatchObject({ success: false, error: 'Invalid project name' });
     });
 
     it('returns error for invalid email', async () => {
       const handler = getHandler('collaboration:invite-to-project');
-      const result = await handler(fakeEvent, 'proj-1', 'not-an-email', 'editor');
+      const result = await handler(fakeEvent, 'proj-1', 'Test Project', 'not-an-email', 'editor');
       expect(result).toMatchObject({ success: false, error: 'Invalid email address' });
     });
 
     it('returns error for invalid role', async () => {
       const handler = getHandler('collaboration:invite-to-project');
-      const result = await handler(fakeEvent, 'proj-1', 'a@b.com', 'superadmin');
+      const result = await handler(fakeEvent, 'proj-1', 'Test Project', 'a@b.com', 'superadmin');
+      expect(result).toMatchObject({ success: false });
+    });
+
+    it('returns error for owner role', async () => {
+      const handler = getHandler('collaboration:invite-to-project');
+      const result = await handler(fakeEvent, 'proj-1', 'Test Project', 'a@b.com', 'owner');
       expect(result).toMatchObject({ success: false });
     });
 
@@ -134,9 +152,14 @@ describe('Collaboration IPC handlers', () => {
       mockInviteToProject.mockResolvedValue({ success: true, memberId: 'm1' });
       const handler = getHandler('collaboration:invite-to-project');
 
-      const result = await handler(fakeEvent, 'proj-1', '  A@B.COM  ', 'editor');
+      const result = await handler(fakeEvent, 'proj-1', 'Test Project', '  A@B.COM  ', 'editor');
 
-      expect(mockInviteToProject).toHaveBeenCalledWith('proj-1', 'a@b.com', 'editor');
+      expect(mockInviteToProject).toHaveBeenCalledWith(
+        'proj-1',
+        'Test Project',
+        'a@b.com',
+        'editor',
+      );
       expect(result).toMatchObject({ success: true });
     });
   });
@@ -232,6 +255,28 @@ describe('Collaboration IPC handlers', () => {
   });
 
   // ==========================================
+  // collaboration:decline-project-invitation
+  // ==========================================
+
+  describe('collaboration:decline-project-invitation', () => {
+    it('returns error for invalid project ID', async () => {
+      const handler = getHandler('collaboration:decline-project-invitation');
+      const result = await handler(fakeEvent, '');
+      expect(result).toMatchObject({ success: false, error: 'Invalid project ID' });
+    });
+
+    it('delegates to collaborationService.declineProjectInvitation', async () => {
+      mockDeclineProjectInvitation.mockResolvedValue({ success: true });
+      const handler = getHandler('collaboration:decline-project-invitation');
+
+      const result = await handler(fakeEvent, 'proj-1');
+
+      expect(mockDeclineProjectInvitation).toHaveBeenCalledWith('proj-1');
+      expect(result).toMatchObject({ success: true });
+    });
+  });
+
+  // ==========================================
   // collaboration:invite-to-shop-order
   // ==========================================
 
@@ -255,6 +300,28 @@ describe('Collaboration IPC handlers', () => {
       const result = await handler(fakeEvent, 'order-1', 'a@b.com', 'viewer');
 
       expect(mockInviteToShopOrder).toHaveBeenCalledWith('order-1', 'a@b.com', 'viewer');
+      expect(result).toMatchObject({ success: true });
+    });
+  });
+
+  // ==========================================
+  // collaboration:decline-shop-order-invitation
+  // ==========================================
+
+  describe('collaboration:decline-shop-order-invitation', () => {
+    it('returns error for invalid shop order ID', async () => {
+      const handler = getHandler('collaboration:decline-shop-order-invitation');
+      const result = await handler(fakeEvent, '');
+      expect(result).toMatchObject({ success: false, error: 'Invalid shop order ID' });
+    });
+
+    it('delegates to collaborationService.declineShopOrderInvitation', async () => {
+      mockDeclineShopOrderInvitation.mockResolvedValue({ success: true });
+      const handler = getHandler('collaboration:decline-shop-order-invitation');
+
+      const result = await handler(fakeEvent, 'order-1');
+
+      expect(mockDeclineShopOrderInvitation).toHaveBeenCalledWith('order-1');
       expect(result).toMatchObject({ success: true });
     });
   });

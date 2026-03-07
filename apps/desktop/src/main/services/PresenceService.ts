@@ -128,7 +128,8 @@ export class PresenceService {
    * Sign-out cleanup — leave all active presence channels.
    */
   cleanup(): void {
-    for (const projectId of this.channels.keys()) {
+    // Snapshot keys before iterating — leaveProjectPresence deletes from the Map
+    for (const projectId of [...this.channels.keys()]) {
       this.leaveProjectPresence(projectId);
     }
   }
