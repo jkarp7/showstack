@@ -14,43 +14,15 @@ import { getSupabaseConnector } from './sync/SupabaseConnector';
 import { getPowerSyncService } from './sync';
 import { licenseService } from './LicenseService';
 import { logger } from '../utils/logger';
+import type {
+  MemberRole,
+  MemberStatus,
+  ProjectMember,
+  ShopOrderMember,
+  CollaborationResult,
+} from '../../shared/types/collaboration.types';
 
-export type MemberRole = 'owner' | 'editor' | 'viewer';
-export type MemberStatus = 'pending' | 'accepted' | 'declined';
-
-export interface ProjectMember {
-  id: string;
-  project_id: string;
-  project_name?: string;
-  user_id: string | null;
-  email: string;
-  role: MemberRole;
-  invited_by: string;
-  invited_by_email?: string;
-  status: MemberStatus;
-  invited_at: number;
-  accepted_at: number | null;
-}
-
-export interface ShopOrderMember {
-  id: string;
-  shop_order_id: string;
-  shop_order_name?: string;
-  user_id: string | null;
-  email: string;
-  role: MemberRole;
-  invited_by: string;
-  invited_by_email?: string;
-  status: MemberStatus;
-  invited_at: number;
-  accepted_at: number | null;
-}
-
-export interface CollaborationResult {
-  success: boolean;
-  error?: string;
-  memberId?: string;
-}
+export type { MemberRole, MemberStatus, ProjectMember, ShopOrderMember, CollaborationResult };
 
 export class CollaborationService {
   // ============================================
@@ -150,7 +122,7 @@ export class CollaborationService {
       if (!db) return [];
 
       const rows = await db.getAll<ProjectMember>(
-        'SELECT * FROM project_members WHERE project_id = ? ORDER BY invited_at ASC',
+        'SELECT id, project_id, user_id, email, role, invited_by, status, invited_at, accepted_at FROM project_members WHERE project_id = ? ORDER BY invited_at ASC',
         [projectId],
       );
       return rows;
@@ -389,7 +361,7 @@ export class CollaborationService {
       if (!db) return [];
 
       const rows = await db.getAll<ShopOrderMember>(
-        'SELECT * FROM shop_order_members WHERE shop_order_id = ? ORDER BY invited_at ASC',
+        'SELECT id, shop_order_id, user_id, email, role, invited_by, status, invited_at, accepted_at FROM shop_order_members WHERE shop_order_id = ? ORDER BY invited_at ASC',
         [shopOrderId],
       );
       return rows;

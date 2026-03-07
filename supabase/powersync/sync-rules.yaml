@@ -19,7 +19,7 @@ bucket_definitions:
   # One bucket instance per project owned by the current user.
   # ============================================
   by_owned_project:
-    parameters: SELECT id as project_id FROM projects WHERE user_id = request.user_id()
+    parameters: SELECT id as project_id, request.user_id() as user_id FROM projects WHERE user_id = request.user_id()
 
     data:
       - SELECT * FROM projects WHERE id = bucket.project_id
@@ -29,7 +29,7 @@ bucket_definitions:
       - SELECT * FROM pd_racks WHERE project_id = bucket.project_id
       - SELECT * FROM phase_distribution_templates WHERE project_id = bucket.project_id
       - SELECT * FROM infrastructure_equipment WHERE project_id = bucket.project_id
-      - SELECT * FROM user_preferences WHERE project_id = bucket.project_id
+      - SELECT * FROM user_preferences WHERE project_id = bucket.project_id AND user_id = bucket.user_id
       - SELECT * FROM project_members WHERE project_id = bucket.project_id
 
   # ============================================
@@ -38,7 +38,7 @@ bucket_definitions:
   # project_members.project_id is a direct column — no JOIN needed.
   # ============================================
   by_shared_project:
-    parameters: SELECT project_id FROM project_members
+    parameters: SELECT project_id, request.user_id() as user_id FROM project_members
       WHERE user_id = request.user_id()
       AND status = 'accepted'
 
@@ -50,7 +50,7 @@ bucket_definitions:
       - SELECT * FROM pd_racks WHERE project_id = bucket.project_id
       - SELECT * FROM phase_distribution_templates WHERE project_id = bucket.project_id
       - SELECT * FROM infrastructure_equipment WHERE project_id = bucket.project_id
-      - SELECT * FROM user_preferences WHERE project_id = bucket.project_id
+      - SELECT * FROM user_preferences WHERE project_id = bucket.project_id AND user_id = bucket.user_id
       - SELECT * FROM project_members WHERE project_id = bucket.project_id
 
   # ============================================

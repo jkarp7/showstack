@@ -24,21 +24,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { X, Users, UserPlus, Trash2, AlertCircle, Crown, Edit3, Eye } from 'lucide-react';
-
-type MemberRole = 'owner' | 'editor' | 'viewer';
-type MemberStatus = 'pending' | 'accepted' | 'declined';
-
-interface ProjectMember {
-  id: string;
-  project_id: string;
-  user_id: string | null;
-  email: string;
-  role: MemberRole;
-  invited_by: string;
-  status: MemberStatus;
-  invited_at: number;
-  accepted_at: number | null;
-}
+import type {
+  MemberRole,
+  MemberStatus,
+  ProjectMember,
+} from '../../../../shared/types/collaboration.types';
 
 interface ProjectSharingDialogProps {
   projectId: string;

@@ -314,6 +314,79 @@ describe('Collaboration IPC handlers', () => {
   });
 
   // ==========================================
+  // collaboration:remove-shop-order-member
+  // ==========================================
+
+  describe('collaboration:remove-shop-order-member', () => {
+    it('returns error for invalid shop order ID', async () => {
+      const handler = getHandler('collaboration:remove-shop-order-member');
+      const result = await handler(fakeEvent, '', 'user-uuid');
+      expect(result).toMatchObject({ success: false, error: 'Invalid shop order ID' });
+    });
+
+    it('returns error for invalid user ID', async () => {
+      const handler = getHandler('collaboration:remove-shop-order-member');
+      const result = await handler(fakeEvent, 'order-1', '');
+      expect(result).toMatchObject({ success: false, error: 'Invalid user ID' });
+    });
+
+    it('delegates to collaborationService.removeShopOrderMember', async () => {
+      mockRemoveShopOrderMember.mockResolvedValue({ success: true });
+      const handler = getHandler('collaboration:remove-shop-order-member');
+
+      const result = await handler(fakeEvent, 'order-1', 'user-uuid');
+
+      expect(mockRemoveShopOrderMember).toHaveBeenCalledWith('order-1', 'user-uuid');
+      expect(result).toMatchObject({ success: true });
+    });
+  });
+
+  // ==========================================
+  // collaboration:get-shop-order-members
+  // ==========================================
+
+  describe('collaboration:get-shop-order-members', () => {
+    it('returns empty array for invalid shop order ID', async () => {
+      const handler = getHandler('collaboration:get-shop-order-members');
+      const result = await handler(fakeEvent, '');
+      expect(result).toEqual([]);
+    });
+
+    it('delegates to collaborationService.getShopOrderMembers', async () => {
+      const members = [{ id: 'm2' }];
+      mockGetShopOrderMembers.mockResolvedValue(members);
+      const handler = getHandler('collaboration:get-shop-order-members');
+
+      const result = await handler(fakeEvent, 'order-1');
+
+      expect(mockGetShopOrderMembers).toHaveBeenCalledWith('order-1');
+      expect(result).toEqual(members);
+    });
+  });
+
+  // ==========================================
+  // collaboration:accept-shop-order-invitation
+  // ==========================================
+
+  describe('collaboration:accept-shop-order-invitation', () => {
+    it('returns error for invalid shop order ID', async () => {
+      const handler = getHandler('collaboration:accept-shop-order-invitation');
+      const result = await handler(fakeEvent, '');
+      expect(result).toMatchObject({ success: false });
+    });
+
+    it('delegates to collaborationService.acceptShopOrderInvitation', async () => {
+      mockAcceptShopOrderInvitation.mockResolvedValue({ success: true });
+      const handler = getHandler('collaboration:accept-shop-order-invitation');
+
+      const result = await handler(fakeEvent, 'order-1');
+
+      expect(mockAcceptShopOrderInvitation).toHaveBeenCalledWith('order-1');
+      expect(result).toMatchObject({ success: true });
+    });
+  });
+
+  // ==========================================
   // collaboration:cancel-project-invitation
   // ==========================================
 

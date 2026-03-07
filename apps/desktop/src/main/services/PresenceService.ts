@@ -15,14 +15,9 @@
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { getSupabaseConnector } from './sync/SupabaseConnector';
 import { logger } from '../utils/logger';
+import type { PresenceMember } from '../../shared/types/collaboration.types';
 
-export interface PresenceMember {
-  userId: string;
-  email: string;
-  displayName: string;
-  activeView: string;
-  joinedAt: number;
-}
+export type { PresenceMember };
 
 type PresenceChangeCallback = (members: PresenceMember[]) => void;
 

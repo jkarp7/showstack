@@ -21,8 +21,8 @@ CREATE TABLE project_members (
   role TEXT NOT NULL CHECK (role IN ('owner', 'editor', 'viewer')),
   invited_by UUID NOT NULL REFERENCES auth.users(id),
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'declined')),
-  invited_at BIGINT NOT NULL,
-  accepted_at BIGINT,
+  invited_at BIGINT NOT NULL, -- Unix milliseconds (Date.now())
+  accepted_at BIGINT,         -- Unix milliseconds (Date.now()); NULL until accepted
   UNIQUE (project_id, email)
 );
 
@@ -44,8 +44,8 @@ CREATE TABLE shop_order_members (
   role TEXT NOT NULL CHECK (role IN ('owner', 'editor', 'viewer')),
   invited_by UUID NOT NULL REFERENCES auth.users(id),
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'declined')),
-  invited_at BIGINT NOT NULL,
-  accepted_at BIGINT,
+  invited_at BIGINT NOT NULL, -- Unix milliseconds (Date.now())
+  accepted_at BIGINT,         -- Unix milliseconds (Date.now()); NULL until accepted
   UNIQUE (shop_order_id, email)
 );
 
@@ -73,7 +73,7 @@ SET user_id = (
 ALTER TABLE user_preferences ALTER COLUMN user_id SET NOT NULL;
 
 -- Replace the old unique constraint with a per-user one
-ALTER TABLE user_preferences DROP CONSTRAINT user_preferences_project_id_preference_key_key;
+ALTER TABLE user_preferences DROP CONSTRAINT IF EXISTS user_preferences_project_id_preference_key_key;
 ALTER TABLE user_preferences ADD UNIQUE (project_id, user_id, preference_key);
 
 -- ============================================

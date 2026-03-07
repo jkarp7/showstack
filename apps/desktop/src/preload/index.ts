@@ -1,4 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import type {
+  ProjectMember,
+  ShopOrderMember,
+  PresenceMember,
+} from '../shared/types/collaboration.types';
 
 // Define the Fixture type (will match renderer types)
 interface Fixture {
@@ -20,8 +25,8 @@ interface Fixture {
 
 // Maps original callbacks to their IPC wrapper functions so removeListener works by reference.
 // The user callback takes (projectId, members); the IPC wrapper takes (event, projectId, members).
-type UserPresenceCallback = (projectId: string, members: unknown[]) => void;
-type IpcPresenceWrapper = (_event: unknown, projectId: string, members: unknown[]) => void;
+type UserPresenceCallback = (projectId: string, members: PresenceMember[]) => void;
+type IpcPresenceWrapper = (_event: unknown, projectId: string, members: PresenceMember[]) => void;
 const presenceChangeWrappers = new WeakMap<UserPresenceCallback, IpcPresenceWrapper>();
 
 // Expose APIs to renderer
@@ -751,9 +756,9 @@ export interface ElectronAPI {
       projectId: string,
       userId: string,
     ) => Promise<{ success: boolean; error?: string }>;
-    getProjectMembers: (projectId: string) => Promise<any[]>;
+    getProjectMembers: (projectId: string) => Promise<ProjectMember[]>;
     acceptProjectInvitation: (projectId: string) => Promise<{ success: boolean; error?: string }>;
-    checkPendingProjectInvitations: () => Promise<any[]>;
+    checkPendingProjectInvitations: () => Promise<ProjectMember[]>;
     declineProjectInvitation: (projectId: string) => Promise<{ success: boolean; error?: string }>;
     cancelProjectInvitation: (memberId: string) => Promise<{ success: boolean; error?: string }>;
     inviteToShopOrder: (
@@ -765,11 +770,11 @@ export interface ElectronAPI {
       shopOrderId: string,
       userId: string,
     ) => Promise<{ success: boolean; error?: string }>;
-    getShopOrderMembers: (shopOrderId: string) => Promise<any[]>;
+    getShopOrderMembers: (shopOrderId: string) => Promise<ShopOrderMember[]>;
     acceptShopOrderInvitation: (
       shopOrderId: string,
     ) => Promise<{ success: boolean; error?: string }>;
-    checkPendingShopOrderInvitations: () => Promise<any[]>;
+    checkPendingShopOrderInvitations: () => Promise<ShopOrderMember[]>;
     declineShopOrderInvitation: (
       shopOrderId: string,
     ) => Promise<{ success: boolean; error?: string }>;
@@ -779,11 +784,11 @@ export interface ElectronAPI {
       activeView?: string,
     ) => Promise<{ success: boolean; error?: string }>;
     leavePresence: (projectId: string) => Promise<{ success: boolean; error?: string }>;
-    getPresence: (projectId: string) => Promise<any[]>;
+    getPresence: (projectId: string) => Promise<PresenceMember[]>;
     subscribePresence: (projectId: string) => Promise<{ success: boolean; error?: string }>;
     unsubscribePresence: (projectId: string) => Promise<{ success: boolean }>;
-    onPresenceChanged: (callback: (projectId: string, members: any[]) => void) => void;
-    offPresenceChanged: (callback: (projectId: string, members: any[]) => void) => void;
+    onPresenceChanged: (callback: (projectId: string, members: PresenceMember[]) => void) => void;
+    offPresenceChanged: (callback: (projectId: string, members: PresenceMember[]) => void) => void;
   };
 }
 

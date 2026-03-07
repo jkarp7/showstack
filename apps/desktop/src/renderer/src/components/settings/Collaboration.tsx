@@ -7,8 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { Users, Crown, Edit3, Eye, AlertCircle, CheckCircle2, Clock, X } from 'lucide-react';
-
-type MemberRole = 'owner' | 'editor' | 'viewer';
+import type { MemberRole } from '../../../../shared/types/collaboration.types';
 
 interface PendingInvitation {
   id: string;
