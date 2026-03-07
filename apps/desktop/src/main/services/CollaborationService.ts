@@ -236,11 +236,8 @@ export class CollaborationService {
    * to the invitee's local PowerSync database (sync rules only cover accepted members).
    */
   async checkPendingProjectInvitations(): Promise<ProjectMember[]> {
-    const connector = getSupabaseConnector();
-    if (!connector.isAuthenticated()) return [];
-
     try {
-      const { data, error } = await connector
+      const { data, error } = await getSupabaseConnector()
         .getSupabaseClient()
         .rpc('get_pending_project_invitations');
 
@@ -441,11 +438,8 @@ export class CollaborationService {
    * Queries Supabase directly via RPC — same reason as checkPendingProjectInvitations.
    */
   async checkPendingShopOrderInvitations(): Promise<ShopOrderMember[]> {
-    const connector = getSupabaseConnector();
-    if (!connector.isAuthenticated()) return [];
-
     try {
-      const { data, error } = await connector
+      const { data, error } = await getSupabaseConnector()
         .getSupabaseClient()
         .rpc('get_pending_shop_order_invitations');
 
