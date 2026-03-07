@@ -175,17 +175,26 @@ export class CollaborationService {
 
   /**
    * Check for pending project invitations for the current user's email.
-   * Call this after sign-in to surface pending invites.
+   * Queries Supabase directly via RPC — pending invitations are never synced
+   * to the invitee's local PowerSync database (sync rules only cover accepted members).
    */
   async checkPendingProjectInvitations(): Promise<ProjectMember[]> {
-    try {
-      const db = getPowerSyncService().getDatabase();
-      if (!db) return [];
+    const connector = getSupabaseConnector();
+    if (!connector.isAuthenticated()) return [];
 
-      const rows = await db.getAll<ProjectMember>(
-        "SELECT * FROM project_members WHERE status = 'pending' AND user_id IS NULL ORDER BY invited_at DESC",
-      );
-      return rows;
+    try {
+      const { data, error } = await connector
+        .getSupabaseClient()
+        .rpc('get_pending_project_invitations');
+
+      if (error) {
+        logger.warn('[CollaborationService] get_pending_project_invitations RPC error', {
+          error: error.message,
+        });
+        return [];
+      }
+
+      return (data as ProjectMember[]) ?? [];
     } catch (err) {
       logger.error('[CollaborationService] checkPendingProjectInvitations failed', {
         error: err instanceof Error ? err.message : String(err),
@@ -221,13 +230,11 @@ export class CollaborationService {
     }
 
     try {
-      const { data, error } = await connector
-        .getSupabaseClient()
-        .rpc('invite_to_shop_order', {
-          p_shop_order_id: shopOrderId,
-          p_email: email,
-          p_role: role,
-        });
+      const { data, error } = await connector.getSupabaseClient().rpc('invite_to_shop_order', {
+        p_shop_order_id: shopOrderId,
+        p_email: email,
+        p_role: role,
+      });
 
       if (error) {
         logger.warn('[CollaborationService] invite_to_shop_order RPC error', {
@@ -325,16 +332,25 @@ export class CollaborationService {
 
   /**
    * Check for pending shop order invitations for the current user's email.
+   * Queries Supabase directly via RPC — same reason as checkPendingProjectInvitations.
    */
   async checkPendingShopOrderInvitations(): Promise<ShopOrderMember[]> {
-    try {
-      const db = getPowerSyncService().getDatabase();
-      if (!db) return [];
+    const connector = getSupabaseConnector();
+    if (!connector.isAuthenticated()) return [];
 
-      const rows = await db.getAll<ShopOrderMember>(
-        "SELECT * FROM shop_order_members WHERE status = 'pending' AND user_id IS NULL ORDER BY invited_at DESC",
-      );
-      return rows;
+    try {
+      const { data, error } = await connector
+        .getSupabaseClient()
+        .rpc('get_pending_shop_order_invitations');
+
+      if (error) {
+        logger.warn('[CollaborationService] get_pending_shop_order_invitations RPC error', {
+          error: error.message,
+        });
+        return [];
+      }
+
+      return (data as ShopOrderMember[]) ?? [];
     } catch (err) {
       logger.error('[CollaborationService] checkPendingShopOrderInvitations failed', {
         error: err instanceof Error ? err.message : String(err),

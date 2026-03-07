@@ -8,6 +8,7 @@
  * Usage:
  *   <ProjectSharingDialog
  *     projectId={project.id}
+ *     projectOwnerId={project.user_id}
  *     currentUserId={userId}
  *     open={sharingOpen}
  *     onClose={() => setSharingOpen(false)}
@@ -34,7 +35,9 @@ interface ProjectMember {
 
 interface ProjectSharingDialogProps {
   projectId: string;
-  /** The current signed-in user's ID — used to determine if they are the owner. */
+  /** The user_id of the project owner — determines if the current user can invite/remove. */
+  projectOwnerId: string;
+  /** The current signed-in user's ID. */
   currentUserId: string;
   open: boolean;
   onClose: () => void;
@@ -54,6 +57,7 @@ const ROLE_LABELS: Record<MemberRole, string> = {
 
 export function ProjectSharingDialog({
   projectId,
+  projectOwnerId,
   currentUserId,
   open,
   onClose,
@@ -67,9 +71,9 @@ export function ProjectSharingDialog({
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
   const [removeError, setRemoveError] = useState<string | null>(null);
 
-  const isOwner = members.some(
-    (m) => m.user_id === currentUserId && m.role === 'owner' && m.status === 'accepted',
-  );
+  // Ownership is stored on the project row (projects.user_id), not in project_members.
+  // project_members only contains invited collaborators, never the owner themselves.
+  const isOwner = currentUserId === projectOwnerId;
 
   const loadMembers = useCallback(async () => {
     setLoading(true);

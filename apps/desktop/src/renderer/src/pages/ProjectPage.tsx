@@ -675,6 +675,7 @@ export function ProjectPage() {
       {collaborationEnabled && isSharingOpen && projectId && userId && (
         <ProjectSharingDialog
           projectId={projectId}
+          projectOwnerId={userId}
           currentUserId={userId}
           open={isSharingOpen}
           onClose={() => setIsSharingOpen(false)}
