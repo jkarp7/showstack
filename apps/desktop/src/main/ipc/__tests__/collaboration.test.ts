@@ -587,6 +587,25 @@ describe('Collaboration IPC handlers', () => {
       expect(mockWin.once).toHaveBeenCalledTimes(1);
       expect(mockWin.once).toHaveBeenCalledWith('closed', expect.any(Function));
     });
+
+    it('invokes all unsubscribe functions when the window closes', async () => {
+      const unsub1 = vi.fn();
+      const unsub2 = vi.fn();
+      const mockWin = makeMockWindow();
+      mockFromWebContents.mockReturnValue(mockWin);
+      mockOnPresenceChange.mockReturnValueOnce(unsub1).mockReturnValueOnce(unsub2);
+      const handler = getHandler('collaboration:subscribe-presence');
+
+      await handler(fakeEvent, 'proj-1');
+      await handler(fakeEvent, 'proj-2');
+
+      // Capture and invoke the 'closed' listener
+      const closedListener = mockWin.once.mock.calls[0][1] as () => void;
+      closedListener();
+
+      expect(unsub1).toHaveBeenCalled();
+      expect(unsub2).toHaveBeenCalled();
+    });
   });
 
   // ==========================================

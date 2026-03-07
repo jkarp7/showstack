@@ -15,10 +15,10 @@ vi.mock('react-router-dom', async () => {
   return { ...actual, useNavigate: () => mockNavigate };
 });
 
-function renderBanner(canCollaborate = true) {
+function renderBanner(canReceiveInvitations = true) {
   return render(
     <MemoryRouter>
-      <PendingInvitationsBanner canCollaborate={canCollaborate} />
+      <PendingInvitationsBanner canReceiveInvitations={canReceiveInvitations} />
     </MemoryRouter>,
   );
 }
@@ -34,7 +34,7 @@ describe('PendingInvitationsBanner', () => {
     ).mockResolvedValue([]);
   });
 
-  it('renders nothing when canCollaborate is false', async () => {
+  it('renders nothing when canReceiveInvitations is false (e.g. demo tier)', async () => {
     renderBanner(false);
     // Nothing should be in the document — no RPCs called either
     expect(screen.queryByText(/invitation/i)).toBeNull();

@@ -79,9 +79,15 @@ function AppContent() {
       {/* Offline Banner - shows when cloud sync is disconnected */}
       <OfflineBanner />
 
-      {/* Pending Invitations Banner - shows when user has unaccepted collaboration invites */}
+      {/* Pending Invitations Banner - shows when user has unaccepted collaboration invites.
+          Any authenticated non-demo user can receive invitations; demo users are excluded
+          because they don't have cloud sync enabled. */}
       {collaborationEnabled && (
-        <PendingInvitationsBanner canCollaborate={licenseStatus?.canCollaborate ?? false} />
+        <PendingInvitationsBanner
+          canReceiveInvitations={
+            licenseStatus !== undefined && licenseStatus !== null && licenseStatus.tier !== 'demo'
+          }
+        />
       )}
 
       <Routes>

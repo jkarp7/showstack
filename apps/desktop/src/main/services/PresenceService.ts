@@ -54,7 +54,7 @@ export class PresenceService {
     const channelName = `presence:project:${projectId}`;
 
     const channel = supabase.channel(channelName, {
-      config: { presence: { key: userId ?? 'anonymous' } },
+      config: { presence: { key: userId } },
     });
 
     channel

@@ -6,6 +6,11 @@
 -- dimmer_racks to reach the project — unnecessary now that project_id is a direct
 -- column. This migration replaces those join-based policies with simpler
 -- project_id-based equivalents, matching the pattern used by every other table.
+--
+-- NOTE: role IN ('owner', 'editor') — 'owner' is intentionally included for
+-- forward-compatibility parity with migration 006, but it is dead code today.
+-- Ownership is tracked via projects.user_id (first branch of the USING clause),
+-- not via a project_members row. No member row ever carries role = 'owner'.
 -- ============================================
 
 DROP POLICY "Users can view dimmer rack modules in accessible projects" ON dimmer_rack_modules;

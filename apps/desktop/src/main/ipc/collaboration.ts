@@ -24,7 +24,15 @@ const VALID_INVITE_ROLES: InviteRole[] = ['editor', 'viewer'];
 // windowId → Map<projectId, unsubscribe fn>
 const presenceSubscriptions = new Map<number, Map<string, () => void>>();
 
-/** Reset module-level presence state. Only for use in tests. */
+/**
+ * Reset module-level presence subscription state.
+ *
+ * @internal Test-only escape hatch. Application code must not call this.
+ * Alternative: `vi.resetModules()` + re-import, but that requires restructuring
+ * all hoisted mocks in the IPC test suite. This lightweight export is the
+ * pragmatic trade-off; the underscore prefix signals it is not part of the
+ * public API.
+ */
 export function _resetPresenceStateForTesting(): void {
   presenceSubscriptions.clear();
 }
@@ -252,7 +260,7 @@ export function registerCollaborationHandlers(): void {
   // PRESENCE SUBSCRIPTIONS (push to renderer)
   // ============================================
 
-  ipcMain.handle('collaboration:subscribe-presence', (event, projectId: string) => {
+  ipcMain.handle('collaboration:subscribe-presence', async (event, projectId: string) => {
     if (!projectId || typeof projectId !== 'string') {
       return { success: false, error: 'Invalid project ID' };
     }
@@ -293,7 +301,7 @@ export function registerCollaborationHandlers(): void {
     return { success: true };
   });
 
-  ipcMain.handle('collaboration:unsubscribe-presence', (event, projectId: string) => {
+  ipcMain.handle('collaboration:unsubscribe-presence', async (event, projectId: string) => {
     const windowId = event.sender.id;
     presenceSubscriptions.get(windowId)?.get(projectId)?.();
     presenceSubscriptions.get(windowId)?.delete(projectId);

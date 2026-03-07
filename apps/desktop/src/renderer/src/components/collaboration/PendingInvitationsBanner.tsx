@@ -11,17 +11,25 @@ import { Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface PendingInvitationsBannerProps {
-  /** Whether the user has an active collaboration-capable license. */
-  canCollaborate: boolean;
+  /**
+   * Whether the user is eligible to receive collaboration invitations.
+   * True for any authenticated, non-demo licensed user.
+   * Distinct from `canCollaborate` (which gates *sending* invitations and
+   * requires a Professional/Institutional tier).
+   *
+   * TODO: Student tier eligibility for receiving invitations is TBD — currently
+   * treated as eligible (same as professional/institutional).
+   */
+  canReceiveInvitations: boolean;
 }
 
-export function PendingInvitationsBanner({ canCollaborate }: PendingInvitationsBannerProps) {
+export function PendingInvitationsBanner({ canReceiveInvitations }: PendingInvitationsBannerProps) {
   const [count, setCount] = useState(0);
   const [dismissed, setDismissed] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!canCollaborate) return;
+    if (!canReceiveInvitations) return;
 
     const check = () => {
       Promise.all([
@@ -49,9 +57,9 @@ export function PendingInvitationsBanner({ canCollaborate }: PendingInvitationsB
       window.removeEventListener('focus', debouncedCheck);
       clearTimeout(debounceTimer);
     };
-  }, [canCollaborate]);
+  }, [canReceiveInvitations]);
 
-  if (!canCollaborate || count === 0 || dismissed) return null;
+  if (!canReceiveInvitations || count === 0 || dismissed) return null;
 
   return (
     <div className="flex-shrink-0 bg-blue-600 text-white px-4 py-2 flex items-center justify-between text-sm">

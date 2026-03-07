@@ -33,6 +33,15 @@ BEGIN
     RETURN jsonb_build_object('success', false, 'error', 'Authentication required');
   END IF;
 
+  -- SECURITY NOTE: TOCTOU / first-caller-wins ownership risk
+  -- If the project row does not exist in Supabase yet (offline-first: project
+  -- was created locally and has not synced), any authenticated user who learns
+  -- the project UUID can call invite_to_project first and claim ownership here.
+  -- UUID v4 guessing is impractical, but a leaked UUID is a real (if low) risk.
+  -- Full mitigation requires writing the project row to Supabase at creation time
+  -- so the owner is established before anyone can call this function.
+  -- See: NEXT_STEPS.md — "Project row sync on creation"
+  --
   -- Upsert a minimal project stub so the row always exists in Supabase.
   -- Projects are created locally and may not have been synced yet.
   -- On conflict we do nothing — we never overwrite an existing owner.

@@ -88,6 +88,10 @@ export class CollaborationService {
 
   /**
    * Remove a member from a project. Only the project owner can call this.
+   *
+   * No `canCollaborate` check here: owners can always manage their own projects
+   * regardless of their current license tier. The Supabase RPC enforces
+   * ownership server-side.
    */
   async removeProjectMember(projectId: string, userId: string): Promise<CollaborationResult> {
     const connector = getSupabaseConnector();
@@ -214,6 +218,9 @@ export class CollaborationService {
    * Cancel a pending project invitation (owner cancelling an invite they sent).
    * Uses the project_members row ID so it works before the invitee accepts
    * (when user_id is still null on the pending row).
+   *
+   * No `canCollaborate` check: owners can rescind invitations they've already
+   * sent regardless of their current license tier.
    */
   async cancelProjectInvitation(memberId: string): Promise<CollaborationResult> {
     const connector = getSupabaseConnector();
@@ -331,6 +338,9 @@ export class CollaborationService {
 
   /**
    * Remove a member from a shop order. Only the shop order owner can call this.
+   *
+   * No `canCollaborate` check: owners can manage their own shop orders regardless
+   * of license tier. The RPC enforces ownership server-side.
    */
   async removeShopOrderMember(shopOrderId: string, userId: string): Promise<CollaborationResult> {
     const connector = getSupabaseConnector();
@@ -386,6 +396,8 @@ export class CollaborationService {
 
   /**
    * Cancel a pending shop order invitation (owner cancelling an invite they sent).
+   *
+   * No `canCollaborate` check: owners can rescind invitations regardless of tier.
    */
   async cancelShopOrderInvitation(memberId: string): Promise<CollaborationResult> {
     const connector = getSupabaseConnector();
