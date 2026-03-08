@@ -91,7 +91,7 @@ export class ShopOrderProjectService {
       async () =>
         createShopOrderProject({
           ...data,
-          user_id: userId !== null ? userId : data.user_id,
+          user_id: userId ?? data.user_id,
         }),
       'shop-order:projects:create',
     );

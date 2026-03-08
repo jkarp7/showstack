@@ -39,10 +39,10 @@ export async function syncProjectToPowerSync(project: Project, userId: string): 
   const ps = getPowerSyncService();
   if (!ps.isReady()) return;
 
-  // Cast to any to access columns that exist in the local SQLite schema but are
-  // not present in the minimal typed Project interface (e.g. lighting_designer,
-  // venue_city, phase_label_a, …).
-  const p = project as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  // Cast to Record<string, unknown> to access columns that exist in the local
+  // SQLite schema but are not present in the minimal typed Project interface
+  // (e.g. lighting_designer, venue_city, phase_label_a, …).
+  const p = project as unknown as Record<string, unknown>;
 
   await ps.execute(
     `INSERT INTO projects (

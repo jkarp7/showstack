@@ -158,18 +158,16 @@ export class CollaborationService {
     // feature and ensures ownership is established atomically. The stub-upsert
     // inside `invite_to_project` remains as a final safety net.
     const conn = getSupabaseConnector();
-    if (conn.isAuthenticated()) {
-      const userId = conn.getUserId();
-      if (userId) {
-        const project = getProjectById(projectId);
-        if (project) {
-          await syncProjectToPowerSync(project, userId).catch((err) =>
-            logger.warn(
-              '[CollaborationService] project backfill failed; stub upsert in RPC is safety net',
-              { error: err instanceof Error ? err.message : String(err) },
-            ),
-          );
-        }
+    const userId = conn.isAuthenticated() ? conn.getUserId() : null;
+    if (userId) {
+      const project = getProjectById(projectId);
+      if (project) {
+        await syncProjectToPowerSync(project, userId).catch((err) =>
+          logger.warn(
+            '[CollaborationService] project backfill failed; stub upsert in RPC is safety net',
+            { error: err instanceof Error ? err.message : String(err) },
+          ),
+        );
       }
     }
 
@@ -258,18 +256,16 @@ export class CollaborationService {
     // the invite RPC runs. This ensures ownership is established before the invite,
     // and the RPC's server-side lookup will find the row.
     const conn = getSupabaseConnector();
-    if (conn.isAuthenticated()) {
-      const userId = conn.getUserId();
-      if (userId) {
-        const shopOrder = getShopOrderProjectById(shopOrderId);
-        if (shopOrder) {
-          await syncShopOrderToPowerSync(shopOrder, userId).catch((err) =>
-            logger.warn(
-              '[CollaborationService] shop order backfill failed; RPC will proceed without it',
-              { error: err instanceof Error ? err.message : String(err) },
-            ),
-          );
-        }
+    const userId = conn.isAuthenticated() ? conn.getUserId() : null;
+    if (userId) {
+      const shopOrder = getShopOrderProjectById(shopOrderId);
+      if (shopOrder) {
+        await syncShopOrderToPowerSync(shopOrder, userId).catch((err) =>
+          logger.warn(
+            '[CollaborationService] shop order backfill failed; RPC will proceed without it',
+            { error: err instanceof Error ? err.message : String(err) },
+          ),
+        );
       }
     }
 
