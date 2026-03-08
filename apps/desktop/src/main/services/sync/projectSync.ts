@@ -11,6 +11,7 @@
  */
 
 import { getPowerSyncService } from './PowerSyncService';
+import { projects, shop_order_projects } from './powerSyncSchema';
 import type { ProjectRow } from '../../database/queries/projects';
 import type { ShopOrderProject } from '../../database/queries/shop-order';
 import { logger } from '../../utils/logger';
@@ -47,53 +48,9 @@ function buildUpsertSql(table: string, columns: string[], immutableCols: string[
 // PROJECTS
 // ============================================
 
-const PROJECT_COLUMNS = [
-  'id',
-  'user_id',
-  'name',
-  'description',
-  'logo_path',
-  'lighting_designer',
-  'lighting_designer_email',
-  'lighting_designer_phone',
-  'lighting_associates',
-  'audio_designer',
-  'audio_designer_email',
-  'audio_designer_phone',
-  'audio_associates',
-  'video_designer',
-  'video_designer_email',
-  'video_designer_phone',
-  'video_associates',
-  'electrician',
-  'electrician_email',
-  'electrician_phone',
-  'audio_tech',
-  'audio_tech_email',
-  'audio_tech_phone',
-  'video_tech',
-  'video_tech_email',
-  'video_tech_phone',
-  'production_manager',
-  'production_manager_email',
-  'production_manager_phone',
-  'production_manager_company',
-  'general_manager',
-  'general_manager_email',
-  'general_manager_phone',
-  'general_manager_company',
-  'venue',
-  'venue_city',
-  'venue_state',
-  'show_dates',
-  'phase_label_a',
-  'phase_label_b',
-  'phase_label_c',
-  'enabled_modules',
-  'created_at',
-  'updated_at',
-  'root_project_id',
-] as const;
+// Derived from the schema so adding a column to powerSyncSchema.ts automatically
+// includes it here. PowerSync adds 'id' implicitly; we prepend it manually.
+const PROJECT_COLUMNS = ['id', ...Object.keys(projects.columns)];
 
 const PROJECT_UPSERT_SQL = buildUpsertSql(
   'projects',
@@ -144,48 +101,8 @@ export async function deleteProjectFromPowerSync(id: string): Promise<void> {
 // SHOP ORDER PROJECTS
 // ============================================
 
-const SHOP_ORDER_COLUMNS = [
-  'id',
-  'user_id',
-  'parent_project_id',
-  'production_name',
-  'venue',
-  'venue_city',
-  'venue_state',
-  'order_date',
-  'original_order_date',
-  'prep_start_date',
-  'prep_end_date',
-  'load_in_date',
-  'first_preview_date',
-  'opening_night_date',
-  'closing_date',
-  'load_out_date',
-  'gm_name',
-  'gm_company',
-  'gm_email',
-  'gm_phone',
-  'pm_name',
-  'pm_company',
-  'pm_email',
-  'pm_phone',
-  'ld_name',
-  'ld_email',
-  'ld_phone',
-  'ald_name',
-  'ald_email',
-  'ald_phone',
-  'pe_name',
-  'pe_email',
-  'pe_phone',
-  'additional_contacts',
-  'logo_url',
-  'logo_storage_path',
-  'disciplines',
-  'current_revision',
-  'created_at',
-  'updated_at',
-] as const;
+// Derived from the schema — same rationale as PROJECT_COLUMNS above.
+const SHOP_ORDER_COLUMNS = ['id', ...Object.keys(shop_order_projects.columns)];
 
 const SHOP_ORDER_UPSERT_SQL = buildUpsertSql(
   'shop_order_projects',
