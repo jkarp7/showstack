@@ -48,6 +48,15 @@ vi.mock('../sync/SupabaseConnector', () => ({
   getSupabaseConnector: () => mockConnector,
 }));
 
+// Mock getPowerSyncService — return a db that confirms membership for any project
+vi.mock('../sync', () => ({
+  getPowerSyncService: () => ({
+    getDatabase: () => ({
+      getAll: vi.fn().mockResolvedValue([{ '?column?': 1 }]),
+    }),
+  }),
+}));
+
 // Import PresenceService after mocks
 import { PresenceService } from '../PresenceService';
 
@@ -83,8 +92,8 @@ describe('PresenceService', () => {
       expect(mockConnector.getSupabaseClient).not.toHaveBeenCalled();
     });
 
-    it('creates a presence channel and subscribes', () => {
-      service.joinProjectPresence('proj-1', 'fixtures');
+    it('creates a presence channel and subscribes', async () => {
+      await service.joinProjectPresence('proj-1', 'fixtures');
 
       expect(mockConnector.getSupabaseClient).toHaveBeenCalled();
       expect(mockChannel.on).toHaveBeenCalledWith(
@@ -95,11 +104,11 @@ describe('PresenceService', () => {
       expect(mockChannel.subscribe).toHaveBeenCalled();
     });
 
-    it('does not create a second channel when already joined', () => {
-      service.joinProjectPresence('proj-1');
+    it('does not create a second channel when already joined', async () => {
+      await service.joinProjectPresence('proj-1');
       const firstClient = mockConnector.getSupabaseClient.mock.calls.length;
 
-      service.joinProjectPresence('proj-1'); // second call
+      await service.joinProjectPresence('proj-1'); // second call
 
       // getSupabaseClient should not have been called again — used track instead
       expect(mockConnector.getSupabaseClient.mock.calls.length).toBe(firstClient);
@@ -117,8 +126,8 @@ describe('PresenceService', () => {
       service.leaveProjectPresence('not-joined');
     });
 
-    it('unsubscribes and cleans up channel', () => {
-      service.joinProjectPresence('proj-1');
+    it('unsubscribes and cleans up channel', async () => {
+      await service.joinProjectPresence('proj-1');
       service.leaveProjectPresence('proj-1');
 
       expect(mockChannel.unsubscribe).toHaveBeenCalled();
@@ -127,15 +136,15 @@ describe('PresenceService', () => {
       expect(service.getPresenceMembers('proj-1')).toEqual([]);
     });
 
-    it('removes registered callbacks on leave', () => {
-      service.joinProjectPresence('proj-1');
+    it('removes registered callbacks on leave', async () => {
+      await service.joinProjectPresence('proj-1');
       const cb = vi.fn();
       service.onPresenceChange('proj-1', cb);
 
       service.leaveProjectPresence('proj-1');
 
       // Re-join and trigger presence — old callback should not fire
-      service.joinProjectPresence('proj-1');
+      await service.joinProjectPresence('proj-1');
       expect(cb).not.toHaveBeenCalled();
     });
   });
@@ -152,8 +161,8 @@ describe('PresenceService', () => {
       expect(typeof unsub).toBe('function');
     });
 
-    it('unsubscribe removes the callback', () => {
-      service.joinProjectPresence('proj-1');
+    it('unsubscribe removes the callback', async () => {
+      await service.joinProjectPresence('proj-1');
 
       // Capture the 'sync' event handler to trigger it manually
       const syncCallArgs = mockChannel.on.mock.calls.find(
@@ -181,8 +190,8 @@ describe('PresenceService', () => {
       expect(service.getPresenceMembers('not-joined')).toEqual([]);
     });
 
-    it('returns flattened presence state', () => {
-      service.joinProjectPresence('proj-1');
+    it('returns flattened presence state', async () => {
+      await service.joinProjectPresence('proj-1');
       const member = {
         userId: 'u1',
         email: 'a@b.com',
@@ -203,9 +212,9 @@ describe('PresenceService', () => {
   // ==========================================
 
   describe('cleanup', () => {
-    it('leaves all active channels', () => {
-      service.joinProjectPresence('proj-1');
-      service.joinProjectPresence('proj-2');
+    it('leaves all active channels', async () => {
+      await service.joinProjectPresence('proj-1');
+      await service.joinProjectPresence('proj-2');
 
       service.cleanup();
 

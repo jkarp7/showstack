@@ -48,19 +48,24 @@ export class PresenceService {
     // Verify the current user owns or is an accepted member of this project
     // before subscribing to its presence channel.
     const db = getPowerSyncService().getDatabase();
-    if (db) {
-      const rows = await db.getAll(
-        `SELECT 1 FROM projects WHERE id = ? AND user_id = ? LIMIT 1
-         UNION ALL
-         SELECT 1 FROM project_members WHERE project_id = ? AND user_id = ? AND status = 'accepted' LIMIT 1`,
-        [projectId, userId, projectId, userId],
+    if (!db) {
+      logger.warn(
+        `[PresenceService] Blocked presence join: database not initialized for project ${projectId}`,
       );
-      if (rows.length === 0) {
-        logger.warn(
-          `[PresenceService] Blocked presence join: user is not a member of project ${projectId}`,
-        );
-        return;
-      }
+      return;
+    }
+
+    const rows = await db.getAll(
+      `SELECT 1 FROM projects WHERE id = ? AND user_id = ? LIMIT 1
+       UNION ALL
+       SELECT 1 FROM project_members WHERE project_id = ? AND user_id = ? AND status = 'accepted' LIMIT 1`,
+      [projectId, userId, projectId, userId],
+    );
+    if (rows.length === 0) {
+      logger.warn(
+        `[PresenceService] Blocked presence join: user is not a member of project ${projectId}`,
+      );
+      return;
     }
 
     // getSession() is a public method on SupabaseConnector (SupabaseConnector.ts:152)

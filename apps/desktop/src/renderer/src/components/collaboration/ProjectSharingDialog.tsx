@@ -134,7 +134,7 @@ export function ProjectSharingDialog({
   };
 
   const handleRemove = async (member: ProjectMember) => {
-    if (removing) return; // in-flight guard
+    if (removing || !member.user_id) return; // in-flight guard and null safety
     setRemoveError(null);
     setRemoving(member.id);
     try {
@@ -186,6 +186,7 @@ export function ProjectSharingDialog({
           </h2>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
           >
             <X className="w-5 h-5" />
@@ -281,7 +282,7 @@ export function ProjectSharingDialog({
                           onClick={() => handleRemove(member)}
                           disabled={!!removing}
                           className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors ml-2 flex-shrink-0"
-                          title="Remove member"
+                          aria-label="Remove member"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -318,7 +319,7 @@ export function ProjectSharingDialog({
                         onClick={() => handleCancelInvitation(member)}
                         disabled={!!removing}
                         className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors ml-2 flex-shrink-0"
-                        title="Cancel invitation"
+                        aria-label="Cancel invitation"
                       >
                         <X className="w-4 h-4" />
                       </button>

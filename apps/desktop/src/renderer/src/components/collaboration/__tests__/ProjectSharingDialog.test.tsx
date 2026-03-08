@@ -144,8 +144,8 @@ describe('ProjectSharingDialog', () => {
 
     render(<ProjectSharingDialog {...defaultProps} />);
 
-    await waitFor(() => screen.getByTitle(/Cancel invitation/i));
-    await userEvent.click(screen.getByTitle(/Cancel invitation/i));
+    await waitFor(() => screen.getByRole('button', { name: /Cancel invitation/i }));
+    await userEvent.click(screen.getByRole('button', { name: /Cancel invitation/i }));
 
     await waitFor(() => {
       expect(window.api.collaboration.cancelProjectInvitation).toHaveBeenCalledWith('m2');
@@ -162,8 +162,8 @@ describe('ProjectSharingDialog', () => {
 
     render(<ProjectSharingDialog {...defaultProps} />);
 
-    await waitFor(() => screen.getByTitle(/Remove member/i));
-    await userEvent.click(screen.getByTitle(/Remove member/i));
+    await waitFor(() => screen.getByRole('button', { name: /Remove member/i }));
+    await userEvent.click(screen.getByRole('button', { name: /Remove member/i }));
 
     await waitFor(() => {
       expect(window.api.collaboration.removeProjectMember).toHaveBeenCalledWith(
