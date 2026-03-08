@@ -31,14 +31,16 @@ function toJsonStr(value: unknown): string | null {
 function buildUpsertSql(table: string, columns: string[], immutableCols: string[]): string {
   const placeholders = columns.map(() => '?').join(', ');
   const quotedColumns = columns.map((c) => `"${c}"`);
-  const updateSet = columns
+  const updateClauses = columns
     .filter((c) => !immutableCols.includes(c))
-    .map((c) => `"${c}" = excluded."${c}"`)
-    .join(',\n      ');
+    .map((c) => `"${c}" = excluded."${c}"`);
+  const onConflict =
+    updateClauses.length > 0
+      ? `DO UPDATE SET\n      ${updateClauses.join(',\n      ')}`
+      : 'DO NOTHING';
   return `INSERT INTO ${table} (${quotedColumns.join(', ')})
     VALUES (${placeholders})
-    ON CONFLICT(id) DO UPDATE SET
-      ${updateSet}`;
+    ON CONFLICT(id) ${onConflict}`;
 }
 
 // ============================================
