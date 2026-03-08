@@ -1,7 +1,7 @@
 # Next Steps - ShowStack Development
 
 **Last Updated:** March 2026
-**Status:** Multi-user collaboration shipped; PowerSync project-sync gap documented below
+**Status:** Multi-user collaboration merged to `develop`; PowerSync write-path (issue #86) open on `feature/powersync-write-path`
 
 ---
 
@@ -9,10 +9,10 @@
 
 ```bash
 # 1. Ensure you're on the correct branch
-git checkout feature/user-accounts-licensing
+git checkout develop
 
 # 2. Pull latest changes
-git pull origin feature/user-accounts-licensing
+git pull origin develop
 
 # 3. Install dependencies (sets up Husky hooks)
 npm install
@@ -37,16 +37,31 @@ npm run format:check
 
 ## Recently Completed
 
-### Multi-User Collaboration (March 2026)
+### PowerSync Write-Path for Projects & Shop Orders (March 2026) — `feature/powersync-write-path`
 
-- Project and shop-order sharing: invite by email with editor/viewer roles
-- `CollaborationService` — invite/remove/accept/decline via Supabase RPCs (migrations 005–011)
-- `PresenceService` — real-time collaborator presence via Supabase Realtime channels
-- `ProjectSharingDialog` — Share button on project pages; member list with remove support
-- `PendingInvitationsBanner` — app-top banner surfacing pending invitations on login
-- Collaboration settings tab — Accept/Decline UI with project name and inviter email
-- PowerSync sync rules rewritten — parameterized buckets, no JOINs anywhere (migration 008 denormalizes `project_id` onto `dimmer_rack_modules` and `shop_order_id` onto `shop_order_items`)
-- Feature-flagged behind `collaboration`; license-gated to Professional/Institutional tiers
+Fixes issue #86 (TOCTOU ownership race) by writing project and shop-order rows into the PowerSync local SQLite at creation/update/delete time. PowerSync's CRUD queue then uploads them to Supabase automatically, establishing ownership atomically before any invite RPC can run.
+
+- `sync/projectSync.ts` — new module: `syncProjectToPowerSync`, `deleteProjectFromPowerSync`, `syncShopOrderToPowerSync`, `deleteShopOrderFromPowerSync`; all are no-ops when PowerSync is not initialized
+- `powerSyncSchema.ts` — added missing `root_project_id` column to the `projects` table definition
+- `ProjectService` — calls `maybeSyncToPowerSync()` after `create`, `update`, `createCopy`; fire-and-forget `deleteProjectFromPowerSync()` after `delete`
+- `ShopOrderProjectService` — same pattern; `create()` now injects the authenticated user's ID so the local row is always owned before it reaches Supabase
+- `CollaborationService` — backfills the full project/shop-order row to PowerSync before the invite RPC (handles rows created before this fix); the `invite_to_project` stub-upsert remains as a final safety net
+- PowerSync writes are fire-and-forget with catch — failures are logged as warnings and do not fail local operations
+- +23 tests; 1,933 total (all passing), 0 TypeScript errors
+
+### Multi-User Collaboration (March 2026) — merged to `develop` as PR #85
+
+- **CollaborationService** — invite/remove/accept/decline for projects and shop orders via Supabase RPCs
+- **PresenceService** — real-time collaborator presence via Supabase Realtime channels with membership auth guard
+- **ProjectSharingDialog** — Share button on project pages; invite by email with editor/viewer role selection; member list with remove/cancel-invite support
+- **PendingInvitationsBanner** — persistent banner at the top of the app when the signed-in user has pending invitations; persists dismissed state per user
+- **Collaboration settings tab** — shows pending invitations with project name and inviter email; Accept/Decline buttons deep-link to the relevant project on accept
+- **16 Supabase migrations (005–016):** `project_members` + `shop_order_members` tables, RLS policies (WITH CHECK + USING), 12 RPCs (invite/remove/accept/decline/cancel/pending for both projects and shop orders), PowerSync denormalization columns, pending-invitation enrichment, license gate enforced server-side (migration 015+), RLS + RPC hardening (migration 016)
+- **PowerSync sync rules rewritten** — no JOINs anywhere; parameterized buckets scoped per project and per shop order
+- **License-gated:** sending invites requires Professional/Institutional tier with active cloud sync — enforced both client-side (`LicenseService`) and server-side (database function guard)
+- **Feature-flagged** behind the `collaboration` flag
+- **IPC layer** — 19 collaboration channels with UUID validation on all member ID params
+- **Tests:** 1,910 passing across 74 files at merge
 
 ### User Accounts, Licensing & Demo Mode (February 2026)
 
@@ -80,32 +95,29 @@ npm run format:check
 - [x] Sentry integration
 - [x] Health check system
 
-### Current: Phase 7 - Disaster Recovery & Documentation
+### Completed: Phase 7 - Disaster Recovery & Documentation
 
 - [x] Phase 7.0: PR #77 review follow-ups
 - [x] Phase 7.1: Automated database backups (every 6 hours, retention policy)
 - [x] Phase 7.2: Crash recovery with database integrity validation
-- [ ] Phase 7.3: Documentation updates (in progress)
+- [x] Phase 7.3: Documentation updates
 
 See `docs/archive/renovation/README.md` for the full renovation plan.
 
 ---
 
-## Known Issues / Next Steps
+## Open Issues / Next Steps
 
-### PowerSync: Projects Not Written to Supabase on Creation
+### Merge `feature/powersync-write-path` → `develop`
 
-**Context:** ShowStack stores project data in a local SQLite file (`showstack-projects.db`). Supabase has a separate `projects` table used by PowerSync sync rules and the collaboration RPCs. These two are currently not kept in sync automatically.
+PR open at `feature/powersync-write-path`. Once reviewed and merged, the TOCTOU ownership race (issue #86) is fully resolved. No Supabase migration required — existing RLS INSERT policies already cover this.
 
-**Workaround in place:** The `invite_to_project` RPC (migration 010) upserts a minimal project stub (`id`, `user_id`, `name`) into Supabase's `projects` table on first invite. This allows the ownership check and `project_members` insert to succeed. Only `name` is populated; all other columns remain NULL in Supabase.
+**Before merging, verify PowerSync sync rules include a project-owner bucket:**
+The PowerSync server sync rules must have a bucket that syncs `projects` rows where `user_id = token_parameters.user_id` (owned projects, not just member projects). Without this, written rows won't download back after a fresh install. Check the PowerSync dashboard sync rules (`supabase/powersync/sync-rules.yaml`) before merging.
 
-**Full fix needed:** One of the following approaches:
+### Merge `develop` → `main`
 
-1. **PowerSync write path** — Write project creates/updates/deletes to the PowerSync SQLite instead of (or in addition to) the local project DB. PowerSync's `uploadData` connector will then sync them to Supabase automatically.
-2. **Direct Supabase writes** — On every project create/update/delete in `ProjectService`, also call Supabase directly (upsert the full row). Simpler to implement but duplicates the write path.
-3. **Migrate primary store to PowerSync** — Make the PowerSync SQLite the single source of truth for project data (replace `showstack-projects.db`). Larger refactor but eliminates the two-DB split entirely.
-
-Until this is resolved, project metadata visible to collaborators in Supabase will only include `name`. Fixtures, racks, and other project data still live exclusively in the local SQLite and are not accessible to collaborators.
+Both the collaboration feature (PR #85) and the PowerSync write-path fix (#86) should be batched into a `develop` → `main` merge once the write-path PR is reviewed.
 
 ---
 
@@ -154,4 +166,4 @@ Until this is resolved, project metadata visible to collaborators in Supabase wi
 
 ---
 
-**Current Focus:** Phase 7.3 - Documentation updates, then merge feature branch to main
+**Current Focus:** Merge `feature/powersync-write-path` → `develop`, then `develop` → `main`

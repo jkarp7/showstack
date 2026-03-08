@@ -5,6 +5,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ValidationError } from '../../errors';
 
+// ============================================
+// Hoisted mocks for mutable state
+// ============================================
+
+const { mockIsAuthenticated, mockGetUserId, mockSyncProject, mockDeleteProject } = vi.hoisted(
+  () => ({
+    mockIsAuthenticated: vi.fn(),
+    mockGetUserId: vi.fn(),
+    mockSyncProject: vi.fn(),
+    mockDeleteProject: vi.fn(),
+  }),
+);
+
 // Mock dependencies
 vi.mock('../../utils/logger', () => ({
   logger: {
@@ -19,8 +32,21 @@ vi.mock('../../database/queries/projects', () => ({
   getAllProjects: vi.fn(),
   getProjectById: vi.fn(),
   createProject: vi.fn(),
+  createProjectCopy: vi.fn(),
   updateProject: vi.fn(),
   deleteProject: vi.fn(),
+}));
+
+vi.mock('../sync/SupabaseConnector', () => ({
+  getSupabaseConnector: () => ({
+    isAuthenticated: mockIsAuthenticated,
+    getUserId: mockGetUserId,
+  }),
+}));
+
+vi.mock('../sync/projectSync', () => ({
+  syncProjectToPowerSync: mockSyncProject,
+  deleteProjectFromPowerSync: mockDeleteProject,
 }));
 
 vi.mock('../../errors', async () => {
@@ -57,6 +83,7 @@ import {
   getAllProjects,
   getProjectById,
   createProject,
+  createProjectCopy,
   updateProject,
   deleteProject,
 } from '../../database/queries/projects';
@@ -89,6 +116,11 @@ describe('ProjectService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     service = new ProjectService();
+    // Default: unauthenticated, sync helpers succeed
+    mockIsAuthenticated.mockReturnValue(false);
+    mockGetUserId.mockReturnValue(null);
+    mockSyncProject.mockResolvedValue(undefined);
+    mockDeleteProject.mockResolvedValue(undefined);
   });
 
   describe('getAll', () => {
@@ -259,6 +291,94 @@ describe('ProjectService', () => {
     it('should throw ValidationError for whitespace-only ID', async () => {
       await expect(service.delete('   ')).rejects.toThrow(ValidationError);
       expect(deleteProject).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('createCopy', () => {
+    it('should call createProjectCopy and return the copy', async () => {
+      const copy: Project = { ...mockProject, id: 'copy-1', name: 'Test Show — 2024-01-01 12:00' };
+      vi.mocked(createProjectCopy).mockReturnValue(copy);
+
+      const result = await service.createCopy('project-1');
+
+      expect(createProjectCopy).toHaveBeenCalledWith('project-1', undefined);
+      expect(result).toEqual(copy);
+    });
+
+    it('should pass copyName to createProjectCopy', async () => {
+      const copy: Project = { ...mockProject, id: 'copy-2', name: 'My Copy' };
+      vi.mocked(createProjectCopy).mockReturnValue(copy);
+
+      await service.createCopy('project-1', 'My Copy');
+
+      expect(createProjectCopy).toHaveBeenCalledWith('project-1', 'My Copy');
+    });
+
+    it('should throw ValidationError for empty originalProjectId', async () => {
+      await expect(service.createCopy('')).rejects.toThrow(ValidationError);
+      expect(createProjectCopy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('PowerSync write-path', () => {
+    beforeEach(() => {
+      vi.mocked(createProject).mockReturnValue(mockProject);
+      vi.mocked(updateProject).mockReturnValue(mockProject);
+      vi.mocked(deleteProject).mockReturnValue(undefined as any);
+      vi.mocked(createProjectCopy).mockReturnValue({ ...mockProject, id: 'copy-1' });
+    });
+
+    it('should call syncProjectToPowerSync on create when authenticated', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
+      mockGetUserId.mockReturnValue('user-123');
+
+      await service.create('Test Show');
+
+      expect(mockSyncProject).toHaveBeenCalledWith(mockProject, 'user-123');
+    });
+
+    it('should NOT call syncProjectToPowerSync on create when unauthenticated', async () => {
+      await service.create('Test Show');
+
+      expect(mockSyncProject).not.toHaveBeenCalled();
+    });
+
+    it('should call syncProjectToPowerSync on update when authenticated', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
+      mockGetUserId.mockReturnValue('user-123');
+
+      await service.update('project-1', { name: 'Updated' });
+
+      expect(mockSyncProject).toHaveBeenCalledWith(mockProject, 'user-123');
+    });
+
+    it('should call syncProjectToPowerSync on createCopy when authenticated', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
+      mockGetUserId.mockReturnValue('user-123');
+      const copy = { ...mockProject, id: 'copy-1' };
+      vi.mocked(createProjectCopy).mockReturnValue(copy);
+
+      await service.createCopy('project-1');
+
+      expect(mockSyncProject).toHaveBeenCalledWith(copy, 'user-123');
+    });
+
+    it('should call deleteProjectFromPowerSync on delete', async () => {
+      await service.delete('project-1');
+
+      // deleteProjectFromPowerSync is fire-and-forget; allow microtasks to flush
+      await Promise.resolve();
+
+      expect(mockDeleteProject).toHaveBeenCalledWith('project-1');
+    });
+
+    it('should not fail create when PowerSync write throws', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
+      mockGetUserId.mockReturnValue('user-123');
+      mockSyncProject.mockRejectedValue(new Error('PS unavailable'));
+
+      // Should resolve without throwing
+      await expect(service.create('Test Show')).resolves.toEqual(mockProject);
     });
   });
 
