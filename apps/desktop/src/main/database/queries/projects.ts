@@ -1,5 +1,6 @@
 import { getDatabase, saveDatabase } from '../index';
 import { v4 as uuidv4 } from 'uuid';
+import { z } from 'zod';
 import { logger } from '../../utils/logger';
 
 export interface Project {
@@ -16,10 +17,12 @@ export interface Project {
 }
 
 /**
- * Full database row shape for a project, including all columns in the SQLite
- * schema. The minimal `Project` interface above only carries the fields needed
- * by the UI; this type is used wherever the complete row must be written (e.g.
- * the PowerSync write-path in projectSync.ts).
+ * Full project database row — a superset of the minimal Project interface that
+ * includes every SQLite column returned by `SELECT * FROM projects`.
+ *
+ * The companion `ProjectRowSchema` Zod schema (below) validates raw SQLite rows
+ * against this shape at runtime, catching schema/type drift without relying on
+ * unsafe casts.
  */
 export interface ProjectRow extends Project {
   lighting_designer?: string | null;
@@ -60,6 +63,64 @@ export interface ProjectRow extends Project {
   phase_label_c?: string | null;
 }
 
+/**
+ * Zod schema for the full project database row.
+ * Used in `getProjectById` to validate raw SQLite rows at runtime.
+ * `z.infer` is intentionally NOT used as the canonical `ProjectRow` type
+ * because this codebase uses `"strict": false`, which causes Zod's type
+ * inference to mark all fields as optional regardless of their schema definition.
+ */
+export const ProjectRowSchema = z.object({
+  // Fields shared with the minimal Project interface
+  id: z.string(),
+  name: z.string(),
+  description: z.string().nullish(),
+  venue: z.string().nullish(),
+  designer: z.string().nullish(),
+  logo_path: z.string().nullish(),
+  enabled_modules: z.string().nullish(),
+  root_project_id: z.string().nullish(),
+  created_at: z.number(),
+  updated_at: z.number(),
+  // Extended columns (full row)
+  lighting_designer: z.string().nullish(),
+  lighting_designer_email: z.string().nullish(),
+  lighting_designer_phone: z.string().nullish(),
+  lighting_associates: z.array(z.string()).nullish(),
+  audio_designer: z.string().nullish(),
+  audio_designer_email: z.string().nullish(),
+  audio_designer_phone: z.string().nullish(),
+  audio_associates: z.array(z.string()).nullish(),
+  video_designer: z.string().nullish(),
+  video_designer_email: z.string().nullish(),
+  video_designer_phone: z.string().nullish(),
+  video_associates: z.array(z.string()).nullish(),
+  electrician: z.string().nullish(),
+  electrician_email: z.string().nullish(),
+  electrician_phone: z.string().nullish(),
+  audio_tech: z.string().nullish(),
+  audio_tech_email: z.string().nullish(),
+  audio_tech_phone: z.string().nullish(),
+  video_tech: z.string().nullish(),
+  video_tech_email: z.string().nullish(),
+  video_tech_phone: z.string().nullish(),
+  production_manager: z.string().nullish(),
+  production_manager_email: z.string().nullish(),
+  production_manager_phone: z.string().nullish(),
+  production_manager_company: z.string().nullish(),
+  general_manager: z.string().nullish(),
+  general_manager_email: z.string().nullish(),
+  general_manager_phone: z.string().nullish(),
+  general_manager_company: z.string().nullish(),
+  venue_city: z.string().nullish(),
+  venue_state: z.string().nullish(),
+  /** Parsed JSON object: keys are date-type labels, values are ISO date strings. */
+  show_dates: z.record(z.string().optional()).nullish(),
+  phase_label_a: z.string().nullish(),
+  phase_label_b: z.string().nullish(),
+  phase_label_c: z.string().nullish(),
+});
+
 export function getAllProjects(): Project[] {
   const db = getDatabase();
 
@@ -98,6 +159,11 @@ export function getProjectById(id: string): ProjectRow | null {
   if (!project) {
     return null;
   }
+
+  // Validate the raw SQLite row against the schema before any mutation.
+  // This catches schema/type drift at runtime (e.g. a missing required column).
+  // The cast below is safe because parse() has already verified the shape.
+  ProjectRowSchema.parse(project);
 
   // Parse JSON fields
   const jsonFields = [
