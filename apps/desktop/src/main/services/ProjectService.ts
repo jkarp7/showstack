@@ -123,7 +123,7 @@ export class ProjectService extends BaseService {
     await backupService.performBackup(`before-delete-project-${id}`);
 
     await this.executeWithRetry(async () => deleteProject(id), 'projects:delete');
-    deleteProjectFromPowerSync(id).catch((err) =>
+    await deleteProjectFromPowerSync(id).catch((err) =>
       logger.warn('[ProjectService] PowerSync delete failed; row may linger until reconnect', {
         error: err instanceof Error ? err.message : String(err),
       }),

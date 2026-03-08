@@ -135,7 +135,7 @@ export class ShopOrderProjectService {
       async () => deleteShopOrderProject(id),
       'shop-order:projects:delete',
     );
-    deleteShopOrderFromPowerSync(id).catch((err) =>
+    await deleteShopOrderFromPowerSync(id).catch((err) =>
       logger.warn(
         '[ShopOrderProjectService] PowerSync delete failed; row may linger until reconnect',
         {
