@@ -21,6 +21,9 @@ import { getSupabaseConnector } from './sync/SupabaseConnector';
 import { getPowerSyncService } from './sync';
 import { licenseService } from './LicenseService';
 import { logger } from '../utils/logger';
+import { getProjectById } from '../database/queries/projects';
+import { getShopOrderProjectById } from '../database/queries/shop-order';
+import { syncProjectToPowerSync, syncShopOrderToPowerSync } from './sync/projectSync';
 import type {
   MemberRole,
   InviteRole,
@@ -150,6 +153,26 @@ export class CollaborationService {
     email: string,
     role: InviteRole,
   ): Promise<CollaborationResult> {
+    // Backfill: write the full project row to PowerSync (→ Supabase) before
+    // the invite RPC runs. This handles projects that pre-date the write-path
+    // feature and ensures ownership is established atomically. The stub-upsert
+    // inside `invite_to_project` remains as a final safety net.
+    const conn = getSupabaseConnector();
+    if (conn.isAuthenticated()) {
+      const userId = conn.getUserId();
+      if (userId) {
+        const project = getProjectById(projectId);
+        if (project) {
+          await syncProjectToPowerSync(project, userId).catch((err) =>
+            logger.warn(
+              '[CollaborationService] project backfill failed; stub upsert in RPC is safety net',
+              { error: err instanceof Error ? err.message : String(err) },
+            ),
+          );
+        }
+      }
+    }
+
     return this._callRpcGated(
       'invite_to_project',
       { p_project_id: projectId, p_project_name: projectName, p_email: email, p_role: role },
@@ -222,16 +245,34 @@ export class CollaborationService {
    * Invite a user to collaborate on a shop order.
    * Requires professional or institutional license with active sync.
    *
-   * No `shopOrderName` parameter: unlike projects (which are local-SQLite-first and may
-   * not exist in Supabase yet), shop orders are written to Supabase when created, so the
-   * `invite_to_shop_order` RPC can look up the name server-side. No stub-upsert workaround
-   * is needed, and there is no TOCTOU ownership risk.
+   * A backfill writes the full shop order row to PowerSync (→ Supabase) before
+   * the invite RPC runs, handling shop orders created before the write-path feature
+   * was introduced and preventing the TOCTOU ownership race (issue #86).
    */
   async inviteToShopOrder(
     shopOrderId: string,
     email: string,
     role: InviteRole,
   ): Promise<CollaborationResult> {
+    // Backfill: write the full shop order row to PowerSync (→ Supabase) before
+    // the invite RPC runs. This ensures ownership is established before the invite,
+    // and the RPC's server-side lookup will find the row.
+    const conn = getSupabaseConnector();
+    if (conn.isAuthenticated()) {
+      const userId = conn.getUserId();
+      if (userId) {
+        const shopOrder = getShopOrderProjectById(shopOrderId);
+        if (shopOrder) {
+          await syncShopOrderToPowerSync(shopOrder, userId).catch((err) =>
+            logger.warn(
+              '[CollaborationService] shop order backfill failed; RPC will proceed without it',
+              { error: err instanceof Error ? err.message : String(err) },
+            ),
+          );
+        }
+      }
+    }
+
     return this._callRpcGated(
       'invite_to_shop_order',
       { p_shop_order_id: shopOrderId, p_email: email, p_role: role },

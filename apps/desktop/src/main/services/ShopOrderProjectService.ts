@@ -8,12 +8,31 @@ import {
 } from '../database/queries/shop-order';
 import { errorHandler, ValidationError } from '../errors';
 import { performanceMonitor } from '../monitoring/PerformanceMonitor';
+import { logger } from '../utils/logger';
+import { getSupabaseConnector } from './sync/SupabaseConnector';
+import { syncShopOrderToPowerSync, deleteShopOrderFromPowerSync } from './sync/projectSync';
 
 /**
  * ShopOrderProjectService
  * Handles business logic for shop order projects
  */
 export class ShopOrderProjectService {
+  /**
+   * Sync a shop order to PowerSync if the user is authenticated.
+   * Fire-and-forget with catch: a failure is logged but does not fail the caller.
+   */
+  private async maybeSyncToPowerSync(shopOrder: ShopOrderProject): Promise<void> {
+    const conn = getSupabaseConnector();
+    if (!conn.isAuthenticated()) return;
+    const userId = conn.getUserId();
+    if (!userId) return;
+    await syncShopOrderToPowerSync(shopOrder, userId).catch((err) =>
+      logger.warn('[ShopOrderProjectService] PowerSync write failed; will retry on reconnect', {
+        error: err instanceof Error ? err.message : String(err),
+      }),
+    );
+  }
+
   /**
    * Get all shop order projects
    */
@@ -63,10 +82,21 @@ export class ShopOrderProjectService {
       );
     }
 
-    return await errorHandler.executeWithRetry(
-      async () => createShopOrderProject(data),
+    // Inject the authenticated user's ID so the row is written to Supabase
+    // under the correct owner, preventing the TOCTOU ownership race (issue #86).
+    const conn = getSupabaseConnector();
+    const userId = conn.isAuthenticated() ? conn.getUserId() : null;
+
+    const shopOrder = await errorHandler.executeWithRetry(
+      async () =>
+        createShopOrderProject({
+          ...data,
+          user_id: userId !== null ? userId : data.user_id,
+        }),
       'shop-order:projects:create',
     );
+    await this.maybeSyncToPowerSync(shopOrder);
+    return shopOrder;
   }
 
   /**
@@ -86,10 +116,12 @@ export class ShopOrderProjectService {
       );
     }
 
-    return await errorHandler.executeWithRetry(
+    const shopOrder = await errorHandler.executeWithRetry(
       async () => updateShopOrderProject(id, updates),
       'shop-order:projects:update',
     );
+    await this.maybeSyncToPowerSync(shopOrder);
+    return shopOrder;
   }
 
   /**
@@ -100,9 +132,17 @@ export class ShopOrderProjectService {
       throw new ValidationError('Project ID is required', 'id', id);
     }
 
-    return await errorHandler.executeWithRetry(
+    await errorHandler.executeWithRetry(
       async () => deleteShopOrderProject(id),
       'shop-order:projects:delete',
+    );
+    deleteShopOrderFromPowerSync(id).catch((err) =>
+      logger.warn(
+        '[ShopOrderProjectService] PowerSync delete failed; row may linger until reconnect',
+        {
+          error: err instanceof Error ? err.message : String(err),
+        },
+      ),
     );
   }
 }

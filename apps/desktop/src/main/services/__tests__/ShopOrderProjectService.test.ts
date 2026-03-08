@@ -5,6 +5,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ValidationError } from '../../errors';
 
+// ============================================
+// Hoisted mocks for mutable state
+// ============================================
+
+const { mockIsAuthenticated, mockGetUserId, mockSyncShopOrder, mockDeleteShopOrder } = vi.hoisted(
+  () => ({
+    mockIsAuthenticated: vi.fn(),
+    mockGetUserId: vi.fn(),
+    mockSyncShopOrder: vi.fn(),
+    mockDeleteShopOrder: vi.fn(),
+  }),
+);
+
 // Mock dependencies
 vi.mock('../../utils/logger', () => ({
   logger: {
@@ -37,6 +50,18 @@ vi.mock('../../monitoring/PerformanceMonitor', () => ({
   performanceMonitor: {
     trackDatabaseQuery: vi.fn(),
   },
+}));
+
+vi.mock('../sync/SupabaseConnector', () => ({
+  getSupabaseConnector: () => ({
+    isAuthenticated: mockIsAuthenticated,
+    getUserId: mockGetUserId,
+  }),
+}));
+
+vi.mock('../sync/projectSync', () => ({
+  syncShopOrderToPowerSync: mockSyncShopOrder,
+  deleteShopOrderFromPowerSync: mockDeleteShopOrder,
 }));
 
 import { ShopOrderProjectService } from '../ShopOrderProjectService';
@@ -79,6 +104,11 @@ describe('ShopOrderProjectService', () => {
   beforeEach(() => {
     service = new ShopOrderProjectService();
     vi.clearAllMocks();
+    // Default: unauthenticated, sync helpers succeed
+    mockIsAuthenticated.mockReturnValue(false);
+    mockGetUserId.mockReturnValue(null);
+    mockSyncShopOrder.mockResolvedValue(undefined);
+    mockDeleteShopOrder.mockResolvedValue(undefined);
   });
 
   describe('getAll', () => {
@@ -183,7 +213,8 @@ describe('ShopOrderProjectService', () => {
       const result = await service.create(input);
 
       expect(result).toEqual(mockProject);
-      expect(mockCreate).toHaveBeenCalledWith(input);
+      // user_id is injected from auth session (null when unauthenticated)
+      expect(mockCreate).toHaveBeenCalledWith({ ...input, user_id: undefined });
     });
 
     it('should throw ValidationError when production_name is missing', async () => {
@@ -354,6 +385,70 @@ describe('ShopOrderProjectService', () => {
       mockDelete.mockRejectedValue(new Error('Delete failed'));
 
       await expect(service.delete('proj-1')).rejects.toThrow('Delete failed');
+    });
+  });
+
+  describe('PowerSync write-path', () => {
+    beforeEach(() => {
+      mockCreate.mockResolvedValue(mockProject as any);
+      mockUpdate.mockResolvedValue(mockProject as any);
+      mockDelete.mockResolvedValue(undefined as any);
+    });
+
+    it('should call syncShopOrderToPowerSync on create when authenticated', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
+      mockGetUserId.mockReturnValue('user-123');
+
+      await service.create({ production_name: 'Test' });
+
+      expect(mockSyncShopOrder).toHaveBeenCalledWith(mockProject, 'user-123');
+    });
+
+    it('should NOT call syncShopOrderToPowerSync on create when unauthenticated', async () => {
+      await service.create({ production_name: 'Test' });
+
+      expect(mockSyncShopOrder).not.toHaveBeenCalled();
+    });
+
+    it('should inject authenticated user_id into create', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
+      mockGetUserId.mockReturnValue('auth-user');
+
+      await service.create({ production_name: 'Test' });
+
+      expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ user_id: 'auth-user' }));
+    });
+
+    it('should preserve caller-supplied user_id when unauthenticated', async () => {
+      await service.create({ production_name: 'Test', user_id: 'caller-user' });
+
+      expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ user_id: 'caller-user' }));
+    });
+
+    it('should call syncShopOrderToPowerSync on update when authenticated', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
+      mockGetUserId.mockReturnValue('user-123');
+
+      await service.update('proj-1', { production_name: 'Updated' });
+
+      expect(mockSyncShopOrder).toHaveBeenCalledWith(mockProject, 'user-123');
+    });
+
+    it('should call deleteShopOrderFromPowerSync on delete', async () => {
+      await service.delete('proj-1');
+
+      // deleteShopOrderFromPowerSync is fire-and-forget; allow microtasks to flush
+      await Promise.resolve();
+
+      expect(mockDeleteShopOrder).toHaveBeenCalledWith('proj-1');
+    });
+
+    it('should not fail create when PowerSync write throws', async () => {
+      mockIsAuthenticated.mockReturnValue(true);
+      mockGetUserId.mockReturnValue('user-123');
+      mockSyncShopOrder.mockRejectedValue(new Error('PS unavailable'));
+
+      await expect(service.create({ production_name: 'Test' })).resolves.toEqual(mockProject);
     });
   });
 });

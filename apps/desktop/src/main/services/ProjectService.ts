@@ -9,6 +9,8 @@ import {
 } from '../database/queries/projects';
 import { BaseService } from './BaseService';
 import { logger } from '../utils/logger';
+import { getSupabaseConnector } from './sync/SupabaseConnector';
+import { syncProjectToPowerSync, deleteProjectFromPowerSync } from './sync/projectSync';
 
 /**
  * ProjectService
@@ -22,6 +24,22 @@ import { logger } from '../utils/logger';
  * - Design team and production staff coordination
  */
 export class ProjectService extends BaseService {
+  /**
+   * Sync a project to PowerSync if the user is authenticated.
+   * Fire-and-forget with catch: a failure is logged but does not fail the caller.
+   */
+  private async maybeSyncToPowerSync(project: Project): Promise<void> {
+    const conn = getSupabaseConnector();
+    if (!conn.isAuthenticated()) return;
+    const userId = conn.getUserId();
+    if (!userId) return;
+    await syncProjectToPowerSync(project, userId).catch((err) =>
+      logger.warn('[ProjectService] PowerSync write failed; will retry on reconnect', {
+        error: err instanceof Error ? err.message : String(err),
+      }),
+    );
+  }
+
   /**
    * Get all projects
    *
@@ -61,10 +79,12 @@ export class ProjectService extends BaseService {
   ): Promise<Project> {
     this.validateRequired(name, 'name', 'Project name');
 
-    return await this.executeWithRetry(
+    const project = await this.executeWithRetry(
       async () => createProject(name, description, logoPath, enabledModules),
       'projects:create',
     );
+    await this.maybeSyncToPowerSync(project);
+    return project;
   }
 
   /**
@@ -82,7 +102,12 @@ export class ProjectService extends BaseService {
       this.validateRequired(updates.name, 'name', 'Project name');
     }
 
-    return await this.executeWithRetry(async () => updateProject(id, updates), 'projects:update');
+    const project = await this.executeWithRetry(
+      async () => updateProject(id, updates),
+      'projects:update',
+    );
+    await this.maybeSyncToPowerSync(project);
+    return project;
   }
 
   /**
@@ -97,7 +122,12 @@ export class ProjectService extends BaseService {
     const { backupService } = await import('./BackupService');
     await backupService.performBackup(`before-delete-project-${id}`);
 
-    return await this.executeWithRetry(async () => deleteProject(id), 'projects:delete');
+    await this.executeWithRetry(async () => deleteProject(id), 'projects:delete');
+    deleteProjectFromPowerSync(id).catch((err) =>
+      logger.warn('[ProjectService] PowerSync delete failed; row may linger until reconnect', {
+        error: err instanceof Error ? err.message : String(err),
+      }),
+    );
   }
 
   /**
@@ -110,10 +140,12 @@ export class ProjectService extends BaseService {
   async createCopy(originalProjectId: string, copyName?: string): Promise<Project> {
     this.validateId(originalProjectId, 'Project');
 
-    return await this.executeWithRetry(
+    const project = await this.executeWithRetry(
       async () => createProjectCopy(originalProjectId, copyName),
       'projects:createCopy',
     );
+    await this.maybeSyncToPowerSync(project);
+    return project;
   }
 
   /**
