@@ -78,6 +78,9 @@ export async function syncProjectToPowerSync(project: ProjectRow, userId: string
 
   const values = PROJECT_COLUMNS.map((col) => {
     if (col === 'user_id') return userId;
+    if (!(col in project)) {
+      logger.warn(`[projectSync] schema column "${col}" missing from project object; syncing null`);
+    }
     const value = project[col as keyof ProjectRow];
     return PROJECT_JSON_COLS.has(col) ? toJsonStr(value) : (value ?? null);
   });
@@ -129,6 +132,11 @@ export async function syncShopOrderToPowerSync(
 
   const values = SHOP_ORDER_COLUMNS.map((col) => {
     if (col === 'user_id') return userId;
+    if (!(col in shopOrder)) {
+      logger.warn(
+        `[projectSync] schema column "${col}" missing from shopOrder object; syncing null`,
+      );
+    }
     const value = shopOrder[col as keyof ShopOrderProject];
     return SHOP_ORDER_JSON_COLS.has(col) ? toJsonStr(value) : (value ?? null);
   });
