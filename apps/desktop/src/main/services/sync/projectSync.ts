@@ -98,6 +98,15 @@ const PROJECT_UPSERT_SQL = buildUpsertSql(
   ['id', 'user_id', 'created_at'],
 );
 
+/** Columns in the projects table whose values are stored as JSON strings. */
+const PROJECT_JSON_COLS = new Set<string>([
+  'lighting_associates',
+  'audio_associates',
+  'video_associates',
+  'show_dates',
+  'enabled_modules',
+]);
+
 /**
  * Upsert a project row into the PowerSync local database.
  * PowerSync will queue this as a CRUD PUT operation and upload it to Supabase.
@@ -107,53 +116,13 @@ export async function syncProjectToPowerSync(project: ProjectRow, userId: string
   const ps = getPowerSyncService();
   if (!ps.isReady()) return;
 
-  await ps.execute(PROJECT_UPSERT_SQL, [
-    project.id,
-    userId,
-    project.name,
-    project.description ?? null,
-    project.logo_path ?? null,
-    project.lighting_designer ?? null,
-    project.lighting_designer_email ?? null,
-    project.lighting_designer_phone ?? null,
-    toJsonStr(project.lighting_associates),
-    project.audio_designer ?? null,
-    project.audio_designer_email ?? null,
-    project.audio_designer_phone ?? null,
-    toJsonStr(project.audio_associates),
-    project.video_designer ?? null,
-    project.video_designer_email ?? null,
-    project.video_designer_phone ?? null,
-    toJsonStr(project.video_associates),
-    project.electrician ?? null,
-    project.electrician_email ?? null,
-    project.electrician_phone ?? null,
-    project.audio_tech ?? null,
-    project.audio_tech_email ?? null,
-    project.audio_tech_phone ?? null,
-    project.video_tech ?? null,
-    project.video_tech_email ?? null,
-    project.video_tech_phone ?? null,
-    project.production_manager ?? null,
-    project.production_manager_email ?? null,
-    project.production_manager_phone ?? null,
-    project.production_manager_company ?? null,
-    project.general_manager ?? null,
-    project.general_manager_email ?? null,
-    project.general_manager_phone ?? null,
-    project.general_manager_company ?? null,
-    project.venue ?? null,
-    project.venue_city ?? null,
-    project.venue_state ?? null,
-    toJsonStr(project.show_dates),
-    project.phase_label_a ?? null,
-    project.phase_label_b ?? null,
-    project.phase_label_c ?? null,
-    toJsonStr(project.enabled_modules),
-    project.created_at,
-    project.updated_at,
-    project.root_project_id ?? null,
-  ]);
+  const values = PROJECT_COLUMNS.map((col) => {
+    if (col === 'user_id') return userId;
+    const value = project[col as keyof ProjectRow];
+    return PROJECT_JSON_COLS.has(col) ? toJsonStr(value) : (value ?? null);
+  });
+
+  await ps.execute(PROJECT_UPSERT_SQL, values);
 
   logger.debug(`[projectSync] synced project ${project.id} to PowerSync`);
 }
@@ -221,6 +190,9 @@ const SHOP_ORDER_UPSERT_SQL = buildUpsertSql(
   ['id', 'user_id', 'created_at'],
 );
 
+/** Columns in the shop_order_projects table whose values are stored as JSON strings. */
+const SHOP_ORDER_JSON_COLS = new Set<string>(['additional_contacts', 'disciplines']);
+
 /**
  * Upsert a shop order row into the PowerSync local database.
  * The INSERT … ON CONFLICT DO UPDATE never changes the `user_id` (ownership).
@@ -235,48 +207,13 @@ export async function syncShopOrderToPowerSync(
   const ps = getPowerSyncService();
   if (!ps.isReady()) return;
 
-  await ps.execute(SHOP_ORDER_UPSERT_SQL, [
-    shopOrder.id,
-    userId,
-    shopOrder.parent_project_id ?? null,
-    shopOrder.production_name,
-    shopOrder.venue ?? null,
-    shopOrder.venue_city ?? null,
-    shopOrder.venue_state ?? null,
-    shopOrder.order_date,
-    shopOrder.original_order_date ?? null,
-    shopOrder.prep_start_date ?? null,
-    shopOrder.prep_end_date ?? null,
-    shopOrder.load_in_date ?? null,
-    shopOrder.first_preview_date ?? null,
-    shopOrder.opening_night_date ?? null,
-    shopOrder.closing_date ?? null,
-    shopOrder.load_out_date ?? null,
-    shopOrder.gm_name ?? null,
-    shopOrder.gm_company ?? null,
-    shopOrder.gm_email ?? null,
-    shopOrder.gm_phone ?? null,
-    shopOrder.pm_name ?? null,
-    shopOrder.pm_company ?? null,
-    shopOrder.pm_email ?? null,
-    shopOrder.pm_phone ?? null,
-    shopOrder.ld_name ?? null,
-    shopOrder.ld_email ?? null,
-    shopOrder.ld_phone ?? null,
-    shopOrder.ald_name ?? null,
-    shopOrder.ald_email ?? null,
-    shopOrder.ald_phone ?? null,
-    shopOrder.pe_name ?? null,
-    shopOrder.pe_email ?? null,
-    shopOrder.pe_phone ?? null,
-    toJsonStr(shopOrder.additional_contacts),
-    shopOrder.logo_url ?? null,
-    shopOrder.logo_storage_path ?? null,
-    toJsonStr(shopOrder.disciplines),
-    shopOrder.current_revision,
-    shopOrder.created_at,
-    shopOrder.updated_at,
-  ]);
+  const values = SHOP_ORDER_COLUMNS.map((col) => {
+    if (col === 'user_id') return userId;
+    const value = shopOrder[col as keyof ShopOrderProject];
+    return SHOP_ORDER_JSON_COLS.has(col) ? toJsonStr(value) : (value ?? null);
+  });
+
+  await ps.execute(SHOP_ORDER_UPSERT_SQL, values);
 
   logger.debug(`[projectSync] synced shop order ${shopOrder.id} to PowerSync`);
 }
