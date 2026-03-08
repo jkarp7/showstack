@@ -8,6 +8,13 @@
  *
  * License gate: invite operations require canCollaborate === true
  * (professional + institutional tiers with active cloud sync).
+ *
+ * Private helpers eliminate the boilerplate repeated across the project/shop-order
+ * method pairs:
+ *   _callRpc        — auth guard + RPC call returning CollaborationResult
+ *   _callRpcGated   — canCollaborate gate + delegates to _callRpc
+ *   _queryLocal<T>  — PowerSync getAll() with error handling
+ *   _checkPending<T>— auth guard + RPC returning an array (pending invitations)
  */
 
 import { getSupabaseConnector } from './sync/SupabaseConnector';
@@ -34,6 +41,102 @@ export type {
 
 export class CollaborationService {
   // ============================================
+  // PRIVATE HELPERS
+  // ============================================
+
+  /**
+   * Call a Supabase RPC that returns JSONB `{success, error?, member_id?}`.
+   * Handles the auth check, try/catch, and response parsing shared by every
+   * mutating collaboration method.
+   */
+  private async _callRpc(
+    rpcName: string,
+    params: Record<string, unknown>,
+    fallbackError = 'Operation failed',
+  ): Promise<CollaborationResult> {
+    const connector = getSupabaseConnector();
+    if (!connector.isAuthenticated()) {
+      return { success: false, error: 'You must be signed in.' };
+    }
+    try {
+      const { data, error } = await connector.getSupabaseClient().rpc(rpcName, params);
+      if (error) {
+        logger.warn(`[CollaborationService] ${rpcName} RPC error`, { error: error.message });
+        return { success: false, error: error.message };
+      }
+      const result = data as { success: boolean; error?: string; member_id?: string };
+      if (!result?.success) {
+        return { success: false, error: result?.error ?? fallbackError };
+      }
+      return { success: true, memberId: result.member_id };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      logger.error(`[CollaborationService] ${rpcName} failed`, { error: message });
+      return { success: false, error: message };
+    }
+  }
+
+  /**
+   * Like `_callRpc` but also enforces the `canCollaborate` license gate.
+   * Used by invite operations that require a Professional/Institutional tier.
+   */
+  private async _callRpcGated(
+    rpcName: string,
+    params: Record<string, unknown>,
+    fallbackError = 'Operation failed',
+  ): Promise<CollaborationResult> {
+    const licenseStatus = licenseService.getLicenseStatus();
+    if (!licenseStatus.canCollaborate) {
+      return {
+        success: false,
+        error: 'Collaboration requires a Professional or Institutional license with active sync.',
+      };
+    }
+    return this._callRpc(rpcName, params, fallbackError);
+  }
+
+  /**
+   * Run a SELECT query against the local PowerSync database.
+   * Returns an empty array if the database is not initialized or if the query throws.
+   */
+  private async _queryLocal<T>(sql: string, params: unknown[]): Promise<T[]> {
+    try {
+      const db = getPowerSyncService().getDatabase();
+      if (!db) return [];
+      return await db.getAll<T>(sql, params);
+    } catch (err) {
+      logger.error('[CollaborationService] local query failed', {
+        error: err instanceof Error ? err.message : String(err),
+      });
+      return [];
+    }
+  }
+
+  /**
+   * Call a Supabase RPC that returns an array of pending invitations.
+   * Returns an empty array when the user is unauthenticated or the call fails.
+   * Pending invitations are never synced to the local PowerSync database
+   * (sync rules only cover accepted members), so we query Supabase directly.
+   */
+  private async _checkPending<T>(rpcName: string): Promise<T[]> {
+    const connector = getSupabaseConnector();
+    if (!connector.isAuthenticated()) return [];
+    try {
+      const { data, error } = await connector.getSupabaseClient().rpc(rpcName);
+      if (error) {
+        logger.warn(`[CollaborationService] ${rpcName} RPC error`, { error: error.message });
+        return [];
+      }
+      return (data as T[]) ?? [];
+    } catch (err) {
+      logger.error(`[CollaborationService] ${rpcName} failed`, {
+        error: err instanceof Error ? err.message : String(err),
+      });
+      return [];
+    }
+  }
+
+  // ============================================
   // PROJECT COLLABORATION
   // ============================================
 
@@ -47,81 +150,26 @@ export class CollaborationService {
     email: string,
     role: InviteRole,
   ): Promise<CollaborationResult> {
-    const licenseStatus = licenseService.getLicenseStatus();
-    if (!licenseStatus.canCollaborate) {
-      return {
-        success: false,
-        error: 'Collaboration requires a Professional or Institutional license with active sync.',
-      };
-    }
-
-    const connector = getSupabaseConnector();
-    if (!connector.isAuthenticated()) {
-      return { success: false, error: 'You must be signed in to invite collaborators.' };
-    }
-
-    try {
-      const { data, error } = await connector.getSupabaseClient().rpc('invite_to_project', {
-        p_project_id: projectId,
-        p_project_name: projectName,
-        p_email: email,
-        p_role: role,
-      });
-
-      if (error) {
-        logger.warn('[CollaborationService] invite_to_project RPC error', { error: error.message });
-        return { success: false, error: error.message };
-      }
-
-      const result = data as { success: boolean; error?: string; member_id?: string };
-      if (!result?.success) {
-        return { success: false, error: result?.error ?? 'Invite failed' };
-      }
-
-      return { success: true, memberId: result.member_id };
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      logger.error('[CollaborationService] inviteToProject failed', { error: message });
-      return { success: false, error: message };
-    }
+    return this._callRpcGated(
+      'invite_to_project',
+      { p_project_id: projectId, p_project_name: projectName, p_email: email, p_role: role },
+      'Invite failed',
+    );
   }
 
   /**
    * Remove a member from a project. Only the project owner can call this.
    *
-   * No `canCollaborate` check here: owners can always manage their own projects
+   * No `canCollaborate` check: owners can always manage their own projects
    * regardless of their current license tier. The Supabase RPC enforces
    * ownership server-side.
    */
   async removeProjectMember(projectId: string, userId: string): Promise<CollaborationResult> {
-    const connector = getSupabaseConnector();
-    if (!connector.isAuthenticated()) {
-      return { success: false, error: 'You must be signed in.' };
-    }
-
-    try {
-      const { data, error } = await connector
-        .getSupabaseClient()
-        .rpc('remove_project_member', { p_project_id: projectId, p_user_id: userId });
-
-      if (error) {
-        logger.warn('[CollaborationService] remove_project_member RPC error', {
-          error: error.message,
-        });
-        return { success: false, error: error.message };
-      }
-
-      const result = data as { success: boolean; error?: string };
-      if (!result?.success) {
-        return { success: false, error: result?.error ?? 'Remove failed' };
-      }
-
-      return { success: true };
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      logger.error('[CollaborationService] removeProjectMember failed', { error: message });
-      return { success: false, error: message };
-    }
+    return this._callRpc(
+      'remove_project_member',
+      { p_project_id: projectId, p_user_id: userId },
+      'Remove failed',
+    );
   }
 
   /**
@@ -129,89 +177,24 @@ export class CollaborationService {
    * Returns an empty array if sync is not initialized.
    */
   async getProjectMembers(projectId: string): Promise<ProjectMember[]> {
-    try {
-      const db = getPowerSyncService().getDatabase();
-      if (!db) return [];
-
-      const rows = await db.getAll<ProjectMember>(
-        'SELECT id, project_id, user_id, email, role, invited_by, status, invited_at, accepted_at FROM project_members WHERE project_id = ? ORDER BY invited_at ASC',
-        [projectId],
-      );
-      return rows;
-    } catch (err) {
-      logger.error('[CollaborationService] getProjectMembers failed', {
-        error: err instanceof Error ? err.message : String(err),
-      });
-      return [];
-    }
+    return this._queryLocal<ProjectMember>(
+      'SELECT id, project_id, user_id, email, role, invited_by, status, invited_at, accepted_at FROM project_members WHERE project_id = ? ORDER BY invited_at ASC',
+      [projectId],
+    );
   }
 
-  /**
-   * Accept a pending project invitation. Called after the user clicks an invite link.
-   */
+  /** Accept a pending project invitation. Called after the user clicks an invite link. */
   async acceptProjectInvitation(projectId: string): Promise<CollaborationResult> {
-    const connector = getSupabaseConnector();
-    if (!connector.isAuthenticated()) {
-      return { success: false, error: 'You must be signed in to accept an invitation.' };
-    }
-
-    try {
-      const { data, error } = await connector
-        .getSupabaseClient()
-        .rpc('accept_project_invitation', { p_project_id: projectId });
-
-      if (error) {
-        logger.warn('[CollaborationService] accept_project_invitation RPC error', {
-          error: error.message,
-        });
-        return { success: false, error: error.message };
-      }
-
-      const result = data as { success: boolean; error?: string };
-      if (!result?.success) {
-        return { success: false, error: result?.error ?? 'Accept failed' };
-      }
-
-      return { success: true };
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      logger.error('[CollaborationService] acceptProjectInvitation failed', { error: message });
-      return { success: false, error: message };
-    }
+    return this._callRpc('accept_project_invitation', { p_project_id: projectId }, 'Accept failed');
   }
 
-  /**
-   * Decline a pending project invitation.
-   */
+  /** Decline a pending project invitation. */
   async declineProjectInvitation(projectId: string): Promise<CollaborationResult> {
-    const connector = getSupabaseConnector();
-    if (!connector.isAuthenticated()) {
-      return { success: false, error: 'You must be signed in.' };
-    }
-
-    try {
-      const { data, error } = await connector
-        .getSupabaseClient()
-        .rpc('decline_project_invitation', { p_project_id: projectId });
-
-      if (error) {
-        logger.warn('[CollaborationService] decline_project_invitation RPC error', {
-          error: error.message,
-        });
-        return { success: false, error: error.message };
-      }
-
-      const result = data as { success: boolean; error?: string };
-      if (!result?.success) {
-        return { success: false, error: result?.error ?? 'Decline failed' };
-      }
-
-      return { success: true };
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      logger.error('[CollaborationService] declineProjectInvitation failed', { error: message });
-      return { success: false, error: message };
-    }
+    return this._callRpc(
+      'decline_project_invitation',
+      { p_project_id: projectId },
+      'Decline failed',
+    );
   }
 
   /**
@@ -223,64 +206,12 @@ export class CollaborationService {
    * sent regardless of their current license tier.
    */
   async cancelProjectInvitation(memberId: string): Promise<CollaborationResult> {
-    const connector = getSupabaseConnector();
-    if (!connector.isAuthenticated()) {
-      return { success: false, error: 'You must be signed in.' };
-    }
-
-    try {
-      const { data, error } = await connector
-        .getSupabaseClient()
-        .rpc('cancel_project_invitation', { p_member_id: memberId });
-
-      if (error) {
-        logger.warn('[CollaborationService] cancel_project_invitation RPC error', {
-          error: error.message,
-        });
-        return { success: false, error: error.message };
-      }
-
-      const result = data as { success: boolean; error?: string };
-      if (!result?.success) {
-        return { success: false, error: result?.error ?? 'Cancel failed' };
-      }
-
-      return { success: true };
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      logger.error('[CollaborationService] cancelProjectInvitation failed', { error: message });
-      return { success: false, error: message };
-    }
+    return this._callRpc('cancel_project_invitation', { p_member_id: memberId }, 'Cancel failed');
   }
 
-  /**
-   * Check for pending project invitations for the current user's email.
-   * Queries Supabase directly via RPC — pending invitations are never synced
-   * to the invitee's local PowerSync database (sync rules only cover accepted members).
-   */
+  /** Check for pending project invitations for the current user's email. */
   async checkPendingProjectInvitations(): Promise<ProjectMember[]> {
-    const connector = getSupabaseConnector();
-    if (!connector.isAuthenticated()) return [];
-
-    try {
-      const { data, error } = await connector
-        .getSupabaseClient()
-        .rpc('get_pending_project_invitations');
-
-      if (error) {
-        logger.warn('[CollaborationService] get_pending_project_invitations RPC error', {
-          error: error.message,
-        });
-        return [];
-      }
-
-      return (data as ProjectMember[]) ?? [];
-    } catch (err) {
-      logger.error('[CollaborationService] checkPendingProjectInvitations failed', {
-        error: err instanceof Error ? err.message : String(err),
-      });
-      return [];
-    }
+    return this._checkPending<ProjectMember>('get_pending_project_invitations');
   }
 
   // ============================================
@@ -301,44 +232,11 @@ export class CollaborationService {
     email: string,
     role: InviteRole,
   ): Promise<CollaborationResult> {
-    const licenseStatus = licenseService.getLicenseStatus();
-    if (!licenseStatus.canCollaborate) {
-      return {
-        success: false,
-        error: 'Collaboration requires a Professional or Institutional license with active sync.',
-      };
-    }
-
-    const connector = getSupabaseConnector();
-    if (!connector.isAuthenticated()) {
-      return { success: false, error: 'You must be signed in to invite collaborators.' };
-    }
-
-    try {
-      const { data, error } = await connector.getSupabaseClient().rpc('invite_to_shop_order', {
-        p_shop_order_id: shopOrderId,
-        p_email: email,
-        p_role: role,
-      });
-
-      if (error) {
-        logger.warn('[CollaborationService] invite_to_shop_order RPC error', {
-          error: error.message,
-        });
-        return { success: false, error: error.message };
-      }
-
-      const result = data as { success: boolean; error?: string; member_id?: string };
-      if (!result?.success) {
-        return { success: false, error: result?.error ?? 'Invite failed' };
-      }
-
-      return { success: true, memberId: result.member_id };
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      logger.error('[CollaborationService] inviteToShopOrder failed', { error: message });
-      return { success: false, error: message };
-    }
+    return this._callRpcGated(
+      'invite_to_shop_order',
+      { p_shop_order_id: shopOrderId, p_email: email, p_role: role },
+      'Invite failed',
+    );
   }
 
   /**
@@ -348,55 +246,21 @@ export class CollaborationService {
    * of license tier. The RPC enforces ownership server-side.
    */
   async removeShopOrderMember(shopOrderId: string, userId: string): Promise<CollaborationResult> {
-    const connector = getSupabaseConnector();
-    if (!connector.isAuthenticated()) {
-      return { success: false, error: 'You must be signed in.' };
-    }
-
-    try {
-      const { data, error } = await connector
-        .getSupabaseClient()
-        .rpc('remove_shop_order_member', { p_shop_order_id: shopOrderId, p_user_id: userId });
-
-      if (error) {
-        logger.warn('[CollaborationService] remove_shop_order_member RPC error', {
-          error: error.message,
-        });
-        return { success: false, error: error.message };
-      }
-
-      const result = data as { success: boolean; error?: string };
-      if (!result?.success) {
-        return { success: false, error: result?.error ?? 'Remove failed' };
-      }
-
-      return { success: true };
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      logger.error('[CollaborationService] removeShopOrderMember failed', { error: message });
-      return { success: false, error: message };
-    }
+    return this._callRpc(
+      'remove_shop_order_member',
+      { p_shop_order_id: shopOrderId, p_user_id: userId },
+      'Remove failed',
+    );
   }
 
   /**
    * Get all members for a shop order from the local PowerSync database.
    */
   async getShopOrderMembers(shopOrderId: string): Promise<ShopOrderMember[]> {
-    try {
-      const db = getPowerSyncService().getDatabase();
-      if (!db) return [];
-
-      const rows = await db.getAll<ShopOrderMember>(
-        'SELECT id, shop_order_id, user_id, email, role, invited_by, status, invited_at, accepted_at FROM shop_order_members WHERE shop_order_id = ? ORDER BY invited_at ASC',
-        [shopOrderId],
-      );
-      return rows;
-    } catch (err) {
-      logger.error('[CollaborationService] getShopOrderMembers failed', {
-        error: err instanceof Error ? err.message : String(err),
-      });
-      return [];
-    }
+    return this._queryLocal<ShopOrderMember>(
+      'SELECT id, shop_order_id, user_id, email, role, invited_by, status, invited_at, accepted_at FROM shop_order_members WHERE shop_order_id = ? ORDER BY invited_at ASC',
+      [shopOrderId],
+    );
   }
 
   /**
@@ -405,131 +269,34 @@ export class CollaborationService {
    * No `canCollaborate` check: owners can rescind invitations regardless of tier.
    */
   async cancelShopOrderInvitation(memberId: string): Promise<CollaborationResult> {
-    const connector = getSupabaseConnector();
-    if (!connector.isAuthenticated()) {
-      return { success: false, error: 'You must be signed in.' };
-    }
-
-    try {
-      const { data, error } = await connector
-        .getSupabaseClient()
-        .rpc('cancel_shop_order_invitation', { p_member_id: memberId });
-
-      if (error) {
-        logger.warn('[CollaborationService] cancel_shop_order_invitation RPC error', {
-          error: error.message,
-        });
-        return { success: false, error: error.message };
-      }
-
-      const result = data as { success: boolean; error?: string };
-      if (!result?.success) {
-        return { success: false, error: result?.error ?? 'Cancel failed' };
-      }
-
-      return { success: true };
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      logger.error('[CollaborationService] cancelShopOrderInvitation failed', { error: message });
-      return { success: false, error: message };
-    }
+    return this._callRpc(
+      'cancel_shop_order_invitation',
+      { p_member_id: memberId },
+      'Cancel failed',
+    );
   }
 
-  /**
-   * Accept a pending shop order invitation.
-   */
+  /** Accept a pending shop order invitation. */
   async acceptShopOrderInvitation(shopOrderId: string): Promise<CollaborationResult> {
-    const connector = getSupabaseConnector();
-    if (!connector.isAuthenticated()) {
-      return { success: false, error: 'You must be signed in to accept an invitation.' };
-    }
-
-    try {
-      const { data, error } = await connector
-        .getSupabaseClient()
-        .rpc('accept_shop_order_invitation', { p_shop_order_id: shopOrderId });
-
-      if (error) {
-        logger.warn('[CollaborationService] accept_shop_order_invitation RPC error', {
-          error: error.message,
-        });
-        return { success: false, error: error.message };
-      }
-
-      const result = data as { success: boolean; error?: string };
-      if (!result?.success) {
-        return { success: false, error: result?.error ?? 'Accept failed' };
-      }
-
-      return { success: true };
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      logger.error('[CollaborationService] acceptShopOrderInvitation failed', { error: message });
-      return { success: false, error: message };
-    }
+    return this._callRpc(
+      'accept_shop_order_invitation',
+      { p_shop_order_id: shopOrderId },
+      'Accept failed',
+    );
   }
 
-  /**
-   * Decline a pending shop order invitation.
-   */
+  /** Decline a pending shop order invitation. */
   async declineShopOrderInvitation(shopOrderId: string): Promise<CollaborationResult> {
-    const connector = getSupabaseConnector();
-    if (!connector.isAuthenticated()) {
-      return { success: false, error: 'You must be signed in.' };
-    }
-
-    try {
-      const { data, error } = await connector
-        .getSupabaseClient()
-        .rpc('decline_shop_order_invitation', { p_shop_order_id: shopOrderId });
-
-      if (error) {
-        logger.warn('[CollaborationService] decline_shop_order_invitation RPC error', {
-          error: error.message,
-        });
-        return { success: false, error: error.message };
-      }
-
-      const result = data as { success: boolean; error?: string };
-      if (!result?.success) {
-        return { success: false, error: result?.error ?? 'Decline failed' };
-      }
-
-      return { success: true };
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      logger.error('[CollaborationService] declineShopOrderInvitation failed', { error: message });
-      return { success: false, error: message };
-    }
+    return this._callRpc(
+      'decline_shop_order_invitation',
+      { p_shop_order_id: shopOrderId },
+      'Decline failed',
+    );
   }
 
-  /**
-   * Check for pending shop order invitations for the current user's email.
-   * Queries Supabase directly via RPC — same reason as checkPendingProjectInvitations.
-   */
+  /** Check for pending shop order invitations for the current user's email. */
   async checkPendingShopOrderInvitations(): Promise<ShopOrderMember[]> {
-    const connector = getSupabaseConnector();
-    if (!connector.isAuthenticated()) return [];
-
-    try {
-      const { data, error } = await connector
-        .getSupabaseClient()
-        .rpc('get_pending_shop_order_invitations');
-
-      if (error) {
-        logger.warn('[CollaborationService] get_pending_shop_order_invitations RPC error', {
-          error: error.message,
-        });
-        return [];
-      }
-
-      return (data as ShopOrderMember[]) ?? [];
-    } catch (err) {
-      logger.error('[CollaborationService] checkPendingShopOrderInvitations failed', {
-        error: err instanceof Error ? err.message : String(err),
-      });
-      return [];
-    }
+    return this._checkPending<ShopOrderMember>('get_pending_shop_order_invitations');
   }
 }
 
