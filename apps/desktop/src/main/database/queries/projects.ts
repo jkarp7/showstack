@@ -25,15 +25,15 @@ export interface ProjectRow extends Project {
   lighting_designer?: string | null;
   lighting_designer_email?: string | null;
   lighting_designer_phone?: string | null;
-  lighting_associates?: unknown;
+  lighting_associates?: string[] | null;
   audio_designer?: string | null;
   audio_designer_email?: string | null;
   audio_designer_phone?: string | null;
-  audio_associates?: unknown;
+  audio_associates?: string[] | null;
   video_designer?: string | null;
   video_designer_email?: string | null;
   video_designer_phone?: string | null;
-  video_associates?: unknown;
+  video_associates?: string[] | null;
   electrician?: string | null;
   electrician_email?: string | null;
   electrician_phone?: string | null;
@@ -53,7 +53,8 @@ export interface ProjectRow extends Project {
   general_manager_company?: string | null;
   venue_city?: string | null;
   venue_state?: string | null;
-  show_dates?: unknown;
+  /** Parsed JSON object: keys are date-type labels, values are ISO date strings. */
+  show_dates?: Record<string, string | undefined> | null;
   phase_label_a?: string | null;
   phase_label_b?: string | null;
   phase_label_c?: string | null;
