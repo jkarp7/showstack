@@ -151,7 +151,7 @@ export class CollaborationService {
     warnMessage: string,
   ): Promise<void> {
     const conn = getSupabaseConnector();
-    const userId = conn.isAuthenticated() ? conn.getUserId() : null;
+    const userId = conn.getUserId();
     if (!userId) return;
     const entity = getEntityFn(entityId);
     if (!entity) return;

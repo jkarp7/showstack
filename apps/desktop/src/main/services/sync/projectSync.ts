@@ -30,11 +30,12 @@ function toJsonStr(value: unknown): string | null {
  *  Columns in `immutableCols` (id, user_id, created_at) are never overwritten. */
 function buildUpsertSql(table: string, columns: string[], immutableCols: string[]): string {
   const placeholders = columns.map(() => '?').join(', ');
+  const quotedColumns = columns.map((c) => `"${c}"`);
   const updateSet = columns
     .filter((c) => !immutableCols.includes(c))
-    .map((c) => `${c} = excluded.${c}`)
+    .map((c) => `"${c}" = excluded."${c}"`)
     .join(',\n      ');
-  return `INSERT INTO ${table} (${columns.join(', ')})
+  return `INSERT INTO ${table} (${quotedColumns.join(', ')})
     VALUES (${placeholders})
     ON CONFLICT(id) DO UPDATE SET
       ${updateSet}`;

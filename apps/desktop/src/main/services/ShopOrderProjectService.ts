@@ -23,7 +23,6 @@ export class ShopOrderProjectService {
    */
   private async maybeSyncToPowerSync(shopOrder: ShopOrderProject): Promise<void> {
     const conn = getSupabaseConnector();
-    if (!conn.isAuthenticated()) return;
     const userId = conn.getUserId();
     if (!userId) return;
     await syncShopOrderToPowerSync(shopOrder, userId).catch((err) =>
@@ -85,7 +84,7 @@ export class ShopOrderProjectService {
     // Inject the authenticated user's ID so the row is written to Supabase
     // under the correct owner, preventing the TOCTOU ownership race (issue #86).
     const conn = getSupabaseConnector();
-    const userId = conn.isAuthenticated() ? conn.getUserId() : null;
+    const userId = conn.getUserId();
 
     const shopOrder = await errorHandler.executeWithRetry(
       async () =>

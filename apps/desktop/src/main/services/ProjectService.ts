@@ -30,7 +30,6 @@ export class ProjectService extends BaseService {
    */
   private async maybeSyncToPowerSync(project: Project): Promise<void> {
     const conn = getSupabaseConnector();
-    if (!conn.isAuthenticated()) return;
     const userId = conn.getUserId();
     if (!userId) return;
     await syncProjectToPowerSync(project, userId).catch((err) =>
