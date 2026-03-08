@@ -152,7 +152,7 @@ export function formatCopyTimestamp(ms: number): string {
  * @param originalProjectId  ID of the project to copy
  * @param copyName           Optional name override; defaults to "Original Name — YYYY-MM-DD HH:mm"
  */
-export function createProjectCopy(originalProjectId: string, copyName?: string): Project {
+export function createProjectCopy(originalProjectId: string, copyName?: string): ProjectRow {
   const db = getDatabase();
 
   const row = db.prepare('SELECT * FROM projects WHERE id = ?').get(originalProjectId) as any;
@@ -199,7 +199,7 @@ export function createProject(
   logoPath?: string,
   enabledModules?: string[],
   rootProjectId?: string | null,
-): Project {
+): ProjectRow {
   const db = getDatabase();
   const id = uuidv4();
   const now = Date.now();
@@ -283,7 +283,7 @@ function isProjectAllowedField(field: string): field is ProjectAllowedField {
   return PROJECT_ALLOWED_FIELDS.includes(field as ProjectAllowedField);
 }
 
-export function updateProject(id: string, updates: Partial<Project>): Project {
+export function updateProject(id: string, updates: Partial<Project>): ProjectRow {
   const db = getDatabase();
   const now = Date.now();
 

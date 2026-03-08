@@ -6,6 +6,7 @@ import {
   updateProject,
   deleteProject,
   Project,
+  ProjectRow,
 } from '../database/queries/projects';
 import { BaseService } from './BaseService';
 import { logger } from '../utils/logger';
@@ -28,7 +29,7 @@ export class ProjectService extends BaseService {
    * Sync a project to PowerSync if the user is authenticated.
    * Fire-and-forget with catch: a failure is logged but does not fail the caller.
    */
-  private async maybeSyncToPowerSync(project: Project): Promise<void> {
+  private async maybeSyncToPowerSync(project: ProjectRow): Promise<void> {
     const conn = getSupabaseConnector();
     const userId = conn.getUserId();
     if (!userId) return;
@@ -75,7 +76,7 @@ export class ProjectService extends BaseService {
     description?: string,
     logoPath?: string,
     enabledModules?: string[],
-  ): Promise<Project> {
+  ): Promise<ProjectRow> {
     this.validateRequired(name, 'name', 'Project name');
 
     const project = await this.executeWithRetry(
@@ -93,7 +94,7 @@ export class ProjectService extends BaseService {
    * @param updates Partial project data to update
    * @returns Updated project
    */
-  async update(id: string, updates: Partial<Project>): Promise<Project> {
+  async update(id: string, updates: Partial<Project>): Promise<ProjectRow> {
     this.validateId(id, 'Project');
 
     // Validate name if being updated
@@ -136,7 +137,7 @@ export class ProjectService extends BaseService {
    * @param originalProjectId  ID of the project to copy
    * @param copyName           Optional name override
    */
-  async createCopy(originalProjectId: string, copyName?: string): Promise<Project> {
+  async createCopy(originalProjectId: string, copyName?: string): Promise<ProjectRow> {
     this.validateId(originalProjectId, 'Project');
 
     const project = await this.executeWithRetry(
