@@ -23,7 +23,6 @@ import { getPowerSyncService } from './sync';
 import { licenseService } from './LicenseService';
 import { logger } from '../utils/logger';
 import { getProjectById } from '../database/queries/projects';
-import type { ProjectRow } from '../database/queries/projects';
 import { getShopOrderProjectById } from '../database/queries/shop-order';
 import { syncProjectToPowerSync, syncShopOrderToPowerSync } from './sync/projectSync';
 import type {
@@ -181,7 +180,7 @@ export class CollaborationService {
     // inside `invite_to_project` remains as a final safety net.
     await this._backfillToPowerSync(
       projectId,
-      (id) => getProjectById(id) as ProjectRow | null,
+      getProjectById,
       syncProjectToPowerSync,
       '[CollaborationService] project backfill failed; stub upsert in RPC is safety net',
     );

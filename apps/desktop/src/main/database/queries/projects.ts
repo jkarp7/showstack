@@ -90,7 +90,7 @@ export function getAllProjects(): Project[] {
   });
 }
 
-export function getProjectById(id: string): Project | null {
+export function getProjectById(id: string): ProjectRow | null {
   const db = getDatabase();
   const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
 
@@ -120,7 +120,7 @@ export function getProjectById(id: string): Project | null {
     }
   });
 
-  return project as Project;
+  return project as unknown as ProjectRow;
 }
 
 /**
