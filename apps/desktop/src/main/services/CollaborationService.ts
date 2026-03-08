@@ -290,6 +290,11 @@ export class CollaborationService {
   /**
    * Invite a user to collaborate on a shop order.
    * Requires professional or institutional license with active sync.
+   *
+   * No `shopOrderName` parameter: unlike projects (which are local-SQLite-first and may
+   * not exist in Supabase yet), shop orders are written to Supabase when created, so the
+   * `invite_to_shop_order` RPC can look up the name server-side. No stub-upsert workaround
+   * is needed, and there is no TOCTOU ownership risk.
    */
   async inviteToShopOrder(
     shopOrderId: string,

@@ -34,7 +34,9 @@ type Tab =
 export function Settings() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState<Tab>('workspace');
+  // Allow deep-linking to a specific tab via router state (e.g. from PendingInvitationsBanner)
+  const initialTab = (location.state as { tab?: Tab } | null)?.tab ?? 'workspace';
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
 
   const handleBackClick = () => {
     // Navigate to the location we came from (stored in state), or home as fallback

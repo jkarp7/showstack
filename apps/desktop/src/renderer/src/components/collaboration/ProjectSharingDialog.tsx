@@ -64,9 +64,11 @@ export function ProjectSharingDialog({
 }: ProjectSharingDialogProps) {
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<InviteRole>('editor');
   const [inviting, setInviting] = useState(false);
+  const [removing, setRemoving] = useState<string | null>(null); // member id being removed/cancelled
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
   const [removeError, setRemoveError] = useState<string | null>(null);
@@ -77,9 +79,13 @@ export function ProjectSharingDialog({
 
   const loadMembers = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const result = await window.api.collaboration.getProjectMembers(projectId);
       setMembers(result as ProjectMember[]);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load members.';
+      setLoadError(message);
     } finally {
       setLoading(false);
     }
@@ -93,6 +99,7 @@ export function ProjectSharingDialog({
       setInviteError(null);
       setInviteSuccess(null);
       setRemoveError(null);
+      setRemoving(null);
     }
   }, [open, loadMembers]);
 
@@ -131,24 +138,34 @@ export function ProjectSharingDialog({
       setRemoveError('Cannot remove a pending invitation — use Cancel instead.');
       return;
     }
+    if (removing) return; // in-flight guard
     setRemoveError(null);
-
-    const result = await window.api.collaboration.removeProjectMember(projectId, member.user_id);
-    if (result.success) {
-      await loadMembers();
-    } else {
-      setRemoveError(result.error ?? 'Failed to remove member.');
+    setRemoving(member.id);
+    try {
+      const result = await window.api.collaboration.removeProjectMember(projectId, member.user_id);
+      if (result.success) {
+        await loadMembers();
+      } else {
+        setRemoveError(result.error ?? 'Failed to remove member.');
+      }
+    } finally {
+      setRemoving(null);
     }
   };
 
   const handleCancelInvitation = async (member: ProjectMember) => {
+    if (removing) return; // in-flight guard
     setRemoveError(null);
-
-    const result = await window.api.collaboration.cancelProjectInvitation(member.id);
-    if (result.success) {
-      await loadMembers();
-    } else {
-      setRemoveError(result.error ?? 'Failed to cancel invitation.');
+    setRemoving(member.id);
+    try {
+      const result = await window.api.collaboration.cancelProjectInvitation(member.id);
+      if (result.success) {
+        await loadMembers();
+      } else {
+        setRemoveError(result.error ?? 'Failed to cancel invitation.');
+      }
+    } finally {
+      setRemoving(null);
     }
   };
 
@@ -230,6 +247,12 @@ export function ProjectSharingDialog({
             <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               {accepted.length === 0 ? 'No members yet' : `Members (${accepted.length})`}
             </h3>
+            {loadError && (
+              <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1 mb-2">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                {loadError}
+              </p>
+            )}
             {loading ? (
               <p className="text-sm text-gray-400">Loading…</p>
             ) : (
@@ -260,7 +283,8 @@ export function ProjectSharingDialog({
                       {isOwner && member.role !== 'owner' && member.user_id && (
                         <button
                           onClick={() => handleRemove(member)}
-                          className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors ml-2 flex-shrink-0"
+                          disabled={!!removing}
+                          className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors ml-2 flex-shrink-0"
                           title="Remove member"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -296,7 +320,8 @@ export function ProjectSharingDialog({
                     {isOwner && (
                       <button
                         onClick={() => handleCancelInvitation(member)}
-                        className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors ml-2 flex-shrink-0"
+                        disabled={!!removing}
+                        className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors ml-2 flex-shrink-0"
                         title="Cancel invitation"
                       >
                         <X className="w-4 h-4" />

@@ -26,6 +26,7 @@ function renderBanner(canReceiveInvitations = true) {
 describe('PendingInvitationsBanner', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
     (
       window.api.collaboration.checkPendingProjectInvitations as ReturnType<typeof vi.fn>
     ).mockResolvedValue([]);
@@ -100,7 +101,7 @@ describe('PendingInvitationsBanner', () => {
     await waitFor(() => screen.getByText(/View Invitations/i));
     await userEvent.click(screen.getByText(/View Invitations/i));
 
-    expect(mockNavigate).toHaveBeenCalledWith('/settings');
+    expect(mockNavigate).toHaveBeenCalledWith('/settings', { state: { tab: 'collaboration' } });
   });
 
   it('hides the banner when dismissed', async () => {

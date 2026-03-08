@@ -11,6 +11,13 @@
 --   UPDATE  — owner OR accepted editor
 --   DELETE  — owner OR accepted editor (project row itself: owner only)
 --
+-- NOTE: role IN ('owner', 'editor') — 'owner' is dead code throughout this file.
+-- Ownership is tracked via projects.user_id (the first branch of every USING clause),
+-- not via a project_members row. No member row ever carries role = 'owner'.
+-- The 'owner' value is retained for forward-compatibility with the CHECK constraint
+-- in migration 005 but will never match in practice.
+-- See migration 013 for additional context.
+--
 -- user_preferences is additionally scoped to auth.uid() so each
 -- collaborator only ever reads/writes their own UI preferences.
 -- ============================================

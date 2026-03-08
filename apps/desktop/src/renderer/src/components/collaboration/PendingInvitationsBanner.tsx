@@ -23,10 +23,21 @@ interface PendingInvitationsBannerProps {
   canReceiveInvitations: boolean;
 }
 
+const DISMISSED_KEY = 'pendingInvitationsBanner.dismissed';
+
 export function PendingInvitationsBanner({ canReceiveInvitations }: PendingInvitationsBannerProps) {
   const [count, setCount] = useState(0);
-  const [dismissed, setDismissed] = useState(false);
+  // Persist dismissed state for the session so re-mounting (e.g. navigating away and back)
+  // doesn't re-show the banner until the next app launch.
+  const [dismissed, setDismissed] = useState(
+    () => sessionStorage.getItem(DISMISSED_KEY) === 'true',
+  );
   const navigate = useNavigate();
+
+  const dismiss = () => {
+    sessionStorage.setItem(DISMISSED_KEY, 'true');
+    setDismissed(true);
+  };
 
   useEffect(() => {
     if (!canReceiveInvitations) return;
@@ -71,16 +82,12 @@ export function PendingInvitationsBanner({ canReceiveInvitations }: PendingInvit
       </div>
       <div className="flex items-center gap-3">
         <button
-          onClick={() => navigate('/settings')}
+          onClick={() => navigate('/settings', { state: { tab: 'collaboration' } })}
           className="font-medium underline hover:no-underline"
         >
           View Invitations
         </button>
-        <button
-          onClick={() => setDismissed(true)}
-          className="opacity-75 hover:opacity-100"
-          aria-label="Dismiss"
-        >
+        <button onClick={dismiss} className="opacity-75 hover:opacity-100" aria-label="Dismiss">
           ✕
         </button>
       </div>
