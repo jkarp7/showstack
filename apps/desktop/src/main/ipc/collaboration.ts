@@ -228,7 +228,7 @@ export function registerCollaborationHandlers(): void {
       }
 
       try {
-        presenceService.joinProjectPresence(projectId, activeView);
+        await presenceService.joinProjectPresence(projectId, activeView);
         return { success: true };
       } catch (err) {
         logger.warn('[Collaboration IPC] join-presence failed', {

@@ -436,6 +436,10 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
         const putPayload: Record<string, unknown> = { id, ...data };
         if (table === 'fixtures') {
           putPayload.changed_who = this.getUserId();
+          // Intentional: client-side timestamp captures when the user made the
+          // change, not when it was synced to the server (which may be delayed
+          // in an offline-first flow). This differs from the server clock used
+          // in RPC migrations — both are stored and serve different purposes.
           putPayload.changed_at = Date.now();
         }
         const { error } = await this.supabase.from(table).upsert(putPayload);

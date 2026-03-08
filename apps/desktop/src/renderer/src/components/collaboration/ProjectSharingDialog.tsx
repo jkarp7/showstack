@@ -134,10 +134,6 @@ export function ProjectSharingDialog({
   };
 
   const handleRemove = async (member: ProjectMember) => {
-    if (!member.user_id) {
-      setRemoveError('Cannot remove a pending invitation — use Cancel instead.');
-      return;
-    }
     if (removing) return; // in-flight guard
     setRemoveError(null);
     setRemoving(member.id);

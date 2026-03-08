@@ -14,6 +14,7 @@
 
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { getSupabaseConnector } from './sync/SupabaseConnector';
+import { getPowerSyncService } from './sync';
 import { logger } from '../utils/logger';
 import type { PresenceMember } from '../../shared/types/collaboration.types';
 
@@ -30,13 +31,38 @@ export class PresenceService {
   /**
    * Join the presence channel for a project.
    * Tracks the current user's session and subscribes to other members.
+   *
+   * Supabase Realtime channels have no built-in authorization — any
+   * authenticated user can subscribe to any channel name. We therefore
+   * verify membership in the local PowerSync database before connecting.
+   * Note: this is a client-side defence-in-depth guard; the PowerSync sync
+   * rules (RLS) already prevent non-members from seeing the project data.
    */
-  joinProjectPresence(projectId: string, activeView = 'project'): void {
+  async joinProjectPresence(projectId: string, activeView = 'project'): Promise<void> {
     const connector = getSupabaseConnector();
     if (!connector.isAuthenticated()) return;
 
     const userId = connector.getUserId();
     if (!userId) return; // guard: isAuthenticated() should guarantee this, but be explicit
+
+    // Verify the current user owns or is an accepted member of this project
+    // before subscribing to its presence channel.
+    const db = getPowerSyncService().getDatabase();
+    if (db) {
+      const rows = await db.getAll(
+        `SELECT 1 FROM projects WHERE id = ? AND user_id = ? LIMIT 1
+         UNION ALL
+         SELECT 1 FROM project_members WHERE project_id = ? AND user_id = ? AND status = 'accepted' LIMIT 1`,
+        [projectId, userId, projectId, userId],
+      );
+      if (rows.length === 0) {
+        logger.warn(
+          `[PresenceService] Blocked presence join: user is not a member of project ${projectId}`,
+        );
+        return;
+      }
+    }
+
     // getSession() is a public method on SupabaseConnector (SupabaseConnector.ts:152)
     const session = connector.getSession();
     const email = session?.user?.email ?? '';
