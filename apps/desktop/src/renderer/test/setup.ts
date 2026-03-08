@@ -86,35 +86,73 @@ if (isJsdom) {
       on: vi.fn(),
       off: vi.fn(),
     },
+
+    // License
+    license: {
+      getStatus: vi.fn().mockResolvedValue({ canCollaborate: false, tier: 'demo' }),
+      getCurrent: vi.fn(),
+      hasModule: vi.fn().mockResolvedValue(false),
+      getModuleFeatures: vi.fn(),
+      getAvailableModules: vi.fn().mockResolvedValue([]),
+      canUseFeature: vi.fn().mockResolvedValue(false),
+      refresh: vi.fn(),
+      verifyOnline: vi.fn(),
+      createDemo: vi.fn(),
+    },
+
+    // Collaboration
+    collaboration: {
+      inviteToProject: vi.fn().mockResolvedValue({ success: true }),
+      removeProjectMember: vi.fn().mockResolvedValue({ success: true }),
+      getProjectMembers: vi.fn().mockResolvedValue([]),
+      acceptProjectInvitation: vi.fn().mockResolvedValue({ success: true }),
+      checkPendingProjectInvitations: vi.fn().mockResolvedValue([]),
+      declineProjectInvitation: vi.fn().mockResolvedValue({ success: true }),
+      cancelProjectInvitation: vi.fn().mockResolvedValue({ success: true }),
+      inviteToShopOrder: vi.fn().mockResolvedValue({ success: true }),
+      removeShopOrderMember: vi.fn().mockResolvedValue({ success: true }),
+      getShopOrderMembers: vi.fn().mockResolvedValue([]),
+      acceptShopOrderInvitation: vi.fn().mockResolvedValue({ success: true }),
+      checkPendingShopOrderInvitations: vi.fn().mockResolvedValue([]),
+      declineShopOrderInvitation: vi.fn().mockResolvedValue({ success: true }),
+      cancelShopOrderInvitation: vi.fn().mockResolvedValue({ success: true }),
+      joinPresence: vi.fn().mockResolvedValue({ success: true }),
+      leavePresence: vi.fn().mockResolvedValue({ success: true }),
+      getPresence: vi.fn().mockResolvedValue([]),
+      subscribePresence: vi.fn().mockResolvedValue({ success: true }),
+      unsubscribePresence: vi.fn().mockResolvedValue({ success: true }),
+      onPresenceChanged: vi.fn(),
+      offPresenceChanged: vi.fn(),
+    },
   };
 
-  // Mock lucide-react icons (to avoid SVG rendering issues)
-  const mockIcon = (name: string) => {
-    return (props: any) =>
-      React.createElement(
-        'div',
-        {
-          'data-testid': `icon-${name.toLowerCase()}`,
-          ...props,
-        },
-        name,
-      );
-  };
-
+  // Mock lucide-react icons (to avoid SVG rendering issues).
+  // The factory must be self-contained (no references to outer-scope variables)
+  // because vi.mock is hoisted to the top of the file before any setup code runs.
+  // Each icon is mocked as () => null so React renders nothing in its place.
   vi.mock('lucide-react', () => ({
-    AlertCircle: mockIcon('AlertCircle'),
-    ChevronDown: mockIcon('ChevronDown'),
-    ChevronRight: mockIcon('ChevronRight'),
-    Plus: mockIcon('Plus'),
-    X: mockIcon('X'),
-    Check: mockIcon('Check'),
-    Save: mockIcon('Save'),
-    Upload: mockIcon('Upload'),
-    Download: mockIcon('Download'),
-    Edit: mockIcon('Edit'),
-    Trash: mockIcon('Trash'),
-    Search: mockIcon('Search'),
-    Settings: mockIcon('Settings'),
+    AlertCircle: () => null,
+    ChevronDown: () => null,
+    ChevronRight: () => null,
+    Plus: () => null,
+    X: () => null,
+    Check: () => null,
+    Save: () => null,
+    Upload: () => null,
+    Download: () => null,
+    Edit: () => null,
+    Trash: () => null,
+    Search: () => null,
+    Settings: () => null,
+    Users: () => null,
+    UserPlus: () => null,
+    Trash2: () => null,
+    Crown: () => null,
+    Edit3: () => null,
+    Eye: () => null,
+    CheckCircle2: () => null,
+    Clock: () => null,
+    Package: () => null,
   }));
 
   // Suppress noisy console output in tests

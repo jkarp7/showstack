@@ -223,6 +223,72 @@ describe('LicenseService', () => {
     });
   });
 
+  describe('canCollaborate', () => {
+    it('is false when no license', () => {
+      mockedGetCurrentLicense.mockReturnValue(null);
+      expect(service.getLicenseStatus().canCollaborate).toBe(false);
+    });
+
+    it('is true for active professional license with cloudSync', () => {
+      const license = buildLicense({ tier: 'professional', cloudSync: true });
+      mockedGetCurrentLicense.mockReturnValue(license);
+      expect(service.getLicenseStatus().canCollaborate).toBe(true);
+    });
+
+    it('is true for active institutional license with cloudSync', () => {
+      const license = buildLicense({ tier: 'institutional', cloudSync: true });
+      mockedGetCurrentLicense.mockReturnValue(license);
+      expect(service.getLicenseStatus().canCollaborate).toBe(true);
+    });
+
+    it('is false for student tier even with cloudSync', () => {
+      const license = buildLicense({ tier: 'student', cloudSync: true });
+      mockedGetCurrentLicense.mockReturnValue(license);
+      expect(service.getLicenseStatus().canCollaborate).toBe(false);
+    });
+
+    it('is false for demo tier', () => {
+      const license = buildLicense({ tier: 'demo', cloudSync: false });
+      mockedGetCurrentLicense.mockReturnValue(license);
+      expect(service.getLicenseStatus().canCollaborate).toBe(false);
+    });
+
+    it('is false for professional license when cloudSync is disabled', () => {
+      const license = buildLicense({ tier: 'professional', cloudSync: false });
+      mockedGetCurrentLicense.mockReturnValue(license);
+      expect(service.getLicenseStatus().canCollaborate).toBe(false);
+    });
+
+    it('is false for suspended license', () => {
+      const license = buildLicense({ tier: 'professional', cloudSync: true, status: 'suspended' });
+      mockedGetCurrentLicense.mockReturnValue(license);
+      expect(service.getLicenseStatus().canCollaborate).toBe(false);
+    });
+
+    it('is false when in grace period (cloudSync disabled in grace)', () => {
+      const license = buildLicense({
+        tier: 'professional',
+        cloudSync: true,
+        lastVerified: Date.now() - 20 * 24 * 60 * 60 * 1000,
+      });
+      mockedGetCurrentLicense.mockReturnValue(license);
+      // Grace period disables sync, so canCollaborate is also false
+      expect(service.getLicenseStatus().canCollaborate).toBe(false);
+    });
+
+    it('is false when maintenance expired', () => {
+      const pastDate = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      const license = buildLicense({
+        tier: 'professional',
+        cloudSync: true,
+        maintenanceEndDate: pastDate,
+        expirationDate: pastDate,
+      });
+      mockedGetCurrentLicense.mockReturnValue(license);
+      expect(service.getLicenseStatus().canCollaborate).toBe(false);
+    });
+  });
+
   describe('hasModuleAccess', () => {
     it('returns false with no license', () => {
       mockedGetCurrentLicense.mockReturnValue(null);

@@ -66,6 +66,7 @@ export interface LicenseValidation {
   canView: boolean;
   canEdit: boolean;
   canSync: boolean;
+  canCollaborate: boolean; // true for professional + institutional tiers with active sync
   warningLevel?: 'low' | 'medium' | 'high';
   daysUntilExpiration?: number;
   daysSinceVerification?: number;

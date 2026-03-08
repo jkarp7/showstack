@@ -168,6 +168,14 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
   }
 
   /**
+   * Expose the underlying Supabase client for RPC calls and Realtime subscriptions.
+   * Used by CollaborationService and PresenceService.
+   */
+  getSupabaseClient(): SupabaseClient {
+    return this.supabase;
+  }
+
+  /**
    * Sign in with email and password
    */
   async signIn(email: string, password: string): Promise<{ success: boolean; error?: string }> {
@@ -424,11 +432,17 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
 
     switch (entry.op) {
       case UpdateType.PUT: {
-        // Upsert: insert or update
-        const { error } = await this.supabase.from(table).upsert({
-          id,
-          ...data,
-        });
+        // Upsert: insert or update; inject attribution fields for fixtures
+        const putPayload: Record<string, unknown> = { id, ...data };
+        if (table === 'fixtures') {
+          putPayload.changed_who = this.getUserId();
+          // Intentional: client-side timestamp captures when the user made the
+          // change, not when it was synced to the server (which may be delayed
+          // in an offline-first flow). This differs from the server clock used
+          // in RPC migrations — both are stored and serve different purposes.
+          putPayload.changed_at = Date.now();
+        }
+        const { error } = await this.supabase.from(table).upsert(putPayload);
 
         if (error) {
           logger.error(`[SupabaseConnector] PUT failed ${table}/${id}:`, error);
@@ -438,8 +452,13 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       }
 
       case UpdateType.PATCH: {
-        // Update existing record
-        const { error } = await this.supabase.from(table).update(data).eq('id', id);
+        // Update existing record; inject attribution fields for fixtures
+        const patchPayload: Record<string, unknown> = { ...data };
+        if (table === 'fixtures') {
+          patchPayload.changed_who = this.getUserId();
+          patchPayload.changed_at = Date.now();
+        }
+        const { error } = await this.supabase.from(table).update(patchPayload).eq('id', id);
 
         if (error) {
           logger.error(`[SupabaseConnector] PATCH failed ${table}/${id}:`, error);

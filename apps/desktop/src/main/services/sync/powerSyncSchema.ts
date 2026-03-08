@@ -224,6 +224,7 @@ const dimmer_racks = new Table({
 
 const dimmer_rack_modules = new Table({
   rack_id: column.text,
+  project_id: column.text, // denormalized from dimmer_racks; added in migration 008
   start_circuit: column.integer,
   end_circuit: column.integer,
   module_type: column.text,
@@ -333,10 +334,41 @@ const infrastructure_equipment = new Table({
 
 const user_preferences = new Table({
   project_id: column.text,
+  user_id: column.text, // UUID → TEXT; scopes prefs per-user in shared projects
   preference_key: column.text,
   preference_value: column.text, // JSONB → TEXT
   created_at: column.integer,
   updated_at: column.integer,
+});
+
+// ============================================
+// PROJECT MEMBERS TABLE
+// ============================================
+
+const project_members = new Table({
+  project_id: column.text, // TEXT FK → projects(id)
+  user_id: column.text, // UUID → TEXT; NULL until invitation accepted
+  email: column.text,
+  role: column.text, // 'owner' | 'editor' | 'viewer'
+  invited_by: column.text, // UUID → TEXT
+  status: column.text, // 'pending' | 'accepted' | 'declined'
+  invited_at: column.integer,
+  accepted_at: column.integer,
+});
+
+// ============================================
+// SHOP ORDER MEMBERS TABLE
+// ============================================
+
+const shop_order_members = new Table({
+  shop_order_id: column.text, // TEXT FK → shop_order_projects(id)
+  user_id: column.text, // UUID → TEXT; NULL until invitation accepted
+  email: column.text,
+  role: column.text, // 'owner' | 'editor' | 'viewer'
+  invited_by: column.text, // UUID → TEXT
+  status: column.text, // 'pending' | 'accepted' | 'declined'
+  invited_at: column.integer,
+  accepted_at: column.integer,
 });
 
 // ============================================
@@ -422,6 +454,7 @@ const shop_order_sections = new Table({
 
 const shop_order_items = new Table({
   section_id: column.text,
+  shop_order_id: column.text, // denormalized from shop_order_sections; added in migration 008
   description: column.text,
   active_qty: column.integer,
   spare_qty: column.integer,
@@ -550,12 +583,14 @@ export const AppSchema = new Schema({
   phase_distribution_templates,
   infrastructure_equipment,
   user_preferences,
+  project_members,
   shop_order_projects,
   shop_order_sections,
   shop_order_items,
   shop_order_revisions,
   shop_order_notes,
   shop_order_note_templates,
+  shop_order_members,
   page_layout_templates,
   page_layout_elements,
   paperwork_templates,
@@ -571,12 +606,14 @@ export {
   phase_distribution_templates,
   infrastructure_equipment,
   user_preferences,
+  project_members,
   shop_order_projects,
   shop_order_sections,
   shop_order_items,
   shop_order_revisions,
   shop_order_notes,
   shop_order_note_templates,
+  shop_order_members,
   page_layout_templates,
   page_layout_elements,
   paperwork_templates,

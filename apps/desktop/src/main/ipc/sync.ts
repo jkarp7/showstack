@@ -12,6 +12,7 @@ import {
   type ShowStackSyncStatus,
 } from '../services/sync';
 import { licenseService } from '../services/LicenseService';
+import { presenceService } from '../services/PresenceService';
 import { logger } from '../utils/logger';
 
 /** Basic email format validation */
@@ -166,6 +167,9 @@ export function registerSyncHandlers(): void {
       // Disconnect sync first
       const service = getPowerSyncService();
       await service.disconnect();
+
+      // Clean up presence channels before signing out
+      presenceService.cleanup();
 
       // Then sign out
       const connector = getSupabaseConnector();

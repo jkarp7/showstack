@@ -1,174 +1,111 @@
 # ============================================
 # PowerSync Sync Rules for ShowStack
 # ============================================
-# Defines which tables to sync and how to filter them
 # See: https://docs.powersync.com/usage/sync-rules
 #
-# Key Concepts:
-# - bucket_definitions: Group tables by access patterns
-# - parameters: User-specific filters (user_id from JWT)
-# - data transformations: Map PostgreSQL types to local SQLite
+# Constraints (learned from validation errors):
+# - parameters queries: use request.user_id(); no JOINs; no subqueries
+# - data queries:       use bucket.<name>; no JOINs; no subqueries
 #
-# ============================================
-
-# User ID from Supabase Auth JWT token
-parameters:
-  user_id:
-    type: uuid
-    description: "Current user's ID from auth.uid()"
-
-# ============================================
-# BUCKET DEFINITIONS
+# All tables must have a direct filtering column on them.
+# dimmer_rack_modules.project_id and shop_order_items.shop_order_id were
+# added in migration 008 (denormalized, kept in sync via triggers) to satisfy
+# this constraint.
 # ============================================
 
 bucket_definitions:
   # ============================================
-  # USER PROJECTS BUCKET
+  # OWNED PROJECTS
+  # One bucket instance per project owned by the current user.
   # ============================================
-  user_projects:
-    # All tables related to ShowStack projects
-    description: "User's ShowStack projects and related data"
-
-    # Filter: Only sync projects owned by the user
-    parameters:
-      - user_id
+  by_owned_project:
+    parameters: SELECT id as project_id, request.user_id() as user_id FROM projects WHERE user_id = request.user_id()
 
     data:
-      - SELECT * FROM projects WHERE user_id = token_parameters.user_id
-
-      - SELECT fixtures.* FROM fixtures
-        INNER JOIN projects ON projects.id = fixtures.project_id
-        WHERE projects.user_id = token_parameters.user_id
-
-      - SELECT dimmer_racks.* FROM dimmer_racks
-        INNER JOIN projects ON projects.id = dimmer_racks.project_id
-        WHERE projects.user_id = token_parameters.user_id
-
-      - SELECT dimmer_rack_modules.* FROM dimmer_rack_modules
-        INNER JOIN dimmer_racks ON dimmer_racks.id = dimmer_rack_modules.rack_id
-        INNER JOIN projects ON projects.id = dimmer_racks.project_id
-        WHERE projects.user_id = token_parameters.user_id
-
-      - SELECT pd_racks.* FROM pd_racks
-        INNER JOIN projects ON projects.id = pd_racks.project_id
-        WHERE projects.user_id = token_parameters.user_id
-
-      - SELECT phase_distribution_templates.* FROM phase_distribution_templates
-        INNER JOIN projects ON projects.id = phase_distribution_templates.project_id
-        WHERE projects.user_id = token_parameters.user_id
-
-      - SELECT infrastructure_equipment.* FROM infrastructure_equipment
-        INNER JOIN projects ON projects.id = infrastructure_equipment.project_id
-        WHERE projects.user_id = token_parameters.user_id
-
-      - SELECT user_preferences.* FROM user_preferences
-        INNER JOIN projects ON projects.id = user_preferences.project_id
-        WHERE projects.user_id = token_parameters.user_id
+      - SELECT * FROM projects WHERE id = bucket.project_id
+      - SELECT * FROM fixtures WHERE project_id = bucket.project_id
+      - SELECT * FROM dimmer_racks WHERE project_id = bucket.project_id
+      - SELECT * FROM dimmer_rack_modules WHERE project_id = bucket.project_id
+      - SELECT * FROM pd_racks WHERE project_id = bucket.project_id
+      - SELECT * FROM phase_distribution_templates WHERE project_id = bucket.project_id
+      - SELECT * FROM infrastructure_equipment WHERE project_id = bucket.project_id
+      - SELECT * FROM user_preferences WHERE project_id = bucket.project_id AND user_id = bucket.user_id
+      - SELECT * FROM project_members WHERE project_id = bucket.project_id
 
   # ============================================
-  # SHOP ORDERS BUCKET
+  # SHARED PROJECTS
+  # One bucket instance per project where the user is an accepted member.
+  # project_members.project_id is a direct column — no JOIN needed.
   # ============================================
-  shop_orders:
-    # All tables related to shop orders
-    description: "User's shop orders and related data"
-
-    parameters:
-      - user_id
+  by_shared_project:
+    parameters: SELECT project_id, request.user_id() as user_id FROM project_members
+      WHERE user_id = request.user_id()
+      AND status = 'accepted'
 
     data:
-      - SELECT * FROM shop_order_projects WHERE user_id = token_parameters.user_id
-
-      - SELECT shop_order_sections.* FROM shop_order_sections
-        INNER JOIN shop_order_projects ON shop_order_projects.id = shop_order_sections.prep_project_id
-        WHERE shop_order_projects.user_id = token_parameters.user_id
-
-      - SELECT shop_order_items.* FROM shop_order_items
-        INNER JOIN shop_order_sections ON shop_order_sections.id = shop_order_items.section_id
-        INNER JOIN shop_order_projects ON shop_order_projects.id = shop_order_sections.prep_project_id
-        WHERE shop_order_projects.user_id = token_parameters.user_id
-
-      - SELECT shop_order_revisions.* FROM shop_order_revisions
-        INNER JOIN shop_order_projects ON shop_order_projects.id = shop_order_revisions.prep_project_id
-        WHERE shop_order_projects.user_id = token_parameters.user_id
-
-      - SELECT shop_order_notes.* FROM shop_order_notes
-        INNER JOIN shop_order_projects ON shop_order_projects.id = shop_order_notes.prep_project_id
-        WHERE shop_order_projects.user_id = token_parameters.user_id
+      - SELECT * FROM projects WHERE id = bucket.project_id
+      - SELECT * FROM fixtures WHERE project_id = bucket.project_id
+      - SELECT * FROM dimmer_racks WHERE project_id = bucket.project_id
+      - SELECT * FROM dimmer_rack_modules WHERE project_id = bucket.project_id
+      - SELECT * FROM pd_racks WHERE project_id = bucket.project_id
+      - SELECT * FROM phase_distribution_templates WHERE project_id = bucket.project_id
+      - SELECT * FROM infrastructure_equipment WHERE project_id = bucket.project_id
+      - SELECT * FROM user_preferences WHERE project_id = bucket.project_id AND user_id = bucket.user_id
+      - SELECT * FROM project_members WHERE project_id = bucket.project_id
 
   # ============================================
-  # USER TEMPLATES BUCKET
+  # OWNED SHOP ORDERS
+  # One bucket instance per shop order owned by the current user.
+  # ============================================
+  by_owned_shop_order:
+    parameters: SELECT id as shop_order_id FROM shop_order_projects
+      WHERE user_id = request.user_id()
+
+    data:
+      - SELECT * FROM shop_order_projects WHERE id = bucket.shop_order_id
+      - SELECT * FROM shop_order_sections WHERE prep_project_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_items WHERE shop_order_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_revisions WHERE prep_project_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_notes WHERE prep_project_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_members WHERE shop_order_id = bucket.shop_order_id
+
+  # ============================================
+  # SHARED SHOP ORDERS
+  # One bucket instance per shop order where the user is an accepted member.
+  # ============================================
+  by_shared_shop_order:
+    parameters: SELECT shop_order_id FROM shop_order_members
+      WHERE user_id = request.user_id()
+      AND status = 'accepted'
+
+    data:
+      - SELECT * FROM shop_order_projects WHERE id = bucket.shop_order_id
+      - SELECT * FROM shop_order_sections WHERE prep_project_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_items WHERE shop_order_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_revisions WHERE prep_project_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_notes WHERE prep_project_id = bucket.shop_order_id
+      - SELECT * FROM shop_order_members WHERE shop_order_id = bucket.shop_order_id
+
+  # ============================================
+  # USER TEMPLATES
+  # Templates are owned directly (user_id on each table).
   # ============================================
   user_templates:
-    # User's reusable templates (page layouts, paperwork configs, note templates)
-    description: "User's templates and configurations"
-
-    parameters:
-      - user_id
+    parameters: SELECT request.user_id() as user_id
 
     data:
-      - SELECT * FROM page_layout_templates WHERE user_id = token_parameters.user_id
+      - SELECT * FROM page_layout_templates WHERE user_id = bucket.user_id
+      - SELECT * FROM paperwork_templates WHERE user_id = bucket.user_id
+      - SELECT * FROM shop_order_note_templates WHERE user_id = bucket.user_id
 
-      - SELECT page_layout_elements.* FROM page_layout_elements
-        INNER JOIN page_layout_templates ON page_layout_templates.id = page_layout_elements.template_id
-        WHERE page_layout_templates.user_id = token_parameters.user_id
+  # ============================================
+  # PAGE LAYOUT ELEMENTS
+  # page_layout_elements has no user_id — parameterize by template_id.
+  # page_layout_templates.user_id is a direct column, so no JOIN needed.
+  # ============================================
+  by_page_layout_template:
+    parameters: SELECT id as template_id FROM page_layout_templates
+      WHERE user_id = request.user_id()
 
-      - SELECT * FROM paperwork_templates WHERE user_id = token_parameters.user_id
-
-      - SELECT * FROM shop_order_note_templates WHERE user_id = token_parameters.user_id
-
-# ============================================
-# DATA TYPE TRANSFORMATIONS
-# ============================================
-# Map PostgreSQL types to SQLite types for local storage
-
-# PostgreSQL BIGINT → SQLite INTEGER
-# PostgreSQL BOOLEAN → SQLite INTEGER (0 or 1)
-# PostgreSQL JSONB → SQLite TEXT (JSON string)
-# PostgreSQL UUID → SQLite TEXT
-
-# Note: PowerSync handles these transformations automatically,
-# but you may need custom transforms for complex JSONB operations.
-
-# ============================================
-# CONFLICT RESOLUTION STRATEGY
-# ============================================
-# Default: Last-Write-Wins (LWW) based on updated_at timestamp
-#
-# For MVP, we use LWW for all tables.
-# Future enhancement: Custom resolution for critical fields.
-#
-# How it works:
-# 1. User A edits fixture while offline
-# 2. User B edits same fixture while User A is offline
-# 3. User A reconnects and syncs
-# 4. PowerSync compares updated_at timestamps
-# 5. Most recent change wins, older change is overwritten
-#
-# Future custom resolution:
-# - Manual conflict resolution dialog for critical fields
-# - Merge strategies for non-conflicting fields
-# - Preserve both versions and let user choose
-
-# ============================================
-# SYNC OPTIMIZATION NOTES
-# ============================================
-#
-# Bucket Size:
-# - user_projects bucket: Largest (fixtures table can have 1000+ rows)
-# - shop_orders bucket: Medium (typically 100-500 items per order)
-# - user_templates bucket: Small (10-50 templates per user)
-#
-# Sync Frequency:
-# - Initial sync: All user data downloaded
-# - Incremental sync: Only changed records since last sync
-# - Real-time: Changes pushed immediately when online
-#
-# Offline Queue:
-# - Changes stored locally in pending queue
-# - Synced when connection restored
-# - Max queue size: 10,000 operations (configurable)
-#
-# Bandwidth Optimization:
-# - Only sync changed fields (delta sync)
-# - Compress large JSONB fields
-# - Batch operations (up to 100 per request)
+    data:
+      - SELECT * FROM page_layout_elements WHERE template_id = bucket.template_id

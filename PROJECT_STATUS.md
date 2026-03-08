@@ -4,7 +4,7 @@
 **Last Updated:** March 2026
 **Current Version:** 0.1.0-alpha
 **Development Phase:** Alpha (Renovation complete, Supabase/PowerSync cloud services integrated)
-**Active Branch:** `feature/menu-bar-toolbar-evaluation` (PR open → develop)
+**Active Branch:** `feature/multi-user-collaboration` (PR open → develop); `feature/menu-bar-toolbar-evaluation` (PR open → develop)
 
 This document tracks the development status of all ShowStack feature domains and editions. It serves as the central source of truth for what's completed, in progress, and planned.
 
@@ -16,6 +16,7 @@ This document tracks the development status of all ShowStack feature domains and
 | ------------------- | -------------- | ---------- |
 | Lighting Features   | 🚧 In Progress | 80%        |
 | Core Infrastructure | ✅ Complete    | 100%       |
+| Collaboration       | ✅ Complete    | 100%       |
 | Sound Features      | ⬜ Planned     | 0%         |
 | Video Features      | ⬜ Planned     | 0%         |
 | Production Features | ⬜ Planned     | 0%         |
@@ -28,7 +29,20 @@ This document tracks the development status of all ShowStack feature domains and
 
 ### ✅ Recently Completed (December 2025 - March 2026)
 
-**Latest (March 2026):** 13. ✅ Menu Bar & Toolbar Reorganization (feature/menu-bar-toolbar-evaluation) - COMPLETED (March 2, 2026)
+**Latest (March 2026):** 14. ✅ Multi-User Collaboration (feature/multi-user-collaboration) - COMPLETED (March 2026)
+
+- **CollaborationService** — invite/remove/accept/decline for projects and shop orders via Supabase RPCs
+- **PresenceService** — real-time presence tracking via Supabase Realtime channels
+- **ProjectSharingDialog** — Share button on project pages; invite collaborators by email with editor/viewer role selection
+- **PendingInvitationsBanner** — persistent banner at the top of the app when the signed-in user has pending invitations
+- **Collaboration settings tab** — shows pending invitations with project name and inviter email; Accept/Decline buttons
+- **6 Supabase migrations (005–011):** `project_members` and `shop_order_members` tables, RLS policies, 8 RPCs (`invite_to_project`, `remove_from_project`, `accept_project_invitation`, `decline_project_invitation`, and shop-order equivalents), PowerSync denormalization columns, pending-invitation enrichment with decline support
+- **PowerSync sync rules rewritten** — no JOINs anywhere; parameterized buckets scoped per project and per shop order
+- **Feature-flagged** behind the `collaboration` flag
+- **License-gated:** Professional/Institutional tiers only for sending invites; any authenticated user can receive invitations
+- **Known limitation:** Projects are created in the local SQLite DB and not automatically written to Supabase's `projects` table. The `invite_to_project` RPC works around this by upserting a minimal project stub (id, user_id, name) on first invite. Full fix: write project data to Supabase on creation/update — either by migrating the primary project store to PowerSync writes, or by making project CRUD also write to Supabase directly.
+
+13. ✅ Menu Bar & Toolbar Reorganization (feature/menu-bar-toolbar-evaluation) - COMPLETED (March 2, 2026)
 
 - **Bug fix:** Wired Duplicate and Export CSV toolbar buttons that previously had no `onClick` handlers and silently did nothing when clicked
 - **New menu items:** Edit > Add Infrastructure (⌘⇧I), View > Columns > Conditional Formatting..., Project > Generate Paperwork...

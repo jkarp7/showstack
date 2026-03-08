@@ -19,6 +19,8 @@ import { SettingsDialog } from './components/common/SettingsDialog';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthModal } from './components/auth';
 import { OfflineBanner } from './components/sync';
+import { PendingInvitationsBanner } from './components/collaboration/PendingInvitationsBanner';
+import { useFeatureFlag } from './config/featureFlags';
 import { useSettingsStore } from './store/settingsStore';
 import { useUIStore } from './store/uiStore';
 import { useAuthStore } from './store/authStore';
@@ -46,6 +48,7 @@ function safeSetItem(key: string, value: string): void {
 
 function AppContent() {
   const licenseStatus = useAuthStore((state) => state.licenseStatus);
+  const collaborationEnabled = useFeatureFlag('collaboration');
   const navigate = useNavigate();
   const isSettingsDialogOpen = useUIStore((state) => state.isSettingsDialogOpen);
   const closeSettingsDialog = useUIStore((state) => state.closeSettingsDialog);
@@ -75,6 +78,17 @@ function AppContent() {
 
       {/* Offline Banner - shows when cloud sync is disconnected */}
       <OfflineBanner />
+
+      {/* Pending Invitations Banner - shows when user has unaccepted collaboration invites.
+          Any authenticated non-demo user can receive invitations; demo users are excluded
+          because they don't have cloud sync enabled. */}
+      {collaborationEnabled && (
+        <PendingInvitationsBanner
+          canReceiveInvitations={
+            licenseStatus !== undefined && licenseStatus !== null && licenseStatus.tier !== 'demo'
+          }
+        />
+      )}
 
       <Routes>
         {/* Default route - show landing page (projects) */}

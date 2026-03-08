@@ -1,4 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import type {
+  ProjectMember,
+  ShopOrderMember,
+  PresenceMember,
+} from '../shared/types/collaboration.types';
 
 // Define the Fixture type (will match renderer types)
 interface Fixture {
@@ -17,6 +22,12 @@ interface Fixture {
   notes?: string;
   [key: string]: any;
 }
+
+// Maps original callbacks to their IPC wrapper functions so removeListener works by reference.
+// The user callback takes (projectId, members); the IPC wrapper takes (event, projectId, members).
+type UserPresenceCallback = (projectId: string, members: PresenceMember[]) => void;
+type IpcPresenceWrapper = (_event: unknown, projectId: string, members: PresenceMember[]) => void;
+const presenceChangeWrappers = new WeakMap<UserPresenceCallback, IpcPresenceWrapper>();
 
 // Expose APIs to renderer
 contextBridge.exposeInMainWorld('api', {
@@ -362,6 +373,73 @@ contextBridge.exposeInMainWorld('api', {
     resetPassword: (email: string) => ipcRenderer.invoke('auth:resetPassword', email),
     getState: () => ipcRenderer.invoke('auth:getState'),
   },
+
+  // Collaboration operations (project & shop order sharing, presence)
+  collaboration: {
+    // Project members
+    inviteToProject: (projectId: string, projectName: string, email: string, role: string) =>
+      ipcRenderer.invoke('collaboration:invite-to-project', projectId, projectName, email, role),
+    removeProjectMember: (projectId: string, userId: string) =>
+      ipcRenderer.invoke('collaboration:remove-project-member', projectId, userId),
+    getProjectMembers: (projectId: string) =>
+      ipcRenderer.invoke('collaboration:get-project-members', projectId),
+    acceptProjectInvitation: (projectId: string) =>
+      ipcRenderer.invoke('collaboration:accept-project-invitation', projectId),
+    checkPendingProjectInvitations: () =>
+      ipcRenderer.invoke('collaboration:check-pending-project-invitations'),
+    declineProjectInvitation: (projectId: string) =>
+      ipcRenderer.invoke('collaboration:decline-project-invitation', projectId),
+    cancelProjectInvitation: (memberId: string) =>
+      ipcRenderer.invoke('collaboration:cancel-project-invitation', memberId),
+
+    // Shop order members
+    inviteToShopOrder: (shopOrderId: string, email: string, role: string) =>
+      ipcRenderer.invoke('collaboration:invite-to-shop-order', shopOrderId, email, role),
+    removeShopOrderMember: (shopOrderId: string, userId: string) =>
+      ipcRenderer.invoke('collaboration:remove-shop-order-member', shopOrderId, userId),
+    getShopOrderMembers: (shopOrderId: string) =>
+      ipcRenderer.invoke('collaboration:get-shop-order-members', shopOrderId),
+    acceptShopOrderInvitation: (shopOrderId: string) =>
+      ipcRenderer.invoke('collaboration:accept-shop-order-invitation', shopOrderId),
+    checkPendingShopOrderInvitations: () =>
+      ipcRenderer.invoke('collaboration:check-pending-shop-order-invitations'),
+    declineShopOrderInvitation: (shopOrderId: string) =>
+      ipcRenderer.invoke('collaboration:decline-shop-order-invitation', shopOrderId),
+    cancelShopOrderInvitation: (memberId: string) =>
+      ipcRenderer.invoke('collaboration:cancel-shop-order-invitation', memberId),
+
+    // Presence
+    joinPresence: (projectId: string, activeView?: string) =>
+      ipcRenderer.invoke('collaboration:join-presence', projectId, activeView),
+    leavePresence: (projectId: string) =>
+      ipcRenderer.invoke('collaboration:leave-presence', projectId),
+    getPresence: (projectId: string) => ipcRenderer.invoke('collaboration:get-presence', projectId),
+    subscribePresence: (projectId: string) =>
+      ipcRenderer.invoke('collaboration:subscribe-presence', projectId),
+    unsubscribePresence: (projectId: string) =>
+      ipcRenderer.invoke('collaboration:unsubscribe-presence', projectId),
+    onPresenceChanged: (callback: UserPresenceCallback) => {
+      // Store the IPC wrapper so offPresenceChanged can remove it by reference.
+      // ipcRenderer delivers (event, ...args); the user callback receives only (projectId, members).
+      const wrapper: IpcPresenceWrapper = (_event, projectId, members) =>
+        callback(projectId, members);
+      presenceChangeWrappers.set(callback, wrapper);
+      ipcRenderer.on(
+        'collaboration:presenceChanged',
+        wrapper as Parameters<typeof ipcRenderer.on>[1],
+      );
+    },
+    offPresenceChanged: (callback: UserPresenceCallback) => {
+      const wrapper = presenceChangeWrappers.get(callback);
+      if (wrapper) {
+        ipcRenderer.removeListener(
+          'collaboration:presenceChanged',
+          wrapper as Parameters<typeof ipcRenderer.removeListener>[1],
+        );
+        presenceChangeWrappers.delete(callback);
+      }
+    },
+  },
 });
 
 // TypeScript declaration
@@ -666,6 +744,51 @@ export interface ElectronAPI {
       error?: string;
     }>;
     delete: (backupDirName: string) => Promise<{ success: boolean; error?: string }>;
+  };
+  collaboration: {
+    inviteToProject: (
+      projectId: string,
+      projectName: string,
+      email: string,
+      role: string,
+    ) => Promise<{ success: boolean; error?: string; memberId?: string }>;
+    removeProjectMember: (
+      projectId: string,
+      userId: string,
+    ) => Promise<{ success: boolean; error?: string }>;
+    getProjectMembers: (projectId: string) => Promise<ProjectMember[]>;
+    acceptProjectInvitation: (projectId: string) => Promise<{ success: boolean; error?: string }>;
+    checkPendingProjectInvitations: () => Promise<ProjectMember[]>;
+    declineProjectInvitation: (projectId: string) => Promise<{ success: boolean; error?: string }>;
+    cancelProjectInvitation: (memberId: string) => Promise<{ success: boolean; error?: string }>;
+    inviteToShopOrder: (
+      shopOrderId: string,
+      email: string,
+      role: string,
+    ) => Promise<{ success: boolean; error?: string; memberId?: string }>;
+    removeShopOrderMember: (
+      shopOrderId: string,
+      userId: string,
+    ) => Promise<{ success: boolean; error?: string }>;
+    getShopOrderMembers: (shopOrderId: string) => Promise<ShopOrderMember[]>;
+    acceptShopOrderInvitation: (
+      shopOrderId: string,
+    ) => Promise<{ success: boolean; error?: string }>;
+    checkPendingShopOrderInvitations: () => Promise<ShopOrderMember[]>;
+    declineShopOrderInvitation: (
+      shopOrderId: string,
+    ) => Promise<{ success: boolean; error?: string }>;
+    cancelShopOrderInvitation: (memberId: string) => Promise<{ success: boolean; error?: string }>;
+    joinPresence: (
+      projectId: string,
+      activeView?: string,
+    ) => Promise<{ success: boolean; error?: string }>;
+    leavePresence: (projectId: string) => Promise<{ success: boolean; error?: string }>;
+    getPresence: (projectId: string) => Promise<PresenceMember[]>;
+    subscribePresence: (projectId: string) => Promise<{ success: boolean; error?: string }>;
+    unsubscribePresence: (projectId: string) => Promise<{ success: boolean }>;
+    onPresenceChanged: (callback: (projectId: string, members: PresenceMember[]) => void) => void;
+    offPresenceChanged: (callback: (projectId: string, members: PresenceMember[]) => void) => void;
   };
 }
 
