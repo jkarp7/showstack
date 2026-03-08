@@ -11,10 +11,11 @@
  *
  * Private helpers eliminate the boilerplate repeated across the project/shop-order
  * method pairs:
- *   _callRpc        — auth guard + RPC call returning CollaborationResult
- *   _callRpcGated   — canCollaborate gate + delegates to _callRpc
- *   _queryLocal<T>  — PowerSync getAll() with error handling
- *   _checkPending<T>— auth guard + RPC returning an array (pending invitations)
+ *   _callRpc              — auth guard + RPC call returning CollaborationResult
+ *   _callRpcGated         — canCollaborate gate + delegates to _callRpc
+ *   _queryLocal<T>        — PowerSync getAll() with error handling
+ *   _checkPending<T>      — auth guard + RPC returning an array (pending invitations)
+ *   _backfillToPowerSync  — pre-invite ownership backfill (project or shop order)
  */
 
 import { getSupabaseConnector } from './sync/SupabaseConnector';
@@ -22,6 +23,7 @@ import { getPowerSyncService } from './sync';
 import { licenseService } from './LicenseService';
 import { logger } from '../utils/logger';
 import { getProjectById } from '../database/queries/projects';
+import type { ProjectRow } from '../database/queries/projects';
 import { getShopOrderProjectById } from '../database/queries/shop-order';
 import { syncProjectToPowerSync, syncShopOrderToPowerSync } from './sync/projectSync';
 import type {
@@ -139,6 +141,26 @@ export class CollaborationService {
     }
   }
 
+  /** Sync a local entity row to PowerSync before an invite RPC, establishing
+   *  ownership in Supabase ahead of the RPC. Silently skips if unauthenticated
+   *  or the entity is not found locally. Errors are logged as warnings — the
+   *  RPC proceeds regardless. */
+  private async _backfillToPowerSync<T extends { id: string }>(
+    entityId: string,
+    getEntityFn: (id: string) => T | null,
+    syncFn: (entity: T, userId: string) => Promise<void>,
+    warnMessage: string,
+  ): Promise<void> {
+    const conn = getSupabaseConnector();
+    const userId = conn.isAuthenticated() ? conn.getUserId() : null;
+    if (!userId) return;
+    const entity = getEntityFn(entityId);
+    if (!entity) return;
+    await syncFn(entity, userId).catch((err) =>
+      logger.warn(warnMessage, { error: err instanceof Error ? err.message : String(err) }),
+    );
+  }
+
   // ============================================
   // PROJECT COLLABORATION
   // ============================================
@@ -157,19 +179,12 @@ export class CollaborationService {
     // the invite RPC runs. This handles projects that pre-date the write-path
     // feature and ensures ownership is established atomically. The stub-upsert
     // inside `invite_to_project` remains as a final safety net.
-    const conn = getSupabaseConnector();
-    const userId = conn.isAuthenticated() ? conn.getUserId() : null;
-    if (userId) {
-      const project = getProjectById(projectId);
-      if (project) {
-        await syncProjectToPowerSync(project, userId).catch((err) =>
-          logger.warn(
-            '[CollaborationService] project backfill failed; stub upsert in RPC is safety net',
-            { error: err instanceof Error ? err.message : String(err) },
-          ),
-        );
-      }
-    }
+    await this._backfillToPowerSync(
+      projectId,
+      (id) => getProjectById(id) as ProjectRow | null,
+      syncProjectToPowerSync,
+      '[CollaborationService] project backfill failed; stub upsert in RPC is safety net',
+    );
 
     return this._callRpcGated(
       'invite_to_project',
@@ -255,19 +270,12 @@ export class CollaborationService {
     // Backfill: write the full shop order row to PowerSync (→ Supabase) before
     // the invite RPC runs. This ensures ownership is established before the invite,
     // and the RPC's server-side lookup will find the row.
-    const conn = getSupabaseConnector();
-    const userId = conn.isAuthenticated() ? conn.getUserId() : null;
-    if (userId) {
-      const shopOrder = getShopOrderProjectById(shopOrderId);
-      if (shopOrder) {
-        await syncShopOrderToPowerSync(shopOrder, userId).catch((err) =>
-          logger.warn(
-            '[CollaborationService] shop order backfill failed; RPC will proceed without it',
-            { error: err instanceof Error ? err.message : String(err) },
-          ),
-        );
-      }
-    }
+    await this._backfillToPowerSync(
+      shopOrderId,
+      getShopOrderProjectById,
+      syncShopOrderToPowerSync,
+      '[CollaborationService] shop order backfill failed; RPC will proceed without it',
+    );
 
     return this._callRpcGated(
       'invite_to_shop_order',

@@ -15,6 +15,50 @@ export interface Project {
   updated_at: number;
 }
 
+/**
+ * Full database row shape for a project, including all columns in the SQLite
+ * schema. The minimal `Project` interface above only carries the fields needed
+ * by the UI; this type is used wherever the complete row must be written (e.g.
+ * the PowerSync write-path in projectSync.ts).
+ */
+export interface ProjectRow extends Project {
+  lighting_designer?: string | null;
+  lighting_designer_email?: string | null;
+  lighting_designer_phone?: string | null;
+  lighting_associates?: unknown;
+  audio_designer?: string | null;
+  audio_designer_email?: string | null;
+  audio_designer_phone?: string | null;
+  audio_associates?: unknown;
+  video_designer?: string | null;
+  video_designer_email?: string | null;
+  video_designer_phone?: string | null;
+  video_associates?: unknown;
+  electrician?: string | null;
+  electrician_email?: string | null;
+  electrician_phone?: string | null;
+  audio_tech?: string | null;
+  audio_tech_email?: string | null;
+  audio_tech_phone?: string | null;
+  video_tech?: string | null;
+  video_tech_email?: string | null;
+  video_tech_phone?: string | null;
+  production_manager?: string | null;
+  production_manager_email?: string | null;
+  production_manager_phone?: string | null;
+  production_manager_company?: string | null;
+  general_manager?: string | null;
+  general_manager_email?: string | null;
+  general_manager_phone?: string | null;
+  general_manager_company?: string | null;
+  venue_city?: string | null;
+  venue_state?: string | null;
+  show_dates?: unknown;
+  phase_label_a?: string | null;
+  phase_label_b?: string | null;
+  phase_label_c?: string | null;
+}
+
 export function getAllProjects(): Project[] {
   const db = getDatabase();
 

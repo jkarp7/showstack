@@ -11,7 +11,7 @@
  */
 
 import { getPowerSyncService } from './PowerSyncService';
-import type { Project } from '../../database/queries/projects';
+import type { ProjectRow } from '../../database/queries/projects';
 import type { ShopOrderProject } from '../../database/queries/shop-order';
 import { logger } from '../../utils/logger';
 
@@ -35,14 +35,9 @@ function toJsonStr(value: unknown): string | null {
  * PowerSync will queue this as a CRUD PUT operation and upload it to Supabase.
  * The INSERT … ON CONFLICT DO UPDATE never changes the `user_id` (ownership).
  */
-export async function syncProjectToPowerSync(project: Project, userId: string): Promise<void> {
+export async function syncProjectToPowerSync(project: ProjectRow, userId: string): Promise<void> {
   const ps = getPowerSyncService();
   if (!ps.isReady()) return;
-
-  // Cast to Record<string, unknown> to access columns that exist in the local
-  // SQLite schema but are not present in the minimal typed Project interface
-  // (e.g. lighting_designer, venue_city, phase_label_a, …).
-  const p = project as unknown as Record<string, unknown>;
 
   await ps.execute(
     `INSERT INTO projects (
@@ -121,42 +116,42 @@ export async function syncProjectToPowerSync(project: Project, userId: string): 
       project.name,
       project.description ?? null,
       project.logo_path ?? null,
-      p.lighting_designer ?? null,
-      p.lighting_designer_email ?? null,
-      p.lighting_designer_phone ?? null,
-      toJsonStr(p.lighting_associates),
-      p.audio_designer ?? null,
-      p.audio_designer_email ?? null,
-      p.audio_designer_phone ?? null,
-      toJsonStr(p.audio_associates),
-      p.video_designer ?? null,
-      p.video_designer_email ?? null,
-      p.video_designer_phone ?? null,
-      toJsonStr(p.video_associates),
-      p.electrician ?? null,
-      p.electrician_email ?? null,
-      p.electrician_phone ?? null,
-      p.audio_tech ?? null,
-      p.audio_tech_email ?? null,
-      p.audio_tech_phone ?? null,
-      p.video_tech ?? null,
-      p.video_tech_email ?? null,
-      p.video_tech_phone ?? null,
-      p.production_manager ?? null,
-      p.production_manager_email ?? null,
-      p.production_manager_phone ?? null,
-      p.production_manager_company ?? null,
-      p.general_manager ?? null,
-      p.general_manager_email ?? null,
-      p.general_manager_phone ?? null,
-      p.general_manager_company ?? null,
-      p.venue ?? null,
-      p.venue_city ?? null,
-      p.venue_state ?? null,
-      toJsonStr(p.show_dates),
-      p.phase_label_a ?? null,
-      p.phase_label_b ?? null,
-      p.phase_label_c ?? null,
+      project.lighting_designer ?? null,
+      project.lighting_designer_email ?? null,
+      project.lighting_designer_phone ?? null,
+      toJsonStr(project.lighting_associates),
+      project.audio_designer ?? null,
+      project.audio_designer_email ?? null,
+      project.audio_designer_phone ?? null,
+      toJsonStr(project.audio_associates),
+      project.video_designer ?? null,
+      project.video_designer_email ?? null,
+      project.video_designer_phone ?? null,
+      toJsonStr(project.video_associates),
+      project.electrician ?? null,
+      project.electrician_email ?? null,
+      project.electrician_phone ?? null,
+      project.audio_tech ?? null,
+      project.audio_tech_email ?? null,
+      project.audio_tech_phone ?? null,
+      project.video_tech ?? null,
+      project.video_tech_email ?? null,
+      project.video_tech_phone ?? null,
+      project.production_manager ?? null,
+      project.production_manager_email ?? null,
+      project.production_manager_phone ?? null,
+      project.production_manager_company ?? null,
+      project.general_manager ?? null,
+      project.general_manager_email ?? null,
+      project.general_manager_phone ?? null,
+      project.general_manager_company ?? null,
+      project.venue ?? null,
+      project.venue_city ?? null,
+      project.venue_state ?? null,
+      toJsonStr(project.show_dates),
+      project.phase_label_a ?? null,
+      project.phase_label_b ?? null,
+      project.phase_label_c ?? null,
       toJsonStr(project.enabled_modules),
       project.created_at,
       project.updated_at,
