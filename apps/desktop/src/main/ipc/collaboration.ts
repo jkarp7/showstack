@@ -17,6 +17,13 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
+/** UUID v4 format validation — matches the database id column type */
+function isValidUuid(value: string): boolean {
+  return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
+    value,
+  );
+}
+
 const VALID_INVITE_ROLES: InviteRole[] = ['editor', 'viewer'];
 
 // Module-scoped so state survives across registerCollaborationHandlers() calls
@@ -138,7 +145,7 @@ export function registerCollaborationHandlers(): void {
   });
 
   ipcMain.handle('collaboration:cancel-project-invitation', async (_, memberId: string) => {
-    if (!memberId || typeof memberId !== 'string') {
+    if (!memberId || !isValidUuid(memberId)) {
       return { success: false, error: 'Invalid member ID' };
     }
 
@@ -209,7 +216,7 @@ export function registerCollaborationHandlers(): void {
   });
 
   ipcMain.handle('collaboration:cancel-shop-order-invitation', async (_, memberId: string) => {
-    if (!memberId || typeof memberId !== 'string') {
+    if (!memberId || !isValidUuid(memberId)) {
       return { success: false, error: 'Invalid member ID' };
     }
 

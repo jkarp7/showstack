@@ -402,11 +402,18 @@ describe('Collaboration IPC handlers', () => {
     it('delegates to collaborationService.cancelProjectInvitation', async () => {
       mockCancelProjectInvitation.mockResolvedValue({ success: true });
       const handler = getHandler('collaboration:cancel-project-invitation');
+      const memberId = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
 
-      const result = await handler(fakeEvent, 'member-uuid');
+      const result = await handler(fakeEvent, memberId);
 
-      expect(mockCancelProjectInvitation).toHaveBeenCalledWith('member-uuid');
+      expect(mockCancelProjectInvitation).toHaveBeenCalledWith(memberId);
       expect(result).toMatchObject({ success: true });
+    });
+
+    it('returns error for non-UUID member ID', async () => {
+      const handler = getHandler('collaboration:cancel-project-invitation');
+      const result = await handler(fakeEvent, 'not-a-uuid');
+      expect(result).toMatchObject({ success: false, error: 'Invalid member ID' });
     });
   });
 
@@ -446,11 +453,18 @@ describe('Collaboration IPC handlers', () => {
     it('delegates to collaborationService.cancelShopOrderInvitation', async () => {
       mockCancelShopOrderInvitation.mockResolvedValue({ success: true });
       const handler = getHandler('collaboration:cancel-shop-order-invitation');
+      const memberId = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
 
-      const result = await handler(fakeEvent, 'member-uuid');
+      const result = await handler(fakeEvent, memberId);
 
-      expect(mockCancelShopOrderInvitation).toHaveBeenCalledWith('member-uuid');
+      expect(mockCancelShopOrderInvitation).toHaveBeenCalledWith(memberId);
       expect(result).toMatchObject({ success: true });
+    });
+
+    it('returns error for non-UUID member ID', async () => {
+      const handler = getHandler('collaboration:cancel-shop-order-invitation');
+      const result = await handler(fakeEvent, 'not-a-uuid');
+      expect(result).toMatchObject({ success: false, error: 'Invalid member ID' });
     });
   });
 
