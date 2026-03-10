@@ -13,7 +13,7 @@ import { Settings } from './pages/Settings';
 import { EquipmentManager } from './pages/modules/EquipmentManager';
 import { PowerManagement } from './pages/modules/PowerManagement';
 import { Paperwork } from './pages/modules/Paperwork';
-import { LabelDesigner } from './pages/modules/LabelDesigner';
+import { LabelsPage } from './pages/modules/LabelsPage';
 import { ProjectInfo } from './pages/modules/ProjectInfo';
 import { LicenseBanner } from './components/License/LicenseBanner';
 import { SplashScreen } from './components/SplashScreen';
@@ -122,7 +122,7 @@ function AppContent() {
             element={<PowerManagement key="summary" initialTab="summary" />}
           />
           <Route path="shop-orders" element={<ShopOrderBuilder />} />
-          <Route path="labels" element={<LabelDesigner />} />
+          <Route path="labels" element={<LabelsPage />} />
           <Route path="paperwork" element={<Paperwork />} />
           <Route path="project-info" element={<ProjectInfo />} />
           {/* Backwards-compat redirects inside workspace */}
