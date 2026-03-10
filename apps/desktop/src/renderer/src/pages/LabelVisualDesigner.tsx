@@ -14,20 +14,17 @@ export function LabelVisualDesigner() {
   const navigate = useNavigate();
 
   if (!projectId || !averyCode) {
-    // Redirect back to system docs if params missing
-    navigate('/module/production/system-docs');
+    navigate('/');
     return null;
   }
 
   const handleSave = (templateId: string) => {
     logger.info('Label template saved:', templateId);
-    // Navigate back to system docs after save
-    navigate(`/project/${projectId}/module/production/system-docs`);
+    navigate(`/project/${projectId}/labels`);
   };
 
   const handleCancel = () => {
-    // Navigate back to system docs on cancel
-    navigate(`/project/${projectId}/module/production/system-docs`);
+    navigate(`/project/${projectId}/labels`);
   };
 
   return (

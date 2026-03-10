@@ -16,7 +16,6 @@ import {
   ExportHeaderDialog,
   ExportHeaderOptions,
 } from '../../components/fixture/ExportHeaderDialog';
-import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import {
   UnsavedChangesDialog,
   useUnsavedChangesDialog,
@@ -59,10 +58,10 @@ import { GroupsInspector } from '../../components/inspector/GroupsInspector';
 import { ConditionalFormattingInspector } from '../../components/inspector/ConditionalFormattingInspector';
 
 interface EquipmentManagerProps {
-  embedded?: boolean;
+  initialTab?: 'fixtures' | 'infrastructure' | 'power';
 }
 
-export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {}) {
+export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerProps = {}) {
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId?: string; moduleType?: string }>();
   const {
@@ -78,8 +77,8 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     useInfrastructureStore();
   const { undo, redo, canUndo, canRedo } = useUndoRedoStore();
 
-  // Tab state
-  const [activeTab, setActiveTab] = useState<'fixtures' | 'infrastructure' | 'power'>('fixtures');
+  // Tab state — initialized from the route via initialTab prop
+  const [activeTab, setActiveTab] = useState<'fixtures' | 'infrastructure' | 'power'>(initialTab);
 
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [selectedInfrastructure, setSelectedInfrastructure] = useState<Set<string>>(new Set());
@@ -1089,29 +1088,12 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
   return (
     <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
-      {/* Breadcrumbs */}
-      {!embedded && (
-        <div className="flex-shrink-0">
-          <Breadcrumbs />
-        </div>
-      )}
-
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-4">
             <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold">{projectName}</h1>
-                {!embedded && (
-                  <>
-                    <span className="text-gray-500">•</span>
-                    <span className="text-lg text-gray-600 dark:text-gray-400">
-                      ShowStack:Lighting
-                    </span>
-                  </>
-                )}
-              </div>
+              <h1 className="text-2xl font-bold">{projectName}</h1>
               <p className="text-sm text-gray-600 dark:text-gray-400">Fixture Schedule</p>
             </div>
           </div>

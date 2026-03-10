@@ -89,11 +89,9 @@ export function ShopOrderBuilder() {
 
   const handleBackClick = () => {
     if (parentProjectId) {
-      // Go back to module tool selection
-      navigate(`/project/${parentProjectId}/module/production`);
+      navigate(`/project/${parentProjectId}/shop-orders`);
     } else {
-      // Go back to module tool selection (no project context)
-      navigate('/module/production');
+      navigate('/');
     }
   };
 
@@ -207,10 +205,8 @@ export function ShopOrderBuilder() {
 
   const handleBackToList = () => {
     if (parentProjectId) {
-      // Go back to module tool selection when in project context
-      navigate(`/project/${parentProjectId}/module/production`);
+      navigate(`/project/${parentProjectId}/shop-orders`);
     } else {
-      // Clear current project and show list when not in project context
       clearCurrentProject();
     }
   };

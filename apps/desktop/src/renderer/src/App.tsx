@@ -2,15 +2,19 @@ import { HashRouter as Router, Routes, Route, Navigate, useNavigate } from 'reac
 import { useEffect, useState } from 'react';
 import { Login } from './pages/Login';
 import { LandingPage } from './pages/LandingPage';
-import { ProjectPage } from './pages/ProjectPage';
+import { ProjectWorkspace } from './pages/ProjectWorkspace';
 import { ModuleLanding } from './pages/ModuleLanding';
 import { ShopOrderBuilder } from './pages/modules/ShopOrderBuilder';
-import { SystemDocs } from './pages/modules/SystemDocs';
 import { Manager } from './pages/modules/Manager';
 import { LabelVisualDesigner } from './pages/LabelVisualDesigner';
 import { AdminPanel } from './pages/admin/AdminPanel';
 import { Account } from './pages/Account';
 import { Settings } from './pages/Settings';
+import { EquipmentManager } from './pages/modules/EquipmentManager';
+import { PowerManagement } from './pages/modules/PowerManagement';
+import { Paperwork } from './pages/modules/Paperwork';
+import { LabelDesigner } from './pages/modules/LabelDesigner';
+import { ProjectInfo } from './pages/modules/ProjectInfo';
 import { LicenseBanner } from './components/License/LicenseBanner';
 import { SplashScreen } from './components/SplashScreen';
 import { ThemeProvider } from './components/ThemeProvider';
@@ -21,7 +25,6 @@ import { AuthModal } from './components/auth';
 import { OfflineBanner } from './components/sync';
 import { PendingInvitationsBanner } from './components/collaboration/PendingInvitationsBanner';
 import { useFeatureFlag } from './config/featureFlags';
-import { useSettingsStore } from './store/settingsStore';
 import { useUIStore } from './store/uiStore';
 import { useAuthStore } from './store/authStore';
 import { telemetry } from './services/telemetry';
@@ -97,72 +100,56 @@ function AppContent() {
         {/* Auth */}
         <Route path="/login" element={<Login />} />
 
-        {/* Project-based routes */}
-        <Route path="/project/:projectId" element={<ProjectPage />} />
-        <Route path="/project/:projectId/module/:moduleType" element={<ModuleLanding />} />
-        <Route path="/project/:projectId/module/production/system-docs" element={<SystemDocs />} />
-        <Route
-          path="/project/:projectId/module/production/shop-order"
-          element={<ShopOrderBuilder />}
-        />
+        {/* Project workspace — sidebar layout wraps all project routes */}
+        <Route path="/project/:projectId" element={<ProjectWorkspace />}>
+          <Route index element={<Navigate to="fixtures" replace />} />
+          <Route path="fixtures" element={<EquipmentManager initialTab="fixtures" />} />
+          <Route path="infrastructure" element={<EquipmentManager initialTab="infrastructure" />} />
+          <Route path="racks" element={<EquipmentManager initialTab="power" />} />
+          <Route path="power" element={<PowerManagement />} />
+          <Route path="power/services" element={<PowerManagement />} />
+          <Route path="power/summary" element={<PowerManagement />} />
+          <Route path="shop-orders" element={<ShopOrderBuilder />} />
+          <Route path="labels" element={<LabelDesigner />} />
+          <Route path="paperwork" element={<Paperwork />} />
+          <Route path="project-info" element={<ProjectInfo />} />
+          {/* Backwards-compat redirects inside workspace */}
+          <Route
+            path="module/production/system-docs"
+            element={<Navigate to="../fixtures" replace />}
+          />
+          <Route
+            path="module/production/shop-order"
+            element={<Navigate to="../shop-orders" replace />}
+          />
+          <Route
+            path="module/production/equipment"
+            element={<Navigate to="../fixtures" replace />}
+          />
+          <Route
+            path="module/production/paperwork"
+            element={<Navigate to="../paperwork" replace />}
+          />
+          <Route path="module/production/labels" element={<Navigate to="../labels" replace />} />
+          <Route path="module/production" element={<Navigate to="../fixtures" replace />} />
+          <Route path="module/:moduleType" element={<Navigate to="../fixtures" replace />} />
+        </Route>
+        {/* Label visual designer — full-screen canvas, outside workspace layout */}
         <Route
           path="/project/:projectId/prep/label-designer/:averyCode"
           element={<LabelVisualDesigner />}
         />
-        <Route path="/project/:projectId/module/design" element={<Navigate to="prep" replace />} />
-        <Route
-          path="/project/:projectId/module/prep"
-          element={<Navigate to="/project/:projectId/module/production/shop-order" replace />}
-        />
-        <Route path="/project/:projectId/module/manager" element={<Manager />} />
 
-        {/* Direct module access (no project) */}
+        {/* Backwards compatibility — old module-only routes (no project context) */}
         <Route path="/module/:moduleType" element={<ModuleLanding />} />
-        <Route path="/module/production/system-docs" element={<SystemDocs />} />
-        <Route path="/module/production/shop-order" element={<ShopOrderBuilder />} />
-        <Route
-          path="/module/prep"
-          element={<Navigate to="/module/production/shop-order" replace />}
-        />
         <Route path="/module/manager" element={<Manager />} />
-        <Route
-          path="/module/production"
-          element={<Navigate to="/module/production/system-docs" replace />}
-        />
-        <Route path="/module/design" element={<Navigate to="/module/prep" replace />} />
-
-        {/* Backwards compatibility - redirect old routes */}
+        <Route path="/module/production" element={<Navigate to="/" replace />} />
+        <Route path="/module/production/system-docs" element={<Navigate to="/" replace />} />
+        <Route path="/module/production/shop-order" element={<Navigate to="/" replace />} />
         <Route path="/modules" element={<LandingPage />} />
-        <Route
-          path="/modules/prep"
-          element={<Navigate to="/module/production/shop-order" replace />}
-        />
-        <Route path="/modules/production" element={<Navigate to="/module/production" replace />} />
+        <Route path="/modules/prep" element={<Navigate to="/" replace />} />
+        <Route path="/modules/production" element={<Navigate to="/" replace />} />
         <Route path="/modules/manager" element={<Navigate to="/module/manager" replace />} />
-        <Route
-          path="/project/:projectId/module/production/equipment"
-          element={<Navigate to="/project/:projectId/module/production/system-docs" replace />}
-        />
-        <Route
-          path="/project/:projectId/module/production/paperwork"
-          element={<Navigate to="/project/:projectId/module/production/system-docs" replace />}
-        />
-        <Route
-          path="/project/:projectId/module/production/labels"
-          element={<Navigate to="/project/:projectId/module/production/system-docs" replace />}
-        />
-        <Route
-          path="/module/production/equipment"
-          element={<Navigate to="/module/production/system-docs" replace />}
-        />
-        <Route
-          path="/module/production/paperwork"
-          element={<Navigate to="/module/production/system-docs" replace />}
-        />
-        <Route
-          path="/module/production/labels"
-          element={<Navigate to="/module/production/system-docs" replace />}
-        />
 
         {/* Admin panel */}
         <Route path="/admin" element={<AdminPanel />} />

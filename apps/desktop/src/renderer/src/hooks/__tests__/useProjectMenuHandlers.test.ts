@@ -79,24 +79,22 @@ describe('useProjectMenuHandlers', () => {
   });
 
   describe('menu:generatePaperwork handler', () => {
-    it('should navigate to project system-docs when projectId is in route params', () => {
+    it('should navigate to project paperwork when projectId is in route params', () => {
       mockParams = { projectId: 'proj-abc123' };
 
       renderHook(() => useProjectMenuHandlers());
       registeredHandlers['menu:generatePaperwork']?.();
 
-      expect(mockNavigate).toHaveBeenCalledWith(
-        '/project/proj-abc123/module/production/system-docs',
-      );
+      expect(mockNavigate).toHaveBeenCalledWith('/project/proj-abc123/paperwork');
     });
 
-    it('should navigate to standalone system-docs when no projectId in params', () => {
+    it('should navigate to home when no projectId in params', () => {
       mockParams = {};
 
       renderHook(() => useProjectMenuHandlers());
       registeredHandlers['menu:generatePaperwork']?.();
 
-      expect(mockNavigate).toHaveBeenCalledWith('/module/production/system-docs');
+      expect(mockNavigate).toHaveBeenCalledWith('/');
     });
 
     it('should use the projectId from params verbatim', () => {
@@ -105,9 +103,7 @@ describe('useProjectMenuHandlers', () => {
       renderHook(() => useProjectMenuHandlers());
       registeredHandlers['menu:generatePaperwork']?.();
 
-      expect(mockNavigate).toHaveBeenCalledWith(
-        '/project/my-project-id/module/production/system-docs',
-      );
+      expect(mockNavigate).toHaveBeenCalledWith('/project/my-project-id/paperwork');
     });
   });
 });

@@ -10,13 +10,9 @@ import { ServiceConfigurationPanel } from '../../components/power/ServiceConfigu
 import { DimmerRack, PDRack } from '../../types/power';
 import { Zap, Server, Activity, Settings } from 'lucide-react';
 
-interface PowerManagementProps {
-  embedded?: boolean;
-}
-
 type PowerTab = 'racks' | 'configuration' | 'summary';
 
-export function PowerManagement({ embedded = false }: PowerManagementProps) {
+export function PowerManagement() {
   const { projectId } = useParams<{ projectId?: string }>();
   const currentProject = useProjectStore((state) => state.currentProject);
   const fixtures = useFixtureStore((state) => state.fixtures);
