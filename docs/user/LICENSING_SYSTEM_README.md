@@ -409,5 +409,5 @@ See `LicenseService.ts:verifyLicenseViaSupabase()` for implementation details.
 ---
 
 **Version**: 2.0.0
-**Last Updated**: February 2026
+**Last Updated**: February 26, 2026
 **Author**: ShowStack Development Team

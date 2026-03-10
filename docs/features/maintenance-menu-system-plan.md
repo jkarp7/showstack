@@ -5,7 +5,7 @@
 **Timeline:** 4 weeks (1 month)
 **Effort:** 1 developer full-time
 **Status:** Planned (not yet implemented)
-**Created:** January 2026
+**Created:** January 20, 2026
 **Priority:** Medium-High (enables shop order automation, Lightwright parity)
 
 ---
@@ -76,7 +76,7 @@ The Maintenance Menu System provides custom categorization for fixtures with rul
 
 The following related features shipped after this plan was written. Phase 1 and 2 should integrate with these rather than building from scratch.
 
-### Menu Bar Framework (PR #83 — March 2026)
+### Menu Bar Framework (PR #83 — March 4, 2026)
 
 `apps/desktop/src/main/menu/menuTemplate.ts` — Full context-aware menu already exists.
 Current top-level menus: ShowStack (macOS), File, Edit, View, Project, Tools, Window, Help.

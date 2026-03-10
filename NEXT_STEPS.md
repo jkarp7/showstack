@@ -37,7 +37,7 @@ npm run format:check
 
 ## Recently Completed
 
-### Multi-User Collaboration (March 2026)
+### Multi-User Collaboration (March 7, 2026)
 
 - Project and shop-order sharing: invite by email with editor/viewer roles
 - `CollaborationService` — invite/remove/accept/decline via Supabase RPCs (migrations 005–011)
@@ -48,7 +48,7 @@ npm run format:check
 - PowerSync sync rules rewritten — parameterized buckets, no JOINs anywhere (migration 008 denormalizes `project_id` onto `dimmer_rack_modules` and `shop_order_id` onto `shop_order_items`)
 - Feature-flagged behind `collaboration`; license-gated to Professional/Institutional tiers
 
-### User Accounts, Licensing & Demo Mode (February 2026)
+### User Accounts, Licensing & Demo Mode (February 15, 2026)
 
 - Supabase Auth integration (sign in, sign up, sign out, password reset)
 - Email-based license auto-claim (no manual key entry)

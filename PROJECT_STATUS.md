@@ -29,7 +29,7 @@ This document tracks the development status of all ShowStack feature domains and
 
 ### ✅ Recently Completed (December 2025 - March 2026)
 
-**Latest (March 2026):** 14. ✅ Multi-User Collaboration (feature/multi-user-collaboration) - COMPLETED (March 2026)
+**Latest (March 7, 2026):** 14. ✅ Multi-User Collaboration (feature/multi-user-collaboration) - COMPLETED (March 7, 2026)
 
 - **CollaborationService** — invite/remove/accept/decline for projects and shop orders via Supabase RPCs
 - **PresenceService** — real-time presence tracking via Supabase Realtime channels
@@ -116,7 +116,7 @@ This document tracks the development status of all ShowStack feature domains and
 
 The original cloud-native architecture plan (Issues #33 + #34) called for a custom Express.js + PostgreSQL + Socket.io backend. That plan was archived in favor of Supabase and PowerSync, which provide the same capabilities with significantly less infrastructure to maintain.
 
-**Implemented (February 2026, PR #80):**
+**Implemented (February 15, 2026, PR #80):**
 
 - **Supabase Auth** — sign in/up, password reset, session management
 - **Supabase Licenses table** — auto-claim by email, perpetual fallback model, cloud sync flag, tier-based feature limits

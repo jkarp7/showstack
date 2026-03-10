@@ -37,7 +37,7 @@ _Goal: declutter the project list by grouping versions of the same show into sta
 
 _Goal: Switch to a "Key-Centric Identity" with Perpetual Fallback (Keep what you paid for)._
 
-**Implemented (February 2026, PR #80):**
+**Implemented (February 15, 2026, PR #80):**
 
 - Supabase Auth integration — users sign in with email/password. No manual key entry.
 - Licenses are auto-claimed by email match on the Supabase `licenses` table.
