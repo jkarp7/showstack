@@ -52,6 +52,10 @@ import {
   formatHeaderForGrandMA,
 } from '../../utils/exportHeaders';
 import { HighlightRule, DEFAULT_HIGHLIGHT_RULES } from '../../types/highlighting';
+import { useGroupStore } from '../../store/groupStore';
+import { getGroupMembers } from '../../utils/groupMembership';
+import { InspectorPanel } from '../../components/inspector/InspectorPanel';
+import { GroupsInspector } from '../../components/inspector/GroupsInspector';
 
 interface EquipmentManagerProps {
   embedded?: boolean;
@@ -114,6 +118,14 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
   // Highlight rules for conditional formatting
   const [highlightRules, setHighlightRules] = useState<HighlightRule[]>(DEFAULT_HIGHLIGHT_RULES);
+
+  // Smart Groups — inspector panel
+  const { groups, loadGroups } = useGroupStore();
+  const [isInspectorOpen, setIsInspectorOpen] = useState(false);
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
+
+  // Pinned fixture IDs for the active group (used for membership evaluation)
+  const [activePins, setActivePins] = useState<string[]>([]);
 
   // Project state
   const [project, setProject] = useState<Project>({ name: 'Untitled Project' });
@@ -233,6 +245,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     setCurrentProjectId(currentProjectId);
     loadFixtures(currentProjectId);
     loadInfrastructure(currentProjectId);
+    loadGroups(currentProjectId);
 
     // Clear undo/redo history when switching projects
     useUndoRedoStore.getState().clearHistory();
@@ -783,9 +796,29 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     };
   }, [fixtures, availableTypes, availableLocations]);
 
+  // When the active group changes, load its pins for membership evaluation
+  useEffect(() => {
+    if (!activeGroupId) {
+      setActivePins([]);
+      return;
+    }
+    window.api?.groups
+      ?.getPins(activeGroupId)
+      .then((rows: { fixture_id: string }[]) => setActivePins(rows.map((r) => r.fixture_id)))
+      .catch(() => setActivePins([]));
+  }, [activeGroupId]);
+
   // Filtered and sorted fixtures
   const processedFixtures = useMemo(() => {
     let result = [...fixtures];
+
+    // When a group filter is active, restrict to group members only
+    if (activeGroupId) {
+      const activeGroup = groups.find((g) => g.id === activeGroupId);
+      if (activeGroup) {
+        result = getGroupMembers(activeGroup, result, activePins);
+      }
+    }
 
     // Filter out hidden fixtures unless "Show Hidden" is enabled
     if (!showHidden) {
@@ -864,7 +897,18 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     }
 
     return result;
-  }, [fixtures, searchQuery, locationFilter, typeFilter, statusFilter, showHidden, sortConfigs]);
+  }, [
+    fixtures,
+    searchQuery,
+    locationFilter,
+    typeFilter,
+    statusFilter,
+    showHidden,
+    sortConfigs,
+    activeGroupId,
+    groups,
+    activePins,
+  ]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -1157,24 +1201,91 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
             />
           </div>
 
-          {/* Main Content - Virtual Data Grid */}
-          <main className="flex-1 min-h-0 overflow-hidden">
-            <VirtualDataGrid
-              fixtures={processedFixtures}
-              selectedRows={selectedRows}
-              onSelectRows={setSelectedRows}
-              onUpdateFixture={updateFixture}
-              columnVisibility={columnVisibility}
-              columnOrder={columnOrder}
-              onColumnOrderChange={setColumnOrder}
-              columnWidths={columnWidths}
-              onColumnWidthChange={setColumnWidths}
-              userColumnDefinitions={userColumnDefinitions}
-              dimmerRacks={dimmerRacks}
-              pdRacks={pdRacks}
-              autoFillSuggestions={autoFillSuggestions}
-              highlightRules={highlightRules}
-            />
+          {/* Main Content — grid + optional inspector panel */}
+          <main className="flex-1 min-h-0 overflow-hidden flex flex-row">
+            {/* Groups toggle button (floating at top-right of grid area) */}
+            <div className="flex-1 min-w-0 relative">
+              <button
+                onClick={() => setIsInspectorOpen((o) => !o)}
+                className={`absolute top-2 right-2 z-10 flex items-center gap-1.5 px-2 py-1 text-xs rounded border transition-colors ${
+                  isInspectorOpen
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+                title="Toggle Groups inspector"
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <rect
+                    x="1"
+                    y="1"
+                    width="4"
+                    height="4"
+                    rx="1"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                  <rect
+                    x="7"
+                    y="1"
+                    width="4"
+                    height="4"
+                    rx="1"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                  <rect
+                    x="1"
+                    y="7"
+                    width="4"
+                    height="4"
+                    rx="1"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                  <rect
+                    x="7"
+                    y="7"
+                    width="4"
+                    height="4"
+                    rx="1"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                </svg>
+                Groups
+                {activeGroupId && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-300 flex-shrink-0" />
+                )}
+              </button>
+              <VirtualDataGrid
+                fixtures={processedFixtures}
+                selectedRows={selectedRows}
+                onSelectRows={setSelectedRows}
+                onUpdateFixture={updateFixture}
+                columnVisibility={columnVisibility}
+                columnOrder={columnOrder}
+                onColumnOrderChange={setColumnOrder}
+                columnWidths={columnWidths}
+                onColumnWidthChange={setColumnWidths}
+                userColumnDefinitions={userColumnDefinitions}
+                dimmerRacks={dimmerRacks}
+                pdRacks={pdRacks}
+                autoFillSuggestions={autoFillSuggestions}
+                highlightRules={highlightRules}
+              />
+            </div>
+
+            {/* Inspector Panel */}
+            {isInspectorOpen && (
+              <InspectorPanel content="groups" onClose={() => setIsInspectorOpen(false)}>
+                <GroupsInspector
+                  fixtures={fixtures}
+                  activeGroupId={activeGroupId}
+                  onGroupActivate={setActiveGroupId}
+                  projectId={currentProjectId}
+                />
+              </InspectorPanel>
+            )}
           </main>
 
           {/* Status Bar */}

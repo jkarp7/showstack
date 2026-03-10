@@ -33,6 +33,7 @@ import { registerSyncHandlers, initializePowerSync, disposePowerSync } from './i
 import { registerHealthHandlers } from './ipc/health';
 import { registerBackupHandlers } from './ipc/backup';
 import { registerCollaborationHandlers } from './ipc/collaboration';
+import { registerGroupHandlers } from './ipc/groups';
 import { backgroundVerifier } from './services/BackgroundVerifier';
 import { backupService } from './services/BackupService';
 import { crashRecoveryService } from './services/CrashRecoveryService';
@@ -98,6 +99,7 @@ app.on('ready', async () => {
   registerHealthHandlers();
   registerBackupHandlers();
   registerCollaborationHandlers();
+  registerGroupHandlers();
 
   // Initialize PowerSync (non-blocking, works offline)
   initializePowerSync().catch((err) => {

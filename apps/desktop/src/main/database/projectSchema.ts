@@ -517,4 +517,42 @@ export const PROJECT_SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_shop_order_notes_type ON shop_order_notes(prep_project_id, type);
   CREATE INDEX IF NOT EXISTS idx_shop_order_note_templates_type ON shop_order_note_templates(type);
   CREATE INDEX IF NOT EXISTS idx_shop_order_note_templates_default ON shop_order_note_templates(type, is_default);
+
+  -- ============================================
+  -- SMART GROUPS TABLES
+  -- ============================================
+
+  -- Fixture Groups table (named saved filters for shop orders, labels, and paperwork)
+  CREATE TABLE IF NOT EXISTS fixture_groups (
+    id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL,
+
+    name TEXT NOT NULL,
+    color TEXT,           -- hex color for visual indicators (e.g. "#4A90E2")
+    notes TEXT,           -- general notes (inspector display, paperwork section headers)
+    shop_notes TEXT,      -- section-level note in shop order output
+    filter_def TEXT,      -- JSON: existing filter system format
+    sort_order INTEGER NOT NULL DEFAULT 0,
+
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+  );
+
+  -- Fixture Group Pins table (fixtures force-included in a group regardless of filter)
+  CREATE TABLE IF NOT EXISTS fixture_group_pins (
+    fixture_id TEXT NOT NULL,
+    group_id   TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+
+    PRIMARY KEY (fixture_id, group_id),
+    FOREIGN KEY (fixture_id) REFERENCES fixtures(id) ON DELETE CASCADE,
+    FOREIGN KEY (group_id)   REFERENCES fixture_groups(id) ON DELETE CASCADE
+  );
+
+  -- Indexes for smart groups
+  CREATE INDEX IF NOT EXISTS idx_fixture_groups_project ON fixture_groups(project_id);
+  CREATE INDEX IF NOT EXISTS idx_fixture_groups_sort ON fixture_groups(project_id, sort_order);
+  CREATE INDEX IF NOT EXISTS idx_fixture_group_pins_group ON fixture_group_pins(group_id);
 `;
