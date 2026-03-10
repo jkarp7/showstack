@@ -8,7 +8,7 @@ import { SortBar } from '../../components/fixture/SortBar';
 import { AddFixtureDialog } from '../../components/fixture/AddFixtureDialog';
 import { BulkEditDialog } from '../../components/fixture/BulkEditDialog';
 import { UserColumnSettingsDialog } from '../../components/fixture/UserColumnSettingsDialog';
-import { ConditionalFormattingDialog } from '../../components/fixture/ConditionalFormattingDialog';
+
 import { InfrastructureToolbar } from '../../components/infrastructure/InfrastructureToolbar';
 import { AddInfrastructureDialog } from '../../components/infrastructure/AddInfrastructureDialog';
 import { EditInfrastructureDialog } from '../../components/infrastructure/EditInfrastructureDialog';
@@ -54,8 +54,9 @@ import {
 import { HighlightRule, DEFAULT_HIGHLIGHT_RULES } from '../../types/highlighting';
 import { useGroupStore } from '../../store/groupStore';
 import { getGroupMembers, computeFixtureGroupMap } from '../../utils/groupMembership';
-import { InspectorPanel } from '../../components/inspector/InspectorPanel';
+import { InspectorPanel, InspectorContent } from '../../components/inspector/InspectorPanel';
 import { GroupsInspector } from '../../components/inspector/GroupsInspector';
+import { ConditionalFormattingInspector } from '../../components/inspector/ConditionalFormattingInspector';
 
 interface EquipmentManagerProps {
   embedded?: boolean;
@@ -90,7 +91,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   );
   const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = useState(false);
   const [isUserColumnSettingsOpen, setIsUserColumnSettingsOpen] = useState(false);
-  const [isConditionalFormattingOpen, setIsConditionalFormattingOpen] = useState(false);
+
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
   const duplicateErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -122,6 +123,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   // Smart Groups — inspector panel
   const { groups, allPins, pinsByGroup, loadGroups, addPin, removePin } = useGroupStore();
   const [isInspectorOpen, setIsInspectorOpen] = useState(false);
+  const [inspectorContent, setInspectorContent] = useState<InspectorContent>('groups');
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
 
   // Pinned fixture IDs for the active group (used for membership evaluation)
@@ -1054,7 +1056,10 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     },
     onClearSort: () => setSortConfigs([]),
     onClearFilters: handleClearFilters,
-    onConditionalFormatting: () => setIsConditionalFormattingOpen(true),
+    onConditionalFormatting: () => {
+      setIsInspectorOpen(true);
+      setInspectorContent('conditionalFormatting');
+    },
     onAddInfrastructure: () => {
       setActiveTab('infrastructure');
       setIsAddInfrastructureDialogOpen(true);
@@ -1302,13 +1307,25 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
             {/* Inspector Panel */}
             {isInspectorOpen && (
-              <InspectorPanel content="groups" onClose={() => setIsInspectorOpen(false)}>
-                <GroupsInspector
-                  fixtures={fixtures}
-                  activeGroupId={activeGroupId}
-                  onGroupActivate={setActiveGroupId}
-                  projectId={currentProjectId}
-                />
+              <InspectorPanel
+                content={inspectorContent}
+                onContentChange={setInspectorContent}
+                onClose={() => setIsInspectorOpen(false)}
+              >
+                {inspectorContent === 'groups' && (
+                  <GroupsInspector
+                    fixtures={fixtures}
+                    activeGroupId={activeGroupId}
+                    onGroupActivate={setActiveGroupId}
+                    projectId={currentProjectId}
+                  />
+                )}
+                {inspectorContent === 'conditionalFormatting' && (
+                  <ConditionalFormattingInspector
+                    rules={highlightRules}
+                    onChange={handleSaveHighlightRules}
+                  />
+                )}
               </InspectorPanel>
             )}
           </main>
@@ -1639,14 +1656,6 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
         onClose={() => setIsUserColumnSettingsOpen(false)}
         onSave={handleSaveUserColumnDefinitions}
         initialDefinitions={userColumnDefinitions}
-      />
-
-      {/* Conditional Formatting Dialog */}
-      <ConditionalFormattingDialog
-        isOpen={isConditionalFormattingOpen}
-        onClose={() => setIsConditionalFormattingOpen(false)}
-        rules={highlightRules}
-        onSave={handleSaveHighlightRules}
       />
 
       {/* Export Header Dialog */}
