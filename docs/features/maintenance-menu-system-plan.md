@@ -4,9 +4,9 @@
 **Delivery:** Phased approach with 4 iterative milestones
 **Timeline:** 3 weeks
 **Effort:** 1 developer full-time
-**Status:** Planned (not yet implemented)
+**Status:** In Progress — Phases 1, 3, 4 complete; Phase 2 next
 **Created:** January 20, 2026
-**Revised:** March 9, 2026
+**Revised:** March 10, 2026
 **Priority:** Medium-High (enables shop order automation)
 
 ---
@@ -241,6 +241,7 @@ export function registerGroupHandlers(): void {
   );
   ipcMain.handle('groups:getPins', async (_event, groupId: string) => getGroupPins(groupId));
 }
+// Also implemented: groups:getAllPins (projectId) — loads all pins for all groups in a project via JOIN
 ```
 
 ### Membership Evaluation
@@ -282,12 +283,12 @@ No re-evaluate step. No stale data. Membership is always derived from the curren
 
 ### Deliverables
 
-- [ ] Database schema with 2 tables
-- [ ] Group CRUD operations with 80%+ coverage
-- [ ] Pin/unpin operations
-- [ ] Membership evaluation via existing filter system
-- [ ] IPC handlers with 70%+ coverage
-- [ ] TypeScript interfaces
+- [x] Database schema with 2 tables
+- [x] Group CRUD operations with 80%+ coverage
+- [x] Pin/unpin operations
+- [x] Membership evaluation via existing filter system
+- [x] IPC handlers with 70%+ coverage
+- [x] TypeScript interfaces
 
 **Effort:** 1 week
 
@@ -495,8 +496,8 @@ In the bulk edit toolbar (appears when rows are selected):
 
 ### Deliverables
 
-- [ ] Group indicator column in Equipment Manager grid
-- [ ] Context menu "Pin to Group" with toggle behavior
+- [x] Group indicator column in Equipment Manager grid
+- [x] Context menu "Pin to Group" with toggle behavior
 - [ ] Bulk "Pin to Group" action on selected fixtures
 - [ ] 50%+ component test coverage
 
@@ -616,11 +617,17 @@ export function generateChannelHookup(
 
 ### Deliverables
 
-- [ ] "Auto-populate from Groups" action in Shop Order Builder
-- [ ] `shop_notes` → section note; `fixture.notes` → line-item notes
-- [ ] `{group}` field token in label designer
-- [ ] "Group by: Smart Group" option in paperwork report generator
-- [ ] 60%+ test coverage for integration functions
+- [x] "Auto-populate from Groups" action in Shop Order Builder
+- [x] `shop_notes` → section note; `fixture.notes` → line-item notes
+- [x] `{group}` field token in label designer
+- [x] "Group by: Smart Group" option in paperwork report generator
+- [x] 60%+ test coverage for integration functions
+
+**Implementation notes:**
+
+- `groupHelpers.ts` created at `src/renderer/src/utils/shop-order/groupHelpers.ts` (plan listed different path)
+- `ShopOrderTable.tsx` is at `src/renderer/src/components/shop-order/` (not `prep/`)
+- `GroupingSortingControls.tsx` already existed — wired into `PaperworkEditor.tsx` with `extraGroupOptions` prop
 
 **Effort:** 3-4 days
 
@@ -670,9 +677,9 @@ export function generateChannelHookup(
 
 ### Technical
 
-- [ ] Group membership always reflects current fixture data (no re-evaluate step)
-- [ ] Filter definition stored and evaluated using existing filter system format
-- [ ] `shop_notes` flows to section note; `fixture.notes` flows to line-item note
+- [x] Group membership always reflects current fixture data (no re-evaluate step)
+- [x] Filter definition stored and evaluated using existing filter system format
+- [x] `shop_notes` flows to section note; `fixture.notes` flows to line-item note
 - [ ] 70%+ overall test coverage
 - [ ] `<InspectorPanel>` shell usable by conditional formatting without structural changes
 
@@ -680,8 +687,8 @@ export function generateChannelHookup(
 
 - [ ] Creating a group takes < 30 seconds (name a filter, pick a color)
 - [ ] Inspector shows live fixture count per group
-- [ ] Auto-populate from Groups produces a correctly structured shop order
-- [ ] Group field available in labels and paperwork
+- [x] Auto-populate from Groups produces a correctly structured shop order
+- [x] Group field available in labels and paperwork
 
 ---
 
@@ -696,6 +703,6 @@ export function generateChannelHookup(
 
 ---
 
-**Last Updated:** March 9, 2026
+**Last Updated:** March 10, 2026
 **Author:** Claude Code
-**Version:** 2.0
+**Version:** 2.1

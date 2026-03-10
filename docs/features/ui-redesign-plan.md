@@ -1,7 +1,7 @@
 # ShowStack UI Redesign Plan
 
 **Created:** March 9, 2026
-**Status:** Planned — design complete, implementation not started
+**Status:** Partially In Progress — Phase 1 (Inspector Shell) next; design complete for all phases
 **Priority:** High (foundational — affects all features built after this)
 **Scope:** Landing page, navigation model, Equipment Manager layout, inspector panel system,
 tool consolidation, error checking
@@ -418,10 +418,12 @@ For projects without an uploaded show logo:
 
 This is a structural change, not a big-bang rewrite. Each step ships independently.
 
-### Phase 1 — Inspector Shell (with Smart Groups)
+### Phase 1 — Inspector Shell (with Smart Groups) — **Next Up**
 
 Build `<InspectorPanel>` and `<GroupsInspector>` as planned in the Smart Groups
 implementation plan. Establish CSS custom property styling convention.
+
+_Smart Groups Phases 1, 3, and 4 are complete (backend, grid integration, shop order/labels/paperwork). Phase 2 (this phase) adds the visible inspector UI._
 
 ### Phase 2 — Conditional Formatting Migration
 
@@ -481,6 +483,6 @@ they slot in without navigation changes when they ship.
 
 ---
 
-**Last Updated:** March 9, 2026
+**Last Updated:** March 10, 2026
 **Author:** Claude Code
 **Version:** 1.0

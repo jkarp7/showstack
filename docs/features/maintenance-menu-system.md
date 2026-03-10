@@ -1,10 +1,10 @@
 # Smart Groups
 
 **Created:** January 18, 2026
-**Revised:** March 9, 2026
-**Status:** Planned
+**Revised:** March 10, 2026
+**Status:** Partially Implemented — Phases 1, 3, 4 complete; Phase 2 (Inspector UI) next
 **Target Release:** TBD
-**Estimated Effort:** 2-3 weeks
+**Estimated Effort:** 1 week remaining (Phase 2 only)
 
 ---
 
@@ -119,26 +119,28 @@ CREATE TABLE fixture_group_pins (
 
 ## Integration Points
 
-### Equipment Manager
+### Equipment Manager ✓ (Phase 3 complete)
 
 - Group chips in inspector with live fixture count
 - Clicking a group filters the grid
 - Color indicator column shows group membership
 - Bulk action: "Pin selected fixtures to Group"
 
-### Shop Orders
+_Note: Color dot indicator column and right-click "Pin to Group" context menu are implemented. Group chips in Inspector and bulk pin action require Phase 2 (Inspector UI)._
+
+### Shop Orders ✓ (Phase 4 complete)
 
 - "Auto-populate from Groups" creates one section per group, ordered by `sort_order`
 - Group `shop_notes` → section note
 - Fixtures grouped by type within each section (quantity rollup)
 - Existing fixture `notes` → line-item notes
 
-### Labels
+### Labels ✓ (Phase 4 complete)
 
 - `{group}` field token available in label designer
 - Group color available as a label element
 
-### Paperwork
+### Paperwork ✓ (Phase 4 complete)
 
 - "Group by: Smart Group" option in report generator
 - One section per group, ordered by `sort_order`
