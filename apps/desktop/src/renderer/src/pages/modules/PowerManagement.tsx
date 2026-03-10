@@ -12,11 +12,15 @@ import { Zap, Server, Activity, Settings } from 'lucide-react';
 
 type PowerTab = 'racks' | 'configuration' | 'summary';
 
-export function PowerManagement() {
+interface PowerManagementProps {
+  initialTab?: PowerTab;
+}
+
+export function PowerManagement({ initialTab = 'racks' }: PowerManagementProps = {}) {
   const { projectId } = useParams<{ projectId?: string }>();
   const currentProject = useProjectStore((state) => state.currentProject);
   const fixtures = useFixtureStore((state) => state.fixtures);
-  const [activeTab, setActiveTab] = useState<PowerTab>('racks');
+  const [activeTab, setActiveTab] = useState<PowerTab>(initialTab);
   const [dimmerRacks, setDimmerRacks] = useState<DimmerRack[]>([]);
   const [pdRacks, setPdRacks] = useState<PDRack[]>([]);
 

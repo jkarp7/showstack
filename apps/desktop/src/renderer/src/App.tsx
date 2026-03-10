@@ -111,10 +111,16 @@ function AppContent() {
             path="infrastructure"
             element={<EquipmentManager key="infrastructure" initialTab="infrastructure" />}
           />
-          <Route path="racks" element={<EquipmentManager key="racks" initialTab="power" />} />
-          <Route path="power" element={<PowerManagement />} />
-          <Route path="power/services" element={<PowerManagement />} />
-          <Route path="power/summary" element={<PowerManagement />} />
+          <Route path="racks" element={<PowerManagement key="racks" initialTab="racks" />} />
+          <Route path="power" element={<PowerManagement key="racks" initialTab="racks" />} />
+          <Route
+            path="power/services"
+            element={<PowerManagement key="services" initialTab="configuration" />}
+          />
+          <Route
+            path="power/summary"
+            element={<PowerManagement key="summary" initialTab="summary" />}
+          />
           <Route path="shop-orders" element={<ShopOrderBuilder />} />
           <Route path="labels" element={<LabelDesigner />} />
           <Route path="paperwork" element={<Paperwork />} />
