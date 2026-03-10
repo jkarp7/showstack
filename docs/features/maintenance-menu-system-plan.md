@@ -72,6 +72,37 @@ The Maintenance Menu System provides custom categorization for fixtures with rul
 
 ---
 
+## Completed Infrastructure (Available to Build On)
+
+The following related features shipped after this plan was written. Phase 1 and 2 should integrate with these rather than building from scratch.
+
+### Menu Bar Framework (PR #83 — March 2026)
+
+`apps/desktop/src/main/menu/menuTemplate.ts` — Full context-aware menu already exists.
+Current top-level menus: ShowStack (macOS), File, Edit, View, Project, Tools, Window, Help.
+**There is no "Maintenance" top-level menu.** Phase 2 must either:
+
+- Add a new "Maintenance" top-level menu between Project and Tools, OR
+- Add "Manage Categories..." under the Project menu
+
+`apps/desktop/src/main/menu/menuState.ts` — `MenuStateManager` singleton; `MenuContext` type;
+`MenuStateData` interface (`context`, `projectId`, `isDirty`, `hasSelection`, `canUndo`, `canRedo`).
+IPC convention: `menu:*` channels sent via `sendToRenderer()`.
+
+`apps/desktop/src/main/ipc/menu.ts` — IPC handler for menu state updates.
+
+### Menu Handler Hook Pattern
+
+Three hooks establish the pattern for wiring IPC → component handlers:
+
+- `apps/desktop/src/renderer/src/hooks/useEquipmentMenuHandlers.ts`
+- `apps/desktop/src/renderer/src/hooks/useProjectMenuHandlers.ts`
+- `apps/desktop/src/renderer/src/hooks/useShopOrderMenuHandlers.ts`
+
+Phase 2 should create `useMaintenanceMenuHandlers.ts` following this same pattern (register on mount, unregister on unmount, store props in refs).
+
+---
+
 ## Phase 1: Core System (Week 1)
 
 **Milestone:** Database, IPC handlers, rule engine
@@ -409,12 +440,12 @@ export function registerCategoryHandlers(): void {
 
 ### Deliverables
 
-- [x] Database schema with 3 tables
-- [x] Category CRUD operations with 80%+ coverage
-- [x] Rule engine with 80%+ coverage
-- [x] IPC handlers with 70%+ coverage
-- [x] Integration tests for auto-assignment
-- [x] Documentation: Rule operators, category system guide
+- [ ] Database schema with 3 tables
+- [ ] Category CRUD operations with 80%+ coverage
+- [ ] Rule engine with 80%+ coverage
+- [ ] IPC handlers with 70%+ coverage
+- [ ] Integration tests for auto-assignment
+- [ ] Documentation: Rule operators, category system guide
 
 **Effort:** 1 week
 
@@ -450,8 +481,9 @@ src/renderer/src/store/
 ### Files to Modify
 
 ```
-src/renderer/src/hooks/useEquipmentMenuHandlers.ts  (Add maintenance menu handler)
-src/main/menu/menuTemplate.ts                      (Add "Maintenance" menu)
+src/main/menu/menuTemplate.ts          (EXISTS — add buildMaintenanceMenu() and wire into buildMenu())
+src/main/menu/menuState.ts             (EXISTS — no changes needed)
+src/renderer/src/hooks/useMaintenanceMenuHandlers.ts  (NEW — follows useEquipmentMenuHandlers pattern)
 ```
 
 ### UI Components
@@ -676,25 +708,39 @@ export function RuleBuilder({ category }: Props) {
 
 ### Menu Integration
 
-```typescript
-// src/main/menu/menuTemplate.ts
+`menuTemplate.ts` already exists with a full `buildMenu()` function. Add a new `buildMaintenanceMenu()` function and wire it in between `buildProjectMenu()` and `buildToolsMenu()`:
 
-{
-  label: 'Maintenance',
-  submenu: [
-    {
-      label: 'Manage Categories...',
-      accelerator: 'CmdOrCtrl+Shift+M',
-      click: () => {
-        // Send IPC event to open maintenance dialog
-        BrowserWindow.getFocusedWindow()?.webContents.send('menu:maintenance:open');
-      }
-    },
-    { type: 'separator' },
-    // Dynamic menu items for each column (added at runtime)
-  ]
+```typescript
+// apps/desktop/src/main/menu/menuTemplate.ts
+
+// In buildMenu(), after the Project menu block:
+// Maintenance menu (only when project is open)
+if (state.projectId) {
+  template.push(buildMaintenanceMenu(state));
+}
+
+// Tools menu
+template.push(buildToolsMenu(state, isMac));
+
+// New function to add:
+function buildMaintenanceMenu(state: MenuStateData): MenuItemConstructorOptions {
+  return {
+    label: 'Maintenance',
+    submenu: [
+      {
+        label: 'Manage Categories...',
+        accelerator: 'CmdOrCtrl+Shift+M',
+        enabled: !!state.projectId,
+        click: () => sendToRenderer('menu:maintenance:open'),
+      },
+      { type: 'separator' },
+      // Dynamic menu items for each column can be added here at runtime
+    ],
+  };
 }
 ```
+
+The renderer side registers a handler via `useMaintenanceMenuHandlers.ts` (new hook following the `useEquipmentMenuHandlers` pattern) listening on `menu:maintenance:open`.
 
 ### Testing Strategy
 
@@ -714,12 +760,12 @@ export function RuleBuilder({ category }: Props) {
 
 ### Deliverables
 
-- [x] Maintenance menu dialog with 4 tabs
-- [x] Category list with CRUD operations
-- [x] Rule builder UI
-- [x] Menu bar integration
-- [x] 50%+ component test coverage
-- [x] Documentation: UI guide, rule builder instructions
+- [ ] Maintenance menu dialog with 4 tabs
+- [ ] Category list with CRUD operations
+- [ ] Rule builder UI
+- [ ] Menu bar integration
+- [ ] 50%+ component test coverage
+- [ ] Documentation: UI guide, rule builder instructions
 
 **Effort:** 1 week
 
@@ -858,13 +904,13 @@ Add bulk action to assign multiple fixtures to category
 
 ### Deliverables
 
-- [x] Category column in Equipment Manager
-- [x] Category filter dropdown
-- [x] Context menu integration
-- [x] Bulk assignment action
-- [x] Visual indicators (color dots)
-- [x] 50%+ component test coverage
-- [x] Documentation: Integration guide
+- [ ] Category column in Equipment Manager
+- [ ] Category filter dropdown
+- [ ] Context menu integration
+- [ ] Bulk assignment action
+- [ ] Visual indicators (color dots)
+- [ ] 50%+ component test coverage
+- [ ] Documentation: Integration guide
 
 **Effort:** 1 week
 
@@ -982,11 +1028,11 @@ const handleAutoPopulateFromCategories = async () => {
 
 ### Deliverables
 
-- [x] Category field in label designer
-- [x] Paperwork group by category
-- [x] Shop order auto-populate from categories
-- [x] 60%+ test coverage for integrations
-- [x] Documentation: Integration examples, shop order automation guide
+- [ ] Category field in label designer
+- [ ] Paperwork group by category
+- [ ] Shop order auto-populate from categories
+- [ ] 60%+ test coverage for integrations
+- [ ] Documentation: Integration examples, shop order automation guide
 
 **Effort:** 1 week
 
@@ -1052,19 +1098,19 @@ Week 4: Phase 4 - Label/Paperwork/Shop Order Integration
 
 ### Technical Requirements
 
-- [x] Rule engine evaluates 5000 fixtures in < 5 seconds
-- [x] 70%+ overall test coverage
-- [x] Manual assignment overrides auto-assignment
-- [x] Categories persist across sessions
-- [x] Integration with all major features (labels, paperwork, shop orders)
+- [ ] Rule engine evaluates 5000 fixtures in < 5 seconds
+- [ ] 70%+ overall test coverage
+- [ ] Manual assignment overrides auto-assignment
+- [ ] Categories persist across sessions
+- [ ] Integration with all major features (labels, paperwork, shop orders)
 
 ### User Experience Requirements
 
-- [x] Maintenance menu is discoverable
-- [x] Rule builder is intuitive
-- [x] Visual indicators are clear
-- [x] Shop order automation saves time
-- [x] Comprehensive documentation
+- [ ] Maintenance menu is discoverable
+- [ ] Rule builder is intuitive
+- [ ] Visual indicators are clear
+- [ ] Shop order automation saves time
+- [ ] Comprehensive documentation
 
 ---
 
@@ -1089,6 +1135,6 @@ Week 4: Phase 4 - Label/Paperwork/Shop Order Integration
 
 ---
 
-**Last Updated:** January 20, 2026
+**Last Updated:** March 8, 2026
 **Author:** Claude Code
-**Version:** 1.0
+**Version:** 1.1

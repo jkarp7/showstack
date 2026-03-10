@@ -197,7 +197,7 @@ describe('LicenseService', () => {
 
     it('returns grace when verification is stale', () => {
       const license = buildLicense({
-        lastVerified: Date.now() - 20 * 24 * 60 * 60 * 1000, // 20 days ago
+        lastVerified: Date.now() - 10 * 24 * 60 * 60 * 1000, // 10 days ago
       });
       mockedGetCurrentLicense.mockReturnValue(license);
 
