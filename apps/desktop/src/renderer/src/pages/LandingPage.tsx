@@ -233,11 +233,24 @@ export function LandingPage() {
     return all.sort((a, b) => b.updated_at - a.updated_at); // modified (default)
   }, [families, standalones, sortOrder]);
 
-  // Recent: top 5 by updated_at (always, regardless of sort/search)
-  const recentProjects = useMemo(
-    () => [...projects].sort((a, b) => b.updated_at - a.updated_at).slice(0, 5),
-    [projects],
-  );
+  // Recent: top 5 unique shows (one per family) by most-recent version's updated_at
+  const recentProjects = useMemo(() => {
+    const childIds = new Set(families.flatMap((f) => f.children.map((c) => c.id)));
+    // For each family, use the most recently modified member's timestamp for sorting
+    const familyTimestamp = new Map(
+      families.map((f) => [
+        f.root.id,
+        Math.max(f.root.updated_at, ...f.children.map((c) => c.updated_at)),
+      ]),
+    );
+    return [...projects]
+      .filter((p) => !childIds.has(p.id))
+      .sort(
+        (a, b) =>
+          (familyTimestamp.get(b.id) ?? b.updated_at) - (familyTimestamp.get(a.id) ?? a.updated_at),
+      )
+      .slice(0, 5);
+  }, [projects, families]);
 
   // Filtered all-projects (search applied)
   const filteredProjects = useMemo(() => {
@@ -528,7 +541,7 @@ export function LandingPage() {
         {isRightPanelOpen && (
           <div
             className="flex flex-col bg-gray-50 dark:bg-gray-800/50 flex-shrink-0"
-            style={{ width: 320 }}
+            style={{ width: '35%', minWidth: 280 }}
           >
             {selectedProject ? (
               <>
