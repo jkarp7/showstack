@@ -21,6 +21,14 @@ function buildSections(projectId: string): NavSection[] {
   const base = `/project/${projectId}`;
   return [
     {
+      title: 'Project',
+      items: [
+        { label: 'Project Info', path: `${base}/project-info` },
+        { label: 'Team', path: `${base}/team`, placeholder: true },
+        { label: 'Show Health', path: `${base}/show-health`, placeholder: true },
+      ],
+    },
+    {
       title: 'Equipment Manager',
       items: [
         { label: 'Fixtures', path: `${base}/fixtures` },
@@ -50,14 +58,6 @@ function buildSections(projectId: string): NavSection[] {
         { label: 'Shop Orders', path: `${base}/shop-orders` },
         { label: 'Labels', path: `${base}/labels` },
         { label: 'Paperwork', path: `${base}/paperwork` },
-      ],
-    },
-    {
-      title: 'Project',
-      items: [
-        { label: 'Project Info', path: `${base}/project-info` },
-        { label: 'Team', path: `${base}/team`, placeholder: true },
-        { label: 'Show Health', path: `${base}/show-health`, placeholder: true },
       ],
     },
   ];

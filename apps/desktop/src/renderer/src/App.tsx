@@ -103,9 +103,15 @@ function AppContent() {
         {/* Project workspace — sidebar layout wraps all project routes */}
         <Route path="/project/:projectId" element={<ProjectWorkspace />}>
           <Route index element={<Navigate to="fixtures" replace />} />
-          <Route path="fixtures" element={<EquipmentManager initialTab="fixtures" />} />
-          <Route path="infrastructure" element={<EquipmentManager initialTab="infrastructure" />} />
-          <Route path="racks" element={<EquipmentManager initialTab="power" />} />
+          <Route
+            path="fixtures"
+            element={<EquipmentManager key="fixtures" initialTab="fixtures" />}
+          />
+          <Route
+            path="infrastructure"
+            element={<EquipmentManager key="infrastructure" initialTab="infrastructure" />}
+          />
+          <Route path="racks" element={<EquipmentManager key="racks" initialTab="power" />} />
           <Route path="power" element={<PowerManagement />} />
           <Route path="power/services" element={<PowerManagement />} />
           <Route path="power/summary" element={<PowerManagement />} />

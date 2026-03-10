@@ -64,7 +64,10 @@ export function LandingPage() {
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
 
   // Selection state
+  // selectedId = the root/standalone project shown in the right panel
+  // selectedVersionId = the specific version targeted by the Open button (defaults to selectedId)
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
 
   // List state
   const [searchQuery, setSearchQuery] = useState('');
@@ -160,15 +163,17 @@ export function LandingPage() {
         clickTimerRef.current = null;
         handleOpenProject(projectId);
       } else {
-        // First click — select; wait to see if double-click follows
-        setSelectedId(projectId);
+        // First click — select root for right panel, track version for Open button
+        const rootId = childToRoot.get(projectId) ?? projectId;
+        setSelectedId(rootId);
+        setSelectedVersionId(projectId);
         if (!isRightPanelOpen) setIsRightPanelOpen(true);
         clickTimerRef.current = setTimeout(() => {
           clickTimerRef.current = null;
         }, 300);
       }
     },
-    [handleOpenProject, isRightPanelOpen],
+    [handleOpenProject, isRightPanelOpen, childToRoot],
   );
 
   const handleCreateProject = async (
@@ -179,7 +184,10 @@ export function LandingPage() {
   ) => {
     try {
       const created = await createProject(name, description, logoPath, enabledModules);
-      if (created?.id) setSelectedId(created.id);
+      if (created?.id) {
+        setSelectedId(created.id);
+        setSelectedVersionId(created.id);
+      }
     } catch (error) {
       logger.error('Failed to create project:', { error: String(error) });
     }
@@ -189,7 +197,10 @@ export function LandingPage() {
     if (!projectToDelete) return;
     try {
       await deleteProject(projectToDelete.id);
-      if (selectedId === projectToDelete.id) setSelectedId(null);
+      if (selectedId === projectToDelete.id || selectedVersionId === projectToDelete.id) {
+        setSelectedId(null);
+        setSelectedVersionId(null);
+      }
     } catch (error) {
       logger.error('Failed to delete project:', { error: String(error) });
     }
@@ -265,6 +276,15 @@ export function LandingPage() {
   const familyMap = useMemo(() => {
     const m = new Map<string, Project[]>();
     for (const f of families) m.set(f.root.id, f.children);
+    return m;
+  }, [families]);
+
+  // Reverse lookup: child id → root id (so clicking a child row selects the right root)
+  const childToRoot = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const f of families) {
+      for (const child of f.children) m.set(child.id, f.root.id);
+    }
     return m;
   }, [families]);
 
@@ -593,21 +613,28 @@ export function LandingPage() {
                     <div className="space-y-1">
                       {[selectedProject, ...selectedFamilyChildren]
                         .sort((a, b) => b.updated_at - a.updated_at)
-                        .map((v, i) => (
-                          <div
-                            key={v.id}
-                            className="flex items-center gap-2 text-xs cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
-                            onClick={() => setSelectedId(v.id)}
-                          >
-                            <span className="text-gray-400">{i === 0 ? '●' : '○'}</span>
-                            <span className="flex-1 text-gray-700 dark:text-gray-300">
-                              {new Date(v.updated_at).toLocaleDateString()}
-                            </span>
-                            <span className="text-gray-400">
-                              {formatRelativeTime(v.updated_at)}
-                            </span>
-                          </div>
-                        ))}
+                        .map((v) => {
+                          const isActive = (selectedVersionId ?? selectedId) === v.id;
+                          return (
+                            <div
+                              key={v.id}
+                              className="flex items-center gap-2 text-xs cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
+                              onClick={() => setSelectedVersionId(v.id)}
+                            >
+                              <span className={isActive ? 'text-blue-500' : 'text-gray-400'}>
+                                {isActive ? '●' : '○'}
+                              </span>
+                              <span
+                                className={`flex-1 ${isActive ? 'font-medium text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
+                              >
+                                {new Date(v.updated_at).toLocaleDateString()}
+                              </span>
+                              <span className="text-gray-400">
+                                {formatRelativeTime(v.updated_at)}
+                              </span>
+                            </div>
+                          );
+                        })}
                     </div>
                   </div>
                 )}
@@ -615,7 +642,7 @@ export function LandingPage() {
                 {/* Actions */}
                 <div className="px-5 py-4 grid grid-cols-2 gap-2 mt-auto">
                   <button
-                    onClick={() => handleOpenProject(selectedProject.id)}
+                    onClick={() => handleOpenProject(selectedVersionId ?? selectedProject.id)}
                     className="col-span-2 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors"
                   >
                     Open
