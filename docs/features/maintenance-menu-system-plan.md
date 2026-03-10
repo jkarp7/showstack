@@ -1,35 +1,54 @@
-# Maintenance Menu System Implementation Plan
+# Smart Groups Implementation Plan
 
-**Feature:** Lightwright 6 Parity - Custom categorization system for grouping fixtures
+**Feature:** Fixture Smart Groups — named saved filters driving shop order automation
 **Delivery:** Phased approach with 4 iterative milestones
-**Timeline:** 4 weeks (1 month)
+**Timeline:** 3 weeks
 **Effort:** 1 developer full-time
 **Status:** Planned (not yet implemented)
 **Created:** January 20, 2026
-**Priority:** Medium-High (enables shop order automation, Lightwright parity)
+**Revised:** March 9, 2026
+**Priority:** Medium-High (enables shop order automation)
 
 ---
 
 ## Overview
 
-The Maintenance Menu System provides custom categorization for fixtures with rule-based auto-assignment. This is a **critical foundation** for Equipment Manager → Shop Order automation and achieves Lightwright 6 parity.
+Smart Groups replace the originally planned "Maintenance Menu" category system with a
+ShowStack-native approach. Rather than replicating Lightwright 6's Maintenance Menu model (separate
+rule engine, 3-table schema, 4-tab dialog), Smart Groups use **named saved filters** built on top
+of the existing filter system.
+
+**Lightwright context:** Lightwright's own new platform (launched January 2026) has moved away from
+the LW6 Maintenance Menu model as part of their full rebuild. Targeting LW6 parity is no longer
+the right frame — the goal is a better ShowStack-native solution.
 
 ### Core Capabilities
 
-- **Custom Categories:** Create categories like "ALL Moving Lights", "FOH Fixtures", "Rental Package"
-- **Rule-Based Auto-Assignment:** Define rules (e.g., Type contains "MAC" → "Moving Lights")
-- **4-Tab Dialog:** Notes, Physical, Vectorworks, Position notes per category
-- **Integration:** Labels, paperwork grouping, shop order automation, visual indicators
-- **Color-Coding:** Assign colors to categories for visual identification
+- **Named groups** with color, notes, and shop-specific notes
+- **Saved filter membership** — group membership computed on-demand, never stale
+- **Manual pins** — force-include fixtures regardless of filter
+- **Inspector panel UI** — groups managed in a sidebar, not a modal dialog
+- **Shop order automation** — groups become sections; `shop_notes` becomes the section note
+- **Labels and paperwork** — group field available throughout
+
+### Note Field Mapping
+
+| Field                      | Level     | Where it appears                             |
+| -------------------------- | --------- | -------------------------------------------- |
+| Group `notes`              | Section   | Paperwork section headers, inspector display |
+| Group `shop_notes`         | Section   | Shop order section note                      |
+| Fixture `notes` (existing) | Line item | Shop order line-item notes                   |
 
 ---
 
 ## Strategic Value
 
-1. **Shop Order Automation** - Foundation for auto-generating shop orders from fixture groups
-2. **Lightwright Parity** - Matches Lightwright 6's categorization system
-3. **Workflow Customization** - Users can organize fixtures by their workflow needs
-4. **Professional Efficiency** - Reduces manual grouping, enables bulk operations
+1. **Shop Order Automation** — groups directly drive section creation, quantity rollup, and
+   section notes (#29)
+2. **Inspector Panel Foundation** — first consumer of the shared `<InspectorPanel>` shell;
+   conditional formatting and future panels reuse the same infrastructure
+3. **Simpler implementation** — 2 tables + filter reuse vs. 3 tables + custom rule engine
+4. **Always current** — no re-evaluate step, no stale assignment table
 
 **Related Issues:** #29 (shop order automation), #14 (auto-complete)
 
@@ -37,780 +56,414 @@ The Maintenance Menu System provides custom categorization for fixtures with rul
 
 ## Architecture Decisions
 
-### 1. Database Schema: Three Tables
+### 1. Database Schema: Two Tables
 
-- `fixture_categories` - Category definitions with 4 note types
-- `category_rules` - Auto-assignment rules
-- `fixture_category_assignments` - Many-to-many with manual override flag
+- `fixture_groups` — group definitions: name, color, notes, shop_notes, filter_def (JSON)
+- `fixture_group_pins` — manual fixture pins (force-include regardless of filter)
 
-### 2. Rule Engine: SQL-Based Evaluation
+No assignment join table. Membership is computed on-demand.
 
-- Evaluate rules on fixture create/update
-- Support operators: equals, contains, starts_with, ends_with, is_empty, is_not_empty, greater_than, less_than
-- Priority-based (first matching rule wins)
-- Manual assignment overrides auto-assignment
+### 2. Filter Reuse, No Custom Rule Engine
+
+Group auto-membership is evaluated by running the existing filter system against the stored
+`filter_def` JSON. The same logic that powers the Equipment Manager filter toolbar powers group
+membership. No new rule engine, no re-evaluate button, no stale state.
 
 ### 3. State Management: Zustand Store
 
-- `categoryStore.ts` for category CRUD and rule management
-- Integrates with existing `fixtureStore.ts`
-- Real-time category assignment on fixture changes
+- `groupStore.ts` for group CRUD and pin management
+- `getGroupMembers(groupId)` evaluates filter + pins against current fixture list
+- Integrates with existing `fixtureStore.ts` and filter utilities
 
-### 4. UI Pattern: Menu Bar + Dialog
+### 4. UI Pattern: Inspector Panel
 
-- Menu bar "Maintenance" menu (dynamic based on columns)
-- 4-tab dialog (Notes, Physical, Vectorworks, Position)
-- Rule builder UI (similar to conditional formatting dialog)
-- Follows existing dialog patterns
+The Inspector Panel is a **shared shell** component, not a one-off sidebar. Smart Groups is
+its first consumer. The shell handles docking, resize, and show/hide — content is swapped by
+context. This architecture allows conditional formatting and future tools to migrate into the
+same panel.
+
+```
+<InspectorPanel>
+  <GroupsInspector />                    ← this feature
+  <ConditionalFormattingInspector />     ← migrate from modal (future)
+  <FixturePropertiesInspector />         ← future
+  <LabelDesignInspector />              ← future
+</InspectorPanel>
+```
 
 ### 5. Integration Points
 
-- **Equipment Manager:** Color indicators, filter dropdown
-- **Labels:** Category field available in label designer
-- **Paperwork:** Group by category option
-- **Shop Orders:** Auto-populate sections from categories
+- **Equipment Manager:** Inspector panel, color indicator column, grid filter, bulk pin action
+- **Shop Orders:** Auto-populate sections from groups; `shop_notes` → section note
+- **Labels:** `{group}` field token, color element
+- **Paperwork:** "Group by: Smart Group" report option
 
 ---
 
 ## Completed Infrastructure (Available to Build On)
 
-The following related features shipped after this plan was written. Phase 1 and 2 should integrate with these rather than building from scratch.
-
 ### Menu Bar Framework (PR #83 — March 4, 2026)
 
 `apps/desktop/src/main/menu/menuTemplate.ts` — Full context-aware menu already exists.
 Current top-level menus: ShowStack (macOS), File, Edit, View, Project, Tools, Window, Help.
-**There is no "Maintenance" top-level menu.** Phase 2 must either:
 
-- Add a new "Maintenance" top-level menu between Project and Tools, OR
-- Add "Manage Categories..." under the Project menu
+Smart Groups does **not** add a top-level "Maintenance" menu. Access is via the Inspector Panel
+in Equipment Manager. If a menu entry is needed for keyboard discoverability, "Manage Groups..."
+can be added under the Project menu, not as a new top-level menu.
 
 `apps/desktop/src/main/menu/menuState.ts` — `MenuStateManager` singleton; `MenuContext` type;
-`MenuStateData` interface (`context`, `projectId`, `isDirty`, `hasSelection`, `canUndo`, `canRedo`).
-IPC convention: `menu:*` channels sent via `sendToRenderer()`.
-
-`apps/desktop/src/main/ipc/menu.ts` — IPC handler for menu state updates.
+`MenuStateData` interface. IPC convention: `menu:*` channels via `sendToRenderer()`.
 
 ### Menu Handler Hook Pattern
-
-Three hooks establish the pattern for wiring IPC → component handlers:
 
 - `apps/desktop/src/renderer/src/hooks/useEquipmentMenuHandlers.ts`
 - `apps/desktop/src/renderer/src/hooks/useProjectMenuHandlers.ts`
 - `apps/desktop/src/renderer/src/hooks/useShopOrderMenuHandlers.ts`
 
-Phase 2 should create `useMaintenanceMenuHandlers.ts` following this same pattern (register on mount, unregister on unmount, store props in refs).
+If a menu entry is added for "Manage Groups...", create `useGroupMenuHandlers.ts` following this
+pattern (register on mount, unregister on unmount, store props in refs).
+
+### Existing Filter System
+
+The Equipment Manager filter system already evaluates field/operator/value conditions against
+fixtures. `filter_def` on `fixture_groups` stores a filter in this same JSON format. Group
+membership evaluation calls the same filter utility — no new matching logic to write.
 
 ---
 
 ## Phase 1: Core System (Week 1)
 
-**Milestone:** Database, IPC handlers, rule engine
+**Milestone:** Database schema, IPC handlers, filter-based membership evaluation
 
 ### New Files to Create
 
 ```
-src/main/database/
-├── queries/
-│   ├── categories.ts                         (400 lines) - CRUD operations
-│   └── __tests__/
-│       └── categories.test.ts                (300 lines, 80%+ coverage)
+src/main/database/queries/
+├── groups.ts                             - CRUD for fixture_groups and fixture_group_pins
+└── __tests__/
+    └── groups.test.ts                    - 80%+ coverage
 
 src/main/ipc/
-├── categories.ts                             (350 lines) - IPC handlers
+├── groups.ts                             - IPC handlers
 └── __tests__/
-    └── categories.test.ts                    (250 lines, 70%+ coverage)
-
-src/main/utils/
-├── categoryRuleEngine.ts                     (300 lines) - Rule evaluation
-└── __tests__/
-    └── categoryRuleEngine.test.ts            (250 lines, 80%+ coverage)
+    └── groups.test.ts                    - 70%+ coverage
 
 src/renderer/src/types/
-└── category.ts                               (100 lines) - TypeScript interfaces
+└── group.ts                              - TypeScript interfaces
+
+src/renderer/src/store/
+├── groupStore.ts                         - Zustand store
+└── __tests__/
+    └── groupStore.test.ts
 ```
 
 ### Files to Modify
 
 ```
-src/main/database/projectSchema.ts            (Add 3 tables)
-src/main/ipc/index.ts                         (Register category handlers)
-src/main/database/queries/fixtures.ts         (Add category auto-assignment on create/update)
+src/main/database/projectSchema.ts        (Add 2 tables: fixture_groups, fixture_group_pins)
+src/main/ipc/index.ts                     (Register group handlers)
 ```
 
 ### Database Schema
 
 ```sql
--- Category definitions
-CREATE TABLE IF NOT EXISTS fixture_categories (
-  id TEXT PRIMARY KEY,
-  project_id TEXT NOT NULL,
-  name TEXT NOT NULL UNIQUE,
-  color TEXT, -- hex color for visual indicators
-  notes TEXT, -- General notes
-  physical_notes TEXT, -- Physical handling notes
-  vectorworks_notes TEXT, -- CAD-specific notes
-  position_notes TEXT, -- Location-specific notes
-  sort_order INTEGER NOT NULL DEFAULT 0,
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL,
+CREATE TABLE IF NOT EXISTS fixture_groups (
+  id            TEXT     PRIMARY KEY,
+  project_id    TEXT     NOT NULL,
+  name          TEXT     NOT NULL,
+  color         TEXT,                    -- hex color
+  notes         TEXT,                    -- general notes (paperwork, inspector)
+  shop_notes    TEXT,                    -- section-level note for shop order output
+  filter_def    TEXT,                    -- JSON: existing filter system format
+  sort_order    INTEGER  NOT NULL DEFAULT 0,
+  created_at    INTEGER  NOT NULL,
+  updated_at    INTEGER  NOT NULL,
   FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
 
--- Auto-assignment rules
-CREATE TABLE IF NOT EXISTS category_rules (
-  id TEXT PRIMARY KEY,
-  category_id TEXT NOT NULL,
-  field TEXT NOT NULL, -- fixture field name (type, manufacturer, position, etc.)
-  operator TEXT NOT NULL, -- equals, contains, starts_with, ends_with, is_empty, etc.
-  value TEXT NOT NULL,
-  case_sensitive BOOLEAN DEFAULT 0,
-  sort_order INTEGER NOT NULL DEFAULT 0, -- Rule priority (lower = higher priority)
-  created_at INTEGER NOT NULL,
-  FOREIGN KEY (category_id) REFERENCES fixture_categories(id) ON DELETE CASCADE
-);
-
--- Fixture-category assignments
-CREATE TABLE IF NOT EXISTS fixture_category_assignments (
-  fixture_id TEXT NOT NULL,
-  category_id TEXT NOT NULL,
-  is_manual BOOLEAN DEFAULT 0, -- true if manually assigned, false if auto-assigned
-  assigned_at INTEGER NOT NULL,
-  PRIMARY KEY (fixture_id, category_id),
+CREATE TABLE IF NOT EXISTS fixture_group_pins (
+  fixture_id    TEXT     NOT NULL,
+  group_id      TEXT     NOT NULL,
+  created_at    INTEGER  NOT NULL,
+  PRIMARY KEY (fixture_id, group_id),
   FOREIGN KEY (fixture_id) REFERENCES fixtures(id) ON DELETE CASCADE,
-  FOREIGN KEY (category_id) REFERENCES fixture_categories(id) ON DELETE CASCADE
+  FOREIGN KEY (group_id)   REFERENCES fixture_groups(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_category_assignments_fixture ON fixture_category_assignments(fixture_id);
-CREATE INDEX idx_category_assignments_category ON fixture_category_assignments(category_id);
+CREATE INDEX idx_group_pins_group   ON fixture_group_pins(group_id);
+CREATE INDEX idx_group_pins_fixture ON fixture_group_pins(fixture_id);
 ```
 
 ### TypeScript Interfaces
 
 ```typescript
-// src/renderer/src/types/category.ts
+// src/renderer/src/types/group.ts
 
-export interface FixtureCategory {
+export interface FixtureGroup {
   id: string;
   project_id: string;
   name: string;
-  color?: string; // hex color
+  color?: string;
   notes?: string;
-  physical_notes?: string;
-  vectorworks_notes?: string;
-  position_notes?: string;
+  shop_notes?: string;
+  filter_def?: string; // JSON — same format as existing FilterDefinition
   sort_order: number;
   created_at: number;
   updated_at: number;
 }
 
-export interface CategoryRule {
-  id: string;
-  category_id: string;
-  field: string;
-  operator: RuleOperator;
-  value: string;
-  case_sensitive: boolean;
-  sort_order: number;
-  created_at: number;
-}
-
-export type RuleOperator =
-  | 'equals'
-  | 'not_equals'
-  | 'contains'
-  | 'not_contains'
-  | 'starts_with'
-  | 'ends_with'
-  | 'is_empty'
-  | 'is_not_empty'
-  | 'greater_than'
-  | 'less_than'
-  | 'matches_regex';
-
-export interface CategoryAssignment {
+export interface FixtureGroupPin {
   fixture_id: string;
-  category_id: string;
-  is_manual: boolean;
-  assigned_at: number;
-}
-```
-
-### Rule Engine Implementation
-
-```typescript
-// src/main/utils/categoryRuleEngine.ts
-
-export class CategoryRuleEngine {
-  /**
-   * Evaluate all rules and return matching category IDs
-   */
-  evaluateRules(
-    fixture: Fixture,
-    categoriesWithRules: Array<{ category: FixtureCategory; rules: CategoryRule[] }>,
-  ): string[] {
-    const matchingCategories: string[] = [];
-
-    // Sort categories by sort_order (priority)
-    const sorted = categoriesWithRules.sort(
-      (a, b) => a.category.sort_order - b.category.sort_order,
-    );
-
-    for (const { category, rules } of sorted) {
-      // ALL rules must match for category assignment
-      const allRulesMatch = rules.every((rule) => this.evaluateRule(fixture, rule));
-
-      if (allRulesMatch) {
-        matchingCategories.push(category.id);
-      }
-    }
-
-    return matchingCategories;
-  }
-
-  /**
-   * Evaluate single rule against fixture
-   */
-  private evaluateRule(fixture: Fixture, rule: CategoryRule): boolean {
-    const fixtureValue = fixture[rule.field];
-    const ruleValue = rule.case_sensitive ? rule.value : rule.value.toLowerCase();
-    const compareValue = rule.case_sensitive
-      ? String(fixtureValue || '')
-      : String(fixtureValue || '').toLowerCase();
-
-    switch (rule.operator) {
-      case 'equals':
-        return compareValue === ruleValue;
-
-      case 'not_equals':
-        return compareValue !== ruleValue;
-
-      case 'contains':
-        return compareValue.includes(ruleValue);
-
-      case 'not_contains':
-        return !compareValue.includes(ruleValue);
-
-      case 'starts_with':
-        return compareValue.startsWith(ruleValue);
-
-      case 'ends_with':
-        return compareValue.endsWith(ruleValue);
-
-      case 'is_empty':
-        return !fixtureValue || String(fixtureValue).trim() === '';
-
-      case 'is_not_empty':
-        return !!fixtureValue && String(fixtureValue).trim() !== '';
-
-      case 'greater_than':
-        return Number(fixtureValue) > Number(ruleValue);
-
-      case 'less_than':
-        return Number(fixtureValue) < Number(ruleValue);
-
-      case 'matches_regex':
-        try {
-          const regex = new RegExp(ruleValue, rule.case_sensitive ? '' : 'i');
-          return regex.test(compareValue);
-        } catch {
-          return false;
-        }
-
-      default:
-        return false;
-    }
-  }
-
-  /**
-   * Re-evaluate all fixtures and update assignments
-   */
-  async reevaluateAllFixtures(projectId: string): Promise<void> {
-    // Get all fixtures
-    const fixtures = await getAllFixtures(projectId);
-
-    // Get all categories with rules
-    const categories = await getAllCategories(projectId);
-    const categoriesWithRules = await Promise.all(
-      categories.map(async (category) => ({
-        category,
-        rules: await getCategoryRules(category.id),
-      })),
-    );
-
-    // Evaluate each fixture
-    for (const fixture of fixtures) {
-      const matchingCategoryIds = this.evaluateRules(fixture, categoriesWithRules);
-
-      // Remove old auto-assignments
-      await removeAutoAssignments(fixture.id);
-
-      // Add new auto-assignments
-      for (const categoryId of matchingCategoryIds) {
-        await assignFixtureToCategory(fixture.id, categoryId, false); // is_manual = false
-      }
-    }
-  }
+  group_id: string;
+  created_at: number;
 }
 ```
 
 ### IPC Handlers
 
 ```typescript
-// src/main/ipc/categories.ts
+// src/main/ipc/groups.ts
 
-export function registerCategoryHandlers(): void {
-  // Get all categories for project
-  ipcMain.handle('categories:getAll', async (_event, projectId: string) => {
-    return getAllCategories(projectId);
-  });
-
-  // Create category
-  ipcMain.handle('categories:create', async (_event, category: Partial<FixtureCategory>) => {
-    return createCategory(category);
-  });
-
-  // Update category
-  ipcMain.handle(
-    'categories:update',
-    async (_event, id: string, updates: Partial<FixtureCategory>) => {
-      return updateCategory(id, updates);
-    },
+export function registerGroupHandlers(): void {
+  ipcMain.handle('groups:getAll', async (_event, projectId: string) => getAllGroups(projectId));
+  ipcMain.handle('groups:create', async (_event, group: Partial<FixtureGroup>) =>
+    createGroup(group),
   );
-
-  // Delete category
-  ipcMain.handle('categories:delete', async (_event, id: string) => {
-    return deleteCategory(id);
-  });
-
-  // Get rules for category
-  ipcMain.handle('categories:getRules', async (_event, categoryId: string) => {
-    return getCategoryRules(categoryId);
-  });
-
-  // Create rule
-  ipcMain.handle('categories:createRule', async (_event, rule: Partial<CategoryRule>) => {
-    return createCategoryRule(rule);
-  });
-
-  // Delete rule
-  ipcMain.handle('categories:deleteRule', async (_event, ruleId: string) => {
-    return deleteCategoryRule(ruleId);
-  });
-
-  // Get fixture assignments
-  ipcMain.handle('categories:getFixtureAssignments', async (_event, fixtureId: string) => {
-    return getFixtureCategories(fixtureId);
-  });
-
-  // Manually assign fixture to category
-  ipcMain.handle(
-    'categories:assignFixture',
-    async (_event, fixtureId: string, categoryId: string) => {
-      return assignFixtureToCategory(fixtureId, categoryId, true); // is_manual = true
-    },
+  ipcMain.handle('groups:update', async (_event, id: string, updates: Partial<FixtureGroup>) =>
+    updateGroup(id, updates),
   );
-
-  // Re-evaluate all fixtures (run rule engine)
-  ipcMain.handle('categories:reevaluateAll', async (_event, projectId: string) => {
-    const engine = new CategoryRuleEngine();
-    return engine.reevaluateAllFixtures(projectId);
-  });
+  ipcMain.handle('groups:delete', async (_event, id: string) => deleteGroup(id));
+  ipcMain.handle('groups:pin', async (_event, fixtureId: string, groupId: string) =>
+    pinFixtureToGroup(fixtureId, groupId),
+  );
+  ipcMain.handle('groups:unpin', async (_event, fixtureId: string, groupId: string) =>
+    unpinFixtureFromGroup(fixtureId, groupId),
+  );
+  ipcMain.handle('groups:getPins', async (_event, groupId: string) => getGroupPins(groupId));
 }
 ```
+
+### Membership Evaluation
+
+Group membership is not stored — it is computed by running `filter_def` through the existing
+filter utility, then unioning pinned fixture IDs:
+
+```typescript
+// src/renderer/src/store/groupStore.ts
+
+function getGroupMembers(group: FixtureGroup, allFixtures: Fixture[]): Fixture[] {
+  const filterMatches = group.filter_def
+    ? applyFilter(allFixtures, JSON.parse(group.filter_def)) // existing utility
+    : [];
+  const pinnedIds = new Set(group.pins?.map((p) => p.fixture_id) ?? []);
+  const matchedIds = new Set(filterMatches.map((f) => f.id));
+
+  return allFixtures.filter((f) => matchedIds.has(f.id) || pinnedIds.has(f.id));
+}
+```
+
+No re-evaluate step. No stale data. Membership is always derived from the current fixture list.
 
 ### Testing Strategy
 
 **Key Tests:**
 
-- Category CRUD operations
-- Rule engine evaluation (all operators)
-- Auto-assignment on fixture create/update
-- Manual assignment overrides
-- Re-evaluation of all fixtures
-- Rule priority ordering
-- Case-sensitive vs case-insensitive matching
-- Edge cases (null values, empty strings, special characters)
+- Group CRUD (create, read, update, delete)
+- Pin/unpin fixture
+- `getGroupMembers` with filter-only, pin-only, and combined membership
+- Filter evaluation edge cases (null fields, empty strings)
+- IPC handler validation
 
 **Coverage Targets:**
 
-- Rule Engine: 80%+ (critical utility)
-- Database Queries: 80%+ (critical utility)
-- IPC Handlers: 70%+ (IPC handlers)
+- Database Queries: 80%+
+- IPC Handlers: 70%+
+- Store / membership evaluation: 80%+
 
 ### Deliverables
 
-- [ ] Database schema with 3 tables
-- [ ] Category CRUD operations with 80%+ coverage
-- [ ] Rule engine with 80%+ coverage
+- [ ] Database schema with 2 tables
+- [ ] Group CRUD operations with 80%+ coverage
+- [ ] Pin/unpin operations
+- [ ] Membership evaluation via existing filter system
 - [ ] IPC handlers with 70%+ coverage
-- [ ] Integration tests for auto-assignment
-- [ ] Documentation: Rule operators, category system guide
+- [ ] TypeScript interfaces
 
 **Effort:** 1 week
 
 ---
 
-## Phase 2: Maintenance Menu UI (Week 2)
+## Phase 2: Inspector Panel UI (Week 2)
 
-**Milestone:** Menu bar integration, category dialog, rule builder
+**Milestone:** `<InspectorPanel>` shell + `<GroupsInspector>` as first consumer
 
 ### New Files to Create
 
 ```
-src/renderer/src/components/maintenance/
-├── MaintenanceMenuDialog.tsx                 (500 lines) - Main dialog
-├── CategoryList.tsx                          (250 lines) - Category sidebar
-├── CategoryNotesTab.tsx                      (150 lines) - Notes tab
-├── CategoryPhysicalTab.tsx                   (150 lines) - Physical tab
-├── CategoryVectorworksTab.tsx                (150 lines) - Vectorworks tab
-├── CategoryPositionTab.tsx                   (150 lines) - Position tab
-├── RuleBuilder.tsx                           (400 lines) - Rule builder UI
-├── RuleRow.tsx                               (200 lines) - Single rule UI
+src/renderer/src/components/inspector/
+├── InspectorPanel.tsx                    - Shell: docking, resize, show/hide, context routing
+├── GroupsInspector.tsx                   - Groups list + group detail view
+├── GroupChip.tsx                         - Colored chip with name and fixture count
+├── GroupDetail.tsx                       - Name, color, notes, shop_notes, filter, pins
+├── GroupFilterEditor.tsx                 - Filter definition editor (wraps existing filter UI)
 └── __tests__/
-    ├── MaintenanceMenuDialog.test.tsx        (300 lines, 50%+ coverage)
-    ├── RuleBuilder.test.tsx                  (250 lines, 50%+ coverage)
-    └── CategoryList.test.tsx                 (150 lines, 50%+ coverage)
-
-src/renderer/src/store/
-├── categoryStore.ts                          (300 lines) - State management
-└── __tests__/
-    └── categoryStore.test.ts                 (200 lines)
+    ├── InspectorPanel.test.tsx
+    ├── GroupsInspector.test.tsx
+    └── GroupDetail.test.tsx
 ```
 
 ### Files to Modify
 
 ```
-src/main/menu/menuTemplate.ts          (EXISTS — add buildMaintenanceMenu() and wire into buildMenu())
-src/main/menu/menuState.ts             (EXISTS — no changes needed)
-src/renderer/src/hooks/useMaintenanceMenuHandlers.ts  (NEW — follows useEquipmentMenuHandlers pattern)
+src/renderer/src/pages/modules/EquipmentManager.tsx
+  (Mount <InspectorPanel> alongside the grid; wire group selection to grid filter)
 ```
 
-### UI Components
+### InspectorPanel Shell
 
-#### 1. MaintenanceMenuDialog
-
-**Pattern:** Multi-tab dialog with category list sidebar
+The shell is intentionally minimal — it owns layout and visibility, not content:
 
 ```typescript
-// src/renderer/src/components/maintenance/MaintenanceMenuDialog.tsx
+// src/renderer/src/components/inspector/InspectorPanel.tsx
 
-export function MaintenanceMenuDialog({ onClose }: Props) {
-  const [selectedCategory, setSelectedCategory] = useState<FixtureCategory | null>(null);
-  const [activeTab, setActiveTab] = useState<'notes' | 'physical' | 'vectorworks' | 'position'>('notes');
-  const categories = useCategoryStore(state => state.categories);
+type InspectorContent = 'groups' | 'conditionalFormatting' | 'fixtureProperties';
 
+interface InspectorPanelProps {
+  content: InspectorContent;
+  onClose: () => void;
+}
+
+export function InspectorPanel({ content, onClose }: InspectorPanelProps) {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[900px] h-[700px] flex flex-col">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold">Maintenance Categories</h2>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Left Sidebar: Category List */}
-          <div className="w-64 border-r border-gray-200 dark:border-gray-700">
-            <CategoryList
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={setSelectedCategory}
-            />
-          </div>
-
-          {/* Right Content: 4 Tabs */}
-          <div className="flex-1 flex flex-col">
-            {selectedCategory ? (
-              <>
-                {/* Tab Navigation */}
-                <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700 flex gap-4">
-                  <button
-                    onClick={() => setActiveTab('notes')}
-                    className={activeTab === 'notes' ? 'tab-active' : 'tab-inactive'}
-                  >
-                    Notes
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('physical')}
-                    className={activeTab === 'physical' ? 'tab-active' : 'tab-inactive'}
-                  >
-                    Physical
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('vectorworks')}
-                    className={activeTab === 'vectorworks' ? 'tab-active' : 'tab-inactive'}
-                  >
-                    Vectorworks
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('position')}
-                    className={activeTab === 'position' ? 'tab-active' : 'tab-inactive'}
-                  >
-                    Position
-                  </button>
-                </div>
-
-                {/* Tab Content */}
-                <div className="flex-1 overflow-auto p-6">
-                  {activeTab === 'notes' && <CategoryNotesTab category={selectedCategory} />}
-                  {activeTab === 'physical' && <CategoryPhysicalTab category={selectedCategory} />}
-                  {activeTab === 'vectorworks' && <CategoryVectorworksTab category={selectedCategory} />}
-                  {activeTab === 'position' && <CategoryPositionTab category={selectedCategory} />}
-                </div>
-              </>
-            ) : (
-              <div className="flex-1 flex items-center justify-center text-gray-500">
-                Select a category to view details
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
-          <button onClick={onClose} className="btn-secondary">
-            Close
-          </button>
-        </div>
+    <aside className="inspector-panel">
+      <div className="inspector-panel__header">
+        <InspectorTabs content={content} />
+        <button onClick={onClose} aria-label="Close inspector" />
       </div>
-    </div>
+      <div className="inspector-panel__body">
+        {content === 'groups' && <GroupsInspector />}
+        {content === 'conditionalFormatting' && <ConditionalFormattingInspector />}
+        {content === 'fixtureProperties' && <FixturePropertiesInspector />}
+      </div>
+    </aside>
   );
 }
 ```
 
-#### 2. CategoryList
+Styling uses CSS custom properties so the panel can be reskinned during the broader UI overhaul
+without structural changes.
 
-**Pattern:** Sidebar list with add/delete actions
+### GroupsInspector Layout
 
-```typescript
-// src/renderer/src/components/maintenance/CategoryList.tsx
-
-export function CategoryList({ categories, selectedCategory, onSelectCategory }: Props) {
-  const createCategory = useCategoryStore(state => state.createCategory);
-  const deleteCategory = useCategoryStore(state => state.deleteCategory);
-
-  const handleAddCategory = async () => {
-    const name = prompt('Enter category name:');
-    if (name) {
-      const newCategory = await createCategory({ name });
-      onSelectCategory(newCategory);
-    }
-  };
-
-  return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-        <button onClick={handleAddCategory} className="btn-primary w-full">
-          + New Category
-        </button>
-      </div>
-
-      {/* Category List */}
-      <div className="flex-1 overflow-auto">
-        {categories.map(category => (
-          <div
-            key={category.id}
-            onClick={() => onSelectCategory(category)}
-            className={`
-              px-3 py-2 cursor-pointer border-l-4 hover:bg-gray-50 dark:hover:bg-gray-700
-              ${selectedCategory?.id === category.id ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500' : 'border-transparent'}
-            `}
-          >
-            <div className="flex items-center gap-2">
-              {category.color && (
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: category.color }}
-                />
-              )}
-              <span className="font-medium">{category.name}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+```
+┌─────────────────────────────────┐
+│  Groups                    [+]  │  ← header with "New Group" button
+├─────────────────────────────────┤
+│  ● All Moving Lights    (14) ▶  │  ← colored chip, fixture count, active indicator
+│  ● FOH Fixtures          (8) ▶  │
+│  ● Rental Package        (6) ▶  │
+├─────────────────────────────────┤
+│  [Selected group detail]        │
+│  Name: ___________________      │
+│  Color: ■ ________________      │
+│  Notes: ________________        │
+│         ________________        │
+│  Shop notes: ___________        │
+│              ___________        │
+│  Filter: [filter definition]    │
+│  Pinned fixtures: (3)  [edit]   │
+└─────────────────────────────────┘
 ```
 
-#### 3. RuleBuilder
+### Group Detail Fields
 
-**Pattern:** Rule list with add/remove actions (similar to conditional formatting)
+- **Name**: text input, inline edit
+- **Color**: color swatch picker (same palette as conditional formatting)
+- **Notes**: textarea — appears in paperwork section headers
+- **Shop notes**: textarea — section note in shop order output
+- **Filter**: renders `<GroupFilterEditor>` which wraps the existing filter condition UI
+- **Pinned fixtures**: list of manually pinned fixture IDs with unpin action
 
-```typescript
-// src/renderer/src/components/maintenance/RuleBuilder.tsx
+### Menu Entry (Optional, for discoverability)
 
-export function RuleBuilder({ category }: Props) {
-  const [rules, setRules] = useState<CategoryRule[]>([]);
-  const createRule = useCategoryStore(state => state.createRule);
-  const deleteRule = useCategoryStore(state => state.deleteRule);
-  const reevaluateAll = useCategoryStore(state => state.reevaluateAll);
-
-  const handleAddRule = () => {
-    setRules([...rules, {
-      id: 'temp-' + Date.now(),
-      category_id: category.id,
-      field: 'type',
-      operator: 'contains',
-      value: '',
-      case_sensitive: false,
-      sort_order: rules.length,
-      created_at: Date.now()
-    }]);
-  };
-
-  const handleSaveRule = async (rule: CategoryRule) => {
-    await createRule(rule);
-    // Re-evaluate all fixtures
-    await reevaluateAll();
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Auto-Assignment Rules</h3>
-        <button onClick={handleAddRule} className="btn-secondary">
-          + Add Rule
-        </button>
-      </div>
-
-      <div className="space-y-2">
-        {rules.map((rule, index) => (
-          <RuleRow
-            key={rule.id}
-            rule={rule}
-            onSave={handleSaveRule}
-            onDelete={() => deleteRule(rule.id)}
-          />
-        ))}
-      </div>
-
-      {rules.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
-          No rules defined. Click "Add Rule" to create auto-assignment rules.
-        </div>
-      )}
-
-      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-        <button onClick={reevaluateAll} className="btn-secondary">
-          Re-evaluate All Fixtures
-        </button>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-          Re-runs all rules and updates category assignments for all fixtures
-        </p>
-      </div>
-    </div>
-  );
-}
-```
-
-### Menu Integration
-
-`menuTemplate.ts` already exists with a full `buildMenu()` function. Add a new `buildMaintenanceMenu()` function and wire it in between `buildProjectMenu()` and `buildToolsMenu()`:
+If a keyboard-accessible entry point is needed, add to the Project menu rather than a new
+top-level menu:
 
 ```typescript
-// apps/desktop/src/main/menu/menuTemplate.ts
-
-// In buildMenu(), after the Project menu block:
-// Maintenance menu (only when project is open)
-if (state.projectId) {
-  template.push(buildMaintenanceMenu(state));
-}
-
-// Tools menu
-template.push(buildToolsMenu(state, isMac));
-
-// New function to add:
-function buildMaintenanceMenu(state: MenuStateData): MenuItemConstructorOptions {
-  return {
-    label: 'Maintenance',
-    submenu: [
-      {
-        label: 'Manage Categories...',
-        accelerator: 'CmdOrCtrl+Shift+M',
-        enabled: !!state.projectId,
-        click: () => sendToRenderer('menu:maintenance:open'),
-      },
-      { type: 'separator' },
-      // Dynamic menu items for each column can be added here at runtime
-    ],
-  };
+// apps/desktop/src/main/menu/menuTemplate.ts — in buildProjectMenu()
+{
+  label: 'Manage Groups...',
+  accelerator: 'CmdOrCtrl+Shift+G',
+  enabled: !!state.projectId,
+  click: () => sendToRenderer('menu:groups:open'),
 }
 ```
-
-The renderer side registers a handler via `useMaintenanceMenuHandlers.ts` (new hook following the `useEquipmentMenuHandlers` pattern) listening on `menu:maintenance:open`.
 
 ### Testing Strategy
 
 **Key Tests:**
 
-- Dialog opens/closes correctly
-- Category creation/deletion
-- Tab navigation
-- Rule builder UI (add/edit/delete rules)
-- Field/operator dropdowns
-- Re-evaluate button functionality
-- Category color picker
+- Inspector panel renders correct content for each context
+- Groups list shows live fixture counts
+- Clicking a group applies filter to grid
+- Creating a group from current grid filter
+- Color picker updates group color
+- Notes and shop_notes autosave on blur
 
 **Coverage Targets:**
 
-- UI Components: 50%+ (standard for UI)
+- UI Components: 50%+
 
 ### Deliverables
 
-- [ ] Maintenance menu dialog with 4 tabs
-- [ ] Category list with CRUD operations
-- [ ] Rule builder UI
-- [ ] Menu bar integration
+- [ ] `<InspectorPanel>` shell (composable, CSS-custom-property styled)
+- [ ] `<GroupsInspector>` — group list with live counts, group detail form
+- [ ] `<GroupFilterEditor>` — wraps existing filter UI for defining group membership
+- [ ] Equipment Manager wired to mount inspector and apply group filter on selection
+- [ ] Optional: "Manage Groups..." entry in Project menu
 - [ ] 50%+ component test coverage
-- [ ] Documentation: UI guide, rule builder instructions
 
 **Effort:** 1 week
 
 ---
 
-## Phase 3: Equipment Manager Integration (Week 3)
+## Phase 3: Equipment Manager Integration (Week 3, Part 1)
 
-**Milestone:** Visual indicators, filtering, bulk assignment
+**Milestone:** Group indicator column, bulk pin action, context menu
 
 ### New Files to Create
 
 ```
 src/renderer/src/components/fixture/
-├── CategoryIndicator.tsx                     (100 lines) - Color dot indicator
-├── CategoryFilterDropdown.tsx                (150 lines) - Filter by category
+├── GroupIndicator.tsx                    - Color dot(s) showing group membership
 └── __tests__/
-    ├── CategoryIndicator.test.tsx            (80 lines, 50%+ coverage)
-    └── CategoryFilterDropdown.test.tsx       (100 lines, 50%+ coverage)
+    └── GroupIndicator.test.tsx
 ```
 
 ### Files to Modify
 
 ```
-src/renderer/src/pages/modules/EquipmentManager.tsx  (Add category column, filter, bulk action)
-src/renderer/src/components/fixture/VirtualDataGrid.tsx  (Add category indicator rendering)
-src/renderer/src/components/fixture/FixtureContextMenu.tsx  (Add category assignment option)
+src/renderer/src/pages/modules/EquipmentManager.tsx
+  (Add group indicator column; add "Pin to Group" bulk action)
+src/renderer/src/components/fixture/VirtualDataGrid.tsx
+  (Render GroupIndicator in group column)
+src/renderer/src/components/fixture/FixtureContextMenu.tsx
+  (Add "Pin to Group" submenu)
 ```
 
-### Equipment Manager Enhancements
-
-#### 1. Category Column
-
-Add category column to VirtualDataGrid showing color indicators
+### Group Indicator Column
 
 ```typescript
-// CategoryIndicator component
-export function CategoryIndicator({ categories }: Props) {
+// GroupIndicator component
+export function GroupIndicator({ groups }: { groups: FixtureGroup[] }) {
   return (
-    <div className="flex gap-1">
-      {categories.map(category => (
+    <div className="flex gap-1 items-center">
+      {groups.map(group => (
         <div
-          key={category.id}
-          className="w-3 h-3 rounded-full"
-          style={{ backgroundColor: category.color || '#ccc' }}
-          title={category.name}
+          key={group.id}
+          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+          style={{ backgroundColor: group.color ?? '#94a3b8' }}
+          title={group.name}
         />
       ))}
     </div>
@@ -818,323 +471,231 @@ export function CategoryIndicator({ categories }: Props) {
 }
 ```
 
-#### 2. Category Filter
-
-Add dropdown to filter fixtures by category
+### Context Menu: Pin to Group
 
 ```typescript
-// CategoryFilterDropdown component
-export function CategoryFilterDropdown({ onFilterChange }: Props) {
-  const categories = useCategoryStore(state => state.categories);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
-  const handleChange = (categoryId: string | null) => {
-    setSelectedCategory(categoryId);
-    onFilterChange(categoryId);
-  };
-
-  return (
-    <select
-      value={selectedCategory || ''}
-      onChange={(e) => handleChange(e.target.value || null)}
-      className="form-select"
-    >
-      <option value="">All Fixtures</option>
-      {categories.map(category => (
-        <option key={category.id} value={category.id}>
-          {category.name}
-        </option>
-      ))}
-    </select>
-  );
-}
-```
-
-#### 3. Context Menu Integration
-
-Add "Assign to Category" option in right-click menu
-
-```typescript
-// FixtureContextMenu additions
+// FixtureContextMenu — add submenu
 {
-  label: 'Assign to Category',
-  submenu: categories.map(category => ({
-    label: category.name,
-    click: () => assignFixtureToCategory(selectedFixture.id, category.id)
+  label: 'Pin to Group',
+  submenu: groups.map(group => ({
+    label: group.name,
+    checked: isPinnedToGroup(fixture.id, group.id),
+    click: () => toggleGroupPin(fixture.id, group.id),
   }))
 }
 ```
 
-#### 4. Bulk Assignment
+### Bulk Pin Action
 
-Add bulk action to assign multiple fixtures to category
+In the bulk edit toolbar (appears when rows are selected):
 
-```typescript
-// In BulkEditDialog
-<div className="form-group">
-  <label>Assign to Category</label>
-  <select
-    value={selectedCategory || ''}
-    onChange={(e) => handleBulkCategoryAssignment(e.target.value)}
-    className="form-select"
-  >
-    <option value="">No Change</option>
-    {categories.map(category => (
-      <option key={category.id} value={category.id}>
-        {category.name}
-      </option>
-    ))}
-  </select>
-</div>
 ```
-
-### Testing Strategy
-
-**Key Tests:**
-
-- Category indicators render correctly
-- Filter dropdown filters fixtures
-- Context menu assigns category
-- Bulk assignment updates multiple fixtures
-- Visual indicators update in real-time
-
-**Coverage Targets:**
-
-- UI Components: 50%+ (standard for UI)
+[Pin to Group ▾]   → dropdown of all groups → applies pin to all selected fixtures
+```
 
 ### Deliverables
 
-- [ ] Category column in Equipment Manager
-- [ ] Category filter dropdown
-- [ ] Context menu integration
-- [ ] Bulk assignment action
-- [ ] Visual indicators (color dots)
+- [ ] Group indicator column in Equipment Manager grid
+- [ ] Context menu "Pin to Group" with toggle behavior
+- [ ] Bulk "Pin to Group" action on selected fixtures
 - [ ] 50%+ component test coverage
-- [ ] Documentation: Integration guide
 
-**Effort:** 1 week
+**Effort:** 3-4 days
 
 ---
 
-## Phase 4: Label, Paperwork & Shop Order Integration (Week 4)
+## Phase 4: Shop Order, Labels & Paperwork Integration (Week 3, Part 2)
 
-**Milestone:** Category field in labels, paperwork grouping, shop order automation
+**Milestone:** Groups drive shop order sections; `shop_notes` maps to section note; labels and
+paperwork consume group data
 
 ### Files to Modify
 
 ```
-src/renderer/src/components/labels/
-├── labelDataMapper.ts                        (Add category field mapping)
-
-src/renderer/src/utils/paperwork/
-├── reportGenerators.ts                       (Add group by category option)
-
-src/renderer/src/components/prep/
-├── ShopOrderTable.tsx                        (Add auto-populate from categories)
+src/renderer/src/components/prep/ShopOrderTable.tsx
+  (Add "Auto-populate from Groups" action)
+src/renderer/src/utils/shop-order/shopOrderHelpers.ts
+  (Add generateSectionsFromGroups())
+src/renderer/src/utils/labels/labelDataMapper.ts
+  (Add {group} field token)
+src/renderer/src/utils/paperwork/reportGenerators.ts
+  (Add groupBy: 'smart-group' option)
 ```
+
+### Shop Order: Auto-populate from Groups
+
+```typescript
+// shopOrderHelpers.ts
+export async function generateSectionsFromGroups(
+  projectId: string,
+  groups: FixtureGroup[],
+  allFixtures: Fixture[],
+): Promise<void> {
+  for (const group of groups) {
+    const members = getGroupMembers(group, allFixtures);
+
+    // One section per group
+    const section = await createShopOrderSection({
+      name: group.name,
+      notes: group.shop_notes ?? '', // section-level note
+    });
+
+    // Quantity rollup by fixture type
+    const byType = groupBy(members, (f) => f.type);
+    for (const [type, fixtures] of Object.entries(byType)) {
+      await createShopOrderItem({
+        section_id: section.id,
+        description: type,
+        quantity: fixtures.length,
+        notes: fixtures
+          .map((f) => f.notes)
+          .filter(Boolean)
+          .join('; '), // line-item notes from fixture.notes
+      });
+    }
+  }
+}
+```
+
+**Note mapping summary:**
+
+- `group.shop_notes` → `section.notes` (section-level annotation for the shop)
+- `fixture.notes` → `item.notes` (line-item annotation per fixture type)
 
 ### Label Integration
 
-**Add Category Field:**
-
 ```typescript
-// labelDataMapper.ts
-export const AVAILABLE_FIELDS = [
-  // ... existing fields
-  {
-    field: 'category',
-    label: 'Category',
-    type: 'text',
-    getValue: (fixture: Fixture) => {
-      const categories = getFixtureCategories(fixture.id);
-      return categories.map((c) => c.name).join(', ');
-    },
+// labelDataMapper.ts — add to AVAILABLE_FIELDS
+{
+  field: 'group',
+  label: 'Group',
+  type: 'text',
+  getValue: (fixture: Fixture, context: { groups: FixtureGroup[] }) => {
+    const memberOf = context.groups.filter(g =>
+      getGroupMembers(g, context.allFixtures).some(f => f.id === fixture.id)
+    );
+    return memberOf.map(g => g.name).join(', ');
   },
-];
+},
 ```
 
 ### Paperwork Integration
 
-**Group by Category Option:**
-
 ```typescript
 // reportGenerators.ts
-export function generateChannelHookup(fixtures: Fixture[], options: ReportOptions) {
-  if (options.groupBy === 'category') {
-    // Group fixtures by category
-    const grouped = groupBy(fixtures, (fixture) => {
-      const categories = getFixtureCategories(fixture.id);
-      return categories[0]?.name || 'Uncategorized';
-    });
-
-    // Generate report with category sections
-    return Object.entries(grouped).map(([categoryName, fixtures]) => ({
-      sectionTitle: categoryName,
-      fixtures: sortFixtures(fixtures, options.sortBy),
+export function generateChannelHookup(
+  fixtures: Fixture[],
+  options: ReportOptions,
+  groups?: FixtureGroup[],
+) {
+  if (options.groupBy === 'smart-group' && groups?.length) {
+    return groups.map((group) => ({
+      sectionTitle: group.name,
+      sectionNotes: group.notes,
+      fixtures: getGroupMembers(group, fixtures),
     }));
   }
-
   // ... existing grouping logic
 }
-```
-
-### Shop Order Automation
-
-**Auto-populate from Categories:**
-
-```typescript
-// ShopOrderTable.tsx
-const handleAutoPopulateFromCategories = async () => {
-  const categories = await window.api.categories.getAll(projectId);
-
-  for (const category of categories) {
-    // Get fixtures in this category
-    const fixtures = await getFixturesInCategory(category.id);
-
-    // Create shop order section
-    const section = await createShopOrderSection({
-      name: category.name,
-      notes: category.notes,
-    });
-
-    // Group fixtures by type and create items
-    const grouped = groupBy(fixtures, 'type');
-
-    for (const [type, fixturesOfType] of Object.entries(grouped)) {
-      await createShopOrderItem({
-        section_id: section.id,
-        description: type,
-        quantity: fixturesOfType.length,
-        notes: category.physical_notes,
-      });
-    }
-  }
-};
 ```
 
 ### Testing Strategy
 
 **Key Tests:**
 
-- Category field available in label designer
-- Labels render category correctly
-- Paperwork groups by category
-- Shop order auto-populate creates sections
-- Quantity rollup by category/type
+- `generateSectionsFromGroups` creates correct section count, names, notes
+- `shop_notes` appears as section note, not line-item note
+- `fixture.notes` appears as line-item note, not section note
+- `{group}` label field resolves correctly for pinned and filter-matched fixtures
+- Paperwork groups by smart group in correct sort order
+- Fixtures in multiple groups appear in each section
 
 **Coverage Targets:**
 
-- Integration Functions: 60%+ (important integrations)
+- Integration Functions: 60%+
 
 ### Deliverables
 
-- [ ] Category field in label designer
-- [ ] Paperwork group by category
-- [ ] Shop order auto-populate from categories
-- [ ] 60%+ test coverage for integrations
-- [ ] Documentation: Integration examples, shop order automation guide
+- [ ] "Auto-populate from Groups" action in Shop Order Builder
+- [ ] `shop_notes` → section note; `fixture.notes` → line-item notes
+- [ ] `{group}` field token in label designer
+- [ ] "Group by: Smart Group" option in paperwork report generator
+- [ ] 60%+ test coverage for integration functions
 
-**Effort:** 1 week
+**Effort:** 3-4 days
 
 ---
 
 ## Testing Summary
 
-| Component             | Files  | Tests   | Coverage |
-| --------------------- | ------ | ------- | -------- |
-| Rule Engine           | 1      | 25      | 80%+     |
-| Database Queries      | 1      | 20      | 80%+     |
-| IPC Handlers          | 1      | 15      | 70%+     |
-| UI Components         | 10     | 40      | 50%+     |
-| Integration Functions | 3      | 15      | 60%+     |
-| **TOTAL**             | **16** | **115** | **70%**  |
-
-**Testing Tools:**
-
-- Vitest + React Testing Library
-- Mock data for categories and rules
-- CI/CD: GitHub Actions
+| Component                                              | Coverage Target |
+| ------------------------------------------------------ | --------------- |
+| Database Queries                                       | 80%+            |
+| IPC Handlers                                           | 70%+            |
+| Group Store / membership evaluation                    | 80%+            |
+| UI Components                                          | 50%+            |
+| Integration Functions (shop orders, labels, paperwork) | 60%+            |
+| **Overall**                                            | **70%+**        |
 
 ---
 
 ## Risk Assessment
 
-### High-Risk Items
-
-1. **Rule Evaluation Performance**
-   - **Risk:** Re-evaluating 5000+ fixtures is slow
-   - **Mitigation:** Batch updates, progress indicators, background processing
-
-2. **Rule Complexity**
-   - **Risk:** Users create conflicting or overly complex rules
-   - **Mitigation:** Rule testing UI, clear documentation, "test rule" button
-
 ### Medium-Risk Items
 
-1. **UI Complexity**
-   - **Risk:** 4-tab dialog is overwhelming
-   - **Mitigation:** Good defaults, tooltips, help documentation
+1. **Filter definition format stability**
+   - **Risk:** The existing filter format changes and stored `filter_def` JSON becomes invalid
+   - **Mitigation:** Version the filter format; validate on load; fallback to empty group
+     (show 0 members, prompt user to redefine filter)
 
-2. **Category Bloat**
-   - **Risk:** Users create too many categories
-   - **Mitigation:** Category templates, import/export, merge functionality
+2. **Membership computation performance**
+   - **Risk:** Computing membership for 20 groups × 5,000 fixtures on every render
+   - **Mitigation:** Memoize `getGroupMembers` results; recompute only when `filter_def`,
+     fixture list, or pins change
 
----
+3. **Inspector panel restyling**
+   - **Risk:** Broader UI overhaul requires significant rework of the inspector shell
+   - **Mitigation:** Style exclusively via CSS custom properties; no hardcoded colors or
+     dimensions in component files
 
-## Timeline
+### Low-Risk Items
 
-```
-Week 1: Phase 1 - Core System (database, IPC, rule engine)
-Week 2: Phase 2 - Maintenance Menu UI (dialog, rule builder)
-Week 3: Phase 3 - Equipment Manager Integration (indicators, filter, bulk)
-Week 4: Phase 4 - Label/Paperwork/Shop Order Integration
-```
-
-**Total:** 4 weeks (1 month)
+1. **Multiple group membership**
+   - A fixture can match multiple groups — this is intentional and correct. Shop orders,
+     labels, and paperwork all handle it (fixture appears in each section it belongs to).
 
 ---
 
 ## Success Criteria
 
-### Technical Requirements
+### Technical
 
-- [ ] Rule engine evaluates 5000 fixtures in < 5 seconds
+- [ ] Group membership always reflects current fixture data (no re-evaluate step)
+- [ ] Filter definition stored and evaluated using existing filter system format
+- [ ] `shop_notes` flows to section note; `fixture.notes` flows to line-item note
 - [ ] 70%+ overall test coverage
-- [ ] Manual assignment overrides auto-assignment
-- [ ] Categories persist across sessions
-- [ ] Integration with all major features (labels, paperwork, shop orders)
+- [ ] `<InspectorPanel>` shell usable by conditional formatting without structural changes
 
-### User Experience Requirements
+### User Experience
 
-- [ ] Maintenance menu is discoverable
-- [ ] Rule builder is intuitive
-- [ ] Visual indicators are clear
-- [ ] Shop order automation saves time
-- [ ] Comprehensive documentation
+- [ ] Creating a group takes < 30 seconds (name a filter, pick a color)
+- [ ] Inspector shows live fixture count per group
+- [ ] Auto-populate from Groups produces a correctly structured shop order
+- [ ] Group field available in labels and paperwork
 
 ---
 
 ## Future Enhancements
 
-1. **Category Templates** - Pre-built categories for common workflows
-2. **Import/Export Categories** - Share categories across projects
-3. **Category Analytics** - Show fixture count per category
-4. **Smart Rules** - AI-suggested rules based on fixture patterns
-5. **Category Hierarchy** - Parent/child category relationships
-6. **Merge Categories** - Combine duplicate categories
-7. **Category History** - Track assignment changes over time
+1. **Conditional Formatting migration** — move from modal dialog to `<ConditionalFormattingInspector>`
+   using the inspector shell built here
+2. **Group templates** — pre-built groups for common show types (corporate, concert, theatre)
+3. **Import/export groups** — share group definitions across projects
+4. **Group analytics** — fixture count by type within each group
+5. **Group sort in grid** — sort fixture grid by group membership
 
 ---
 
-## Next Steps
-
-1. **Team Review** - Review plan with stakeholders
-2. **Resource Allocation** - Assign developer
-3. **User Research** - Survey users on category naming conventions
-4. **Begin Phase 1** - Start with database schema and rule engine
-
----
-
-**Last Updated:** March 8, 2026
+**Last Updated:** March 9, 2026
 **Author:** Claude Code
-**Version:** 1.1
+**Version:** 2.0
