@@ -20,6 +20,9 @@ import { telemetry } from '../../services/telemetry';
 import { formatPhoneNumber } from '../../utils/phoneFormatter';
 import type { PrepSection, Discipline, PrepProject } from '../../types/shopOrder';
 import { useShopOrderMenuHandlers } from '../../hooks/useShopOrderMenuHandlers';
+import { useFixtureStore } from '../../store/fixtureStore';
+import { useGroupStore } from '../../store/groupStore';
+import { generateSectionsFromGroups } from '../../utils/shop-order/groupHelpers';
 
 export function ShopOrderBuilder() {
   const navigate = useNavigate();
@@ -42,6 +45,8 @@ export function ShopOrderBuilder() {
     syncFromParent,
   } = useShopOrderStore();
   const { projects, loadProjects } = useProjectStore();
+  const { fixtures } = useFixtureStore();
+  const { groups, pinsByGroup } = useGroupStore();
   const [moduleStartTime] = useState(Date.now());
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   const [showAddSectionDialog, setShowAddSectionDialog] = useState(false);
@@ -76,6 +81,9 @@ export function ShopOrderBuilder() {
   // State for file menu
   const [showFileMenu, setShowFileMenu] = useState(false);
 
+  // State for "From Groups" auto-populate
+  const [isAddingFromGroups, setIsAddingFromGroups] = useState(false);
+
   // Ref for click timer (to distinguish single vs double click)
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -91,6 +99,28 @@ export function ShopOrderBuilder() {
 
   const handleHomeClick = () => {
     navigate('/');
+  };
+
+  const handleAddFromGroups = async () => {
+    if (!currentProject) return;
+    if (groups.length === 0) return;
+    setIsAddingFromGroups(true);
+    try {
+      const result = await generateSectionsFromGroups(
+        currentProject.id,
+        groups,
+        fixtures,
+        pinsByGroup,
+      );
+      await loadProject(currentProject.id);
+      logger.info(
+        `From Groups: created ${result.sectionsCreated} sections, ${result.itemsCreated} items (${result.skippedEmpty} empty groups skipped)`,
+      );
+    } catch (error) {
+      logger.error('Failed to add sections from groups', { error: String(error) });
+    } finally {
+      setIsAddingFromGroups(false);
+    }
   };
 
   useEffect(() => {
@@ -1254,6 +1284,8 @@ export function ShopOrderBuilder() {
                     <ShopOrderTable
                       projectId={currentProject.id}
                       onAddSection={() => setShowAddSectionDialog(true)}
+                      onAddFromGroups={groups.length > 0 ? handleAddFromGroups : undefined}
+                      isAddingFromGroups={isAddingFromGroups}
                     />
                   </div>
                 </div>

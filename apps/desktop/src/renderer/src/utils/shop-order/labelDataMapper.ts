@@ -7,6 +7,7 @@
 
 import { logger } from '../logger';
 import type { Fixture } from '../../types';
+import type { FixtureGroup } from '../../types/group';
 
 /**
  * Label data interface - represents all fields that can be used on labels
@@ -56,6 +57,9 @@ export interface LabelData {
   system?: string;
   status?: string;
   notes?: string;
+
+  // Smart Groups
+  group?: string; // Comma-separated list of group names this fixture belongs to
 
   // Custom fields for flexibility
   custom1?: string;
@@ -116,6 +120,9 @@ export function mapFixtureToLabelData(fixture: Fixture): LabelData {
     status: fixture.status || '',
     notes: fixture.notes || '',
 
+    // Smart Groups — populated by mapFixturesToLabelDataWithGroups
+    group: '',
+
     // Custom fields - can be mapped from fixture.custom_fields if needed
     custom1: '',
     custom2: '',
@@ -129,6 +136,25 @@ export function mapFixtureToLabelData(fixture: Fixture): LabelData {
  */
 export function mapFixturesToLabelData(fixtures: Fixture[]): LabelData[] {
   return fixtures.map(mapFixtureToLabelData);
+}
+
+/**
+ * Map fixtures to label data, populating the `group` field from a pre-computed
+ * fixture→groups map (produced by `computeFixtureGroupMap` in groupMembership.ts).
+ *
+ * Use this instead of `mapFixturesToLabelData` when the label template includes a
+ * `{group}` token.
+ */
+export function mapFixturesToLabelDataWithGroups(
+  fixtures: Fixture[],
+  fixtureGroupMap: Map<string, FixtureGroup[]>,
+): LabelData[] {
+  return fixtures.map((fixture) => {
+    const data = mapFixtureToLabelData(fixture);
+    const groups = fixtureGroupMap.get(fixture.id) ?? [];
+    data.group = groups.map((g) => g.name).join(', ');
+    return data;
+  });
 }
 
 /**
@@ -251,6 +277,9 @@ export function getAvailableLabelFields(): Array<{
     { key: 'system', label: 'System', category: 'System' },
     { key: 'status', label: 'Status', category: 'System' },
     { key: 'notes', label: 'Notes', category: 'System' },
+
+    // Groups
+    { key: 'group', label: 'Group(s)', category: 'Groups' },
 
     // Custom
     { key: 'custom1', label: 'Custom 1', category: 'Custom' },

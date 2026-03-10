@@ -6,6 +6,8 @@
 import { logger } from '../logger';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { useInfrastructureStore } from '../../store/infrastructureStore';
+import { useGroupStore } from '../../store/groupStore';
+import { computeFixtureGroupMap } from '../groupMembership';
 import { ReportDataItem } from './reportOrganizer';
 import {
   parseFrameSize,
@@ -69,28 +71,36 @@ function isInfrastructureReport(reportType: string): boolean {
 
 function getFixtureData(reportType: string): ReportDataItem[] {
   const { fixtures } = useFixtureStore.getState();
+  const { groups, pinsByGroup } = useGroupStore.getState();
 
-  return fixtures.map((fixture) => ({
-    id: fixture.id,
-    channel: fixture.channel,
-    dimmer: fixture.dimmer,
-    circuit: fixture.circuit_number,
-    position: fixture.position,
-    unit: fixture.unit_number,
-    type: fixture.type,
-    manufacturer: fixture.manufacturer,
-    model: fixture.model,
-    wattage: fixture.wattage,
-    amperage: fixture.wattage ? fixture.wattage / 120 : 0,
-    purpose: fixture.purpose,
-    color: fixture.color,
-    gobo: fixture.gobo,
-    accessories: fixture.accessories,
-    universe: fixture.universe,
-    dmx_address: fixture.dmx_address,
-    notes: fixture.notes,
-    _raw: fixture,
-  }));
+  // Pre-compute fixture→groups map so `group` field is available for groupBy
+  const fixtureGroupMap = computeFixtureGroupMap(groups, fixtures, pinsByGroup);
+
+  return fixtures.map((fixture) => {
+    const fixtureGroups = fixtureGroupMap.get(fixture.id) ?? [];
+    return {
+      id: fixture.id,
+      channel: fixture.channel,
+      dimmer: fixture.dimmer,
+      circuit: fixture.circuit_number,
+      position: fixture.position,
+      unit: fixture.unit_number,
+      type: fixture.type,
+      manufacturer: fixture.manufacturer,
+      model: fixture.model,
+      wattage: fixture.wattage,
+      amperage: fixture.wattage ? fixture.wattage / 120 : 0,
+      purpose: fixture.purpose,
+      color: fixture.color,
+      gobo: fixture.gobo,
+      accessories: fixture.accessories,
+      universe: fixture.universe,
+      dmx_address: fixture.dmx_address,
+      notes: fixture.notes,
+      group: fixtureGroups.map((g) => g.name).join(', '),
+      _raw: fixture,
+    };
+  });
 }
 
 function getInfrastructureData(reportType: string): ReportDataItem[] {

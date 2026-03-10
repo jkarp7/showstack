@@ -10,6 +10,7 @@ import { ReportTypeSelector } from './ReportTypeSelector';
 import { ColumnVisibilityControls } from './ColumnVisibilityControls';
 import { ColumnNameSettings } from './ColumnNameSettings';
 import { FontCustomizationControls } from './FontCustomizationControls';
+import { GroupingSortingControls } from './GroupingSortingControls';
 import { PaperworkTemplateLibrary } from './PaperworkTemplateLibrary';
 import { ReportTableRenderer } from './ReportTableRenderer';
 import { usePaperworkTemplates, useActiveTemplate } from '../../hooks/usePaperworkTemplates';
@@ -362,6 +363,31 @@ export function PaperworkEditor({
                   columns={activeTemplate.columns}
                   onChange={handleColumnsChange}
                   reportType={reportType}
+                />
+              </div>
+            )}
+
+            {/* Grouping & Sorting Controls */}
+            {activeTemplate && (
+              <div className="flex-shrink-0">
+                <GroupingSortingControls
+                  organization={activeTemplate.organization}
+                  columns={activeTemplate.columns}
+                  onChange={handleOrganizationChange}
+                  extraGroupOptions={
+                    [
+                      'channel-hookup',
+                      'dimmer-schedule',
+                      'circuit-list',
+                      'dmx-addresses',
+                      'power-summary',
+                      'color-schedule',
+                      'gobo-schedule',
+                      'color-cut-report',
+                    ].includes(reportType)
+                      ? [{ value: 'group', label: 'Smart Group' }]
+                      : []
+                  }
                 />
               </div>
             )}
