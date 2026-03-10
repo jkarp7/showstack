@@ -1,6 +1,6 @@
 # Next Steps - ShowStack Development
 
-**Last Updated:** March 2026
+**Last Updated:** March 9, 2026
 **Status:** Multi-user collaboration shipped; PowerSync project-sync gap documented below
 
 ---
