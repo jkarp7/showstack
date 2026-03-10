@@ -33,13 +33,13 @@ function buildSections(projectId: string): NavSection[] {
       items: [
         { label: 'Fixtures', path: `${base}/fixtures` },
         { label: 'Infrastructure', path: `${base}/infrastructure` },
-        { label: 'Racks & Distribution', path: `${base}/racks` },
         { label: 'Multi-Cable Tracking', path: `${base}/multi-cable`, placeholder: true },
       ],
     },
     {
       title: 'Power',
       items: [
+        { label: 'Racks & Distribution', path: `${base}/racks` },
         { label: 'Services & Templates', path: `${base}/power/services` },
         { label: 'Power Summary', path: `${base}/power/summary` },
         { label: 'Power/Cable Diagrams', path: `${base}/power/diagrams`, placeholder: true },

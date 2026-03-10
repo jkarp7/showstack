@@ -1132,16 +1132,6 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
           >
             Infrastructure
           </button>
-          <button
-            onClick={() => setActiveTab('power')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-              activeTab === 'power'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
-            }`}
-          >
-            Power
-          </button>
         </div>
       </div>
 
