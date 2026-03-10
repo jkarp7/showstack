@@ -45,6 +45,10 @@ export interface FixtureGroupPin {
 
 export interface GroupStore {
   groups: FixtureGroup[];
+  /** Flat list of all fixture-group pins for the current project. */
+  allPins: { fixture_id: string; group_id: string }[];
+  /** Pin lookup by group ID → fixture IDs. Derived from allPins. */
+  pinsByGroup: Record<string, string[]>;
   loading: boolean;
   currentProjectId: string | null;
 

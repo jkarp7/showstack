@@ -53,7 +53,7 @@ import {
 } from '../../utils/exportHeaders';
 import { HighlightRule, DEFAULT_HIGHLIGHT_RULES } from '../../types/highlighting';
 import { useGroupStore } from '../../store/groupStore';
-import { getGroupMembers } from '../../utils/groupMembership';
+import { getGroupMembers, computeFixtureGroupMap } from '../../utils/groupMembership';
 import { InspectorPanel } from '../../components/inspector/InspectorPanel';
 import { GroupsInspector } from '../../components/inspector/GroupsInspector';
 
@@ -120,7 +120,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   const [highlightRules, setHighlightRules] = useState<HighlightRule[]>(DEFAULT_HIGHLIGHT_RULES);
 
   // Smart Groups — inspector panel
-  const { groups, loadGroups } = useGroupStore();
+  const { groups, allPins, pinsByGroup, loadGroups, addPin, removePin } = useGroupStore();
   const [isInspectorOpen, setIsInspectorOpen] = useState(false);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
 
@@ -910,6 +910,26 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     activePins,
   ]);
 
+  // Fixture → groups map (for group indicator dots on every row)
+  const fixtureGroupMap = useMemo(
+    () => computeFixtureGroupMap(groups, fixtures, pinsByGroup),
+    [groups, fixtures, pinsByGroup],
+  );
+
+  // Fixture → pinned group IDs map (for context menu pin toggle)
+  const fixturePinnedGroupMap = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const pin of allPins) {
+      const existing = map.get(pin.fixture_id);
+      if (existing) {
+        existing.add(pin.group_id);
+      } else {
+        map.set(pin.fixture_id, new Set([pin.group_id]));
+      }
+    }
+    return map;
+  }, [allPins]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1272,6 +1292,11 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
                 pdRacks={pdRacks}
                 autoFillSuggestions={autoFillSuggestions}
                 highlightRules={highlightRules}
+                groups={groups}
+                fixtureGroupMap={fixtureGroupMap}
+                fixturePinnedGroupMap={fixturePinnedGroupMap}
+                onPinToGroup={(fixtureId, groupId) => addPin(groupId, fixtureId)}
+                onUnpinFromGroup={(fixtureId, groupId) => removePin(groupId, fixtureId)}
               />
             </div>
 

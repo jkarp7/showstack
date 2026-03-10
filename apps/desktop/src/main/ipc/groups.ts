@@ -137,6 +137,21 @@ export function registerGroupHandlers(): void {
     }
   });
 
+  // Get all pins for every group in a project (bulk)
+  ipcMain.handle('groups:getAllPins', async (_event, projectId: string) => {
+    try {
+      return await groupService.getAllPinsForProject(projectId);
+    } catch (error) {
+      logger.error('Failed to get all pins for project', {
+        operation: 'groups:getAllPins',
+        projectId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      if (error instanceof DatabaseError) throw new Error(`Unable to load pins: ${error.message}`);
+      throw error;
+    }
+  });
+
   // Get all group IDs a fixture is pinned to
   ipcMain.handle('groups:getGroupsForFixture', async (_event, fixtureId: string) => {
     try {

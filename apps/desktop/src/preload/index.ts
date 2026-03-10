@@ -373,6 +373,7 @@ contextBridge.exposeInMainWorld('api', {
     update: (id: string, updates: any) => ipcRenderer.invoke('groups:update', id, updates),
     delete: (id: string) => ipcRenderer.invoke('groups:delete', id),
     getPins: (groupId: string) => ipcRenderer.invoke('groups:getPins', groupId),
+    getAllPins: (projectId: string) => ipcRenderer.invoke('groups:getAllPins', projectId),
     addPin: (groupId: string, fixtureId: string) =>
       ipcRenderer.invoke('groups:addPin', groupId, fixtureId),
     removePin: (groupId: string, fixtureId: string) =>
@@ -728,6 +729,7 @@ export interface ElectronAPI {
     update: (id: string, updates: any) => Promise<any>;
     delete: (id: string) => Promise<void>;
     getPins: (groupId: string) => Promise<any[]>;
+    getAllPins: (projectId: string) => Promise<{ fixture_id: string; group_id: string }[]>;
     addPin: (groupId: string, fixtureId: string) => Promise<void>;
     removePin: (groupId: string, fixtureId: string) => Promise<void>;
     getGroupsForFixture: (fixtureId: string) => Promise<string[]>;

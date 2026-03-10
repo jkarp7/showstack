@@ -9,6 +9,7 @@ import {
   addPin,
   removePin,
   getGroupsForFixture,
+  getAllPinsForProject,
   FixtureGroup,
   FixtureGroupPin,
 } from '../database/queries/groups';
@@ -91,6 +92,16 @@ export class GroupService extends BaseService {
     return this.executeWithRetry(
       async () => getGroupsForFixture(fixtureId),
       'groups:getGroupsForFixture',
+    );
+  }
+
+  async getAllPinsForProject(
+    projectId: string,
+  ): Promise<{ fixture_id: string; group_id: string }[]> {
+    this.validateId(projectId, 'Project');
+    return this.executeWithRetry(
+      async () => getAllPinsForProject(projectId),
+      'groups:getAllPinsForProject',
     );
   }
 }

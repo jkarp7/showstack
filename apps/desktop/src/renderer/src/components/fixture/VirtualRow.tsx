@@ -14,6 +14,7 @@ import {
   ColorFlagType,
 } from '../../types/highlighting';
 import { RowContextMenu } from './RowContextMenu';
+import type { FixtureGroup } from '../../types/group';
 
 // Gel color database - Complete GAM, LEE, and Rosco theatrical gels (628 colors)
 // Converted from manufacturer RGB values to hex format
@@ -682,6 +683,14 @@ interface VirtualRowProps {
   highlightRules?: HighlightRule[];
   onSetFlag?: (fixtureId: string, flag: ColorFlagType | null) => void;
   onHide?: (fixtureId: string) => void;
+  /** Groups this fixture belongs to (filter match or pinned). Used for indicator dots. */
+  fixtureGroups?: FixtureGroup[];
+  /** Group IDs this fixture is manually pinned to. Used for context menu pin toggles. */
+  fixturePinnedGroupIds?: Set<string>;
+  /** All groups in the project, for the "Pin to Group" context menu. */
+  groups?: FixtureGroup[];
+  onPinToGroup?: (groupId: string) => void;
+  onUnpinFromGroup?: (groupId: string) => void;
 }
 
 export const VirtualRow = memo(function VirtualRow({
@@ -699,6 +708,11 @@ export const VirtualRow = memo(function VirtualRow({
   highlightRules = [],
   onSetFlag,
   onHide,
+  fixtureGroups = [],
+  fixturePinnedGroupIds,
+  groups,
+  onPinToGroup,
+  onUnpinFromGroup,
 }: VirtualRowProps) {
   // Context menu state
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
@@ -892,6 +906,10 @@ export const VirtualRow = memo(function VirtualRow({
           onHide={() => onHide(fixture.id)}
           currentFlag={fixture.color_flag as ColorFlagType | null | undefined}
           isHidden={fixture.hidden}
+          groups={groups}
+          fixturePinnedGroupIds={fixturePinnedGroupIds}
+          onPinToGroup={onPinToGroup}
+          onUnpinFromGroup={onUnpinFromGroup}
         />
       )}
       {/* Inner wrapper with highlight - starts after flag bar with 2px offset */}
@@ -914,6 +932,37 @@ export const VirtualRow = memo(function VirtualRow({
               backgroundRepeat: 'no-repeat',
             }}
           />
+        </div>
+        {/* Group indicator dots — up to 3, then overflow dot */}
+        <div
+          className="flex-shrink-0 flex flex-col items-center justify-center"
+          style={{ width: 16, gap: 2 }}
+        >
+          {fixtureGroups.slice(0, 3).map((g) => (
+            <div
+              key={g.id}
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                backgroundColor: g.color ?? '#9CA3AF',
+                flexShrink: 0,
+              }}
+              title={g.name}
+            />
+          ))}
+          {fixtureGroups.length > 3 && (
+            <div
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                backgroundColor: '#9CA3AF',
+                flexShrink: 0,
+              }}
+              title={`+${fixtureGroups.length - 3} more groups`}
+            />
+          )}
         </div>
         {orderedColumns
           .filter((col) => columnVisibility[col.key])

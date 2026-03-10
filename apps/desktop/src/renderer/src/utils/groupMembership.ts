@@ -81,3 +81,29 @@ export function countGroupMembers(
 ): number {
   return getGroupMembers(group, allFixtures, pinnedFixtureIds).length;
 }
+
+/**
+ * Build a reverse map: fixture ID → FixtureGroup[].
+ *
+ * Used for rendering group indicator dots on every fixture row without per-row
+ * iteration over all groups.
+ */
+export function computeFixtureGroupMap(
+  groups: FixtureGroup[],
+  allFixtures: Fixture[],
+  pinsByGroup: Record<string, string[]>,
+): Map<string, FixtureGroup[]> {
+  const result = new Map<string, FixtureGroup[]>();
+  for (const group of groups) {
+    const members = getGroupMembers(group, allFixtures, pinsByGroup[group.id] ?? []);
+    for (const fixture of members) {
+      const existing = result.get(fixture.id);
+      if (existing) {
+        existing.push(group);
+      } else {
+        result.set(fixture.id, [group]);
+      }
+    }
+  }
+  return result;
+}

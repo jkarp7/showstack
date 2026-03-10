@@ -144,3 +144,18 @@ export function getGroupsForFixture(fixtureId: string): string[] {
     .all(fixtureId) as { group_id: string }[];
   return rows.map((r) => r.group_id);
 }
+
+/** All pins for every group in a project — used for bulk group indicator rendering. */
+export function getAllPinsForProject(
+  projectId: string,
+): { fixture_id: string; group_id: string }[] {
+  const db = getDatabase();
+  return db
+    .prepare(
+      `SELECT fgp.fixture_id, fgp.group_id
+       FROM fixture_group_pins fgp
+       JOIN fixture_groups fg ON fg.id = fgp.group_id
+       WHERE fg.project_id = ?`,
+    )
+    .all(projectId) as { fixture_id: string; group_id: string }[];
+}
