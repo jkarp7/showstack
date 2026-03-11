@@ -82,6 +82,9 @@ const projects = new Table({
   // Modules
   enabled_modules: column.text, // JSONB → TEXT
 
+  // Family stacking (migration 004)
+  root_project_id: column.text,
+
   // Metadata
   created_at: column.integer,
   updated_at: column.integer,

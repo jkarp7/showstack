@@ -1,10 +1,10 @@
 # ShowStack Project Status
 
 **Created:** December 18, 2025
-**Last Updated:** March 9, 2026
+**Last Updated:** March 2026
 **Current Version:** 0.1.0-alpha
 **Development Phase:** Alpha (Renovation complete, Supabase/PowerSync cloud services integrated)
-**Active Branch:** `feature/multi-user-collaboration` (PR open → develop); `feature/menu-bar-toolbar-evaluation` (PR open → develop)
+**Active Branch:** `feature/powersync-write-path` (PR open → develop); `develop` contains multi-user collaboration (PR #85 merged)
 
 This document tracks the development status of all ShowStack feature domains and editions. It serves as the central source of truth for what's completed, in progress, and planned.
 
@@ -29,18 +29,31 @@ This document tracks the development status of all ShowStack feature domains and
 
 ### ✅ Recently Completed (December 2025 - March 2026)
 
-**Latest (March 7, 2026):** 14. ✅ Multi-User Collaboration (feature/multi-user-collaboration) - COMPLETED (March 7, 2026)
+**Latest (March 2026):** 15. ✅ PowerSync Write-Path for Projects & Shop Orders (feature/powersync-write-path) - COMPLETED (March 2026)
+
+Fixes issue #86 (TOCTOU ownership race) — project and shop-order rows are now written into the PowerSync local SQLite at creation/update/delete time, so the PowerSync CRUD queue uploads them to Supabase and establishes ownership atomically.
+
+- `sync/projectSync.ts` — new module with `syncProjectToPowerSync`, `deleteProjectFromPowerSync`, `syncShopOrderToPowerSync`, `deleteShopOrderFromPowerSync`
+- `powerSyncSchema.ts` — added missing `root_project_id` column to the PowerSync projects table
+- `ProjectService` — `maybeSyncToPowerSync()` called after create/update/createCopy; fire-and-forget delete
+- `ShopOrderProjectService` — same pattern; `create()` now injects the authenticated user's ID into the row
+- `CollaborationService` — backfills the full project/shop-order row before the invite RPC (handles pre-fix rows); stub-upsert in `invite_to_project` remains as safety net
+- PowerSync writes are fire-and-forget with catch — logged as warnings, never fail local operations
+- +23 tests; **1,933 total tests** (all passing), 0 TypeScript errors, 844 lint warnings
+
+14. ✅ Multi-User Collaboration (PR #85 → develop) - COMPLETED (March 2026)
 
 - **CollaborationService** — invite/remove/accept/decline for projects and shop orders via Supabase RPCs
-- **PresenceService** — real-time presence tracking via Supabase Realtime channels
-- **ProjectSharingDialog** — Share button on project pages; invite collaborators by email with editor/viewer role selection
-- **PendingInvitationsBanner** — persistent banner at the top of the app when the signed-in user has pending invitations
-- **Collaboration settings tab** — shows pending invitations with project name and inviter email; Accept/Decline buttons
-- **6 Supabase migrations (005–011):** `project_members` and `shop_order_members` tables, RLS policies, 8 RPCs (`invite_to_project`, `remove_from_project`, `accept_project_invitation`, `decline_project_invitation`, and shop-order equivalents), PowerSync denormalization columns, pending-invitation enrichment with decline support
+- **PresenceService** — real-time presence tracking via Supabase Realtime channels with membership auth guard (fails closed when membership cannot be verified)
+- **ProjectSharingDialog** — Share button on project pages; invite collaborators by email with editor/viewer role selection; member list with remove/cancel-invite support
+- **PendingInvitationsBanner** — persistent banner at the top of the app when the signed-in user has pending invitations; dismissed state persisted per user
+- **Collaboration settings tab** — shows pending invitations with project name and inviter email; Accept/Decline buttons; Accept deep-links to the relevant project
+- **16 Supabase migrations (005–016):** `project_members` and `shop_order_members` tables; RLS policies with `WITH CHECK`; 12 RPCs (invite/remove/accept/decline/cancel/pending for both entity types); PowerSync denormalization columns; pending-invitation enrichment; server-side license gate (migration 015); RLS + RPC hardening pass (migration 016)
 - **PowerSync sync rules rewritten** — no JOINs anywhere; parameterized buckets scoped per project and per shop order
+- **IPC layer** — 19 collaboration channels with UUID validation on all member ID parameters
 - **Feature-flagged** behind the `collaboration` flag
-- **License-gated:** Professional/Institutional tiers only for sending invites; any authenticated user can receive invitations
-- **Known limitation:** Projects are created in the local SQLite DB and not automatically written to Supabase's `projects` table. The `invite_to_project` RPC works around this by upserting a minimal project stub (id, user_id, name) on first invite. Full fix: write project data to Supabase on creation/update — either by migrating the primary project store to PowerSync writes, or by making project CRUD also write to Supabase directly.
+- **License-gated:** sending invites requires Professional/Institutional tier with active cloud sync — enforced both client-side (LicenseService) and server-side (database function guard)
+- **Tests:** 1,910 passing at merge
 
 13. ✅ Menu Bar & Toolbar Reorganization (feature/menu-bar-toolbar-evaluation) - COMPLETED (March 2, 2026)
 
@@ -116,12 +129,17 @@ This document tracks the development status of all ShowStack feature domains and
 
 The original cloud-native architecture plan (Issues #33 + #34) called for a custom Express.js + PostgreSQL + Socket.io backend. That plan was archived in favor of Supabase and PowerSync, which provide the same capabilities with significantly less infrastructure to maintain.
 
-**Implemented (February 15, 2026, PR #80):**
+**Implemented (February 2026, PR #80):**
 
 - **Supabase Auth** — sign in/up, password reset, session management
 - **Supabase Licenses table** — auto-claim by email, perpetual fallback model, cloud sync flag, tier-based feature limits
 - **PowerSync** — offline-first sync architecture; sync enabled per license tier via `cloud_sync` flag
 - **Demo Mode** — restricted access for unauthenticated users (25 fixtures, no exports, no cloud sync)
+
+**Also Implemented (March 2026):**
+
+- **Multi-user collaboration** — invite/remove/accept/decline via Supabase RPCs; Realtime presence; RLS + license gate (migrations 005–016)
+- **PowerSync write-path** — projects and shop orders written to PowerSync on create/update/delete; fixes TOCTOU ownership race (issue #86)
 
 **Still Pending:**
 
@@ -239,7 +257,7 @@ The original cloud architecture plan is archived at `docs/archive/CLOUD_NATIVE_A
 
 ### Long-term (6-12 Months) - **Market Differentiation**
 
-1. **Real-time multi-user collaboration** (strategic decision - requires cloud backend)
+1. ✅ **Real-time multi-user collaboration** — shipped (PR #85); invite/presence/sync via Supabase + PowerSync
 2. Tour & Production features (logistics, budgeting)
 3. Advanced features (focus charts, work notes, cable tracking)
 4. Roll printer support for label printing

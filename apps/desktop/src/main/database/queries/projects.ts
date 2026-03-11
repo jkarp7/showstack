@@ -1,5 +1,6 @@
 import { getDatabase, saveDatabase } from '../index';
 import { v4 as uuidv4 } from 'uuid';
+import { z } from 'zod';
 import { logger } from '../../utils/logger';
 
 export interface Project {
@@ -14,6 +15,111 @@ export interface Project {
   created_at: number;
   updated_at: number;
 }
+
+/**
+ * Full project database row — a superset of the minimal Project interface that
+ * includes every SQLite column returned by `SELECT * FROM projects`.
+ *
+ * The companion `ProjectRowSchema` Zod schema (below) validates raw SQLite rows
+ * against this shape at runtime, catching schema/type drift without relying on
+ * unsafe casts.
+ */
+export interface ProjectRow extends Project {
+  lighting_designer?: string | null;
+  lighting_designer_email?: string | null;
+  lighting_designer_phone?: string | null;
+  lighting_associates?: string[] | null;
+  audio_designer?: string | null;
+  audio_designer_email?: string | null;
+  audio_designer_phone?: string | null;
+  audio_associates?: string[] | null;
+  video_designer?: string | null;
+  video_designer_email?: string | null;
+  video_designer_phone?: string | null;
+  video_associates?: string[] | null;
+  electrician?: string | null;
+  electrician_email?: string | null;
+  electrician_phone?: string | null;
+  audio_tech?: string | null;
+  audio_tech_email?: string | null;
+  audio_tech_phone?: string | null;
+  video_tech?: string | null;
+  video_tech_email?: string | null;
+  video_tech_phone?: string | null;
+  production_manager?: string | null;
+  production_manager_email?: string | null;
+  production_manager_phone?: string | null;
+  production_manager_company?: string | null;
+  general_manager?: string | null;
+  general_manager_email?: string | null;
+  general_manager_phone?: string | null;
+  general_manager_company?: string | null;
+  venue_city?: string | null;
+  venue_state?: string | null;
+  /** Parsed JSON object: keys are date-type labels, values are ISO date strings. */
+  show_dates?: Record<string, string | undefined> | null;
+  phase_label_a?: string | null;
+  phase_label_b?: string | null;
+  phase_label_c?: string | null;
+}
+
+/**
+ * Zod schema for the full project database row.
+ * Used in `getProjectById` to validate raw SQLite rows at runtime.
+ * `z.infer` is intentionally NOT used as the canonical `ProjectRow` type
+ * because this codebase uses `"strict": false`, which causes Zod's type
+ * inference to mark all fields as optional regardless of their schema definition.
+ */
+export const ProjectRowSchema = z.object({
+  // Fields shared with the minimal Project interface
+  id: z.string(),
+  name: z.string(),
+  description: z.string().nullish(),
+  venue: z.string().nullish(),
+  designer: z.string().nullish(),
+  logo_path: z.string().nullish(),
+  enabled_modules: z.string().nullish(),
+  root_project_id: z.string().nullish(),
+  created_at: z.number(),
+  updated_at: z.number(),
+  // Extended columns (full row)
+  lighting_designer: z.string().nullish(),
+  lighting_designer_email: z.string().nullish(),
+  lighting_designer_phone: z.string().nullish(),
+  lighting_associates: z.array(z.string()).nullish(),
+  audio_designer: z.string().nullish(),
+  audio_designer_email: z.string().nullish(),
+  audio_designer_phone: z.string().nullish(),
+  audio_associates: z.array(z.string()).nullish(),
+  video_designer: z.string().nullish(),
+  video_designer_email: z.string().nullish(),
+  video_designer_phone: z.string().nullish(),
+  video_associates: z.array(z.string()).nullish(),
+  electrician: z.string().nullish(),
+  electrician_email: z.string().nullish(),
+  electrician_phone: z.string().nullish(),
+  audio_tech: z.string().nullish(),
+  audio_tech_email: z.string().nullish(),
+  audio_tech_phone: z.string().nullish(),
+  video_tech: z.string().nullish(),
+  video_tech_email: z.string().nullish(),
+  video_tech_phone: z.string().nullish(),
+  production_manager: z.string().nullish(),
+  production_manager_email: z.string().nullish(),
+  production_manager_phone: z.string().nullish(),
+  production_manager_company: z.string().nullish(),
+  general_manager: z.string().nullish(),
+  general_manager_email: z.string().nullish(),
+  general_manager_phone: z.string().nullish(),
+  general_manager_company: z.string().nullish(),
+  venue_city: z.string().nullish(),
+  venue_state: z.string().nullish(),
+  /** Parsed JSON object: keys are date-type labels, values are ISO date strings. */
+  show_dates: z.record(z.string().optional()).nullish(),
+  phase_label_a: z.string().nullish(),
+  phase_label_b: z.string().nullish(),
+  phase_label_c: z.string().nullish(),
+});
 
 export function getAllProjects(): Project[] {
   const db = getDatabase();
@@ -46,13 +152,18 @@ export function getAllProjects(): Project[] {
   });
 }
 
-export function getProjectById(id: string): Project | null {
+export function getProjectById(id: string): ProjectRow | null {
   const db = getDatabase();
   const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
 
   if (!project) {
     return null;
   }
+
+  // Validate the raw SQLite row against the schema before any mutation.
+  // This catches schema/type drift at runtime (e.g. a missing required column).
+  // The cast below is safe because parse() has already verified the shape.
+  ProjectRowSchema.parse(project);
 
   // Parse JSON fields
   const jsonFields = [
@@ -76,7 +187,7 @@ export function getProjectById(id: string): Project | null {
     }
   });
 
-  return project as Project;
+  return project as unknown as ProjectRow;
 }
 
 /**
@@ -108,7 +219,7 @@ export function formatCopyTimestamp(ms: number): string {
  * @param originalProjectId  ID of the project to copy
  * @param copyName           Optional name override; defaults to "Original Name — YYYY-MM-DD HH:mm"
  */
-export function createProjectCopy(originalProjectId: string, copyName?: string): Project {
+export function createProjectCopy(originalProjectId: string, copyName?: string): ProjectRow {
   const db = getDatabase();
 
   const row = db.prepare('SELECT * FROM projects WHERE id = ?').get(originalProjectId) as any;
@@ -155,7 +266,7 @@ export function createProject(
   logoPath?: string,
   enabledModules?: string[],
   rootProjectId?: string | null,
-): Project {
+): ProjectRow {
   const db = getDatabase();
   const id = uuidv4();
   const now = Date.now();
@@ -239,7 +350,7 @@ function isProjectAllowedField(field: string): field is ProjectAllowedField {
   return PROJECT_ALLOWED_FIELDS.includes(field as ProjectAllowedField);
 }
 
-export function updateProject(id: string, updates: Partial<Project>): Project {
+export function updateProject(id: string, updates: Partial<Project>): ProjectRow {
   const db = getDatabase();
   const now = Date.now();
 

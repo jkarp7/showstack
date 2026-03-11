@@ -12,11 +12,26 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // Hoisted mocks
 // ============================================
 
-const { mockGetLicenseStatus, mockIsAuthenticated, mockRpc, mockGetAll } = vi.hoisted(() => ({
+const {
+  mockGetLicenseStatus,
+  mockIsAuthenticated,
+  mockGetUserId,
+  mockRpc,
+  mockGetAll,
+  mockGetProjectById,
+  mockGetShopOrderById,
+  mockSyncProject,
+  mockSyncShopOrder,
+} = vi.hoisted(() => ({
   mockGetLicenseStatus: vi.fn(),
   mockIsAuthenticated: vi.fn(),
+  mockGetUserId: vi.fn().mockReturnValue(null),
   mockRpc: vi.fn(),
   mockGetAll: vi.fn(),
+  mockGetProjectById: vi.fn().mockReturnValue(null),
+  mockGetShopOrderById: vi.fn().mockReturnValue(null),
+  mockSyncProject: vi.fn().mockResolvedValue(undefined),
+  mockSyncShopOrder: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('../../utils/logger', () => ({
@@ -43,8 +58,22 @@ vi.mock('../sync', () => ({
 vi.mock('../sync/SupabaseConnector', () => ({
   getSupabaseConnector: () => ({
     isAuthenticated: mockIsAuthenticated,
+    getUserId: mockGetUserId,
     getSupabaseClient: () => ({ rpc: mockRpc }),
   }),
+}));
+
+vi.mock('../../database/queries/projects', () => ({
+  getProjectById: mockGetProjectById,
+}));
+
+vi.mock('../../database/queries/shop-order', () => ({
+  getShopOrderProjectById: mockGetShopOrderById,
+}));
+
+vi.mock('../sync/projectSync', () => ({
+  syncProjectToPowerSync: mockSyncProject,
+  syncShopOrderToPowerSync: mockSyncShopOrder,
 }));
 
 // Import after mocks are registered
@@ -57,6 +86,7 @@ import { CollaborationService } from '../CollaborationService';
 function allowCollaborate() {
   mockGetLicenseStatus.mockReturnValue({ canCollaborate: true });
   mockIsAuthenticated.mockReturnValue(true);
+  mockGetUserId.mockReturnValue('user-123');
 }
 
 function denyCollaborate() {
@@ -73,6 +103,11 @@ describe('CollaborationService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     service = new CollaborationService();
+    // Default: sync helpers succeed, no project/shop-order found
+    mockSyncProject.mockResolvedValue(undefined);
+    mockSyncShopOrder.mockResolvedValue(undefined);
+    mockGetProjectById.mockReturnValue(null);
+    mockGetShopOrderById.mockReturnValue(null);
   });
 
   // ==========================================
@@ -474,6 +509,116 @@ describe('CollaborationService', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('No pending invitation');
+    });
+  });
+
+  // ==========================================
+  // Backfill: syncProjectToPowerSync before invite
+  // ==========================================
+
+  describe('inviteToProject backfill', () => {
+    const mockProject = {
+      id: 'proj-1',
+      name: 'Test Project',
+      created_at: 1704067200000,
+      updated_at: 1704067200000,
+    };
+
+    beforeEach(() => {
+      allowCollaborate();
+      mockRpc.mockResolvedValue({ data: { success: true, member_id: 'member-uuid' }, error: null });
+    });
+
+    it('calls syncProjectToPowerSync before the invite RPC when project exists', async () => {
+      mockGetUserId.mockReturnValue('user-123');
+      mockGetProjectById.mockReturnValue(mockProject);
+
+      await service.inviteToProject('proj-1', 'Test Project', 'a@b.com', 'editor');
+
+      expect(mockSyncProject).toHaveBeenCalledWith(mockProject, 'user-123');
+      expect(mockRpc).toHaveBeenCalledWith('invite_to_project', expect.any(Object));
+    });
+
+    it('skips backfill when project is not found locally', async () => {
+      mockGetUserId.mockReturnValue('user-123');
+      mockGetProjectById.mockReturnValue(null);
+
+      await service.inviteToProject('proj-1', 'Test Project', 'a@b.com', 'editor');
+
+      expect(mockSyncProject).not.toHaveBeenCalled();
+      expect(mockRpc).toHaveBeenCalled();
+    });
+
+    it('proceeds with invite even when backfill throws', async () => {
+      mockGetUserId.mockReturnValue('user-123');
+      mockGetProjectById.mockReturnValue(mockProject);
+      mockSyncProject.mockRejectedValue(new Error('PowerSync unavailable'));
+
+      const result = await service.inviteToProject('proj-1', 'Test Project', 'a@b.com', 'editor');
+
+      expect(result.success).toBe(true);
+      expect(mockRpc).toHaveBeenCalled();
+    });
+
+    it('skips backfill when userId is null', async () => {
+      mockGetUserId.mockReturnValue(null);
+      mockGetProjectById.mockReturnValue(mockProject);
+
+      await service.inviteToProject('proj-1', 'Test Project', 'a@b.com', 'editor');
+
+      expect(mockSyncProject).not.toHaveBeenCalled();
+    });
+  });
+
+  // ==========================================
+  // Backfill: syncShopOrderToPowerSync before invite
+  // ==========================================
+
+  describe('inviteToShopOrder backfill', () => {
+    const mockShopOrder = {
+      id: 'order-1',
+      production_name: 'Test Order',
+      disciplines: '["lighting"]',
+      current_revision: 1,
+      order_date: 1704067200000,
+      created_at: 1704067200000,
+      updated_at: 1704067200000,
+    };
+
+    beforeEach(() => {
+      allowCollaborate();
+      mockRpc.mockResolvedValue({ data: { success: true, member_id: 'member-uuid' }, error: null });
+    });
+
+    it('calls syncShopOrderToPowerSync before the invite RPC when shop order exists', async () => {
+      mockGetUserId.mockReturnValue('user-123');
+      mockGetShopOrderById.mockReturnValue(mockShopOrder);
+
+      await service.inviteToShopOrder('order-1', 'a@b.com', 'viewer');
+
+      expect(mockSyncShopOrder).toHaveBeenCalledWith(mockShopOrder, 'user-123');
+      expect(mockRpc).toHaveBeenCalledWith('invite_to_shop_order', expect.any(Object));
+    });
+
+    it('skips backfill when shop order is not found locally', async () => {
+      mockGetUserId.mockReturnValue('user-123');
+      mockGetShopOrderById.mockReturnValue(null);
+
+      await service.inviteToShopOrder('order-1', 'a@b.com', 'viewer');
+
+      expect(mockSyncShopOrder).not.toHaveBeenCalled();
+      expect(mockRpc).toHaveBeenCalled();
+    });
+
+    it('proceeds with invite even when backfill throws', async () => {
+      mockGetUserId.mockReturnValue('user-123');
+      mockGetShopOrderById.mockReturnValue(mockShopOrder);
+      mockSyncShopOrder.mockRejectedValue(new Error('PowerSync unavailable'));
+
+      const result = await service.inviteToShopOrder('order-1', 'a@b.com', 'viewer');
+
+      expect(result.success).toBe(true);
+      expect(mockRpc).toHaveBeenCalled();
     });
   });
 });
