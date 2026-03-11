@@ -1,9 +1,12 @@
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useValidation } from '../../hooks/useValidation';
+import { ValidationSidebarItem } from '../../types/validation';
 
 interface NavItem {
   label: string;
   path: string;
   placeholder?: boolean;
+  validationKey?: ValidationSidebarItem;
 }
 
 interface NavSection {
@@ -25,21 +28,25 @@ function buildSections(projectId: string): NavSection[] {
       items: [
         { label: 'Project Info', path: `${base}/project-info` },
         { label: 'Team', path: `${base}/team`, placeholder: true },
-        { label: 'Show Health', path: `${base}/show-health`, placeholder: true },
+        { label: 'Show Health', path: `${base}/show-health` },
       ],
     },
     {
       title: 'Equipment Manager',
       items: [
-        { label: 'Fixtures', path: `${base}/fixtures` },
-        { label: 'Infrastructure', path: `${base}/infrastructure` },
+        { label: 'Fixtures', path: `${base}/fixtures`, validationKey: 'fixtures' },
+        {
+          label: 'Infrastructure',
+          path: `${base}/infrastructure`,
+          validationKey: 'infrastructure',
+        },
         { label: 'Multi-Cable Tracking', path: `${base}/multi-cable`, placeholder: true },
       ],
     },
     {
       title: 'Power',
       items: [
-        { label: 'Racks & Distribution', path: `${base}/racks` },
+        { label: 'Racks & Distribution', path: `${base}/racks`, validationKey: 'racks' },
         { label: 'Services & Templates', path: `${base}/power/services` },
         { label: 'Power Summary', path: `${base}/power/summary` },
         { label: 'Power/Cable Diagrams', path: `${base}/power/diagrams`, placeholder: true },
@@ -63,8 +70,30 @@ function buildSections(projectId: string): NavSection[] {
   ];
 }
 
+interface BadgeProps {
+  errors: number;
+  warnings: number;
+}
+
+function ValidationBadge({ errors, warnings }: BadgeProps) {
+  if (!errors && !warnings) return null;
+  if (errors) {
+    return (
+      <span className="ml-auto flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+        {errors}
+      </span>
+    );
+  }
+  return (
+    <span className="ml-auto flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-400 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+      {warnings}
+    </span>
+  );
+}
+
 export function ProjectSidebar({ projectId, projectName, onHome }: ProjectSidebarProps) {
   const sections = buildSections(projectId);
+  const { badgeCounts } = useValidation();
 
   return (
     <aside
@@ -114,7 +143,8 @@ export function ProjectSidebar({ projectId, projectName, onHome }: ProjectSideba
                     }`
                   }
                 >
-                  {item.label}
+                  <span className="flex-1 truncate">{item.label}</span>
+                  {item.validationKey && <ValidationBadge {...badgeCounts[item.validationKey]} />}
                 </NavLink>
               ),
             )}

@@ -1,7 +1,7 @@
 # ShowStack UI Redesign Plan
 
 **Created:** March 9, 2026
-**Status:** Partially In Progress — Phase 1 (Inspector Shell) next; design complete for all phases
+**Status:** Phases 4–7 complete; Phase 8 (Filter Chips + Toolbar Slim) next
 **Priority:** High (foundational — affects all features built after this)
 **Scope:** Landing page, navigation model, Equipment Manager layout, inspector panel system,
 tool consolidation, error checking
@@ -418,7 +418,7 @@ For projects without an uploaded show logo:
 
 This is a structural change, not a big-bang rewrite. Each step ships independently.
 
-### Phase 1 — Inspector Shell (with Smart Groups) — **Next Up**
+### Phase 1 — Inspector Shell (with Smart Groups)
 
 Build `<InspectorPanel>` and `<GroupsInspector>` as planned in the Smart Groups
 implementation plan. Establish CSS custom property styling convention.
@@ -434,30 +434,37 @@ inspector shell. Modal dialog is retired.
 
 New landing page: list + right panel, tags, version handling, show art/placeholder.
 
-### Phase 4 — Navigation Flattening
+### Phase 4 — Navigation Flattening ✅
 
-- Eliminate SystemDocs wrapper
-- Eliminate ModuleLanding for lighting
-- Sidebar replaces tab rows
-- Shop Orders joins sidebar
-- `embedded` prop removed from EquipmentManager, PowerManagement, LabelDesigner
-- Route structure simplified
+- `ProjectWorkspace` layout with persistent sidebar (`ProjectSidebar.tsx`)
+- Flat nested routes under `/project/:projectId` replacing SystemDocs/ModuleLanding
+- `EquipmentManager`, `PowerManagement`, `Paperwork`, `LabelDesigner` — `embedded` prop removed
+- `initialTab` prop pattern for tab-based pages; `key` prop forces remount on route change
+- `ProjectInfo` page added at `project-info` route
+- Shop Orders wired directly into sidebar
 
-### Phase 5 — Labels Consolidation
+### Phase 5 — Labels Consolidation ✅
 
-Retire `LabelDesigner.tsx` intermediate page. `LabelVisualDesigner` becomes the single
-implementation with a "New Label" dialog for type/printer selection.
+- `LabelDesigner.tsx` intermediate list page retired
+- `LabelsPage.tsx` — inline Avery template picker → `LabelLayoutDesigner` directly
+- `LabelVisualDesigner` navigates back to `/project/:id/labels` on save/cancel
 
-### Phase 6 — Power Consolidation
+### Phase 6 — Power Consolidation ✅
 
-Remove power sub-tab from EquipmentManager. Racks & Distribution, Services & Templates,
-and Power Summary become dedicated sidebar items.
+- Power sub-tab removed from `EquipmentManager` tab bar
+- Racks & Distribution → `PowerManagement` with `initialTab="racks"` at `/racks` route
+- Services & Templates at `/power/services`, Power Summary at `/power/summary`
+- All power routes under sidebar Power section
 
-### Phase 7 — Show Health
+### Phase 7 — Show Health ✅
 
-Passive validation engine, sidebar badges, Show Health panel.
+- `types/validation.ts` — `ValidationIssue`, `ValidationSeverity`, `ValidationSidebarItem`
+- `utils/validation.ts` — pure functions: duplicate DMX, duplicate channel, missing circuit, port over capacity
+- `hooks/useValidation.ts` — subscribes to fixture + infrastructure stores, returns `{ issues, badgeCounts }`
+- `ProjectSidebar` — red/amber count badges on Fixtures, Infrastructure, Racks & Distribution nav items
+- `ShowHealth.tsx` — passive panel at `/project/:id/show-health` with grouped error/warning lists
 
-### Phase 8 — Filter Chips + Toolbar Slim
+### Phase 8 — Filter Chips + Toolbar Slim — **Next Up**
 
 Replace FilterBar row with inline grid header chips. Slim toolbar to primary actions only.
 
@@ -483,6 +490,6 @@ they slot in without navigation changes when they ship.
 
 ---
 
-**Last Updated:** March 10, 2026
+**Last Updated:** March 11, 2026
 **Author:** Claude Code
 **Version:** 1.0
