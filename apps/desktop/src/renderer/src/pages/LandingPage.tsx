@@ -140,6 +140,74 @@ export function LandingPage() {
   }, [selectedId, isNewProjectDialogOpen, projectToDelete]);
 
   // ---------------------------------------------------------------------------
+  // Derived data (must be before handlers that close over these values)
+  // ---------------------------------------------------------------------------
+
+  const { families, standalones } = useMemo(() => groupProjectsIntoFamilies(projects), [projects]);
+
+  // All projects flat list (family roots + standalones), sorted
+  const allProjects = useMemo(() => {
+    const roots = families.map((f) => f.root);
+    const all = [...roots, ...standalones];
+    if (sortOrder === 'name') return all.sort((a, b) => a.name.localeCompare(b.name));
+    if (sortOrder === 'created') return all.sort((a, b) => a.created_at - b.created_at);
+    return all.sort((a, b) => b.updated_at - a.updated_at); // modified (default)
+  }, [families, standalones, sortOrder]);
+
+  // Recent: top 5 unique shows (one per family) by most-recent version's updated_at
+  const recentProjects = useMemo(() => {
+    const childIds = new Set(families.flatMap((f) => f.children.map((c) => c.id)));
+    // For each family, use the most recently modified member's timestamp for sorting
+    const familyTimestamp = new Map(
+      families.map((f) => [
+        f.root.id,
+        Math.max(f.root.updated_at, ...f.children.map((c) => c.updated_at)),
+      ]),
+    );
+    return [...projects]
+      .filter((p) => !childIds.has(p.id))
+      .sort(
+        (a, b) =>
+          (familyTimestamp.get(b.id) ?? b.updated_at) - (familyTimestamp.get(a.id) ?? a.updated_at),
+      )
+      .slice(0, 5);
+  }, [projects, families]);
+
+  // Filtered all-projects (search applied)
+  const filteredProjects = useMemo(() => {
+    if (!searchQuery.trim()) return allProjects;
+    const q = searchQuery.toLowerCase();
+    return allProjects.filter(
+      (p) => p.name.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q),
+    );
+  }, [allProjects, searchQuery]);
+
+  // Build family lookup: root id → children
+  const familyMap = useMemo(() => {
+    const m = new Map<string, Project[]>();
+    for (const f of families) m.set(f.root.id, f.children);
+    return m;
+  }, [families]);
+
+  // Reverse lookup: child id → root id (so clicking a child row selects the right root)
+  const childToRoot = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const f of families) {
+      for (const child of f.children) m.set(child.id, f.root.id);
+    }
+    return m;
+  }, [families]);
+
+  // Selected project object
+  const selectedProject = useMemo(
+    () => projects.find((p) => p.id === selectedId) ?? null,
+    [projects, selectedId],
+  );
+
+  // Children of selected (if it's a family root)
+  const selectedFamilyChildren = selectedId ? (familyMap.get(selectedId) ?? []) : [];
+
+  // ---------------------------------------------------------------------------
   // Handlers
   // ---------------------------------------------------------------------------
 
@@ -228,74 +296,6 @@ export function LandingPage() {
       await loadProjects();
     });
   };
-
-  // ---------------------------------------------------------------------------
-  // Derived data
-  // ---------------------------------------------------------------------------
-
-  const { families, standalones } = useMemo(() => groupProjectsIntoFamilies(projects), [projects]);
-
-  // All projects flat list (family roots + standalones), sorted
-  const allProjects = useMemo(() => {
-    const roots = families.map((f) => f.root);
-    const all = [...roots, ...standalones];
-    if (sortOrder === 'name') return all.sort((a, b) => a.name.localeCompare(b.name));
-    if (sortOrder === 'created') return all.sort((a, b) => a.created_at - b.created_at);
-    return all.sort((a, b) => b.updated_at - a.updated_at); // modified (default)
-  }, [families, standalones, sortOrder]);
-
-  // Recent: top 5 unique shows (one per family) by most-recent version's updated_at
-  const recentProjects = useMemo(() => {
-    const childIds = new Set(families.flatMap((f) => f.children.map((c) => c.id)));
-    // For each family, use the most recently modified member's timestamp for sorting
-    const familyTimestamp = new Map(
-      families.map((f) => [
-        f.root.id,
-        Math.max(f.root.updated_at, ...f.children.map((c) => c.updated_at)),
-      ]),
-    );
-    return [...projects]
-      .filter((p) => !childIds.has(p.id))
-      .sort(
-        (a, b) =>
-          (familyTimestamp.get(b.id) ?? b.updated_at) - (familyTimestamp.get(a.id) ?? a.updated_at),
-      )
-      .slice(0, 5);
-  }, [projects, families]);
-
-  // Filtered all-projects (search applied)
-  const filteredProjects = useMemo(() => {
-    if (!searchQuery.trim()) return allProjects;
-    const q = searchQuery.toLowerCase();
-    return allProjects.filter(
-      (p) => p.name.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q),
-    );
-  }, [allProjects, searchQuery]);
-
-  // Build family lookup: root id → children
-  const familyMap = useMemo(() => {
-    const m = new Map<string, Project[]>();
-    for (const f of families) m.set(f.root.id, f.children);
-    return m;
-  }, [families]);
-
-  // Reverse lookup: child id → root id (so clicking a child row selects the right root)
-  const childToRoot = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const f of families) {
-      for (const child of f.children) m.set(child.id, f.root.id);
-    }
-    return m;
-  }, [families]);
-
-  // Selected project object
-  const selectedProject = useMemo(
-    () => projects.find((p) => p.id === selectedId) ?? null,
-    [projects, selectedId],
-  );
-
-  // Children of selected (if it's a family root)
-  const selectedFamilyChildren = selectedId ? (familyMap.get(selectedId) ?? []) : [];
 
   // ---------------------------------------------------------------------------
   // Sub-components (inline for locality)
