@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { logger } from '../../utils/logger';
 import { VirtualDataGrid } from '../../components/fixture/VirtualDataGrid';
 import { Toolbar } from '../../components/fixture/Toolbar';
-import { FilterBar } from '../../components/fixture/FilterBar';
+import { FilterChipBar } from '../../components/fixture/FilterChipBar';
 import { SortBar } from '../../components/fixture/SortBar';
 import { AddFixtureDialog } from '../../components/fixture/AddFixtureDialog';
 import { BulkEditDialog } from '../../components/fixture/BulkEditDialog';
@@ -1166,6 +1166,8 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
               userColumnDefinitions={userColumnDefinitions}
               isColumnVisibilityMenuOpen={isColumnVisibilityMenuOpen}
               onColumnVisibilityMenuOpenChange={setIsColumnVisibilityMenuOpen}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
             />
           </div>
 
@@ -1178,11 +1180,9 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
             />
           </div>
 
-          {/* Filter Bar */}
+          {/* Filter Chip Bar — replaces always-visible FilterBar row */}
           <div ref={filterBarRef} className="flex-shrink-0">
-            <FilterBar
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
+            <FilterChipBar
               locationFilter={locationFilter}
               onLocationChange={setLocationFilter}
               typeFilter={typeFilter}
