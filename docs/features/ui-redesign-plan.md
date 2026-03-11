@@ -1,7 +1,7 @@
 # ShowStack UI Redesign Plan
 
 **Created:** March 9, 2026
-**Status:** Phases 4–9 complete — all structural phases shipped
+**Status:** All 9 phases complete
 **Priority:** High (foundational — affects all features built after this)
 **Scope:** Landing page, navigation model, Equipment Manager layout, inspector panel system,
 tool consolidation, error checking
@@ -418,21 +418,20 @@ For projects without an uploaded show logo:
 
 This is a structural change, not a big-bang rewrite. Each step ships independently.
 
-### Phase 1 — Inspector Shell (with Smart Groups)
+### Phase 1 — Inspector Shell (with Smart Groups) ✅
 
-Build `<InspectorPanel>` and `<GroupsInspector>` as planned in the Smart Groups
-implementation plan. Establish CSS custom property styling convention.
+- `<InspectorPanel>` shell + `<GroupsInspector>` built as part of Smart Groups Phases 1 & 2
+- Smart Groups backend (schema, queries, IPC, store), fixture row indicators, shop order/labels/paperwork integration — all shipped
 
-_Smart Groups Phases 1, 3, and 4 are complete (backend, grid integration, shop order/labels/paperwork). Phase 2 (this phase) adds the visible inspector UI._
+### Phase 2 — Conditional Formatting Migration ✅
 
-### Phase 2 — Conditional Formatting Migration
+- `<ConditionalFormattingInspector>` added to inspector panel
+- Modal dialog retired; conditional formatting now lives in the persistent inspector
 
-Move `ConditionalFormattingDialog` into `<ConditionalFormattingInspector>` using the
-inspector shell. Modal dialog is retired.
+### Phase 3 — Landing Page ✅
 
-### Phase 3 — Landing Page
-
-New landing page: list + right panel, tags, version handling, show art/placeholder.
+- New landing page: list + right panel (35% width), version handling, show logo/typographic placeholder
+- Recent section, version sub-rows, separate `selectedId` / `selectedVersionId` state
 
 ### Phase 4 — Navigation Flattening ✅
 
