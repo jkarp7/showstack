@@ -6,7 +6,6 @@ import { useProjectStore } from '../../store/projectStore';
 import { useShopOrderFileStore } from '../../store/shopOrderFileStore';
 import { NewShopOrderProjectDialog } from '../../components/shop-order/NewShopOrderProjectDialog';
 import { ShopOrderProjectCard } from '../../components/shop-order/ShopOrderProjectCard';
-import { SectionList } from '../../components/shop-order/SectionList';
 import { ShopOrderTable } from '../../components/shop-order/ShopOrderTable';
 import { AddSectionDialog } from '../../components/shop-order/AddSectionDialog';
 import { EditSectionDialog } from '../../components/shop-order/EditSectionDialog';
@@ -37,7 +36,6 @@ export function ShopOrderBuilder() {
     saveTemplate,
     loadAllProjects,
     loadProject,
-    clearCurrentProject,
     updateProject,
     setRevisionZero,
     generateRevision,
@@ -65,7 +63,6 @@ export function ShopOrderBuilder() {
   // State for collapsible sections
   const [projectDetailsExpanded, setProjectDetailsExpanded] = useState(true);
   const [revisionsExpanded, setRevisionsExpanded] = useState(true);
-  const [equipmentExpanded, setEquipmentExpanded] = useState(true);
   const [notesExpanded, setNotesExpanded] = useState(true);
 
   // State for revision generation
@@ -78,9 +75,6 @@ export function ShopOrderBuilder() {
 
   // State for template manager
   const [showTemplateManager, setShowTemplateManager] = useState(false);
-
-  // State for file menu
-  const [showFileMenu, setShowFileMenu] = useState(false);
 
   // State for "From Groups" auto-populate
   const [isAddingFromGroups, setIsAddingFromGroups] = useState(false);
@@ -225,14 +219,6 @@ export function ShopOrderBuilder() {
     await loadProject(projectId);
   };
 
-  const handleBackToList = () => {
-    if (parentProjectId) {
-      navigate(`/project/${parentProjectId}/shop-orders`);
-    } else {
-      clearCurrentProject();
-    }
-  };
-
   const handleNewProject = () => {
     setShowNewProjectDialog(true);
   };
@@ -241,7 +227,7 @@ export function ShopOrderBuilder() {
     await loadProject(projectId);
   };
 
-  const handleEditSection = (section: PrepSection) => {
+  const _handleEditSection = (section: PrepSection) => {
     setSectionToEdit(section);
     setShowEditSectionDialog(true);
   };
@@ -727,7 +713,7 @@ export function ShopOrderBuilder() {
     };
 
     // Helper to render an editable field with label (for backwards compatibility)
-    const renderField = (label: string, field: keyof PrepProject, placeholder = '+ Add') => {
+    const _renderField = (label: string, field: keyof PrepProject, placeholder = '+ Add') => {
       const value = getFieldValue(field);
       const isEditing = editingField === field;
       const fieldIsReadOnly = isFieldReadOnly(field);

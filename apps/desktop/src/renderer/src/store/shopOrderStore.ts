@@ -826,7 +826,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
 
         // Get the last revision's change log to reconstruct state
         const lastRevision = revisions.find((r) => r.revision_number === lastRevisionNumber);
-        const lastChangeLog = lastRevision
+        const _lastChangeLog = lastRevision
           ? typeof lastRevision.change_log === 'string'
             ? JSON.parse(lastRevision.change_log)
             : lastRevision.change_log
@@ -872,7 +872,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       }
 
       // Create the revision
-      const revision = await window.api.prep.revisions.create({
+      const _revision = await window.api.prep.revisions.create({
         prep_project_id: projectId,
         revision_number: newRevisionNumber,
         notes,
