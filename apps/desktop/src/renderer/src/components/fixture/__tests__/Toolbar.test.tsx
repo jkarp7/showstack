@@ -21,6 +21,8 @@ const defaultProps = {
   onUserColumnSettings: vi.fn(),
   columnVisibility: DEFAULT_COLUMN_VISIBILITY,
   onColumnVisibilityChange: vi.fn(),
+  searchQuery: '',
+  onSearchChange: vi.fn(),
 };
 
 describe('Toolbar', () => {
@@ -44,19 +46,19 @@ describe('Toolbar', () => {
       expect(onAddFixture).toHaveBeenCalledTimes(1);
     });
 
-    it('should render User Columns button', () => {
+    it('should render search input', () => {
       render(<Toolbar {...defaultProps} />);
-      expect(screen.getByText('User Columns...')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Search…')).toBeInTheDocument();
     });
 
-    it('should call onUserColumnSettings when User Columns is clicked', async () => {
+    it('should call onSearchChange when search input changes', async () => {
       const user = userEvent.setup();
-      const onUserColumnSettings = vi.fn();
-      render(<Toolbar {...defaultProps} onUserColumnSettings={onUserColumnSettings} />);
+      const onSearchChange = vi.fn();
+      render(<Toolbar {...defaultProps} onSearchChange={onSearchChange} />);
 
-      await user.click(screen.getByText('User Columns...'));
+      await user.type(screen.getByPlaceholderText('Search…'), 'spot');
 
-      expect(onUserColumnSettings).toHaveBeenCalledTimes(1);
+      expect(onSearchChange).toHaveBeenCalled();
     });
   });
 
@@ -64,45 +66,45 @@ describe('Toolbar', () => {
     it('should not render selection buttons when selectedCount is 0', () => {
       render(<Toolbar {...defaultProps} selectedCount={0} />);
 
-      expect(screen.queryByText(/Bulk Edit/)).not.toBeInTheDocument();
-      expect(screen.queryByText(/Delete Selected/)).not.toBeInTheDocument();
-      expect(screen.queryByText('Deselect All')).not.toBeInTheDocument();
+      expect(screen.queryByText(/^Edit/)).not.toBeInTheDocument();
+      expect(screen.queryByText('Delete')).not.toBeInTheDocument();
+      expect(screen.queryByTitle('Clear selection')).not.toBeInTheDocument();
     });
 
     it('should render selection buttons when selectedCount > 0', () => {
       render(<Toolbar {...defaultProps} selectedCount={3} />);
 
-      expect(screen.getByText('Bulk Edit (3)')).toBeInTheDocument();
-      expect(screen.getByText('Delete Selected (3)')).toBeInTheDocument();
-      expect(screen.getByText('Deselect All')).toBeInTheDocument();
+      expect(screen.getByText('Edit 3')).toBeInTheDocument();
+      expect(screen.getByText('Delete')).toBeInTheDocument();
+      expect(screen.getByTitle('Clear selection')).toBeInTheDocument();
     });
 
-    it('should call onBulkEdit when Bulk Edit is clicked', async () => {
+    it('should call onBulkEdit when Edit button is clicked', async () => {
       const user = userEvent.setup();
       const onBulkEdit = vi.fn();
       render(<Toolbar {...defaultProps} selectedCount={2} onBulkEdit={onBulkEdit} />);
 
-      await user.click(screen.getByText('Bulk Edit (2)'));
+      await user.click(screen.getByText('Edit 2'));
 
       expect(onBulkEdit).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onDeleteSelected when Delete Selected is clicked', async () => {
+    it('should call onDeleteSelected when Delete button is clicked', async () => {
       const user = userEvent.setup();
       const onDeleteSelected = vi.fn();
       render(<Toolbar {...defaultProps} selectedCount={1} onDeleteSelected={onDeleteSelected} />);
 
-      await user.click(screen.getByText('Delete Selected (1)'));
+      await user.click(screen.getByText('Delete'));
 
       expect(onDeleteSelected).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onDeselectAll when Deselect All is clicked', async () => {
+    it('should call onDeselectAll when deselect button is clicked', async () => {
       const user = userEvent.setup();
       const onDeselectAll = vi.fn();
       render(<Toolbar {...defaultProps} selectedCount={1} onDeselectAll={onDeselectAll} />);
 
-      await user.click(screen.getByText('Deselect All'));
+      await user.click(screen.getByTitle('Clear selection'));
 
       expect(onDeselectAll).toHaveBeenCalledTimes(1);
     });
@@ -140,33 +142,33 @@ describe('Toolbar', () => {
     });
   });
 
-  describe('Export CSV button (bug fix: was missing onClick)', () => {
+  describe('Export CSV button', () => {
     it('should not render Export CSV button when onExportCSV is not provided', () => {
-      render(<Toolbar {...defaultProps} selectedCount={2} />);
+      render(<Toolbar {...defaultProps} />);
 
-      expect(screen.queryByText('Export CSV')).not.toBeInTheDocument();
+      expect(screen.queryByText('Export ↓')).not.toBeInTheDocument();
     });
 
-    it('should render Export CSV button when onExportCSV is provided and rows are selected', () => {
+    it('should render Export CSV button when onExportCSV is provided', () => {
       const onExportCSV = vi.fn();
-      render(<Toolbar {...defaultProps} selectedCount={2} onExportCSV={onExportCSV} />);
+      render(<Toolbar {...defaultProps} onExportCSV={onExportCSV} />);
 
-      expect(screen.getByText('Export CSV')).toBeInTheDocument();
+      expect(screen.getByText('Export ↓')).toBeInTheDocument();
     });
 
-    it('should not render Export CSV button when onExportCSV provided but selectedCount is 0', () => {
+    it('should render Export CSV button even when selectedCount is 0', () => {
       const onExportCSV = vi.fn();
       render(<Toolbar {...defaultProps} selectedCount={0} onExportCSV={onExportCSV} />);
 
-      expect(screen.queryByText('Export CSV')).not.toBeInTheDocument();
+      expect(screen.getByText('Export ↓')).toBeInTheDocument();
     });
 
     it('should call onExportCSV when Export CSV button is clicked', async () => {
       const user = userEvent.setup();
       const onExportCSV = vi.fn();
-      render(<Toolbar {...defaultProps} selectedCount={1} onExportCSV={onExportCSV} />);
+      render(<Toolbar {...defaultProps} onExportCSV={onExportCSV} />);
 
-      await user.click(screen.getByText('Export CSV'));
+      await user.click(screen.getByText('Export ↓'));
 
       expect(onExportCSV).toHaveBeenCalledTimes(1);
     });
@@ -191,20 +193,20 @@ describe('Toolbar', () => {
       const onHideSelected = vi.fn();
       render(<Toolbar {...defaultProps} selectedCount={2} onHideSelected={onHideSelected} />);
 
-      expect(screen.getByText('Hide (2)')).toBeInTheDocument();
+      expect(screen.getByText('Hide')).toBeInTheDocument();
     });
 
     it('should not render Hide button when onHideSelected is not provided', () => {
       render(<Toolbar {...defaultProps} selectedCount={2} />);
 
-      expect(screen.queryByText(/^Hide/)).not.toBeInTheDocument();
+      expect(screen.queryByText('Hide')).not.toBeInTheDocument();
     });
 
     it('should render Unhide button when onUnhideSelected is provided', () => {
       const onUnhideSelected = vi.fn();
       render(<Toolbar {...defaultProps} selectedCount={2} onUnhideSelected={onUnhideSelected} />);
 
-      expect(screen.getByText('Unhide (2)')).toBeInTheDocument();
+      expect(screen.getByText('Unhide')).toBeInTheDocument();
     });
 
     it('should call onHideSelected when Hide is clicked', async () => {
@@ -212,7 +214,7 @@ describe('Toolbar', () => {
       const onHideSelected = vi.fn();
       render(<Toolbar {...defaultProps} selectedCount={1} onHideSelected={onHideSelected} />);
 
-      await user.click(screen.getByText('Hide (1)'));
+      await user.click(screen.getByText('Hide'));
 
       expect(onHideSelected).toHaveBeenCalledTimes(1);
     });
