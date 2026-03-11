@@ -1,7 +1,7 @@
 # ShowStack UI Redesign Plan
 
 **Created:** March 9, 2026
-**Status:** Phases 4–7 complete; Phase 8 (Filter Chips + Toolbar Slim) next
+**Status:** Phases 4–9 complete — all structural phases shipped
 **Priority:** High (foundational — affects all features built after this)
 **Scope:** Landing page, navigation model, Equipment Manager layout, inspector panel system,
 tool consolidation, error checking
@@ -464,14 +464,20 @@ New landing page: list + right panel, tags, version handling, show art/placehold
 - `ProjectSidebar` — red/amber count badges on Fixtures, Infrastructure, Racks & Distribution nav items
 - `ShowHealth.tsx` — passive panel at `/project/:id/show-health` with grouped error/warning lists
 
-### Phase 8 — Filter Chips + Toolbar Slim — **Next Up**
+### Phase 8 — Filter Chips + Toolbar Slim ✅
 
-Replace FilterBar row with inline grid header chips. Slim toolbar to primary actions only.
+- `FilterChipBar`: replaces always-visible `FilterBar` row; collapses when no filters active;
+  active filters shown as removable chips; "Filters ▾" button expands inline dropdown panel
+- `Toolbar`: search input moved in-toolbar; Export always visible; selection actions slimmed;
+  "User Columns…" moved into `ColumnVisibilityMenu` footer via new `onUserColumnSettings` prop
+- `ColumnVisibilityMenu`: `onUserColumnSettings` optional prop renders footer link inside menu
 
-### Phase 9 — Design Token Rollout
+### Phase 9 — Design Token Rollout ✅
 
-Apply CSS custom properties across all components as they are touched in the above phases.
-Full visual overhaul can then retheme by updating token values.
+- `index.css`: full token set on `:root` (light) and `.dark` overrides
+  — surface colors, interactive (accent, destructive, warning), text, borders, layout spacing, radius
+- `ProjectSidebar` validation badges now use `--color-destructive` / `--color-warning`
+- Token reference: any future visual overhaul changes token values only, not component files
 
 ---
 
@@ -490,6 +496,6 @@ they slot in without navigation changes when they ship.
 
 ---
 
-**Last Updated:** March 11, 2026
+**Last Updated:** March 11, 2026 — all phases complete
 **Author:** Claude Code
 **Version:** 1.0
