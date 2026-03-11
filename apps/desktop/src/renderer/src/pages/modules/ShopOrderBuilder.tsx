@@ -160,30 +160,44 @@ export function ShopOrderBuilder() {
   useEffect(() => {
     const autoLoadProjectShopOrder = async () => {
       if (parentProjectId && allProjects.length > 0 && !currentProject) {
-        // Find existing shop order for this parent project
-        const existingShopOrder = allProjects.find((p) => p.parent_project_id === parentProjectId);
+        const parentProject = projects.find((p) => p.id === parentProjectId);
+
+        // 1. Match by parent_project_id (preferred — set on shop orders created from a project)
+        let existingShopOrder = allProjects.find((p) => p.parent_project_id === parentProjectId);
+
+        // 2. Fallback: match by production name for shop orders created before parent linking existed
+        if (!existingShopOrder && parentProject) {
+          existingShopOrder = allProjects.find(
+            (p) =>
+              !p.parent_project_id &&
+              p.production_name.trim().toLowerCase() === parentProject.name.trim().toLowerCase(),
+          );
+          // If found via name match, backfill the parent_project_id so future loads use the fast path
+          if (existingShopOrder) {
+            try {
+              await updateProject(existingShopOrder.id, { parent_project_id: parentProjectId });
+            } catch (err) {
+              logger.error('Failed to backfill parent_project_id on shop order:', err);
+            }
+          }
+        }
 
         if (existingShopOrder) {
-          // Load the existing shop order
           await loadProject(existingShopOrder.id);
-        } else {
-          // No shop order exists - create one automatically
-          const parentProject = projects.find((p) => p.id === parentProjectId);
-          if (parentProject) {
-            try {
-              const newProject = await useShopOrderStore.getState().createProject({
-                production_name: parentProject.name,
-                parent_project_id: parentProjectId,
-                venue: parentProject.venue || undefined,
-                disciplines: ['lighting'], // Default to lighting
-              });
-
-              if (newProject) {
-                await loadProject(newProject.id);
-              }
-            } catch (error) {
-              logger.error('Failed to auto-create shop order:', error);
+        } else if (parentProject) {
+          // No shop order exists — create one automatically
+          try {
+            const newProject = await useShopOrderStore.getState().createProject({
+              production_name: parentProject.name,
+              parent_project_id: parentProjectId,
+              venue: parentProject.venue || undefined,
+              disciplines: ['lighting'],
+            });
+            if (newProject) {
+              await loadProject(newProject.id);
             }
+          } catch (error) {
+            logger.error('Failed to auto-create shop order:', error);
           }
         }
       }

@@ -69,7 +69,7 @@ export function Paperwork() {
 
   // Load data on mount
   useEffect(() => {
-    loadFixtures();
+    loadFixtures(currentProjectId);
     loadEquipment(currentProjectId);
 
     const loadProjectInfo = async () => {

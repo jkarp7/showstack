@@ -1088,27 +1088,6 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
 
   return (
     <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex-shrink-0">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-2xl font-bold">{projectName}</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Fixture Schedule</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {processedFixtures.length} / {fixtures.length} fixtures
-            </span>
-            <span className="text-sm text-gray-600 dark:text-gray-400">•</span>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {selectedRows.size} selected
-            </span>
-          </div>
-        </div>
-      </header>
-
       {/* Tabs */}
       <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
         <div className="flex space-x-8 px-6">
@@ -1304,7 +1283,10 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
 
           {/* Status Bar */}
           <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-            <div>Ready</div>
+            <div>
+              {processedFixtures.length} / {fixtures.length} fixtures
+              {selectedRows.size > 0 && ` | ${selectedRows.size} selected`}
+            </div>
             <div>ShowStack:Lighting v0.1.0-alpha</div>
           </footer>
         </>
