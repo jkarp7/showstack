@@ -79,13 +79,19 @@ function ValidationBadge({ errors, warnings }: BadgeProps) {
   if (!errors && !warnings) return null;
   if (errors) {
     return (
-      <span className="ml-auto flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+      <span
+        className="ml-auto flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full text-white text-[10px] font-bold flex items-center justify-center leading-none"
+        style={{ backgroundColor: 'var(--color-destructive)' }}
+      >
         {errors}
       </span>
     );
   }
   return (
-    <span className="ml-auto flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-400 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+    <span
+      className="ml-auto flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full text-white text-[10px] font-bold flex items-center justify-center leading-none"
+      style={{ backgroundColor: 'var(--color-warning)' }}
+    >
       {warnings}
     </span>
   );
@@ -98,7 +104,7 @@ export function ProjectSidebar({ projectId, projectName, onHome }: ProjectSideba
   return (
     <aside
       className="flex flex-col h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-shrink-0 overflow-y-auto"
-      style={{ width: 'var(--spacing-sidebar-width, 200px)', minWidth: 180 }}
+      style={{ width: 'var(--spacing-sidebar-width)', minWidth: 180 }}
     >
       {/* Project name / home button */}
       <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
