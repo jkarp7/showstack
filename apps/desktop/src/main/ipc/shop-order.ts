@@ -13,6 +13,7 @@ import { shopOrderFileService } from '../services/shopOrderFileService';
 
 // Direct database imports (for non-service operations)
 import { getProjectById } from '../database/queries/projects';
+import { getNotesByProjectId } from '../database/queries/shop-order';
 import {
   // Layout Templates (app-level user preferences)
   getAllLayoutTemplates,

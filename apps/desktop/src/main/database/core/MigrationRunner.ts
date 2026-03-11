@@ -152,20 +152,37 @@ export class MigrationRunner {
         }
       }
 
+      // Seed default paperwork header template (must be before paperwork templates — FK dependency)
+      try {
+        seedPaperworkHeaderTemplate();
+      } catch (err) {
+        logger.error(
+          'seedPaperworkHeaderTemplate failed',
+          err instanceof Error ? err : new Error(String(err)),
+        );
+      }
+
       // Seed paperwork templates
-      seedPaperworkTemplates();
-
-      // Update system templates
-      updateSystemTemplates();
-
-      // Reseed missing templates
-      reseedMissingTemplates();
-
-      // Seed default paperwork header template
-      seedPaperworkHeaderTemplate();
+      try {
+        seedPaperworkTemplates();
+        updateSystemTemplates();
+        reseedMissingTemplates();
+      } catch (err) {
+        logger.error(
+          'seedPaperworkTemplates failed',
+          err instanceof Error ? err : new Error(String(err)),
+        );
+      }
 
       // Update existing paperwork templates to reference the default header
-      updatePaperworkTemplateHeaders();
+      try {
+        updatePaperworkTemplateHeaders();
+      } catch (err) {
+        logger.error(
+          'updatePaperworkTemplateHeaders failed',
+          err instanceof Error ? err : new Error(String(err)),
+        );
+      }
 
       logger.info('App database migrations complete');
     } catch (error) {
@@ -209,6 +226,9 @@ export class MigrationRunner {
 
       // Prep to Shop Order table migrations (Phase 0.3)
       this.migratePrepToShopOrder();
+
+      // Shop order projects column migrations
+      this.migrateShopOrderProjectsTable();
 
       logger.info('Project database migrations complete');
     } catch (error) {
@@ -500,6 +520,39 @@ export class MigrationRunner {
         error instanceof Error ? error : new Error(String(error)),
       );
       // Don't throw - allow app to continue
+    }
+  }
+
+  /**
+   * Migrate shop_order_projects table — add columns added after initial schema
+   */
+  private migrateShopOrderProjectsTable(): void {
+    const tableExists = this.db
+      .prepare(
+        `SELECT COUNT(*) as count FROM sqlite_master WHERE type='table' AND name='shop_order_projects'`,
+      )
+      .get() as { count: number };
+    if ((tableExists?.count || 0) === 0) return;
+
+    const columns = (
+      this.db.prepare('PRAGMA table_info(shop_order_projects)').all() as Array<{ name: string }>
+    ).map((r) => r.name);
+
+    if (!columns.includes('logo_path')) {
+      logger.info('Running migration: Adding logo_path to shop_order_projects');
+      this.db.prepare('ALTER TABLE shop_order_projects ADD COLUMN logo_path TEXT').run();
+    }
+    if (!columns.includes('logo_url')) {
+      logger.info('Running migration: Adding logo_url to shop_order_projects');
+      this.db.prepare('ALTER TABLE shop_order_projects ADD COLUMN logo_url TEXT').run();
+    }
+    if (!columns.includes('logo_storage_path')) {
+      logger.info('Running migration: Adding logo_storage_path to shop_order_projects');
+      this.db.prepare('ALTER TABLE shop_order_projects ADD COLUMN logo_storage_path TEXT').run();
+    }
+    if (!columns.includes('parent_project_id')) {
+      logger.info('Running migration: Adding parent_project_id to shop_order_projects');
+      this.db.prepare('ALTER TABLE shop_order_projects ADD COLUMN parent_project_id TEXT').run();
     }
   }
 }

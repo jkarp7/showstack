@@ -6,7 +6,14 @@ interface ShopOrderProjectCardProps {
 }
 
 export function ShopOrderProjectCard({ project, onClick }: ShopOrderProjectCardProps) {
-  const disciplines = JSON.parse(project.disciplines || '["lighting"]');
+  const disciplines = (() => {
+    try {
+      const parsed = JSON.parse(project.disciplines || '["lighting"]');
+      return Array.isArray(parsed) ? parsed : [parsed];
+    } catch {
+      return project.disciplines ? [project.disciplines] : ['lighting'];
+    }
+  })();
   const formattedDate = new Date(project.updated_at).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',

@@ -14,18 +14,20 @@ export function seedPaperworkHeaderTemplate(): void {
 
   try {
     // Check if default header already exists with elements
-    const checkTemplateQuery = `SELECT id FROM page_layout_templates WHERE id = 'default-paperwork-header'`;
-    const templateResult = db.exec(checkTemplateQuery);
-
-    const templateExists = templateResult[0] && templateResult[0].values.length > 0;
+    const templateRow = db
+      .prepare(`SELECT id FROM page_layout_templates WHERE id = 'default-paperwork-header'`)
+      .get();
+    const templateExists = !!templateRow;
 
     // Check if elements exist for the template
     let elementsExist = false;
     if (templateExists) {
-      const checkElementsQuery = `SELECT COUNT(*) as count FROM page_layout_elements WHERE template_id = 'default-paperwork-header'`;
-      const elementsResult = db.exec(checkElementsQuery);
-      const elementCount = (elementsResult[0]?.values[0]?.[0] as number) || 0;
-      elementsExist = elementCount > 0;
+      const countRow = db
+        .prepare(
+          `SELECT COUNT(*) as count FROM page_layout_elements WHERE template_id = 'default-paperwork-header'`,
+        )
+        .get() as { count: number } | undefined;
+      elementsExist = (countRow?.count ?? 0) > 0;
     }
 
     if (templateExists && elementsExist) {
