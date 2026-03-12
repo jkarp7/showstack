@@ -36,6 +36,8 @@ function sanitizeCSVValue(value: string): string {
 interface ShopOrderTableProps {
   projectId: string;
   onAddSection?: () => void;
+  onAddFromGroups?: () => void;
+  isAddingFromGroups?: boolean;
 }
 
 interface EditingCell {
@@ -55,7 +57,12 @@ interface EditingCell {
  * - Add/delete revision columns
  * - Row reordering via drag-and-drop
  */
-export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps) {
+export function ShopOrderTable({
+  projectId,
+  onAddSection,
+  onAddFromGroups,
+  isAddingFromGroups,
+}: ShopOrderTableProps) {
   const {
     currentProject,
     sections,
@@ -896,6 +903,16 @@ export function ShopOrderTable({ projectId, onAddSection }: ShopOrderTableProps)
               title="Add new section"
             >
               + Add Section
+            </button>
+          )}
+          {onAddFromGroups && (
+            <button
+              className="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={onAddFromGroups}
+              disabled={isAddingFromGroups}
+              title="Auto-populate sections from Smart Groups"
+            >
+              {isAddingFromGroups ? 'Adding…' : '+ From Groups'}
             </button>
           )}
           <button

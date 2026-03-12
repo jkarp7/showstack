@@ -6,26 +6,28 @@ import { useProjectStore } from '../../store/projectStore';
 import { useShopOrderFileStore } from '../../store/shopOrderFileStore';
 import { NewShopOrderProjectDialog } from '../../components/shop-order/NewShopOrderProjectDialog';
 import { ShopOrderProjectCard } from '../../components/shop-order/ShopOrderProjectCard';
-import { SectionList } from '../../components/shop-order/SectionList';
 import { ShopOrderTable } from '../../components/shop-order/ShopOrderTable';
 import { AddSectionDialog } from '../../components/shop-order/AddSectionDialog';
 import { EditSectionDialog } from '../../components/shop-order/EditSectionDialog';
 import { RevisionPanel } from '../../components/shop-order/RevisionPanel';
 import { NotesPanel } from '../../components/shop-order/NotesPanel';
 import { TemplateManagerDialog } from '../../components/shop-order/TemplateManagerDialog';
-import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import { PrintPreview } from '../../components/shop-order/PrintPreview';
 import { DeveloperPanel } from '../../components/common/DeveloperPanel';
 import { telemetry } from '../../services/telemetry';
 import { formatPhoneNumber } from '../../utils/phoneFormatter';
 import type { PrepSection, Discipline, PrepProject } from '../../types/shopOrder';
 import { useShopOrderMenuHandlers } from '../../hooks/useShopOrderMenuHandlers';
+import { useFixtureStore } from '../../store/fixtureStore';
+import { useGroupStore } from '../../store/groupStore';
+import { generateSectionsFromGroups } from '../../utils/shop-order/groupHelpers';
 
 export function ShopOrderBuilder() {
   const navigate = useNavigate();
   const { projectId: parentProjectId } = useParams<{ projectId?: string }>();
   const {
     allProjects,
+    isLoading: shopOrdersLoading,
     currentProject,
     sections,
     revisions,
@@ -34,7 +36,6 @@ export function ShopOrderBuilder() {
     saveTemplate,
     loadAllProjects,
     loadProject,
-    clearCurrentProject,
     updateProject,
     setRevisionZero,
     generateRevision,
@@ -42,7 +43,10 @@ export function ShopOrderBuilder() {
     syncFromParent,
   } = useShopOrderStore();
   const { projects, loadProjects } = useProjectStore();
+  const { fixtures } = useFixtureStore();
+  const { groups, pinsByGroup } = useGroupStore();
   const [moduleStartTime] = useState(Date.now());
+  const [allProjectsLoaded, setAllProjectsLoaded] = useState(false);
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   const [showAddSectionDialog, setShowAddSectionDialog] = useState(false);
   const [showEditSectionDialog, setShowEditSectionDialog] = useState(false);
@@ -59,7 +63,6 @@ export function ShopOrderBuilder() {
   // State for collapsible sections
   const [projectDetailsExpanded, setProjectDetailsExpanded] = useState(true);
   const [revisionsExpanded, setRevisionsExpanded] = useState(true);
-  const [equipmentExpanded, setEquipmentExpanded] = useState(true);
   const [notesExpanded, setNotesExpanded] = useState(true);
 
   // State for revision generation
@@ -73,19 +76,17 @@ export function ShopOrderBuilder() {
   // State for template manager
   const [showTemplateManager, setShowTemplateManager] = useState(false);
 
-  // State for file menu
-  const [showFileMenu, setShowFileMenu] = useState(false);
+  // State for "From Groups" auto-populate
+  const [isAddingFromGroups, setIsAddingFromGroups] = useState(false);
 
   // Ref for click timer (to distinguish single vs double click)
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleBackClick = () => {
     if (parentProjectId) {
-      // Go back to module tool selection
-      navigate(`/project/${parentProjectId}/module/production`);
+      navigate(`/project/${parentProjectId}/shop-orders`);
     } else {
-      // Go back to module tool selection (no project context)
-      navigate('/module/production');
+      navigate('/');
     }
   };
 
@@ -93,9 +94,31 @@ export function ShopOrderBuilder() {
     navigate('/');
   };
 
+  const handleAddFromGroups = async () => {
+    if (!currentProject) return;
+    if (groups.length === 0) return;
+    setIsAddingFromGroups(true);
+    try {
+      const result = await generateSectionsFromGroups(
+        currentProject.id,
+        groups,
+        fixtures,
+        pinsByGroup,
+      );
+      await loadProject(currentProject.id);
+      logger.info(
+        `From Groups: created ${result.sectionsCreated} sections, ${result.itemsCreated} items (${result.skippedEmpty} empty groups skipped)`,
+      );
+    } catch (error) {
+      logger.error('Failed to add sections from groups', { error: String(error) });
+    } finally {
+      setIsAddingFromGroups(false);
+    }
+  };
+
   useEffect(() => {
     // Load all prep projects and parent projects on mount
-    loadAllProjects();
+    loadAllProjects().then(() => setAllProjectsLoaded(true));
     loadProjects();
   }, []);
 
@@ -131,38 +154,74 @@ export function ShopOrderBuilder() {
   // Auto-load or create shop order when opened from a project
   useEffect(() => {
     const autoLoadProjectShopOrder = async () => {
-      if (parentProjectId && allProjects.length > 0 && !currentProject) {
-        // Find existing shop order for this parent project
-        const existingShopOrder = allProjects.find((p) => p.parent_project_id === parentProjectId);
+      if (parentProjectId && allProjectsLoaded && !shopOrdersLoading && !currentProject) {
+        const parentProject = projects.find((p) => p.id === parentProjectId);
+
+        // 1. Match by parent_project_id (preferred — set on shop orders created from a project)
+        let existingShopOrder = allProjects.find((p) => p.parent_project_id === parentProjectId);
+
+        // 2. Fallback: match by production name for shop orders created before parent linking existed
+        if (!existingShopOrder && parentProject) {
+          const nameCandidates = allProjects.filter(
+            (p) =>
+              !p.parent_project_id &&
+              p.production_name.trim().toLowerCase() === parentProject.name.trim().toLowerCase(),
+          );
+          if (nameCandidates.length > 1) {
+            // Multiple unlinked shop orders share the same name — ask the user rather than
+            // silently picking the first one
+            const confirmed = confirm(
+              `Found ${nameCandidates.length} unlinked shop orders named "${parentProject.name}". ` +
+                `Link the most recently updated one to this project?`,
+            );
+            if (confirmed) {
+              existingShopOrder = nameCandidates.reduce((a, b) =>
+                (a.updated_at ?? 0) >= (b.updated_at ?? 0) ? a : b,
+              );
+            }
+          } else if (nameCandidates.length === 1) {
+            existingShopOrder = nameCandidates[0];
+          }
+          // If found via name match, backfill the parent_project_id so future loads use the fast path
+          if (existingShopOrder) {
+            try {
+              await updateProject(existingShopOrder.id, { parent_project_id: parentProjectId });
+            } catch (err) {
+              logger.error('Failed to backfill parent_project_id on shop order:', err);
+            }
+          }
+        }
 
         if (existingShopOrder) {
-          // Load the existing shop order
           await loadProject(existingShopOrder.id);
-        } else {
-          // No shop order exists - create one automatically
-          const parentProject = projects.find((p) => p.id === parentProjectId);
-          if (parentProject) {
-            try {
-              const newProject = await useShopOrderStore.getState().createProject({
-                production_name: parentProject.name,
-                parent_project_id: parentProjectId,
-                venue: parentProject.venue || undefined,
-                disciplines: ['lighting'], // Default to lighting
-              });
-
-              if (newProject) {
-                await loadProject(newProject.id);
-              }
-            } catch (error) {
-              logger.error('Failed to auto-create shop order:', error);
+        } else if (parentProject) {
+          // No shop order exists — create one automatically
+          try {
+            const newProject = await useShopOrderStore.getState().createProject({
+              production_name: parentProject.name,
+              parent_project_id: parentProjectId,
+              venue: parentProject.venue || undefined,
+              disciplines: ['lighting'],
+            });
+            if (newProject) {
+              await loadProject(newProject.id);
             }
+          } catch (error) {
+            logger.error('Failed to auto-create shop order:', error);
           }
         }
       }
     };
 
     autoLoadProjectShopOrder();
-  }, [parentProjectId, allProjects, currentProject, projects]);
+  }, [
+    parentProjectId,
+    allProjectsLoaded,
+    shopOrdersLoading,
+    allProjects,
+    currentProject,
+    projects,
+  ]);
 
   // Update file store when current project changes
   useEffect(() => {
@@ -175,16 +234,6 @@ export function ShopOrderBuilder() {
     await loadProject(projectId);
   };
 
-  const handleBackToList = () => {
-    if (parentProjectId) {
-      // Go back to module tool selection when in project context
-      navigate(`/project/${parentProjectId}/module/production`);
-    } else {
-      // Clear current project and show list when not in project context
-      clearCurrentProject();
-    }
-  };
-
   const handleNewProject = () => {
     setShowNewProjectDialog(true);
   };
@@ -193,7 +242,7 @@ export function ShopOrderBuilder() {
     await loadProject(projectId);
   };
 
-  const handleEditSection = (section: PrepSection) => {
+  const _handleEditSection = (section: PrepSection) => {
     setSectionToEdit(section);
     setShowEditSectionDialog(true);
   };
@@ -478,7 +527,16 @@ export function ShopOrderBuilder() {
       ? projects.find((p) => p.id === currentProject.parent_project_id)
       : null;
     const isLinked = !!parentProject;
-    const disciplines = JSON.parse((currentProject.disciplines as any) || '[]') as Discipline[];
+    const disciplines = (() => {
+      try {
+        const raw = (currentProject.disciplines as any) || '[]';
+        const parsed = JSON.parse(raw);
+        return (Array.isArray(parsed) ? parsed : [parsed]) as Discipline[];
+      } catch {
+        // disciplines stored as plain string (legacy bad write) — wrap it
+        return [currentProject.disciplines as unknown as Discipline].filter(Boolean);
+      }
+    })();
 
     // Helper to get field value (from parent if linked, otherwise from prep project)
     const getFieldValue = (field: keyof PrepProject): string => {
@@ -670,7 +728,7 @@ export function ShopOrderBuilder() {
     };
 
     // Helper to render an editable field with label (for backwards compatibility)
-    const renderField = (label: string, field: keyof PrepProject, placeholder = '+ Add') => {
+    const _renderField = (label: string, field: keyof PrepProject, placeholder = '+ Add') => {
       const value = getFieldValue(field);
       const isEditing = editingField === field;
       const fieldIsReadOnly = isFieldReadOnly(field);
@@ -717,62 +775,29 @@ export function ShopOrderBuilder() {
 
     return (
       <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
-        {/* Breadcrumbs */}
-        <div className="flex-shrink-0">
-          <Breadcrumbs />
-        </div>
-
-        {/* Show name and badges */}
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex-shrink-0">
-          <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-bold">{currentProject.production_name}</h1>
-            {currentProject.current_revision > 0 && (
-              <span className="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded">
-                Revision {currentProject.current_revision}
-              </span>
-            )}
-            {isLinked && (
-              <>
-                <span className="px-3 py-1.5 bg-blue-600/20 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 text-sm rounded">
-                  Linked to Parent Project
-                </span>
-                <button
-                  onClick={handleSyncFromParent}
-                  className="px-3 py-1.5 bg-blue-600/20 dark:bg-blue-600/20 hover:bg-blue-600/30 dark:hover:bg-blue-600/30 text-blue-600 dark:text-blue-400 text-sm rounded transition"
-                  title="Sync dates and contacts from parent project"
-                >
-                  🔄 Sync from Parent
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
         {/* Tabs */}
-        <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="flex gap-4">
-              <button
-                onClick={() => setActiveTab('builder')}
-                className={`px-4 py-3 text-sm font-medium transition border-b-2 ${
-                  activeTab === 'builder'
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'
-                }`}
-              >
-                Shop Order Builder
-              </button>
-              <button
-                onClick={() => setActiveTab('output')}
-                className={`px-4 py-3 text-sm font-medium transition border-b-2 ${
-                  activeTab === 'output'
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'
-                }`}
-              >
-                Print-Ready Output
-              </button>
-            </div>
+        <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+          <div className="flex space-x-8 px-6">
+            <button
+              onClick={() => setActiveTab('builder')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'builder'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
+              }`}
+            >
+              Shop Order Builder
+            </button>
+            <button
+              onClick={() => setActiveTab('output')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'output'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
+              }`}
+            >
+              Print-Ready Output
+            </button>
           </div>
         </div>
 
@@ -885,6 +910,13 @@ export function ShopOrderBuilder() {
                                   {projects.find((p) => p.id === currentProject.parent_project_id)
                                     ?.name || 'Unknown Project'}
                                 </span>
+                                <button
+                                  onClick={handleSyncFromParent}
+                                  className="text-xs px-2 py-1 bg-blue-600/20 hover:bg-blue-600/30 text-blue-500 dark:text-blue-400 rounded transition"
+                                  title="Sync dates and contacts from parent project"
+                                >
+                                  ↕ Sync
+                                </button>
                                 <button
                                   onClick={handleUnlinkFromParent}
                                   className="text-xs px-2 py-1 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded transition"
@@ -1254,6 +1286,8 @@ export function ShopOrderBuilder() {
                     <ShopOrderTable
                       projectId={currentProject.id}
                       onAddSection={() => setShowAddSectionDialog(true)}
+                      onAddFromGroups={groups.length > 0 ? handleAddFromGroups : undefined}
+                      isAddingFromGroups={isAddingFromGroups}
                     />
                   </div>
                 </div>
@@ -1275,7 +1309,7 @@ export function ShopOrderBuilder() {
             isOpen={showAddSectionDialog}
             onClose={() => setShowAddSectionDialog(false)}
             projectId={currentProject.id}
-            projectDisciplines={JSON.parse(currentProject.disciplines || '[]') as Discipline[]}
+            projectDisciplines={disciplines}
           />
 
           {/* Edit Section Dialog */}
@@ -1283,7 +1317,7 @@ export function ShopOrderBuilder() {
             isOpen={showEditSectionDialog}
             onClose={handleCloseEditDialog}
             section={sectionToEdit}
-            projectDisciplines={JSON.parse(currentProject.disciplines || '[]') as Discipline[]}
+            projectDisciplines={disciplines}
           />
 
           {/* Template Manager Dialog */}

@@ -179,8 +179,9 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
         try {
           const parentProject = await window.api.projects.getById(data.parent_project_id);
           if (parentProject) {
-            // Map parent project fields to prep project fields
-            parentData = {
+            // Map parent project fields to prep project fields.
+            // Strip null values — Zod schema uses .optional() which accepts undefined but not null.
+            const raw = {
               parent_project_id: data.parent_project_id,
               venue: parentProject.venue,
               // logo_path is a local file path, not a URL — pass as storage path only;
@@ -204,6 +205,9 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
               pe_email: parentProject.electrician_email,
               pe_phone: parentProject.electrician_phone,
             };
+            parentData = Object.fromEntries(
+              Object.entries(raw).filter(([, v]) => v !== null && v !== undefined),
+            );
           }
         } catch (error) {
           logger.error('Failed to load parent project:', error);
@@ -307,37 +311,49 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       // Dates - map from parent project's show_dates object
       if (parentProject.show_dates) {
         const showDates = parentProject.show_dates;
+        const dateStr = (v: unknown): string | null => (v && typeof v === 'string' ? v : null);
 
-        if (showDates.prep_start) {
-          updates.prep_start_date = showDates.prep_start;
+        const prepStart = dateStr(showDates.prep_start);
+        if (prepStart) {
+          updates.prep_start_date = prepStart;
           syncedFields.push('prep_start_date');
         }
-        if (showDates.prep_end) {
-          updates.prep_end_date = showDates.prep_end;
+
+        const prepEnd = dateStr(showDates.prep_end);
+        if (prepEnd) {
+          updates.prep_end_date = prepEnd;
           syncedFields.push('prep_end_date');
         }
-        if (showDates.load_in) {
-          updates.load_in_date = showDates.load_in;
+
+        const loadIn = dateStr(showDates.load_in);
+        if (loadIn) {
+          updates.load_in_date = loadIn;
           syncedFields.push('load_in_date');
         }
-        if (showDates.tech) {
-          updates.first_preview_date = showDates.tech; // Map tech to first_preview
+
+        // tech or previews → first_preview_date (previews wins if both exist)
+        const tech = dateStr(showDates.tech);
+        const previews = dateStr(showDates.previews);
+        if (previews || tech) {
+          updates.first_preview_date = previews || tech;
           syncedFields.push('first_preview_date');
         }
-        if (showDates.previews) {
-          updates.first_preview_date = showDates.previews;
-          syncedFields.push('first_preview_date');
-        }
-        if (showDates.opening) {
-          updates.opening_night_date = showDates.opening;
+
+        const opening = dateStr(showDates.opening);
+        if (opening) {
+          updates.opening_night_date = opening;
           syncedFields.push('opening_night_date');
         }
-        if (showDates.closing) {
-          updates.closing_date = showDates.closing;
+
+        const closing = dateStr(showDates.closing);
+        if (closing) {
+          updates.closing_date = closing;
           syncedFields.push('closing_date');
         }
-        if (showDates.load_out) {
-          updates.load_out_date = showDates.load_out;
+
+        const loadOut = dateStr(showDates.load_out);
+        if (loadOut) {
+          updates.load_out_date = loadOut;
           syncedFields.push('load_out_date');
         }
       }
@@ -478,7 +494,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       }
 
       if (additionalContacts.length > 0) {
-        updates.additional_contacts = JSON.stringify(additionalContacts);
+        updates.additional_contacts = additionalContacts;
         syncedFields.push('additional_contacts');
       }
 
@@ -807,7 +823,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
 
         // Get the last revision's change log to reconstruct state
         const lastRevision = revisions.find((r) => r.revision_number === lastRevisionNumber);
-        const lastChangeLog = lastRevision
+        const _lastChangeLog = lastRevision
           ? typeof lastRevision.change_log === 'string'
             ? JSON.parse(lastRevision.change_log)
             : lastRevision.change_log
@@ -853,7 +869,7 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
       }
 
       // Create the revision
-      const revision = await window.api.prep.revisions.create({
+      const _revision = await window.api.prep.revisions.create({
         prep_project_id: projectId,
         revision_number: newRevisionNumber,
         notes,

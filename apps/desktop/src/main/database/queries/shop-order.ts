@@ -96,8 +96,16 @@ export function createShopOrderProject(data: Partial<ShopOrderProject>): ShopOrd
   const id = uuidv4();
   const now = Date.now();
 
-  const disciplines = data.disciplines || JSON.stringify(['lighting']);
-  const additionalContacts = data.additional_contacts || null;
+  const disciplinesRaw = data.disciplines || ['lighting'];
+  const disciplines =
+    typeof disciplinesRaw === 'object' && disciplinesRaw !== null
+      ? JSON.stringify(disciplinesRaw)
+      : disciplinesRaw;
+  const additionalContactsRaw = data.additional_contacts || null;
+  const additionalContacts =
+    typeof additionalContactsRaw === 'object' && additionalContactsRaw !== null
+      ? JSON.stringify(additionalContactsRaw)
+      : additionalContactsRaw;
 
   db.prepare(
     `
@@ -217,7 +225,12 @@ export function updateShopOrderProject(
   }
 
   const setClause = fields.map((f) => `${f} = ?`).join(', ');
-  const values = fields.map((f) => updates[f]);
+  const values = fields.map((f) => {
+    const v = updates[f];
+    if ((f === 'disciplines' || f === 'additional_contacts') && typeof v === 'object' && v !== null)
+      return JSON.stringify(v);
+    return v;
+  });
 
   db.prepare(
     `

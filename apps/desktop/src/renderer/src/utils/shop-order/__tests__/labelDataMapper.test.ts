@@ -340,7 +340,7 @@ describe('Label Data Mapper', () => {
       const fields = getAvailableLabelFields();
 
       expect(fields.length).toBeGreaterThan(0);
-      expect(fields.length).toBe(35); // All LabelData fields
+      expect(fields.length).toBe(36); // All LabelData fields (includes group)
     });
 
     it('should include all field categories', () => {

@@ -1,7 +1,7 @@
 # ShowStack Admin Panel - User Guide
 
 **Version**: 1.0
-**Last Updated**: November 2025
+**Last Updated**: December 10, 2025
 
 ---
 

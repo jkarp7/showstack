@@ -4,8 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useUIStore } from '../store/uiStore';
 import { useProjectStore } from '../store/projectStore';
 
-/** Shared route segment for the system-docs (paperwork) module. */
-const SYSTEM_DOCS_PATH = '/module/production/system-docs';
+/** Path segment for the paperwork tool within the project workspace. */
+const PAPERWORK_PATH_SUFFIX = '/paperwork';
 
 /**
  * Project menu event handlers
@@ -27,8 +27,8 @@ export function useProjectMenuHandlers() {
 
       if (projectIdMatch) {
         const projectId = projectIdMatch[1];
-        // Navigate to project page with edit dialog flag
-        navigate(`/project/${projectId}`, { state: { openEditDialog: true } });
+        // Navigate to project info with edit dialog flag
+        navigate(`/project/${projectId}/project-info`, { state: { openEditDialog: true } });
       } else {
         logger.info('No project context for Edit Project Info');
       }
@@ -65,10 +65,10 @@ export function useProjectMenuHandlers() {
 
     const handleGeneratePaperwork = () => {
       if (params.projectId) {
-        navigate(`/project/${params.projectId}${SYSTEM_DOCS_PATH}`);
+        navigate(`/project/${params.projectId}${PAPERWORK_PATH_SUFFIX}`);
       } else {
-        logger.debug('No project context for Generate Paperwork — navigating to standalone path');
-        navigate(SYSTEM_DOCS_PATH);
+        logger.debug('No project context for Generate Paperwork');
+        navigate('/');
       }
     };
 

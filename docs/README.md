@@ -2,7 +2,7 @@
 
 Welcome to the ShowStack documentation! This directory contains all project documentation organized by category.
 
-**Last Updated:** March 2026
+**Last Updated:** March 9, 2026
 
 ---
 
@@ -211,4 +211,4 @@ If you can't find what you're looking for:
 ---
 
 **Documentation maintained by the ShowStack team**
-**Last major reorganization:** March 2026
+**Last major reorganization:** March 1, 2026

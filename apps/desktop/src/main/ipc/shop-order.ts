@@ -13,6 +13,7 @@ import { shopOrderFileService } from '../services/shopOrderFileService';
 
 // Direct database imports (for non-service operations)
 import { getProjectById } from '../database/queries/projects';
+import { getNotesByProjectId } from '../database/queries/shop-order';
 import {
   // Layout Templates (app-level user preferences)
   getAllLayoutTemplates,
@@ -831,7 +832,7 @@ function renderLayoutElement(
   layout: any,
   contentWidth: number,
   contentHeight: number,
-  notesMap: Record<string, { content: string; format: string }>,
+  _notesMap: Record<string, { content: string; format: string }>,
 ): string {
   const { grid_column, grid_row, column_span, row_span, config, style, element_type } = element;
 
@@ -1186,7 +1187,7 @@ function renderLayoutElement(
     let changeLog: any[] = [];
     try {
       changeLog = JSON.parse(currentRevision.change_log || '[]');
-    } catch (e) {
+    } catch {
       changeLog = [];
     }
 
@@ -1452,7 +1453,7 @@ function escapeHtml(text: string): string {
 }
 
 // Helper function to get section label
-function getSectionLabel(type: string): string {
+function _getSectionLabel(type: string): string {
   const labels: Record<string, string> = {
     cover: 'Cover Page',
     'project-details': 'Project Details',
@@ -1470,7 +1471,7 @@ function getSectionLabel(type: string): string {
 }
 
 // Helper function to get note type label
-function getNoteTypeLabel(noteType: string): string {
+function _getNoteTypeLabel(noteType: string): string {
   const labels: Record<string, string> = {
     general_conditions: 'General Conditions',
     general_notes: 'General Notes',

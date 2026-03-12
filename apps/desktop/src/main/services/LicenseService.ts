@@ -78,7 +78,7 @@ const VALID_TIERS = [
 ] as const satisfies readonly ServerLicenseTier[];
 
 export class LicenseService {
-  private readonly OFFLINE_GRACE_DAYS = 14;
+  private readonly OFFLINE_GRACE_DAYS = 7;
   private readonly EXPIRATION_WARNING_DAYS = 7;
   private readonly VERIFICATION_INTERVAL_HOURS = 24;
 

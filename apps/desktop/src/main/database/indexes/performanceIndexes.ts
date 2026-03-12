@@ -359,7 +359,7 @@ export function analyzeQueryPerformance(db: Database.Database): {
         count: number;
       };
       return { table, rowCount: result?.count || 0 };
-    } catch (error) {
+    } catch {
       return { table, rowCount: 0 };
     }
   });

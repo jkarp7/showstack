@@ -14,6 +14,8 @@ interface ColumnVisibilityMenuProps {
    * `isOpen` in response to this callback to actually open/close the menu.
    */
   onOpenChange?: (open: boolean) => void;
+  /** When provided, shows a "User Columns…" link at the bottom of the menu. */
+  onUserColumnSettings?: () => void;
 }
 
 export function ColumnVisibilityMenu({
@@ -22,6 +24,7 @@ export function ColumnVisibilityMenu({
   userColumnDefinitions = {},
   isOpen: isOpenProp,
   onOpenChange,
+  onUserColumnSettings,
 }: ColumnVisibilityMenuProps) {
   const [isOpenInternal, setIsOpenInternal] = useState(false);
   const isControlled = isOpenProp !== undefined;
@@ -166,6 +169,20 @@ export function ColumnVisibilityMenu({
                 </div>
               ))}
           </div>
+
+          {onUserColumnSettings && (
+            <div className="border-t border-gray-200 dark:border-gray-700 p-2">
+              <button
+                onClick={() => {
+                  onUserColumnSettings();
+                  setIsOpen(false);
+                }}
+                className="w-full text-left px-2 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+              >
+                User Columns…
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

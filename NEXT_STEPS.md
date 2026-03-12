@@ -1,7 +1,7 @@
 # Next Steps - ShowStack Development
 
-**Last Updated:** March 2026
-**Status:** Multi-user collaboration merged to `develop`; PowerSync write-path (issue #86) open on `feature/powersync-write-path`
+**Last Updated:** March 11, 2026
+**Status:** PR #88 (UI Redesign phases 4-9, Smart Groups phases 1-4, bug fixes) open → `develop`
 
 ---
 
@@ -36,6 +36,18 @@ npm run format:check
 ---
 
 ## Recently Completed
+
+### UI Redesign Phases 4-9, Smart Groups Phases 1-4, Bug Fixes (March 11, 2026) — PR #88 → `develop`
+
+Completes the full UI redesign roadmap and all four phases of Smart Groups.
+
+**UI Redesign (phases 4-9):** Navigation flattened to persistent sidebar; SystemDocs and ModuleLanding eliminated; Labels consolidated to single designer; Racks & Distribution under Equipment Manager; Show Health passive validation with sidebar badges; filter chips; CSS design tokens.
+
+**Smart Groups (phases 1-4):** Named saved filters with pin overrides. Schema: `fixture_groups` + `fixture_group_pins`. Membership computed on demand (no re-evaluate button). Inspector panel shell. Equipment Manager integration (column, bulk pin, context menu). Shop orders auto-populate, labels `{group}` token, paperwork group-by.
+
+**Bug fixes:** paperwork template seeding (FK order, `db.exec` → `db.prepare().get()`), `seedDefaultLayouts` bundler fix, shop order JSON array serialization, `syncFromParent` null/date validation, missing `getNotesByProjectId` import, shop order project column migration.
+
+Plans archived: `docs/archive/completed-features/ui-redesign-plan.md`, `smart-groups-plan.md`, `smart-groups-spec.md`.
 
 ### PowerSync Write-Path for Projects & Shop Orders (March 2026) — `feature/powersync-write-path`
 
@@ -108,16 +120,21 @@ See `docs/archive/renovation/README.md` for the full renovation plan.
 
 ## Open Issues / Next Steps
 
-### Merge `feature/powersync-write-path` → `develop`
+### Merge PR #88 → `develop`
 
-PR open at `feature/powersync-write-path`. Once reviewed and merged, the TOCTOU ownership race (issue #86) is fully resolved. No Supabase migration required — existing RLS INSERT policies already cover this.
-
-**Before merging, verify PowerSync sync rules include a project-owner bucket:**
-The PowerSync server sync rules must have a bucket that syncs `projects` rows where `user_id = token_parameters.user_id` (owned projects, not just member projects). Without this, written rows won't download back after a fresh install. Check the PowerSync dashboard sync rules (`supabase/powersync/sync-rules.yaml`) before merging.
+PR #88 (UI Redesign + Smart Groups + bug fixes) is open and passing CI. Merge when approved.
 
 ### Merge `develop` → `main`
 
-Both the collaboration feature (PR #85) and the PowerSync write-path fix (#86) should be batched into a `develop` → `main` merge once the write-path PR is reviewed.
+Batch `develop` → `main` after PR #88 merges. Includes: collaboration (PR #85), PowerSync write-path (PR #87), UI redesign + Smart Groups (PR #88).
+
+### Next Feature Work
+
+- [ ] **Smart Groups Phase 5 (if planned)** — any remaining group features
+- [ ] **MVR export** — industry standard CAD/visualizer format (Lightwright parity)
+- [ ] **Enhanced error checking** — overlapping patches, overloaded dimmers, duplicate channels
+- [ ] **Basic console integration** — OSC protocol for ETC Eos
+- [ ] **E-commerce webhook** → Supabase Edge Function (auto-fulfill Stripe/Shopify purchases)
 
 ---
 
@@ -166,4 +183,4 @@ Both the collaboration feature (PR #85) and the PowerSync write-path fix (#86) s
 
 ---
 
-**Current Focus:** Merge `feature/powersync-write-path` → `develop`, then `develop` → `main`
+**Current Focus:** Merge PR #88 → `develop`, then batch `develop` → `main`

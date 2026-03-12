@@ -3,12 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { logger } from '../../utils/logger';
 import { VirtualDataGrid } from '../../components/fixture/VirtualDataGrid';
 import { Toolbar } from '../../components/fixture/Toolbar';
-import { FilterBar } from '../../components/fixture/FilterBar';
+import { FilterChipBar } from '../../components/fixture/FilterChipBar';
 import { SortBar } from '../../components/fixture/SortBar';
 import { AddFixtureDialog } from '../../components/fixture/AddFixtureDialog';
 import { BulkEditDialog } from '../../components/fixture/BulkEditDialog';
 import { UserColumnSettingsDialog } from '../../components/fixture/UserColumnSettingsDialog';
-import { ConditionalFormattingDialog } from '../../components/fixture/ConditionalFormattingDialog';
+
 import { InfrastructureToolbar } from '../../components/infrastructure/InfrastructureToolbar';
 import { AddInfrastructureDialog } from '../../components/infrastructure/AddInfrastructureDialog';
 import { EditInfrastructureDialog } from '../../components/infrastructure/EditInfrastructureDialog';
@@ -16,7 +16,6 @@ import {
   ExportHeaderDialog,
   ExportHeaderOptions,
 } from '../../components/fixture/ExportHeaderDialog';
-import { Breadcrumbs } from '../../components/common/Breadcrumbs';
 import {
   UnsavedChangesDialog,
   useUnsavedChangesDialog,
@@ -52,12 +51,17 @@ import {
   formatHeaderForGrandMA,
 } from '../../utils/exportHeaders';
 import { HighlightRule, DEFAULT_HIGHLIGHT_RULES } from '../../types/highlighting';
+import { useGroupStore } from '../../store/groupStore';
+import { getGroupMembers, computeFixtureGroupMap } from '../../utils/groupMembership';
+import { InspectorPanel, InspectorContent } from '../../components/inspector/InspectorPanel';
+import { GroupsInspector } from '../../components/inspector/GroupsInspector';
+import { ConditionalFormattingInspector } from '../../components/inspector/ConditionalFormattingInspector';
 
 interface EquipmentManagerProps {
-  embedded?: boolean;
+  initialTab?: 'fixtures' | 'infrastructure' | 'power';
 }
 
-export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {}) {
+export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerProps = {}) {
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId?: string; moduleType?: string }>();
   const {
@@ -73,8 +77,8 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     useInfrastructureStore();
   const { undo, redo, canUndo, canRedo } = useUndoRedoStore();
 
-  // Tab state
-  const [activeTab, setActiveTab] = useState<'fixtures' | 'infrastructure' | 'power'>('fixtures');
+  // Tab state — initialized from the route via initialTab prop
+  const [activeTab, setActiveTab] = useState<'fixtures' | 'infrastructure' | 'power'>(initialTab);
 
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [selectedInfrastructure, setSelectedInfrastructure] = useState<Set<string>>(new Set());
@@ -86,7 +90,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
   );
   const [isBulkEditDialogOpen, setIsBulkEditDialogOpen] = useState(false);
   const [isUserColumnSettingsOpen, setIsUserColumnSettingsOpen] = useState(false);
-  const [isConditionalFormattingOpen, setIsConditionalFormattingOpen] = useState(false);
+
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
   const duplicateErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -114,6 +118,15 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
   // Highlight rules for conditional formatting
   const [highlightRules, setHighlightRules] = useState<HighlightRule[]>(DEFAULT_HIGHLIGHT_RULES);
+
+  // Smart Groups — inspector panel
+  const { groups, allPins, pinsByGroup, loadGroups, addPin, removePin } = useGroupStore();
+  const [isInspectorOpen, setIsInspectorOpen] = useState(false);
+  const [inspectorContent, setInspectorContent] = useState<InspectorContent>('groups');
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
+
+  // Pinned fixture IDs for the active group (used for membership evaluation)
+  const [activePins, setActivePins] = useState<string[]>([]);
 
   // Project state
   const [project, setProject] = useState<Project>({ name: 'Untitled Project' });
@@ -233,6 +246,7 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     setCurrentProjectId(currentProjectId);
     loadFixtures(currentProjectId);
     loadInfrastructure(currentProjectId);
+    loadGroups(currentProjectId);
 
     // Clear undo/redo history when switching projects
     useUndoRedoStore.getState().clearHistory();
@@ -783,9 +797,29 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     };
   }, [fixtures, availableTypes, availableLocations]);
 
+  // When the active group changes, load its pins for membership evaluation
+  useEffect(() => {
+    if (!activeGroupId) {
+      setActivePins([]);
+      return;
+    }
+    window.api?.groups
+      ?.getPins(activeGroupId)
+      .then((rows: { fixture_id: string }[]) => setActivePins(rows.map((r) => r.fixture_id)))
+      .catch(() => setActivePins([]));
+  }, [activeGroupId]);
+
   // Filtered and sorted fixtures
   const processedFixtures = useMemo(() => {
     let result = [...fixtures];
+
+    // When a group filter is active, restrict to group members only
+    if (activeGroupId) {
+      const activeGroup = groups.find((g) => g.id === activeGroupId);
+      if (activeGroup) {
+        result = getGroupMembers(activeGroup, result, activePins);
+      }
+    }
 
     // Filter out hidden fixtures unless "Show Hidden" is enabled
     if (!showHidden) {
@@ -864,7 +898,38 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     }
 
     return result;
-  }, [fixtures, searchQuery, locationFilter, typeFilter, statusFilter, showHidden, sortConfigs]);
+  }, [
+    fixtures,
+    searchQuery,
+    locationFilter,
+    typeFilter,
+    statusFilter,
+    showHidden,
+    sortConfigs,
+    activeGroupId,
+    groups,
+    activePins,
+  ]);
+
+  // Fixture → groups map (for group indicator dots on every row)
+  const fixtureGroupMap = useMemo(
+    () => computeFixtureGroupMap(groups, fixtures, pinsByGroup),
+    [groups, fixtures, pinsByGroup],
+  );
+
+  // Fixture → pinned group IDs map (for context menu pin toggle)
+  const fixturePinnedGroupMap = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const pin of allPins) {
+      const existing = map.get(pin.fixture_id);
+      if (existing) {
+        existing.add(pin.group_id);
+      } else {
+        map.set(pin.fixture_id, new Set([pin.group_id]));
+      }
+    }
+    return map;
+  }, [allPins]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -990,7 +1055,10 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
     },
     onClearSort: () => setSortConfigs([]),
     onClearFilters: handleClearFilters,
-    onConditionalFormatting: () => setIsConditionalFormattingOpen(true),
+    onConditionalFormatting: () => {
+      setIsInspectorOpen(true);
+      setInspectorContent('conditionalFormatting');
+    },
     onAddInfrastructure: () => {
       setActiveTab('infrastructure');
       setIsAddInfrastructureDialogOpen(true);
@@ -1020,44 +1088,6 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
 
   return (
     <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
-      {/* Breadcrumbs */}
-      {!embedded && (
-        <div className="flex-shrink-0">
-          <Breadcrumbs />
-        </div>
-      )}
-
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex-shrink-0">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-4">
-            <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold">{projectName}</h1>
-                {!embedded && (
-                  <>
-                    <span className="text-gray-500">•</span>
-                    <span className="text-lg text-gray-600 dark:text-gray-400">
-                      ShowStack:Lighting
-                    </span>
-                  </>
-                )}
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Fixture Schedule</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {processedFixtures.length} / {fixtures.length} fixtures
-            </span>
-            <span className="text-sm text-gray-600 dark:text-gray-400">•</span>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {selectedRows.size} selected
-            </span>
-          </div>
-        </div>
-      </header>
-
       {/* Tabs */}
       <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
         <div className="flex space-x-8 px-6">
@@ -1080,16 +1110,6 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
             }`}
           >
             Infrastructure
-          </button>
-          <button
-            onClick={() => setActiveTab('power')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-              activeTab === 'power'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
-            }`}
-          >
-            Power
           </button>
         </div>
       </div>
@@ -1125,6 +1145,8 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
               userColumnDefinitions={userColumnDefinitions}
               isColumnVisibilityMenuOpen={isColumnVisibilityMenuOpen}
               onColumnVisibilityMenuOpenChange={setIsColumnVisibilityMenuOpen}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
             />
           </div>
 
@@ -1137,11 +1159,9 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
             />
           </div>
 
-          {/* Filter Bar */}
+          {/* Filter Chip Bar — replaces always-visible FilterBar row */}
           <div ref={filterBarRef} className="flex-shrink-0">
-            <FilterBar
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
+            <FilterChipBar
               locationFilter={locationFilter}
               onLocationChange={setLocationFilter}
               typeFilter={typeFilter}
@@ -1157,29 +1177,116 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
             />
           </div>
 
-          {/* Main Content - Virtual Data Grid */}
-          <main className="flex-1 min-h-0 overflow-hidden">
-            <VirtualDataGrid
-              fixtures={processedFixtures}
-              selectedRows={selectedRows}
-              onSelectRows={setSelectedRows}
-              onUpdateFixture={updateFixture}
-              columnVisibility={columnVisibility}
-              columnOrder={columnOrder}
-              onColumnOrderChange={setColumnOrder}
-              columnWidths={columnWidths}
-              onColumnWidthChange={setColumnWidths}
-              userColumnDefinitions={userColumnDefinitions}
-              dimmerRacks={dimmerRacks}
-              pdRacks={pdRacks}
-              autoFillSuggestions={autoFillSuggestions}
-              highlightRules={highlightRules}
-            />
+          {/* Main Content — grid + optional inspector panel */}
+          <main className="flex-1 min-h-0 overflow-hidden flex flex-row">
+            {/* Groups toggle button (floating at top-right of grid area) */}
+            <div className="flex-1 min-w-0 relative">
+              <button
+                onClick={() => setIsInspectorOpen((o) => !o)}
+                className={`absolute top-2 right-2 z-10 flex items-center gap-1.5 px-2 py-1 text-xs rounded border transition-colors ${
+                  isInspectorOpen
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+                title="Toggle Groups inspector"
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <rect
+                    x="1"
+                    y="1"
+                    width="4"
+                    height="4"
+                    rx="1"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                  <rect
+                    x="7"
+                    y="1"
+                    width="4"
+                    height="4"
+                    rx="1"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                  <rect
+                    x="1"
+                    y="7"
+                    width="4"
+                    height="4"
+                    rx="1"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                  <rect
+                    x="7"
+                    y="7"
+                    width="4"
+                    height="4"
+                    rx="1"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                </svg>
+                Groups
+                {activeGroupId && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-300 flex-shrink-0" />
+                )}
+              </button>
+              <VirtualDataGrid
+                fixtures={processedFixtures}
+                selectedRows={selectedRows}
+                onSelectRows={setSelectedRows}
+                onUpdateFixture={updateFixture}
+                columnVisibility={columnVisibility}
+                columnOrder={columnOrder}
+                onColumnOrderChange={setColumnOrder}
+                columnWidths={columnWidths}
+                onColumnWidthChange={setColumnWidths}
+                userColumnDefinitions={userColumnDefinitions}
+                dimmerRacks={dimmerRacks}
+                pdRacks={pdRacks}
+                autoFillSuggestions={autoFillSuggestions}
+                highlightRules={highlightRules}
+                groups={groups}
+                fixtureGroupMap={fixtureGroupMap}
+                fixturePinnedGroupMap={fixturePinnedGroupMap}
+                onPinToGroup={(fixtureId, groupId) => addPin(groupId, fixtureId)}
+                onUnpinFromGroup={(fixtureId, groupId) => removePin(groupId, fixtureId)}
+              />
+            </div>
+
+            {/* Inspector Panel */}
+            {isInspectorOpen && (
+              <InspectorPanel
+                content={inspectorContent}
+                onContentChange={setInspectorContent}
+                onClose={() => setIsInspectorOpen(false)}
+              >
+                {inspectorContent === 'groups' && (
+                  <GroupsInspector
+                    fixtures={fixtures}
+                    activeGroupId={activeGroupId}
+                    onGroupActivate={setActiveGroupId}
+                    projectId={currentProjectId}
+                  />
+                )}
+                {inspectorContent === 'conditionalFormatting' && (
+                  <ConditionalFormattingInspector
+                    rules={highlightRules}
+                    onChange={handleSaveHighlightRules}
+                  />
+                )}
+              </InspectorPanel>
+            )}
           </main>
 
           {/* Status Bar */}
           <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-            <div>Ready</div>
+            <div>
+              {processedFixtures.length} / {fixtures.length} fixtures
+              {selectedRows.size > 0 && ` | ${selectedRows.size} selected`}
+            </div>
             <div>ShowStack:Lighting v0.1.0-alpha</div>
           </footer>
         </>
@@ -1503,14 +1610,6 @@ export function EquipmentManager({ embedded = false }: EquipmentManagerProps = {
         onClose={() => setIsUserColumnSettingsOpen(false)}
         onSave={handleSaveUserColumnDefinitions}
         initialDefinitions={userColumnDefinitions}
-      />
-
-      {/* Conditional Formatting Dialog */}
-      <ConditionalFormattingDialog
-        isOpen={isConditionalFormattingOpen}
-        onClose={() => setIsConditionalFormattingOpen(false)}
-        rules={highlightRules}
-        onSave={handleSaveHighlightRules}
       />
 
       {/* Export Header Dialog */}

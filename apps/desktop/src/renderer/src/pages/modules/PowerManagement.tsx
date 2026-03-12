@@ -10,17 +10,17 @@ import { ServiceConfigurationPanel } from '../../components/power/ServiceConfigu
 import { DimmerRack, PDRack } from '../../types/power';
 import { Zap, Server, Activity, Settings } from 'lucide-react';
 
-interface PowerManagementProps {
-  embedded?: boolean;
-}
-
 type PowerTab = 'racks' | 'configuration' | 'summary';
 
-export function PowerManagement({ embedded = false }: PowerManagementProps) {
+interface PowerManagementProps {
+  initialTab?: PowerTab;
+}
+
+export function PowerManagement({ initialTab = 'racks' }: PowerManagementProps = {}) {
   const { projectId } = useParams<{ projectId?: string }>();
   const currentProject = useProjectStore((state) => state.currentProject);
   const fixtures = useFixtureStore((state) => state.fixtures);
-  const [activeTab, setActiveTab] = useState<PowerTab>('racks');
+  const [activeTab, setActiveTab] = useState<PowerTab>(initialTab);
   const [dimmerRacks, setDimmerRacks] = useState<DimmerRack[]>([]);
   const [pdRacks, setPdRacks] = useState<PDRack[]>([]);
 

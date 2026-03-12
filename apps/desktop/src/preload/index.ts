@@ -365,6 +365,23 @@ contextBridge.exposeInMainWorld('api', {
     delete: (backupDirName: string) => ipcRenderer.invoke('backup:delete', backupDirName),
   },
 
+  // Smart Groups operations
+  groups: {
+    getAll: (projectId: string) => ipcRenderer.invoke('groups:getAll', projectId),
+    getById: (id: string) => ipcRenderer.invoke('groups:getById', id),
+    create: (data: any, projectId: string) => ipcRenderer.invoke('groups:create', data, projectId),
+    update: (id: string, updates: any) => ipcRenderer.invoke('groups:update', id, updates),
+    delete: (id: string) => ipcRenderer.invoke('groups:delete', id),
+    getPins: (groupId: string) => ipcRenderer.invoke('groups:getPins', groupId),
+    getAllPins: (projectId: string) => ipcRenderer.invoke('groups:getAllPins', projectId),
+    addPin: (groupId: string, fixtureId: string) =>
+      ipcRenderer.invoke('groups:addPin', groupId, fixtureId),
+    removePin: (groupId: string, fixtureId: string) =>
+      ipcRenderer.invoke('groups:removePin', groupId, fixtureId),
+    getGroupsForFixture: (fixtureId: string) =>
+      ipcRenderer.invoke('groups:getGroupsForFixture', fixtureId),
+  },
+
   // Authentication operations
   auth: {
     signIn: (email: string, password: string) => ipcRenderer.invoke('auth:signIn', email, password),
@@ -704,6 +721,18 @@ export interface ElectronAPI {
         sync: { status: string; message: string; details?: Record<string, unknown> };
       };
     }>;
+  };
+  groups: {
+    getAll: (projectId: string) => Promise<any[]>;
+    getById: (id: string) => Promise<any | null>;
+    create: (data: any, projectId: string) => Promise<any>;
+    update: (id: string, updates: any) => Promise<any>;
+    delete: (id: string) => Promise<void>;
+    getPins: (groupId: string) => Promise<any[]>;
+    getAllPins: (projectId: string) => Promise<{ fixture_id: string; group_id: string }[]>;
+    addPin: (groupId: string, fixtureId: string) => Promise<void>;
+    removePin: (groupId: string, fixtureId: string) => Promise<void>;
+    getGroupsForFixture: (fixtureId: string) => Promise<string[]>;
   };
   auth: {
     signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;

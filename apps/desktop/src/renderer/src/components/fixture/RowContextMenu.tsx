@@ -1,6 +1,7 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { COLOR_FLAG_DEFINITIONS, ColorFlagType } from '../../types/highlighting';
+import type { FixtureGroup } from '../../types/group';
 
 interface RowContextMenuProps {
   x: number;
@@ -10,6 +11,10 @@ interface RowContextMenuProps {
   onHide: () => void;
   currentFlag?: ColorFlagType | null;
   isHidden?: boolean;
+  groups?: FixtureGroup[];
+  fixturePinnedGroupIds?: Set<string>;
+  onPinToGroup?: (groupId: string) => void;
+  onUnpinFromGroup?: (groupId: string) => void;
 }
 
 export function RowContextMenu({
@@ -20,38 +25,35 @@ export function RowContextMenu({
   onHide,
   currentFlag,
   isHidden,
+  groups,
+  fixturePinnedGroupIds,
+  onPinToGroup,
+  onUnpinFromGroup,
 }: RowContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Adjust position to prevent menu from going off-screen
-  const adjustedPosition = useMemo(() => {
-    const menuWidth = 200;
-    const menuHeight = 300; // Approximate
+  // Start invisible — position is corrected after the first render once we
+  // know the actual rendered dimensions.
+  const [position, setPosition] = useState({ x, y, visible: false });
 
-    let adjustedX = x;
-    let adjustedY = y;
+  useLayoutEffect(() => {
+    const el = menuRef.current;
+    if (!el) return;
 
-    // Prevent overflow right
-    if (x + menuWidth > window.innerWidth) {
-      adjustedX = window.innerWidth - menuWidth - 10;
-    }
+    const { offsetWidth: w, offsetHeight: h } = el;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const margin = 8;
 
-    // Prevent overflow bottom
-    if (y + menuHeight > window.innerHeight) {
-      adjustedY = window.innerHeight - menuHeight - 10;
-    }
+    let ax = x;
+    let ay = y;
 
-    // Prevent overflow left
-    if (adjustedX < 0) {
-      adjustedX = 10;
-    }
+    if (ax + w + margin > vw) ax = vw - w - margin;
+    if (ay + h + margin > vh) ay = vh - h - margin;
+    if (ax < margin) ax = margin;
+    if (ay < margin) ay = margin;
 
-    // Prevent overflow top
-    if (adjustedY < 0) {
-      adjustedY = 10;
-    }
-
-    return { x: adjustedX, y: adjustedY };
+    setPosition({ x: ax, y: ay, visible: true });
   }, [x, y]);
 
   useEffect(() => {
@@ -79,10 +81,12 @@ export function RowContextMenu({
   const menuContent = (
     <div
       ref={menuRef}
-      className="fixed z-50 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-lg py-1 min-w-[200px]"
+      className="fixed z-50 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-lg py-1 min-w-[200px] overflow-y-auto"
       style={{
-        left: `${adjustedPosition.x}px`,
-        top: `${adjustedPosition.y}px`,
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        visibility: position.visible ? 'visible' : 'hidden',
+        maxHeight: `calc(100vh - 16px)`,
       }}
     >
       {/* Set Flag submenu */}
@@ -129,6 +133,47 @@ export function RowContextMenu({
       >
         {isHidden ? 'Unhide' : 'Hide'}
       </button>
+
+      {/* Pin to Group */}
+      {groups && groups.length > 0 && (
+        <>
+          <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+          <div className="px-3 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+            Pin to Group
+          </div>
+          {groups.map((group) => {
+            const isPinned = fixturePinnedGroupIds?.has(group.id) ?? false;
+            return (
+              <button
+                key={group.id}
+                onClick={() => {
+                  if (isPinned) {
+                    onUnpinFromGroup?.(group.id);
+                  } else {
+                    onPinToGroup?.(group.id);
+                  }
+                  onClose();
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+              >
+                <div
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    backgroundColor: group.color ?? '#9CA3AF',
+                    flexShrink: 0,
+                  }}
+                />
+                <span className="text-sm flex-1">{group.name}</span>
+                {isPinned && (
+                  <span className="text-xs text-blue-500 dark:text-blue-400">pinned</span>
+                )}
+              </button>
+            );
+          })}
+        </>
+      )}
     </div>
   );
 

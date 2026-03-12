@@ -17,6 +17,9 @@ interface ToolbarProps {
   userColumnDefinitions?: Record<string, string>;
   isColumnVisibilityMenuOpen?: boolean;
   onColumnVisibilityMenuOpenChange?: (open: boolean) => void;
+  // Search (moved from FilterBar into toolbar)
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
 }
 
 export function Toolbar({
@@ -35,90 +38,95 @@ export function Toolbar({
   userColumnDefinitions,
   isColumnVisibilityMenuOpen,
   onColumnVisibilityMenuOpenChange,
+  searchQuery,
+  onSearchChange,
 }: ToolbarProps) {
   return (
     <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center gap-2">
+      {/* Primary action */}
       <button
         onClick={onAddFixture}
-        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition"
+        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition flex-shrink-0"
       >
         + Add Fixture
       </button>
 
+      {/* Selection-contextual actions */}
       {selectedCount > 0 && (
         <>
+          <div className="h-5 w-px bg-gray-200 dark:bg-gray-700 mx-0.5 flex-shrink-0" />
+
           <button
             onClick={onBulkEdit}
-            className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium transition"
+            className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded text-sm font-medium transition flex-shrink-0"
           >
-            Bulk Edit ({selectedCount})
+            Edit {selectedCount}
           </button>
 
-          <button
-            onClick={onDeleteSelected}
-            className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-sm font-medium transition"
-          >
-            Delete Selected ({selectedCount})
-          </button>
-
-          <button
-            onClick={onDeselectAll}
-            className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm font-medium transition"
-          >
-            Deselect All
-          </button>
-
-          <div className="h-6 w-px bg-gray-300 dark:bg-gray-700 mx-2" />
+          {onDuplicate && (
+            <button
+              onClick={onDuplicate}
+              className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded text-sm font-medium transition flex-shrink-0"
+            >
+              Duplicate
+            </button>
+          )}
 
           {onHideSelected && (
             <button
               onClick={onHideSelected}
-              className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm font-medium transition"
-              title="Hide selected fixtures from table"
+              className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded text-sm font-medium transition flex-shrink-0"
+              title="Hide selected fixtures"
             >
-              Hide ({selectedCount})
+              Hide
             </button>
           )}
 
           {onUnhideSelected && (
             <button
               onClick={onUnhideSelected}
-              className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium transition"
+              className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded text-sm font-medium transition flex-shrink-0"
               title="Unhide selected fixtures"
             >
-              Unhide ({selectedCount})
+              Unhide
             </button>
           )}
 
-          {onDuplicate && (
-            <button
-              onClick={onDuplicate}
-              className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm font-medium transition"
-            >
-              Duplicate
-            </button>
-          )}
+          <button
+            onClick={onDeleteSelected}
+            className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-red-300 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded text-sm font-medium transition flex-shrink-0"
+          >
+            Delete
+          </button>
 
-          {onExportCSV && (
-            <button
-              onClick={onExportCSV}
-              className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm font-medium transition"
-            >
-              Export CSV
-            </button>
-          )}
+          <button
+            onClick={onDeselectAll}
+            className="px-2 py-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-sm transition flex-shrink-0"
+            title="Clear selection"
+          >
+            ✕
+          </button>
         </>
       )}
 
-      {/* Right side buttons */}
+      {/* Right side — search, export, column controls */}
       <div className="ml-auto flex items-center gap-2">
-        <button
-          onClick={onUserColumnSettings}
-          className="px-3 py-1.5 bg-gray-600 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded text-sm transition"
-          title="Define User Columns"
-        >
-          User Columns...
-        </button>
+        <input
+          type="text"
+          placeholder="Search…"
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded text-sm w-44 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 transition-colors"
+        />
+
+        {onExportCSV && (
+          <button
+            onClick={onExportCSV}
+            className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded text-sm font-medium transition flex-shrink-0"
+          >
+            Export ↓
+          </button>
+        )}
 
         <ColumnVisibilityMenu
           visibility={columnVisibility}
@@ -126,6 +134,7 @@ export function Toolbar({
           userColumnDefinitions={userColumnDefinitions}
           isOpen={isColumnVisibilityMenuOpen}
           onOpenChange={onColumnVisibilityMenuOpenChange}
+          onUserColumnSettings={onUserColumnSettings}
         />
       </div>
     </div>

@@ -10,12 +10,15 @@ interface GroupingSortingControlsProps {
   organization: ReportOrganization;
   columns: PaperworkColumnConfig[];
   onChange: (organization: ReportOrganization) => void;
+  /** Additional groupBy options prepended before the column-based list. */
+  extraGroupOptions?: { value: string; label: string }[];
 }
 
 export function GroupingSortingControls({
   organization,
   columns,
   onChange,
+  extraGroupOptions = [],
 }: GroupingSortingControlsProps) {
   const groupableFields = columns
     .filter((c) => c.visible)
@@ -40,6 +43,11 @@ export function GroupingSortingControls({
           className="w-full bg-gray-700 text-white px-3 py-2 rounded border border-gray-600"
         >
           <option value="none">No Grouping</option>
+          {extraGroupOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
           {groupableFields.map((field) => (
             <option key={field.value} value={field.value}>
               {field.label}

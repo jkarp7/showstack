@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { logger } from '../../utils/logger';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { useInfrastructureStore } from '../../store/infrastructureStore';
@@ -41,12 +41,7 @@ const REPORT_TEMPLATES = [
   { id: 'infrastructure-location', name: 'Infrastructure by Location' },
 ] as const;
 
-interface PaperworkProps {
-  embedded?: boolean;
-}
-
-export function Paperwork({ embedded = false }: PaperworkProps = {}) {
-  const navigate = useNavigate();
+export function Paperwork() {
   const { projectId: routeProjectId } = useParams<{ projectId?: string }>();
   const currentProjectId = routeProjectId || 'default-project';
 
@@ -74,7 +69,7 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
   // Load data on mount
   useEffect(() => {
-    loadFixtures();
+    loadFixtures(currentProjectId);
     loadEquipment(currentProjectId);
 
     const loadProjectInfo = async () => {
@@ -577,41 +572,6 @@ export function Paperwork({ embedded = false }: PaperworkProps = {}) {
 
   return (
     <div className="flex flex-col h-full bg-gray-900 text-white">
-      {/* Top Navigation Bar */}
-      {!embedded && (
-        <header className="bg-gray-800 border-b border-gray-700 px-4 py-3 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate('/modules')}
-                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm transition"
-              >
-                ← Modules
-              </button>
-              <div>
-                <h1 className="text-xl font-bold">{projectName}</h1>
-                <p className="text-sm text-gray-400">
-                  Paperwork Generator • {fixtures.length} fixtures • {infrastructure.length}{' '}
-                  infrastructure
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  logger.info('Batch Export button clicked');
-                  setShowBatchExport(true);
-                }}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm transition"
-              >
-                Batch Export
-              </button>
-            </div>
-          </div>
-        </header>
-      )}
-
       {/* Main Editor */}
       <div className="flex-1 min-h-0 overflow-hidden">
         <PaperworkEditor

@@ -11,6 +11,7 @@ import {
 import { DimmerRack, PDRack } from '../../types/power';
 import { autoLinkCircuit } from '../../utils/circuitParser';
 import { HighlightRule } from '../../types/highlighting';
+import type { FixtureGroup } from '../../types/group';
 
 interface VirtualDataGridProps {
   fixtures: Fixture[];
@@ -37,6 +38,11 @@ interface VirtualDataGridProps {
     locations?: string[];
   };
   highlightRules?: HighlightRule[];
+  groups?: FixtureGroup[];
+  fixtureGroupMap?: Map<string, FixtureGroup[]>;
+  fixturePinnedGroupMap?: Map<string, Set<string>>;
+  onPinToGroup?: (fixtureId: string, groupId: string) => void;
+  onUnpinFromGroup?: (fixtureId: string, groupId: string) => void;
 }
 
 const ROW_HEIGHT = 40; // pixels
@@ -58,6 +64,11 @@ export function VirtualDataGrid({
   pdRacks = [],
   autoFillSuggestions = {},
   highlightRules = [],
+  groups = [],
+  fixtureGroupMap,
+  fixturePinnedGroupMap,
+  onPinToGroup,
+  onUnpinFromGroup,
 }: VirtualDataGridProps) {
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -443,6 +454,8 @@ export function VirtualDataGrid({
             }}
           />
         </div>
+        {/* Spacer matching the group dots column in each row */}
+        <div className="flex-shrink-0" style={{ width: 16 }} />
         {orderedColumns
           .filter((col) => columnVisibility[col.key])
           .map((col) => {
@@ -494,6 +507,15 @@ export function VirtualDataGrid({
                 highlightRules={highlightRules}
                 onSetFlag={(fixtureId, flag) => onUpdateFixture(fixtureId, { color_flag: flag })}
                 onHide={(fixtureId) => onUpdateFixture(fixtureId, { hidden: !fixture.hidden })}
+                fixtureGroups={fixtureGroupMap?.get(fixture.id) ?? []}
+                fixturePinnedGroupIds={fixturePinnedGroupMap?.get(fixture.id)}
+                groups={groups}
+                onPinToGroup={
+                  onPinToGroup ? (groupId) => onPinToGroup(fixture.id, groupId) : undefined
+                }
+                onUnpinFromGroup={
+                  onUnpinFromGroup ? (groupId) => onUnpinFromGroup(fixture.id, groupId) : undefined
+                }
               />
             ))}
           </div>
