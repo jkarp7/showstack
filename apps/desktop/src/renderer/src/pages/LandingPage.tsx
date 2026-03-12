@@ -107,8 +107,11 @@ export function LandingPage() {
         try {
           const url = await window.api?.files?.readImageAsDataUrl(p.logo_path);
           if (url) map.set(p.id, url);
-        } catch {
-          // ignore
+        } catch (error) {
+          logger.warn(
+            `Failed to load logo for project ${p.id} from path ${p.logo_path}`,
+            error instanceof Error ? { message: error.message } : { error: String(error) },
+          );
         }
       }
       setLogoDataUrls(map);
