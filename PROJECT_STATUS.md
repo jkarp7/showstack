@@ -1,10 +1,10 @@
 # ShowStack Project Status
 
 **Created:** December 18, 2025
-**Last Updated:** March 2026
+**Last Updated:** March 11, 2026
 **Current Version:** 0.1.0-alpha
 **Development Phase:** Alpha (Renovation complete, Supabase/PowerSync cloud services integrated)
-**Active Branch:** `feature/powersync-write-path` (PR open → develop); `develop` contains multi-user collaboration (PR #85 merged)
+**Active Branch:** `develop` — PR #88 pending merge (UI Redesign phases 4-9, Smart Groups, bug fixes)
 
 This document tracks the development status of all ShowStack feature domains and editions. It serves as the central source of truth for what's completed, in progress, and planned.
 
@@ -14,7 +14,7 @@ This document tracks the development status of all ShowStack feature domains and
 
 | Feature Domain      | Status         | Completion |
 | ------------------- | -------------- | ---------- |
-| Lighting Features   | 🚧 In Progress | 80%        |
+| Lighting Features   | 🚧 In Progress | 90%        |
 | Core Infrastructure | ✅ Complete    | 100%       |
 | Collaboration       | ✅ Complete    | 100%       |
 | Sound Features      | ⬜ Planned     | 0%         |
@@ -29,7 +29,22 @@ This document tracks the development status of all ShowStack feature domains and
 
 ### ✅ Recently Completed (December 2025 - March 2026)
 
-**Latest (March 2026):** 15. ✅ PowerSync Write-Path for Projects & Shop Orders (feature/powersync-write-path) - COMPLETED (March 2026)
+**Latest (March 11, 2026):** 16. ✅ UI Redesign Phases 4-9, Smart Groups, Bug Fixes (PR #88 → develop) - COMPLETED
+
+- **UI Redesign Phase 4** — Navigation flattening: eliminated SystemDocs tab container; fixtures, infrastructure, power, shop orders, labels, and paperwork now directly accessible from persistent sidebar; `ModuleLanding` eliminated for lighting
+- **UI Redesign Phase 5** — Labels consolidation: retired intermediate label list page; `LabelVisualDesigner` is now the only label designer entry point
+- **UI Redesign Phase 6** — Power reorganization: Racks & Distribution moved under Equipment Manager sidebar; power sub-tab in EquipmentManager removed
+- **UI Redesign Phase 7** — Show Health: passive validation engine, sidebar badges (red/amber counts), aggregated Show Health panel
+- **UI Redesign Phase 8** — Filter chips + slim toolbar: `FilterBar` horizontal dropdowns replaced with inline tag filter chips; toolbar consolidated
+- **UI Redesign Phase 9** — Design tokens: CSS custom properties rolled out across all inspector components
+- **Smart Groups Phase 1** — Backend: `fixture_groups` + `fixture_group_pins` schema migration, `groups.ts` DB queries, `ipc/groups.ts` (10 channels), `groupStore.ts`, TypeScript interfaces
+- **Smart Groups Phase 2** — `<InspectorPanel>` shell + `<GroupsInspector>`: create/edit/delete groups, filter-based membership computed on demand via `applyFilter()` + pins union
+- **Smart Groups Phase 3** — Equipment Manager integration: group indicator column, bulk pin/unpin, context menu
+- **Smart Groups Phase 4** — Shop orders auto-populate from groups, labels `{group}` token, paperwork group-by
+- **Bug fixes:** paperwork template seeding order (FK constraint), `db.exec()` → `db.prepare().get()` for existence checks, `seedDefaultLayouts` bundler dynamic-require fix, shop order array JSON serialization, `syncFromParent` null-stripping and date validation, `getNotesByProjectId` missing import, shop order project column migration
+- **Tests:** 855 lint warnings (at threshold), all tests passing
+
+**Previous (March 2026):** 15. ✅ PowerSync Write-Path for Projects & Shop Orders (feature/powersync-write-path) - COMPLETED (March 2026)
 
 Fixes issue #86 (TOCTOU ownership race) — project and shop-order rows are now written into the PowerSync local SQLite at creation/update/delete time, so the PowerSync CRUD queue uploads them to Supabase and establishes ownership atomically.
 

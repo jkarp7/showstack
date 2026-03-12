@@ -333,13 +333,10 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
 
         // tech or previews → first_preview_date (previews wins if both exist)
         const tech = dateStr(showDates.tech);
-        if (tech) {
-          updates.first_preview_date = tech;
-          syncedFields.push('first_preview_date');
-        }
         const previews = dateStr(showDates.previews);
-        if (previews) {
-          updates.first_preview_date = previews;
+        if (previews || tech) {
+          updates.first_preview_date = previews || tech;
+          syncedFields.push('first_preview_date');
         }
 
         const opening = dateStr(showDates.opening);
