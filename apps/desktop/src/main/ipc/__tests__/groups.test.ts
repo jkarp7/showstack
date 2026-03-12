@@ -20,6 +20,7 @@ const {
   mockAddPin,
   mockRemovePin,
   mockGetGroupsForFixture,
+  mockGetAllPins,
 } = vi.hoisted(() => ({
   mockHandle: vi.fn(),
   mockGetAll: vi.fn(),
@@ -31,6 +32,7 @@ const {
   mockAddPin: vi.fn(),
   mockRemovePin: vi.fn(),
   mockGetGroupsForFixture: vi.fn(),
+  mockGetAllPins: vi.fn(),
 }));
 
 vi.mock('electron', () => ({
@@ -50,6 +52,7 @@ vi.mock('../../services/GroupService', () => ({
     addPin: mockAddPin,
     removePin: mockRemovePin,
     getGroupsForFixture: mockGetGroupsForFixture,
+    getAllPinsForProject: mockGetAllPins,
   },
 }));
 
@@ -122,6 +125,7 @@ describe('registerGroupHandlers', () => {
     expect(channels).toContain('groups:addPin');
     expect(channels).toContain('groups:removePin');
     expect(channels).toContain('groups:getGroupsForFixture');
+    expect(channels).toContain('groups:getAllPins');
   });
 
   describe('groups:getAll', () => {
@@ -227,6 +231,26 @@ describe('registerGroupHandlers', () => {
       const result = await handler({}, 'f-1');
       expect(mockGetGroupsForFixture).toHaveBeenCalledWith('f-1');
       expect(result).toEqual(['g-1', 'g-2']);
+    });
+  });
+
+  describe('groups:getAllPins', () => {
+    it('delegates to groupService.getAllPinsForProject', async () => {
+      const pins = [
+        { fixture_id: 'f-1', group_id: 'g-1', created_at: 1000 },
+        { fixture_id: 'f-2', group_id: 'g-1', created_at: 1001 },
+      ];
+      mockGetAllPins.mockResolvedValue(pins);
+      const handler = getHandler('groups:getAllPins');
+      const result = await handler({}, 'proj-1');
+      expect(mockGetAllPins).toHaveBeenCalledWith('proj-1');
+      expect(result).toEqual(pins);
+    });
+
+    it('re-throws service errors', async () => {
+      mockGetAllPins.mockRejectedValue(new Error('DB error'));
+      const handler = getHandler('groups:getAllPins');
+      await expect(handler({}, 'proj-1')).rejects.toThrow('DB error');
     });
   });
 });

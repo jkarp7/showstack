@@ -165,11 +165,27 @@ export class MigrationRunner {
       // Seed paperwork templates
       try {
         seedPaperworkTemplates();
-        updateSystemTemplates();
-        reseedMissingTemplates();
       } catch (err) {
         logger.error(
           'seedPaperworkTemplates failed',
+          err instanceof Error ? err : new Error(String(err)),
+        );
+      }
+
+      try {
+        updateSystemTemplates();
+      } catch (err) {
+        logger.error(
+          'updateSystemTemplates failed',
+          err instanceof Error ? err : new Error(String(err)),
+        );
+      }
+
+      try {
+        reseedMissingTemplates();
+      } catch (err) {
+        logger.error(
+          'reseedMissingTemplates failed',
           err instanceof Error ? err : new Error(String(err)),
         );
       }

@@ -68,7 +68,11 @@ export function createGroup(data: Partial<FixtureGroup>, projectId: string): Fix
   });
 
   saveDatabase();
-  return getGroupById(id)!;
+  const newGroup = getGroupById(id);
+  if (!newGroup) {
+    throw new Error(`Failed to retrieve group with id ${id} immediately after creation.`);
+  }
+  return newGroup;
 }
 
 export function updateGroup(id: string, updates: Partial<FixtureGroup>): FixtureGroup {
@@ -97,7 +101,11 @@ export function updateGroup(id: string, updates: Partial<FixtureGroup>): Fixture
   db.prepare(`UPDATE fixture_groups SET ${setClauses.join(', ')} WHERE id = @id`).run(params);
 
   saveDatabase();
-  return getGroupById(id)!;
+  const updatedGroup = getGroupById(id);
+  if (!updatedGroup) {
+    throw new Error(`Failed to retrieve group with id ${id} after update.`);
+  }
+  return updatedGroup;
 }
 
 export function deleteGroup(id: string): void {
