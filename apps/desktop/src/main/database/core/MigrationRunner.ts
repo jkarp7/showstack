@@ -152,53 +152,24 @@ export class MigrationRunner {
         }
       }
 
+      const runSeeding = (name: string, fn: () => void) => {
+        try {
+          fn();
+        } catch (err) {
+          logger.error(`${name} failed`, err instanceof Error ? err : new Error(String(err)));
+        }
+      };
+
       // Seed default paperwork header template (must be before paperwork templates — FK dependency)
-      try {
-        seedPaperworkHeaderTemplate();
-      } catch (err) {
-        logger.error(
-          'seedPaperworkHeaderTemplate failed',
-          err instanceof Error ? err : new Error(String(err)),
-        );
-      }
+      runSeeding('seedPaperworkHeaderTemplate', seedPaperworkHeaderTemplate);
 
       // Seed paperwork templates
-      try {
-        seedPaperworkTemplates();
-      } catch (err) {
-        logger.error(
-          'seedPaperworkTemplates failed',
-          err instanceof Error ? err : new Error(String(err)),
-        );
-      }
-
-      try {
-        updateSystemTemplates();
-      } catch (err) {
-        logger.error(
-          'updateSystemTemplates failed',
-          err instanceof Error ? err : new Error(String(err)),
-        );
-      }
-
-      try {
-        reseedMissingTemplates();
-      } catch (err) {
-        logger.error(
-          'reseedMissingTemplates failed',
-          err instanceof Error ? err : new Error(String(err)),
-        );
-      }
+      runSeeding('seedPaperworkTemplates', seedPaperworkTemplates);
+      runSeeding('updateSystemTemplates', updateSystemTemplates);
+      runSeeding('reseedMissingTemplates', reseedMissingTemplates);
 
       // Update existing paperwork templates to reference the default header
-      try {
-        updatePaperworkTemplateHeaders();
-      } catch (err) {
-        logger.error(
-          'updatePaperworkTemplateHeaders failed',
-          err instanceof Error ? err : new Error(String(err)),
-        );
-      }
+      runSeeding('updatePaperworkTemplateHeaders', updatePaperworkTemplateHeaders);
 
       logger.info('App database migrations complete');
     } catch (error) {
@@ -554,21 +525,12 @@ export class MigrationRunner {
       this.db.prepare('PRAGMA table_info(shop_order_projects)').all() as Array<{ name: string }>
     ).map((r) => r.name);
 
-    if (!columns.includes('logo_path')) {
-      logger.info('Running migration: Adding logo_path to shop_order_projects');
-      this.db.prepare('ALTER TABLE shop_order_projects ADD COLUMN logo_path TEXT').run();
-    }
-    if (!columns.includes('logo_url')) {
-      logger.info('Running migration: Adding logo_url to shop_order_projects');
-      this.db.prepare('ALTER TABLE shop_order_projects ADD COLUMN logo_url TEXT').run();
-    }
-    if (!columns.includes('logo_storage_path')) {
-      logger.info('Running migration: Adding logo_storage_path to shop_order_projects');
-      this.db.prepare('ALTER TABLE shop_order_projects ADD COLUMN logo_storage_path TEXT').run();
-    }
-    if (!columns.includes('parent_project_id')) {
-      logger.info('Running migration: Adding parent_project_id to shop_order_projects');
-      this.db.prepare('ALTER TABLE shop_order_projects ADD COLUMN parent_project_id TEXT').run();
+    const columnsToAdd = ['logo_path', 'logo_url', 'logo_storage_path', 'parent_project_id'];
+    for (const column of columnsToAdd) {
+      if (!columns.includes(column)) {
+        logger.info(`Running migration: Adding ${column} to shop_order_projects`);
+        this.db.prepare(`ALTER TABLE shop_order_projects ADD COLUMN ${column} TEXT`).run();
+      }
     }
   }
 }
