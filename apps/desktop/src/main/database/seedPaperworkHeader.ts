@@ -13,22 +13,17 @@ export function seedPaperworkHeaderTemplate(): void {
   const db = getAppDatabase();
 
   try {
-    // Check if default header already exists with elements
-    const templateRow = db
-      .prepare(`SELECT id FROM page_layout_templates WHERE id = 'default-paperwork-header'`)
-      .get();
-    const templateExists = !!templateRow;
+    // Check template and element existence in one round-trip
+    const counts = db
+      .prepare(
+        `SELECT
+          (SELECT COUNT(*) FROM page_layout_templates WHERE id = 'default-paperwork-header') as template_count,
+          (SELECT COUNT(*) FROM page_layout_elements WHERE template_id = 'default-paperwork-header') as element_count`,
+      )
+      .get() as { template_count: number; element_count: number };
 
-    // Check if elements exist for the template
-    let elementsExist = false;
-    if (templateExists) {
-      const countRow = db
-        .prepare(
-          `SELECT COUNT(*) as count FROM page_layout_elements WHERE template_id = 'default-paperwork-header'`,
-        )
-        .get() as { count: number } | undefined;
-      elementsExist = (countRow?.count ?? 0) > 0;
-    }
+    const templateExists = counts.template_count > 0;
+    const elementsExist = counts.element_count > 0;
 
     if (templateExists && elementsExist) {
       logger.info('✅ Default paperwork header already seeded');

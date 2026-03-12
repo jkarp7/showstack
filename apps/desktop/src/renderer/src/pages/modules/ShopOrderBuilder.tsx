@@ -162,11 +162,26 @@ export function ShopOrderBuilder() {
 
         // 2. Fallback: match by production name for shop orders created before parent linking existed
         if (!existingShopOrder && parentProject) {
-          existingShopOrder = allProjects.find(
+          const nameCandidates = allProjects.filter(
             (p) =>
               !p.parent_project_id &&
               p.production_name.trim().toLowerCase() === parentProject.name.trim().toLowerCase(),
           );
+          if (nameCandidates.length > 1) {
+            // Multiple unlinked shop orders share the same name — ask the user rather than
+            // silently picking the first one
+            const confirmed = confirm(
+              `Found ${nameCandidates.length} unlinked shop orders named "${parentProject.name}". ` +
+                `Link the most recently updated one to this project?`,
+            );
+            if (confirmed) {
+              existingShopOrder = nameCandidates.reduce((a, b) =>
+                (a.updated_at ?? 0) >= (b.updated_at ?? 0) ? a : b,
+              );
+            }
+          } else if (nameCandidates.length === 1) {
+            existingShopOrder = nameCandidates[0];
+          }
           // If found via name match, backfill the parent_project_id so future loads use the fast path
           if (existingShopOrder) {
             try {
