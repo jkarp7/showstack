@@ -12,7 +12,6 @@
 
 Issues requiring immediate attention before 1.0:
 
-- **#86 — Security: TOCTOU ownership race (OPEN)** — PR #87 added the PowerSync write-path as a mitigation but this issue was never closed. Needs verification that the fix fully eliminates the race, or a separate SQL-level fix. _Security issue — do not ship 1.0 without closing._
 - **#81 — Security follow-ups from PR #80 (licensing)** — Supabase email verification enforcement must be confirmed; unclaimed license RLS policy creates a visibility window if email verification is not required. Rate-limiting on `license:getStatus` IPC (renderer can hammer it). _Security/abuse concern — verify before launch._
 - **#62 — Telemetry: unbounded event growth** — If network is down for an extended period, unsynced telemetry events can grow without bound. High-priority item per the issue. _Data integrity risk — address before beta._
 
@@ -24,6 +23,11 @@ These items are either actively deferred or waiting on a dependency. Address bef
 
 ### Fixture Management
 
+- ⬜ **Equipment Manager Export (Issue #51)** — Menu handlers wired but all 4 implementations are TODO stubs:
+  - CSV export (`useEquipmentMenuHandlers.ts:69`)
+  - ETC Eos ASCII export (`useEquipmentMenuHandlers.ts:79`)
+  - GrandMA2 XML export (`useEquipmentMenuHandlers.ts:89`)
+  - GrandMA3 XML export (`useEquipmentMenuHandlers.ts:99`)
 - ⬜ **Auto-complete System** — Manufacturer, type, color, gobo lookup from an external fixture database.
   _Deferred — requires extensive fixture database work before this is feasible._
 - ⬜ **DMX Conflict Detection** — Highlight conflicting DMX addresses in the grid.
@@ -135,7 +139,7 @@ Non-critical enhancements identified during PR #63 and #64 review:
 ### Fixture Management (Equipment Manager)
 
 - ✅ **Virtual Data Grid** (`VirtualDataGrid.tsx`) — Virtual scrolling for 10,000+ fixtures, 60 FPS, multi-select, in-cell editing.
-- ✅ **Equipment Manager Page** — Full fixture CRUD, duplicate, export (CSV, Eos, GrandMA). (Issue #51 — verify closed)
+- ✅ **Equipment Manager Page** — Full fixture CRUD, duplicate. Export menu items are wired but implementations are TODO stubs. (Issue #51 — still open)
 - ✅ **Fixture Database** — 68+ columns, LightWright parity achieved.
 - ✅ **Add Fixture Dialog** — Full creation form with all fields and validation.
 - ✅ **Bulk Edit Dialog** — 30+ editable fields, 7 collapsible sections, auto-numbering for 6 fields.
@@ -230,7 +234,7 @@ _Note: Supersedes Issue #40 (Maintenance Menu) and Issue #29 (Shop Order from Sy
 ### Cloud & Collaboration
 
 - ✅ **Multi-user collaboration (PR #85)** — Invite/remove/accept/decline via Supabase RPCs; real-time presence; RLS + license gate (migrations 005–016).
-- ✅ **PowerSync write-path (PR #87)** — Projects and shop orders written to PowerSync on create/update/delete; mitigates TOCTOU ownership race. _(Issue #86 still open — verify fully resolved.)_
+- ✅ **PowerSync write-path (PR #87)** — Projects and shop orders written to PowerSync on create/update/delete; fixes TOCTOU ownership race (Issue #86, closed). Student-tier cloud sync eligibility still TBD.
 
 ---
 
@@ -239,6 +243,7 @@ _Note: Supersedes Issue #40 (Maintenance Menu) and Issue #29 (Shop Order from Sy
 - `useModuleAccess.ts` may need renaming to `useEditionAccess.ts` for clarity.
 - ESLint warning count is exactly at the CI threshold (855). Reducing to 0 is a tracked goal.
 - Shop order `alert()` calls should migrate to toast notifications (Issue #65).
-- Issue #51 (Equipment Manager export) shows as open on GitHub but the feature appears complete — needs triage/close.
-- Issue #40 (Maintenance Menu) and Issue #29 (Shop Order from System Docs) are superseded by Smart Groups Phases 1–4 — both should be closed.
-- Issue #86 (TOCTOU security) shows as open despite PR #87 — confirm resolution and close or create a follow-up fix.
+- Issue #51 (Equipment Manager export) — CSV, Eos, GrandMA2, GrandMA3 exports are all TODO stubs. Menu is wired; implementations still needed.
+- Issue #40 (Maintenance Menu) closed — superseded by Smart Groups. Per-column maintenance menu and 4-tab notes dialog not implemented; re-open if user feedback demands.
+- Issue #29 (Shop Order from System Docs) closed — superseded by Smart Groups Phase 4.
+- Issue #86 (TOCTOU security) closed — fixed by PR #87 PowerSync write-path. Student-tier cloud sync eligibility still TBD.
