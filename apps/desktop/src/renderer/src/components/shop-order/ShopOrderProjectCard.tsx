@@ -11,6 +11,12 @@ export function ShopOrderProjectCard({ project, onClick }: ShopOrderProjectCardP
       const parsed = JSON.parse(project.disciplines || '["lighting"]');
       return Array.isArray(parsed) ? parsed : [parsed];
     } catch {
+      if (typeof project.disciplines === 'string' && project.disciplines.includes(',')) {
+        return project.disciplines
+          .split(',')
+          .map((d) => d.trim())
+          .filter(Boolean);
+      }
       return project.disciplines ? [project.disciplines] : ['lighting'];
     }
   })();

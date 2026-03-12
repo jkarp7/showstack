@@ -241,7 +241,7 @@ export function LandingPage() {
         if (!isRightPanelOpen) setIsRightPanelOpen(true);
         clickTimerRef.current = setTimeout(() => {
           clickTimerRef.current = null;
-        }, 300);
+        }, 200);
       }
     },
     [handleOpenProject, isRightPanelOpen, childToRoot],

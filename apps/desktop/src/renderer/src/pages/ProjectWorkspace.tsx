@@ -33,7 +33,7 @@ export function ProjectWorkspace() {
     }
 
     return () => {
-      window.api?.menu?.setState({ context: 'module' });
+      window.api?.menu?.setState({ context: 'landing' });
     };
   }, [projectId, project]);
 
