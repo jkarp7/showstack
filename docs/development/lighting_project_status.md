@@ -55,21 +55,6 @@ These items are either actively deferred or waiting on a dependency. Address bef
 - ⬜ **Auto-updater maintenance gate** — Block updates released after `maintenanceEndDate` on a license.
 - ⬜ **Supabase dashboard** — Add `showstack://*` to Auth → URL Configuration → Redirect URLs (required for email verification deep link to complete). _Manual step — cannot be done in code._
 
-### Telemetry (Issue #62 — partial)
-
-- ⬜ Batch flush on app quit — ensure events are not lost on clean shutdown
-- ⬜ Retry backoff improvements for failed sync attempts
-
-### Backup Service (Issue #79 — partial)
-
-- ⬜ SHA-256 integrity checksums on backup metadata
-- ⬜ Auto-backup hooks before destructive operations (project delete, migrations)
-
-### Security / Auth Follow-ups (Issue #81 — partial)
-
-- ⬜ Audit session token storage for compliance requirements
-- ⬜ Review `demo_mode` bypass paths for license checks
-
 ### Developer / Admin
 
 - ⬜ **Feature flag system** — Connect Developer Mode toggle to a feature flag system for controlled rollouts / A/B testing. (Issue #35, 95% complete — flags layer missing)
@@ -224,6 +209,9 @@ _Note: Supersedes Issue #40 (Maintenance Menu) and Issue #29 (Shop Order from Sy
 - ✅ **Issue #65 — Shop order error handling** — Replaced `alert()` calls in `shopOrderFileStore` with `errorMessage` state; `ShopOrderFileMenu` displays errors inline with click-to-dismiss.
 - ✅ **Issue #79 — Backup compression** — Backups now stored as `.db.gz` (gzip via `stream/promises` pipeline); restore transparently decompresses; legacy uncompressed `.db` backups still supported.
 - ✅ **Issue #84 — Logo URL mapping for shop orders** — `logo_path` field added to `ShopOrderProject` type; store maps parent project `logo_path` to the correct field instead of silently dropping it; `PageRenderer` uses typed fields without `as any`.
+- ✅ **Issue #62 — Telemetry batch flush on quit** — `telemetry.shutdown()` now calls `posthog.shutdown(3000)` instead of `posthog.reset()`, flushing queued events before the Electron process exits (3 s timeout prevents hangs). PostHog SDK handles network retry backoff internally — no additional implementation needed.
+- ✅ **Issue #79 — Backup integrity checksums** — `BackupService` computes SHA-256 checksums of both `.db.gz` files after each backup and persists them in metadata; checksums are verified before restore and abort with an error on mismatch. Auto-backup hook added to `ShopOrderProjectService.delete()` matching the existing `ProjectService.delete()` pattern.
+- ✅ **Issue #81 — Session token & demo mode audit** — Supabase SDK stores session tokens in Electron's sandboxed `localStorage` (acceptable for desktop). `demo_mode` is properly gated: `canSync: false`, `canCollaborate: false`, explicit downgrade protection in `LicenseService`. No code changes required.
 
 ---
 
