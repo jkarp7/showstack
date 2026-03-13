@@ -57,14 +57,16 @@ export interface AuthState {
 
   // UI state
   showAuthModal: boolean;
-  authModalView: 'login' | 'signup' | 'reset';
+  authModalView: 'login' | 'signup' | 'reset' | 'set-password';
   isFirstLaunchPrompt: boolean;
+  pendingDeepLinkType: 'recovery' | 'invite' | null;
 
   // Actions
   signIn: (email: string, password: string) => Promise<boolean>;
   signUp: (email: string, password: string) => Promise<boolean>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<boolean>;
+  updatePassword: (password: string) => Promise<boolean>;
   refreshAuthState: () => Promise<void>;
   refreshSyncStatus: () => Promise<void>;
   refreshLicenseStatus: () => Promise<void>;
@@ -74,9 +76,9 @@ export interface AuthState {
   activateDemoMode: () => Promise<void>;
 
   // UI actions
-  openAuthModal: (view?: 'login' | 'signup' | 'reset') => void;
+  openAuthModal: (view?: 'login' | 'signup' | 'reset' | 'set-password') => void;
   closeAuthModal: () => void;
-  setAuthModalView: (view: 'login' | 'signup' | 'reset') => void;
+  setAuthModalView: (view: 'login' | 'signup' | 'reset' | 'set-password') => void;
   setFirstLaunchPrompt: (value: boolean) => void;
   clearError: () => void;
 }
@@ -180,6 +182,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   showAuthModal: false,
   authModalView: 'login',
   isFirstLaunchPrompt: false,
+  pendingDeepLinkType: null,
 
   // Sign in
   signIn: async (email: string, password: string) => {
@@ -316,6 +319,42 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
+  // Set new password (after recovery/invite deep link verification)
+  updatePassword: async (password: string) => {
+    if (password.length < 8) {
+      set({ error: 'Password must be at least 8 characters' });
+      return false;
+    }
+    set({ isLoading: true, error: null });
+
+    try {
+      const result = await window.api.auth.updatePassword(password);
+
+      if (result.success) {
+        await Promise.allSettled([
+          get().refreshAuthState(),
+          get().refreshLicenseStatus(),
+          get().refreshSyncStatus(),
+        ]);
+        set({
+          isLoading: false,
+          showAuthModal: false,
+          pendingDeepLinkType: null,
+        });
+        return true;
+      } else {
+        set({ isLoading: false, error: result.error || 'Password update failed' });
+        return false;
+      }
+    } catch (error) {
+      set({
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Password update failed',
+      });
+      return false;
+    }
+  },
+
   // Refresh auth state from main process
   refreshAuthState: async () => {
     try {
@@ -405,7 +444,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   closeAuthModal: () => {
-    set({ showAuthModal: false, error: null, isFirstLaunchPrompt: false });
+    set({
+      showAuthModal: false,
+      error: null,
+      isFirstLaunchPrompt: false,
+      pendingDeepLinkType: null,
+    });
   },
 
   setAuthModalView: (view) => {

@@ -186,8 +186,17 @@ export function registerSyncHandlers(): void {
 
   /**
    * Exchange deep-link tokens for a Supabase session.
-   * Called by the renderer after receiving an auth:deepLink event (email verification callback).
-   * The URL has the form: showstack://auth/callback#access_token=...&refresh_token=...&type=signup
+   * Called by the renderer after receiving an auth:deepLink event.
+   *
+   * Two URL formats are handled:
+   *   - Email confirmation (type=signup):
+   *       showstack://auth/callback#access_token=...&refresh_token=...&type=signup
+   *       → calls setSession(); user is immediately authenticated
+   *   - Password reset (type=recovery) and invite (type=invite):
+   *       showstack://auth/callback?token_hash=...&type=recovery|invite
+   *       → calls verifyOtp(); user must then set a password via auth:updatePassword
+   *
+   * Returns { success, type } so the renderer can decide what to show next.
    */
   ipcMain.handle('auth:exchangeDeepLink', async (_, url: string) => {
     if (!url || typeof url !== 'string') {
@@ -195,34 +204,88 @@ export function registerSyncHandlers(): void {
     }
 
     try {
+      // Parse both query string and hash fragment from the URL
+      const questionIndex = url.indexOf('?');
       const hashIndex = url.indexOf('#');
-      if (hashIndex === -1) {
-        return { success: false, error: 'No token fragment in URL' };
+
+      // token_hash flows use query params (?token_hash=...&type=recovery|invite)
+      if (questionIndex !== -1) {
+        const queryString =
+          hashIndex !== -1 ? url.slice(questionIndex + 1, hashIndex) : url.slice(questionIndex + 1);
+        const params = new URLSearchParams(queryString);
+        const tokenHash = params.get('token_hash');
+        const type = params.get('type') as 'recovery' | 'invite' | null;
+
+        if (tokenHash && (type === 'recovery' || type === 'invite')) {
+          const connector = getSupabaseConnector();
+          const { error } = await connector.getClient().auth.verifyOtp({
+            token_hash: tokenHash,
+            type,
+          });
+
+          if (error) {
+            return { success: false, error: error.message };
+          }
+
+          // User is authenticated but must set a password before proceeding
+          return { success: true, type };
+        }
       }
 
-      const params = new URLSearchParams(url.slice(hashIndex + 1));
-      const accessToken = params.get('access_token');
-      const refreshToken = params.get('refresh_token');
+      // access_token flows use hash fragment (#access_token=...&refresh_token=...&type=signup)
+      if (hashIndex !== -1) {
+        const params = new URLSearchParams(url.slice(hashIndex + 1));
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
 
-      if (!accessToken || !refreshToken) {
-        return { success: false, error: 'Missing access_token or refresh_token in URL' };
+        if (!accessToken || !refreshToken) {
+          return { success: false, error: 'Missing access_token or refresh_token in URL' };
+        }
+
+        const connector = getSupabaseConnector();
+        const { data, error } = await connector.getClient().auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+
+        if (error) {
+          return { success: false, error: error.message };
+        }
+
+        return { success: true, type: 'signup', hasSession: !!data.session };
       }
 
+      return { success: false, error: 'No recognisable token in URL' };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Deep link exchange failed',
+      };
+    }
+  });
+
+  /**
+   * Update the authenticated user's password.
+   * Called after a recovery or invite deep link has been verified via auth:exchangeDeepLink.
+   */
+  ipcMain.handle('auth:updatePassword', async (_, password: string) => {
+    if (!password || typeof password !== 'string' || password.length < 8) {
+      return { success: false, error: 'Password must be at least 8 characters' };
+    }
+
+    try {
       const connector = getSupabaseConnector();
-      const { data, error } = await connector.getClient().auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken,
-      });
+      const { error } = await connector.getClient().auth.updateUser({ password });
 
       if (error) {
         return { success: false, error: error.message };
       }
 
-      return { success: true, hasSession: !!data.session };
+      return { success: true };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Deep link exchange failed',
+        error: error instanceof Error ? error.message : 'Password update failed',
       };
     }
   });

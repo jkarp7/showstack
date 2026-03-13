@@ -243,7 +243,7 @@ export default function App() {
     initSync();
   }, []);
 
-  // Handle email verification deep links (showstack://auth/callback#access_token=...&type=signup)
+  // Handle auth deep links (email confirmation, password reset, invite)
   useEffect(() => {
     const unlisten = window.api.auth.onDeepLink(async (url: string) => {
       logger.info('[App] Processing auth deep link');
@@ -251,11 +251,18 @@ export default function App() {
         const result = await window.api.auth.exchangeDeepLink(url);
         if (result.success) {
           const authState = useAuthStore.getState();
-          await Promise.allSettled([
-            authState.refreshAuthState(),
-            authState.refreshLicenseStatus(),
-            authState.refreshSyncStatus(),
-          ]);
+          if (result.type === 'recovery' || result.type === 'invite') {
+            // OTP verified — user must now set a password
+            useAuthStore.setState({ pendingDeepLinkType: result.type });
+            authState.openAuthModal('set-password');
+          } else {
+            // Email confirmation — fully authenticated, just refresh state
+            await Promise.allSettled([
+              authState.refreshAuthState(),
+              authState.refreshLicenseStatus(),
+              authState.refreshSyncStatus(),
+            ]);
+          }
         } else {
           logger.warn('[App] Deep link exchange failed', { error: result.error });
         }

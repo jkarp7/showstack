@@ -399,6 +399,7 @@ contextBridge.exposeInMainWorld('api', {
         );
     },
     exchangeDeepLink: (url: string) => ipcRenderer.invoke('auth:exchangeDeepLink', url),
+    updatePassword: (password: string) => ipcRenderer.invoke('auth:updatePassword', password),
   },
 
   // Collaboration operations (project & shop order sharing, presence)
@@ -758,9 +759,13 @@ export interface ElectronAPI {
       email: string | null;
     }>;
     onDeepLink: (callback: (url: string) => void) => () => void;
-    exchangeDeepLink: (
-      url: string,
-    ) => Promise<{ success: boolean; error?: string; hasSession?: boolean }>;
+    exchangeDeepLink: (url: string) => Promise<{
+      success: boolean;
+      error?: string;
+      type?: 'signup' | 'recovery' | 'invite';
+      hasSession?: boolean;
+    }>;
+    updatePassword: (password: string) => Promise<{ success: boolean; error?: string }>;
   };
   backup: {
     create: (reason?: string) => Promise<{
