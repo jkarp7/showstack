@@ -7,6 +7,15 @@ import { errorHandler } from '../errors';
 import { logger } from '../utils/logger';
 
 /**
+ * Simple rate limiter for license:getStatus to prevent renderer hammering.
+ * Allows one call per interval; subsequent calls within the window return the
+ * cached result instead of hitting the database on every tick.
+ */
+const LICENSE_STATUS_RATE_LIMIT_MS = 2000; // 2 seconds
+let lastLicenseStatusCall = 0;
+let cachedLicenseStatus: unknown = null;
+
+/**
  * Register all license and settings IPC handlers
  */
 export function registerLicenseHandlers(): void {
@@ -15,14 +24,25 @@ export function registerLicenseHandlers(): void {
   // ============================================
 
   /**
-   * Get current license validation status
+   * Get current license validation status.
+   * Rate-limited to prevent renderer from hammering the database on every render.
    */
   ipcMain.handle('license:getStatus', async () => {
+    const now = Date.now();
+    if (
+      cachedLicenseStatus !== null &&
+      now - lastLicenseStatusCall < LICENSE_STATUS_RATE_LIMIT_MS
+    ) {
+      return cachedLicenseStatus;
+    }
     try {
-      return await errorHandler.executeWithRetry(
+      const result = await errorHandler.executeWithRetry(
         async () => licenseService.getLicenseStatus(),
         'license:getStatus',
       );
+      cachedLicenseStatus = result;
+      lastLicenseStatusCall = now;
+      return result;
     } catch (error) {
       logger.error('Failed to get license status:', {
         operation: 'license:getStatus',

@@ -1,6 +1,9 @@
 import { app } from 'electron';
 import { join } from 'path';
-import { mkdir, readdir, rm, readFile, writeFile, stat, copyFile } from 'fs/promises';
+import { mkdir, readdir, rm, readFile, writeFile, stat, copyFile, unlink } from 'fs/promises';
+import { createReadStream, createWriteStream } from 'fs';
+import { createGzip, createGunzip } from 'zlib';
+import { pipeline } from 'stream/promises';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { z } from 'zod';
@@ -150,6 +153,21 @@ export class BackupService {
   }
 
   /**
+   * Compress a file using gzip and delete the original.
+   */
+  private async compressFile(srcPath: string, destPath: string): Promise<void> {
+    await pipeline(createReadStream(srcPath), createGzip(), createWriteStream(destPath));
+    await unlink(srcPath);
+  }
+
+  /**
+   * Decompress a gzip file to a destination path.
+   */
+  private async decompressFile(srcPath: string, destPath: string): Promise<void> {
+    await pipeline(createReadStream(srcPath), createGunzip(), createWriteStream(destPath));
+  }
+
+  /**
    * Wrap a promise with a timeout.
    */
   private withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: string): Promise<T> {
@@ -234,6 +252,8 @@ export class BackupService {
 
       const appBackupPath = join(backupDir, 'showstack-app.db');
       const projectBackupPath = join(backupDir, 'showstack-projects.db');
+      const appBackupGzPath = `${appBackupPath}.gz`;
+      const projectBackupGzPath = `${projectBackupPath}.gz`;
 
       await this.withTimeout(appDb.backup(appBackupPath), BACKUP_TIMEOUT_MS, 'App database backup');
       await this.withTimeout(
@@ -242,13 +262,17 @@ export class BackupService {
         'Project database backup',
       );
 
-      // Verify backup integrity with quick_check
+      // Verify backup integrity before compression (requires uncompressed file)
       await this.verifyBackupIntegrity(appBackupPath, 'app');
       await this.verifyBackupIntegrity(projectBackupPath, 'project');
 
-      // Get file sizes
-      const appDbStat = await stat(appBackupPath);
-      const projectDbStat = await stat(projectBackupPath);
+      // Compress backups to save disk space (~60-80% reduction for SQLite files)
+      await this.compressFile(appBackupPath, appBackupGzPath);
+      await this.compressFile(projectBackupPath, projectBackupGzPath);
+
+      // Get compressed file sizes for metadata
+      const appDbStat = await stat(appBackupGzPath);
+      const projectDbStat = await stat(projectBackupGzPath);
 
       // Write metadata last — if missing, backup is incomplete
       const metadata: BackupMetadata = {
@@ -410,12 +434,19 @@ export class BackupService {
     const backupDir = join(this.backupsDir, backupDirName);
 
     try {
-      const appDbStat = await stat(join(backupDir, 'showstack-app.db'));
-      const projectDbStat = await stat(join(backupDir, 'showstack-projects.db'));
       await stat(join(backupDir, 'metadata.json'));
 
-      // Verify files have content
-      return appDbStat.size > 0 && projectDbStat.size > 0;
+      // Support both compressed (new) and uncompressed (legacy) backup formats
+      const appDbGzStat = await stat(join(backupDir, 'showstack-app.db.gz')).catch(() => null);
+      const appDbStat =
+        appDbGzStat ?? (await stat(join(backupDir, 'showstack-app.db')).catch(() => null));
+      const projectDbGzStat = await stat(join(backupDir, 'showstack-projects.db.gz')).catch(
+        () => null,
+      );
+      const projectDbStat =
+        projectDbGzStat ?? (await stat(join(backupDir, 'showstack-projects.db')).catch(() => null));
+
+      return (appDbStat?.size ?? 0) > 0 && (projectDbStat?.size ?? 0) > 0;
     } catch {
       return false;
     }
@@ -467,9 +498,30 @@ export class BackupService {
       databaseManager.close();
 
       try {
-        // Copy backup files to database paths
-        await copyFile(join(backupDir, 'showstack-app.db'), appDbPath);
-        await copyFile(join(backupDir, 'showstack-projects.db'), projectDbPath);
+        // Restore backup files — support both compressed (.db.gz) and legacy (.db) formats
+        const appGzPath = join(backupDir, 'showstack-app.db.gz');
+        const projectGzPath = join(backupDir, 'showstack-projects.db.gz');
+        const appLegacyPath = join(backupDir, 'showstack-app.db');
+        const projectLegacyPath = join(backupDir, 'showstack-projects.db');
+
+        const appGzExists = await stat(appGzPath)
+          .then(() => true)
+          .catch(() => false);
+        const projectGzExists = await stat(projectGzPath)
+          .then(() => true)
+          .catch(() => false);
+
+        if (appGzExists) {
+          await this.decompressFile(appGzPath, appDbPath);
+        } else {
+          await copyFile(appLegacyPath, appDbPath);
+        }
+
+        if (projectGzExists) {
+          await this.decompressFile(projectGzPath, projectDbPath);
+        } else {
+          await copyFile(projectLegacyPath, projectDbPath);
+        }
 
         // Reinitialize databases
         await databaseManager.initialize();

@@ -12,7 +12,7 @@ import {
   parseSpareSnapshot,
   getDeltaIndicator,
 } from '../revisionUtils';
-import type { PrepEquipmentItem, RevisionQuantities, SpareSnapshot } from '../../types/shopOrder';
+import type { ShopOrderItem, RevisionQuantities, SpareSnapshot } from '../../types/shopOrder';
 
 /**
  * Revision Utilities Tests
@@ -22,8 +22,8 @@ import type { PrepEquipmentItem, RevisionQuantities, SpareSnapshot } from '../..
  */
 
 describe('revisionUtils - Table-Based Revision Tracking', () => {
-  // Helper to create a mock PrepEquipmentItem
-  const createMockItem = (overrides?: Partial<PrepEquipmentItem>): PrepEquipmentItem => ({
+  // Helper to create a mock ShopOrderItem
+  const createMockItem = (overrides?: Partial<ShopOrderItem>): ShopOrderItem => ({
     id: 'item-1',
     section_id: 'section-1',
     description: 'LED Par 64',

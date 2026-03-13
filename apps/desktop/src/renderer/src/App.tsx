@@ -243,6 +243,31 @@ export default function App() {
     initSync();
   }, []);
 
+  // Handle email verification deep links (showstack://auth/callback#access_token=...&type=signup)
+  useEffect(() => {
+    const unlisten = window.api.auth.onDeepLink(async (url: string) => {
+      logger.info('[App] Processing auth deep link');
+      try {
+        const result = await window.api.auth.exchangeDeepLink(url);
+        if (result.success) {
+          const authState = useAuthStore.getState();
+          await Promise.allSettled([
+            authState.refreshAuthState(),
+            authState.refreshLicenseStatus(),
+            authState.refreshSyncStatus(),
+          ]);
+        } else {
+          logger.warn('[App] Deep link exchange failed', { error: result.error });
+        }
+      } catch (error) {
+        logger.error('[App] Deep link handler error', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    });
+    return unlisten;
+  }, []);
+
   // Track app lifecycle with telemetry
   useEffect(() => {
     const appStartTime = Date.now();

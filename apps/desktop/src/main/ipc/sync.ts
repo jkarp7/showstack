@@ -185,6 +185,49 @@ export function registerSyncHandlers(): void {
   });
 
   /**
+   * Exchange deep-link tokens for a Supabase session.
+   * Called by the renderer after receiving an auth:deepLink event (email verification callback).
+   * The URL has the form: showstack://auth/callback#access_token=...&refresh_token=...&type=signup
+   */
+  ipcMain.handle('auth:exchangeDeepLink', async (_, url: string) => {
+    if (!url || typeof url !== 'string') {
+      return { success: false, error: 'Invalid URL' };
+    }
+
+    try {
+      const hashIndex = url.indexOf('#');
+      if (hashIndex === -1) {
+        return { success: false, error: 'No token fragment in URL' };
+      }
+
+      const params = new URLSearchParams(url.slice(hashIndex + 1));
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+
+      if (!accessToken || !refreshToken) {
+        return { success: false, error: 'Missing access_token or refresh_token in URL' };
+      }
+
+      const connector = getSupabaseConnector();
+      const { data, error } = await connector.getClient().auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, hasSession: !!data.session };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Deep link exchange failed',
+      };
+    }
+  });
+
+  /**
    * Request password reset
    */
   ipcMain.handle('auth:resetPassword', async (_, email: string) => {

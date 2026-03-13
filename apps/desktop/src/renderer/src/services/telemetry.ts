@@ -130,7 +130,8 @@ class TelemetryService {
   private readonly STORAGE_KEY = 'showstack-telemetry-events';
   private readonly BATCH_SIZE = 50;
   private readonly FLUSH_INTERVAL = 60000; // 1 minute
-  private readonly MAX_LOCAL_EVENTS = 1000; // Prevent memory issues
+  private readonly MAX_LOCAL_EVENTS = 1000; // Total events cap (synced + unsynced)
+  private readonly MAX_UNSYNCED_EVENTS = 500; // Cap on unsynced events when offline
   private flushTimer: number | null = null;
   private sessionId: string;
   private localEvents: StoredEvent[] = [];
@@ -439,14 +440,25 @@ class TelemetryService {
 
     this.localEvents.push(storedEvent);
 
-    // Enforce maximum local events limit
-    if (this.localEvents.length > this.MAX_LOCAL_EVENTS) {
-      // Remove oldest synced event first (more efficient)
+    // Enforce cap on unsynced events to prevent unbounded growth when offline
+    const unsyncedCount = this.localEvents.filter((e) => !e.synced).length;
+    if (unsyncedCount > this.MAX_UNSYNCED_EVENTS) {
+      // Drop oldest unsynced event
+      const oldestUnsyncedIndex = this.localEvents.findIndex((e) => !e.synced);
+      if (oldestUnsyncedIndex > -1) {
+        this.localEvents.splice(oldestUnsyncedIndex, 1);
+        if (import.meta.env.DEV) {
+          console.warn(
+            `[Telemetry] MAX_UNSYNCED_EVENTS (${this.MAX_UNSYNCED_EVENTS}) reached — oldest unsynced event dropped`,
+          );
+        }
+      }
+    } else if (this.localEvents.length > this.MAX_LOCAL_EVENTS) {
+      // Enforce total cap: remove oldest synced event first
       const syncedIndex = this.localEvents.findIndex((e) => e.synced);
       if (syncedIndex > -1) {
         this.localEvents.splice(syncedIndex, 1);
       } else {
-        // If no synced events, remove oldest event
         this.localEvents.shift();
       }
     }

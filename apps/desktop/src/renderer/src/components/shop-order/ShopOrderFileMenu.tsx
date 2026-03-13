@@ -13,6 +13,8 @@ export function ShopOrderFileMenu({ className = '', onNewProject }: PrepFileMenu
     isDirty,
     isSaving,
     isOpening,
+    errorMessage,
+    clearError,
     getCurrentFileName,
     newFile,
     openFile,
@@ -142,6 +144,16 @@ export function ShopOrderFileMenu({ className = '', onNewProject }: PrepFileMenu
         <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
           <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full" />
           Opening...
+        </div>
+      )}
+
+      {errorMessage && (
+        <div
+          className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1 cursor-pointer"
+          onClick={clearError}
+          title="Click to dismiss"
+        >
+          ⚠ {errorMessage}
         </div>
       )}
     </div>

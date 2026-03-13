@@ -45,17 +45,55 @@ const MEMORY_MONITOR_INTERVAL_MS = 5 * 60 * 1000;
 // Set app name for macOS menu bar
 app.setName('ShowStack');
 
+// Register custom URL scheme for email verification callbacks.
+// Supabase redirects to showstack://auth/callback after email confirmation.
+// Must be called before app ready on macOS.
+if (process.defaultApp) {
+  // Dev: Electron is the default app, pass the app path as argv[1]
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('showstack', process.execPath, [process.argv[1]]);
+  }
+} else {
+  app.setAsDefaultProtocolClient('showstack');
+}
+
+/**
+ * Forward a deep-link URL to the renderer so it can complete auth.
+ * The URL has the form: showstack://auth/callback#access_token=...&type=signup
+ */
+function handleDeepLink(url: string): void {
+  logger.info('Received deep link URL', { url });
+  const win = BrowserWindow.getAllWindows()[0];
+  if (win) {
+    win.webContents.send('auth:deepLink', url);
+  }
+}
+
 // Disable hardware acceleration on Linux
 if (process.platform === 'linux') {
   app.disableHardwareAcceleration();
 }
 
-// Single instance lock
+// Single instance lock — also receives deep links on Windows/Linux via argv
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
   app.quit();
   process.exit(0);
 }
+
+// Windows/Linux: deep link arrives as argv when a second instance is launched
+app.on('second-instance', (_event, commandLine) => {
+  const url = commandLine.find((arg) => arg.startsWith('showstack://'));
+  if (url) {
+    handleDeepLink(url);
+  }
+  // Focus the existing window
+  const win = BrowserWindow.getAllWindows()[0];
+  if (win) {
+    if (win.isMinimized()) win.restore();
+    win.focus();
+  }
+});
 
 app.on('ready', async () => {
   try {
@@ -144,6 +182,12 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     windowManager.createLandingWindow();
   }
+});
+
+// macOS: deep link arrives as open-url event
+app.on('open-url', (event, url) => {
+  event.preventDefault();
+  handleDeepLink(url);
 });
 
 app.on('before-quit', async () => {
