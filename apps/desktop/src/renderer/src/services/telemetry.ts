@@ -629,15 +629,17 @@ class TelemetryService {
       }
     }
 
-    // Reset PostHog if initialized
+    // Shut down PostHog — flushes any queued events before disconnecting.
+    // posthog.shutdown() is preferred over posthog.reset() on quit because
+    // reset() clears identity without flushing, potentially losing pending events.
     if (this.posthogInitialized) {
       try {
-        posthog.reset();
+        await posthog.shutdown(3000); // 3s timeout so quit isn't delayed
         if (import.meta.env.DEV) {
-          console.log('[Telemetry] PostHog reset successfully');
+          console.log('[Telemetry] PostHog shut down successfully');
         }
       } catch (error) {
-        console.error('[Telemetry] Failed to reset PostHog:', error);
+        console.error('[Telemetry] Failed to shut down PostHog:', error);
       }
     }
   }

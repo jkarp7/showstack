@@ -3,6 +3,7 @@ import { join } from 'path';
 import { mkdir, readdir, rm, readFile, writeFile, stat, copyFile, unlink } from 'fs/promises';
 import { createReadStream, createWriteStream } from 'fs';
 import { createGzip, createGunzip } from 'zlib';
+import { createHash } from 'crypto';
 import { pipeline } from 'stream/promises';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
@@ -18,6 +19,14 @@ const BackupMetadataSchema = z.object({
   appDbSize: z.number(),
   projectDbSize: z.number(),
   version: z.string(),
+  // SHA-256 checksums of the stored backup files (compressed if present).
+  // Optional for backwards compatibility with pre-compression backups.
+  checksums: z
+    .object({
+      appDb: z.string(),
+      projectDb: z.string(),
+    })
+    .optional(),
 });
 
 export type BackupMetadata = z.infer<typeof BackupMetadataSchema>;
@@ -168,6 +177,19 @@ export class BackupService {
   }
 
   /**
+   * Compute the SHA-256 hash of a file, returned as a hex string.
+   */
+  private async sha256File(filePath: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const hash = createHash('sha256');
+      const stream = createReadStream(filePath);
+      stream.on('data', (chunk) => hash.update(chunk));
+      stream.on('end', () => resolve(hash.digest('hex')));
+      stream.on('error', reject);
+    });
+  }
+
+  /**
    * Wrap a promise with a timeout.
    */
   private withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: string): Promise<T> {
@@ -270,9 +292,13 @@ export class BackupService {
       await this.compressFile(appBackupPath, appBackupGzPath);
       await this.compressFile(projectBackupPath, projectBackupGzPath);
 
-      // Get compressed file sizes for metadata
+      // Get compressed file sizes and checksums for metadata
       const appDbStat = await stat(appBackupGzPath);
       const projectDbStat = await stat(projectBackupGzPath);
+      const [appDbChecksum, projectDbChecksum] = await Promise.all([
+        this.sha256File(appBackupGzPath),
+        this.sha256File(projectBackupGzPath),
+      ]);
 
       // Write metadata last — if missing, backup is incomplete
       const metadata: BackupMetadata = {
@@ -281,6 +307,10 @@ export class BackupService {
         appDbSize: appDbStat.size,
         projectDbSize: projectDbStat.size,
         version: app.getVersion(),
+        checksums: {
+          appDb: appDbChecksum,
+          projectDb: projectDbChecksum,
+        },
       };
 
       await writeFile(join(backupDir, 'metadata.json'), JSON.stringify(metadata, null, 2));
@@ -488,6 +518,29 @@ export class BackupService {
       }
 
       logger.info(`Restoring from backup`, { backupDir: backupDirName });
+
+      // Verify checksums if present in metadata (compressed files only)
+      if (metadata.checksums) {
+        const appGzPath = join(backupDir, 'showstack-app.db.gz');
+        const projectGzPath = join(backupDir, 'showstack-projects.db.gz');
+        const [actualApp, actualProject] = await Promise.all([
+          this.sha256File(appGzPath),
+          this.sha256File(projectGzPath),
+        ]);
+        if (actualApp !== metadata.checksums.appDb) {
+          return {
+            success: false,
+            error: 'Backup integrity check failed: app database checksum mismatch',
+          };
+        }
+        if (actualProject !== metadata.checksums.projectDb) {
+          return {
+            success: false,
+            error: 'Backup integrity check failed: projects database checksum mismatch',
+          };
+        }
+        logger.debug('Backup checksums verified', { backupDir: backupDirName });
+      }
 
       // Save current DB files for rollback before overwriting
       await mkdir(tempDir, { recursive: true });

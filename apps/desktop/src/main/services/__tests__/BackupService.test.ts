@@ -20,10 +20,18 @@ const {
   mockBackup,
   mockAppDb,
   mockProjectDb,
+  mockHashInstance,
+  mockCreateHash,
 } = vi.hoisted(() => {
   const mockBackup = vi.fn().mockResolvedValue(undefined);
   const mockPragma = vi.fn().mockReturnValue([{ quick_check: 'ok' }]);
   const mockCloseDb = vi.fn();
+  const mockHashInstance = {
+    update: vi.fn().mockReturnThis(),
+    digest: vi
+      .fn()
+      .mockReturnValue('abc123def456abc123def456abc123def456abc123def456abc123def456abc1'),
+  };
   return {
     mockMkdir: vi.fn().mockResolvedValue(undefined),
     mockReaddir: vi.fn().mockResolvedValue([]),
@@ -43,6 +51,8 @@ const {
     mockBackup,
     mockAppDb: { backup: mockBackup },
     mockProjectDb: { backup: mockBackup },
+    mockHashInstance,
+    mockCreateHash: vi.fn().mockReturnValue(mockHashInstance),
   };
 });
 
@@ -76,10 +86,28 @@ vi.mock('fs/promises', () => ({
   unlink: (...args: unknown[]) => mockUnlink(...args),
 }));
 
-// Mock fs (used for createReadStream/createWriteStream in compression)
+// Mock fs (used for createReadStream/createWriteStream in compression and sha256File)
+// createReadStream must support both pipeline (compression) and event-based (sha256File) usage.
 vi.mock('fs', () => ({
-  createReadStream: vi.fn(() => ({ pipe: vi.fn() })),
+  createReadStream: vi.fn(() => {
+    // Returns an object that works for both stream.pipeline (pipe interface)
+    // and the event-based sha256File (on('data'/'end'/'error') interface).
+    const emitter: { pipe: ReturnType<typeof vi.fn>; on: ReturnType<typeof vi.fn> } = {
+      pipe: vi.fn(),
+      on: vi.fn().mockImplementation(function (event: string, handler: () => void) {
+        // Fire 'end' asynchronously so sha256File's promise resolves cleanly
+        if (event === 'end') Promise.resolve().then(() => handler());
+        return emitter;
+      }),
+    };
+    return emitter;
+  }),
   createWriteStream: vi.fn(() => ({ on: vi.fn() })),
+}));
+
+// Mock crypto (createHash used in sha256File for backup integrity checksums)
+vi.mock('crypto', () => ({
+  createHash: (...args: unknown[]) => mockCreateHash(...args),
 }));
 
 // Mock zlib (used for createGzip/createGunzip in compression)
@@ -146,6 +174,13 @@ describe('BackupService', () => {
       close: mockCloseDb,
     });
 
+    // Mock crypto hash for sha256File
+    mockCreateHash.mockReturnValue(mockHashInstance);
+    mockHashInstance.update.mockReturnThis();
+    mockHashInstance.digest.mockReturnValue(
+      'abc123def456abc123def456abc123def456abc123def456abc123def456abc1',
+    );
+
     // Mock the private disk space check to avoid real execFile calls
     vi.spyOn(service as never, 'getFreeDiskSpaceMB' as never).mockResolvedValue(50000 as never);
 
@@ -163,6 +198,10 @@ describe('BackupService', () => {
             appDbSize: 1024,
             projectDbSize: 1024,
             version: '1.0.0',
+            checksums: {
+              appDb: 'abc123def456abc123def456abc123def456abc123def456abc123def456abc1',
+              projectDb: 'abc123def456abc123def456abc123def456abc123def456abc123def456abc1',
+            },
           }),
         );
       }

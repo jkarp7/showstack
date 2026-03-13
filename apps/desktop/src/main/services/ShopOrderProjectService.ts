@@ -131,6 +131,10 @@ export class ShopOrderProjectService {
       throw new ValidationError('Project ID is required', 'id', id);
     }
 
+    // Backup before destructive operation (matches ProjectService behaviour)
+    const { backupService } = await import('./BackupService');
+    await backupService.performBackup(`before-delete-shop-order-${id}`);
+
     await errorHandler.executeWithRetry(
       async () => deleteShopOrderProject(id),
       'shop-order:projects:delete',
