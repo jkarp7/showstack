@@ -232,11 +232,13 @@ export function registerSyncHandlers(): void {
         }
       }
 
-      // access_token flows use hash fragment (#access_token=...&refresh_token=...&type=signup)
+      // access_token flows use hash fragment (#access_token=...&refresh_token=...&type=signup|invite|recovery)
+      // This is the format Supabase produces when {{ .ConfirmationURL }} is used in email templates.
       if (hashIndex !== -1) {
         const params = new URLSearchParams(url.slice(hashIndex + 1));
         const accessToken = params.get('access_token');
         const refreshToken = params.get('refresh_token');
+        const type = (params.get('type') ?? 'signup') as 'signup' | 'invite' | 'recovery';
 
         if (!accessToken || !refreshToken) {
           return { success: false, error: 'Missing access_token or refresh_token in URL' };
@@ -252,7 +254,9 @@ export function registerSyncHandlers(): void {
           return { success: false, error: error.message };
         }
 
-        return { success: true, type: 'signup', hasSession: !!data.session };
+        // For invite and recovery, the user is authenticated but must set a password.
+        // The renderer will show SetPasswordForm when type is not 'signup'.
+        return { success: true, type, hasSession: !!data.session };
       }
 
       return { success: false, error: 'No recognisable token in URL' };
