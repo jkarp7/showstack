@@ -1,31 +1,33 @@
 import { Fixture } from '../types';
 import { InfrastructureEquipment } from '../types/infrastructure';
 import { ValidationIssue } from '../types/validation';
+import { isIntentionalAddressSharing } from './fixtureUtils';
 
 // ── Fixtures ────────────────────────────────────────────────────────────────
 
 function detectDuplicateDmx(fixtures: Fixture[]): ValidationIssue[] {
-  const map = new Map<string, string[]>(); // key → fixture ids
+  const map = new Map<string, Fixture[]>(); // key → fixtures
 
   for (const f of fixtures) {
     if (f.universe == null || f.dmx_address == null) continue;
     const key = `${f.universe}:${f.dmx_address}`;
-    const ids = map.get(key) ?? [];
-    ids.push(f.id);
-    map.set(key, ids);
+    const group = map.get(key) ?? [];
+    group.push(f);
+    map.set(key, group);
   }
 
   const issues: ValidationIssue[] = [];
-  for (const [key, ids] of map) {
-    if (ids.length < 2) continue;
+  for (const [key, group] of map) {
+    if (group.length < 2) continue;
+    if (isIntentionalAddressSharing(group)) continue;
     const [universe, address] = key.split(':');
     issues.push({
       id: `dup-dmx-${key}`,
       severity: 'error',
       sidebarItem: 'fixtures',
       type: 'Duplicate DMX Address',
-      message: `Universe ${universe}, address ${address} is assigned to ${ids.length} fixtures.`,
-      entityIds: ids,
+      message: `Universe ${universe}, address ${address} is assigned to ${group.length} fixtures.`,
+      entityIds: group.map((f) => f.id),
     });
   }
   return issues;

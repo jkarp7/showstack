@@ -1,15 +1,17 @@
 import { useMemo, useEffect } from 'react';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { Fixture } from '../../types';
+import { isIntentionalAddressSharing } from '../../utils/fixtureUtils';
 
 // 512 addresses per universe, displayed as 32 columns × 16 rows
 const COLS = 32;
-const ROWS = 16;
 const ADDRESSES_PER_UNIVERSE = 512;
+
+type AddressState = 'used' | 'shared' | 'conflict';
 
 interface AddressInfo {
   fixtures: Fixture[];
-  isConflict: boolean;
+  state: AddressState;
 }
 
 function buildUniverseMap(fixtures: Fixture[]): Map<number, Map<number, AddressInfo>> {
@@ -21,16 +23,21 @@ function buildUniverseMap(fixtures: Fixture[]): Map<number, Map<number, AddressI
     const address = f.dmx_address;
     if (address < 1 || address > ADDRESSES_PER_UNIVERSE) continue;
 
-    if (!universeMap.has(universe)) {
-      universeMap.set(universe, new Map());
-    }
+    if (!universeMap.has(universe)) universeMap.set(universe, new Map());
     const addrMap = universeMap.get(universe)!;
     const existing = addrMap.get(address);
     if (existing) {
       existing.fixtures.push(f);
-      existing.isConflict = true;
     } else {
-      addrMap.set(address, { fixtures: [f], isConflict: false });
+      addrMap.set(address, { fixtures: [f], state: 'used' });
+    }
+  }
+
+  // Second pass: resolve state for addresses with multiple fixtures
+  for (const addrMap of universeMap.values()) {
+    for (const info of addrMap.values()) {
+      if (info.fixtures.length < 2) continue;
+      info.state = isIntentionalAddressSharing(info.fixtures) ? 'shared' : 'conflict';
     }
   }
 
@@ -66,9 +73,12 @@ function UniverseGrid({ universe, addrMap }: UniverseGridProps) {
           let title = `Address ${addr} — empty`;
 
           if (info) {
-            if (info.isConflict) {
+            if (info.state === 'conflict') {
               bg = 'bg-red-500';
               title = `Address ${addr} — CONFLICT (${info.fixtures.length} fixtures): ${info.fixtures.map((f) => f.channel || f.type || f.id).join(', ')}`;
+            } else if (info.state === 'shared') {
+              bg = 'bg-teal-400 dark:bg-teal-600';
+              title = `Address ${addr} — shared (${info.fixtures.length} fixtures): ${info.fixtures.map((f) => f.channel || f.type || f.id).join(', ')}`;
             } else {
               bg = 'bg-blue-400 dark:bg-blue-600';
               const f = info.fixtures[0];
@@ -85,11 +95,7 @@ function UniverseGrid({ universe, addrMap }: UniverseGridProps) {
               style={{ height: 20, fontSize: 7, lineHeight: 1 }}
             >
               {info && (
-                <span
-                  className={`truncate px-0.5 ${info.isConflict ? 'text-white font-bold' : 'text-white'}`}
-                >
-                  {label || addr}
-                </span>
+                <span className="truncate px-0.5 text-white font-bold">{label || addr}</span>
               )}
             </div>
           );
@@ -127,14 +133,16 @@ export function DMXMap() {
     () => fixtures.filter((f) => f.universe != null && f.dmx_address != null).length,
     [fixtures],
   );
-  const conflictCount = useMemo(() => {
-    let n = 0;
+  const { conflictCount, sharedCount } = useMemo(() => {
+    let conflicts = 0;
+    let shared = 0;
     for (const addrMap of universeMap.values()) {
       for (const info of addrMap.values()) {
-        if (info.isConflict) n++;
+        if (info.state === 'conflict') conflicts++;
+        else if (info.state === 'shared') shared++;
       }
     }
-    return n;
+    return { conflictCount: conflicts, sharedCount: shared };
   }, [universeMap]);
 
   return (
@@ -146,6 +154,11 @@ export function DMXMap() {
           {sortedUniverses.length} universe{sortedUniverses.length !== 1 ? 's' : ''} •{' '}
           {totalPatched} patched
         </span>
+        {sharedCount > 0 && (
+          <span className="text-xs font-medium text-teal-600 dark:text-teal-400">
+            {sharedCount} shared
+          </span>
+        )}
         {conflictCount > 0 && (
           <span className="text-xs font-medium text-red-600 dark:text-red-400">
             {conflictCount} conflict{conflictCount !== 1 ? 's' : ''}
@@ -160,6 +173,10 @@ export function DMXMap() {
           <span className="flex items-center gap-1">
             <span className="inline-block w-3 h-3 rounded-sm bg-blue-400 dark:bg-blue-600" />
             Used
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="inline-block w-3 h-3 rounded-sm bg-teal-400 dark:bg-teal-600" />
+            Shared
           </span>
           <span className="flex items-center gap-1">
             <span className="inline-block w-3 h-3 rounded-sm bg-red-500" />
