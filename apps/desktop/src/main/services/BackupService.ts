@@ -557,12 +557,14 @@ export class BackupService {
         const appLegacyPath = join(backupDir, 'showstack-app.db');
         const projectLegacyPath = join(backupDir, 'showstack-projects.db');
 
-        const appGzExists = await stat(appGzPath)
-          .then(() => true)
-          .catch(() => false);
-        const projectGzExists = await stat(projectGzPath)
-          .then(() => true)
-          .catch(() => false);
+        const [appGzExists, projectGzExists] = await Promise.all([
+          stat(appGzPath)
+            .then(() => true)
+            .catch(() => false),
+          stat(projectGzPath)
+            .then(() => true)
+            .catch(() => false),
+        ]);
 
         if (appGzExists) {
           await this.decompressFile(appGzPath, appDbPath);

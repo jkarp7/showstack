@@ -338,7 +338,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         ]);
         set({
           isLoading: false,
-          showAuthModal: false,
           pendingDeepLinkType: null,
         });
         return true;

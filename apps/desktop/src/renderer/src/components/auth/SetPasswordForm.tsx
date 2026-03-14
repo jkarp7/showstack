@@ -6,17 +6,25 @@
  * need to set (or reset) their password to complete the flow.
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Lock, Eye, EyeOff, Loader2, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
 export function SetPasswordForm() {
-  const { updatePassword, isLoading, error, clearError, pendingDeepLinkType } = useAuthStore();
+  const { updatePassword, closeAuthModal, isLoading, error, clearError, pendingDeepLinkType } =
+    useAuthStore();
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => closeAuthModal(), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, closeAuthModal]);
 
   const isInvite = pendingDeepLinkType === 'invite';
 
