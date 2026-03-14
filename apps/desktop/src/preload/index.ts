@@ -85,6 +85,11 @@ contextBridge.exposeInMainWorld('api', {
     getFileName: (filePath: string) => ipcRenderer.invoke('file:getFileName', filePath),
     readImageAsDataUrl: (imagePath: string) =>
       ipcRenderer.invoke('file:readImageAsDataUrl', imagePath),
+    saveText: (
+      content: string,
+      defaultFilename: string,
+      filters?: { name: string; extensions: string[] }[],
+    ) => ipcRenderer.invoke('file:saveText', content, defaultFilename, filters),
   },
 
   // ShowStack:Prep operations
@@ -512,6 +517,11 @@ export interface ElectronAPI {
     validate: (filePath: string) => Promise<any>;
     getFileName: (filePath: string) => Promise<string>;
     readImageAsDataUrl: (imagePath: string) => Promise<string | null>;
+    saveText: (
+      content: string,
+      defaultFilename: string,
+      filters?: { name: string; extensions: string[] }[],
+    ) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
   };
   prep: {
     projects: {

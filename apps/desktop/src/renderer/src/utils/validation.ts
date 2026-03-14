@@ -75,6 +75,55 @@ function detectMissingCircuit(fixtures: Fixture[]): ValidationIssue[] {
   ];
 }
 
+function detectMissingType(fixtures: Fixture[]): ValidationIssue[] {
+  const ids = fixtures.filter((f) => !f.hidden && !f.type?.trim()).map((f) => f.id);
+  if (!ids.length) return [];
+  return [
+    {
+      id: 'missing-type',
+      severity: 'warning',
+      sidebarItem: 'fixtures',
+      type: 'Missing Instrument Type',
+      message: `${ids.length} fixture${ids.length === 1 ? '' : 's'} ${ids.length === 1 ? 'has' : 'have'} no instrument type specified.`,
+      entityIds: ids,
+    },
+  ];
+}
+
+function detectPatchedWithoutChannel(fixtures: Fixture[]): ValidationIssue[] {
+  const ids = fixtures
+    .filter((f) => !f.hidden && (f.universe != null || f.dmx_address != null) && !f.channel?.trim())
+    .map((f) => f.id);
+  if (!ids.length) return [];
+  return [
+    {
+      id: 'patched-no-channel',
+      severity: 'warning',
+      sidebarItem: 'fixtures',
+      type: 'Patched Without Channel',
+      message: `${ids.length} fixture${ids.length === 1 ? '' : 's'} ${ids.length === 1 ? 'has' : 'have'} a DMX address but no channel number.`,
+      entityIds: ids,
+    },
+  ];
+}
+
+function detectChannelWithoutPatch(fixtures: Fixture[]): ValidationIssue[] {
+  const ids = fixtures
+    .filter((f) => !f.hidden && f.channel?.trim() && f.universe == null && f.dmx_address == null)
+    .map((f) => f.id);
+  if (!ids.length) return [];
+  return [
+    {
+      id: 'channel-no-patch',
+      severity: 'warning',
+      sidebarItem: 'fixtures',
+      type: 'Channel Without Patch',
+      message: `${ids.length} fixture${ids.length === 1 ? '' : 's'} ${ids.length === 1 ? 'has' : 'have'} a channel number but no DMX address.`,
+      entityIds: ids,
+    },
+  ];
+}
+
 // ── Infrastructure ───────────────────────────────────────────────────────────
 
 function detectPortOverCapacity(equipment: InfrastructureEquipment[]): ValidationIssue[] {
@@ -106,6 +155,9 @@ export function runValidation(
   return [
     ...detectDuplicateDmx(fixtures),
     ...detectDuplicateChannel(fixtures),
+    ...detectMissingType(fixtures),
+    ...detectPatchedWithoutChannel(fixtures),
+    ...detectChannelWithoutPatch(fixtures),
     ...detectMissingCircuit(fixtures),
     ...detectPortOverCapacity(equipment),
   ];

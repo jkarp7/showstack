@@ -1,10 +1,10 @@
 # ShowStack — Lighting Edition Status
 
-**Last Updated:** March 12, 2026
+**Last Updated:** March 14, 2026
 **Edition Price:** $249/year
 **Target Users:** Lighting Designers, Production Electricians, Master Electricians
 **Competes With:** LightWright 6 ($845 one-time)
-**Overall Completion:** ~91%
+**Overall Completion:** ~92%
 
 ---
 
@@ -20,15 +20,9 @@ These items are either actively deferred or waiting on a dependency. Address bef
 
 ### Fixture Management
 
-- ⬜ **Equipment Manager Export (Issue #51)** — Menu handlers wired but all 4 implementations are TODO stubs:
-  - CSV export (`useEquipmentMenuHandlers.ts:69`)
-  - ETC Eos ASCII export (`useEquipmentMenuHandlers.ts:79`)
-  - GrandMA2 XML export (`useEquipmentMenuHandlers.ts:89`)
-  - GrandMA3 XML export (`useEquipmentMenuHandlers.ts:99`)
 - ⬜ **Auto-complete System** — Manufacturer, type, color, gobo lookup from an external fixture database.
   _Deferred — requires extensive fixture database work before this is feasible._
-- ⬜ **DMX Conflict Detection** — Highlight conflicting DMX addresses in the grid.
-  _Waiting on Vectorworks integration (conflict detection only meaningful once CAD import is wired up)._
+- ⬜ **DMX Conflict Highlighting in Grid** — Surface Show Health duplicate DMX errors as inline highlights in the Equipment Manager grid. _(Show Health already detects conflicts; this is a UI integration task.)_
 
 ### Power Management
 
@@ -76,7 +70,7 @@ These items are either actively deferred or waiting on a dependency. Address bef
 ### Short-term — Lightwright Parity
 
 1. **MVR export** — Industry-standard CAD/visualizer format for Vectorworks, Cast, Depiction, etc. (Issue #30)
-2. **Enhanced error checking** — Overlapping patches, overloaded dimmers, duplicate channels, missing data warnings. (Issue #31)
+2. **Enhanced error checking** — Overloaded dimmers (requires rack data plumbing). (Issue #31 partial — see completed)
 3. **Basic console integration (ETC Eos via OSC)** — Push/pull patch data from an Eos family console. (Issue #25, 5% complete)
 
 **Refs:** `docs/features/console-integration-plan.md`
@@ -103,7 +97,8 @@ These items are either actively deferred or waiting on a dependency. Address bef
 ### Fixture Management (Equipment Manager)
 
 - ✅ **Virtual Data Grid** (`VirtualDataGrid.tsx`) — Virtual scrolling for 10,000+ fixtures, 60 FPS, multi-select, in-cell editing.
-- ✅ **Equipment Manager Page** — Full fixture CRUD, duplicate. Export menu items are wired but implementations are TODO stubs. (Issue #51 — still open)
+- ✅ **Equipment Manager Page** — Full fixture CRUD, duplicate, export. (Issue #51 — closed)
+- ✅ **Equipment Manager Export (Issue #51)** — CSV, ETC Eos ASCII, GrandMA2 XML, GrandMA3 XML exports via `ExportHeaderDialog`; native save dialog via `file:saveText` IPC; RFC 4180 CSV escaping.
 - ✅ **Fixture Database** — 68+ columns, LightWright parity achieved.
 - ✅ **Add Fixture Dialog** — Full creation form with all fields and validation.
 - ✅ **Bulk Edit Dialog** — 30+ editable fields, 7 collapsible sections, auto-numbering for 6 fields.
@@ -191,6 +186,7 @@ _Note: Supersedes Issue #40 (Maintenance Menu) and Issue #29 (Shop Order from Sy
 - ✅ **UI Redesign Phase 5** — Labels consolidation: `LabelVisualDesigner` is the single entry point.
 - ✅ **UI Redesign Phase 6** — Racks & Distribution moved under Equipment Manager sidebar; power sub-tab removed.
 - ✅ **UI Redesign Phase 7** — Show Health: passive validation engine, sidebar badges (red/amber counts), aggregated panel.
+- ✅ **Enhanced error checking (Issue #31 partial)** — Added: missing instrument type, patched-without-channel, channel-without-patch warnings. Existing: duplicate DMX, duplicate channel, missing circuit, port over capacity. Rack overload checks deferred (require rack store integration).
 - ✅ **UI Redesign Phase 8** — Filter chips + slim toolbar: `FilterBar` dropdowns replaced with inline tag filter chips.
 - ✅ **UI Redesign Phase 9** — Design tokens: CSS custom properties across all inspector components.
 - ✅ **Menu Bar Reorganization (PR #83)** — Context-aware menu (equipment / infrastructure / power contexts), Duplicate wired, Conditional Formatting moved to View menu, Generate Paperwork in Project menu.
@@ -219,7 +215,7 @@ _Note: Supersedes Issue #40 (Maintenance Menu) and Issue #29 (Shop Order from Sy
 
 - `useModuleAccess.ts` may need renaming to `useEditionAccess.ts` for clarity.
 - ESLint warning count is exactly at the CI threshold (855). Reducing to 0 is a tracked goal.
-- Issue #51 (Equipment Manager export) — CSV, Eos, GrandMA2, GrandMA3 exports are all TODO stubs. Menu is wired; implementations still needed.
+- Issue #51 (Equipment Manager export) — Closed. All 4 formats implemented (CSV, Eos ASCII, GrandMA2 XML, GrandMA3 XML) with native save dialog via `file:saveText` IPC. CSV uses proper RFC 4180 escaping.
 - Issue #40 (Maintenance Menu) closed — superseded by Smart Groups. Per-column maintenance menu and 4-tab notes dialog not implemented; re-open if user feedback demands.
 - Issue #29 (Shop Order from System Docs) closed — superseded by Smart Groups Phase 4.
 - Issue #86 (TOCTOU security) closed — fixed by PR #87 PowerSync write-path. Student-tier cloud sync eligibility still TBD.

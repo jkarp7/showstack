@@ -86,15 +86,15 @@ export const ProjectRowSchema = z.object({
   lighting_designer: z.string().nullish(),
   lighting_designer_email: z.string().nullish(),
   lighting_designer_phone: z.string().nullish(),
-  lighting_associates: z.array(z.string()).nullish(),
+  lighting_associates: z.string().nullish(), // stored as JSON string in SQLite
   audio_designer: z.string().nullish(),
   audio_designer_email: z.string().nullish(),
   audio_designer_phone: z.string().nullish(),
-  audio_associates: z.array(z.string()).nullish(),
+  audio_associates: z.string().nullish(), // stored as JSON string in SQLite
   video_designer: z.string().nullish(),
   video_designer_email: z.string().nullish(),
   video_designer_phone: z.string().nullish(),
-  video_associates: z.array(z.string()).nullish(),
+  video_associates: z.string().nullish(), // stored as JSON string in SQLite
   electrician: z.string().nullish(),
   electrician_email: z.string().nullish(),
   electrician_phone: z.string().nullish(),
@@ -114,8 +114,7 @@ export const ProjectRowSchema = z.object({
   general_manager_company: z.string().nullish(),
   venue_city: z.string().nullish(),
   venue_state: z.string().nullish(),
-  /** Parsed JSON object: keys are date-type labels, values are ISO date strings. */
-  show_dates: z.record(z.string().optional()).nullish(),
+  show_dates: z.string().nullish(), // stored as JSON string in SQLite; parsed after validation
   phase_label_a: z.string().nullish(),
   phase_label_b: z.string().nullish(),
   phase_label_c: z.string().nullish(),

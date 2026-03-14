@@ -1,357 +1,220 @@
-# Claude Code Quick Start - ShowStack:Production
+# Claude Code Quickstart — ShowStack
 
-**For:** Continuing development with Claude Code  
-**Current Status:** POC validated, ready for Phase 1  
-**Branch:** `develop`
-
----
-
-## 🎯 Current State
-
-✅ **Completed:**
-
-- POC proof-of-concept working (virtual grid at 60 FPS)
-- Complete technical specification
-- Pricing strategy and business plan
-- GitHub repository set up (public)
-- `develop` branch created
-
-🚧 **Next Up:**
-
-- Phase 1: Electron app shell + SQLite database (Weeks 1-4)
+**For:** AI-assisted development on an active codebase
+**Branch:** `develop` (feature branches off this)
+**Status:** Alpha — ~92% complete, actively seeking beta testers
 
 ---
 
-## 📚 Essential Documents in Repo
+## Current State
 
-### **Primary References (Read These First)**
+The app is largely built. Day-to-day work is bug fixes, feature additions, and polish — not scaffolding.
 
-1. **`docs/technical-spec.md`** - Complete feature specifications
-   - All 6 major feature areas
-   - Database schema (use this!)
-   - Architecture decisions
+**Start every session:**
 
-2. **`docs/dev-setup.md`** - Development environment
-   - Tech stack details
-   - Project structure
-   - Testing strategies
-
-3. **`proof-of-concept/`** - Working reference implementation
-   - Virtual grid (copy this approach)
-   - React components (reuse these)
-   - Performance optimizations (keep these)
-
-4. **`PHASE_1_DEVELOPMENT_GUIDE.md`** - Week-by-week tasks
-   - Detailed implementation steps
-   - Code examples
-   - Success criteria
-
----
-
-## 🚀 Phase 1 Overview (Your Current Focus)
-
-### **Goal:** Electron desktop app with SQLite database
-
-**Timeline:** 4 weeks (can go faster with Claude Code!)
-
-**Key Milestones:**
-
-1. Week 1: Electron shell running with POC embedded
-2. Week 2: SQLite database with full schema
-3. Week 3: IPC connecting renderer to database
-4. Week 4: Testing with 10,000+ fixtures
-
----
-
-## 🛠️ Tech Stack (From Specs)
-
-```javascript
-// Desktop App
-Electron 27+
-Node.js 20+
-better-sqlite3 (database)
-
-// Frontend
-React 18+
-TypeScript 5+
-Zustand (state)
-Tailwind CSS + Radix UI
-Vite (build)
-
-// Key Dependencies
-electron-vite (bundler)
-electron-builder (packager)
-uuid (IDs)
+```bash
+npm run dev          # start Electron + Vite dev server
+npx tsc --noEmit     # type check (must be 0 errors)
+npm run lint         # ESLint (≤855 warnings in CI)
+npm run test:run     # run full test suite
 ```
 
+**Key files to orient yourself:**
+
+- `docs/development/lighting_project_status.md` — feature tracking, pending/completed work
+- `README.md` — high-level overview and feature list
+- `PROJECT_STATUS.md` — comprehensive tracking (root level)
+
 ---
 
-## 📁 Project Structure to Create
+## Architecture
 
 ```
-showstack-production/
-├── src/
-│   ├── main/              # Electron main (Node.js)
-│   │   ├── index.ts      # Entry point
-│   │   ├── window.ts     # Window management
-│   │   ├── database/     # SQLite layer
-│   │   │   ├── index.ts
-│   │   │   ├── schema.ts
-│   │   │   └── queries/
-│   │   │       └── fixtures.ts
-│   │   └── ipc/          # IPC handlers
-│   │       └── fixtures.ts
-│   │
-│   ├── preload/          # Preload scripts
-│   │   └── index.ts     # Expose APIs
-│   │
-│   └── renderer/        # React (copy from POC)
-│       └── src/
-│           ├── App.tsx
-│           ├── components/
-│           ├── stores/
-│           └── types/
+apps/desktop/src/
+├── main/           # Electron main process (Node.js)
+│   ├── ipc/        # IPC handlers — one file per domain
+│   ├── database/   # better-sqlite3 queries + migrations
+│   ├── services/   # Business logic (FixtureService, etc.)
+│   └── menu/       # App menu state machine
 │
-├── resources/           # App icons
-├── electron.vite.config.ts
-└── electron-builder.yml
+├── preload/
+│   └── index.ts    # contextBridge — exposes window.api to renderer
+│
+└── renderer/src/
+    ├── pages/      # Route-level components
+    ├── components/ # Reusable UI components
+    ├── store/      # Zustand stores (9 stores)
+    ├── hooks/      # Custom hooks (useValidation, etc.)
+    ├── utils/      # Pure utility functions
+    └── types/      # TypeScript interfaces
+```
+
+**Two databases:**
+
+- `app.db` — global (auth, licenses, preferences)
+- `projects.db` — per-project (fixtures, shop orders, infrastructure, racks)
+
+---
+
+## Adding a New IPC Handler (Standard Pattern)
+
+**1. Main process** (`apps/desktop/src/main/ipc/<domain>.ts`):
+
+```typescript
+ipcMain.handle('domain:action', async (_event, param: string) => {
+  try {
+    const result = await someService.doThing(param);
+    return result;
+  } catch (error) {
+    logger.error('Failed to do thing:', {
+      operation: 'domain:action',
+      param,
+      error: error instanceof Error ? error.message : error,
+    });
+    throw new Error(error instanceof Error ? error.message : 'Failed');
+  }
+});
+```
+
+**2. Preload** (`apps/desktop/src/preload/index.ts`):
+
+Add to both the `contextBridge.exposeInMainWorld` implementation block AND the `ElectronAPI` TypeScript interface:
+
+```typescript
+// Implementation (contextBridge block):
+doThing: (param: string) => ipcRenderer.invoke('domain:action', param),
+
+// Type declaration (ElectronAPI interface):
+doThing: (param: string) => Promise<ResultType>;
+```
+
+**3. Renderer:**
+
+```typescript
+const result = await window.api.domain.doThing(param);
 ```
 
 ---
 
-## 💾 Database Schema (From Technical Spec)
+## Saving Files (Native Save Dialog)
 
-**Key Tables:**
+Use the `file:saveText` IPC handler for text-based exports:
 
-```sql
--- Projects (shows)
-CREATE TABLE projects (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  venue TEXT,
-  created_at INTEGER,
-  updated_at INTEGER
+```typescript
+// Renderer
+const result = await window.api.files.saveText(
+  content, // string content
+  'default-name.csv', // suggested filename
+  [{ name: 'CSV Files', extensions: ['csv'] }], // filters
 );
-
--- Fixtures (main data)
-CREATE TABLE fixtures (
-  id TEXT PRIMARY KEY,
-  project_id TEXT NOT NULL,
-  position TEXT,
-  unit_number INTEGER,
-  type TEXT,
-  purpose TEXT,
-  channel TEXT,
-  dimmer TEXT,
-  circuit TEXT,
-  phase TEXT CHECK(phase IN ('A', 'B', 'C')),
-  wattage REAL,
-  color TEXT,
-  gobo TEXT,
-  location TEXT,
-  notes TEXT,
-  custom_fields TEXT, -- JSON
-  created_at INTEGER,
-  updated_at INTEGER,
-  FOREIGN KEY (project_id) REFERENCES projects(id)
-);
+if (result.success) {
+  /* saved to result.filePath */
+}
 ```
 
-**See `docs/technical-spec.md` for complete schema with all fields!**
+This shows a native macOS/Windows save dialog. Don't use `URL.createObjectURL` + `link.click()` — that silently saves to Downloads.
 
 ---
 
-## 🎨 UI/UX Guidelines (From POC)
+## Menu Context System
 
-**Keep these patterns from POC:**
+The app menu is context-aware. When a component mounts, it sets its context:
 
-- Dark theme (bg-gray-900)
-- Virtual scrolling for performance
-- In-cell editing (click → edit → Tab/Enter)
-- Multi-select (Click, Shift+Click, Cmd+Click)
-- Clean, minimal toolbar
-- Status bar at bottom
+```typescript
+useEffect(() => {
+  window.api?.menu?.setState({ context: 'equipment' });
+  return () => {
+    window.api?.menu?.setState({ context: 'module' });
+  };
+}, []);
+```
 
-**Don't change:**
+**Contexts:** `landing` | `project` | `module` | `equipment` | `infrastructure` | `power` | `shop-order` | `paperwork` | `labels`
 
-- Grid performance optimizations (React.memo, virtualization)
-- Keyboard navigation
-- Cell editing UX
-
-**Can improve:**
-
-- Add sorting controls
-- Add filter UI
-- Add column management
-- Add keyboard shortcuts legend
+**Critical:** React runs child effects before parent effects. `ProjectWorkspace` intentionally does NOT set `context` — only child route components do, to avoid overwriting each other.
 
 ---
 
-## 🔧 Development Workflow
+## Validation / Show Health
 
-### **1. Start Each Session**
+Add new checks to `apps/desktop/src/renderer/src/utils/validation.ts`:
+
+```typescript
+function detectMyCheck(fixtures: Fixture[]): ValidationIssue[] {
+  const ids = fixtures.filter(/* condition */).map((f) => f.id);
+  if (!ids.length) return [];
+  return [
+    {
+      id: 'unique-check-id',
+      severity: 'error' | 'warning',
+      sidebarItem: 'fixtures' | 'infrastructure' | 'racks',
+      type: 'Human Readable Name',
+      message: `${ids.length} fixture(s) have the problem.`,
+      entityIds: ids,
+    },
+  ];
+}
+```
+
+Then add it to `runValidation()`. The `useValidation` hook and Show Health page pick it up automatically — no other changes needed.
+
+---
+
+## Logger
+
+```typescript
+// Correct usage — context must be an object, NOT a string
+logger.info(`Loading project: ${projectId}`);
+logger.error('Failed to load project:', { projectId, error: error.message });
+
+// Wrong — second arg must be LogContext object
+logger.error('Failed', 'some string'); // ❌
+```
+
+---
+
+## Common Pitfalls
+
+- **`ProjectRowSchema`** validates raw SQLite rows BEFORE JSON parsing. JSON fields (`show_dates`, associates arrays, etc.) must be typed as `z.string().nullish()` in the schema since they're stored as strings in SQLite.
+- **Zustand `mockReset: true`** in vitest.config.ts resets mock implementations between tests. Always re-set mock return values in `beforeEach`.
+- **`better-sqlite3`** needs `npm rebuild better-sqlite3` after Electron rebuilds, or `npx electron-rebuild -f -w better-sqlite3` for Electron (breaks vitest until you run `npm rebuild`).
+- **Renderer files** using `import.meta.env` need `apps/desktop/src/env.d.ts` for root tsconfig type resolution.
+- **Don't use `z.infer`** as canonical types — `"strict": false` in tsconfig makes all inferred fields optional.
+
+---
+
+## Running Tests
+
+```bash
+npm run test:run          # all tests, CI mode
+npm test                  # watch mode
+npm run test:coverage     # with coverage report
+npm run test:ui           # visual UI
+```
+
+Test files live alongside source: `ComponentName.test.ts` or in `__tests__/` directories.
+
+---
+
+## Supabase / Database
+
+```bash
+npx supabase link --project-ref jfjvlsvuojuglfnokddl
+npx supabase db push      # push migrations (needs SUPABASE_ACCESS_TOKEN)
+```
+
+Migrations: `supabase/migrations/` — numbered sequentially (001, 002, ...).
+
+---
+
+## Branching
 
 ```bash
 git checkout develop
-git pull origin develop
-npm run dev
+git checkout -b feature/my-feature
+# work...
+git push origin feature/my-feature
+# open PR → develop
 ```
 
-### **2. Make Changes**
-
-- Work in feature branches: `git checkout -b feature/electron-setup`
-- Test frequently: `npm run dev`
-- Commit often: `git commit -m "Add electron window management"`
-
-### **3. Push to GitHub**
-
-```bash
-git push origin feature/electron-setup
-# Create PR on GitHub
-# Merge to develop when ready
-```
-
----
-
-## ✅ Phase 1 Success Criteria
-
-**Week 1 (Electron Shell):**
-
-- [ ] `npm run dev` launches Electron window
-- [ ] POC UI visible in Electron
-- [ ] Hot reload working
-- [ ] No console errors
-
-**Week 2 (Database):**
-
-- [ ] SQLite database created on app start
-- [ ] Schema matches technical spec
-- [ ] Can insert/query fixtures via SQL
-- [ ] Database file persists in user data folder
-
-**Week 3 (IPC Integration):**
-
-- [ ] Renderer can call window.api.fixtures.getAll()
-- [ ] Add fixture → saves to database
-- [ ] Edit fixture → updates database
-- [ ] Delete fixture → removes from database
-- [ ] Data survives app restart
-
-**Week 4 (Testing):**
-
-- [ ] Load 10,000 fixtures in <2 seconds
-- [ ] Scroll maintains 60 FPS
-- [ ] Edit latency <100ms
-- [ ] No memory leaks
-- [ ] Can build production app
-
----
-
-## 🎯 What to Build First (Priority Order)
-
-### **Immediate (This Session)**
-
-1. Set up Electron project structure
-2. Install dependencies (electron, electron-vite, better-sqlite3)
-3. Create basic main process (src/main/index.ts)
-4. Create window (src/main/window.ts)
-5. Test Electron launches
-
-### **Next Session**
-
-1. Copy POC code to src/renderer/
-2. Configure electron-vite for renderer
-3. Test POC loads in Electron window
-
-### **Following Sessions**
-
-1. Create database schema
-2. Create IPC handlers
-3. Connect renderer to database
-4. Test CRUD operations
-
-**See `PHASE_1_DEVELOPMENT_GUIDE.md` for detailed tasks!**
-
----
-
-## 📝 Code Guidelines
-
-**TypeScript:**
-
-- Strict mode enabled
-- No `any` types
-- Explicit return types
-- Descriptive names
-
-**React:**
-
-- Functional components only
-- Use hooks (useState, useEffect, useCallback)
-- Memoize list items (React.memo)
-- Zustand for global state
-
-**Performance:**
-
-- Virtual scrolling for lists >100 items
-- Debounce search/filter inputs
-- Lazy load heavy components
-- Keep 60 FPS always
-
----
-
-## 🐛 Common Issues & Solutions
-
-**"better-sqlite3 won't build"**
-
-```bash
-npm rebuild better-sqlite3 --build-from-source
-```
-
-**"Electron window blank"**
-
-- Check console for errors (Ctrl+Shift+I in Electron)
-- Verify preload script path is correct
-- Check VITE_DEV_SERVER_URL is set
-
-**"IPC not working"**
-
-- Verify contextBridge in preload
-- Check handler registered in main
-- Console.log both sides to debug
-
----
-
-## 📞 Questions to Ask
-
-When you need help, provide:
-
-1. **What you're trying to do** (e.g., "Set up SQLite database")
-2. **What you tried** (code snippet)
-3. **What happened** (error message or unexpected behavior)
-4. **What you expected** (desired outcome)
-
----
-
-## 🎯 Key Principles
-
-1. **Start simple** - Get basic version working first
-2. **Test incrementally** - Don't write a lot without testing
-3. **Refer to POC** - It's proven to work
-4. **Follow the spec** - Database schema is already designed
-5. **Keep performance in mind** - 60 FPS is non-negotiable
-
----
-
-## 🚀 Ready to Start!
-
-**First command:**
-
-```bash
-cd ~/showstack
-git checkout develop
-code .
-```
-
-Then follow `PHASE_1_DEVELOPMENT_GUIDE.md` step by step.
-
-**Let's build ShowStack:Production! 🎭💡**
+Main branch (`main`) is for releases. `develop` is the integration branch.
