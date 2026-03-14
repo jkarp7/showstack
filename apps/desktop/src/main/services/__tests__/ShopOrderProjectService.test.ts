@@ -9,14 +9,19 @@ import { ValidationError } from '../../errors';
 // Hoisted mocks for mutable state
 // ============================================
 
-const { mockIsAuthenticated, mockGetUserId, mockSyncShopOrder, mockDeleteShopOrder } = vi.hoisted(
-  () => ({
-    mockIsAuthenticated: vi.fn(),
-    mockGetUserId: vi.fn(),
-    mockSyncShopOrder: vi.fn(),
-    mockDeleteShopOrder: vi.fn(),
-  }),
-);
+const {
+  mockIsAuthenticated,
+  mockGetUserId,
+  mockSyncShopOrder,
+  mockDeleteShopOrder,
+  mockPerformBackup,
+} = vi.hoisted(() => ({
+  mockIsAuthenticated: vi.fn(),
+  mockGetUserId: vi.fn(),
+  mockSyncShopOrder: vi.fn(),
+  mockDeleteShopOrder: vi.fn(),
+  mockPerformBackup: vi.fn(),
+}));
 
 // Mock dependencies
 vi.mock('../../utils/logger', () => ({
@@ -64,6 +69,12 @@ vi.mock('../sync/projectSync', () => ({
   deleteShopOrderFromPowerSync: mockDeleteShopOrder,
 }));
 
+vi.mock('../BackupService', () => ({
+  backupService: {
+    performBackup: mockPerformBackup,
+  },
+}));
+
 import { ShopOrderProjectService } from '../ShopOrderProjectService';
 import {
   getAllShopOrderProjects,
@@ -109,6 +120,7 @@ describe('ShopOrderProjectService', () => {
     mockGetUserId.mockReturnValue(null);
     mockSyncShopOrder.mockResolvedValue(undefined);
     mockDeleteShopOrder.mockResolvedValue(undefined);
+    mockPerformBackup.mockResolvedValue(undefined);
   });
 
   describe('getAll', () => {

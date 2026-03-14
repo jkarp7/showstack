@@ -11,6 +11,7 @@ import { useAuthStore } from '../../store/authStore';
 import { LoginForm } from './LoginForm';
 import { SignUpForm } from './SignUpForm';
 import { PasswordResetForm } from './PasswordResetForm';
+import { SetPasswordForm } from './SetPasswordForm';
 
 export function AuthModal() {
   const {
@@ -73,14 +74,16 @@ export function AuthModal() {
 
       {/* Modal */}
       <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
-        {/* Close Button */}
-        <button
-          onClick={closeAuthModal}
-          disabled={isLoading}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 disabled:opacity-50"
-        >
-          <X className="h-5 w-5" />
-        </button>
+        {/* Close Button — hidden during set-password (user must complete this step) */}
+        {authModalView !== 'set-password' && (
+          <button
+            onClick={closeAuthModal}
+            disabled={isLoading}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
 
         {/* Header with Logo */}
         <div className="pt-6 pb-2 px-6 text-center">
@@ -105,10 +108,12 @@ export function AuthModal() {
           {authModalView === 'reset' && (
             <PasswordResetForm onSwitchToLogin={() => setAuthModalView('login')} />
           )}
+
+          {authModalView === 'set-password' && <SetPasswordForm />}
         </div>
 
-        {/* Demo Mode Button (first-launch only) */}
-        {isFirstLaunchPrompt && (
+        {/* Demo Mode Button (first-launch only, not shown during set-password) */}
+        {isFirstLaunchPrompt && authModalView !== 'set-password' && (
           <div className="px-6 pb-4">
             <div className="relative flex items-center justify-center my-2">
               <div className="border-t border-gray-200 w-full" />

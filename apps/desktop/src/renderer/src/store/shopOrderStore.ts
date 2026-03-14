@@ -184,10 +184,10 @@ export const useShopOrderStore = create<ShopOrderStore>((set, get) => ({
             const raw = {
               parent_project_id: data.parent_project_id,
               venue: parentProject.venue,
-              // logo_path is a local file path, not a URL — pass as storage path only;
-              // logo_url must be a valid URL or empty string per schema validation
+              // Map parent project logo to the unified logo_path field.
+              // logo_url must be empty or a valid HTTP URL per schema — local paths are not valid.
+              logo_path: parentProject.logo_path,
               logo_url: '',
-              logo_storage_path: parentProject.logo_path,
               // Map designers
               ld_name: parentProject.lighting_designer,
               ld_email: parentProject.lighting_designer_email,

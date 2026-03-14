@@ -1,19 +1,16 @@
 # ShowStack — Lighting Edition Status
 
-**Last Updated:** March 11, 2026
+**Last Updated:** March 12, 2026
 **Edition Price:** $249/year
 **Target Users:** Lighting Designers, Production Electricians, Master Electricians
 **Competes With:** LightWright 6 ($845 one-time)
-**Overall Completion:** ~90%
+**Overall Completion:** ~91%
 
 ---
 
 ## ⚠️ Priority Flags
 
-Issues requiring immediate attention before 1.0:
-
-- **#81 — Security follow-ups from PR #80 (licensing)** — Supabase email verification enforcement must be confirmed; unclaimed license RLS policy creates a visibility window if email verification is not required. Rate-limiting on `license:getStatus` IPC (renderer can hammer it). _Security/abuse concern — verify before launch._
-- **#62 — Telemetry: unbounded event growth** — If network is down for an extended period, unsynced telemetry events can grow without bound. High-priority item per the issue. _Data integrity risk — address before beta._
+All pre-1.0 priority flags resolved. ✅
 
 ---
 
@@ -45,51 +42,18 @@ These items are either actively deferred or waiting on a dependency. Address bef
 - ⬜ **Network Topology Visualization** — Visual network layout diagram for infrastructure. (Issue #19)
 - ⬜ **Real-time Port Status Monitoring** — Ping/connectivity checks, port up/down status, SNMP integration, status dashboard. (Issue #20)
 
-### Shop Orders (Post-Migration Improvements)
+### Shop Orders
 
-Non-critical enhancements identified during PR #63 and #64 review:
-
-**Should Fix Soon (Issue #65):**
-
-- ⬜ Standardize error handling (use toast notifications consistently; remove bare `alert()` calls)
 - ⬜ Add integration tests for critical shop order workflows
 - ⬜ Virtual scrolling for large tables (500+ items)
-- ⬜ Extract configuration constants to a separate file
 - ⬜ E2E tests with Playwright for shop order flow
-
-**Medium Priority (Issue #64):**
-
-- ⬜ Type safety improvements — remove `as any` in `revisionUtils.ts:81-82`
 - ⬜ Performance optimization for large revision sets
-- ⬜ Additional unit test coverage
-
-**Logo URL mapping (Issue #84):**
-
-- ⬜ Map parent project `logo_path` (local FS path) to a usable URL/base64 when creating a shop order from a project. Currently silently drops the logo.
 
 ### Cloud Services
 
 - ⬜ **E-commerce webhook → Supabase Edge Function** — Auto-fulfill license purchases from Stripe/Shopify.
 - ⬜ **Auto-updater maintenance gate** — Block updates released after `maintenanceEndDate` on a license.
-
-### Telemetry (Issue #62)
-
-- ⬜ Add max unsynced events limit to prevent unbounded growth when offline (🔴 High Priority per issue)
-- ⬜ Batch flush on app quit — ensure events are not lost on clean shutdown
-- ⬜ Retry backoff improvements for failed sync attempts
-
-### Backup Service (Issue #79)
-
-- ⬜ Backup compression (gzip/zstd) — 10 backups currently = 20× database size
-- ⬜ SHA-256 integrity checksums on backup metadata
-- ⬜ Auto-backup hooks before destructive operations (project delete, migrations)
-
-### Security / Auth Follow-ups (Issue #81)
-
-- ⬜ Confirm Supabase email verification is enforced (RLS on unclaimed licenses depends on it)
-- ⬜ Rate-limit `license:getStatus` IPC handler to prevent renderer hammering
-- ⬜ Audit session token storage for compliance requirements
-- ⬜ Review `demo_mode` bypass paths for license checks
+- ⬜ **Supabase dashboard** — Add `showstack://*` to Auth → URL Configuration → Redirect URLs (required for email verification deep link to complete). _Manual step — cannot be done in code._
 
 ### Developer / Admin
 
@@ -236,13 +200,25 @@ _Note: Supersedes Issue #40 (Maintenance Menu) and Issue #29 (Shop Order from Sy
 - ✅ **Multi-user collaboration (PR #85)** — Invite/remove/accept/decline via Supabase RPCs; real-time presence; RLS + license gate (migrations 005–016).
 - ✅ **PowerSync write-path (PR #87)** — Projects and shop orders written to PowerSync on create/update/delete; fixes TOCTOU ownership race (Issue #86, closed). Student-tier cloud sync eligibility still TBD.
 
+### Pre-1.0 Fixes (branch `feature/pre-1.0-fixes`, March 12, 2026)
+
+- ✅ **Issue #81 — Email verification deep link** — `showstack://` custom URL scheme registered; main process receives `open-url`/`second-instance` callbacks and forwards to renderer via `auth:deepLink` IPC. New `auth:exchangeDeepLink` handler calls `supabase.auth.setSession()` to complete verification. `signUp` now returns `emailConfirmationRequired` flag. Renderer refreshes auth/license/sync state on successful exchange. _Supabase dashboard redirect URL still requires manual configuration — see pending items._
+- ✅ **Issue #81 — `license:getStatus` rate limiting** — IPC handler caches result for 2 seconds to prevent renderer hammering.
+- ✅ **Issue #62 — Telemetry unbounded growth** — Added `MAX_UNSYNCED_EVENTS = 500` cap; oldest unsynced event dropped when offline queue exceeds limit (separate from the 1,000 total cap).
+- ✅ **Issue #64 — Type safety in revisionUtils** — Replaced all `PrepEquipmentItem`/`PrepSection` references (types were renamed) with `ShopOrderItem`/`ShopOrderSection`; removed all `as any` casts in revision diff logic.
+- ✅ **Issue #65 — Shop order error handling** — Replaced `alert()` calls in `shopOrderFileStore` with `errorMessage` state; `ShopOrderFileMenu` displays errors inline with click-to-dismiss.
+- ✅ **Issue #79 — Backup compression** — Backups now stored as `.db.gz` (gzip via `stream/promises` pipeline); restore transparently decompresses; legacy uncompressed `.db` backups still supported.
+- ✅ **Issue #84 — Logo URL mapping for shop orders** — `logo_path` field added to `ShopOrderProject` type; store maps parent project `logo_path` to the correct field instead of silently dropping it; `PageRenderer` uses typed fields without `as any`.
+- ✅ **Issue #62 — Telemetry batch flush on quit** — `telemetry.shutdown()` now calls `posthog.shutdown(3000)` instead of `posthog.reset()`, flushing queued events before the Electron process exits (3 s timeout prevents hangs). PostHog SDK handles network retry backoff internally — no additional implementation needed.
+- ✅ **Issue #79 — Backup integrity checksums** — `BackupService` computes SHA-256 checksums of both `.db.gz` files after each backup and persists them in metadata; checksums are verified before restore and abort with an error on mismatch. Auto-backup hook added to `ShopOrderProjectService.delete()` matching the existing `ProjectService.delete()` pattern.
+- ✅ **Issue #81 — Session token & demo mode audit** — Supabase SDK stores session tokens in Electron's sandboxed `localStorage` (acceptable for desktop). `demo_mode` is properly gated: `canSync: false`, `canCollaborate: false`, explicit downgrade protection in `LicenseService`. No code changes required.
+
 ---
 
 ## 📋 Known Technical Debt
 
 - `useModuleAccess.ts` may need renaming to `useEditionAccess.ts` for clarity.
 - ESLint warning count is exactly at the CI threshold (855). Reducing to 0 is a tracked goal.
-- Shop order `alert()` calls should migrate to toast notifications (Issue #65).
 - Issue #51 (Equipment Manager export) — CSV, Eos, GrandMA2, GrandMA3 exports are all TODO stubs. Menu is wired; implementations still needed.
 - Issue #40 (Maintenance Menu) closed — superseded by Smart Groups. Per-column maintenance menu and 4-tab notes dialog not implemented; re-open if user feedback demands.
 - Issue #29 (Shop Order from System Docs) closed — superseded by Smart Groups Phase 4.

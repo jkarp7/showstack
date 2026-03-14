@@ -130,10 +130,12 @@ class TelemetryService {
   private readonly STORAGE_KEY = 'showstack-telemetry-events';
   private readonly BATCH_SIZE = 50;
   private readonly FLUSH_INTERVAL = 60000; // 1 minute
-  private readonly MAX_LOCAL_EVENTS = 1000; // Prevent memory issues
+  private readonly MAX_LOCAL_EVENTS = 1000; // Total events cap (synced + unsynced)
+  private readonly MAX_UNSYNCED_EVENTS = 500; // Cap on unsynced events when offline
   private flushTimer: number | null = null;
   private sessionId: string;
   private localEvents: StoredEvent[] = [];
+  private unsyncedCount = 0;
   private posthogInitialized = false;
   private posthogInitPromise: Promise<void> | null = null;
   private eventQueue: Array<() => void> = [];
@@ -245,7 +247,7 @@ class TelemetryService {
     await this.storeLocal(telemetryEvent);
 
     // Auto-flush if batch size reached
-    if (this.localEvents.filter((e) => !e.synced).length >= this.BATCH_SIZE) {
+    if (this.unsyncedCount >= this.BATCH_SIZE) {
       // Wait for PostHog initialization to complete before flushing
       if (this.posthogInitPromise) {
         await this.posthogInitPromise;
@@ -373,6 +375,7 @@ class TelemetryService {
       unsyncedEvents.forEach((event) => {
         event.synced = true;
       });
+      this.unsyncedCount -= unsyncedEvents.length;
 
       this.saveLocalEvents();
 
@@ -438,15 +441,27 @@ class TelemetryService {
     };
 
     this.localEvents.push(storedEvent);
+    this.unsyncedCount++;
 
-    // Enforce maximum local events limit
-    if (this.localEvents.length > this.MAX_LOCAL_EVENTS) {
-      // Remove oldest synced event first (more efficient)
+    // Enforce cap on unsynced events to prevent unbounded growth when offline
+    if (this.unsyncedCount > this.MAX_UNSYNCED_EVENTS) {
+      // Drop oldest unsynced event
+      const oldestUnsyncedIndex = this.localEvents.findIndex((e) => !e.synced);
+      if (oldestUnsyncedIndex > -1) {
+        this.localEvents.splice(oldestUnsyncedIndex, 1);
+        this.unsyncedCount--;
+        if (import.meta.env.DEV) {
+          console.warn(
+            `[Telemetry] MAX_UNSYNCED_EVENTS (${this.MAX_UNSYNCED_EVENTS}) reached — oldest unsynced event dropped`,
+          );
+        }
+      }
+    } else if (this.localEvents.length > this.MAX_LOCAL_EVENTS) {
+      // Enforce total cap: remove oldest synced event first
       const syncedIndex = this.localEvents.findIndex((e) => e.synced);
       if (syncedIndex > -1) {
         this.localEvents.splice(syncedIndex, 1);
       } else {
-        // If no synced events, remove oldest event
         this.localEvents.shift();
       }
     }
@@ -547,6 +562,7 @@ class TelemetryService {
       console.error('Failed to load local telemetry events:', error);
       this.localEvents = [];
     }
+    this.unsyncedCount = this.localEvents.filter((e) => !e.synced).length;
   }
 
   /**
@@ -617,15 +633,17 @@ class TelemetryService {
       }
     }
 
-    // Reset PostHog if initialized
+    // Shut down PostHog — flushes any queued events before disconnecting.
+    // posthog.shutdown() is preferred over posthog.reset() on quit because
+    // reset() clears identity without flushing, potentially losing pending events.
     if (this.posthogInitialized) {
       try {
-        posthog.reset();
+        await posthog.shutdown(3000); // 3s timeout so quit isn't delayed
         if (import.meta.env.DEV) {
-          console.log('[Telemetry] PostHog reset successfully');
+          console.log('[Telemetry] PostHog shut down successfully');
         }
       } catch (error) {
-        console.error('[Telemetry] Failed to reset PostHog:', error);
+        console.error('[Telemetry] Failed to shut down PostHog:', error);
       }
     }
   }

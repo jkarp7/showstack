@@ -1,12 +1,12 @@
 import { logger } from './logger';
-import type { PrepEquipmentItem, PrepSection, ItemChange, ChangeType } from '../types/shopOrder';
+import type { ShopOrderItem, ShopOrderSection, ItemChange, ChangeType } from '../types/shopOrder';
 
 /**
  * Snapshot of project state for revision comparison
  */
 export interface ProjectSnapshot {
-  items: PrepEquipmentItem[];
-  sections: PrepSection[];
+  items: ShopOrderItem[];
+  sections: ShopOrderSection[];
   timestamp: number;
 }
 
@@ -16,7 +16,7 @@ export interface ProjectSnapshot {
 export function detectChanges(
   previousSnapshot: ProjectSnapshot,
   currentSnapshot: ProjectSnapshot,
-  sectionsMap: Map<string, PrepSection>,
+  sectionsMap: Map<string, ShopOrderSection>,
 ): ItemChange[] {
   const changes: ItemChange[] = [];
 
@@ -63,11 +63,11 @@ export function detectChanges(
       });
     } else {
       // Check for modifications
-      const modifications: Partial<PrepEquipmentItem> = {};
-      const oldValues: Partial<PrepEquipmentItem> = {};
+      const modifications: Partial<ShopOrderItem> = {};
+      const oldValues: Partial<ShopOrderItem> = {};
 
       // Compare relevant fields
-      const fieldsToCompare: (keyof PrepEquipmentItem)[] = [
+      const fieldsToCompare: (keyof ShopOrderItem)[] = [
         'description',
         'active_qty',
         'spare_qty',
@@ -79,8 +79,8 @@ export function detectChanges(
 
       for (const field of fieldsToCompare) {
         if (prevItem[field] !== currItem[field]) {
-          modifications[field] = currItem[field] as any;
-          oldValues[field] = prevItem[field] as any;
+          (modifications as ShopOrderItem)[field] = currItem[field];
+          (oldValues as ShopOrderItem)[field] = prevItem[field];
         }
       }
 
@@ -112,8 +112,8 @@ export function detectChanges(
  * Create a snapshot of current project state
  */
 export function createSnapshot(
-  items: PrepEquipmentItem[],
-  sections: PrepSection[],
+  items: ShopOrderItem[],
+  sections: ShopOrderSection[],
 ): ProjectSnapshot {
   return {
     items: items.map((item) => ({ ...item })), // Deep copy
@@ -152,10 +152,8 @@ export function formatChange(change: ItemChange): string {
   } else if (change.change_type === 'modification') {
     const mods: string[] = [];
     if (change.old_values && change.new_values) {
-      for (const key of Object.keys(change.new_values)) {
-        mods.push(
-          `${key}: ${(change.old_values as any)[key]} → ${(change.new_values as any)[key]}`,
-        );
+      for (const key of Object.keys(change.new_values) as Array<keyof ShopOrderItem>) {
+        mods.push(`${key}: ${change.old_values[key]} → ${change.new_values[key]}`);
       }
     }
     details = mods.length > 0 ? ` (${mods.join(', ')})` : '';
@@ -195,7 +193,7 @@ export function stringifyRevisionQuantities(quantities: RevisionQuantities): str
 /**
  * Get active quantity for a specific revision
  */
-export function getRevisionQuantity(item: PrepEquipmentItem, revisionNumber: number): number {
+export function getRevisionQuantity(item: ShopOrderItem, revisionNumber: number): number {
   const quantities = parseRevisionQuantities(item.revision_quantities);
   return quantities[revisionNumber] || 0;
 }
@@ -204,10 +202,10 @@ export function getRevisionQuantity(item: PrepEquipmentItem, revisionNumber: num
  * Set active quantity for a specific revision
  */
 export function setRevisionQuantity(
-  item: PrepEquipmentItem,
+  item: ShopOrderItem,
   revisionNumber: number,
   quantity: number,
-): PrepEquipmentItem {
+): ShopOrderItem {
   const quantities = parseRevisionQuantities(item.revision_quantities);
   quantities[revisionNumber] = quantity;
   return {
@@ -219,7 +217,7 @@ export function setRevisionQuantity(
 /**
  * Get all revision numbers for an item
  */
-export function getItemRevisions(item: PrepEquipmentItem): number[] {
+export function getItemRevisions(item: ShopOrderItem): number[] {
   const quantities = parseRevisionQuantities(item.revision_quantities);
   return Object.keys(quantities)
     .map(Number)
@@ -229,7 +227,7 @@ export function getItemRevisions(item: PrepEquipmentItem): number[] {
 /**
  * Calculate total quantity (max of all revisions + spare)
  */
-export function calculateTotalQuantity(item: PrepEquipmentItem): number {
+export function calculateTotalQuantity(item: ShopOrderItem): number {
   const quantities = parseRevisionQuantities(item.revision_quantities);
   const maxActive = Math.max(...Object.values(quantities), 0);
   return maxActive + (item.spare_qty || 0);
@@ -238,7 +236,7 @@ export function calculateTotalQuantity(item: PrepEquipmentItem): number {
 /**
  * Calculate rental quantity (total - venue)
  */
-export function calculateRentalQuantity(item: PrepEquipmentItem): number {
+export function calculateRentalQuantity(item: ShopOrderItem): number {
   const total = calculateTotalQuantity(item);
   return total - (item.venue_qty || 0);
 }
@@ -247,7 +245,7 @@ export function calculateRentalQuantity(item: PrepEquipmentItem): number {
  * Detect changes between two revisions using revision_quantities
  */
 export function detectRevisionChanges(
-  items: PrepEquipmentItem[],
+  items: ShopOrderItem[],
   fromRevision: number,
   toRevision: number,
   previousSpareSnapshot?: SpareSnapshot,
@@ -312,7 +310,7 @@ export function detectRevisionChanges(
 /**
  * Create spare snapshot for a revision
  */
-export function createSpareSnapshot(items: PrepEquipmentItem[]): SpareSnapshot {
+export function createSpareSnapshot(items: ShopOrderItem[]): SpareSnapshot {
   const snapshot: SpareSnapshot = {};
   for (const item of items) {
     snapshot[item.id] = item.spare_qty || 0;
@@ -337,7 +335,7 @@ export function parseSpareSnapshot(jsonString?: string): SpareSnapshot {
  * Get DELTA indicator for print view (+/-/~)
  */
 export function getDeltaIndicator(
-  item: PrepEquipmentItem,
+  item: ShopOrderItem,
   currentRevision: number,
   previousRevision?: number,
 ): string {

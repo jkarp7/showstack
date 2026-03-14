@@ -243,6 +243,38 @@ export default function App() {
     initSync();
   }, []);
 
+  // Handle auth deep links (email confirmation, password reset, invite)
+  useEffect(() => {
+    const unlisten = window.api.auth.onDeepLink(async (url: string) => {
+      logger.info('[App] Processing auth deep link');
+      try {
+        const result = await window.api.auth.exchangeDeepLink(url);
+        if (result.success) {
+          const authState = useAuthStore.getState();
+          if (result.type === 'recovery' || result.type === 'invite') {
+            // OTP verified — user must now set a password
+            useAuthStore.setState({ pendingDeepLinkType: result.type });
+            authState.openAuthModal('set-password');
+          } else {
+            // Email confirmation — fully authenticated, just refresh state
+            await Promise.allSettled([
+              authState.refreshAuthState(),
+              authState.refreshLicenseStatus(),
+              authState.refreshSyncStatus(),
+            ]);
+          }
+        } else {
+          logger.warn('[App] Deep link exchange failed', { error: result.error });
+        }
+      } catch (error) {
+        logger.error('[App] Deep link handler error', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    });
+    return unlisten;
+  }, []);
+
   // Track app lifecycle with telemetry
   useEffect(() => {
     const appStartTime = Date.now();

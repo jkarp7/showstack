@@ -69,7 +69,8 @@ export interface ShopOrderProject {
   // Additional discipline contacts (stored as JSON)
   additional_contacts?: AdditionalContact[];
 
-  // Logo
+  // Logo — logo_path is the primary local-file field; logo_storage_path is kept for legacy backcompat
+  logo_path?: string;
   logo_url?: string;
   logo_storage_path?: string;
 

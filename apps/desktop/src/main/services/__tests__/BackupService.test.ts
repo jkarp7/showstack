@@ -12,16 +12,26 @@ const {
   mockWriteFile,
   mockStat,
   mockCopyFile,
+  mockUnlink,
+  mockPipeline,
   mockPragma,
   mockCloseDb,
   mockBetterSqlite3,
   mockBackup,
   mockAppDb,
   mockProjectDb,
+  mockHashInstance,
+  mockCreateHash,
 } = vi.hoisted(() => {
   const mockBackup = vi.fn().mockResolvedValue(undefined);
   const mockPragma = vi.fn().mockReturnValue([{ quick_check: 'ok' }]);
   const mockCloseDb = vi.fn();
+  const mockHashInstance = {
+    update: vi.fn().mockReturnThis(),
+    digest: vi
+      .fn()
+      .mockReturnValue('abc123def456abc123def456abc123def456abc123def456abc123def456abc1'),
+  };
   return {
     mockMkdir: vi.fn().mockResolvedValue(undefined),
     mockReaddir: vi.fn().mockResolvedValue([]),
@@ -30,6 +40,8 @@ const {
     mockWriteFile: vi.fn().mockResolvedValue(undefined),
     mockStat: vi.fn(),
     mockCopyFile: vi.fn().mockResolvedValue(undefined),
+    mockUnlink: vi.fn().mockResolvedValue(undefined),
+    mockPipeline: vi.fn().mockResolvedValue(undefined),
     mockPragma,
     mockCloseDb,
     mockBetterSqlite3: vi.fn().mockReturnValue({
@@ -39,6 +51,8 @@ const {
     mockBackup,
     mockAppDb: { backup: mockBackup },
     mockProjectDb: { backup: mockBackup },
+    mockHashInstance,
+    mockCreateHash: vi.fn().mockReturnValue(mockHashInstance),
   };
 });
 
@@ -69,6 +83,42 @@ vi.mock('fs/promises', () => ({
   writeFile: (...args: unknown[]) => mockWriteFile(...args),
   stat: (...args: unknown[]) => mockStat(...args),
   copyFile: (...args: unknown[]) => mockCopyFile(...args),
+  unlink: (...args: unknown[]) => mockUnlink(...args),
+}));
+
+// Mock fs (used for createReadStream/createWriteStream in compression and sha256File)
+// createReadStream must support both pipeline (compression) and event-based (sha256File) usage.
+vi.mock('fs', () => ({
+  createReadStream: vi.fn(() => {
+    // Returns an object that works for both stream.pipeline (pipe interface)
+    // and the event-based sha256File (on('data'/'end'/'error') interface).
+    const emitter: { pipe: ReturnType<typeof vi.fn>; on: ReturnType<typeof vi.fn> } = {
+      pipe: vi.fn(),
+      on: vi.fn().mockImplementation(function (event: string, handler: () => void) {
+        // Fire 'end' asynchronously so sha256File's promise resolves cleanly
+        if (event === 'end') Promise.resolve().then(() => handler());
+        return emitter;
+      }),
+    };
+    return emitter;
+  }),
+  createWriteStream: vi.fn(() => ({ on: vi.fn() })),
+}));
+
+// Mock crypto (createHash used in sha256File for backup integrity checksums)
+vi.mock('crypto', () => ({
+  createHash: (...args: unknown[]) => mockCreateHash(...args),
+}));
+
+// Mock zlib (used for createGzip/createGunzip in compression)
+vi.mock('zlib', () => ({
+  createGzip: vi.fn(() => ({ pipe: vi.fn() })),
+  createGunzip: vi.fn(() => ({ pipe: vi.fn() })),
+}));
+
+// Mock stream/promises (pipeline used in compression)
+vi.mock('stream/promises', () => ({
+  pipeline: (...args: unknown[]) => mockPipeline(...args),
 }));
 
 // Mock better-sqlite3 for integrity verification
@@ -108,6 +158,8 @@ describe('BackupService', () => {
     mockRm.mockResolvedValue(undefined);
     mockWriteFile.mockResolvedValue(undefined);
     mockCopyFile.mockResolvedValue(undefined);
+    mockUnlink.mockResolvedValue(undefined);
+    mockPipeline.mockResolvedValue(undefined);
     vi.mocked(databaseManager.initialize).mockResolvedValue(undefined);
     vi.mocked(databaseManager.forceCheckpoint).mockReturnValue({
       appBusy: false,
@@ -121,6 +173,13 @@ describe('BackupService', () => {
       pragma: mockPragma,
       close: mockCloseDb,
     });
+
+    // Mock crypto hash for sha256File
+    mockCreateHash.mockReturnValue(mockHashInstance);
+    mockHashInstance.update.mockReturnThis();
+    mockHashInstance.digest.mockReturnValue(
+      'abc123def456abc123def456abc123def456abc123def456abc123def456abc1',
+    );
 
     // Mock the private disk space check to avoid real execFile calls
     vi.spyOn(service as never, 'getFreeDiskSpaceMB' as never).mockResolvedValue(50000 as never);
@@ -139,6 +198,10 @@ describe('BackupService', () => {
             appDbSize: 1024,
             projectDbSize: 1024,
             version: '1.0.0',
+            checksums: {
+              appDb: 'abc123def456abc123def456abc123def456abc123def456abc123def456abc1',
+              projectDb: 'abc123def456abc123def456abc123def456abc123def456abc123def456abc1',
+            },
           }),
         );
       }
@@ -508,8 +571,10 @@ describe('BackupService', () => {
       expect(mockMkdir).toHaveBeenCalledWith(expect.stringContaining('.restore-rollback'), {
         recursive: true,
       });
-      // 2 rollback copies + 2 restore copies = 4 copyFile calls
-      expect(mockCopyFile).toHaveBeenCalledTimes(4);
+      // 2 rollback copies only (restore uses pipeline for compressed files)
+      expect(mockCopyFile).toHaveBeenCalledTimes(2);
+      // 2 decompress pipeline calls (one per database)
+      expect(mockPipeline).toHaveBeenCalledTimes(2);
       expect(databaseManager.close).toHaveBeenCalled();
       expect(databaseManager.initialize).toHaveBeenCalled();
       // Rollback dir should be cleaned up on success
@@ -607,8 +672,14 @@ describe('BackupService', () => {
 
   describe('validateBackup', () => {
     it('should reject dirs without both DB files', async () => {
-      // First file exists, second doesn't
-      mockStat.mockResolvedValueOnce({ size: 1024 }).mockRejectedValueOnce(new Error('ENOENT'));
+      // stat call order: metadata.json, app.db.gz, app.db, project.db.gz, project.db
+      // Simulate: app.db.gz missing, app.db exists, project.db.gz missing, project.db missing
+      mockStat
+        .mockResolvedValueOnce({ size: 1024 }) // metadata.json
+        .mockRejectedValueOnce(new Error('ENOENT')) // app.db.gz → null
+        .mockResolvedValueOnce({ size: 1024 }) // app.db → found
+        .mockRejectedValueOnce(new Error('ENOENT')) // project.db.gz → null
+        .mockRejectedValueOnce(new Error('ENOENT')); // project.db → null
 
       const valid = await service.validateBackup('backup-123');
 
@@ -616,10 +687,11 @@ describe('BackupService', () => {
     });
 
     it('should reject dirs with empty DB files', async () => {
+      // stat call order: metadata.json, app.db.gz (empty), project.db.gz (valid)
       mockStat
-        .mockResolvedValueOnce({ size: 0 })
-        .mockResolvedValueOnce({ size: 1024 })
-        .mockResolvedValueOnce({ size: 100 });
+        .mockResolvedValueOnce({ size: 1024 }) // metadata.json
+        .mockResolvedValueOnce({ size: 0 }) // app.db.gz → size 0 (empty)
+        .mockResolvedValueOnce({ size: 1024 }); // project.db.gz → ok
 
       const valid = await service.validateBackup('backup-123');
 

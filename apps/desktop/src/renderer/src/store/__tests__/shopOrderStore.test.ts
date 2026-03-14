@@ -88,8 +88,8 @@ describe('shopOrderStore.createProject', () => {
       const payload = prepProjectsCreate.mock.calls[0][0];
       // logo_url must be a valid URL or '' per schema — local paths must not be passed
       expect(payload.logo_url).toBe('');
-      // The path is preserved separately for future storage resolution
-      expect(payload.logo_storage_path).toBe('/Users/designer/Documents/logo.png');
+      // The path is preserved in the unified logo_path field
+      expect(payload.logo_path).toBe('/Users/designer/Documents/logo.png');
     });
 
     it('does not set logo_url when there is no parent project', async () => {

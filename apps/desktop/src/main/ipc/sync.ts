@@ -14,6 +14,7 @@ import {
 import { licenseService } from '../services/LicenseService';
 import { presenceService } from '../services/PresenceService';
 import { logger } from '../utils/logger';
+import { validatePassword } from '@showstack/shared';
 
 /** Basic email format validation */
 function isValidEmail(email: string): boolean {
@@ -180,6 +181,113 @@ export function registerSyncHandlers(): void {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Sign out failed',
+      };
+    }
+  });
+
+  /**
+   * Exchange deep-link tokens for a Supabase session.
+   * Called by the renderer after receiving an auth:deepLink event.
+   *
+   * Two URL formats are handled:
+   *   - Email confirmation (type=signup):
+   *       showstack://auth/callback#access_token=...&refresh_token=...&type=signup
+   *       → calls setSession(); user is immediately authenticated
+   *   - Password reset (type=recovery) and invite (type=invite):
+   *       showstack://auth/callback?token_hash=...&type=recovery|invite
+   *       → calls verifyOtp(); user must then set a password via auth:updatePassword
+   *
+   * Returns { success, type } so the renderer can decide what to show next.
+   */
+  ipcMain.handle('auth:exchangeDeepLink', async (_, url: string) => {
+    if (!url || typeof url !== 'string') {
+      return { success: false, error: 'Invalid URL' };
+    }
+
+    try {
+      const parsedUrl = new URL(url);
+      const queryParams = parsedUrl.searchParams;
+      const hashParams = new URLSearchParams(parsedUrl.hash.substring(1));
+
+      // token_hash flows use query params (?token_hash=...&type=recovery|invite)
+      const tokenHash = queryParams.get('token_hash');
+      const tokenType = queryParams.get('type') as 'recovery' | 'invite' | null;
+
+      if (tokenHash && (tokenType === 'recovery' || tokenType === 'invite')) {
+        const connector = getSupabaseConnector();
+        const { error } = await connector.getClient().auth.verifyOtp({
+          token_hash: tokenHash,
+          type: tokenType,
+        });
+
+        if (error) {
+          return { success: false, error: error.message };
+        }
+
+        // User is authenticated but must set a password before proceeding
+        return { success: true, type: tokenType };
+      }
+
+      // access_token flows use hash fragment (#access_token=...&refresh_token=...&type=signup|invite|recovery)
+      // This is the format Supabase produces when {{ .ConfirmationURL }} is used in email templates.
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+
+      if (accessToken && refreshToken) {
+        const sessionType = (hashParams.get('type') ?? 'signup') as
+          | 'signup'
+          | 'invite'
+          | 'recovery';
+        const connector = getSupabaseConnector();
+        const { data, error } = await connector.getClient().auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+
+        if (error) {
+          return { success: false, error: error.message };
+        }
+
+        // For invite and recovery, the user is authenticated but must set a password.
+        // The renderer will show SetPasswordForm when type is not 'signup'.
+        return { success: true, type: sessionType, hasSession: !!data.session };
+      }
+
+      return { success: false, error: 'No recognisable token in URL' };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Deep link exchange failed',
+      };
+    }
+  });
+
+  /**
+   * Update the authenticated user's password.
+   * Called after a recovery or invite deep link has been verified via auth:exchangeDeepLink.
+   */
+  ipcMain.handle('auth:updatePassword', async (_, password: string) => {
+    if (!password || typeof password !== 'string') {
+      return { success: false, error: 'Password is required' };
+    }
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      return { success: false, error: passwordError };
+    }
+
+    try {
+      const connector = getSupabaseConnector();
+      const { error } = await connector.getClient().auth.updateUser({ password });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Password update failed',
       };
     }
   });

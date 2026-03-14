@@ -16,7 +16,7 @@ import { PrintPreview } from '../../components/shop-order/PrintPreview';
 import { DeveloperPanel } from '../../components/common/DeveloperPanel';
 import { telemetry } from '../../services/telemetry';
 import { formatPhoneNumber } from '../../utils/phoneFormatter';
-import type { PrepSection, Discipline, PrepProject } from '../../types/shopOrder';
+import type { ShopOrderSection, Discipline, ShopOrderProject } from '../../types/shopOrder';
 import { useShopOrderMenuHandlers } from '../../hooks/useShopOrderMenuHandlers';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { useGroupStore } from '../../store/groupStore';
@@ -50,7 +50,7 @@ export function ShopOrderBuilder() {
   const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
   const [showAddSectionDialog, setShowAddSectionDialog] = useState(false);
   const [showEditSectionDialog, setShowEditSectionDialog] = useState(false);
-  const [sectionToEdit, setSectionToEdit] = useState<PrepSection | null>(null);
+  const [sectionToEdit, setSectionToEdit] = useState<ShopOrderSection | null>(null);
 
   // State for inline editing
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -242,7 +242,7 @@ export function ShopOrderBuilder() {
     await loadProject(projectId);
   };
 
-  const _handleEditSection = (section: PrepSection) => {
+  const _handleEditSection = (section: ShopOrderSection) => {
     setSectionToEdit(section);
     setShowEditSectionDialog(true);
   };
@@ -539,7 +539,7 @@ export function ShopOrderBuilder() {
     })();
 
     // Helper to get field value (from parent if linked, otherwise from prep project)
-    const getFieldValue = (field: keyof PrepProject): string => {
+    const getFieldValue = (field: keyof ShopOrderProject): string => {
       if (isLinked && parentProject) {
         // Map prep project fields to parent project fields
         switch (field) {
@@ -592,11 +592,11 @@ export function ShopOrderBuilder() {
     };
 
     // Helper to check if a specific field is read-only (pulling from parent)
-    const isFieldReadOnly = (field: keyof PrepProject): boolean => {
+    const isFieldReadOnly = (field: keyof ShopOrderProject): boolean => {
       if (!isLinked || !parentProject) return false;
 
       // These fields are read-only when linked (fields that pull from parent)
-      const parentFields: (keyof PrepProject)[] = [
+      const parentFields: (keyof ShopOrderProject)[] = [
         'gm_name',
         'gm_email',
         'gm_phone',
@@ -623,7 +623,11 @@ export function ShopOrderBuilder() {
     };
 
     // Helper to render an editable field inline (no label wrapper)
-    const renderInlineField = (field: keyof PrepProject, placeholder = '+ Add', className = '') => {
+    const renderInlineField = (
+      field: keyof ShopOrderProject,
+      placeholder = '+ Add',
+      className = '',
+    ) => {
       const value = getFieldValue(field);
       const isEditing = editingField === field;
       const fieldIsReadOnly = isFieldReadOnly(field);
@@ -657,7 +661,11 @@ export function ShopOrderBuilder() {
     };
 
     // Helper to render a date field with calendar picker on double-click
-    const renderDateField = (field: keyof PrepProject, placeholder = '+ Add', className = '') => {
+    const renderDateField = (
+      field: keyof ShopOrderProject,
+      placeholder = '+ Add',
+      className = '',
+    ) => {
       const value = getFieldValue(field);
       const isEditing = editingField === field;
 
@@ -728,7 +736,7 @@ export function ShopOrderBuilder() {
     };
 
     // Helper to render an editable field with label (for backwards compatibility)
-    const _renderField = (label: string, field: keyof PrepProject, placeholder = '+ Add') => {
+    const _renderField = (label: string, field: keyof ShopOrderProject, placeholder = '+ Add') => {
       const value = getFieldValue(field);
       const isEditing = editingField === field;
       const fieldIsReadOnly = isFieldReadOnly(field);

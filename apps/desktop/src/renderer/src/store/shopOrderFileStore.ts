@@ -9,6 +9,7 @@ interface ShopOrderFileStore {
   isSaving: boolean;
   isOpening: boolean;
   lastSavedAt: number | null;
+  errorMessage: string | null;
 
   // Actions
   setFilePath: (path: string | null) => void;
@@ -16,6 +17,7 @@ interface ShopOrderFileStore {
   setDirty: (dirty: boolean) => void;
   setSaving: (saving: boolean) => void;
   setOpening: (opening: boolean) => void;
+  clearError: () => void;
   newFile: (projectName: string) => void;
   openFile: (
     onSuccess?: (projectId: string, projectName: string) => Promise<void>,
@@ -33,6 +35,7 @@ export const useShopOrderFileStore = create<ShopOrderFileStore>((set, get) => ({
   isSaving: false,
   isOpening: false,
   lastSavedAt: null,
+  errorMessage: null,
 
   // Set file path
   setFilePath: (path) => set({ currentFilePath: path }),
@@ -48,6 +51,9 @@ export const useShopOrderFileStore = create<ShopOrderFileStore>((set, get) => ({
 
   // Set opening state
   setOpening: (opening) => set({ isOpening: opening }),
+
+  // Clear error message
+  clearError: () => set({ errorMessage: null }),
 
   // Get current filename
   getCurrentFileName: () => {
@@ -97,8 +103,7 @@ export const useShopOrderFileStore = create<ShopOrderFileStore>((set, get) => ({
 
       const result = await window.api.prep.file.import(filePath);
       if (!result.success) {
-        alert(result.error || 'Failed to open file');
-        set({ isOpening: false });
+        set({ isOpening: false, errorMessage: result.error || 'Failed to open file' });
         return false;
       }
 
@@ -119,8 +124,7 @@ export const useShopOrderFileStore = create<ShopOrderFileStore>((set, get) => ({
       return true;
     } catch (error) {
       logger.error('Error opening file:', error);
-      alert('Failed to open shop order');
-      set({ isOpening: false });
+      set({ isOpening: false, errorMessage: 'Failed to open shop order' });
       return false;
     }
   },
@@ -149,8 +153,7 @@ export const useShopOrderFileStore = create<ShopOrderFileStore>((set, get) => ({
       return true;
     } catch (error) {
       logger.error('Error saving file:', error);
-      alert('Failed to save shop order');
-      set({ isSaving: false });
+      set({ isSaving: false, errorMessage: 'Failed to save shop order' });
       return false;
     }
   },
@@ -179,8 +182,7 @@ export const useShopOrderFileStore = create<ShopOrderFileStore>((set, get) => ({
       return true;
     } catch (error) {
       logger.error('Error saving file:', error);
-      alert('Failed to save shop order');
-      set({ isSaving: false });
+      set({ isSaving: false, errorMessage: 'Failed to save shop order' });
       return false;
     }
   },

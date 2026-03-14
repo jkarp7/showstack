@@ -163,15 +163,13 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
   useEffect(() => {
     const loadLogo = async () => {
       // Try to find logo path from ShopOrderProject or parent Project
-      let logoPath = project.logo_path || (project as any).logo_storage_path;
+      let logoPath = project.logo_path || project.logo_storage_path;
 
       // If no logo in ShopOrderProject, check parent project
-      if (!logoPath && (project as any).parent_project_id) {
+      if (!logoPath && project.parent_project_id) {
         logger.info('[PageRenderer] No logo in ShopOrderProject, checking parent project...');
         try {
-          const parentProject = await window.api.projects.getById(
-            (project as any).parent_project_id,
-          );
+          const parentProject = await window.api.projects.getById(project.parent_project_id);
           if (parentProject?.logo_path) {
             logger.info('[PageRenderer] Found logo in parent project:', parentProject.logo_path);
             logoPath = parentProject.logo_path;
@@ -211,7 +209,7 @@ export function PageRenderer({ section, project, pageSettings, pageNumber }: Pag
     };
 
     loadLogo();
-  }, [project.logo_path, (project as any).logo_storage_path, (project as any).parent_project_id]);
+  }, [project.logo_path, project.logo_storage_path, project.parent_project_id]);
 
   function getDataFieldValue(fieldType: DataFieldType): string {
     const formatDate = (timestamp?: string | number): string => {

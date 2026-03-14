@@ -202,20 +202,35 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
   /**
    * Sign up with email and password
    */
-  async signUp(email: string, password: string): Promise<{ success: boolean; error?: string }> {
+  async signUp(
+    email: string,
+    password: string,
+  ): Promise<{ success: boolean; error?: string; emailConfirmationRequired?: boolean }> {
     try {
       const { data, error } = await this.supabase.auth.signUp({
         email,
         password,
+        options: {
+          // Redirect to the app's custom URL scheme after email confirmation.
+          // Configure Supabase dashboard → Auth → URL Configuration to allow showstack://*.
+          emailRedirectTo: 'showstack://auth/callback',
+        },
       });
 
       if (error) {
         return { success: false, error: mapAuthError(error.message) };
       }
 
-      // Note: Session may be null if email confirmation is required
+      // Session is null when email confirmation is required (Supabase default).
+      // Return a distinct flag so the UI can show the appropriate message.
       this.currentSession = data.session;
-      return { success: true };
+      if (!data.session) {
+        return {
+          success: true,
+          emailConfirmationRequired: true,
+        };
+      }
+      return { success: true, emailConfirmationRequired: false };
     } catch (error) {
       return {
         success: false,

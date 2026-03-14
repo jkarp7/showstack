@@ -389,6 +389,17 @@ contextBridge.exposeInMainWorld('api', {
     signOut: () => ipcRenderer.invoke('auth:signOut'),
     resetPassword: (email: string) => ipcRenderer.invoke('auth:resetPassword', email),
     getState: () => ipcRenderer.invoke('auth:getState'),
+    onDeepLink: (callback: (url: string) => void) => {
+      const wrapper = (_event: unknown, url: string) => callback(url);
+      ipcRenderer.on('auth:deepLink', wrapper as Parameters<typeof ipcRenderer.on>[1]);
+      return () =>
+        ipcRenderer.removeListener(
+          'auth:deepLink',
+          wrapper as Parameters<typeof ipcRenderer.removeListener>[1],
+        );
+    },
+    exchangeDeepLink: (url: string) => ipcRenderer.invoke('auth:exchangeDeepLink', url),
+    updatePassword: (password: string) => ipcRenderer.invoke('auth:updatePassword', password),
   },
 
   // Collaboration operations (project & shop order sharing, presence)
@@ -736,7 +747,10 @@ export interface ElectronAPI {
   };
   auth: {
     signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-    signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+    signUp: (
+      email: string,
+      password: string,
+    ) => Promise<{ success: boolean; error?: string; emailConfirmationRequired?: boolean }>;
     signOut: () => Promise<{ success: boolean; error?: string }>;
     resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
     getState: () => Promise<{
@@ -744,6 +758,14 @@ export interface ElectronAPI {
       userId: string | null;
       email: string | null;
     }>;
+    onDeepLink: (callback: (url: string) => void) => () => void;
+    exchangeDeepLink: (url: string) => Promise<{
+      success: boolean;
+      error?: string;
+      type?: 'signup' | 'recovery' | 'invite';
+      hasSession?: boolean;
+    }>;
+    updatePassword: (password: string) => Promise<{ success: boolean; error?: string }>;
   };
   backup: {
     create: (reason?: string) => Promise<{

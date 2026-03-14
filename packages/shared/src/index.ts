@@ -13,3 +13,6 @@ export const SHARED_VERSION = '0.1.0-alpha';
 
 // Validation schemas and utilities
 export * from './validation';
+
+// Auth utilities
+export * from './auth/passwordPolicy';
