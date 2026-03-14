@@ -16,6 +16,7 @@ import { Paperwork } from './pages/modules/Paperwork';
 import { LabelsPage } from './pages/modules/LabelsPage';
 import { ProjectInfo } from './pages/modules/ProjectInfo';
 import { ShowHealth } from './pages/modules/ShowHealth';
+import { DMXMap } from './pages/modules/DMXMap';
 import { LicenseBanner } from './components/License/LicenseBanner';
 import { SplashScreen } from './components/SplashScreen';
 import { ThemeProvider } from './components/ThemeProvider';
@@ -127,6 +128,7 @@ function AppContent() {
           <Route path="paperwork" element={<Paperwork />} />
           <Route path="project-info" element={<ProjectInfo />} />
           <Route path="show-health" element={<ShowHealth />} />
+          <Route path="dmx-map" element={<DMXMap />} />
           {/* Backwards-compat redirects inside workspace */}
           <Route
             path="module/production/system-docs"

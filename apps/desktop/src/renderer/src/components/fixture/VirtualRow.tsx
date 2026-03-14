@@ -691,6 +691,7 @@ interface VirtualRowProps {
   groups?: FixtureGroup[];
   onPinToGroup?: (groupId: string) => void;
   onUnpinFromGroup?: (groupId: string) => void;
+  validationSeverity?: 'error' | 'warning';
 }
 
 export const VirtualRow = memo(function VirtualRow({
@@ -713,6 +714,7 @@ export const VirtualRow = memo(function VirtualRow({
   groups,
   onPinToGroup,
   onUnpinFromGroup,
+  validationSeverity,
 }: VirtualRowProps) {
   // Context menu state
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
@@ -740,15 +742,23 @@ export const VirtualRow = memo(function VirtualRow({
 
   // Determine row background and style based on conditional formatting and selection state
   const getRowStyle = (): React.CSSProperties => {
+    const validationShadow =
+      validationSeverity === 'error'
+        ? 'inset -3px 0 0 rgb(239 68 68)'
+        : validationSeverity === 'warning'
+          ? 'inset -3px 0 0 rgb(245 158 11)'
+          : undefined;
+
     if (highlightColor) {
       return {
         backgroundColor: highlightColor,
         color: getTextColor(highlightColor),
         outline: isSelected ? '2px solid #3B82F6' : undefined,
         outlineOffset: isSelected ? '-2px' : undefined,
+        boxShadow: validationShadow,
       };
     }
-    return {};
+    return validationShadow ? { boxShadow: validationShadow } : {};
   };
 
   const rowClass = `flex items-center h-10 border-b border-gray-200 dark:border-gray-800 ${

@@ -56,6 +56,7 @@ import { getGroupMembers, computeFixtureGroupMap } from '../../utils/groupMember
 import { InspectorPanel, InspectorContent } from '../../components/inspector/InspectorPanel';
 import { GroupsInspector } from '../../components/inspector/GroupsInspector';
 import { ConditionalFormattingInspector } from '../../components/inspector/ConditionalFormattingInspector';
+import { useValidation } from '../../hooks/useValidation';
 
 interface EquipmentManagerProps {
   initialTab?: 'fixtures' | 'infrastructure' | 'power';
@@ -118,6 +119,9 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
 
   // Highlight rules for conditional formatting
   const [highlightRules, setHighlightRules] = useState<HighlightRule[]>(DEFAULT_HIGHLIGHT_RULES);
+
+  // Validation — for inline grid highlighting
+  const { fixtureIssueMap } = useValidation();
 
   // Smart Groups — inspector panel
   const { groups, allPins, pinsByGroup, loadGroups, addPin, removePin } = useGroupStore();
@@ -1216,6 +1220,7 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
                 fixturePinnedGroupMap={fixturePinnedGroupMap}
                 onPinToGroup={(fixtureId, groupId) => addPin(groupId, fixtureId)}
                 onUnpinFromGroup={(fixtureId, groupId) => removePin(groupId, fixtureId)}
+                fixtureIssueMap={fixtureIssueMap}
               />
             </div>
 

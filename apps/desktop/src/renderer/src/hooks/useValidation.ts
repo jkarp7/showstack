@@ -7,6 +7,8 @@ import { ValidationIssue, ValidationSidebarItem } from '../types/validation';
 export interface ValidationSummary {
   issues: ValidationIssue[];
   badgeCounts: Record<ValidationSidebarItem, { errors: number; warnings: number }>;
+  /** Per-fixture worst severity for inline grid highlighting. */
+  fixtureIssueMap: Map<string, 'error' | 'warning'>;
 }
 
 const EMPTY: ValidationSummary = {
@@ -16,6 +18,7 @@ const EMPTY: ValidationSummary = {
     infrastructure: { errors: 0, warnings: 0 },
     racks: { errors: 0, warnings: 0 },
   },
+  fixtureIssueMap: new Map(),
 };
 
 export function useValidation(): ValidationSummary {
@@ -34,11 +37,22 @@ export function useValidation(): ValidationSummary {
       racks: { errors: 0, warnings: 0 },
     };
 
+    const fixtureIssueMap = new Map<string, 'error' | 'warning'>();
+
     for (const issue of issues) {
       if (issue.severity === 'error') badgeCounts[issue.sidebarItem].errors++;
       else badgeCounts[issue.sidebarItem].warnings++;
+
+      if (issue.sidebarItem === 'fixtures') {
+        for (const id of issue.entityIds) {
+          // errors win over warnings
+          if (issue.severity === 'error' || !fixtureIssueMap.has(id)) {
+            fixtureIssueMap.set(id, issue.severity);
+          }
+        }
+      }
     }
 
-    return { issues, badgeCounts };
+    return { issues, badgeCounts, fixtureIssueMap };
   }, [fixtures, equipment]);
 }
