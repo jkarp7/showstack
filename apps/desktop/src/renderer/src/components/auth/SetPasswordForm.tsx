@@ -9,6 +9,7 @@
 import { useState, useEffect } from 'react';
 import { Lock, Eye, EyeOff, Loader2, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { PASSWORD_MIN_LENGTH } from '@showstack/shared';
 
 export function SetPasswordForm() {
   const { updatePassword, closeAuthModal, isLoading, error, clearError, pendingDeepLinkType } =
@@ -28,7 +29,7 @@ export function SetPasswordForm() {
 
   const isInvite = pendingDeepLinkType === 'invite';
 
-  const passwordMinLength = password.length >= 8;
+  const passwordMinLength = password.length >= PASSWORD_MIN_LENGTH;
   const passwordHasNumber = /\d/.test(password);
   const passwordsMatch = password === confirmPassword && password.length > 0;
   const isValidPassword = passwordMinLength && passwordHasNumber;
@@ -118,7 +119,7 @@ export function SetPasswordForm() {
               <span
                 className={`w-1.5 h-1.5 rounded-full ${passwordMinLength ? 'bg-green-500' : 'bg-gray-300'}`}
               />
-              At least 8 characters
+              At least {PASSWORD_MIN_LENGTH} characters
             </div>
             <div
               className={`text-xs flex items-center gap-1 ${passwordHasNumber ? 'text-green-600' : 'text-gray-400'}`}

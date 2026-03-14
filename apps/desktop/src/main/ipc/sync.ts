@@ -14,6 +14,7 @@ import {
 import { licenseService } from '../services/LicenseService';
 import { presenceService } from '../services/PresenceService';
 import { logger } from '../utils/logger';
+import { validatePassword } from '@showstack/shared';
 
 /** Basic email format validation */
 function isValidEmail(email: string): boolean {
@@ -266,11 +267,12 @@ export function registerSyncHandlers(): void {
    * Called after a recovery or invite deep link has been verified via auth:exchangeDeepLink.
    */
   ipcMain.handle('auth:updatePassword', async (_, password: string) => {
-    if (!password || typeof password !== 'string' || password.length < 8) {
-      return { success: false, error: 'Password must be at least 8 characters' };
+    if (!password || typeof password !== 'string') {
+      return { success: false, error: 'Password is required' };
     }
-    if (!/\d/.test(password)) {
-      return { success: false, error: 'Password must contain at least one number' };
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      return { success: false, error: passwordError };
     }
 
     try {

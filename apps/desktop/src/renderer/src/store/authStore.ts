@@ -7,6 +7,7 @@
 
 import { create } from 'zustand';
 import { logger } from '../utils/logger';
+import { validatePassword } from '@showstack/shared';
 
 /**
  * Sync status from PowerSync
@@ -321,8 +322,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   // Set new password (after recovery/invite deep link verification)
   updatePassword: async (password: string) => {
-    if (password.length < 8) {
-      set({ error: 'Password must be at least 8 characters' });
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      set({ error: passwordError });
       return false;
     }
     set({ isLoading: true, error: null });

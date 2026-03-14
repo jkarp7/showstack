@@ -163,6 +163,19 @@ app.on('ready', async () => {
   // Create landing window
   windowManager.createLandingWindow();
 
+  // Windows/Linux: on the very first launch via a showstack:// URL the URL
+  // arrives in process.argv (no second-instance fires). Send it to the
+  // renderer once the window finishes loading.
+  if (process.platform !== 'darwin') {
+    const deepLinkUrl = process.argv.find((arg) => arg.startsWith('showstack://'));
+    if (deepLinkUrl) {
+      const win = BrowserWindow.getAllWindows()[0];
+      if (win) {
+        win.webContents.once('did-finish-load', () => handleDeepLink(deepLinkUrl));
+      }
+    }
+  }
+
   // Start periodic performance monitoring
   setInterval(() => {
     performanceMonitor.trackMemoryUsage();
