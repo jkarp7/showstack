@@ -43,7 +43,6 @@ interface VirtualDataGridProps {
   fixturePinnedGroupMap?: Map<string, Set<string>>;
   onPinToGroup?: (fixtureId: string, groupId: string) => void;
   onUnpinFromGroup?: (fixtureId: string, groupId: string) => void;
-  fixtureIssueMap?: Map<string, 'error' | 'warning'>;
 }
 
 const ROW_HEIGHT = 40; // pixels
@@ -70,7 +69,6 @@ export function VirtualDataGrid({
   fixturePinnedGroupMap,
   onPinToGroup,
   onUnpinFromGroup,
-  fixtureIssueMap,
 }: VirtualDataGridProps) {
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -518,7 +516,6 @@ export function VirtualDataGrid({
                 onUnpinFromGroup={
                   onUnpinFromGroup ? (groupId) => onUnpinFromGroup(fixture.id, groupId) : undefined
                 }
-                validationSeverity={fixtureIssueMap?.get(fixture.id)}
               />
             ))}
           </div>
