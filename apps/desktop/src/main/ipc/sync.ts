@@ -204,46 +204,39 @@ export function registerSyncHandlers(): void {
     }
 
     try {
-      // Parse both query string and hash fragment from the URL
-      const questionIndex = url.indexOf('?');
-      const hashIndex = url.indexOf('#');
+      const parsedUrl = new URL(url);
+      const queryParams = parsedUrl.searchParams;
+      const hashParams = new URLSearchParams(parsedUrl.hash.substring(1));
 
       // token_hash flows use query params (?token_hash=...&type=recovery|invite)
-      if (questionIndex !== -1) {
-        const queryString =
-          hashIndex !== -1 ? url.slice(questionIndex + 1, hashIndex) : url.slice(questionIndex + 1);
-        const params = new URLSearchParams(queryString);
-        const tokenHash = params.get('token_hash');
-        const type = params.get('type') as 'recovery' | 'invite' | null;
+      const tokenHash = queryParams.get('token_hash');
+      const tokenType = queryParams.get('type') as 'recovery' | 'invite' | null;
 
-        if (tokenHash && (type === 'recovery' || type === 'invite')) {
-          const connector = getSupabaseConnector();
-          const { error } = await connector.getClient().auth.verifyOtp({
-            token_hash: tokenHash,
-            type,
-          });
+      if (tokenHash && (tokenType === 'recovery' || tokenType === 'invite')) {
+        const connector = getSupabaseConnector();
+        const { error } = await connector.getClient().auth.verifyOtp({
+          token_hash: tokenHash,
+          type: tokenType,
+        });
 
-          if (error) {
-            return { success: false, error: error.message };
-          }
-
-          // User is authenticated but must set a password before proceeding
-          return { success: true, type };
+        if (error) {
+          return { success: false, error: error.message };
         }
+
+        // User is authenticated but must set a password before proceeding
+        return { success: true, type: tokenType };
       }
 
       // access_token flows use hash fragment (#access_token=...&refresh_token=...&type=signup|invite|recovery)
       // This is the format Supabase produces when {{ .ConfirmationURL }} is used in email templates.
-      if (hashIndex !== -1) {
-        const params = new URLSearchParams(url.slice(hashIndex + 1));
-        const accessToken = params.get('access_token');
-        const refreshToken = params.get('refresh_token');
-        const type = (params.get('type') ?? 'signup') as 'signup' | 'invite' | 'recovery';
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
 
-        if (!accessToken || !refreshToken) {
-          return { success: false, error: 'Missing access_token or refresh_token in URL' };
-        }
-
+      if (accessToken && refreshToken) {
+        const sessionType = (hashParams.get('type') ?? 'signup') as
+          | 'signup'
+          | 'invite'
+          | 'recovery';
         const connector = getSupabaseConnector();
         const { data, error } = await connector.getClient().auth.setSession({
           access_token: accessToken,
@@ -256,7 +249,7 @@ export function registerSyncHandlers(): void {
 
         // For invite and recovery, the user is authenticated but must set a password.
         // The renderer will show SetPasswordForm when type is not 'signup'.
-        return { success: true, type, hasSession: !!data.session };
+        return { success: true, type: sessionType, hasSession: !!data.session };
       }
 
       return { success: false, error: 'No recognisable token in URL' };
