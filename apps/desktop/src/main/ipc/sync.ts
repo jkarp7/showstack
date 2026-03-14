@@ -269,6 +269,9 @@ export function registerSyncHandlers(): void {
     if (!password || typeof password !== 'string' || password.length < 8) {
       return { success: false, error: 'Password must be at least 8 characters' };
     }
+    if (!/\d/.test(password)) {
+      return { success: false, error: 'Password must contain at least one number' };
+    }
 
     try {
       const connector = getSupabaseConnector();

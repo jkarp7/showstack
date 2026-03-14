@@ -135,6 +135,7 @@ class TelemetryService {
   private flushTimer: number | null = null;
   private sessionId: string;
   private localEvents: StoredEvent[] = [];
+  private unsyncedCount = 0;
   private posthogInitialized = false;
   private posthogInitPromise: Promise<void> | null = null;
   private eventQueue: Array<() => void> = [];
@@ -246,7 +247,7 @@ class TelemetryService {
     await this.storeLocal(telemetryEvent);
 
     // Auto-flush if batch size reached
-    if (this.localEvents.filter((e) => !e.synced).length >= this.BATCH_SIZE) {
+    if (this.unsyncedCount >= this.BATCH_SIZE) {
       // Wait for PostHog initialization to complete before flushing
       if (this.posthogInitPromise) {
         await this.posthogInitPromise;
@@ -374,6 +375,7 @@ class TelemetryService {
       unsyncedEvents.forEach((event) => {
         event.synced = true;
       });
+      this.unsyncedCount -= unsyncedEvents.length;
 
       this.saveLocalEvents();
 
@@ -439,14 +441,15 @@ class TelemetryService {
     };
 
     this.localEvents.push(storedEvent);
+    this.unsyncedCount++;
 
     // Enforce cap on unsynced events to prevent unbounded growth when offline
-    const unsyncedCount = this.localEvents.filter((e) => !e.synced).length;
-    if (unsyncedCount > this.MAX_UNSYNCED_EVENTS) {
+    if (this.unsyncedCount > this.MAX_UNSYNCED_EVENTS) {
       // Drop oldest unsynced event
       const oldestUnsyncedIndex = this.localEvents.findIndex((e) => !e.synced);
       if (oldestUnsyncedIndex > -1) {
         this.localEvents.splice(oldestUnsyncedIndex, 1);
+        this.unsyncedCount--;
         if (import.meta.env.DEV) {
           console.warn(
             `[Telemetry] MAX_UNSYNCED_EVENTS (${this.MAX_UNSYNCED_EVENTS}) reached — oldest unsynced event dropped`,
@@ -559,6 +562,7 @@ class TelemetryService {
       console.error('Failed to load local telemetry events:', error);
       this.localEvents = [];
     }
+    this.unsyncedCount = this.localEvents.filter((e) => !e.synced).length;
   }
 
   /**

@@ -41,6 +41,7 @@ describe('TelemetryService', () => {
 
     // Reset telemetry state
     (telemetry as any).localEvents = [];
+    (telemetry as any).unsyncedCount = 0;
     (telemetry as any).posthogInitialized = false;
   });
 
