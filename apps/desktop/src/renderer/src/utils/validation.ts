@@ -6,28 +6,44 @@ import { isIntentionalAddressSharing } from './fixtureUtils';
 // ── Fixtures ────────────────────────────────────────────────────────────────
 
 function detectDuplicateDmx(fixtures: Fixture[]): ValidationIssue[] {
-  const map = new Map<string, Fixture[]>(); // key → fixtures
+  // Build a per-universe address map covering each fixture's full footprint
+  const map = new Map<string, Fixture[]>(); // "universe:address" → fixtures
 
   for (const f of fixtures) {
     if (f.universe == null || f.dmx_address == null) continue;
-    const key = `${f.universe}:${f.dmx_address}`;
-    const group = map.get(key) ?? [];
-    group.push(f);
-    map.set(key, group);
+    const footprint = f.dmx_footprint ?? 1;
+    for (let offset = 0; offset < footprint; offset++) {
+      const addr = f.dmx_address + offset;
+      if (addr > 512) break;
+      const key = `${f.universe}:${addr}`;
+      const group = map.get(key) ?? [];
+      group.push(f);
+      map.set(key, group);
+    }
   }
 
+  // Collect conflicting addresses, deduplicated by fixture-pair to avoid
+  // reporting the same pair once per occupied address slot.
+  const reportedPairs = new Set<string>();
   const issues: ValidationIssue[] = [];
+
   for (const [key, group] of map) {
     if (group.length < 2) continue;
     if (isIntentionalAddressSharing(group)) continue;
+
+    const ids = group.map((f) => f.id).sort();
+    const pairKey = ids.join('|');
+    if (reportedPairs.has(pairKey)) continue;
+    reportedPairs.add(pairKey);
+
     const [universe, address] = key.split(':');
     issues.push({
-      id: `dup-dmx-${key}`,
+      id: `dup-dmx-${pairKey}`,
       severity: 'error',
       sidebarItem: 'fixtures',
       type: 'Duplicate DMX Address',
-      message: `Universe ${universe}, address ${address} is assigned to ${group.length} fixtures.`,
-      entityIds: group.map((f) => f.id),
+      message: `Universe ${universe}: address ${address} is occupied by ${group.length} fixtures (footprint overlap).`,
+      entityIds: ids,
     });
   }
   return issues;

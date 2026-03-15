@@ -248,6 +248,25 @@ export function BulkEditDialog({
                       placeholder="Leave blank to skip"
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Footprint (ch)
+                    </label>
+                    <input
+                      type="number"
+                      value={updates.dmx_footprint !== undefined ? updates.dmx_footprint : ''}
+                      onChange={(e) =>
+                        handleChange(
+                          'dmx_footprint',
+                          e.target.value ? Math.max(1, parseInt(e.target.value)) : null,
+                        )
+                      }
+                      className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white"
+                      placeholder="Leave blank to skip"
+                      min="1"
+                      max="512"
+                    />
+                  </div>
                 </div>
               )}
             </div>

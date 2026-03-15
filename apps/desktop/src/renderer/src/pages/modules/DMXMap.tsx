@@ -20,16 +20,21 @@ function buildUniverseMap(fixtures: Fixture[]): Map<number, Map<number, AddressI
   for (const f of fixtures) {
     if (f.universe == null || f.dmx_address == null) continue;
     const universe = f.universe;
-    const address = f.dmx_address;
-    if (address < 1 || address > ADDRESSES_PER_UNIVERSE) continue;
+    const startAddr = f.dmx_address;
+    const footprint = f.dmx_footprint ?? 1;
+    if (startAddr < 1 || startAddr > ADDRESSES_PER_UNIVERSE) continue;
 
     if (!universeMap.has(universe)) universeMap.set(universe, new Map());
     const addrMap = universeMap.get(universe)!;
-    const existing = addrMap.get(address);
-    if (existing) {
-      existing.fixtures.push(f);
-    } else {
-      addrMap.set(address, { fixtures: [f], state: 'used' });
+
+    const endAddr = Math.min(startAddr + footprint - 1, ADDRESSES_PER_UNIVERSE);
+    for (let addr = startAddr; addr <= endAddr; addr++) {
+      const existing = addrMap.get(addr);
+      if (existing) {
+        existing.fixtures.push(f);
+      } else {
+        addrMap.set(addr, { fixtures: [f], state: 'used' });
+      }
     }
   }
 
@@ -82,8 +87,12 @@ function UniverseGrid({ universe, addrMap }: UniverseGridProps) {
             } else {
               bg = 'bg-blue-400 dark:bg-blue-600';
               const f = info.fixtures[0];
+              const footprintSuffix =
+                (f.dmx_footprint ?? 1) > 1
+                  ? ` · ${f.mode ?? 'mode unknown'} (${f.dmx_footprint}ch)`
+                  : '';
               title =
-                `Address ${addr} — Ch ${f.channel ?? '—'} ${f.type ?? ''} ${f.position ?? ''}`.trim();
+                `Address ${addr} — Ch ${f.channel ?? '—'} ${f.type ?? ''} ${f.position ?? ''}${footprintSuffix}`.trim();
             }
           }
 

@@ -64,6 +64,8 @@ function createTables(): void {
       channel TEXT,
       universe INTEGER,
       dmx_address INTEGER,
+      dmx_footprint INTEGER NOT NULL DEFAULT 1,
+      mode TEXT,
       dimmer TEXT,
       circuit TEXT,
       circuit_number TEXT,
