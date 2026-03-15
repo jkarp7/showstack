@@ -85,6 +85,11 @@ contextBridge.exposeInMainWorld('api', {
     getFileName: (filePath: string) => ipcRenderer.invoke('file:getFileName', filePath),
     readImageAsDataUrl: (imagePath: string) =>
       ipcRenderer.invoke('file:readImageAsDataUrl', imagePath),
+    saveText: (
+      content: string,
+      defaultFilename: string,
+      filters?: { name: string; extensions: string[] }[],
+    ) => ipcRenderer.invoke('file:saveText', content, defaultFilename, filters),
   },
 
   // ShowStack:Prep operations
@@ -211,6 +216,10 @@ contextBridge.exposeInMainWorld('api', {
     importLayouts: (filePaths?: string[]) => ipcRenderer.invoke('admin:importLayouts', filePaths),
     resetLayoutsToFactory: () => ipcRenderer.invoke('admin:resetLayoutsToFactory'),
     getDefaultLayoutFiles: () => ipcRenderer.invoke('admin:getDefaultLayoutFiles'),
+    getDatabaseInfo: () => ipcRenderer.invoke('admin:getDatabaseInfo'),
+    vacuumDatabase: () => ipcRenderer.invoke('admin:vacuumDatabase'),
+    integrityCheck: () => ipcRenderer.invoke('admin:integrityCheck'),
+    selectFolder: () => ipcRenderer.invoke('admin:selectFolder'),
   },
 
   // Window operations
@@ -363,6 +372,7 @@ contextBridge.exposeInMainWorld('api', {
     list: () => ipcRenderer.invoke('backup:list'),
     restore: (backupDirName: string) => ipcRenderer.invoke('backup:restore', backupDirName),
     delete: (backupDirName: string) => ipcRenderer.invoke('backup:delete', backupDirName),
+    relaunch: () => ipcRenderer.invoke('backup:relaunch'),
   },
 
   // Smart Groups operations
@@ -512,6 +522,11 @@ export interface ElectronAPI {
     validate: (filePath: string) => Promise<any>;
     getFileName: (filePath: string) => Promise<string>;
     readImageAsDataUrl: (imagePath: string) => Promise<string | null>;
+    saveText: (
+      content: string,
+      defaultFilename: string,
+      filters?: { name: string; extensions: string[] }[],
+    ) => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
   };
   prep: {
     projects: {
@@ -611,6 +626,19 @@ export interface ElectronAPI {
     ) => Promise<{ success: boolean; count?: number; errors?: string[]; canceled?: boolean }>;
     resetLayoutsToFactory: () => Promise<{ success: boolean }>;
     getDefaultLayoutFiles: () => Promise<{ success: boolean; files: string[]; directory?: string }>;
+    getDatabaseInfo: () => Promise<{
+      appDbSizeBytes: number;
+      projectsDbSizeBytes: number;
+      lastBackupTime: number | null;
+    }>;
+    vacuumDatabase: () => Promise<{ success: boolean; error?: string }>;
+    integrityCheck: () => Promise<{
+      success: boolean;
+      appDb?: { ok: boolean; details: string[] };
+      projectDb?: { ok: boolean; details: string[] };
+      error?: string;
+    }>;
+    selectFolder: () => Promise<{ canceled: boolean; path?: string }>;
   };
   windows: {
     openProject: (projectId: string) => Promise<void>;
@@ -795,6 +823,7 @@ export interface ElectronAPI {
       error?: string;
     }>;
     delete: (backupDirName: string) => Promise<{ success: boolean; error?: string }>;
+    relaunch: () => Promise<void>;
   };
   collaboration: {
     inviteToProject: (

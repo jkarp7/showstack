@@ -66,16 +66,19 @@ const defaultFlags: FeatureFlags = {
  */
 export function getFeatureFlags(): FeatureFlags {
   const isDeveloperMode = useSettingsStore.getState()?.advanced?.developerMode ?? false;
+  const overrides = useSettingsStore.getState()?.advanced?.featureFlagOverrides ?? {};
 
-  if (isDeveloperMode) {
-    // In developer mode, enable all features
-    return Object.keys(defaultFlags).reduce((acc, key) => {
-      acc[key as keyof FeatureFlags] = true;
-      return acc;
-    }, {} as FeatureFlags);
-  }
-
-  return { ...defaultFlags };
+  return Object.keys(defaultFlags).reduce((acc, key) => {
+    const flag = key as keyof FeatureFlags;
+    if (flag in overrides) {
+      acc[flag] = overrides[flag] as boolean;
+    } else if (isDeveloperMode) {
+      acc[flag] = true;
+    } else {
+      acc[flag] = defaultFlags[flag];
+    }
+    return acc;
+  }, {} as FeatureFlags);
 }
 
 /**
@@ -92,11 +95,14 @@ export function isFeatureEnabled(feature: keyof FeatureFlags): boolean {
  */
 export function useFeatureFlag(feature: keyof FeatureFlags): boolean {
   const isDeveloperMode = useSettingsStore((state) => state.advanced.developerMode);
+  const overrides = useSettingsStore((state) => state.advanced.featureFlagOverrides);
 
-  if (isDeveloperMode) {
-    return true;
+  // Explicit override takes priority over everything
+  if (overrides && feature in overrides) {
+    return overrides[feature] as boolean;
   }
-
+  // Dev mode enables all flags (unless overridden above)
+  if (isDeveloperMode) return true;
   return defaultFlags[feature];
 }
 

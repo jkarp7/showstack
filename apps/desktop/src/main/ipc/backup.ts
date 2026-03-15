@@ -80,4 +80,10 @@ export function registerBackupHandlers(): void {
       };
     }
   });
+
+  ipcMain.handle('backup:relaunch', () => {
+    const { app } = require('electron');
+    app.relaunch();
+    app.exit(0);
+  });
 }

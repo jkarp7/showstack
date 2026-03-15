@@ -1,4 +1,5 @@
-import { ipcMain, BrowserWindow } from 'electron';
+import { ipcMain, BrowserWindow, dialog } from 'electron';
+import { writeFile } from 'fs/promises';
 import {
   fileService,
   ProjectImportResult,
@@ -211,6 +212,42 @@ export function registerFileHandlers(): void {
         // Sanitize error message before sending to renderer (prevents path disclosure)
         const sanitizedMessage = sanitizeError(error);
         throw new Error(sanitizedMessage);
+      }
+    },
+  );
+
+  /**
+   * Save arbitrary text content to a file chosen via native save dialog
+   * Used by Equipment Manager CSV/Eos/GrandMA exports
+   */
+  ipcMain.handle(
+    'file:saveText',
+    async (
+      _,
+      content: string,
+      defaultFilename: string,
+      filters?: { name: string; extensions: string[] }[],
+    ): Promise<{ success: boolean; filePath?: string; canceled?: boolean }> => {
+      try {
+        const result = await dialog.showSaveDialog({
+          title: `Save ${defaultFilename}`,
+          defaultPath: defaultFilename,
+          filters: filters ?? [{ name: 'All Files', extensions: ['*'] }],
+        });
+
+        if (result.canceled || !result.filePath) {
+          return { success: false, canceled: true };
+        }
+
+        await writeFile(result.filePath, content, 'utf-8');
+        return { success: true, filePath: result.filePath };
+      } catch (error) {
+        logger.error('Failed to save text file:', {
+          operation: 'file:saveText',
+          defaultFilename,
+          error: error instanceof Error ? error.message : error,
+        });
+        throw new Error(error instanceof Error ? error.message : 'Failed to save file');
       }
     },
   );

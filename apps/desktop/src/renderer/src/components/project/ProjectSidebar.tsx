@@ -55,7 +55,7 @@ function buildSections(projectId: string): NavSection[] {
     {
       title: 'Visualization',
       items: [
-        { label: 'DMX Map', path: `${base}/dmx-map`, placeholder: true },
+        { label: 'DMX Map', path: `${base}/dmx-map` },
         { label: 'Network Topology', path: `${base}/blueprint`, placeholder: true },
       ],
     },

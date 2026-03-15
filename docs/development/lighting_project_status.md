@@ -1,10 +1,10 @@
 # ShowStack — Lighting Edition Status
 
-**Last Updated:** March 12, 2026
+**Last Updated:** March 15, 2026
 **Edition Price:** $249/year
 **Target Users:** Lighting Designers, Production Electricians, Master Electricians
 **Competes With:** LightWright 6 ($845 one-time)
-**Overall Completion:** ~91%
+**Overall Completion:** ~92%
 
 ---
 
@@ -20,15 +20,9 @@ These items are either actively deferred or waiting on a dependency. Address bef
 
 ### Fixture Management
 
-- ⬜ **Equipment Manager Export (Issue #51)** — Menu handlers wired but all 4 implementations are TODO stubs:
-  - CSV export (`useEquipmentMenuHandlers.ts:69`)
-  - ETC Eos ASCII export (`useEquipmentMenuHandlers.ts:79`)
-  - GrandMA2 XML export (`useEquipmentMenuHandlers.ts:89`)
-  - GrandMA3 XML export (`useEquipmentMenuHandlers.ts:99`)
 - ⬜ **Auto-complete System** — Manufacturer, type, color, gobo lookup from an external fixture database.
   _Deferred — requires extensive fixture database work before this is feasible._
-- ⬜ **DMX Conflict Detection** — Highlight conflicting DMX addresses in the grid.
-  _Waiting on Vectorworks integration (conflict detection only meaningful once CAD import is wired up)._
+- ~~**DMX Conflict Highlighting in Grid**~~ — Evaluated and closed. Show Health collapsible details + DMX Map visualization supersede inline grid highlighting.
 
 ### Power Management
 
@@ -44,10 +38,10 @@ These items are either actively deferred or waiting on a dependency. Address bef
 
 ### Shop Orders
 
-- ⬜ Add integration tests for critical shop order workflows
-- ⬜ Virtual scrolling for large tables (500+ items)
-- ⬜ E2E tests with Playwright for shop order flow
-- ⬜ Performance optimization for large revision sets
+- ✅ **Integration tests for critical shop order workflows** — 35 tests across 8 suites in `shopOrderIntegration.test.ts`: project lifecycle, section management, item CRUD with quantity calculations (total_qty, venue_active/spare), revision tracking (up to 5 revisions, change_log), notes system (3 types, filter by type), full workflow, cascade delete, multi-discipline.
+- ~~Virtual scrolling for large tables~~ — Sections cap at ~30 items in practice; not needed.
+- ~~E2E tests with Playwright~~ — Project uses Puppeteer; second E2E framework not warranted.
+- ~~Performance optimization for large revision sets~~ — Not a real issue given section sizes; revision diff logic is already lightweight.
 
 ### Cloud Services
 
@@ -57,8 +51,8 @@ These items are either actively deferred or waiting on a dependency. Address bef
 
 ### Developer / Admin
 
-- ⬜ **Feature flag system** — Connect Developer Mode toggle to a feature flag system for controlled rollouts / A/B testing. (Issue #35, 95% complete — flags layer missing)
-- ⬜ **Admin Panel backend** — Database vacuum, migration management, settings persistence — UI exists but backend TODOs remain. (Issue #52)
+- ✅ **Feature flag system (Issue #35)** — Per-flag overrides added to `settingsStore.advanced.featureFlagOverrides`; `useFeatureFlag` precedence: override > dev mode blanket > default. Dev mode now shows a Feature Flags section in Advanced Settings with per-flag toggles, override/default labels, and clear buttons.
+- ✅ **Admin Panel backend (Issue #52)** — `DatabaseManagement`: real DB file sizes, last backup time, vacuum (PRAGMA VACUUM on both DBs), integrity check (PRAGMA integrity_check), backup via `backup:create`, two-step restore UI from backup list. `ApplicationSettings`: persisted via `settingsStore.adminConfig`, folder browse via native dialog. New IPC: `admin:getDatabaseInfo`, `admin:vacuumDatabase`, `admin:integrityCheck`, `admin:selectFolder`.
 
 ### User Documentation (Issue #53)
 
@@ -76,8 +70,7 @@ These items are either actively deferred or waiting on a dependency. Address bef
 ### Short-term — Lightwright Parity
 
 1. **MVR export** — Industry-standard CAD/visualizer format for Vectorworks, Cast, Depiction, etc. (Issue #30)
-2. **Enhanced error checking** — Overlapping patches, overloaded dimmers, duplicate channels, missing data warnings. (Issue #31)
-3. **Basic console integration (ETC Eos via OSC)** — Push/pull patch data from an Eos family console. (Issue #25, 5% complete)
+2. **Basic console integration (ETC Eos via OSC)** — Push/pull patch data from an Eos family console. (Issue #25, 5% complete)
 
 **Refs:** `docs/features/console-integration-plan.md`
 
@@ -92,9 +85,10 @@ These items are either actively deferred or waiting on a dependency. Address bef
 ### Advanced Features
 
 - ⬜ **Multi-cable Tracking** — Track multi-cable runs and breakouts.
-- ⬜ **Focus Charts** — Custom focus chart generation.
-- ⬜ **DMX Map Visualization** — Visual DMX universe layout.
-- ⬜ **Work Notes** — Installation notes, issues, and change tracking per fixture.
+- ~~**Focus Charts**~~ — Deferred indefinitely; re-open if users request.
+- 🟡 **DMX Map Visualization** — Universe grid view implemented (32×16, 4 cell states, hover tooltips, intentional sharing suppression). _Remaining: DMX footprint per fixture (see GDTF plan below)._
+- ⬜ **GDTF Personality Library** — 4-phase plan: (1) user-editable `dmx_footprint` field + full-range conflict detection, (2) bundled ~200-fixture starter set + picker UI, (3) ShowStack CDN + update notifications, (4) MVR auto-resolution via Issue #30. **Ref:** `docs/features/gdtf-personality-library-plan.md`
+- ~~**Work Notes**~~ — Deferred indefinitely; re-open if users request.
 
 ---
 
@@ -103,7 +97,8 @@ These items are either actively deferred or waiting on a dependency. Address bef
 ### Fixture Management (Equipment Manager)
 
 - ✅ **Virtual Data Grid** (`VirtualDataGrid.tsx`) — Virtual scrolling for 10,000+ fixtures, 60 FPS, multi-select, in-cell editing.
-- ✅ **Equipment Manager Page** — Full fixture CRUD, duplicate. Export menu items are wired but implementations are TODO stubs. (Issue #51 — still open)
+- ✅ **Equipment Manager Page** — Full fixture CRUD, duplicate, export. (Issue #51 — closed)
+- ✅ **Equipment Manager Export (Issue #51)** — CSV, ETC Eos ASCII, GrandMA2 XML, GrandMA3 XML exports via `ExportHeaderDialog`; native save dialog via `file:saveText` IPC; RFC 4180 CSV escaping.
 - ✅ **Fixture Database** — 68+ columns, LightWright parity achieved.
 - ✅ **Add Fixture Dialog** — Full creation form with all fields and validation.
 - ✅ **Bulk Edit Dialog** — 30+ editable fields, 7 collapsible sections, auto-numbering for 6 fields.
@@ -115,6 +110,7 @@ These items are either actively deferred or waiting on a dependency. Address bef
 - ✅ **Filter out (hidden fixtures)** — Hide fixtures with hidden flag; "Show Hidden" toggle.
 - ✅ **Auto-complete from project data** — Inline suggestions based on existing fixture values.
 - ✅ **Point circuit notation** — Circuits like "1.2", "1.3" for power-thru / daisy chains.
+- ✅ **DMX Map** — Visualization page (`/project/:id/dmx-map`) showing all universes as 32×16 grids (512 addresses each). Cells: empty (gray), used (blue), shared/intentional (teal), conflict (red). Hover tooltip shows channel, type, position. Header shows patched count, shared count, conflict count. Intentional sharing suppressed via `isIntentionalAddressSharing()` — checks `two_fer`/`dimmer_doubles` flags, shared circuit name+number, or shared dimmer value.
 
 ### Smart Groups (Phases 1–4)
 
@@ -191,6 +187,9 @@ _Note: Supersedes Issue #40 (Maintenance Menu) and Issue #29 (Shop Order from Sy
 - ✅ **UI Redesign Phase 5** — Labels consolidation: `LabelVisualDesigner` is the single entry point.
 - ✅ **UI Redesign Phase 6** — Racks & Distribution moved under Equipment Manager sidebar; power sub-tab removed.
 - ✅ **UI Redesign Phase 7** — Show Health: passive validation engine, sidebar badges (red/amber counts), aggregated panel.
+- ✅ **Enhanced error checking (Issue #31 — closed)** — Show Health validates: duplicate DMX address, duplicate channel, missing circuit, missing instrument type, patched-without-channel, channel-without-patch, port over capacity. Rack overload detection is not in Show Health — covered with richer context (% utilization, kW loads, phase balance) by the dedicated Power Summary panel.
+- ✅ **Show Health — intentional sharing suppression** — Duplicate DMX errors suppressed for two-fers, dimmer doubles, and gang-patched fixtures. Logic in `isIntentionalAddressSharing()` (`fixtureUtils.ts`) — checks color flags (`two_fer`, `dimmer_doubles`), shared circuit name+number, or shared dimmer. Used by both Show Health validation and DMX Map.
+- ✅ **Show Health — collapsible fixture details** — Each issue row shows a "show N" toggle (default collapsed). Expanding reveals Ch · Type · Position per affected fixture, or Name · Location for infrastructure issues.
 - ✅ **UI Redesign Phase 8** — Filter chips + slim toolbar: `FilterBar` dropdowns replaced with inline tag filter chips.
 - ✅ **UI Redesign Phase 9** — Design tokens: CSS custom properties across all inspector components.
 - ✅ **Menu Bar Reorganization (PR #83)** — Context-aware menu (equipment / infrastructure / power contexts), Duplicate wired, Conditional Formatting moved to View menu, Generate Paperwork in Project menu.
@@ -219,7 +218,7 @@ _Note: Supersedes Issue #40 (Maintenance Menu) and Issue #29 (Shop Order from Sy
 
 - `useModuleAccess.ts` may need renaming to `useEditionAccess.ts` for clarity.
 - ESLint warning count is exactly at the CI threshold (855). Reducing to 0 is a tracked goal.
-- Issue #51 (Equipment Manager export) — CSV, Eos, GrandMA2, GrandMA3 exports are all TODO stubs. Menu is wired; implementations still needed.
+- Issue #51 (Equipment Manager export) — Closed. All 4 formats implemented (CSV, Eos ASCII, GrandMA2 XML, GrandMA3 XML) with native save dialog via `file:saveText` IPC. CSV uses proper RFC 4180 escaping.
 - Issue #40 (Maintenance Menu) closed — superseded by Smart Groups. Per-column maintenance menu and 4-tab notes dialog not implemented; re-open if user feedback demands.
 - Issue #29 (Shop Order from System Docs) closed — superseded by Smart Groups Phase 4.
 - Issue #86 (TOCTOU security) closed — fixed by PR #87 PowerSync write-path. Student-tier cloud sync eligibility still TBD.

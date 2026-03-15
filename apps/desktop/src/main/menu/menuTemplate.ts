@@ -114,16 +114,16 @@ function buildFileMenu(state: MenuStateData, isMac: boolean): MenuItemConstructo
         enabled: isToolContext,
         click: () => sendToRenderer('menu:saveAs'),
       },
-      // Save as Copy (project context only)
+      // Save as Copy (any project route)
       {
         label: 'Save as Copy',
-        enabled: state.context === 'project' && !!state.projectId,
+        enabled: !!state.projectId,
         click: () => sendToRenderer('menu:saveAsCopy'),
       },
-      // Export Project (project context only)
+      // Export Project (any project route)
       {
         label: 'Export Project...',
-        enabled: state.context === 'project' && !!state.projectId,
+        enabled: !!state.projectId,
         click: () => sendToRenderer('menu:exportProject'),
       },
       { type: 'separator' },

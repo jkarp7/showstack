@@ -18,14 +18,16 @@ ShowStack is a comprehensive suite of tools designed for lighting designers, pro
 
 ### Current Modules
 
-**ShowStack:Lighting** — Equipment & Documentation _(Alpha — ~85% complete)_
+**ShowStack:Lighting** — Equipment & Documentation _(Alpha — ~92% complete)_
 
 - Fixture Manager with virtual grid (10,000+ fixtures at 60 FPS)
+- Export to CSV, ETC Eos ASCII, GrandMA2/3 XML with native save dialog
 - Shop Order builder with spreadsheet-like table interface and revision tracking
 - Paperwork generation with 13 customizable report types
 - Power distribution tracking, phase balancing, and rack management
 - Label designer with 5 Avery templates and batch PDF printing
 - Infrastructure equipment tracking with port assignment management
+- Show Health — passive validation with 7 check types and sidebar badges
 
 **ShowStack:Sound / Video / Production / Tour** _(planned — Year 2+)_
 
@@ -172,7 +174,7 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
 
 **Current Phase:** Alpha
 **Version:** 0.1.0-alpha
-**Status:** User accounts, licensing, and demo mode implemented; core lighting feature set ~85% complete
+**Status:** User accounts, licensing, and demo mode implemented; core lighting feature set ~92% complete — actively seeking beta testers
 
 ### Completed
 
@@ -193,17 +195,20 @@ Coverage reports are uploaded to [Codecov](https://codecov.io/gh/jkarp7/showstac
 **Lighting Features:**
 
 - Fixture Manager — virtual grid, 68+ columns, LightWright parity
+- Equipment Export — CSV, ETC Eos ASCII, GrandMA2/3 XML with native save dialog and configurable headers
+- Show Health — passive validation engine with 7 check types (duplicate DMX/channel, missing type, patched without channel, channel without patch, missing circuit, port over capacity); sidebar error/warning badges
 - Shop Order builder — spreadsheet-like table with revision tracking, clipboard paste, CSV export
 - Paperwork Generator — 13 report types with customizable headers and visual layout designer
 - Power Management — rack configuration, phase balancing, port linking
 - Label Designer — grid-based visual editor, 5 Avery templates, batch PDF printing
 - Infrastructure tracking — network equipment, port assignments, CSV import/export
+- Smart Groups — named saved filters with shop order and label integration
 - Color flags, conditional row highlighting, auto-complete from project data
 
 ### In Progress / Near-term
 
 - MVR / Vectorworks export support
-- Enhanced error checking (DMX conflicts, power overloads)
+- Enhanced error checking — rack overload detection (DMX conflicts and basic data quality checks complete)
 - Basic ETC Eos console integration (OSC)
 - E-commerce → Supabase webhook (auto-fulfill purchases)
 - Auto-updater maintenance gate

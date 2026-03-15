@@ -436,5 +436,79 @@ export function registerAdminHandlers(): void {
     }
   });
 
+  // admin:getDatabaseInfo
+  ipcMain.handle('admin:getDatabaseInfo', async () => {
+    const { stat } = await import('fs/promises');
+    const { databaseManager } = await import('../database/core/DatabaseManager');
+    const { backupService } = await import('../services/BackupService');
+
+    const { appDbPath, projectDbPath } = databaseManager.getPaths();
+
+    let appDbSizeBytes = 0;
+    let projectsDbSizeBytes = 0;
+    try {
+      appDbSizeBytes = (await stat(appDbPath)).size;
+    } catch {
+      /* not yet created */
+    }
+    try {
+      projectsDbSizeBytes = (await stat(projectDbPath)).size;
+    } catch {
+      /* not yet created */
+    }
+
+    const backups = await backupService.listBackups();
+    const lastBackup = backups.length > 0 ? backups[0].timestamp : null;
+
+    return { appDbSizeBytes, projectsDbSizeBytes, lastBackupTime: lastBackup };
+  });
+
+  // admin:vacuumDatabase
+  ipcMain.handle('admin:vacuumDatabase', async () => {
+    const { getAppDatabase, getDatabase } = await import('../database/index');
+    try {
+      getAppDatabase().exec('VACUUM');
+      getDatabase().exec('VACUUM');
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
+    }
+  });
+
+  // admin:integrityCheck
+  ipcMain.handle('admin:integrityCheck', async () => {
+    const { getAppDatabase, getDatabase } = await import('../database/index');
+    try {
+      const toRows = (raw: unknown[]): string[] =>
+        raw.map((r) =>
+          r !== null && typeof r === 'object' && 'integrity_check' in r
+            ? String((r as Record<string, unknown>).integrity_check)
+            : 'unknown',
+        );
+      const appRows = toRows(getAppDatabase().prepare('PRAGMA integrity_check').all());
+      const projectRows = toRows(getDatabase().prepare('PRAGMA integrity_check').all());
+      const appOk = appRows.length === 1 && appRows[0] === 'ok';
+      const projectOk = projectRows.length === 1 && projectRows[0] === 'ok';
+      return {
+        success: true,
+        appDb: { ok: appOk, details: appRows },
+        projectDb: { ok: projectOk, details: projectRows },
+      };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
+    }
+  });
+
+  // admin:selectFolder
+  ipcMain.handle('admin:selectFolder', async () => {
+    const mainWindow = BrowserWindow.getFocusedWindow();
+    if (!mainWindow) return { canceled: true };
+    const result = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openDirectory', 'createDirectory'],
+    });
+    if (result.canceled || !result.filePaths[0]) return { canceled: true };
+    return { canceled: false, path: result.filePaths[0] };
+  });
+
   logger.info('✅ Admin IPC handlers registered');
 }

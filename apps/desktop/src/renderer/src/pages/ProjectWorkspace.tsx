@@ -22,20 +22,27 @@ export function ProjectWorkspace() {
     }
   }, [projects.length, loadProjects]);
 
+  // Set projectId in menu when we navigate to a project.
+  // Intentionally does NOT set context — child routes own their own context.
+  // (React runs child effects before parent effects, so setting context here
+  // would overwrite whatever the child route just set.)
   useEffect(() => {
-    if (projectId && project) {
+    if (projectId) {
       setCurrentProject(projectId);
-      window.api?.menu?.setState({
-        context: 'project',
-        projectId: project.id,
-        projectName: project.name,
-      });
+      window.api?.menu?.setState({ projectId });
     }
 
     return () => {
-      window.api?.menu?.setState({ context: 'landing' });
+      window.api?.menu?.setState({ context: 'landing', projectId: undefined });
     };
-  }, [projectId, project]);
+  }, [projectId, setCurrentProject]);
+
+  // Update project name in menu separately so it doesn't clobber child-route context
+  useEffect(() => {
+    if (project?.name) {
+      window.api?.menu?.setState({ projectName: project.name });
+    }
+  }, [project?.name]);
 
   if (!project && projects.length > 0) {
     return (

@@ -1,31 +1,33 @@
 import { Fixture } from '../types';
 import { InfrastructureEquipment } from '../types/infrastructure';
 import { ValidationIssue } from '../types/validation';
+import { isIntentionalAddressSharing } from './fixtureUtils';
 
 // ── Fixtures ────────────────────────────────────────────────────────────────
 
 function detectDuplicateDmx(fixtures: Fixture[]): ValidationIssue[] {
-  const map = new Map<string, string[]>(); // key → fixture ids
+  const map = new Map<string, Fixture[]>(); // key → fixtures
 
   for (const f of fixtures) {
     if (f.universe == null || f.dmx_address == null) continue;
     const key = `${f.universe}:${f.dmx_address}`;
-    const ids = map.get(key) ?? [];
-    ids.push(f.id);
-    map.set(key, ids);
+    const group = map.get(key) ?? [];
+    group.push(f);
+    map.set(key, group);
   }
 
   const issues: ValidationIssue[] = [];
-  for (const [key, ids] of map) {
-    if (ids.length < 2) continue;
+  for (const [key, group] of map) {
+    if (group.length < 2) continue;
+    if (isIntentionalAddressSharing(group)) continue;
     const [universe, address] = key.split(':');
     issues.push({
       id: `dup-dmx-${key}`,
       severity: 'error',
       sidebarItem: 'fixtures',
       type: 'Duplicate DMX Address',
-      message: `Universe ${universe}, address ${address} is assigned to ${ids.length} fixtures.`,
-      entityIds: ids,
+      message: `Universe ${universe}, address ${address} is assigned to ${group.length} fixtures.`,
+      entityIds: group.map((f) => f.id),
     });
   }
   return issues;
@@ -75,6 +77,55 @@ function detectMissingCircuit(fixtures: Fixture[]): ValidationIssue[] {
   ];
 }
 
+function detectMissingType(fixtures: Fixture[]): ValidationIssue[] {
+  const ids = fixtures.filter((f) => !f.hidden && !f.type?.trim()).map((f) => f.id);
+  if (!ids.length) return [];
+  return [
+    {
+      id: 'missing-type',
+      severity: 'warning',
+      sidebarItem: 'fixtures',
+      type: 'Missing Instrument Type',
+      message: `${ids.length} fixture${ids.length === 1 ? '' : 's'} ${ids.length === 1 ? 'has' : 'have'} no instrument type specified.`,
+      entityIds: ids,
+    },
+  ];
+}
+
+function detectPatchedWithoutChannel(fixtures: Fixture[]): ValidationIssue[] {
+  const ids = fixtures
+    .filter((f) => !f.hidden && (f.universe != null || f.dmx_address != null) && !f.channel?.trim())
+    .map((f) => f.id);
+  if (!ids.length) return [];
+  return [
+    {
+      id: 'patched-no-channel',
+      severity: 'warning',
+      sidebarItem: 'fixtures',
+      type: 'Patched Without Channel',
+      message: `${ids.length} fixture${ids.length === 1 ? '' : 's'} ${ids.length === 1 ? 'has' : 'have'} a DMX address but no channel number.`,
+      entityIds: ids,
+    },
+  ];
+}
+
+function detectChannelWithoutPatch(fixtures: Fixture[]): ValidationIssue[] {
+  const ids = fixtures
+    .filter((f) => !f.hidden && f.channel?.trim() && f.universe == null && f.dmx_address == null)
+    .map((f) => f.id);
+  if (!ids.length) return [];
+  return [
+    {
+      id: 'channel-no-patch',
+      severity: 'warning',
+      sidebarItem: 'fixtures',
+      type: 'Channel Without Patch',
+      message: `${ids.length} fixture${ids.length === 1 ? '' : 's'} ${ids.length === 1 ? 'has' : 'have'} a channel number but no DMX address.`,
+      entityIds: ids,
+    },
+  ];
+}
+
 // ── Infrastructure ───────────────────────────────────────────────────────────
 
 function detectPortOverCapacity(equipment: InfrastructureEquipment[]): ValidationIssue[] {
@@ -106,6 +157,9 @@ export function runValidation(
   return [
     ...detectDuplicateDmx(fixtures),
     ...detectDuplicateChannel(fixtures),
+    ...detectMissingType(fixtures),
+    ...detectPatchedWithoutChannel(fixtures),
+    ...detectChannelWithoutPatch(fixtures),
     ...detectMissingCircuit(fixtures),
     ...detectPortOverCapacity(equipment),
   ];

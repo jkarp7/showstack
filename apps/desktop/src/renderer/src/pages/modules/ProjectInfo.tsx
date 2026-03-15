@@ -27,6 +27,13 @@ export function ProjectInfo() {
     if (!projects.length) loadProjects();
   }, [projects.length, loadProjects]);
 
+  useEffect(() => {
+    window.api?.menu?.setState({ context: 'project' });
+    return () => {
+      window.api?.menu?.setState({ context: 'landing' });
+    };
+  }, []);
+
   // Open edit dialog if navigated here with openEditDialog state (e.g. from menu)
   useEffect(() => {
     const state = location.state as { openEditDialog?: boolean } | null;

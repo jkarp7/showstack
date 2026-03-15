@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { FeatureFlags } from '../config/featureFlags';
 
 // Helper function to generate UUID for anonymous ID
 function generateAnonymousId(): string {
@@ -67,6 +68,7 @@ export interface AdvancedSettings {
   memoryLimit: number; // MB
   cacheSize: number; // MB
   renderQuality: RenderQuality;
+  featureFlagOverrides: Partial<FeatureFlags>;
 }
 
 // Privacy Settings
@@ -86,6 +88,14 @@ export interface UserProfileSettings {
   phone: string;
   designerCredit: string;
   avatarPath?: string; // Path to uploaded avatar image
+}
+
+// Admin Config
+export interface AdminConfig {
+  defaultExportPath: string;
+  defaultProjectPath: string;
+  fileNamingPattern: string;
+  autoBackupEnabled: boolean;
 }
 
 // Power Services Settings
@@ -109,6 +119,7 @@ export interface SettingsState {
   privacy: PrivacySettings;
   userProfile: UserProfileSettings;
   powerServices: PowerServicesSettings;
+  adminConfig: AdminConfig;
 
   // Actions
   updateWorkspace: (settings: Partial<WorkspaceSettings>) => void;
@@ -120,6 +131,8 @@ export interface SettingsState {
   updatePrivacy: (settings: Partial<PrivacySettings>) => void;
   updateUserProfile: (settings: Partial<UserProfileSettings>) => void;
   updatePowerServices: (settings: Partial<PowerServicesSettings>) => void;
+  updateAdminConfig: (settings: Partial<AdminConfig>) => void;
+  updateFeatureFlagOverride: (feature: keyof FeatureFlags, enabled: boolean) => void;
   resetToDefaults: () => void;
 }
 
@@ -164,6 +177,7 @@ const defaultSettings = {
     memoryLimit: 2048,
     cacheSize: 500,
     renderQuality: 'high' as const,
+    featureFlagOverrides: {},
   },
   privacy: {
     telemetryEnabled: false,
@@ -186,6 +200,12 @@ const defaultSettings = {
       { name: 'Service B', capacity_amps: 400 },
       { name: 'Service C', capacity_amps: 200 },
     ],
+  },
+  adminConfig: {
+    defaultExportPath: '',
+    defaultProjectPath: '',
+    fileNamingPattern: '{name}_{date}',
+    autoBackupEnabled: false,
   },
 };
 
@@ -239,6 +259,19 @@ export const useSettingsStore = create<SettingsState>()(
       updatePowerServices: (settings) =>
         set((state) => ({
           powerServices: { ...state.powerServices, ...settings },
+        })),
+
+      updateAdminConfig: (settings) =>
+        set((state) => ({
+          adminConfig: { ...state.adminConfig, ...settings },
+        })),
+
+      updateFeatureFlagOverride: (feature, enabled) =>
+        set((state) => ({
+          advanced: {
+            ...state.advanced,
+            featureFlagOverrides: { ...state.advanced.featureFlagOverrides, [feature]: enabled },
+          },
         })),
 
       resetToDefaults: () => set(defaultSettings),

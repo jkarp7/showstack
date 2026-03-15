@@ -617,8 +617,20 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
     setIsExportDialogOpen(true);
   };
 
+  // Properly escape a value for CSV (RFC 4180)
+  const escapeCsvValue = (value: unknown): string => {
+    if (value === undefined || value === null) return '';
+    if (Array.isArray(value)) return escapeCsvValue(value.join(', '));
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    const str = String(value);
+    if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+
   // Perform the actual export with headers
-  const performExport = (options: ExportHeaderOptions) => {
+  const performExport = async (options: ExportHeaderOptions) => {
     // Build export header
     const header = buildExportHeader(options, project);
 
@@ -626,105 +638,68 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
     const visibleColumns = columnOrder
       .filter((key) => columnVisibility[key])
       .map((key) => {
-        const config = DEFAULT_COLUMN_ORDER.find((c) => c === key);
         return { key, label: userColumnDefinitions[key] || key };
       });
 
+    const dateStr = new Date().toISOString().split('T')[0];
+
     if (options.format === 'csv') {
-      // Build CSV with headers
       const headerText = formatHeaderForCSV(header);
-      const columnHeaders = visibleColumns.map((col) => col.label).join(',');
-
-      const rows = processedFixtures.map((fixture) => {
-        return visibleColumns
-          .map((col) => {
-            const value = fixture[col.key as keyof Fixture];
-
-            // Handle special cases
-            if (value === undefined || value === null) return '';
-            if (Array.isArray(value)) return `"${value.join(', ')}"`;
-            if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-            if (typeof value === 'string' && value.includes(',')) return `"${value}"`;
-
-            return value;
-          })
-          .join(',');
-      });
-
+      const columnHeaders = visibleColumns.map((col) => escapeCsvValue(col.label)).join(',');
+      const rows = processedFixtures.map((fixture) =>
+        visibleColumns.map((col) => escapeCsvValue(fixture[col.key as keyof Fixture])).join(','),
+      );
       const csv = headerText + columnHeaders + '\n' + rows.join('\n');
 
-      // Download CSV
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute(
-        'download',
-        `${projectName}_fixtures_${new Date().toISOString().split('T')[0]}.csv`,
-      );
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      await window.api.files.saveText(csv, `${projectName}_fixtures_${dateStr}.csv`, [
+        { name: 'CSV Files', extensions: ['csv'] },
+        { name: 'All Files', extensions: ['*'] },
+      ]);
     } else if (options.format === 'eos') {
-      // Build Eos format
       const headerText = formatHeaderForEos(header);
-
-      // Eos format: Chan Patch <channel> <fixture_type> <universe>/<address>
       const eosLines = processedFixtures
         .filter((f) => f.channel && f.universe && f.dmx_address)
         .map((fixture) => {
           const type = fixture.type || 'Generic';
           return `Chan Patch ${fixture.channel} "${type}" ${fixture.universe}/${fixture.dmx_address}`;
         });
-
       const eosContent = headerText + eosLines.join('\n');
 
-      // Download Eos file
-      const blob = new Blob([eosContent], { type: 'text/plain;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute(
-        'download',
-        `${projectName}_eos_${new Date().toISOString().split('T')[0]}.txt`,
-      );
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      await window.api.files.saveText(eosContent, `${projectName}_eos_${dateStr}.txt`, [
+        { name: 'Text Files', extensions: ['txt'] },
+        { name: 'All Files', extensions: ['*'] },
+      ]);
     } else if (options.format === 'grandma2' || options.format === 'grandma3') {
-      // Build GrandMA XML format
+      const escapeXmlAttr = (value: unknown): string => {
+        if (value === null || value === undefined) return '';
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&apos;');
+      };
       const headerText = formatHeaderForGrandMA(header);
-
-      // GrandMA format: Simple patch list XML
-      const fixtures = processedFixtures
+      const fixtureLines = processedFixtures
         .filter((f) => f.channel && f.universe && f.dmx_address)
         .map((fixture, idx) => {
-          const type = fixture.type || 'Generic';
-          return `  <Fixture id="${idx + 1}" name="${type}" channel="${fixture.channel}" universe="${fixture.universe}" address="${fixture.dmx_address}" />`;
+          const name = escapeXmlAttr(fixture.type || 'Generic');
+          const channel = escapeXmlAttr(fixture.channel);
+          const universe = escapeXmlAttr(fixture.universe);
+          const address = escapeXmlAttr(fixture.dmx_address);
+          return `  <Fixture id="${idx + 1}" name="${name}" channel="${channel}" universe="${universe}" address="${address}" />`;
         });
-
       const xmlContent =
         headerText +
         '<GrandMA>\n  <Fixtures>\n' +
-        fixtures.join('\n') +
+        fixtureLines.join('\n') +
         '\n  </Fixtures>\n</GrandMA>';
 
-      // Download XML file
-      const blob = new Blob([xmlContent], { type: 'application/xml;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      const format = options.format === 'grandma2' ? 'gma2' : 'gma3';
-      link.setAttribute(
-        'download',
-        `${projectName}_${format}_${new Date().toISOString().split('T')[0]}.xml`,
-      );
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const formatLabel = options.format === 'grandma2' ? 'gma2' : 'gma3';
+      await window.api.files.saveText(xmlContent, `${projectName}_${formatLabel}_${dateStr}.xml`, [
+        { name: 'XML Files', extensions: ['xml'] },
+        { name: 'All Files', extensions: ['*'] },
+      ]);
     }
   };
 
