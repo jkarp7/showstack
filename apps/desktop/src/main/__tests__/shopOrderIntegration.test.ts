@@ -209,13 +209,19 @@ describe('Shop Order Project Lifecycle', () => {
   });
 
   it('should list all projects ordered by updated_at descending', () => {
-    createShopOrderProject({ production_name: 'Show A' });
-    createShopOrderProject({ production_name: 'Show B' });
-    createShopOrderProject({ production_name: 'Show C' });
+    const p1 = createShopOrderProject({ production_name: 'Show A' });
+    const p2 = createShopOrderProject({ production_name: 'Show B' });
+    const p3 = createShopOrderProject({ production_name: 'Show C' });
+
+    // In-memory tests run fast enough that all three may share the same ms
+    // timestamp. Set distinct values directly to make ordering deterministic.
+    db.prepare('UPDATE shop_order_projects SET updated_at = ? WHERE id = ?').run(1000, p1.id);
+    db.prepare('UPDATE shop_order_projects SET updated_at = ? WHERE id = ?').run(2000, p2.id);
+    db.prepare('UPDATE shop_order_projects SET updated_at = ? WHERE id = ?').run(3000, p3.id);
 
     const projects = getAllShopOrderProjects();
     expect(projects).toHaveLength(3);
-    expect(projects.map((p) => p.production_name)).toContain('Show A');
+    expect(projects.map((p) => p.id)).toEqual([p3.id, p2.id, p1.id]);
   });
 
   it('should update allowed project fields', () => {

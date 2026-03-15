@@ -181,6 +181,7 @@ export function DatabaseManagement() {
     setConfirmRestoreDir(null);
     setRestoringDir(backupDirName);
     setRestoreStatus(null);
+    setIsWorking(true);
     try {
       const result = await window.api.backup.restore(backupDirName);
       if (result.success) {
@@ -198,6 +199,7 @@ export function DatabaseManagement() {
       });
     } finally {
       setRestoringDir(null);
+      setIsWorking(false);
     }
   };
 
