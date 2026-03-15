@@ -34,7 +34,7 @@ import { registerHealthHandlers } from './ipc/health';
 import { registerBackupHandlers } from './ipc/backup';
 import { registerCollaborationHandlers } from './ipc/collaboration';
 import { registerGroupHandlers } from './ipc/groups';
-import { registerGdtfHandlers, initGdtfLibrary } from './ipc/gdtf';
+import { registerGdtfHandlers, initGdtfLibrary, initGdtfUpdateCheck } from './ipc/gdtf';
 import { backgroundVerifier } from './services/BackgroundVerifier';
 import { backupService } from './services/BackupService';
 import { crashRecoveryService } from './services/CrashRecoveryService';
@@ -167,6 +167,10 @@ app.on('ready', async () => {
 
   // Create landing window
   windowManager.createLandingWindow();
+
+  // Non-blocking GDTF library update check
+  const gdtfWin = BrowserWindow.getAllWindows()[0];
+  if (gdtfWin) initGdtfUpdateCheck(gdtfWin);
 
   // Windows/Linux: on the very first launch via a showstack:// URL the URL
   // arrives in process.argv (no second-instance fires). Send it to the

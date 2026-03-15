@@ -26,6 +26,12 @@ export function GdtfPickerDialog({ isOpen, onClose, onSelect }: GdtfPickerDialog
   const [modes, setModes] = useState<GdtfMode[]>([]);
   const [selectedModeIndex, setSelectedModeIndex] = useState<number | null>(null);
   const [searching, setSearching] = useState(false);
+  const [cdnQuery, setCdnQuery] = useState<{ manufacturer: string; model: string }>({
+    manufacturer: '',
+    model: '',
+  });
+  const [cdnDownloading, setCdnDownloading] = useState(false);
+  const [cdnError, setCdnError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -37,6 +43,8 @@ export function GdtfPickerDialog({ isOpen, onClose, onSelect }: GdtfPickerDialog
       setSelectedFixture(null);
       setModes([]);
       setSelectedModeIndex(null);
+      setCdnQuery({ manufacturer: '', model: '' });
+      setCdnError(null);
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [isOpen]);
@@ -85,6 +93,43 @@ export function GdtfPickerDialog({ isOpen, onClose, onSelect }: GdtfPickerDialog
   }, [selectedFixture]);
 
   if (!isOpen) return null;
+
+  const handleCdnDownload = async () => {
+    const { manufacturer, model } = cdnQuery;
+    if (!manufacturer.trim() || !model.trim()) return;
+    setCdnDownloading(true);
+    setCdnError(null);
+    try {
+      const result = await window.api?.gdtf?.downloadFixture(manufacturer.trim(), model.trim());
+      if (!result) {
+        setCdnError('Download failed: API unavailable');
+        return;
+      }
+      if (!result.success || !result.modes) {
+        setCdnError(result.error ?? 'Download failed');
+        return;
+      }
+      // Build a search result and auto-select it
+      const id = `${manufacturer.trim()}/${model.trim()}`;
+      const newFixture: GdtfSearchResult = {
+        id,
+        manufacturer: manufacturer.trim(),
+        model: model.trim(),
+        source: 'cdn',
+      };
+      setResults((prev) => {
+        const without = prev.filter((r) => r.id !== id);
+        return [newFixture, ...without];
+      });
+      setSelectedFixture(newFixture);
+      setModes(result.modes);
+      setSelectedModeIndex(result.modes.length > 0 ? 0 : null);
+    } catch (err) {
+      setCdnError(err instanceof Error ? err.message : 'Download failed');
+    } finally {
+      setCdnDownloading(false);
+    }
+  };
 
   const handleConfirm = () => {
     if (selectedModeIndex == null || !modes[selectedModeIndex]) return;
@@ -157,6 +202,50 @@ export function GdtfPickerDialog({ isOpen, onClose, onSelect }: GdtfPickerDialog
                 </div>
               )}
             </div>
+
+            {/* CDN download section — shown when no local results and download API available */}
+            {!searching &&
+              query.trim() &&
+              results.length === 0 &&
+              window.api?.gdtf?.downloadFixture && (
+                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                    Not found locally? Download from CDN:
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={cdnQuery.manufacturer}
+                      onChange={(e) => setCdnQuery((q) => ({ ...q, manufacturer: e.target.value }))}
+                      placeholder="Manufacturer"
+                      className="flex-1 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs focus:outline-none focus:border-blue-500"
+                    />
+                    <input
+                      type="text"
+                      value={cdnQuery.model}
+                      onChange={(e) => setCdnQuery((q) => ({ ...q, model: e.target.value }))}
+                      placeholder="Model"
+                      className="flex-1 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs focus:outline-none focus:border-blue-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCdnDownload}
+                      disabled={
+                        cdnDownloading || !cdnQuery.manufacturer.trim() || !cdnQuery.model.trim()
+                      }
+                      className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+                    >
+                      {cdnDownloading ? (
+                        <span className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : null}
+                      Download
+                    </button>
+                  </div>
+                  {cdnError && (
+                    <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">{cdnError}</p>
+                  )}
+                </div>
+              )}
           </div>
 
           {/* Mode list */}

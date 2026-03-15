@@ -14,8 +14,10 @@ import * as path from 'path';
 import * as fs from 'fs';
 import AdmZip from 'adm-zip';
 import { XMLParser } from 'fast-xml-parser';
+import { app } from 'electron';
 import { getAppDatabase } from '../database';
 import { logger } from '../utils/logger';
+import { getSetting, setSetting } from '../database/queries/settings';
 
 export interface GdtfMode {
   name: string;
@@ -165,6 +167,109 @@ export class GdtfService {
     } catch {
       return [];
     }
+  }
+
+  /**
+   * Fetch the CDN manifest and compare with the stored hash.
+   * Manifest URL: {cdnUrl}/manifest.json
+   * Manifest shape: { version_hash: string, updated_at: number, fixture_count: number }
+   * Stored hash key: 'gdtf_library_version_hash' in app_settings_kv
+   * Returns: { hasUpdate: boolean, versionHash: string, fixtureCount: number } or null on network failure
+   */
+  async checkForUpdates(
+    cdnUrl: string,
+  ): Promise<{ hasUpdate: boolean; versionHash: string; fixtureCount: number } | null> {
+    try {
+      const manifestUrl = `${cdnUrl}/manifest.json`;
+      const response = await fetch(manifestUrl);
+      if (!response.ok) {
+        logger.warn(`GDTF CDN manifest fetch failed`, {
+          status: response.status,
+          url: manifestUrl,
+        });
+        return null;
+      }
+      const manifest = (await response.json()) as {
+        version_hash: string;
+        updated_at: number;
+        fixture_count: number;
+      };
+
+      // Persist the check timestamp
+      setSetting('gdtf_library_checked_at', Date.now().toString());
+
+      const storedHash = getSetting('gdtf_library_version_hash');
+      const hasUpdate = manifest.version_hash !== storedHash;
+
+      return {
+        hasUpdate,
+        versionHash: manifest.version_hash,
+        fixtureCount: manifest.fixture_count,
+      };
+    } catch (err) {
+      logger.warn(`GDTF CDN update check failed`, {
+        error: err instanceof Error ? err.message : String(err),
+      });
+      return null;
+    }
+  }
+
+  /**
+   * Download a single .gdtf file from CDN, save to userData cache dir, parse modes,
+   * upsert into gdtf_cache.
+   * CDN path: {cdnUrl}/{manufacturer}/{model}.gdtf
+   * Local cache: {userData}/gdtf-library/{manufacturer}/{model}.gdtf
+   * Returns GdtfMode[] on success, throws on failure.
+   */
+  async downloadFixture(cdnUrl: string, manufacturer: string, model: string): Promise<GdtfMode[]> {
+    const url = `${cdnUrl}/${encodeURIComponent(manufacturer)}/${encodeURIComponent(model)}.gdtf`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`CDN returned ${response.status} for ${url}`);
+    }
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+
+    const cacheDir = path.join(app.getPath('userData'), 'gdtf-library', manufacturer);
+    fs.mkdirSync(cacheDir, { recursive: true });
+    const filePath = path.join(cacheDir, `${model}.gdtf`);
+    fs.writeFileSync(filePath, buffer);
+
+    const modes = parseGdtfFile(filePath);
+    if (!modes || modes.length === 0) {
+      throw new Error(`No valid DMX modes found in downloaded fixture`);
+    }
+
+    const id = makeId(manufacturer, model);
+    const db = getAppDatabase();
+    db.prepare(
+      `
+      INSERT OR REPLACE INTO gdtf_cache
+        (id, manufacturer, model, revision_id, source, cached_at, file_path, modes_json)
+      VALUES (?, ?, ?, NULL, 'cdn', ?, ?, ?)
+    `,
+    ).run(id, manufacturer, model, Date.now(), filePath, JSON.stringify(modes));
+
+    logger.info(`GDTF CDN fixture downloaded and cached`, { id });
+    return modes;
+  }
+
+  /**
+   * Get current library status from app_settings_kv.
+   * Returns: { versionHash: string | null, checkedAt: number | null }
+   */
+  getLibraryStatus(): { versionHash: string | null; checkedAt: number | null } {
+    const versionHash = getSetting('gdtf_library_version_hash');
+    const checkedAtStr = getSetting('gdtf_library_checked_at');
+    const checkedAt = checkedAtStr !== null ? parseInt(checkedAtStr, 10) : null;
+    return { versionHash, checkedAt };
+  }
+
+  /**
+   * Persist manifest hash after a successful update check.
+   */
+  storeVersionHash(hash: string): void {
+    setSetting('gdtf_library_version_hash', hash);
   }
 }
 
