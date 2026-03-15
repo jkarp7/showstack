@@ -1,6 +1,6 @@
 # ShowStack — Lighting Edition Status
 
-**Last Updated:** March 14, 2026
+**Last Updated:** March 15, 2026
 **Edition Price:** $249/year
 **Target Users:** Lighting Designers, Production Electricians, Master Electricians
 **Competes With:** LightWright 6 ($845 one-time)
@@ -22,7 +22,7 @@ These items are either actively deferred or waiting on a dependency. Address bef
 
 - ⬜ **Auto-complete System** — Manufacturer, type, color, gobo lookup from an external fixture database.
   _Deferred — requires extensive fixture database work before this is feasible._
-- ⬜ **DMX Conflict Highlighting in Grid** — Surface Show Health duplicate DMX errors as inline highlights in the Equipment Manager grid. _(Show Health already detects conflicts; this is a UI integration task.)_
+- ~~**DMX Conflict Highlighting in Grid**~~ — Evaluated and closed. Show Health collapsible details + DMX Map visualization supersede inline grid highlighting.
 
 ### Power Management
 
@@ -110,6 +110,7 @@ These items are either actively deferred or waiting on a dependency. Address bef
 - ✅ **Filter out (hidden fixtures)** — Hide fixtures with hidden flag; "Show Hidden" toggle.
 - ✅ **Auto-complete from project data** — Inline suggestions based on existing fixture values.
 - ✅ **Point circuit notation** — Circuits like "1.2", "1.3" for power-thru / daisy chains.
+- ✅ **DMX Map** — Visualization page (`/project/:id/dmx-map`) showing all universes as 32×16 grids (512 addresses each). Cells: empty (gray), used (blue), shared/intentional (teal), conflict (red). Hover tooltip shows channel, type, position. Header shows patched count, shared count, conflict count. Intentional sharing suppressed via `isIntentionalAddressSharing()` — checks `two_fer`/`dimmer_doubles` flags, shared circuit name+number, or shared dimmer value.
 
 ### Smart Groups (Phases 1–4)
 
@@ -187,6 +188,8 @@ _Note: Supersedes Issue #40 (Maintenance Menu) and Issue #29 (Shop Order from Sy
 - ✅ **UI Redesign Phase 6** — Racks & Distribution moved under Equipment Manager sidebar; power sub-tab removed.
 - ✅ **UI Redesign Phase 7** — Show Health: passive validation engine, sidebar badges (red/amber counts), aggregated panel.
 - ✅ **Enhanced error checking (Issue #31 partial)** — Added: missing instrument type, patched-without-channel, channel-without-patch warnings. Existing: duplicate DMX, duplicate channel, missing circuit, port over capacity. Rack overload checks deferred (require rack store integration).
+- ✅ **Show Health — intentional sharing suppression** — Duplicate DMX errors suppressed for two-fers, dimmer doubles, and gang-patched fixtures. Logic in `isIntentionalAddressSharing()` (`fixtureUtils.ts`) — checks color flags (`two_fer`, `dimmer_doubles`), shared circuit name+number, or shared dimmer. Used by both Show Health validation and DMX Map.
+- ✅ **Show Health — collapsible fixture details** — Each issue row shows a "show N" toggle (default collapsed). Expanding reveals Ch · Type · Position per affected fixture, or Name · Location for infrastructure issues.
 - ✅ **UI Redesign Phase 8** — Filter chips + slim toolbar: `FilterBar` dropdowns replaced with inline tag filter chips.
 - ✅ **UI Redesign Phase 9** — Design tokens: CSS custom properties across all inspector components.
 - ✅ **Menu Bar Reorganization (PR #83)** — Context-aware menu (equipment / infrastructure / power contexts), Duplicate wired, Conditional Formatting moved to View menu, Generate Paperwork in Project menu.
