@@ -70,8 +70,7 @@ These items are either actively deferred or waiting on a dependency. Address bef
 ### Short-term — Lightwright Parity
 
 1. **MVR export** — Industry-standard CAD/visualizer format for Vectorworks, Cast, Depiction, etc. (Issue #30)
-2. **Enhanced error checking** — Overloaded dimmers (requires rack data plumbing). (Issue #31 partial — see completed)
-3. **Basic console integration (ETC Eos via OSC)** — Push/pull patch data from an Eos family console. (Issue #25, 5% complete)
+2. **Basic console integration (ETC Eos via OSC)** — Push/pull patch data from an Eos family console. (Issue #25, 5% complete)
 
 **Refs:** `docs/features/console-integration-plan.md`
 
@@ -86,9 +85,9 @@ These items are either actively deferred or waiting on a dependency. Address bef
 ### Advanced Features
 
 - ⬜ **Multi-cable Tracking** — Track multi-cable runs and breakouts.
-- ⬜ **Focus Charts** — Custom focus chart generation.
-- ⬜ **DMX Map Visualization** — Visual DMX universe layout.
-- ⬜ **Work Notes** — Installation notes, issues, and change tracking per fixture.
+- ~~**Focus Charts**~~ — Deferred indefinitely; re-open if users request.
+- 🟡 **DMX Map Visualization** — Universe grid view implemented (32×16, 4 cell states, hover tooltips, intentional sharing suppression). _Remaining: DMX personality data (address footprint per fixture type) — possible source: ETC fixture library / GDTF format._
+- ~~**Work Notes**~~ — Deferred indefinitely; re-open if users request.
 
 ---
 
@@ -187,7 +186,7 @@ _Note: Supersedes Issue #40 (Maintenance Menu) and Issue #29 (Shop Order from Sy
 - ✅ **UI Redesign Phase 5** — Labels consolidation: `LabelVisualDesigner` is the single entry point.
 - ✅ **UI Redesign Phase 6** — Racks & Distribution moved under Equipment Manager sidebar; power sub-tab removed.
 - ✅ **UI Redesign Phase 7** — Show Health: passive validation engine, sidebar badges (red/amber counts), aggregated panel.
-- ✅ **Enhanced error checking (Issue #31 partial)** — Added: missing instrument type, patched-without-channel, channel-without-patch warnings. Existing: duplicate DMX, duplicate channel, missing circuit, port over capacity. Rack overload checks deferred (require rack store integration).
+- ✅ **Enhanced error checking (Issue #31 — closed)** — Show Health validates: duplicate DMX address, duplicate channel, missing circuit, missing instrument type, patched-without-channel, channel-without-patch, port over capacity. Rack overload detection is not in Show Health — covered with richer context (% utilization, kW loads, phase balance) by the dedicated Power Summary panel.
 - ✅ **Show Health — intentional sharing suppression** — Duplicate DMX errors suppressed for two-fers, dimmer doubles, and gang-patched fixtures. Logic in `isIntentionalAddressSharing()` (`fixtureUtils.ts`) — checks color flags (`two_fer`, `dimmer_doubles`), shared circuit name+number, or shared dimmer. Used by both Show Health validation and DMX Map.
 - ✅ **Show Health — collapsible fixture details** — Each issue row shows a "show N" toggle (default collapsed). Expanding reveals Ch · Type · Position per affected fixture, or Name · Location for infrastructure issues.
 - ✅ **UI Redesign Phase 8** — Filter chips + slim toolbar: `FilterBar` dropdowns replaced with inline tag filter chips.
