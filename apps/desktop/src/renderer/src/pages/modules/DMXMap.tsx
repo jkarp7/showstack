@@ -91,8 +91,7 @@ function UniverseGrid({ universe, addrMap }: UniverseGridProps) {
             <div
               key={addr}
               title={title}
-              className={`${bg} border-r border-b border-gray-200 dark:border-gray-800 flex items-center justify-center overflow-hidden cursor-default`}
-              style={{ height: 20, fontSize: 7, lineHeight: 1 }}
+              className={`${bg} h-5 border-r border-b border-gray-200 dark:border-gray-800 flex items-center justify-center overflow-hidden cursor-default text-[7px] leading-none`}
             >
               {info && (
                 <span className="truncate px-0.5 text-white font-bold">{label || addr}</span>

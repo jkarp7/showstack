@@ -438,7 +438,7 @@ export function registerAdminHandlers(): void {
 
   // admin:getDatabaseInfo
   ipcMain.handle('admin:getDatabaseInfo', async () => {
-    const { statSync } = await import('fs');
+    const { stat } = await import('fs/promises');
     const { databaseManager } = await import('../database/core/DatabaseManager');
     const { backupService } = await import('../services/BackupService');
 
@@ -447,12 +447,12 @@ export function registerAdminHandlers(): void {
     let appDbSizeBytes = 0;
     let projectsDbSizeBytes = 0;
     try {
-      appDbSizeBytes = statSync(appDbPath).size;
+      appDbSizeBytes = (await stat(appDbPath)).size;
     } catch {
       /* not yet created */
     }
     try {
-      projectsDbSizeBytes = statSync(projectDbPath).size;
+      projectsDbSizeBytes = (await stat(projectDbPath)).size;
     } catch {
       /* not yet created */
     }

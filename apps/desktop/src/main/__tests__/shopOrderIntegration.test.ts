@@ -57,6 +57,13 @@ import {
   deleteShopOrderNote,
 } from '../database/queries/shop-order';
 
+/**
+ * Inline schema definition — consistent with the pattern in integration.test.ts.
+ * The MigrationRunner pulls in seeding functions and filesystem dependencies that
+ * make it impractical to use for in-memory test databases. Schema drift is the
+ * known tradeoff; if shop_order_* columns change, update both the migration and
+ * this definition.
+ */
 function createTables(): void {
   db.exec(`
     CREATE TABLE IF NOT EXISTS shop_order_projects (

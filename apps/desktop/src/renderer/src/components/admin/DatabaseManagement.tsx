@@ -62,6 +62,7 @@ export function DatabaseManagement() {
   const [backups, setBackups] = useState<BackupEntry[]>([]);
   const [backupsLoading, setBackupsLoading] = useState(false);
   const [restoringDir, setRestoringDir] = useState<string | null>(null);
+  const [confirmRestoreDir, setConfirmRestoreDir] = useState<string | null>(null);
 
   const [isWorking, setIsWorking] = useState(false);
 
@@ -177,13 +178,7 @@ export function DatabaseManagement() {
   };
 
   const handleRestore = async (backupDirName: string) => {
-    if (
-      !confirm(
-        `Restore from backup at ${formatTimestamp(parseInt(backupDirName.replace('backup-', ''), 10))}? The app will need to restart.`,
-      )
-    ) {
-      return;
-    }
+    setConfirmRestoreDir(null);
     setRestoringDir(backupDirName);
     setRestoreStatus(null);
     try {
@@ -359,13 +354,34 @@ export function DatabaseManagement() {
                             {formatBytes(b.appDbSize + b.projectDbSize)}
                           </div>
                         </div>
-                        <button
-                          onClick={() => handleRestore(dirName)}
-                          disabled={restoringDir === dirName || isWorking}
-                          className="ml-3 px-3 py-1.5 text-xs bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors disabled:opacity-50"
-                        >
-                          {restoringDir === dirName ? 'Restoring...' : 'Restore'}
-                        </button>
+                        {confirmRestoreDir === dirName ? (
+                          <div className="ml-3 flex items-center gap-2">
+                            <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">
+                              Restore? App will restart.
+                            </span>
+                            <button
+                              onClick={() => handleRestore(dirName)}
+                              disabled={isWorking}
+                              className="px-3 py-1.5 text-xs bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors disabled:opacity-50"
+                            >
+                              Confirm
+                            </button>
+                            <button
+                              onClick={() => setConfirmRestoreDir(null)}
+                              className="px-3 py-1.5 text-xs bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-md transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmRestoreDir(dirName)}
+                            disabled={restoringDir === dirName || isWorking}
+                            className="ml-3 px-3 py-1.5 text-xs bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors disabled:opacity-50"
+                          >
+                            {restoringDir === dirName ? 'Restoring...' : 'Restore'}
+                          </button>
+                        )}
                       </div>
                     );
                   })
