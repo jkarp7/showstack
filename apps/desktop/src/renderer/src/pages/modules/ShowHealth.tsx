@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useValidation } from '../../hooks/useValidation';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { useInfrastructureStore } from '../../store/infrastructureStore';
@@ -51,7 +52,8 @@ function InfrastructureDetail({ id }: { id: string }) {
 }
 
 function IssueRow({ issue }: { issue: ValidationIssue }) {
-  const showDetails = issue.entityIds.length > 0;
+  const hasDetails = issue.entityIds.length > 0;
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
@@ -60,7 +62,7 @@ function IssueRow({ issue }: { issue: ValidationIssue }) {
         <div className="flex-1 min-w-0">
           <div className="text-sm font-medium text-gray-800 dark:text-gray-200">{issue.type}</div>
           <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{issue.message}</div>
-          {showDetails && (
+          {hasDetails && expanded && (
             <div className="mt-2 space-y-1">
               {issue.entityIds.map((id) =>
                 issue.sidebarItem === 'infrastructure' ? (
@@ -72,9 +74,19 @@ function IssueRow({ issue }: { issue: ValidationIssue }) {
             </div>
           )}
         </div>
-        <span className="flex-shrink-0 text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide mt-0.5">
-          {issue.sidebarItem}
-        </span>
+        <div className="flex-shrink-0 flex flex-col items-end gap-1.5 mt-0.5">
+          <span className="text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide">
+            {issue.sidebarItem}
+          </span>
+          {hasDetails && (
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              className="text-[10px] text-blue-500 dark:text-blue-400 hover:underline"
+            >
+              {expanded ? 'hide' : `show ${issue.entityIds.length}`}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
