@@ -1,27 +1,32 @@
 import { useState } from 'react';
-import { Settings, FolderOpen, FileText, Save, AlertCircle } from 'lucide-react';
-import { logger } from '../../utils/logger';
+import { Settings, FolderOpen, FileText, Save, AlertCircle, CheckCircle } from 'lucide-react';
+import { useSettingsStore } from '../../store/settingsStore';
 
 export function ApplicationSettings() {
-  const [defaultExportPath, setDefaultExportPath] = useState('');
-  const [defaultProjectPath, setDefaultProjectPath] = useState('');
-  const [autoBackupEnabled, setAutoBackupEnabled] = useState(false);
-  const [autoBackupInterval, setAutoBackupInterval] = useState(24);
-  const [fileNamingPattern, setFileNamingPattern] = useState('{name}_{date}');
+  const adminConfig = useSettingsStore((state) => state.adminConfig);
+  const updateAdminConfig = useSettingsStore((state) => state.updateAdminConfig);
 
-  const handleSave = async () => {
-    // TODO: Implement save functionality
-    logger.info('Saving application settings...');
+  const [localConfig, setLocalConfig] = useState({ ...adminConfig });
+  const [savedIndicator, setSavedIndicator] = useState(false);
+
+  const handleSave = () => {
+    updateAdminConfig(localConfig);
+    setSavedIndicator(true);
+    setTimeout(() => setSavedIndicator(false), 2000);
   };
 
   const handleSelectExportPath = async () => {
-    // TODO: Implement folder selection
-    logger.info('Select export path...');
+    const result = await window.api.admin.selectFolder();
+    if (!result.canceled && result.path) {
+      setLocalConfig((prev) => ({ ...prev, defaultExportPath: result.path! }));
+    }
   };
 
   const handleSelectProjectPath = async () => {
-    // TODO: Implement folder selection
-    logger.info('Select project path...');
+    const result = await window.api.admin.selectFolder();
+    if (!result.canceled && result.path) {
+      setLocalConfig((prev) => ({ ...prev, defaultProjectPath: result.path! }));
+    }
   };
 
   return (
@@ -66,8 +71,10 @@ export function ApplicationSettings() {
             <div className="flex gap-2">
               <input
                 type="text"
-                value={defaultExportPath}
-                onChange={(e) => setDefaultExportPath(e.target.value)}
+                value={localConfig.defaultExportPath}
+                onChange={(e) =>
+                  setLocalConfig((prev) => ({ ...prev, defaultExportPath: e.target.value }))
+                }
                 placeholder="/path/to/exports"
                 className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -90,8 +97,10 @@ export function ApplicationSettings() {
             <div className="flex gap-2">
               <input
                 type="text"
-                value={defaultProjectPath}
-                onChange={(e) => setDefaultProjectPath(e.target.value)}
+                value={localConfig.defaultProjectPath}
+                onChange={(e) =>
+                  setLocalConfig((prev) => ({ ...prev, defaultProjectPath: e.target.value }))
+                }
                 placeholder="/path/to/projects"
                 className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -123,8 +132,10 @@ export function ApplicationSettings() {
             </label>
             <input
               type="text"
-              value={fileNamingPattern}
-              onChange={(e) => setFileNamingPattern(e.target.value)}
+              value={localConfig.fileNamingPattern}
+              onChange={(e) =>
+                setLocalConfig((prev) => ({ ...prev, fileNamingPattern: e.target.value }))
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -160,37 +171,26 @@ export function ApplicationSettings() {
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                checked={autoBackupEnabled}
-                onChange={(e) => setAutoBackupEnabled(e.target.checked)}
+                checked={localConfig.autoBackupEnabled}
+                onChange={(e) =>
+                  setLocalConfig((prev) => ({ ...prev, autoBackupEnabled: e.target.checked }))
+                }
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
           </div>
-
-          {autoBackupEnabled && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Backup Interval (hours)
-              </label>
-              <input
-                type="number"
-                value={autoBackupInterval}
-                onChange={(e) => setAutoBackupInterval(parseInt(e.target.value))}
-                min="1"
-                max="168"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                How often to create automatic backups (1-168 hours)
-              </p>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Save Button */}
-      <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-3">
+        {savedIndicator && (
+          <span className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
+            <CheckCircle className="w-4 h-4" />
+            Settings saved
+          </span>
+        )}
         <button
           onClick={handleSave}
           className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium"

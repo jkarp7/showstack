@@ -216,6 +216,10 @@ contextBridge.exposeInMainWorld('api', {
     importLayouts: (filePaths?: string[]) => ipcRenderer.invoke('admin:importLayouts', filePaths),
     resetLayoutsToFactory: () => ipcRenderer.invoke('admin:resetLayoutsToFactory'),
     getDefaultLayoutFiles: () => ipcRenderer.invoke('admin:getDefaultLayoutFiles'),
+    getDatabaseInfo: () => ipcRenderer.invoke('admin:getDatabaseInfo'),
+    vacuumDatabase: () => ipcRenderer.invoke('admin:vacuumDatabase'),
+    integrityCheck: () => ipcRenderer.invoke('admin:integrityCheck'),
+    selectFolder: () => ipcRenderer.invoke('admin:selectFolder'),
   },
 
   // Window operations
@@ -621,6 +625,19 @@ export interface ElectronAPI {
     ) => Promise<{ success: boolean; count?: number; errors?: string[]; canceled?: boolean }>;
     resetLayoutsToFactory: () => Promise<{ success: boolean }>;
     getDefaultLayoutFiles: () => Promise<{ success: boolean; files: string[]; directory?: string }>;
+    getDatabaseInfo: () => Promise<{
+      appDbSizeBytes: number;
+      projectsDbSizeBytes: number;
+      lastBackupTime: number | null;
+    }>;
+    vacuumDatabase: () => Promise<{ success: boolean; error?: string }>;
+    integrityCheck: () => Promise<{
+      success: boolean;
+      appDb?: { ok: boolean; details: string[] };
+      projectDb?: { ok: boolean; details: string[] };
+      error?: string;
+    }>;
+    selectFolder: () => Promise<{ canceled: boolean; path?: string }>;
   };
   windows: {
     openProject: (projectId: string) => Promise<void>;

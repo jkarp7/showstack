@@ -436,5 +436,77 @@ export function registerAdminHandlers(): void {
     }
   });
 
+  // admin:getDatabaseInfo
+  ipcMain.handle('admin:getDatabaseInfo', async () => {
+    const { statSync } = await import('fs');
+    const { databaseManager } = await import('../database/core/DatabaseManager');
+    const { backupService } = await import('../services/BackupService');
+
+    const { appDbPath, projectDbPath } = databaseManager.getPaths();
+
+    let appDbSizeBytes = 0;
+    let projectsDbSizeBytes = 0;
+    try {
+      appDbSizeBytes = statSync(appDbPath).size;
+    } catch {
+      /* not yet created */
+    }
+    try {
+      projectsDbSizeBytes = statSync(projectDbPath).size;
+    } catch {
+      /* not yet created */
+    }
+
+    const backups = await backupService.listBackups();
+    const lastBackup = backups.length > 0 ? backups[0].timestamp : null;
+
+    return { appDbSizeBytes, projectsDbSizeBytes, lastBackupTime: lastBackup };
+  });
+
+  // admin:vacuumDatabase
+  ipcMain.handle('admin:vacuumDatabase', async () => {
+    const { getAppDatabase, getDatabase } = await import('../database/index');
+    try {
+      getAppDatabase().exec('VACUUM');
+      getDatabase().exec('VACUUM');
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
+    }
+  });
+
+  // admin:integrityCheck
+  ipcMain.handle('admin:integrityCheck', async () => {
+    const { getAppDatabase, getDatabase } = await import('../database/index');
+    try {
+      const appResult = getAppDatabase().prepare('PRAGMA integrity_check').all() as {
+        integrity_check: string;
+      }[];
+      const projectResult = getDatabase().prepare('PRAGMA integrity_check').all() as {
+        integrity_check: string;
+      }[];
+      const appOk = appResult.length === 1 && appResult[0].integrity_check === 'ok';
+      const projectOk = projectResult.length === 1 && projectResult[0].integrity_check === 'ok';
+      return {
+        success: true,
+        appDb: { ok: appOk, details: appResult.map((r) => r.integrity_check) },
+        projectDb: { ok: projectOk, details: projectResult.map((r) => r.integrity_check) },
+      };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
+    }
+  });
+
+  // admin:selectFolder
+  ipcMain.handle('admin:selectFolder', async () => {
+    const mainWindow = BrowserWindow.getFocusedWindow();
+    if (!mainWindow) return { canceled: true };
+    const result = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openDirectory', 'createDirectory'],
+    });
+    if (result.canceled || !result.filePaths[0]) return { canceled: true };
+    return { canceled: false, path: result.filePaths[0] };
+  });
+
   logger.info('✅ Admin IPC handlers registered');
 }

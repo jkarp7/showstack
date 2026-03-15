@@ -1,10 +1,12 @@
-import { Sliders, Code, Zap, Save } from 'lucide-react';
+import { Code, Zap, Save, Flag, X } from 'lucide-react';
 import { useSettingsStore } from '../../store/settingsStore';
 import { logger } from '../../utils/logger';
+import { type FeatureFlags, featureFlagDescriptions } from '../../config/featureFlags';
 
 export function AdvancedSettings() {
   const advanced = useSettingsStore((state) => state.advanced);
   const updateAdvanced = useSettingsStore((state) => state.updateAdvanced);
+  const updateFeatureFlagOverride = useSettingsStore((state) => state.updateFeatureFlagOverride);
 
   const handleDeveloperModeToggle = async (enabled: boolean) => {
     updateAdvanced({ developerMode: enabled });
@@ -173,6 +175,75 @@ export function AdvancedSettings() {
           </div>
         </div>
       </div>
+
+      {advanced.developerMode && (
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <Flag className="w-5 h-5 text-blue-600 dark:text-blue-500" />
+            <span>Feature Flags</span>
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Override individual feature flags. Overrides take priority over developer mode defaults.
+          </p>
+          <div className="space-y-2">
+            {(Object.keys(featureFlagDescriptions) as (keyof FeatureFlags)[]).map((flag) => {
+              const hasOverride = flag in (advanced.featureFlagOverrides ?? {});
+              const overrideValue = hasOverride
+                ? (advanced.featureFlagOverrides[flag] as boolean)
+                : undefined;
+              const effectiveValue = hasOverride ? overrideValue! : true; // dev mode default = true
+              return (
+                <div
+                  key={flag}
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                >
+                  <div className="flex-1 min-w-0 mr-4">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-medium text-gray-900 dark:text-white font-mono">
+                        {flag}
+                      </span>
+                      {hasOverride ? (
+                        <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                          (override)
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400 dark:text-gray-500">(default)</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      {featureFlagDescriptions[flag]}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={effectiveValue}
+                        onChange={(e) => updateFeatureFlagOverride(flag, e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-gray-800 after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                    {hasOverride && (
+                      <button
+                        onClick={() => {
+                          const newOverrides = { ...(advanced.featureFlagOverrides ?? {}) };
+                          delete newOverrides[flag];
+                          updateAdvanced({ featureFlagOverrides: newOverrides });
+                        }}
+                        className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded transition-colors"
+                        title="Reset to default"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="flex justify-end">
         <button
