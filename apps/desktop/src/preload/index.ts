@@ -372,6 +372,7 @@ contextBridge.exposeInMainWorld('api', {
     list: () => ipcRenderer.invoke('backup:list'),
     restore: (backupDirName: string) => ipcRenderer.invoke('backup:restore', backupDirName),
     delete: (backupDirName: string) => ipcRenderer.invoke('backup:delete', backupDirName),
+    relaunch: () => ipcRenderer.invoke('backup:relaunch'),
   },
 
   // Smart Groups operations
@@ -822,6 +823,7 @@ export interface ElectronAPI {
       error?: string;
     }>;
     delete: (backupDirName: string) => Promise<{ success: boolean; error?: string }>;
+    relaunch: () => Promise<void>;
   };
   collaboration: {
     inviteToProject: (

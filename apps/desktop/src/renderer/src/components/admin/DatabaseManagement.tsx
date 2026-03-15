@@ -186,7 +186,7 @@ export function DatabaseManagement() {
       if (result.success) {
         setRestoreStatus({
           type: 'success',
-          message: `Restored from ${result.restoredFrom}. Please restart the app.`,
+          message: `Restored from ${result.restoredFrom}. Restart the app to apply.`,
         });
       } else {
         setRestoreStatus({ type: 'error', message: result.error ?? 'Restore failed.' });
@@ -311,9 +311,19 @@ export function DatabaseManagement() {
                   Select a previous backup to restore from
                 </p>
                 {restoreStatus && (
-                  <p className={`text-xs mt-1 ${statusClass(restoreStatus)}`}>
-                    {restoreStatus.message}
-                  </p>
+                  <div className="flex items-center gap-3 mt-1">
+                    <p className={`text-xs ${statusClass(restoreStatus)}`}>
+                      {restoreStatus.message}
+                    </p>
+                    {restoreStatus.type === 'success' && (
+                      <button
+                        onClick={() => window.api.backup.relaunch()}
+                        className="text-xs px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                      >
+                        Restart Now
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
               <button

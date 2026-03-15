@@ -479,18 +479,20 @@ export function registerAdminHandlers(): void {
   ipcMain.handle('admin:integrityCheck', async () => {
     const { getAppDatabase, getDatabase } = await import('../database/index');
     try {
-      const appResult = getAppDatabase().prepare('PRAGMA integrity_check').all() as {
-        integrity_check: string;
-      }[];
-      const projectResult = getDatabase().prepare('PRAGMA integrity_check').all() as {
-        integrity_check: string;
-      }[];
-      const appOk = appResult.length === 1 && appResult[0].integrity_check === 'ok';
-      const projectOk = projectResult.length === 1 && projectResult[0].integrity_check === 'ok';
+      const toRows = (raw: unknown[]): string[] =>
+        raw.map((r) =>
+          r !== null && typeof r === 'object' && 'integrity_check' in r
+            ? String((r as Record<string, unknown>).integrity_check)
+            : 'unknown',
+        );
+      const appRows = toRows(getAppDatabase().prepare('PRAGMA integrity_check').all());
+      const projectRows = toRows(getDatabase().prepare('PRAGMA integrity_check').all());
+      const appOk = appRows.length === 1 && appRows[0] === 'ok';
+      const projectOk = projectRows.length === 1 && projectRows[0] === 'ok';
       return {
         success: true,
-        appDb: { ok: appOk, details: appResult.map((r) => r.integrity_check) },
-        projectDb: { ok: projectOk, details: projectResult.map((r) => r.integrity_check) },
+        appDb: { ok: appOk, details: appRows },
+        projectDb: { ok: projectOk, details: projectRows },
       };
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : String(error) };

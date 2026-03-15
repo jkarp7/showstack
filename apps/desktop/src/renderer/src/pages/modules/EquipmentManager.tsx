@@ -670,12 +670,24 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
         { name: 'All Files', extensions: ['*'] },
       ]);
     } else if (options.format === 'grandma2' || options.format === 'grandma3') {
+      const escapeXmlAttr = (value: unknown): string => {
+        if (value === null || value === undefined) return '';
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&apos;');
+      };
       const headerText = formatHeaderForGrandMA(header);
       const fixtureLines = processedFixtures
         .filter((f) => f.channel && f.universe && f.dmx_address)
         .map((fixture, idx) => {
-          const type = (fixture.type || 'Generic').replace(/"/g, '&quot;');
-          return `  <Fixture id="${idx + 1}" name="${type}" channel="${fixture.channel}" universe="${fixture.universe}" address="${fixture.dmx_address}" />`;
+          const name = escapeXmlAttr(fixture.type || 'Generic');
+          const channel = escapeXmlAttr(fixture.channel);
+          const universe = escapeXmlAttr(fixture.universe);
+          const address = escapeXmlAttr(fixture.dmx_address);
+          return `  <Fixture id="${idx + 1}" name="${name}" channel="${channel}" universe="${universe}" address="${address}" />`;
         });
       const xmlContent =
         headerText +
