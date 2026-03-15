@@ -165,6 +165,7 @@ function createTables(): void {
 
 beforeEach(() => {
   db = new Database(':memory:');
+  db.pragma('foreign_keys = ON');
   createTables();
 });
 
@@ -683,16 +684,27 @@ describe('Full Shop Order Workflow', () => {
 // 7. Cascade Delete Behavior
 // ---------------------------------------------------------------------------
 describe('Cascade Delete Behavior', () => {
-  it('should remove sections when project is deleted', () => {
+  it('should remove sections and their items when project is deleted', () => {
     const project = createShopOrderProject({ production_name: 'Cascade Test' });
-    createShopOrderSection({ prep_project_id: project.id, name: 'Section 1' });
-    createShopOrderSection({ prep_project_id: project.id, name: 'Section 2' });
+    const s1 = createShopOrderSection({ prep_project_id: project.id, name: 'Section 1' });
+    const s2 = createShopOrderSection({ prep_project_id: project.id, name: 'Section 2' });
+    createShopOrderItem({ section_id: s1.id, description: 'Item A' });
+    createShopOrderItem({ section_id: s2.id, description: 'Item B' });
 
     deleteShopOrderProject(project.id);
 
-    // SQLite foreign key cascade requires PRAGMA foreign_keys = ON
-    // The query layer deletes only the project row — check project is gone
+    // Project row gone
     expect(getShopOrderProjectById(project.id)).toBeNull();
+    // Sections cascade-deleted — query directly by prep_project_id
+    const orphanedSections = db
+      .prepare('SELECT id FROM shop_order_sections WHERE prep_project_id = ?')
+      .all(project.id);
+    expect(orphanedSections).toHaveLength(0);
+    // Items cascade-deleted through sections — query directly by section_id
+    const orphanedItems = db
+      .prepare('SELECT id FROM shop_order_items WHERE section_id IN (?, ?)')
+      .all(s1.id, s2.id);
+    expect(orphanedItems).toHaveLength(0);
   });
 
   it('should remove items when their section is deleted', () => {
@@ -705,9 +717,11 @@ describe('Cascade Delete Behavior', () => {
 
     deleteShopOrderSection(section.id);
 
-    // Section gone — items query returns empty (no section to join against for project-level query)
-    expect(getSectionsByProjectId(project.id)).toHaveLength(0);
-    expect(getItemsByProjectId(project.id)).toHaveLength(0);
+    // Query items directly by section_id — must be gone, not just invisible via JOIN
+    const orphanedItems = db
+      .prepare('SELECT id FROM shop_order_items WHERE section_id = ?')
+      .all(section.id);
+    expect(orphanedItems).toHaveLength(0);
   });
 });
 
