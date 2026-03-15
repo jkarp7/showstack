@@ -1,5 +1,5 @@
 import { ipcMain, BrowserWindow, dialog } from 'electron';
-import { writeFileSync } from 'fs';
+import { writeFile } from 'fs/promises';
 import {
   fileService,
   ProjectImportResult,
@@ -239,7 +239,7 @@ export function registerFileHandlers(): void {
           return { success: false, canceled: true };
         }
 
-        writeFileSync(result.filePath, content, 'utf-8');
+        await writeFile(result.filePath, content, 'utf-8');
         return { success: true, filePath: result.filePath };
       } catch (error) {
         logger.error('Failed to save text file:', {

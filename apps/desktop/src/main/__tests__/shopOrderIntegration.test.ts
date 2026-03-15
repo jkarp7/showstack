@@ -298,7 +298,7 @@ describe('Section Management', () => {
     const section = createShopOrderSection({
       prep_project_id: projectId,
       name: 'Section',
-      page_break: false,
+      page_break: 0,
     });
     expect(section.page_break).toBe(0);
 
