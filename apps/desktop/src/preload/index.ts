@@ -392,6 +392,12 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.invoke('groups:getGroupsForFixture', fixtureId),
   },
 
+  // GDTF fixture library
+  gdtf: {
+    search: (query: string) => ipcRenderer.invoke('gdtf:search', query),
+    getModes: (id: string) => ipcRenderer.invoke('gdtf:getModes', id),
+  },
+
   // Authentication operations
   auth: {
     signIn: (email: string, password: string) => ipcRenderer.invoke('auth:signIn', email, password),
@@ -772,6 +778,12 @@ export interface ElectronAPI {
     addPin: (groupId: string, fixtureId: string) => Promise<void>;
     removePin: (groupId: string, fixtureId: string) => Promise<void>;
     getGroupsForFixture: (fixtureId: string) => Promise<string[]>;
+  };
+  gdtf: {
+    search: (
+      query: string,
+    ) => Promise<{ id: string; manufacturer: string; model: string; source: string }[]>;
+    getModes: (id: string) => Promise<{ name: string; channel_count: number }[]>;
   };
   auth: {
     signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;

@@ -1,7 +1,7 @@
 import { defineConfig } from 'electron-vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
-import { copyFileSync, mkdirSync, readdirSync, existsSync } from 'fs';
+import { copyFileSync, mkdirSync, readdirSync, existsSync, cpSync } from 'fs';
 import { join } from 'path';
 
 export default defineConfig({
@@ -40,6 +40,17 @@ export default defineConfig({
               });
 
               console.log(`✓ Copied ${files.length} layout files to build output`);
+            },
+          },
+          {
+            name: 'copy-gdtf-bundled',
+            writeBundle() {
+              const srcDir = resolve(__dirname, 'apps/desktop/src/main/gdtf-bundled');
+              const destDir = resolve(__dirname, 'out/main/gdtf-bundled');
+              if (existsSync(srcDir)) {
+                cpSync(srcDir, destDir, { recursive: true });
+                console.log('✓ Copied gdtf-bundled to build output');
+              }
             },
           },
         ],

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { logger } from '../../utils/logger';
 import { Fixture } from '../../types';
 import { DimmerRack, PDRack } from '../../types/power';
+import { GdtfPickerDialog } from './GdtfPickerDialog';
 
 interface AutoFillSuggestions {
   positions: string[];
@@ -48,6 +49,7 @@ export function AddFixtureDialog({
   const [address, setAddress] = useState('');
   const [mode, setMode] = useState('');
   const [dmxFootprint, setDmxFootprint] = useState(1);
+  const [gdtfPickerOpen, setGdtfPickerOpen] = useState(false);
   const [dimmer, setDimmer] = useState('');
   const [circuit, setCircuit] = useState('');
   const [circuitNumber, setCircuitNumber] = useState('');
@@ -327,6 +329,7 @@ export function AddFixtureDialog({
     setAddress('');
     setMode('');
     setDmxFootprint(1);
+    setGdtfPickerOpen(false);
     setDimmer('');
     setCircuit('');
     setCircuitNumber('');
@@ -536,6 +539,13 @@ export function AddFixtureDialog({
                     className={inputClass}
                     placeholder="e.g. Standard (18ch)"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setGdtfPickerOpen(true)}
+                    className="mt-1 text-[10px] text-blue-400 hover:text-blue-300 underline"
+                  >
+                    Search library…
+                  </button>
                 </div>
                 <div>
                   <label className={labelClass}>Footprint (ch)</label>
@@ -1039,6 +1049,14 @@ export function AddFixtureDialog({
           </>
         )}
       </div>
+      <GdtfPickerDialog
+        isOpen={gdtfPickerOpen}
+        onClose={() => setGdtfPickerOpen(false)}
+        onSelect={(selectedMode, channelCount) => {
+          setMode(selectedMode);
+          setDmxFootprint(channelCount);
+        }}
+      />
     </div>
   );
 }

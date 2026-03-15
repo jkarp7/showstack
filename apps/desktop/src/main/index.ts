@@ -34,6 +34,7 @@ import { registerHealthHandlers } from './ipc/health';
 import { registerBackupHandlers } from './ipc/backup';
 import { registerCollaborationHandlers } from './ipc/collaboration';
 import { registerGroupHandlers } from './ipc/groups';
+import { registerGdtfHandlers, initGdtfLibrary } from './ipc/gdtf';
 import { backgroundVerifier } from './services/BackgroundVerifier';
 import { backupService } from './services/BackupService';
 import { crashRecoveryService } from './services/CrashRecoveryService';
@@ -138,6 +139,10 @@ app.on('ready', async () => {
   registerBackupHandlers();
   registerCollaborationHandlers();
   registerGroupHandlers();
+  registerGdtfHandlers();
+
+  // Scan bundled GDTF fixtures into cache (non-blocking)
+  initGdtfLibrary();
 
   // Initialize PowerSync (non-blocking, works offline)
   initializePowerSync().catch((err) => {

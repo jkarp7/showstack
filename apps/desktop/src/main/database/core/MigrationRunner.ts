@@ -160,6 +160,9 @@ export class MigrationRunner {
         }
       };
 
+      // GDTF cache table
+      this.migrateGdtfCacheTable();
+
       // Seed default paperwork header template (must be before paperwork templates — FK dependency)
       runSeeding('seedPaperworkHeaderTemplate', seedPaperworkHeaderTemplate);
 
@@ -179,6 +182,44 @@ export class MigrationRunner {
       );
       // Continue anyway - don't block app startup
     }
+  }
+
+  /**
+   * Ensure gdtf_cache table exists (app DB migration)
+   */
+  private migrateGdtfCacheTable(): void {
+    const tableExists = this.db
+      .prepare(
+        `SELECT COUNT(*) as count FROM sqlite_master WHERE type='table' AND name='gdtf_cache'`,
+      )
+      .get() as { count: number };
+    if ((tableExists?.count || 0) > 0) return;
+
+    logger.info('Running migration: Creating gdtf_cache table');
+    this.db
+      .prepare(
+        `
+      CREATE TABLE IF NOT EXISTS gdtf_cache (
+        id TEXT PRIMARY KEY,
+        manufacturer TEXT NOT NULL,
+        model TEXT NOT NULL,
+        revision_id TEXT,
+        source TEXT NOT NULL DEFAULT 'bundled',
+        cached_at INTEGER NOT NULL,
+        file_path TEXT NOT NULL,
+        modes_json TEXT NOT NULL
+      )
+    `,
+      )
+      .run();
+    this.db
+      .prepare('CREATE INDEX IF NOT EXISTS idx_gdtf_cache_manufacturer ON gdtf_cache(manufacturer)')
+      .run();
+    this.db
+      .prepare(
+        'CREATE INDEX IF NOT EXISTS idx_gdtf_cache_search ON gdtf_cache(manufacturer, model)',
+      )
+      .run();
   }
 
   /**
