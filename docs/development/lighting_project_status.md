@@ -86,7 +86,8 @@ These items are either actively deferred or waiting on a dependency. Address bef
 
 - ⬜ **Multi-cable Tracking** — Track multi-cable runs and breakouts.
 - ~~**Focus Charts**~~ — Deferred indefinitely; re-open if users request.
-- 🟡 **DMX Map Visualization** — Universe grid view implemented (32×16, 4 cell states, hover tooltips, intentional sharing suppression). _Remaining: DMX personality data (address footprint per fixture type) — possible source: ETC fixture library / GDTF format._
+- 🟡 **DMX Map Visualization** — Universe grid view implemented (32×16, 4 cell states, hover tooltips, intentional sharing suppression). _Remaining: DMX footprint per fixture (see GDTF plan below)._
+- ⬜ **GDTF Personality Library** — 4-phase plan: (1) user-editable `dmx_footprint` field + full-range conflict detection, (2) bundled ~200-fixture starter set + picker UI, (3) ShowStack CDN + update notifications, (4) MVR auto-resolution via Issue #30. **Ref:** `docs/features/gdtf-personality-library-plan.md`
 - ~~**Work Notes**~~ — Deferred indefinitely; re-open if users request.
 
 ---
