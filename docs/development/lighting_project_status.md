@@ -38,10 +38,10 @@ These items are either actively deferred or waiting on a dependency. Address bef
 
 ### Shop Orders
 
-- ⬜ Add integration tests for critical shop order workflows
-- ⬜ Virtual scrolling for large tables (500+ items)
-- ⬜ E2E tests with Playwright for shop order flow
-- ⬜ Performance optimization for large revision sets
+- ✅ **Integration tests for critical shop order workflows** — 35 tests across 8 suites in `shopOrderIntegration.test.ts`: project lifecycle, section management, item CRUD with quantity calculations (total_qty, venue_active/spare), revision tracking (up to 5 revisions, change_log), notes system (3 types, filter by type), full workflow, cascade delete, multi-discipline.
+- ~~Virtual scrolling for large tables~~ — Sections cap at ~30 items in practice; not needed.
+- ~~E2E tests with Playwright~~ — Project uses Puppeteer; second E2E framework not warranted.
+- ~~Performance optimization for large revision sets~~ — Not a real issue given section sizes; revision diff logic is already lightweight.
 
 ### Cloud Services
 
