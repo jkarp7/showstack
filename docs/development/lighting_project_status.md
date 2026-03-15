@@ -51,8 +51,8 @@ These items are either actively deferred or waiting on a dependency. Address bef
 
 ### Developer / Admin
 
-- ⬜ **Feature flag system** — Connect Developer Mode toggle to a feature flag system for controlled rollouts / A/B testing. (Issue #35, 95% complete — flags layer missing)
-- ⬜ **Admin Panel backend** — Database vacuum, migration management, settings persistence — UI exists but backend TODOs remain. (Issue #52)
+- ✅ **Feature flag system (Issue #35)** — Per-flag overrides added to `settingsStore.advanced.featureFlagOverrides`; `useFeatureFlag` precedence: override > dev mode blanket > default. Dev mode now shows a Feature Flags section in Advanced Settings with per-flag toggles, override/default labels, and clear buttons.
+- ✅ **Admin Panel backend (Issue #52)** — `DatabaseManagement`: real DB file sizes, last backup time, vacuum (PRAGMA VACUUM on both DBs), integrity check (PRAGMA integrity_check), backup via `backup:create`, two-step restore UI from backup list. `ApplicationSettings`: persisted via `settingsStore.adminConfig`, folder browse via native dialog. New IPC: `admin:getDatabaseInfo`, `admin:vacuumDatabase`, `admin:integrityCheck`, `admin:selectFolder`.
 
 ### User Documentation (Issue #53)
 
