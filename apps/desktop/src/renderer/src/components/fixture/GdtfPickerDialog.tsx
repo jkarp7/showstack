@@ -16,7 +16,7 @@ interface GdtfPickerDialogProps {
   isOpen: boolean;
   onClose: () => void;
   /** Called when user confirms a mode selection */
-  onSelect: (mode: string, channelCount: number) => void;
+  onSelect: (manufacturer: string, model: string, mode: string, channelCount: number) => void;
 }
 
 export function GdtfPickerDialog({ isOpen, onClose, onSelect }: GdtfPickerDialogProps) {
@@ -132,9 +132,9 @@ export function GdtfPickerDialog({ isOpen, onClose, onSelect }: GdtfPickerDialog
   };
 
   const handleConfirm = () => {
-    if (selectedModeIndex == null || !modes[selectedModeIndex]) return;
+    if (selectedModeIndex == null || !modes[selectedModeIndex] || !selectedFixture) return;
     const mode = modes[selectedModeIndex];
-    onSelect(mode.name, mode.channel_count);
+    onSelect(selectedFixture.manufacturer, selectedFixture.model, mode.name, mode.channel_count);
     onClose();
   };
 

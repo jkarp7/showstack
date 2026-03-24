@@ -33,7 +33,7 @@ export const FixtureSchema = extendBaseEntity({
   project_id: OptionalIDSchema,
 
   // Position & Identification (required fields)
-  position: z.string().min(1, 'Position is required'),
+  position: z.string().optional(),
   type: z.string().min(1, 'Fixture type is required'),
 
   // Position & Identification (optional fields)

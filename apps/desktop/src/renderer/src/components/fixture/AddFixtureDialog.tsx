@@ -1052,7 +1052,10 @@ export function AddFixtureDialog({
       <GdtfPickerDialog
         isOpen={gdtfPickerOpen}
         onClose={() => setGdtfPickerOpen(false)}
-        onSelect={(selectedMode, channelCount) => {
+        onSelect={(mfr, mdl, selectedMode, channelCount) => {
+          setManufacturer(mfr);
+          setModel(mdl);
+          setType(mdl);
           setMode(selectedMode);
           setDmxFootprint(channelCount);
         }}

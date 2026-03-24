@@ -129,14 +129,14 @@ describe('FixtureSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('should require position and type', () => {
+  it('should require type but not position', () => {
     const result = parseWithZod(CreateFixtureSchema, {
       manufacturer: 'ETC',
     });
 
     expect(result.success).toBe(false);
     {
-      expect(getErrors(result).some((e) => e.field === 'position')).toBe(true);
+      expect(getErrors(result).some((e) => e.field === 'position')).toBe(false);
       expect(getErrors(result).some((e) => e.field === 'type')).toBe(true);
     }
   });

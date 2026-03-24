@@ -825,7 +825,9 @@ export function BulkEditDialog({
       <GdtfPickerDialog
         isOpen={gdtfPickerOpen}
         onClose={() => setGdtfPickerOpen(false)}
-        onSelect={(selectedMode, channelCount) => {
+        onSelect={(mfr, mdl, selectedMode, channelCount) => {
+          handleChange('manufacturer', mfr);
+          handleChange('model', mdl);
           handleChange('mode', selectedMode);
           handleChange('dmx_footprint', channelCount);
         }}
