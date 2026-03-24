@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { Fixture } from '../../types';
 import { isIntentionalAddressSharing } from '../../utils/fixtureUtils';
@@ -70,29 +70,55 @@ function UniverseGrid({ universe, addrMap }: UniverseGridProps) {
         {Array.from({ length: ADDRESSES_PER_UNIVERSE }, (_, i) => {
           const addr = i + 1;
           const info = addrMap.get(addr);
-          const label = info?.fixtures[0]
-            ? info.fixtures[0].channel?.trim() || info.fixtures[0].type?.trim() || ''
-            : '';
 
           let bg = 'bg-gray-50 dark:bg-gray-900';
           let title = `Address ${addr} — empty`;
+          let cellContent: React.ReactNode = null;
+          let extraBorder = '';
 
           if (info) {
+            const f = info.fixtures[0];
+
             if (info.state === 'conflict') {
               bg = 'bg-red-500';
-              title = `Address ${addr} — CONFLICT (${info.fixtures.length} fixtures): ${info.fixtures.map((f) => f.channel || f.type || f.id).join(', ')}`;
+              title = `Address ${addr} — CONFLICT (${info.fixtures.length} fixtures): ${info.fixtures.map((fx) => fx.channel || fx.type || fx.id).join(', ')}`;
+              const label = f.channel?.trim() || f.type?.trim() || String(addr);
+              cellContent = <span className="truncate px-0.5 text-white font-bold">{label}</span>;
             } else if (info.state === 'shared') {
               bg = 'bg-teal-400 dark:bg-teal-600';
-              title = `Address ${addr} — shared (${info.fixtures.length} fixtures): ${info.fixtures.map((f) => f.channel || f.type || f.id).join(', ')}`;
+              title = `Address ${addr} — shared (${info.fixtures.length} fixtures): ${info.fixtures.map((fx) => fx.channel || fx.type || fx.id).join(', ')}`;
+              const label = f.channel?.trim() || f.type?.trim() || String(addr);
+              cellContent = <span className="truncate px-0.5 text-white font-bold">{label}</span>;
             } else {
-              bg = 'bg-blue-400 dark:bg-blue-600';
-              const f = info.fixtures[0];
+              const footprint = f.dmx_footprint ?? 1;
+              const blockStart = f.dmx_address!;
+              const blockEnd = blockStart + footprint - 1;
+              const isStart = addr === blockStart;
+              const isEnd = addr === blockEnd;
               const footprintSuffix =
-                (f.dmx_footprint ?? 1) > 1
-                  ? ` · ${f.mode ?? 'mode unknown'} (${f.dmx_footprint}ch)`
-                  : '';
+                footprint > 1 ? ` · ${f.mode ?? 'mode unknown'} (${footprint}ch)` : '';
               title =
                 `Address ${addr} — Ch ${f.channel ?? '—'} ${f.type ?? ''} ${f.position ?? ''}${footprintSuffix}`.trim();
+
+              if (isStart) {
+                // First cell of the block: full colour + label
+                bg = 'bg-blue-500 dark:bg-blue-500';
+                extraBorder = 'border-l-2 border-l-blue-800 dark:border-l-blue-300';
+                const label = f.channel?.trim() || f.type?.trim() || String(addr);
+                cellContent = <span className="truncate px-0.5 text-white font-bold">{label}</span>;
+              } else if (isEnd && footprint > 1) {
+                // Last cell of a multi-channel block: muted + right edge marker
+                bg = 'bg-blue-200 dark:bg-blue-800';
+                extraBorder = 'border-r-2 border-r-blue-800 dark:border-r-blue-300';
+                cellContent = (
+                  <span className="truncate px-0.5 text-blue-600 dark:text-blue-300 text-[6px]">
+                    {addr}
+                  </span>
+                );
+              } else {
+                // Continuation cell: muted, no label
+                bg = 'bg-blue-200 dark:bg-blue-800';
+              }
             }
           }
 
@@ -100,11 +126,9 @@ function UniverseGrid({ universe, addrMap }: UniverseGridProps) {
             <div
               key={addr}
               title={title}
-              className={`${bg} h-5 border-r border-b border-gray-200 dark:border-gray-800 flex items-center justify-center overflow-hidden cursor-default text-[7px] leading-none`}
+              className={`${bg} ${extraBorder} h-5 border-r border-b border-gray-200 dark:border-gray-800 flex items-center justify-center overflow-hidden cursor-default text-[7px] leading-none`}
             >
-              {info && (
-                <span className="truncate px-0.5 text-white font-bold">{label || addr}</span>
-              )}
+              {cellContent}
             </div>
           );
         })}
@@ -179,8 +203,12 @@ export function DMXMap() {
             Empty
           </span>
           <span className="flex items-center gap-1">
-            <span className="inline-block w-3 h-3 rounded-sm bg-blue-400 dark:bg-blue-600" />
-            Used
+            <span className="inline-block w-3 h-3 rounded-sm bg-blue-500 border-l-2 border-l-blue-800" />
+            Start
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="inline-block w-3 h-3 rounded-sm bg-blue-200 dark:bg-blue-800" />
+            Block
           </span>
           <span className="flex items-center gap-1">
             <span className="inline-block w-3 h-3 rounded-sm bg-teal-400 dark:bg-teal-600" />
