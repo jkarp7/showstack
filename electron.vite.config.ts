@@ -6,6 +6,10 @@ import { join } from 'path';
 
 export default defineConfig({
   main: {
+    watch: {
+      // Also watch the shared package so the main process restarts on schema changes
+      include: ['packages/shared/src/**'],
+    },
     build: {
       lib: {
         entry: resolve(__dirname, 'apps/desktop/src/main/index.ts'),
