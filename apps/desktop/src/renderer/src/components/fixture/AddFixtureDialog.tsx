@@ -170,7 +170,7 @@ export function AddFixtureDialog({
           }
 
           if (!isNaN(rawAddress)) {
-            rawAddress += i;
+            rawAddress += i * dmxFootprint;
             const universe = Math.ceil(rawAddress / 512);
             const dmx = ((rawAddress - 1) % 512) + 1;
             currentAddress = `${universe}/${dmx}`;
