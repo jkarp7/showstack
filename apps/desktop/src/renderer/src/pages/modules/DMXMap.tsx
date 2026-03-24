@@ -54,6 +54,33 @@ interface UniverseGridProps {
   addrMap: Map<number, AddressInfo>;
 }
 
+/**
+ * Returns per-side border classes that draw a boxed container around a fixture block.
+ * Outer edges get a thick dark-blue border; inner cell boundaries get a thin muted line.
+ */
+function fixtureBorderClasses(addr: number, blockStart: number, blockEnd: number): string {
+  const row = Math.floor((addr - 1) / COLS);
+  const topEdge = row === Math.floor((blockStart - 1) / COLS);
+  const bottomEdge = row === Math.floor((blockEnd - 1) / COLS);
+  const leftEdge = addr === blockStart || (addr - 1) % COLS === 0;
+  const rightEdge = addr === blockEnd || addr % COLS === 0;
+
+  return [
+    topEdge
+      ? 'border-t-2 border-t-blue-700 dark:border-t-blue-400'
+      : 'border-t border-t-blue-300 dark:border-t-blue-600',
+    bottomEdge
+      ? 'border-b-2 border-b-blue-700 dark:border-b-blue-400'
+      : 'border-b border-b-blue-300 dark:border-b-blue-600',
+    leftEdge
+      ? 'border-l-2 border-l-blue-700 dark:border-l-blue-400'
+      : 'border-l border-l-blue-300 dark:border-l-blue-600',
+    rightEdge
+      ? 'border-r-2 border-r-blue-700 dark:border-r-blue-400'
+      : 'border-r border-r-blue-300 dark:border-r-blue-600',
+  ].join(' ');
+}
+
 function UniverseGrid({ universe, addrMap }: UniverseGridProps) {
   return (
     <div className="mb-8">
@@ -74,7 +101,8 @@ function UniverseGrid({ universe, addrMap }: UniverseGridProps) {
           let bg = 'bg-gray-50 dark:bg-gray-900';
           let title = `Address ${addr} — empty`;
           let cellContent: React.ReactNode = null;
-          let extraBorder = '';
+          // Empty cells use the standard thin grid border
+          let borderClass = 'border-r border-b border-gray-200 dark:border-gray-800';
 
           if (info) {
             const f = info.fixtures[0];
@@ -82,42 +110,38 @@ function UniverseGrid({ universe, addrMap }: UniverseGridProps) {
             if (info.state === 'conflict') {
               bg = 'bg-red-500';
               title = `Address ${addr} — CONFLICT (${info.fixtures.length} fixtures): ${info.fixtures.map((fx) => fx.channel || fx.type || fx.id).join(', ')}`;
-              const label = f.channel?.trim() || f.type?.trim() || String(addr);
-              cellContent = <span className="truncate px-0.5 text-white font-bold">{label}</span>;
+              cellContent = (
+                <span className="truncate px-0.5 text-white font-bold">
+                  {f.channel?.trim() || f.type?.trim() || String(addr)}
+                </span>
+              );
             } else if (info.state === 'shared') {
               bg = 'bg-teal-400 dark:bg-teal-600';
               title = `Address ${addr} — shared (${info.fixtures.length} fixtures): ${info.fixtures.map((fx) => fx.channel || fx.type || fx.id).join(', ')}`;
-              const label = f.channel?.trim() || f.type?.trim() || String(addr);
-              cellContent = <span className="truncate px-0.5 text-white font-bold">{label}</span>;
+              cellContent = (
+                <span className="truncate px-0.5 text-white font-bold">
+                  {f.channel?.trim() || f.type?.trim() || String(addr)}
+                </span>
+              );
             } else {
               const footprint = f.dmx_footprint ?? 1;
               const blockStart = f.dmx_address!;
               const blockEnd = blockStart + footprint - 1;
               const isStart = addr === blockStart;
-              const isEnd = addr === blockEnd;
               const footprintSuffix =
                 footprint > 1 ? ` · ${f.mode ?? 'mode unknown'} (${footprint}ch)` : '';
               title =
                 `Address ${addr} — Ch ${f.channel ?? '—'} ${f.type ?? ''} ${f.position ?? ''}${footprintSuffix}`.trim();
 
+              bg = isStart ? 'bg-blue-500 dark:bg-blue-500' : 'bg-blue-200 dark:bg-blue-800';
+              borderClass = fixtureBorderClasses(addr, blockStart, blockEnd);
+
               if (isStart) {
-                // First cell of the block: full colour + label
-                bg = 'bg-blue-500 dark:bg-blue-500';
-                extraBorder = 'border-l-2 border-l-blue-800 dark:border-l-blue-300';
-                const label = f.channel?.trim() || f.type?.trim() || String(addr);
-                cellContent = <span className="truncate px-0.5 text-white font-bold">{label}</span>;
-              } else if (isEnd && footprint > 1) {
-                // Last cell of a multi-channel block: muted + right edge marker
-                bg = 'bg-blue-200 dark:bg-blue-800';
-                extraBorder = 'border-r-2 border-r-blue-800 dark:border-r-blue-300';
                 cellContent = (
-                  <span className="truncate px-0.5 text-blue-600 dark:text-blue-300 text-[6px]">
-                    {addr}
+                  <span className="truncate px-0.5 text-white font-bold">
+                    {f.channel?.trim() || f.type?.trim() || String(addr)}
                   </span>
                 );
-              } else {
-                // Continuation cell: muted, no label
-                bg = 'bg-blue-200 dark:bg-blue-800';
               }
             }
           }
@@ -126,7 +150,7 @@ function UniverseGrid({ universe, addrMap }: UniverseGridProps) {
             <div
               key={addr}
               title={title}
-              className={`${bg} ${extraBorder} h-5 border-r border-b border-gray-200 dark:border-gray-800 flex items-center justify-center overflow-hidden cursor-default text-[7px] leading-none`}
+              className={`${bg} ${borderClass} h-5 flex items-center justify-center overflow-hidden cursor-default text-[7px] leading-none`}
             >
               {cellContent}
             </div>
