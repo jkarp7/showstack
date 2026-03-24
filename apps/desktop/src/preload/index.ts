@@ -400,6 +400,7 @@ contextBridge.exposeInMainWorld('api', {
     downloadFixture: (manufacturer: string, model: string) =>
       ipcRenderer.invoke('gdtf:downloadFixture', manufacturer, model),
     getLibraryStatus: () => ipcRenderer.invoke('gdtf:getLibraryStatus'),
+    applyUpdate: () => ipcRenderer.invoke('gdtf:applyUpdate'),
     onUpdateAvailable: (
       callback: (info: { versionHash: string; fixtureCount: number }) => void,
     ) => {
@@ -810,6 +811,7 @@ export interface ElectronAPI {
       error?: string;
     }>;
     getLibraryStatus: () => Promise<{ versionHash: string | null; checkedAt: number | null }>;
+    applyUpdate: () => Promise<{ success: boolean; fixtureCount?: number; error?: string }>;
     onUpdateAvailable: (
       callback: (info: { versionHash: string; fixtureCount: number }) => void,
     ) => () => void;

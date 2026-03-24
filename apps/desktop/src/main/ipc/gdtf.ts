@@ -9,6 +9,7 @@ export function registerGdtfHandlers(): void {
   ipcMain.removeHandler('gdtf:checkForUpdates');
   ipcMain.removeHandler('gdtf:downloadFixture');
   ipcMain.removeHandler('gdtf:getLibraryStatus');
+  ipcMain.removeHandler('gdtf:applyUpdate');
 
   /**
    * Search the GDTF fixture library.
@@ -78,6 +79,28 @@ export function registerGdtfHandlers(): void {
   ipcMain.handle('gdtf:getLibraryStatus', () => {
     return gdtfService.getLibraryStatus();
   });
+
+  /**
+   * Download the full manifest from CDN and bulk-upsert all fixtures into gdtf_cache.
+   * Returns { success, fixtureCount } or { success: false, error }.
+   */
+  ipcMain.handle(
+    'gdtf:applyUpdate',
+    async (): Promise<{ success: boolean; fixtureCount?: number; error?: string }> => {
+      const cdnUrl = process.env.GDTF_CDN_URL ?? '';
+      if (!cdnUrl) {
+        return { success: false, error: 'CDN URL not configured' };
+      }
+      try {
+        const fixtureCount = await gdtfService.applyManifestUpdate(cdnUrl);
+        return { success: true, fixtureCount };
+      } catch (err) {
+        const error = err instanceof Error ? err.message : String(err);
+        logger.warn('GDTF manifest update failed', { error });
+        return { success: false, error };
+      }
+    },
+  );
 
   logger.info('GDTF IPC handlers registered');
 }

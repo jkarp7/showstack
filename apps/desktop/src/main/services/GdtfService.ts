@@ -266,6 +266,68 @@ export class GdtfService {
   }
 
   /**
+   * Download the full manifest from CDN and bulk-upsert all fixtures into gdtf_cache.
+   * Uses a transaction for performance with 7,000+ fixtures.
+   * Stores the new version hash on success.
+   * Returns the number of fixtures upserted, or throws on failure.
+   */
+  async applyManifestUpdate(cdnUrl: string): Promise<number> {
+    const manifestUrl = `${cdnUrl}/manifest.json`;
+    const response = await fetch(manifestUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch manifest: HTTP ${response.status}`);
+    }
+
+    const manifest = (await response.json()) as {
+      version_hash: string;
+      fixture_count: number;
+      fixtures: Array<{
+        id: string;
+        manufacturer: string;
+        model: string;
+        rid: number;
+        modes: Array<{ name: string; channel_count: number }>;
+      }>;
+    };
+
+    if (!Array.isArray(manifest.fixtures)) {
+      throw new Error('Manifest missing fixtures array');
+    }
+
+    const db = getAppDatabase();
+    const upsert = db.prepare(`
+      INSERT OR REPLACE INTO gdtf_cache
+        (id, manufacturer, model, revision_id, source, cached_at, file_path, modes_json)
+      VALUES (?, ?, ?, ?, 'cdn-manifest', ?, '', ?)
+    `);
+
+    const now = Date.now();
+    const runAll = db.transaction((fixtures: typeof manifest.fixtures) => {
+      for (const fixture of fixtures) {
+        upsert.run(
+          fixture.id,
+          fixture.manufacturer,
+          fixture.model,
+          fixture.rid,
+          now,
+          JSON.stringify(fixture.modes),
+        );
+      }
+    });
+
+    runAll(manifest.fixtures);
+
+    setSetting('gdtf_library_version_hash', manifest.version_hash);
+    setSetting('gdtf_library_checked_at', now.toString());
+
+    logger.info(`GDTF manifest applied: ${manifest.fixtures.length} fixtures upserted`, {
+      versionHash: manifest.version_hash,
+    });
+
+    return manifest.fixtures.length;
+  }
+
+  /**
    * Persist manifest hash after a successful update check.
    */
   storeVersionHash(hash: string): void {

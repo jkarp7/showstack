@@ -9,6 +9,8 @@ export function GdtfLibraryUpdateBanner(): JSX.Element | null {
     fixtureCount: number;
   } | null>(null);
   const [isDismissed, setIsDismissed] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
+  const [applyError, setApplyError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!window.api?.gdtf?.onUpdateAvailable) return;
@@ -25,6 +27,7 @@ export function GdtfLibraryUpdateBanner(): JSX.Element | null {
       }
       setUpdateInfo(info);
       setIsDismissed(false);
+      setApplyError(null);
     });
 
     return unsubscribe;
@@ -43,6 +46,29 @@ export function GdtfLibraryUpdateBanner(): JSX.Element | null {
     setIsDismissed(true);
   };
 
+  const handleApply = async () => {
+    if (!window.api?.gdtf?.applyUpdate) return;
+    setIsApplying(true);
+    setApplyError(null);
+    try {
+      const result = await window.api.gdtf.applyUpdate();
+      if (result.success) {
+        try {
+          localStorage.setItem(DISMISSED_VERSION_KEY, updateInfo.versionHash);
+        } catch {
+          // non-fatal
+        }
+        setIsDismissed(true);
+      } else {
+        setApplyError(result.error ?? 'Update failed');
+      }
+    } catch (err) {
+      setApplyError(err instanceof Error ? err.message : 'Update failed');
+    } finally {
+      setIsApplying(false);
+    }
+  };
+
   return (
     <div className="bg-blue-50 border-b border-blue-200 px-4 py-2">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -52,7 +78,15 @@ export function GdtfLibraryUpdateBanner(): JSX.Element | null {
             <span className="text-blue-700 ml-2">
               {updateInfo.fixtureCount.toLocaleString()} fixtures.
             </span>
+            {applyError && <span className="text-red-600 ml-2">{applyError}</span>}
           </div>
+          <button
+            onClick={handleApply}
+            disabled={isApplying}
+            className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 transition"
+          >
+            {isApplying ? 'Updating…' : 'Update Now'}
+          </button>
         </div>
         <button
           onClick={handleDismiss}
