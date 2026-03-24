@@ -147,6 +147,8 @@ function UniverseGrid({ universe, addrMap }: UniverseGridProps) {
 
 export function DMXMap() {
   const fixtures = useFixtureStore((state) => state.fixtures);
+  const loadFixtures = useFixtureStore((state) => state.loadFixtures);
+  const currentProjectId = useFixtureStore((state) => state.currentProjectId);
 
   useEffect(() => {
     window.api?.menu?.setState({ context: 'module' });
@@ -154,6 +156,14 @@ export function DMXMap() {
       window.api?.menu?.setState({ context: 'module' });
     };
   }, []);
+
+  // Reload fixtures on mount so footprints and DMX data are always fresh,
+  // regardless of whether EquipmentManager was visited first.
+  useEffect(() => {
+    if (currentProjectId) {
+      loadFixtures(currentProjectId);
+    }
+  }, [currentProjectId, loadFixtures]);
 
   const universeMap = useMemo(() => buildUniverseMap(fixtures), [fixtures]);
   const sortedUniverses = useMemo(
