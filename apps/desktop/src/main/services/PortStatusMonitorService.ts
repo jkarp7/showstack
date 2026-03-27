@@ -78,10 +78,14 @@ class PortStatusMonitorServiceClass {
       const socket = net.createConnection({ host: ip, port: PROBE_PORT });
       let settled = false;
 
+      const timer = setTimeout(() => finish('timeout'), CONNECT_TIMEOUT_MS);
+
       const finish = (status: PortStatusResult['status']) => {
         if (settled) return;
         settled = true;
+        clearTimeout(timer);
         socket.destroy();
+        socket.removeAllListeners();
         resolve({
           equipment_id: equipmentId,
           ip,
@@ -91,15 +95,9 @@ class PortStatusMonitorServiceClass {
         });
       };
 
-      const timer = setTimeout(() => finish('timeout'), CONNECT_TIMEOUT_MS);
-
-      socket.on('connect', () => {
-        clearTimeout(timer);
-        finish('reachable');
-      });
+      socket.on('connect', () => finish('reachable'));
 
       socket.on('error', (err: NodeJS.ErrnoException) => {
-        clearTimeout(timer);
         // ECONNREFUSED means the host is up — it just rejected the connection.
         finish(err.code === 'ECONNREFUSED' ? 'reachable' : 'unreachable');
       });

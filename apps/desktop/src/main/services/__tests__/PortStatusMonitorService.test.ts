@@ -20,6 +20,7 @@ function makeFakeSocket(event: 'connect' | 'error', err?: NodeJS.ErrnoException)
       return socket;
     }),
     destroy: vi.fn(),
+    removeAllListeners: vi.fn(),
   };
   // Fire the event asynchronously so the promise has time to attach listeners
   setTimeout(() => {

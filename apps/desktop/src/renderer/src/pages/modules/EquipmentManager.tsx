@@ -189,6 +189,12 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
     return INFRASTRUCTURE_COLUMN_CONFIGS.filter((col) => infrastructureColumnVisibility[col.key]);
   }, [infrastructureColumnVisibility]);
 
+  // O(1) lookup map for Network Status panel
+  const infrastructureEquipmentMap = useMemo(
+    () => new Map(infrastructureEquipment.map((e) => [e.id, e])),
+    [infrastructureEquipment],
+  );
+
   // Helper function to render infrastructure cell value
   const renderInfrastructureCellValue = (equipment: any, columnKey: InfrastructureColumnKey) => {
     const value = equipment[columnKey];
@@ -1534,7 +1540,7 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
                 ) : (
                   <div className="divide-y divide-gray-200 dark:divide-gray-700">
                     {portStatusResults.map((r) => {
-                      const eq = infrastructureEquipment.find((e) => e.id === r.equipment_id);
+                      const eq = infrastructureEquipmentMap.get(r.equipment_id);
                       return (
                         <div
                           key={r.equipment_id}
