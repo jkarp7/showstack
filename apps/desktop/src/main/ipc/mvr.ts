@@ -1,6 +1,8 @@
 import { ipcMain, dialog } from 'electron';
 import { mvrService } from '../services/MvrService';
+import { mvrExportService, MvrExportResult } from '../services/MvrExportService';
 import { createFixture } from '../database/queries/fixtures';
+import { getProjectById } from '../database/queries/projects';
 import { logger } from '../utils/logger';
 
 export interface MvrImportResult {
@@ -12,8 +14,13 @@ export interface MvrImportResult {
   warnings: string[];
 }
 
+export interface MvrExportIpcResult extends MvrExportResult {
+  canceled?: boolean;
+}
+
 export function registerMvrHandlers(): void {
   ipcMain.removeHandler('mvr:import');
+  ipcMain.removeHandler('mvr:export');
 
   /**
    * Open a native file dialog for an .mvr file, parse it, and bulk-create
@@ -86,6 +93,52 @@ export function registerMvrHandlers(): void {
       const error = err instanceof Error ? err.message : String(err);
       logger.error('MVR import failed', { filePath, error });
       return { success: false, error, created: 0, gdtfResolved: 0, warnings: [] };
+    }
+  });
+
+  /**
+   * Export project fixtures to an MVR file.
+   * Opens a native save dialog, writes the ZIP, returns a summary.
+   */
+  ipcMain.handle('mvr:export', async (_event, projectId: string): Promise<MvrExportIpcResult> => {
+    if (typeof projectId !== 'string' || !projectId) {
+      return {
+        success: false,
+        error: 'No project ID provided',
+        fixtureCount: 0,
+        layerCount: 0,
+        gdtfBundled: 0,
+      };
+    }
+
+    const project = getProjectById(projectId);
+    const projectName = project?.name ?? 'ShowStack Export';
+
+    const dialogResult = await dialog.showSaveDialog({
+      title: 'Export MVR File',
+      defaultPath: `${projectName.replace(/[^a-z0-9_\-\s]/gi, '_')}.mvr`,
+      filters: [
+        { name: 'My Virtual Rig', extensions: ['mvr'] },
+        { name: 'All Files', extensions: ['*'] },
+      ],
+    });
+
+    if (dialogResult.canceled || !dialogResult.filePath) {
+      return { success: false, canceled: true, fixtureCount: 0, layerCount: 0, gdtfBundled: 0 };
+    }
+
+    try {
+      const result = mvrExportService.export(projectId, dialogResult.filePath, projectName);
+      logger.info('MVR export IPC complete', {
+        fixtureCount: result.fixtureCount,
+        layerCount: result.layerCount,
+        gdtfBundled: result.gdtfBundled,
+      });
+      return result;
+    } catch (err) {
+      const error = err instanceof Error ? err.message : String(err);
+      logger.error('MVR export failed', { projectId, error });
+      return { success: false, error, fixtureCount: 0, layerCount: 0, gdtfBundled: 0 };
     }
   });
 
