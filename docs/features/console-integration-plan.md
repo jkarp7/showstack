@@ -4,9 +4,11 @@
 **Delivery:** Phased approach with 5 iterative milestones
 **Timeline:** 10 weeks (2.5 months)
 **Effort:** 1 developer full-time
-**Status:** Planned (not yet implemented)
+**Status:** Next up (not yet implemented)
 **Created:** January 20, 2026
+**Updated:** March 27, 2026
 **Priority:** High (competitive gap with Lightwright, professional workflow integration)
+**Related:** IP/VLAN Port Validation (Issue #17) — tackle alongside; both require network access infrastructure
 
 ---
 
@@ -39,6 +41,27 @@ Console integration enables **bidirectional communication** between ShowStack an
 5. **Competitive Advantage** - Few tools offer real-time console sync
 
 **Related Issues:** Competitive analysis (PROJECT_STATUS.md lines 1554-1563)
+
+---
+
+## Network Access Prerequisites
+
+Both console integration and IP/VLAN port validation (Issue #17) require network access infrastructure that does not yet exist in ShowStack. These should share a common foundation:
+
+- **Network permission model** — Electron sandboxing allows UDP/TCP from the main process; no special entitlements needed on macOS/Windows for local network access. However, users should be warned when outbound connections are initiated.
+- **IP address validation** — Needed for console IP input (Phase 1 UI) and port field validation (Issue #17). Implement once and reuse. Valid forms: IPv4 dotted-decimal (`192.168.1.100`), optional port suffix (`192.168.1.100:3032`).
+- **VLAN range validation** — Infrastructure port fields accept VLAN IDs (1–4094). Validate at input, not just on save.
+- **Shared network utility** — A small `src/main/utils/networkValidation.ts` covering IPv4 parse/validate and VLAN range check can serve both features. Write it as part of Phase 1 setup.
+
+### Recommended Sequencing
+
+Phase 1 of console integration is the natural moment to also close Issue #17:
+
+1. Build `networkValidation.ts` (IP parse + VLAN range check)
+2. Wire IP validation into `ConsoleConnectionDialog` (console integration)
+3. Wire IP + VLAN validation into infrastructure port fields (Issue #17)
+
+Both ship in the same PR or back-to-back PRs with minimal additional effort.
 
 ---
 
@@ -1027,6 +1050,6 @@ Week 9-10: Phase 5 - Advanced Features & Polish
 
 ---
 
-**Last Updated:** January 20, 2026
+**Last Updated:** March 27, 2026
 **Author:** Claude Code
-**Version:** 1.0
+**Version:** 1.1
