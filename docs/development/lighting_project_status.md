@@ -109,6 +109,7 @@ These items are either actively deferred or waiting on a dependency. Address bef
 - ✅ **Auto-complete from project data** — Inline suggestions based on existing fixture values.
 - ✅ **Point circuit notation** — Circuits like "1.2", "1.3" for power-thru / daisy chains.
 - ✅ **DMX Map** — Visualization page (`/project/:id/dmx-map`) showing all universes as 32×16 grids (512 addresses each). Multi-channel fixtures rendered as contiguous color blocks: start cell (dark blue `bg-blue-500`) shows channel label, continuation cells (light blue `bg-blue-200`) extend the block. Thick outer border (`border-2 border-blue-700`) encloses each fixture block; thin inner cell dividers. Single-channel fixtures: one dark-blue cell. Shared/intentional (teal), conflict (red). Tooltip shows `Ch · type · position · mode · footprint`. Per-universe utilization bar + `used / 512 (XX%)` counter. Reloads fixtures on mount. Intentional sharing suppressed via `isIntentionalAddressSharing()`.
+- ✅ **DMX Conflict Detection** — Full-range conflict detection across both Show Health (validates duplicate DMX addresses, flags with fixture details) and DMX Map (conflict cells rendered red). Multi-channel fixture ranges (`dmx_address` through `dmx_address + dmx_footprint - 1`) checked end-to-end. Intentional sharing (two-fers, dimmer doubles, gang-patched fixtures) suppressed in both places. `⬜ Future: click a conflict cell in DMX Map to navigate/highlight the fixture in Equipment Manager.`
 
 ### GDTF Personality Library (Phases 1–3)
 
