@@ -57,7 +57,7 @@ function lookupCachedGdtfPath(manufacturer: string, model: string): string | nul
   if (!row) {
     row = db
       .prepare(
-        'SELECT file_path FROM gdtf_cache WHERE LOWER(manufacturer) = LOWER(?) AND LOWER(model) = LOWER(?)',
+        'SELECT file_path FROM gdtf_cache WHERE manufacturer = ? COLLATE NOCASE AND model = ? COLLATE NOCASE',
       )
       .get(manufacturer, model) as { file_path: string } | undefined;
   }
