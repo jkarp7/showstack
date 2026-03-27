@@ -16,14 +16,9 @@
 
 import * as net from 'net';
 import { logger } from '../utils/logger';
+import { PortStatusResult } from '@showstack/shared';
 
-export interface PortStatusResult {
-  equipment_id: string;
-  ip: string;
-  status: 'reachable' | 'unreachable' | 'timeout';
-  latency_ms?: number;
-  last_checked: number;
-}
+export type { PortStatusResult };
 
 // Port to probe — HTTP is a reasonable choice: refused quickly by most
 // network devices even when not running a web server, so we get a fast

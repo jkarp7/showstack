@@ -1,14 +1,9 @@
 import { useEffect, useState } from 'react';
 import { logger } from '../../utils/logger';
 import { Activity, AlertCircle, Wifi, WifiOff } from 'lucide-react';
+import { PortStatusResult } from '@showstack/shared';
 
-export interface PortStatusResult {
-  equipment_id: string;
-  ip: string;
-  status: 'reachable' | 'unreachable' | 'timeout';
-  latency_ms?: number;
-  last_checked: number;
-}
+export type { PortStatusResult };
 
 export interface PortUsageStats {
   total_ports: number;

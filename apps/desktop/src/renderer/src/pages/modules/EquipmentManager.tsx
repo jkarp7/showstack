@@ -531,11 +531,6 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
     if (networkStatusOpen && activeTab === 'infrastructure') {
       fetchPortStatus();
       networkStatusIntervalRef.current = setInterval(fetchPortStatus, 10_000);
-    } else {
-      if (networkStatusIntervalRef.current) {
-        clearInterval(networkStatusIntervalRef.current);
-        networkStatusIntervalRef.current = null;
-      }
     }
     return () => {
       if (networkStatusIntervalRef.current) {
