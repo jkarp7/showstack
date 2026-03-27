@@ -1026,7 +1026,7 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
           : '';
       setMvrBanner({
         type: 'success',
-        message: `MVR export: ${result.fixtureCount} fixtures in ${result.layerCount} layer${result.layerCount !== 1 ? 's' : ''}${gdtfNote}.`,
+        message: `MVR export: ${result.fixtureCount} fixture${result.fixtureCount !== 1 ? 's' : ''} in ${result.layerCount} layer${result.layerCount !== 1 ? 's' : ''}${gdtfNote}.`,
       });
     } else {
       setMvrBanner({ type: 'error', message: result.error ?? 'MVR export failed.' });

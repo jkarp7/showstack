@@ -114,7 +114,7 @@ export class MvrExportService {
         return {
           '@_name': posName,
           '@_uuid': this.pseudoUuid(posName),
-          ChildList: fixtureElements.length > 0 ? { Fixture: fixtureElements } : undefined,
+          ChildList: { Fixture: fixtureElements },
         };
       }),
     );
