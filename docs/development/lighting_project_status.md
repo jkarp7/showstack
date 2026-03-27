@@ -4,7 +4,7 @@
 **Edition Price:** $249/year
 **Target Users:** Lighting Designers, Production Electricians, Master Electricians
 **Competes With:** LightWright 6 ($845 one-time)
-**Overall Completion:** ~96%
+**Overall Completion:** ~97%
 
 ---
 
@@ -31,7 +31,7 @@ These items are either actively deferred or waiting on a dependency. Address bef
 
 ### Infrastructure
 
-- ⬜ **Port Validation** — IP address and VLAN range validation on infrastructure port fields. (Issue #17)
+- ⬜ **Port Validation** — IP address and VLAN range validation. (Issue #17) — See Planned section.
 - ⬜ **Network Topology Visualization** — Visual network layout diagram for infrastructure. (Issue #19)
 - ⬜ **Real-time Port Status Monitoring** — Ping/connectivity checks, port up/down status, SNMP integration, status dashboard. (Issue #20)
 
@@ -55,30 +55,34 @@ These items are either actively deferred or waiting on a dependency. Address bef
 
 ### User Documentation (Issue #53)
 
-- ⬜ Getting Started guide (installation, first project, basic workflow)
-- ⬜ Equipment Manager guide
-- ⬜ Shop Order guide
-- ⬜ Power Management guide
-- ⬜ Collaboration guide
-- ⬜ In-app help / tooltips system
+See Planned section for priority context. All guides and in-app help/tooltips system still pending.
 
 ---
 
 ## 🟡 Planned (Next to Implement)
 
-### Short-term — Lightwright Parity
+Priority order reflects complexity and network access requirements.
 
-1. **Basic console integration (ETC Eos via OSC)** — Push/pull patch data from an Eos family console. (Issue #25, 5% complete)
+### Short-term — Console Integration
+
+1. **Basic console integration (ETC Eos via OSC)** — Push/pull patch data from an Eos family console. (Issue #25, 5% complete) — _Requires network access; next up after MVR export._
 
 **Refs:** `docs/features/console-integration-plan.md`
 
-### Medium-term — Professional Integration
+2. **IP/VLAN port validation** — IP address and VLAN range validation on infrastructure port fields. (Issue #17) — _Also requires network access; tackle alongside or immediately after console integration._
 
-1. **Vectorworks XML integration** — Import from Vectorworks with field mapping and reconciliation workflow; export back. (Issue #32)
-   - Effort: ~13 weeks. **Ref:** `docs/features/vectorworks-integration-plan.md`
-2. **Advanced console support** — grandMA2 (Telnet/XML), grandMA3 (MA-Net3/OSC).
-3. **Power/cable diagrams** — Visual power distribution and cable path layouts.
-4. Beta release with 10+ testers.
+### Medium-term — Documentation & Integration
+
+3. **User documentation (Issue #53)** — Getting Started, Equipment Manager, Shop Order, Power Management, Collaboration guides + in-app help/tooltips. Lower dev complexity but significant writing effort.
+
+4. **Vectorworks XML integration** — Import from Vectorworks with field mapping and reconciliation workflow; export back. (Issue #32)
+   - Effort: ~13 weeks. _Largest remaining undertaking._ **Ref:** `docs/features/vectorworks-integration-plan.md`
+
+### Later — Advanced Console & Visualization
+
+5. **Advanced console support** — grandMA2 (Telnet/XML), grandMA3 (MA-Net3/OSC).
+6. **Power/cable diagrams** — Visual power distribution and cable path layouts.
+7. Beta release with 10+ testers.
 
 ### Advanced Features
 
@@ -116,7 +120,7 @@ These items are either actively deferred or waiting on a dependency. Address bef
 - ✅ **Phase 1 — User-editable footprint** — `dmx_footprint` column added to `fixtures` table (migration, `DEFAULT 1`). Added to `FIXTURE_ALLOWED_FIELDS`. `dmx_footprint` added to `FixtureSchema` Zod validation (was missing — caused silent stripping on every save). DMX Map updated to shade full address range per fixture. Conflict detection extended to cover full ranges.
 - ✅ **Phase 2 — Bundled starter set + picker UI** — `gdtf_cache` SQLite table (`id`, `manufacturer`, `model`, `revision_id`, `source`, `cached_at`, `file_path`, `modes_json`). `GdtfService` parses `.gdtf` ZIP files, caches modes. `GdtfPickerDialog` — fuzzy search across 8,000+ fixtures, mode selection with channel count. Wired into Add Fixture and Bulk Edit dialogs. On select: auto-fills manufacturer, model, type, mode, and `dmx_footprint`. `gdtf-bundled/` directory for offline starter fixtures (not yet populated — maintainer step).
 - ✅ **Phase 3 — CDN sync + update notifications** — Supabase Storage bucket `gdtf-library` (public). Manifest format: `{ version_hash, updated_at, fixture_count, fixtures: [{id, manufacturer, model, rid, modes}] }`. `scripts/sync-gdtf-library.mjs` syncs from GDTF-Share REST API and uploads manifest; run to populate **8,033 fixtures** (hash `9bcf41fe2e17a451`, 4.5 MB). `GdtfService.applyManifestUpdate()` bulk-upserts all manifest fixtures in a single SQLite transaction. `gdtf:applyUpdate` IPC wired through preload. `GdtfLibraryUpdateBanner` shows on launch when CDN version differs from stored hash; "Update Now" button triggers bulk upsert and auto-dismisses on success. GitHub Actions workflow `sync-gdtf-library.yml` for future automated syncs.
-- ✅ **Phase 4 — MVR import (Issue #30)** — `MvrService.ts` parses `.mvr` ZIP archives (`GeneralSceneDescription.xml`), recursively traverses `GroupObject`/`SceneObject` layer trees, maps `GDTFSpec` (`Manufacturer@Model@Rev.gdtf`) to `gdtf_cache` (exact then case-insensitive fallback), computes `universe`/`dmx_address` from absolute DMX address (Break="0"), bulk-creates fixtures via `createFixture`. `ipc/mvr.ts` shows native file open dialog, returns `{ created, gdtfResolved, warnings }`. Wired into Equipment Manager toolbar ("Import MVR" button) with auto-dismissing success/error banner. Defensive `Number(channelCount)` coercion guards against string `channel_count` values from manifest JSON.
+- ✅ **Phase 4 — MVR import + export (Issue #30 — closed)** — **Import:** `MvrService.ts` parses `.mvr` ZIP archives (`GeneralSceneDescription.xml`), recursively traverses `GroupObject`/`SceneObject` layer trees, maps `GDTFSpec` (`Manufacturer@Model@Rev.gdtf`) to `gdtf_cache` (exact then case-insensitive fallback), computes `universe`/`dmx_address` from absolute DMX address (Break="0"), bulk-creates fixtures via `createFixture`. Returns `{ created, gdtfResolved, warnings }`. **Export:** `MvrExportService.ts` groups fixtures by position into MVR Layers, generates `GeneralSceneDescription.xml` via `fast-xml-parser` XMLBuilder, bundles matching GDTF files from local cache, writes ZIP via `adm-zip`. Layer UUIDs are deterministic (UUIDv5 with fixed namespace). DMX addresses encoded as absolute `(universe-1)*512 + dmx_address`. Both directions wired into Equipment Manager toolbar with auto-dismissing success/error banners. Defensive `Number(channelCount)` coercion guards string values from manifest JSON.
 - ✅ **Phase 4 — Multi-token search** — `GdtfService.search()` splits query into tokens, requires all tokens match `LOWER(manufacturer || ' ' || model)` (AND logic, word-order independent). Relevance scoring: exact combined match → manufacturer-prefix → alphabetical. Up to 50 results.
 - ✅ **Phase 4 — CDN picker UX** — Collapsible "Download from CDN" section appears for any non-empty search query (not just zero results). Auto pre-fills manufacturer/model from query words on first expand.
 
