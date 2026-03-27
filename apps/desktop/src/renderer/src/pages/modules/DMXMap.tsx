@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { Fixture } from '../../types';
 import { isIntentionalAddressSharing } from '../../utils/fixtureUtils';
@@ -20,16 +20,21 @@ function buildUniverseMap(fixtures: Fixture[]): Map<number, Map<number, AddressI
   for (const f of fixtures) {
     if (f.universe == null || f.dmx_address == null) continue;
     const universe = f.universe;
-    const address = f.dmx_address;
-    if (address < 1 || address > ADDRESSES_PER_UNIVERSE) continue;
+    const startAddr = f.dmx_address;
+    const footprint = f.dmx_footprint ?? 1;
+    if (startAddr < 1 || startAddr > ADDRESSES_PER_UNIVERSE) continue;
 
     if (!universeMap.has(universe)) universeMap.set(universe, new Map());
     const addrMap = universeMap.get(universe)!;
-    const existing = addrMap.get(address);
-    if (existing) {
-      existing.fixtures.push(f);
-    } else {
-      addrMap.set(address, { fixtures: [f], state: 'used' });
+
+    const endAddr = Math.min(startAddr + footprint - 1, ADDRESSES_PER_UNIVERSE);
+    for (let addr = startAddr; addr <= endAddr; addr++) {
+      const existing = addrMap.get(addr);
+      if (existing) {
+        existing.fixtures.push(f);
+      } else {
+        addrMap.set(addr, { fixtures: [f], state: 'used' });
+      }
     }
   }
 
@@ -49,15 +54,55 @@ interface UniverseGridProps {
   addrMap: Map<number, AddressInfo>;
 }
 
+/**
+ * Returns per-side border classes that draw a boxed container around a fixture block.
+ * Outer edges get a thick dark-blue border; inner cell boundaries get a thin muted line.
+ */
+function fixtureBorderClasses(addr: number, blockStart: number, blockEnd: number): string {
+  const row = Math.floor((addr - 1) / COLS);
+  const topEdge = row === Math.floor((blockStart - 1) / COLS);
+  const bottomEdge = row === Math.floor((blockEnd - 1) / COLS);
+  const leftEdge = addr === blockStart || (addr - 1) % COLS === 0;
+  const rightEdge = addr === blockEnd || addr % COLS === 0;
+
+  return [
+    topEdge
+      ? 'border-t-2 border-t-blue-700 dark:border-t-blue-400'
+      : 'border-t border-t-blue-300 dark:border-t-blue-600',
+    bottomEdge
+      ? 'border-b-2 border-b-blue-700 dark:border-b-blue-400'
+      : 'border-b border-b-blue-300 dark:border-b-blue-600',
+    leftEdge
+      ? 'border-l-2 border-l-blue-700 dark:border-l-blue-400'
+      : 'border-l border-l-blue-300 dark:border-l-blue-600',
+    rightEdge
+      ? 'border-r-2 border-r-blue-700 dark:border-r-blue-400'
+      : 'border-r border-r-blue-300 dark:border-r-blue-600',
+  ].join(' ');
+}
+
 function UniverseGrid({ universe, addrMap }: UniverseGridProps) {
+  const usedCount = addrMap.size;
+  const pct = Math.round((usedCount / ADDRESSES_PER_UNIVERSE) * 100);
+
   return (
     <div className="mb-8">
-      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-        Universe {universe}
-        <span className="ml-2 text-xs font-normal text-gray-400 dark:text-gray-500">
-          {addrMap.size} / {ADDRESSES_PER_UNIVERSE} used
-        </span>
-      </h3>
+      <div className="flex items-center gap-3 mb-1">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          Universe {universe}
+        </h3>
+        <div className="flex-1 flex items-center gap-2">
+          <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-blue-500 rounded-full transition-all"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <span className="text-xs text-gray-400 dark:text-gray-500 tabular-nums w-24 shrink-0">
+            {usedCount} / {ADDRESSES_PER_UNIVERSE} ({pct}%)
+          </span>
+        </div>
+      </div>
       <div
         className="grid border border-gray-200 dark:border-gray-700 rounded overflow-hidden"
         style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}
@@ -65,25 +110,52 @@ function UniverseGrid({ universe, addrMap }: UniverseGridProps) {
         {Array.from({ length: ADDRESSES_PER_UNIVERSE }, (_, i) => {
           const addr = i + 1;
           const info = addrMap.get(addr);
-          const label = info?.fixtures[0]
-            ? info.fixtures[0].channel?.trim() || info.fixtures[0].type?.trim() || ''
-            : '';
 
           let bg = 'bg-gray-50 dark:bg-gray-900';
           let title = `Address ${addr} — empty`;
+          let cellContent: React.ReactNode = null;
+          // Empty cells use the standard thin grid border
+          let borderClass = 'border-r border-b border-gray-200 dark:border-gray-800';
 
           if (info) {
+            const f = info.fixtures[0];
+
             if (info.state === 'conflict') {
               bg = 'bg-red-500';
-              title = `Address ${addr} — CONFLICT (${info.fixtures.length} fixtures): ${info.fixtures.map((f) => f.channel || f.type || f.id).join(', ')}`;
+              title = `Address ${addr} — CONFLICT (${info.fixtures.length} fixtures): ${info.fixtures.map((fx) => fx.channel || fx.type || fx.id).join(', ')}`;
+              cellContent = (
+                <span className="truncate px-0.5 text-white font-bold">
+                  {f.channel?.trim() || f.type?.trim() || String(addr)}
+                </span>
+              );
             } else if (info.state === 'shared') {
               bg = 'bg-teal-400 dark:bg-teal-600';
-              title = `Address ${addr} — shared (${info.fixtures.length} fixtures): ${info.fixtures.map((f) => f.channel || f.type || f.id).join(', ')}`;
+              title = `Address ${addr} — shared (${info.fixtures.length} fixtures): ${info.fixtures.map((fx) => fx.channel || fx.type || fx.id).join(', ')}`;
+              cellContent = (
+                <span className="truncate px-0.5 text-white font-bold">
+                  {f.channel?.trim() || f.type?.trim() || String(addr)}
+                </span>
+              );
             } else {
-              bg = 'bg-blue-400 dark:bg-blue-600';
-              const f = info.fixtures[0];
+              const footprint = f.dmx_footprint ?? 1;
+              const blockStart = f.dmx_address!;
+              const blockEnd = blockStart + footprint - 1;
+              const isStart = addr === blockStart;
+              const footprintSuffix =
+                footprint > 1 ? ` · ${f.mode ?? 'mode unknown'} (${footprint}ch)` : '';
               title =
-                `Address ${addr} — Ch ${f.channel ?? '—'} ${f.type ?? ''} ${f.position ?? ''}`.trim();
+                `Address ${addr} — Ch ${f.channel ?? '—'} ${f.type ?? ''} ${f.position ?? ''}${footprintSuffix}`.trim();
+
+              bg = isStart ? 'bg-blue-500 dark:bg-blue-500' : 'bg-blue-200 dark:bg-blue-800';
+              borderClass = fixtureBorderClasses(addr, blockStart, blockEnd);
+
+              if (isStart) {
+                cellContent = (
+                  <span className="truncate px-0.5 text-white font-bold">
+                    {f.channel?.trim() || f.type?.trim() || String(addr)}
+                  </span>
+                );
+              }
             }
           }
 
@@ -91,11 +163,9 @@ function UniverseGrid({ universe, addrMap }: UniverseGridProps) {
             <div
               key={addr}
               title={title}
-              className={`${bg} h-5 border-r border-b border-gray-200 dark:border-gray-800 flex items-center justify-center overflow-hidden cursor-default text-[7px] leading-none`}
+              className={`${bg} ${borderClass} h-5 flex items-center justify-center overflow-hidden cursor-default text-[7px] leading-none`}
             >
-              {info && (
-                <span className="truncate px-0.5 text-white font-bold">{label || addr}</span>
-              )}
+              {cellContent}
             </div>
           );
         })}
@@ -114,6 +184,8 @@ function UniverseGrid({ universe, addrMap }: UniverseGridProps) {
 
 export function DMXMap() {
   const fixtures = useFixtureStore((state) => state.fixtures);
+  const loadFixtures = useFixtureStore((state) => state.loadFixtures);
+  const currentProjectId = useFixtureStore((state) => state.currentProjectId);
 
   useEffect(() => {
     window.api?.menu?.setState({ context: 'module' });
@@ -121,6 +193,14 @@ export function DMXMap() {
       window.api?.menu?.setState({ context: 'module' });
     };
   }, []);
+
+  // Reload fixtures on mount so footprints and DMX data are always fresh,
+  // regardless of whether EquipmentManager was visited first.
+  useEffect(() => {
+    if (currentProjectId) {
+      loadFixtures(currentProjectId);
+    }
+  }, [currentProjectId, loadFixtures]);
 
   const universeMap = useMemo(() => buildUniverseMap(fixtures), [fixtures]);
   const sortedUniverses = useMemo(
@@ -170,8 +250,12 @@ export function DMXMap() {
             Empty
           </span>
           <span className="flex items-center gap-1">
-            <span className="inline-block w-3 h-3 rounded-sm bg-blue-400 dark:bg-blue-600" />
-            Used
+            <span className="inline-block w-3 h-3 rounded-sm bg-blue-500 border-l-2 border-l-blue-800" />
+            Start
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="inline-block w-3 h-3 rounded-sm bg-blue-200 dark:bg-blue-800" />
+            Block
           </span>
           <span className="flex items-center gap-1">
             <span className="inline-block w-3 h-3 rounded-sm bg-teal-400 dark:bg-teal-600" />

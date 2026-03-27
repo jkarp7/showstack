@@ -21,6 +21,7 @@ export type ColumnKey =
   | 'mark'
   | 'universe' // Auto-populates from address
   | 'dmx_address' // DMX # - Auto-populates from address
+  | 'dmx_footprint' // Channel count for multi-channel fixtures
   | 'mode' // LED/Moving Light mode
   | 'system'
   | 'scenery'
@@ -104,6 +105,7 @@ export const COLUMN_CONFIGS: ColumnConfig[] = [
   { key: 'mark', label: 'Mark', width: 'w-20' },
   { key: 'universe', label: 'Universe', width: 'w-20' }, // Can be edited directly or via Address
   { key: 'dmx_address', label: 'DMX #', width: 'w-20' }, // Can be edited directly or via Address
+  { key: 'dmx_footprint', label: 'Footprint', width: 'w-20' }, // Channel count (off by default)
   { key: 'mode', label: 'Mode', width: 'w-24' }, // LED/Moving Light mode
   { key: 'system', label: 'System', width: 'w-24' },
   { key: 'scenery', label: 'Scenery', width: 'w-32' },
@@ -215,7 +217,8 @@ export const DEFAULT_COLUMN_VISIBILITY: ColumnVisibility = {
   mark: false,
   universe: false,
   dmx_address: false,
-  mode: false,
+  dmx_footprint: true,
+  mode: true,
   system: false,
   scenery: false,
   vw_layer: false,

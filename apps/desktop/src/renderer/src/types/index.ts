@@ -17,6 +17,7 @@ export interface Fixture {
   channel?: string;
   universe?: number;
   dmx_address?: number;
+  dmx_footprint?: number;
   mode?: string;
   console_level?: string;
 

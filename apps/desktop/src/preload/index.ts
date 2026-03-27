@@ -392,6 +392,30 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.invoke('groups:getGroupsForFixture', fixtureId),
   },
 
+  // GDTF fixture library
+  gdtf: {
+    search: (query: string) => ipcRenderer.invoke('gdtf:search', query),
+    getModes: (id: string) => ipcRenderer.invoke('gdtf:getModes', id),
+    checkForUpdates: () => ipcRenderer.invoke('gdtf:checkForUpdates'),
+    downloadFixture: (manufacturer: string, model: string) =>
+      ipcRenderer.invoke('gdtf:downloadFixture', manufacturer, model),
+    getLibraryStatus: () => ipcRenderer.invoke('gdtf:getLibraryStatus'),
+    applyUpdate: () => ipcRenderer.invoke('gdtf:applyUpdate'),
+    onUpdateAvailable: (
+      callback: (info: { versionHash: string; fixtureCount: number }) => void,
+    ) => {
+      const wrapper = (_event: unknown, info: { versionHash: string; fixtureCount: number }) =>
+        callback(info);
+      ipcRenderer.on('gdtf:updateAvailable', wrapper as any);
+      return () => ipcRenderer.removeListener('gdtf:updateAvailable', wrapper as any);
+    },
+  },
+
+  // MVR import
+  mvr: {
+    import: (projectId: string) => ipcRenderer.invoke('mvr:import', projectId),
+  },
+
   // Authentication operations
   auth: {
     signIn: (email: string, password: string) => ipcRenderer.invoke('auth:signIn', email, password),
@@ -772,6 +796,40 @@ export interface ElectronAPI {
     addPin: (groupId: string, fixtureId: string) => Promise<void>;
     removePin: (groupId: string, fixtureId: string) => Promise<void>;
     getGroupsForFixture: (fixtureId: string) => Promise<string[]>;
+  };
+  gdtf: {
+    search: (
+      query: string,
+    ) => Promise<{ id: string; manufacturer: string; model: string; source: string }[]>;
+    getModes: (id: string) => Promise<{ name: string; channel_count: number }[]>;
+    checkForUpdates: () => Promise<{
+      hasUpdate: boolean;
+      versionHash: string;
+      fixtureCount: number;
+    } | null>;
+    downloadFixture: (
+      manufacturer: string,
+      model: string,
+    ) => Promise<{
+      success: boolean;
+      modes?: { name: string; channel_count: number }[];
+      error?: string;
+    }>;
+    getLibraryStatus: () => Promise<{ versionHash: string | null; checkedAt: number | null }>;
+    applyUpdate: () => Promise<{ success: boolean; fixtureCount?: number; error?: string }>;
+    onUpdateAvailable: (
+      callback: (info: { versionHash: string; fixtureCount: number }) => void,
+    ) => () => void;
+  };
+  mvr: {
+    import: (projectId: string) => Promise<{
+      success: boolean;
+      error?: string;
+      canceled?: boolean;
+      created: number;
+      gdtfResolved: number;
+      warnings: string[];
+    }>;
   };
   auth: {
     signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;

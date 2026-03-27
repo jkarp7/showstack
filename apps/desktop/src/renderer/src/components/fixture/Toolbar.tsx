@@ -11,6 +11,7 @@ interface ToolbarProps {
   onUnhideSelected?: () => void;
   onDuplicate?: () => void;
   onExportCSV?: () => void;
+  onImportMvr?: () => void;
   onUserColumnSettings: () => void;
   columnVisibility: ColumnVisibility;
   onColumnVisibilityChange: (visibility: ColumnVisibility) => void;
@@ -32,6 +33,7 @@ export function Toolbar({
   onUnhideSelected,
   onDuplicate,
   onExportCSV,
+  onImportMvr,
   onUserColumnSettings,
   columnVisibility,
   onColumnVisibilityChange,
@@ -118,6 +120,16 @@ export function Toolbar({
           onChange={(e) => onSearchChange(e.target.value)}
           className="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded text-sm w-44 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 transition-colors"
         />
+
+        {onImportMvr && (
+          <button
+            onClick={onImportMvr}
+            className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded text-sm font-medium transition flex-shrink-0"
+            title="Import fixtures from an MVR file"
+          >
+            Import MVR
+          </button>
+        )}
 
         {onExportCSV && (
           <button

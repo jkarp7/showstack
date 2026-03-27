@@ -128,4 +128,24 @@ export const APP_SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_paperwork_templates_type ON paperwork_templates(report_type);
   CREATE INDEX IF NOT EXISTS idx_paperwork_templates_user ON paperwork_templates(user_id);
   CREATE INDEX IF NOT EXISTS idx_paperwork_templates_system ON paperwork_templates(is_system);
+
+  -- ============================================
+  -- GDTF FIXTURE LIBRARY CACHE
+  -- ============================================
+
+  -- Cached GDTF fixture entries (populated from bundled set on first launch,
+  -- and from CDN downloads in Phase 3). modes_json avoids re-unzipping on lookup.
+  CREATE TABLE IF NOT EXISTS gdtf_cache (
+    id TEXT PRIMARY KEY,            -- "{manufacturer}/{model}" slug
+    manufacturer TEXT NOT NULL,
+    model TEXT NOT NULL,
+    revision_id TEXT,               -- GDTF-Share revision hash (NULL for bundled)
+    source TEXT NOT NULL DEFAULT 'bundled', -- 'bundled' | 'cdn'
+    cached_at INTEGER NOT NULL,
+    file_path TEXT NOT NULL,        -- Absolute path to .gdtf ZIP file
+    modes_json TEXT NOT NULL        -- JSON: [{name, channel_count}]
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_gdtf_cache_manufacturer ON gdtf_cache(manufacturer);
+  CREATE INDEX IF NOT EXISTS idx_gdtf_cache_search ON gdtf_cache(manufacturer, model);
 `;

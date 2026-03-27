@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { logger } from '../../utils/logger';
 import { Fixture } from '../../types';
 import { DimmerRack, PDRack } from '../../types/power';
+import { GdtfPickerDialog } from './GdtfPickerDialog';
 
 interface AutoFillSuggestions {
   positions: string[];
@@ -46,6 +47,9 @@ export function AddFixtureDialog({
   const [purpose, setPurpose] = useState('');
   const [channel, setChannel] = useState<string>('');
   const [address, setAddress] = useState('');
+  const [mode, setMode] = useState('');
+  const [dmxFootprint, setDmxFootprint] = useState(1);
+  const [gdtfPickerOpen, setGdtfPickerOpen] = useState(false);
   const [dimmer, setDimmer] = useState('');
   const [circuit, setCircuit] = useState('');
   const [circuitNumber, setCircuitNumber] = useState('');
@@ -120,6 +124,8 @@ export function AddFixtureDialog({
         system: system || undefined,
         notes: notes || undefined,
         status: notOnPlot ? 'Not on Plot' : status || undefined,
+        mode: mode || undefined,
+        dmx_footprint: dmxFootprint > 1 ? dmxFootprint : undefined, // 1 is DB default; only send if > 1
       };
 
       // Handle accessories (comma-separated to array)
@@ -164,7 +170,7 @@ export function AddFixtureDialog({
           }
 
           if (!isNaN(rawAddress)) {
-            rawAddress += i;
+            rawAddress += i * dmxFootprint;
             const universe = Math.ceil(rawAddress / 512);
             const dmx = ((rawAddress - 1) % 512) + 1;
             currentAddress = `${universe}/${dmx}`;
@@ -321,6 +327,9 @@ export function AddFixtureDialog({
     setPurpose('');
     setChannel('');
     setAddress('');
+    setMode('');
+    setDmxFootprint(1);
+    setGdtfPickerOpen(false);
     setDimmer('');
     setCircuit('');
     setCircuitNumber('');
@@ -515,6 +524,38 @@ export function AddFixtureDialog({
                     onChange={(e) => setAddress(e.target.value)}
                     className={inputClass}
                     placeholder="1/1 or 1"
+                  />
+                </div>
+              </div>
+
+              {/* Mode & Footprint */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className={labelClass}>Mode</label>
+                  <input
+                    type="text"
+                    value={mode}
+                    onChange={(e) => setMode(e.target.value)}
+                    className={inputClass}
+                    placeholder="e.g. Standard (18ch)"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setGdtfPickerOpen(true)}
+                    className="mt-1 text-[10px] text-blue-400 hover:text-blue-300 underline"
+                  >
+                    Search library…
+                  </button>
+                </div>
+                <div>
+                  <label className={labelClass}>Footprint (ch)</label>
+                  <input
+                    type="number"
+                    value={dmxFootprint}
+                    onChange={(e) => setDmxFootprint(Math.max(1, parseInt(e.target.value) || 1))}
+                    className={inputClass}
+                    min="1"
+                    max="512"
                   />
                 </div>
               </div>
@@ -1008,6 +1049,17 @@ export function AddFixtureDialog({
           </>
         )}
       </div>
+      <GdtfPickerDialog
+        isOpen={gdtfPickerOpen}
+        onClose={() => setGdtfPickerOpen(false)}
+        onSelect={(mfr, mdl, selectedMode, channelCount) => {
+          setManufacturer(mfr);
+          setModel(mdl);
+          setType(mdl);
+          setMode(selectedMode);
+          setDmxFootprint(Number(channelCount) || 1);
+        }}
+      />
     </div>
   );
 }

@@ -25,6 +25,7 @@ import { SettingsDialog } from './components/common/SettingsDialog';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthModal } from './components/auth';
 import { OfflineBanner } from './components/sync';
+import { GdtfLibraryUpdateBanner } from './components/sync/GdtfLibraryUpdateBanner';
 import { PendingInvitationsBanner } from './components/collaboration/PendingInvitationsBanner';
 import { useFeatureFlag } from './config/featureFlags';
 import { useUIStore } from './store/uiStore';
@@ -83,6 +84,9 @@ function AppContent() {
 
       {/* Offline Banner - shows when cloud sync is disconnected */}
       <OfflineBanner />
+
+      {/* GDTF Library Update Banner - shows when a CDN update is available */}
+      <GdtfLibraryUpdateBanner />
 
       {/* Pending Invitations Banner - shows when user has unaccepted collaboration invites.
           Any authenticated non-demo user can receive invitations; demo users are excluded

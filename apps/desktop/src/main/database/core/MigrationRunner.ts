@@ -208,6 +208,9 @@ export class MigrationRunner {
       // Projects table migrations
       this.migrateProjectsTable();
 
+      // Fixtures table migrations
+      this.migrateFixturesTable();
+
       // Infrastructure table migrations
       this.migrateInfrastructureTable();
 
@@ -324,6 +327,22 @@ export class MigrationRunner {
       this.db.prepare('ALTER TABLE projects ADD COLUMN root_project_id TEXT').run();
       this.db
         .prepare('CREATE INDEX IF NOT EXISTS idx_projects_root ON projects(root_project_id)')
+        .run();
+    }
+  }
+
+  /**
+   * Migrate fixtures table schema
+   */
+  private migrateFixturesTable(): void {
+    const columns = (
+      this.db.prepare('PRAGMA table_info(fixtures)').all() as Array<{ name: string }>
+    ).map((r) => r.name);
+
+    if (!columns.includes('dmx_footprint')) {
+      logger.info('Running migration: Adding dmx_footprint to fixtures');
+      this.db
+        .prepare('ALTER TABLE fixtures ADD COLUMN dmx_footprint INTEGER NOT NULL DEFAULT 1')
         .run();
     }
   }

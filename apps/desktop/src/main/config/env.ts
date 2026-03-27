@@ -28,6 +28,7 @@ export interface CloudConfig {
   powersync: {
     url: string | undefined;
   };
+  gdtfCdnUrl: string | undefined;
   isConfigured: boolean;
 }
 
@@ -99,6 +100,7 @@ function parseConfig(): Config {
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const powersyncUrl = process.env.POWERSYNC_URL;
+  const gdtfCdnUrl = process.env.GDTF_CDN_URL;
 
   // Check if cloud services are configured
   const isConfigured = Boolean(supabaseUrl && supabaseAnonKey && powersyncUrl);
@@ -112,6 +114,7 @@ function parseConfig(): Config {
     powersync: {
       url: powersyncUrl,
     },
+    gdtfCdnUrl,
     isConfigured,
     app: {
       nodeEnv: parseNodeEnv(process.env.NODE_ENV),

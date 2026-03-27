@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Fixture } from '../../types';
 import { COLOR_FLAG_DEFINITIONS, ColorFlagType } from '../../types/highlighting';
+import { GdtfPickerDialog } from './GdtfPickerDialog';
 
 interface BulkEditDialogProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export function BulkEditDialog({
 }: BulkEditDialogProps) {
   const [updates, setUpdates] = useState<Partial<Fixture>>({});
   const [showAutoNumber, setShowAutoNumber] = useState(false);
+  const [gdtfPickerOpen, setGdtfPickerOpen] = useState(false);
   const [autoNumberField, setAutoNumberField] = useState<keyof Fixture>('channel');
   const [autoNumberStart, setAutoNumberStart] = useState<number>(1);
   const [autoNumberIncrement, setAutoNumberIncrement] = useState<number>(1);
@@ -246,6 +248,32 @@ export function BulkEditDialog({
                       onChange={(e) => handleChange('mode', e.target.value)}
                       className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white"
                       placeholder="Leave blank to skip"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setGdtfPickerOpen(true)}
+                      className="mt-1 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                      Search library…
+                    </button>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Footprint (ch)
+                    </label>
+                    <input
+                      type="number"
+                      value={updates.dmx_footprint !== undefined ? updates.dmx_footprint : ''}
+                      onChange={(e) =>
+                        handleChange(
+                          'dmx_footprint',
+                          e.target.value ? Math.max(1, parseInt(e.target.value)) : null,
+                        )
+                      }
+                      className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-gray-900 dark:text-white"
+                      placeholder="Leave blank to skip"
+                      min="1"
+                      max="512"
                     />
                   </div>
                 </div>
@@ -794,6 +822,16 @@ export function BulkEditDialog({
           </div>
         </form>
       </div>
+      <GdtfPickerDialog
+        isOpen={gdtfPickerOpen}
+        onClose={() => setGdtfPickerOpen(false)}
+        onSelect={(mfr, mdl, selectedMode, channelCount) => {
+          handleChange('manufacturer', mfr);
+          handleChange('model', mdl);
+          handleChange('mode', selectedMode);
+          handleChange('dmx_footprint', channelCount);
+        }}
+      />
     </div>
   );
 }

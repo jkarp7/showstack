@@ -78,6 +78,7 @@ function mockConfig(powersyncUrl: string): Config {
     app: { nodeEnv: 'development', debugDatabase: false, debugPowerSync: false },
     supabase: { url: undefined, anonKey: undefined, serviceRoleKey: undefined },
     powersync: { url: powersyncUrl || undefined },
+    gdtfCdnUrl: undefined,
     isConfigured: false,
   };
 }

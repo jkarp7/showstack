@@ -26,6 +26,7 @@ export interface Fixture {
   channel?: string;
   universe?: number;
   dmx_address?: number;
+  dmx_footprint?: number;
   mode?: string;
   console_level?: string;
 
@@ -248,10 +249,10 @@ export function createFixture(
     `
     INSERT INTO fixtures (
       id, project_id, position, unit_number, type, manufacturer, model, purpose,
-      channel, universe, dmx_address, dimmer, circuit, circuit_number,
+      channel, universe, dmx_address, dmx_footprint, mode, dimmer, circuit, circuit_number,
       color, gobo, accessories, location, system, wattage,
       status, notes, custom_fields, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
   ).run(
     id,
@@ -265,6 +266,8 @@ export function createFixture(
     fixture.channel || '',
     fixture.universe || null,
     fixture.dmx_address || null,
+    fixture.dmx_footprint ?? 1,
+    fixture.mode || null,
     fixture.dimmer || '',
     fixture.circuit || '',
     fixture.circuit_number || null,
@@ -299,6 +302,8 @@ const FIXTURE_ALLOWED_FIELDS = Object.freeze([
   'channel',
   'universe',
   'dmx_address',
+  'dmx_footprint',
+  'mode',
   'dimmer',
   'circuit',
   'circuit_number',

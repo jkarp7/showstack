@@ -1,0 +1,43 @@
+name: Sync GDTF Fixture Library
+
+# Runs weekly on Sunday at 3 AM UTC, or manually.
+# Fetches the full GDTF Share fixture list and publishes a manifest.json
+# to Supabase Storage. The app downloads this manifest on update check —
+# no .gdtf files are transferred; mode names and channel counts come
+# directly from the GDTF Share list API.
+on:
+  schedule:
+    - cron: '0 3 * * 0' # 03:00 UTC every Sunday
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: 'Force upload even if fixture data is unchanged'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+jobs:
+  sync:
+    name: Sync GDTF Library
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run sync script
+        env:
+          GDTF_SHARE_USER: ${{ secrets.GDTF_SHARE_USER }}
+          GDTF_SHARE_PASSWORD: ${{ secrets.GDTF_SHARE_PASSWORD }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GDTF_STORAGE_BUCKET: ${{ secrets.GDTF_STORAGE_BUCKET || 'gdtf-library' }}
+          FORCE_UPDATE: ${{ github.event.inputs.force_update || 'false' }}
+        run: node scripts/sync-gdtf-library.mjs

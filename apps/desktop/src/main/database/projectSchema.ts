@@ -87,6 +87,7 @@ export const PROJECT_SCHEMA = `
     channel TEXT,
     universe INTEGER,
     dmx_address INTEGER,
+    dmx_footprint INTEGER NOT NULL DEFAULT 1,
     mode TEXT,
     console_level TEXT,
 

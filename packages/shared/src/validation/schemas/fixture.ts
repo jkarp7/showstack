@@ -33,7 +33,7 @@ export const FixtureSchema = extendBaseEntity({
   project_id: OptionalIDSchema,
 
   // Position & Identification (required fields)
-  position: z.string().min(1, 'Position is required'),
+  position: z.string().optional(),
   type: z.string().min(1, 'Fixture type is required'),
 
   // Position & Identification (optional fields)
@@ -48,6 +48,7 @@ export const FixtureSchema = extendBaseEntity({
   channel: z.string().optional(),
   universe: z.number().int().min(1).max(32768).optional(),
   dmx_address: z.number().int().min(1).max(512).optional(),
+  dmx_footprint: z.number().int().min(1).max(512).optional(),
   mode: z.string().optional(),
   console_level: z.string().optional(),
 
