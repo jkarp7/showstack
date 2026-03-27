@@ -1,8 +1,8 @@
 # GDTF Personality Library — Implementation Plan
 
-**Status:** Phases 1–3 Complete ✅ / Phase 4 Planned
-**Relates to:** DMX Map visualization (complete), Issue #30 (MVR import)
-**Last Updated:** March 26, 2026
+**Status:** All Phases Complete ✅
+**Relates to:** DMX Map visualization (complete), Issue #30 (MVR import — complete)
+**Last Updated:** March 27, 2026
 
 ---
 
@@ -236,11 +236,30 @@ This means MVR import gives accurate footprints automatically with no user inter
 7. ✅ `GdtfLibraryUpdateBanner` — shows on launch when CDN version_hash differs; "Update Now" button; auto-dismisses on success; shows progress and error states
 8. ✅ electron-vite watch config extended to `packages/shared/src/**` so main process restarts on schema changes
 
-### Phase 4 — MVR integration (Issue #30) ⬜ PLANNED
+### Phase 4 — MVR import + search/UX improvements ✅ COMPLETE
 
-- Consume `<GDTFType>` and `<GDTFMode>` from MVR import
-- Wire to GDTF cache for automatic footprint resolution
-- `<GDTFMode>` value also written to `fixture.mode`
+**MVR import (Issue #30):**
+
+- `MvrService.ts`: parses `.mvr` ZIP (`GeneralSceneDescription.xml`), recursively traverses `GroupObject`/`SceneObject` layer trees, maps `GDTFSpec` (`Manufacturer@Model@Rev.gdtf`, underscores → spaces) to `gdtf_cache` (exact then case-insensitive fallback), computes `universe`/`dmx_address` from absolute DMX address (Break="0"), bulk-creates fixtures via `createFixture`
+- `ipc/mvr.ts`: opens native file dialog for `.mvr`, returns `{ created, gdtfResolved, warnings }`
+- Toolbar "Import MVR" button with auto-dismissing success/error banner in Equipment Manager
+- Graceful degradation: fixtures created even when GDTF lookup fails (footprint defaults to 1)
+
+**Multi-token search:**
+
+- `GdtfService.search()` splits query into tokens; all tokens must match `LOWER(manufacturer || ' ' || model)` (AND logic, word-order independent); relevance scoring: exact → manufacturer-prefix → alphabetical
+
+**CDN picker UX:**
+
+- Collapsible "Download from CDN" section appears for any non-empty search query (not just zero results); auto pre-fills manufacturer/model from search words on first expand
+
+**DMX utilization stats:**
+
+- Per-universe progress bar + `used / 512 (XX%)` counter in DMX Map header
+
+**Bug fix:**
+
+- `Number(channelCount)` coercion in Add Fixture Dialog when receiving channel count from GDTF picker — guards against string values from manifest JSON that would fail Zod v4 number validation
 
 ---
 

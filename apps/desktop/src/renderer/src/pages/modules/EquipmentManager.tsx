@@ -61,6 +61,11 @@ interface EquipmentManagerProps {
   initialTab?: 'fixtures' | 'infrastructure' | 'power';
 }
 
+// Module-level cache so column visibility survives navigation (component remounts)
+// within the same app session. Cleared on app restart.
+let _sessionColumnVisibility: ColumnVisibility | null = null;
+let _sessionInfrastructureColumnVisibility: InfrastructureColumnVisibility | null = null;
+
 export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerProps = {}) {
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId?: string; moduleType?: string }>();
@@ -155,9 +160,10 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
   const [statusFilter, setStatusFilter] = useState('all');
   const [showHidden, setShowHidden] = useState(false);
 
-  // Column visibility state (fixtures)
-  const [columnVisibility, setColumnVisibility] =
-    useState<ColumnVisibility>(DEFAULT_COLUMN_VISIBILITY);
+  // Column visibility state (fixtures) — initialized from session cache to survive navigation
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibility>(
+    _sessionColumnVisibility ?? DEFAULT_COLUMN_VISIBILITY,
+  );
 
   // Column order state
   const [columnOrder, setColumnOrder] = useState<ColumnKey[]>(DEFAULT_COLUMN_ORDER);
@@ -165,9 +171,11 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
   // Column widths state (in pixels, null means use default from config)
   const [columnWidths, setColumnWidths] = useState<Partial<Record<ColumnKey, number>>>({});
 
-  // Infrastructure column visibility state
+  // Infrastructure column visibility state — initialized from session cache to survive navigation
   const [infrastructureColumnVisibility, setInfrastructureColumnVisibility] =
-    useState<InfrastructureColumnVisibility>(DEFAULT_INFRASTRUCTURE_COLUMN_VISIBILITY);
+    useState<InfrastructureColumnVisibility>(
+      _sessionInfrastructureColumnVisibility ?? DEFAULT_INFRASTRUCTURE_COLUMN_VISIBILITY,
+    );
 
   // Calculate visible infrastructure columns
   const visibleInfrastructureColumns = useMemo(() => {
@@ -283,6 +291,7 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
             'columnVisibility',
           );
           if (savedVisibility) {
+            _sessionColumnVisibility = savedVisibility;
             setColumnVisibility(savedVisibility);
           }
 
@@ -310,6 +319,7 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
             'infrastructureColumnVisibility',
           );
           if (savedInfrastructureVisibility) {
+            _sessionInfrastructureColumnVisibility = savedInfrastructureVisibility;
             setInfrastructureColumnVisibility(savedInfrastructureVisibility);
           }
 
@@ -559,6 +569,7 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
 
   // Handle column visibility change with persistence
   const handleColumnVisibilityChange = async (visibility: ColumnVisibility) => {
+    _sessionColumnVisibility = visibility;
     setColumnVisibility(visibility);
     await window.api.preferences.set(currentProjectId, 'columnVisibility', visibility);
   };
@@ -1321,7 +1332,10 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
               }}
               onDeselectAll={() => setSelectedInfrastructure(new Set())}
               columnVisibility={infrastructureColumnVisibility}
-              onColumnVisibilityChange={setInfrastructureColumnVisibility}
+              onColumnVisibilityChange={(v) => {
+                _sessionInfrastructureColumnVisibility = v;
+                setInfrastructureColumnVisibility(v);
+              }}
             />
           </div>
 
