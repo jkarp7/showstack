@@ -223,7 +223,7 @@ export class MvrService {
     if (!row) {
       row = db
         .prepare(
-          'SELECT modes_json FROM gdtf_cache WHERE LOWER(manufacturer) = LOWER(?) AND LOWER(model) = LOWER(?)',
+          'SELECT modes_json FROM gdtf_cache WHERE manufacturer = ? COLLATE NOCASE AND model = ? COLLATE NOCASE',
         )
         .get(manufacturer, model) as { modes_json: string } | undefined;
     }
