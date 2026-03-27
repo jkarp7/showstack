@@ -3,6 +3,8 @@ import * as path from 'path';
 import { gdtfService, GdtfMode } from '../services/GdtfService';
 import { logger } from '../utils/logger';
 
+const GDTF_CDN_URL = process.env.GDTF_CDN_URL ?? '';
+
 export function registerGdtfHandlers(): void {
   ipcMain.removeHandler('gdtf:search');
   ipcMain.removeHandler('gdtf:getModes');
@@ -33,7 +35,7 @@ export function registerGdtfHandlers(): void {
    * Sends gdtf:updateAvailable push event to all windows if an update is available.
    */
   ipcMain.handle('gdtf:checkForUpdates', async () => {
-    const cdnUrl = process.env.GDTF_CDN_URL ?? '';
+    const cdnUrl = GDTF_CDN_URL;
     if (!cdnUrl) return null;
     const result = await gdtfService.checkForUpdates(cdnUrl);
     if (result?.hasUpdate) {
@@ -58,7 +60,7 @@ export function registerGdtfHandlers(): void {
       manufacturer: string,
       model: string,
     ): Promise<{ success: boolean; modes?: GdtfMode[]; error?: string }> => {
-      const cdnUrl = process.env.GDTF_CDN_URL ?? '';
+      const cdnUrl = GDTF_CDN_URL;
       if (!cdnUrl) {
         return { success: false, error: 'CDN URL not configured' };
       }
@@ -87,7 +89,7 @@ export function registerGdtfHandlers(): void {
   ipcMain.handle(
     'gdtf:applyUpdate',
     async (): Promise<{ success: boolean; fixtureCount?: number; error?: string }> => {
-      const cdnUrl = process.env.GDTF_CDN_URL ?? '';
+      const cdnUrl = GDTF_CDN_URL;
       if (!cdnUrl) {
         return { success: false, error: 'CDN URL not configured' };
       }
@@ -125,7 +127,7 @@ export function initGdtfLibrary(): void {
  * If an update is available, sends gdtf:updateAvailable to the given window.
  */
 export function initGdtfUpdateCheck(win: BrowserWindow): void {
-  const cdnUrl = process.env.GDTF_CDN_URL ?? '';
+  const cdnUrl = GDTF_CDN_URL;
   if (!cdnUrl) return;
 
   setTimeout(() => {

@@ -144,18 +144,12 @@ function buildManifest(list) {
       };
     })
     .filter(Boolean)
-    .sort(
-      (a, b) =>
-        a.manufacturer.localeCompare(b.manufacturer) || a.model.localeCompare(b.model),
-    );
+    .sort((a, b) => a.manufacturer.localeCompare(b.manufacturer) || a.model.localeCompare(b.model));
 
   console.log(`  ${fixtures.length} fixtures with valid modes`);
 
   // Hash the fixture data (not the timestamp) so hash only changes when data changes
-  const dataHash = createHash('sha256')
-    .update(JSON.stringify(fixtures))
-    .digest('hex')
-    .slice(0, 16);
+  const dataHash = createHash('sha256').update(JSON.stringify(fixtures)).digest('hex').slice(0, 16);
 
   const manifest = {
     version_hash: dataHash,
@@ -206,12 +200,7 @@ async function uploadManifest(manifest) {
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
-  requireEnv(
-    'GDTF_SHARE_USER',
-    'GDTF_SHARE_PASSWORD',
-    'SUPABASE_URL',
-    'SUPABASE_SERVICE_ROLE_KEY',
-  );
+  requireEnv('GDTF_SHARE_USER', 'GDTF_SHARE_PASSWORD', 'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY');
 
   const cookie = await login();
   const list = await getFixtureList(cookie);
