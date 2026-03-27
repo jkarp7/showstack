@@ -1022,15 +1022,22 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
     if (result.success) {
       const resolved =
         result.gdtfResolved > 0 ? `, ${result.gdtfResolved} with GDTF footprint` : '';
+      const warningNote =
+        result.warnings.length > 0
+          ? ` — ${result.warnings.length} fixture${result.warnings.length !== 1 ? 's' : ''} skipped`
+          : '';
       setMvrBanner({
         type: 'success',
-        message: `MVR import: ${result.created} fixtures added${resolved}.`,
+        message: `MVR import: ${result.created} fixtures added${resolved}${warningNote}.`,
       });
       await loadFixtures(projectId);
     } else {
       setMvrBanner({ type: 'error', message: result.error ?? 'MVR import failed.' });
     }
-    mvrBannerTimerRef.current = setTimeout(() => setMvrBanner(null), 6000);
+    mvrBannerTimerRef.current = setTimeout(
+      () => setMvrBanner(null),
+      result.success && result.warnings.length > 0 ? 10000 : 6000,
+    );
   };
 
   // Register menu handlers
