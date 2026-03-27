@@ -74,6 +74,20 @@ describe('PortStatusMonitorService', () => {
     expect(net.createConnection).not.toHaveBeenCalled();
   });
 
+  it('returns timeout when socket does not respond within timeout', async () => {
+    vi.useFakeTimers();
+    const socket = { on: vi.fn(), destroy: vi.fn(), removeAllListeners: vi.fn() };
+    vi.mocked(net.createConnection).mockReturnValue(socket as any);
+
+    const checkPromise = service.checkOne('eq-timeout', '10.0.0.99');
+    await vi.advanceTimersByTimeAsync(2001);
+    const result = await checkPromise;
+
+    expect(result.status).toBe('timeout');
+    expect(result.equipment_id).toBe('eq-timeout');
+    vi.useRealTimers();
+  });
+
   it('returns cached results within TTL', async () => {
     vi.mocked(net.createConnection).mockReturnValue(makeFakeSocket('connect') as any);
 
