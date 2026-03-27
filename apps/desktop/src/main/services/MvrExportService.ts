@@ -134,21 +134,24 @@ export class MvrExportService {
     const zip = new AdmZip();
     zip.addFile('GeneralSceneDescription.xml', Buffer.from(xml, 'utf8'));
 
-    // Bundle GDTF files
-    let gdtfBundled = 0;
-    for (const [specFilename, filePath] of gdtfFiles) {
-      try {
-        const gdtfData = await fs.promises.readFile(filePath);
-        zip.addFile(specFilename, gdtfData);
-        gdtfBundled++;
-      } catch (err) {
-        logger.warn('Failed to bundle GDTF file', {
-          specFilename,
-          filePath,
-          error: err instanceof Error ? err.message : String(err),
-        });
-      }
-    }
+    // Bundle GDTF files in parallel
+    const bundleResults = await Promise.all(
+      Array.from(gdtfFiles.entries()).map(async ([specFilename, filePath]) => {
+        try {
+          const gdtfData = await fs.promises.readFile(filePath);
+          zip.addFile(specFilename, gdtfData);
+          return true;
+        } catch (err) {
+          logger.warn('Failed to bundle GDTF file', {
+            specFilename,
+            filePath,
+            error: err instanceof Error ? err.message : String(err),
+          });
+          return false;
+        }
+      }),
+    );
+    const gdtfBundled = bundleResults.filter(Boolean).length;
 
     await zip.writeZipPromise(outputPath);
 
