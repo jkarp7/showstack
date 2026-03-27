@@ -188,14 +188,16 @@ export class MvrExportService {
 
     // GDTFSpec + GDTFMode — only when manufacturer and model are set
     if (f.manufacturer?.trim() && f.model?.trim()) {
-      const specFilename = toGdtfSpec(f.manufacturer, f.model);
+      const manufacturer = f.manufacturer.trim();
+      const model = f.model.trim();
+      const specFilename = toGdtfSpec(manufacturer, model);
       el.GDTFSpec = specFilename;
       if (f.mode?.trim()) {
-        el.GDTFMode = f.mode;
+        el.GDTFMode = f.mode.trim();
       }
       // Register GDTF file for bundling if available in cache
       if (!gdtfFiles.has(specFilename)) {
-        const cachedPath = await lookupCachedGdtfPath(f.manufacturer, f.model);
+        const cachedPath = await lookupCachedGdtfPath(manufacturer, model);
         if (cachedPath) {
           gdtfFiles.set(specFilename, cachedPath);
         }
@@ -233,10 +235,14 @@ export class MvrExportService {
    * Used for Layer UUIDs so re-exports produce the same file.
    */
   private pseudoUuid(seed: string): string {
-    let h = 0x811c9dc5;
+    // FNV-1a 32-bit hash constants
+    const FNV_OFFSET_BASIS = 0x811c9dc5;
+    const FNV_PRIME = 0x01000193;
+
+    let h = FNV_OFFSET_BASIS;
     for (let i = 0; i < seed.length; i++) {
       h ^= seed.charCodeAt(i);
-      h = (h * 0x01000193) >>> 0;
+      h = (h * FNV_PRIME) >>> 0;
     }
     const hex = h.toString(16).padStart(8, '0');
     return `${hex}-0000-4000-8000-000000000000`;
