@@ -411,9 +411,10 @@ contextBridge.exposeInMainWorld('api', {
     },
   },
 
-  // MVR import
+  // MVR import/export
   mvr: {
     import: (projectId: string) => ipcRenderer.invoke('mvr:import', projectId),
+    export: (projectId: string) => ipcRenderer.invoke('mvr:export', projectId),
   },
 
   // Authentication operations
@@ -829,6 +830,14 @@ export interface ElectronAPI {
       created: number;
       gdtfResolved: number;
       warnings: string[];
+    }>;
+    export: (projectId: string) => Promise<{
+      success: boolean;
+      error?: string;
+      canceled?: boolean;
+      fixtureCount: number;
+      layerCount: number;
+      gdtfBundled: number;
     }>;
   };
   auth: {

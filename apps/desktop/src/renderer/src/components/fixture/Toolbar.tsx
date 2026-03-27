@@ -12,6 +12,7 @@ interface ToolbarProps {
   onDuplicate?: () => void;
   onExportCSV?: () => void;
   onImportMvr?: () => void;
+  onExportMvr?: () => void;
   onUserColumnSettings: () => void;
   columnVisibility: ColumnVisibility;
   onColumnVisibilityChange: (visibility: ColumnVisibility) => void;
@@ -34,6 +35,7 @@ export function Toolbar({
   onDuplicate,
   onExportCSV,
   onImportMvr,
+  onExportMvr,
   onUserColumnSettings,
   columnVisibility,
   onColumnVisibilityChange,
@@ -128,6 +130,16 @@ export function Toolbar({
             title="Import fixtures from an MVR file"
           >
             Import MVR
+          </button>
+        )}
+
+        {onExportMvr && (
+          <button
+            onClick={onExportMvr}
+            className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded text-sm font-medium transition flex-shrink-0"
+            title="Export fixtures to an MVR file"
+          >
+            Export MVR
           </button>
         )}
 

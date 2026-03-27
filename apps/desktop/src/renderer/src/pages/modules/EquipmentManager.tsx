@@ -1013,6 +1013,27 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
     }
   };
 
+  const handleExportMvr = async () => {
+    const projectId = routeProjectId;
+    if (!projectId) return;
+    const result = await window.api.mvr.export(projectId);
+    if (mvrBannerTimerRef.current) clearTimeout(mvrBannerTimerRef.current);
+    if (result.canceled) return;
+    if (result.success) {
+      const pluralize = (count: number, singular: string) =>
+        `${count} ${singular}${count !== 1 ? 's' : ''}`;
+      const gdtfNote =
+        result.gdtfBundled > 0 ? `, ${pluralize(result.gdtfBundled, 'GDTF file')} bundled` : '';
+      setMvrBanner({
+        type: 'success',
+        message: `MVR export: ${pluralize(result.fixtureCount, 'fixture')} in ${pluralize(result.layerCount, 'layer')}${gdtfNote}.`,
+      });
+    } else {
+      setMvrBanner({ type: 'error', message: result.error ?? 'MVR export failed.' });
+    }
+    mvrBannerTimerRef.current = setTimeout(() => setMvrBanner(null), 6000);
+  };
+
   const handleImportMvr = async () => {
     const projectId = routeProjectId;
     if (!projectId) return;
@@ -1170,6 +1191,7 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
               onUnhideSelected={handleUnhideSelected}
               onDuplicate={activeTab === 'fixtures' ? handleDuplicate : undefined}
               onImportMvr={activeTab === 'fixtures' ? handleImportMvr : undefined}
+              onExportMvr={activeTab === 'fixtures' ? handleExportMvr : undefined}
               onExportCSV={activeTab === 'fixtures' ? handleExportCSV : undefined}
               onUserColumnSettings={() => setIsUserColumnSettingsOpen(true)}
               columnVisibility={columnVisibility}
