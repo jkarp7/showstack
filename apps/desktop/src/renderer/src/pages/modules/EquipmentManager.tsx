@@ -93,7 +93,7 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
   const [networkStatusOpen, setNetworkStatusOpen] = useState(false);
   const [portStatusResults, setPortStatusResults] = useState<PortStatusResult[]>([]);
   const [networkStatusLoading, setNetworkStatusLoading] = useState(false);
-  const networkStatusIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const networkStatusIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isAddFixtureDialogOpen, setIsAddFixtureDialogOpen] = useState(false);
   const [isAddInfrastructureDialogOpen, setIsAddInfrastructureDialogOpen] = useState(false);
   const [isEditInfrastructureDialogOpen, setIsEditInfrastructureDialogOpen] = useState(false);
@@ -526,15 +526,22 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
     }
   }, [currentProjectId, infrastructureEquipment]);
 
-  // Auto-refresh network status every 10s when panel is open
+  // Auto-refresh network status every 10s when panel is open.
+  // Uses recursive setTimeout so a slow check never overlaps the next one.
   useEffect(() => {
-    if (networkStatusOpen && activeTab === 'infrastructure') {
-      fetchPortStatus();
-      networkStatusIntervalRef.current = setInterval(fetchPortStatus, 10_000);
-    }
+    if (!networkStatusOpen || activeTab !== 'infrastructure') return;
+    let cancelled = false;
+    const poll = async () => {
+      await fetchPortStatus();
+      if (!cancelled) {
+        networkStatusIntervalRef.current = setTimeout(poll, 10_000);
+      }
+    };
+    poll();
     return () => {
+      cancelled = true;
       if (networkStatusIntervalRef.current) {
-        clearInterval(networkStatusIntervalRef.current);
+        clearTimeout(networkStatusIntervalRef.current);
         networkStatusIntervalRef.current = null;
       }
     };

@@ -54,7 +54,14 @@ class PortStatusMonitorServiceClass {
       return [];
     }
 
-    const results = await Promise.all(addressable.map((e) => this.checkOne(e.id, e.ip_address!)));
+    // Process in batches to avoid exhausting OS file descriptors on large rigs.
+    const BATCH_SIZE = 20;
+    const results: PortStatusResult[] = [];
+    for (let i = 0; i < addressable.length; i += BATCH_SIZE) {
+      const batch = addressable.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(batch.map((e) => this.checkOne(e.id, e.ip_address!)));
+      results.push(...batchResults);
+    }
 
     this.cache.set(projectId, { results, expiresAt: Date.now() + PORT_STATUS_TTL_MS });
     logger.debug('Port status check complete', { projectId, count: results.length });
