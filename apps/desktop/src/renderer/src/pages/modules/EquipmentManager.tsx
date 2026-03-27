@@ -1536,19 +1536,24 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
                   <div className="divide-y divide-gray-200 dark:divide-gray-700">
                     {portStatusResults.map((r) => {
                       const eq = infrastructureEquipmentMap.get(r.equipment_id);
+                      const statusStyle = {
+                        reachable: {
+                          dot: 'bg-green-500',
+                          text: 'text-green-600 dark:text-green-400',
+                        },
+                        timeout: {
+                          dot: 'bg-yellow-500',
+                          text: 'text-yellow-600 dark:text-yellow-400',
+                        },
+                        unreachable: { dot: 'bg-red-500', text: 'text-red-600 dark:text-red-400' },
+                      }[r.status];
                       return (
                         <div
                           key={r.equipment_id}
                           className="flex items-center gap-3 py-1.5 text-xs"
                         >
                           <span
-                            className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                              r.status === 'reachable'
-                                ? 'bg-green-500'
-                                : r.status === 'timeout'
-                                  ? 'bg-yellow-500'
-                                  : 'bg-red-500'
-                            }`}
+                            className={`w-2 h-2 rounded-full flex-shrink-0 ${statusStyle.dot}`}
                           />
                           <span className="font-medium text-gray-900 dark:text-white truncate min-w-0">
                             {eq?.name ?? r.equipment_id}
@@ -1556,19 +1561,9 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
                           <span className="text-gray-500 dark:text-gray-400 font-mono flex-shrink-0">
                             {r.ip}
                           </span>
-                          <span
-                            className={`flex-shrink-0 ${
-                              r.status === 'reachable'
-                                ? 'text-green-600 dark:text-green-400'
-                                : r.status === 'timeout'
-                                  ? 'text-yellow-600 dark:text-yellow-400'
-                                  : 'text-red-600 dark:text-red-400'
-                            }`}
-                          >
-                            {r.status === 'reachable'
-                              ? r.latency_ms !== undefined
-                                ? `reachable (${r.latency_ms}ms)`
-                                : 'reachable'
+                          <span className={`flex-shrink-0 ${statusStyle.text}`}>
+                            {r.status === 'reachable' && r.latency_ms !== undefined
+                              ? `reachable (${r.latency_ms}ms)`
                               : r.status}
                           </span>
                           <span className="text-gray-400 dark:text-gray-500 ml-auto flex-shrink-0">

@@ -77,7 +77,7 @@ describe('PortStatusMonitorService', () => {
   it('returns timeout when socket does not respond within timeout', async () => {
     vi.useFakeTimers();
     const socket = { on: vi.fn(), destroy: vi.fn(), removeAllListeners: vi.fn() };
-    vi.mocked(net.createConnection).mockReturnValue(socket as any);
+    vi.mocked(net.createConnection).mockReturnValue(socket as unknown as net.Socket);
 
     const checkPromise = service.checkOne('eq-timeout', '10.0.0.99');
     await vi.advanceTimersByTimeAsync(2001);

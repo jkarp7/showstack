@@ -51,9 +51,7 @@ class PortStatusMonitorServiceClass {
     const addressable = equipment.filter((e) => e.ip_address);
 
     if (addressable.length === 0) {
-      const empty: PortStatusResult[] = [];
-      this.cache.set(projectId, { results: empty, expiresAt: Date.now() + PORT_STATUS_TTL_MS });
-      return empty;
+      return [];
     }
 
     const results = await Promise.all(addressable.map((e) => this.checkOne(e.id, e.ip_address!)));

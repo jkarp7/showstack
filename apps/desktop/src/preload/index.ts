@@ -4,6 +4,7 @@ import type {
   ShopOrderMember,
   PresenceMember,
 } from '../shared/types/collaboration.types';
+import type { PortStatusResult } from '../shared/types/network.types';
 
 // Define the Fixture type (will match renderer types)
 interface Fixture {
@@ -750,15 +751,7 @@ export interface ElectronAPI {
     getPortStatusReport: (
       projectId: string,
       equipment: Array<{ id: string; ip_address?: string | null }>,
-    ) => Promise<
-      Array<{
-        equipment_id: string;
-        ip: string;
-        status: 'reachable' | 'unreachable' | 'timeout';
-        latency_ms?: number;
-        last_checked: number;
-      }>
-    >;
+    ) => Promise<PortStatusResult[]>;
   };
   phaseTemplates: {
     getAll: (projectId: string) => Promise<any[]>;
