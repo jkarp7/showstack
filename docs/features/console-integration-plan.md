@@ -4,7 +4,7 @@
 **Delivery:** Phased approach with 5 iterative milestones
 **Timeline:** 10 weeks (2.5 months)
 **Effort:** 1 developer full-time
-**Status:** Next up (not yet implemented)
+**Status:** In progress — network prerequisites complete; Phase 1 (Eos OSC) next
 **Created:** January 20, 2026
 **Updated:** March 27, 2026
 **Priority:** High (competitive gap with Lightwright, professional workflow integration)
@@ -54,79 +54,60 @@ Both console integration and IP/VLAN port validation (Issue #17) require network
 - **Shared network utility** — A small `packages/shared/src/utils/networkValidation.ts` covering IPv4 parse/validate and VLAN range check can serve both features (importable from both renderer and main). Write it as part of Phase 1 setup.
 - **Port reachability monitoring** — Before initiating OSC/Telnet connections to a console, and for ongoing infrastructure health (Issue #20), the app needs TCP reachability checks per equipment IP. A `PortStatusMonitorService` (modeled after `HealthChecker.ts`) performs `net.createConnection()` checks with a 2-second timeout and caches results for 5–10 seconds. This serves both Issue #20's status dashboard and console integration's pre-connect validation.
 
-### Recommended Sequencing
+### Completed Steps (branch: `feature/console-network-prereqs`)
 
-Phase 1 of console integration is the natural moment to also close Issue #17:
+**✅ Step 1 — `packages/shared/src/utils/networkValidation.ts`** (shipped)
 
-**Step 1 — Create `packages/shared/src/utils/networkValidation.ts`** (new file):
+- `isValidIPv4`, `parseIPWithPort`, `isValidVLAN` — exported from `@showstack/shared`
+- 18 tests, 100% coverage
 
-```ts
-export function isValidIPv4(value: string): boolean {
-  /* validate all 4 octets are 0-255 */
-}
-export function parseIPWithPort(value: string): { ip: string; port?: number } | null {
-  /* e.g. "192.168.1.100:3032" */
-}
-export function isValidVLAN(value: number): boolean {
-  return value >= 1 && value <= 4094;
-}
-```
+**✅ Step 2 — Zod IP validation in `packages/shared/src/validation/schemas/infrastructure.ts`** (shipped)
 
-**Step 2 — Fix Zod IP regex in `packages/shared/src/validation/schemas/infrastructure.ts`** (line 78):
+- `ip_address`, `subnet_mask`, and `gateway` fields now use `refine(isValidIPv4)` — closes the `999.x.x.x` false-positive
 
-The current regex `/^(?:\d{1,3}\.){3}\d{1,3}$/` allows `999.999.999.999`. Replace with a `refine()` call that delegates to `isValidIPv4()` for proper per-octet 0–255 validation.
+**✅ Step 3 — Inline IP validation in infrastructure dialogs** (shipped)
 
-**Step 3 — Add inline IP validation to infrastructure dialogs** (Issue #17 UI):
+- `EditInfrastructureDialog.tsx` and `AddInfrastructureDialog.tsx`: blur-triggered inline error below IP field
 
-- `apps/desktop/src/renderer/src/components/infrastructure/EditInfrastructureDialog.tsx` (IP Address field, lines 191–201): currently a free-text input with no feedback — add blur handler and inline `<p className="text-xs text-red-600 mt-1">` error when `!isValidIPv4(ipAddress)`
-- `apps/desktop/src/renderer/src/components/infrastructure/AddInfrastructureDialog.tsx`: same IP field — same fix
+**✅ Step 4 — Inline VLAN validation in `PortAssignmentEditor.tsx`** (shipped)
 
-**Step 4 — Add inline VLAN validation to `PortAssignmentEditor.tsx`** (Issue #17 UI):
+- Blur-triggered inline error when VLAN is outside 1–4094
 
-- `apps/desktop/src/renderer/src/components/infrastructure/PortAssignmentEditor.tsx` (VLAN input, lines 349–368): has `type="number" min/max` but shows no error message — add inline `<p className="text-xs text-red-600 mt-1">` error when value is outside 1–4094
+**✅ Step 6 — `apps/desktop/src/main/services/PortStatusMonitorService.ts`** (shipped)
 
-**Step 5 — Wire `parseIPWithPort()` into `ConsoleConnectionDialog.tsx`** (Phase 2):
+- `net.createConnection()` with 2s timeout; ECONNREFUSED = reachable; 8s TTL cache per project
+- 6 tests: connect, ECONNREFUSED, ENETUNREACH, no-IP skip, TTL cache hit, cache-clear re-check
 
-- Validate console IP (+ optional port suffix) on blur before enabling the Connect button
+**✅ Step 7 — `infrastructure:getPortStatusReport` IPC channel** (shipped)
+
+- Added to `ipc/infrastructure.ts`, preload bridge, and type declaration
+
+**✅ Step 8 — `PortUsageIndicator.tsx` connectivity badge** (shipped)
+
+- `connectivityStatus?: PortStatusResult` prop — Wifi/WifiOff icon in compact and full views; inline unreachable warning in full view
+
+**✅ Step 9 — Network Status panel in `EquipmentManager`** (shipped)
+
+- Collapsible section in the Infrastructure tab; per-device color dot, IP, status, latency, last-checked time; auto-refreshes every 10s while open
 
 **UI feedback pattern:** All validation errors follow the same inline pattern — show `<p className="text-xs text-red-600 mt-1">{errorMessage}</p>` on blur or on submit attempt, never as a modal or toast.
 
-**Step 6 — Create `apps/desktop/src/main/services/PortStatusMonitorService.ts`** (new file, Issue #20):
+### Deferred to Phase 2
 
-- Checks each equipment's IP via `net.createConnection()` with a 2-second timeout (no `ping` binary required — avoids macOS/Windows permission complications)
-- Returns `PortStatusResult[]`: `{ equipment_id, ip, status: 'reachable' | 'unreachable' | 'timeout', latency_ms?, last_checked: number }`
-- Caches project-scoped results for 5–10 seconds (follow `HealthChecker.ts` pattern: store result + expiry timestamp, skip re-check if within TTL)
+**Step 5 — Wire `parseIPWithPort()` into `ConsoleConnectionDialog.tsx`**
 
-**Step 7 — Add IPC channel to `apps/desktop/src/main/ipc/infrastructure.ts`** (Issue #20):
+- Validate console IP (+ optional port suffix) on blur before enabling the Connect button
+- Deferred: `ConsoleConnectionDialog.tsx` does not exist yet (Phase 2 deliverable)
 
-- `infrastructure:getPortStatusReport` — calls `PortStatusMonitorService.checkAll(projectId)`, returns cached result within TTL (same pattern as `health.ts` line 15)
-
-**Step 8 — Enhance `PortUsageIndicator.tsx`** (Issue #20 UI):
-
-- Accept optional `connectivityStatus?: PortStatusResult[]` prop
-- When provided, update the `error` bucket to reflect unreachable devices and show a per-device connectivity badge (green dot / red dot) alongside the existing usage bar
-
-**Step 9 — Add Network Status panel to the Infrastructure page** (Issue #20 status dashboard):
-
-- Collapsible "Network Status" section listing each device with its reachability status and last-checked time
-- Auto-refreshes every 10 seconds via `setInterval` calling `window.api.infrastructure.getPortStatusReport(projectId)`
-
-**Step 10 — Wire reachability check into `ConsoleConnectionDialog.tsx`** (Phase 2, Issue #20 × console integration):
+**Step 10 — Reachability pre-check in `ConsoleConnectionDialog.tsx`** (Issue #20 × console integration)
 
 - Before enabling the Connect button, call `infrastructure:getPortStatusReport` and warn if the entered IP is unreachable
 - Non-blocking: user can still attempt to connect; the warning is informational only
+- Deferred: same reason as Step 5
 
-**Test coverage targets for Issue #17:**
+### Remaining test gap
 
-- `packages/shared/src/utils/__tests__/networkValidation.test.ts` — 100% coverage of `isValidIPv4`, `parseIPWithPort`, `isValidVLAN` (edge cases: octet 0/255/256, port 0/65535/65536, VLAN 1/4094/4095)
-- Infrastructure dialog tests — add IP/VLAN validation feedback cases to existing test files for `EditInfrastructureDialog`, `AddInfrastructureDialog`, and `PortAssignmentEditor`
-
-**Test coverage targets for Issue #20:**
-
-- `apps/desktop/src/main/services/__tests__/PortStatusMonitorService.test.ts` — mock `net.createConnection()`; test: reachable (fast connect), unreachable (connection refused), timeout (no response within 2s), TTL cache hit, TTL cache miss/expiry
 - `apps/desktop/src/main/ipc/__tests__/infrastructure.test.ts` — add `infrastructure:getPortStatusReport` handler test (returns cached result, calls service on cache miss)
-
-Both issue #17 and #20 ship in the same PR or back-to-back PRs with minimal additional effort.
 
 ---
 
