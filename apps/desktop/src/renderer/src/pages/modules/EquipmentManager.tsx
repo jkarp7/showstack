@@ -1020,7 +1020,10 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
     if (mvrBannerTimerRef.current) clearTimeout(mvrBannerTimerRef.current);
     if (result.canceled) return;
     if (result.success) {
-      const gdtfNote = result.gdtfBundled > 0 ? `, ${result.gdtfBundled} GDTF files bundled` : '';
+      const gdtfNote =
+        result.gdtfBundled > 0
+          ? `, ${result.gdtfBundled} GDTF file${result.gdtfBundled !== 1 ? 's' : ''} bundled`
+          : '';
       setMvrBanner({
         type: 'success',
         message: `MVR export: ${result.fixtureCount} fixtures in ${result.layerCount} layer${result.layerCount !== 1 ? 's' : ''}${gdtfNote}.`,

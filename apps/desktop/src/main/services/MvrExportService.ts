@@ -12,6 +12,7 @@
 import AdmZip from 'adm-zip';
 import * as fs from 'fs';
 import { XMLBuilder } from 'fast-xml-parser';
+import { v5 as uuidv5 } from 'uuid';
 import { z } from 'zod';
 import { getAllFixtures, Fixture } from '../database/queries/fixtures';
 import { getAppDatabase } from '../database';
@@ -235,21 +236,13 @@ export class MvrExportService {
   }
 
   /**
-   * Generate a stable pseudo-UUID from a string (deterministic, not cryptographic).
+   * Generate a stable, deterministic UUID from a seed string using UUIDv5.
    * Used for Layer UUIDs so re-exports produce the same file.
    */
   private pseudoUuid(seed: string): string {
-    // FNV-1a 32-bit hash constants
-    const FNV_OFFSET_BASIS = 0x811c9dc5;
-    const FNV_PRIME = 0x01000193;
-
-    let h = FNV_OFFSET_BASIS;
-    for (let i = 0; i < seed.length; i++) {
-      h ^= seed.charCodeAt(i);
-      h = (h * FNV_PRIME) >>> 0;
-    }
-    const hex = h.toString(16).padStart(8, '0');
-    return `${hex}-0000-4000-8000-000000000000`;
+    // Fixed namespace for MVR layer UUIDs (randomly generated constant).
+    const MVR_LAYER_NAMESPACE = '9e95318b-3407-49a6-89a4-615d800b28e5';
+    return uuidv5(seed, MVR_LAYER_NAMESPACE);
   }
 }
 
