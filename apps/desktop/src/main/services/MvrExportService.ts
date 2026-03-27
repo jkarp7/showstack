@@ -134,7 +134,7 @@ export class MvrExportService {
         },
         Scene: {
           Layers: {
-            Layer: layers,
+            Layer: layers.length > 0 ? layers : undefined,
           },
         },
       },

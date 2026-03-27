@@ -1020,13 +1020,13 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
     if (mvrBannerTimerRef.current) clearTimeout(mvrBannerTimerRef.current);
     if (result.canceled) return;
     if (result.success) {
+      const pluralize = (count: number, singular: string) =>
+        `${count} ${singular}${count !== 1 ? 's' : ''}`;
       const gdtfNote =
-        result.gdtfBundled > 0
-          ? `, ${result.gdtfBundled} GDTF file${result.gdtfBundled !== 1 ? 's' : ''} bundled`
-          : '';
+        result.gdtfBundled > 0 ? `, ${pluralize(result.gdtfBundled, 'GDTF file')} bundled` : '';
       setMvrBanner({
         type: 'success',
-        message: `MVR export: ${result.fixtureCount} fixture${result.fixtureCount !== 1 ? 's' : ''} in ${result.layerCount} layer${result.layerCount !== 1 ? 's' : ''}${gdtfNote}.`,
+        message: `MVR export: ${pluralize(result.fixtureCount, 'fixture')} in ${pluralize(result.layerCount, 'layer')}${gdtfNote}.`,
       });
     } else {
       setMvrBanner({ type: 'error', message: result.error ?? 'MVR export failed.' });
