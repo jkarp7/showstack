@@ -15,6 +15,7 @@ import {
   CSVFieldMapping,
 } from '../database/queries/infrastructure';
 import { infrastructureService } from '../services/InfrastructureService';
+import { portStatusMonitor } from '../services/PortStatusMonitorService';
 import { errorHandler } from '../errors';
 import { DatabaseError, ValidationError } from '../errors';
 import { logger } from '../utils/logger';
@@ -443,6 +444,27 @@ export function registerInfrastructureHandlers(): void {
       );
     }
   });
+
+  // Get port reachability status for all equipment in a project (Issue #20)
+  ipcMain.handle(
+    'infrastructure:getPortStatusReport',
+    async (
+      _event,
+      projectId: string,
+      equipment: Array<{ id: string; ip_address?: string | null }>,
+    ) => {
+      try {
+        return await portStatusMonitor.checkAll(projectId, equipment);
+      } catch (error) {
+        logger.error('Failed to get port status report:', {
+          operation: 'infrastructure:getPortStatusReport',
+          projectId,
+          error: error instanceof Error ? error.message : error,
+        });
+        throw error;
+      }
+    },
+  );
 
   logger.info('✅ Infrastructure IPC handlers registered');
 }

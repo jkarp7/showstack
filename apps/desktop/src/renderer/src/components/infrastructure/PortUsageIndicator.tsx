@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
 import { logger } from '../../utils/logger';
-import { Activity, AlertCircle } from 'lucide-react';
+import { Activity, AlertCircle, Wifi, WifiOff } from 'lucide-react';
+
+export interface PortStatusResult {
+  equipment_id: string;
+  ip: string;
+  status: 'reachable' | 'unreachable' | 'timeout';
+  latency_ms?: number;
+  last_checked: number;
+}
 
 export interface PortUsageStats {
   total_ports: number;
@@ -19,12 +27,14 @@ interface PortUsageIndicatorProps {
   equipmentId: string;
   compact?: boolean; // Show compact version
   showDetails?: boolean; // Show detailed breakdown
+  connectivityStatus?: PortStatusResult; // Optional reachability result for this equipment
 }
 
 export function PortUsageIndicator({
   equipmentId,
   compact = false,
   showDetails = true,
+  connectivityStatus,
 }: PortUsageIndicatorProps) {
   const [stats, setStats] = useState<PortUsageStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,6 +75,25 @@ export function PortUsageIndicator({
     return 'bg-green-500';
   };
 
+  const ConnectivityBadge = () => {
+    if (!connectivityStatus) return null;
+    if (connectivityStatus.status === 'reachable') {
+      return (
+        <span
+          title={`Reachable${connectivityStatus.latency_ms !== undefined ? ` (${connectivityStatus.latency_ms}ms)` : ''}`}
+        >
+          <Wifi className="w-3.5 h-3.5 text-green-500" />
+        </span>
+      );
+    }
+    const label = connectivityStatus.status === 'timeout' ? 'Timeout — no response' : 'Unreachable';
+    return (
+      <span title={label}>
+        <WifiOff className="w-3.5 h-3.5 text-red-500" />
+      </span>
+    );
+  };
+
   if (compact) {
     return (
       <div className="flex items-center gap-2">
@@ -75,6 +104,7 @@ export function PortUsageIndicator({
         <span className={`text-xs font-medium ${getUsageColor()}`}>
           ({stats.usage_percentage}%)
         </span>
+        <ConnectivityBadge />
       </div>
     );
   }
@@ -85,7 +115,12 @@ export function PortUsageIndicator({
       <div className="flex items-center gap-3">
         <div className="flex-1">
           <div className="flex justify-between items-center mb-1">
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Port Usage</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                Port Usage
+              </span>
+              <ConnectivityBadge />
+            </div>
             <span className={`text-xs font-medium ${getUsageColor()}`}>
               {stats.usage_percentage}%
             </span>
@@ -157,6 +192,18 @@ export function PortUsageIndicator({
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Connectivity warning */}
+      {connectivityStatus && connectivityStatus.status !== 'reachable' && (
+        <div className="flex items-center gap-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-2 py-1.5 rounded">
+          <WifiOff className="w-3.5 h-3.5" />
+          <span>
+            {connectivityStatus.status === 'timeout'
+              ? `No response from ${connectivityStatus.ip} (timeout)`
+              : `${connectivityStatus.ip} is unreachable`}
+          </span>
         </div>
       )}
 

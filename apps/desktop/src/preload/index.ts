@@ -328,6 +328,10 @@ contextBridge.exposeInMainWorld('api', {
     readCSVHeaders: (filePath: string) =>
       ipcRenderer.invoke('infrastructure:readCSVHeaders', filePath),
     showImportDialog: () => ipcRenderer.invoke('infrastructure:showImportDialog'),
+    getPortStatusReport: (
+      projectId: string,
+      equipment: Array<{ id: string; ip_address?: string | null }>,
+    ) => ipcRenderer.invoke('infrastructure:getPortStatusReport', projectId, equipment),
   },
 
   // Phase Template operations
@@ -743,6 +747,18 @@ export interface ElectronAPI {
     ) => Promise<{ success: boolean; imported: number; errors: string[] }>;
     readCSVHeaders: (filePath: string) => Promise<{ success: boolean; headers: string[] }>;
     showImportDialog: () => Promise<{ success: boolean; filePath?: string; canceled?: boolean }>;
+    getPortStatusReport: (
+      projectId: string,
+      equipment: Array<{ id: string; ip_address?: string | null }>,
+    ) => Promise<
+      Array<{
+        equipment_id: string;
+        ip: string;
+        status: 'reachable' | 'unreachable' | 'timeout';
+        latency_ms?: number;
+        last_checked: number;
+      }>
+    >;
   };
   phaseTemplates: {
     getAll: (projectId: string) => Promise<any[]>;
