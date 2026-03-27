@@ -12,9 +12,12 @@
 import AdmZip from 'adm-zip';
 import * as fs from 'fs';
 import { XMLBuilder } from 'fast-xml-parser';
+import { z } from 'zod';
 import { getAllFixtures, Fixture } from '../database/queries/fixtures';
 import { getAppDatabase } from '../database';
 import { logger } from '../utils/logger';
+
+const GdtfCacheRowSchema = z.object({ file_path: z.string() });
 
 export interface MvrExportResult {
   success: boolean;
@@ -52,26 +55,27 @@ async function lookupCachedGdtfPath(manufacturer: string, model: string): Promis
   const db = getAppDatabase();
   const id = `${manufacturer}/${model}`;
 
-  let row = db.prepare('SELECT file_path FROM gdtf_cache WHERE id = ?').get(id) as
-    | { file_path: string }
-    | undefined;
+  let rowData: unknown = db.prepare('SELECT file_path FROM gdtf_cache WHERE id = ?').get(id);
 
-  if (!row) {
-    row = db
+  if (!rowData) {
+    rowData = db
       .prepare(
         'SELECT file_path FROM gdtf_cache WHERE manufacturer = ? COLLATE NOCASE AND model = ? COLLATE NOCASE',
       )
-      .get(manufacturer, model) as { file_path: string } | undefined;
+      .get(manufacturer, model);
   }
 
-  if (!row?.file_path) return null;
+  const parsed = GdtfCacheRowSchema.safeParse(rowData);
+  if (!parsed.success) return null;
+
+  const { file_path } = parsed.data;
 
   try {
-    await fs.promises.access(row.file_path);
-    return row.file_path;
+    await fs.promises.access(file_path);
+    return file_path;
   } catch (err) {
     logger.warn('Error checking GDTF file existence', {
-      path: row.file_path,
+      path: file_path,
       error: err instanceof Error ? err.message : String(err),
     });
     return null;
