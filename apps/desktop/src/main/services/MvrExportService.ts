@@ -79,7 +79,11 @@ export class MvrExportService {
   /**
    * Export all fixtures from a project to an MVR file at the given output path.
    */
-  export(projectId: string, outputPath: string, projectName: string): MvrExportResult {
+  async export(
+    projectId: string,
+    outputPath: string,
+    projectName: string,
+  ): Promise<MvrExportResult> {
     const fixtures = getAllFixtures(projectId).filter((f) => f.status !== 'hidden');
 
     // Group fixtures by position → one MVR Layer per position
@@ -134,7 +138,7 @@ export class MvrExportService {
     let gdtfBundled = 0;
     for (const [specFilename, filePath] of gdtfFiles) {
       try {
-        const gdtfData = fs.readFileSync(filePath);
+        const gdtfData = await fs.promises.readFile(filePath);
         zip.addFile(specFilename, gdtfData);
         gdtfBundled++;
       } catch (err) {
@@ -146,7 +150,7 @@ export class MvrExportService {
       }
     }
 
-    zip.writeZip(outputPath);
+    await zip.writeZipPromise(outputPath);
 
     const result: MvrExportResult = {
       success: true,

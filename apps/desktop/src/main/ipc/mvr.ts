@@ -101,14 +101,16 @@ export function registerMvrHandlers(): void {
    * Opens a native save dialog, writes the ZIP, returns a summary.
    */
   ipcMain.handle('mvr:export', async (_event, projectId: string): Promise<MvrExportIpcResult> => {
+    const failure = (extra: Partial<MvrExportIpcResult> = {}): MvrExportIpcResult => ({
+      success: false,
+      fixtureCount: 0,
+      layerCount: 0,
+      gdtfBundled: 0,
+      ...extra,
+    });
+
     if (typeof projectId !== 'string' || !projectId) {
-      return {
-        success: false,
-        error: 'No project ID provided',
-        fixtureCount: 0,
-        layerCount: 0,
-        gdtfBundled: 0,
-      };
+      return failure({ error: 'No project ID provided' });
     }
 
     const project = getProjectById(projectId);
@@ -124,11 +126,11 @@ export function registerMvrHandlers(): void {
     });
 
     if (dialogResult.canceled || !dialogResult.filePath) {
-      return { success: false, canceled: true, fixtureCount: 0, layerCount: 0, gdtfBundled: 0 };
+      return failure({ canceled: true });
     }
 
     try {
-      const result = mvrExportService.export(projectId, dialogResult.filePath, projectName);
+      const result = await mvrExportService.export(projectId, dialogResult.filePath, projectName);
       logger.info('MVR export IPC complete', {
         fixtureCount: result.fixtureCount,
         layerCount: result.layerCount,
@@ -138,7 +140,7 @@ export function registerMvrHandlers(): void {
     } catch (err) {
       const error = err instanceof Error ? err.message : String(err);
       logger.error('MVR export failed', { projectId, error });
-      return { success: false, error, fixtureCount: 0, layerCount: 0, gdtfBundled: 0 };
+      return failure({ error });
     }
   });
 
