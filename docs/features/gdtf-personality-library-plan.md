@@ -1,8 +1,8 @@
 # GDTF Personality Library — Implementation Plan
 
-**Status:** Planned
-**Relates to:** DMX Map visualization (partial), Issue #30 (MVR import)
-**Blocking:** Full DMX Map footprint display
+**Status:** Phases 1–3 Complete ✅ / Phase 4 Planned
+**Relates to:** DMX Map visualization (complete), Issue #30 (MVR import)
+**Last Updated:** March 26, 2026
 
 ---
 
@@ -205,40 +205,48 @@ This means MVR import gives accurate footprints automatically with no user inter
 
 ## Implementation Phases
 
-### Phase 1 — User-editable footprint (no GDTF)
+### Phase 1 — User-editable footprint (no GDTF) ✅ COMPLETE
 
-1. Migration: `ALTER TABLE fixtures ADD COLUMN dmx_footprint INTEGER NOT NULL DEFAULT 1`
-2. Add `dmx_footprint` and `mode` to `FIXTURE_ALLOWED_FIELDS`
-3. Expose `dmx_footprint` in Add Fixture dialog and Bulk Edit dialog
-4. Update `DMXMap.tsx` to shade full address range per fixture
-5. Update conflict detection in `validation.ts` to check full ranges (not just start addresses)
+1. ✅ Migration: `ALTER TABLE fixtures ADD COLUMN dmx_footprint INTEGER NOT NULL DEFAULT 1`
+2. ✅ Add `dmx_footprint` and `mode` to `FIXTURE_ALLOWED_FIELDS`
+3. ✅ Expose `dmx_footprint` in Add Fixture dialog and Bulk Edit dialog
+4. ✅ Update `DMXMap.tsx` to shade full address range per fixture (multi-cell blocks with thick outer border, thin inner dividers)
+5. ✅ Update conflict detection in `validation.ts` to check full ranges (not just start addresses)
+6. ✅ Bug fix: `dmx_footprint` added to `FixtureSchema` Zod validation (was missing — caused silent stripping before DB write)
+7. ✅ Bug fix: `position` field made optional in schema (was incorrectly required)
+8. ✅ Bug fix: DMX auto-increment in Add Fixture dialog now uses `rawAddress += i * dmxFootprint` (was `+= i`)
+9. ✅ DMXMap now calls `loadFixtures()` on mount so footprint data is always fresh
 
-This phase can ship independently and immediately improves the DMX Map for any user who sets footprints manually.
+### Phase 2 — Bundled GDTF starter set + picker UI ✅ COMPLETE
 
-### Phase 2 — Bundled GDTF starter set + picker UI
+1. ✅ `gdtf_cache` SQLite table with `modes_json` pre-parsed column
+2. ✅ `GdtfService`: ZIP extraction, XML parsing, `gdtf-bundled/` scan, `gdtf:search` / `gdtf:getModes` IPC
+3. ✅ `GdtfPickerDialog`: fuzzy search, fixture + mode selection, channel count display
+4. ✅ Wired into Add Fixture and Bulk Edit dialogs — on select auto-fills manufacturer, model, type, mode, dmx_footprint
+5. ⬜ `gdtf-bundled/` starter files not yet added (maintainer step — ~200 common fixtures)
 
-1. Curate and bundle ~200 common fixtures in `resources/gdtf/`
-2. Parse all bundled files at first launch → populate `gdtf_cache`
-3. GDTF picker UI in fixture edit dialog (search, mode select, auto-fill)
-4. IPC handlers: `gdtf:search`, `gdtf:getModes`, `gdtf:downloadFixture`
+### Phase 3 — CDN sync + update notifications ✅ COMPLETE
 
-### Phase 3 — CDN sync + update notifications
+1. ✅ Supabase Storage bucket `gdtf-library` (public) — migration `017_gdtf_library_bucket.sql`
+2. ✅ `scripts/sync-gdtf-library.mjs` — GDTF-Share REST API → manifest.json → Supabase Storage upload
+3. ✅ **8,033 fixtures live** in manifest (hash `9bcf41fe2e17a451`, 4.5 MB, March 2026)
+4. ✅ GitHub Actions workflow `sync-gdtf-library.yml` (GDTF_USERNAME / GDTF_PASSWORD / SUPABASE_SERVICE_ROLE_KEY secrets configured)
+5. ✅ `GdtfService.applyManifestUpdate()` — single SQLite transaction bulk-upsert of all manifest fixtures
+6. ✅ `gdtf:applyUpdate` IPC + preload wiring
+7. ✅ `GdtfLibraryUpdateBanner` — shows on launch when CDN version_hash differs; "Update Now" button; auto-dismisses on success; shows progress and error states
+8. ✅ electron-vite watch config extended to `packages/shared/src/**` so main process restarts on schema changes
 
-1. Set up Supabase Storage bucket + manifest endpoint
-2. Scheduled sync from GDTF-Share → bucket (GitHub Action)
-3. Update check on app launch; notification UI
-4. On-demand CDN download from picker when fixture not in local cache
-
-### Phase 4 — MVR integration (Issue #30)
+### Phase 4 — MVR integration (Issue #30) ⬜ PLANNED
 
 - Consume `<GDTFType>` and `<GDTFMode>` from MVR import
 - Wire to GDTF cache for automatic footprint resolution
+- `<GDTFMode>` value also written to `fixture.mode`
 
 ---
 
-## Open Questions
+## Resolved Questions
 
-- **Bulk download UX**: Silent background download vs. user-initiated? Probably user-initiated for the initial "update available" flow, silent for individual fixture lookups.
-- **CDN hosting**: Supabase Storage is the path of least resistance given existing infrastructure. Alternatively, GitHub Releases (free, no backend needed, but less flexible for partial updates).
-- **Bundled fixture selection**: Need to define the ~200 fixture curated set. Priority: most common rental stock in North American theatrical/touring market. ETC Source Four family, MAC family, Chauvet Professional, Robe, GLP, Clay Paky top candidates.
-- **GDTF-Share sync credentials**: App credentials stored as GitHub/Supabase secrets, never distributed to end users.
+- **Bulk download UX**: "Update Now" button in dismissible banner — user-initiated. Individual fixture downloads from CDN on first use (future, not yet implemented).
+- **CDN hosting**: Supabase Storage ✅ — bucket `gdtf-library` is live.
+- **GDTF-Share sync credentials**: Stored as GitHub Actions secrets (`GDTF_USERNAME`, `GDTF_PASSWORD`, `SUPABASE_SERVICE_ROLE_KEY`) — not distributed to end users. ✅
+- **Bundled fixture selection**: Deferred — `gdtf-bundled/` directory scaffolded but empty. Maintainer step.

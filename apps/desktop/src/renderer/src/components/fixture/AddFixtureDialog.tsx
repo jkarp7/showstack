@@ -125,7 +125,7 @@ export function AddFixtureDialog({
         notes: notes || undefined,
         status: notOnPlot ? 'Not on Plot' : status || undefined,
         mode: mode || undefined,
-        dmx_footprint: dmxFootprint > 1 ? dmxFootprint : undefined,
+        dmx_footprint: dmxFootprint > 1 ? dmxFootprint : undefined, // 1 is DB default; only send if > 1
       };
 
       // Handle accessories (comma-separated to array)
@@ -1057,7 +1057,7 @@ export function AddFixtureDialog({
           setModel(mdl);
           setType(mdl);
           setMode(selectedMode);
-          setDmxFootprint(channelCount);
+          setDmxFootprint(Number(channelCount) || 1);
         }}
       />
     </div>

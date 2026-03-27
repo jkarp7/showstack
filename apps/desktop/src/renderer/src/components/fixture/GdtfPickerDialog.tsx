@@ -30,6 +30,7 @@ export function GdtfPickerDialog({ isOpen, onClose, onSelect }: GdtfPickerDialog
     manufacturer: '',
     model: '',
   });
+  const [cdnExpanded, setCdnExpanded] = useState(false);
   const [cdnDownloading, setCdnDownloading] = useState(false);
   const [cdnError, setCdnError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -45,6 +46,7 @@ export function GdtfPickerDialog({ isOpen, onClose, onSelect }: GdtfPickerDialog
       setSelectedModeIndex(null);
       setCdnQuery({ manufacturer: '', model: '' });
       setCdnError(null);
+      setCdnExpanded(false);
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [isOpen]);
@@ -203,49 +205,73 @@ export function GdtfPickerDialog({ isOpen, onClose, onSelect }: GdtfPickerDialog
               )}
             </div>
 
-            {/* CDN download section — shown when no local results and download API available */}
-            {!searching &&
-              query.trim() &&
-              results.length === 0 &&
-              window.api?.gdtf?.downloadFixture && (
-                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                    Not found locally? Download from CDN:
-                  </p>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={cdnQuery.manufacturer}
-                      onChange={(e) => setCdnQuery((q) => ({ ...q, manufacturer: e.target.value }))}
-                      placeholder="Manufacturer"
-                      className="flex-1 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs focus:outline-none focus:border-blue-500"
-                    />
-                    <input
-                      type="text"
-                      value={cdnQuery.model}
-                      onChange={(e) => setCdnQuery((q) => ({ ...q, model: e.target.value }))}
-                      placeholder="Model"
-                      className="flex-1 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs focus:outline-none focus:border-blue-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleCdnDownload}
-                      disabled={
-                        cdnDownloading || !cdnQuery.manufacturer.trim() || !cdnQuery.model.trim()
+            {/* CDN download section — available whenever there's a query */}
+            {!searching && query.trim() && window.api?.gdtf?.downloadFixture && (
+              <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Pre-fill from query when expanding for the first time
+                    if (!cdnExpanded) {
+                      const parts = query.trim().split(/\s+/);
+                      if (!cdnQuery.manufacturer && !cdnQuery.model) {
+                        setCdnQuery({
+                          manufacturer: parts[0] ?? '',
+                          model: parts.slice(1).join(' ') || parts[0] || '',
+                        });
                       }
-                      className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
-                    >
-                      {cdnDownloading ? (
-                        <span className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      ) : null}
-                      Download
-                    </button>
+                    }
+                    setCdnExpanded((v) => !v);
+                    setCdnError(null);
+                  }}
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  {results.length === 0
+                    ? 'Not found? Download from CDN'
+                    : 'Download a specific fixture from CDN'}{' '}
+                  {cdnExpanded ? '▲' : '▼'}
+                </button>
+
+                {cdnExpanded && (
+                  <div className="mt-2">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={cdnQuery.manufacturer}
+                        onChange={(e) =>
+                          setCdnQuery((q) => ({ ...q, manufacturer: e.target.value }))
+                        }
+                        placeholder="Manufacturer"
+                        className="flex-1 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs focus:outline-none focus:border-blue-500"
+                      />
+                      <input
+                        type="text"
+                        value={cdnQuery.model}
+                        onChange={(e) => setCdnQuery((q) => ({ ...q, model: e.target.value }))}
+                        placeholder="Model"
+                        className="flex-1 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs focus:outline-none focus:border-blue-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleCdnDownload}
+                        disabled={
+                          cdnDownloading || !cdnQuery.manufacturer.trim() || !cdnQuery.model.trim()
+                        }
+                        className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+                      >
+                        {cdnDownloading ? (
+                          <span className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : null}
+                        Download
+                      </button>
+                    </div>
+                    {cdnError && (
+                      <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">{cdnError}</p>
+                    )}
                   </div>
-                  {cdnError && (
-                    <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">{cdnError}</p>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
+            )}
           </div>
 
           {/* Mode list */}

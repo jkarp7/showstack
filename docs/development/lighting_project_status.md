@@ -1,10 +1,10 @@
 # ShowStack — Lighting Edition Status
 
-**Last Updated:** March 15, 2026
+**Last Updated:** March 26, 2026
 **Edition Price:** $249/year
 **Target Users:** Lighting Designers, Production Electricians, Master Electricians
 **Competes With:** LightWright 6 ($845 one-time)
-**Overall Completion:** ~92%
+**Overall Completion:** ~96%
 
 ---
 
@@ -20,8 +20,8 @@ These items are either actively deferred or waiting on a dependency. Address bef
 
 ### Fixture Management
 
-- ⬜ **Auto-complete System** — Manufacturer, type, color, gobo lookup from an external fixture database.
-  _Deferred — requires extensive fixture database work before this is feasible._
+- ✅ **GDTF Personality Library (Phases 1–3)** — See completed section below. ~~Auto-complete deferred.~~ Superseded by GDTF library.
+- ⬜ **GDTF Phase 4 — MVR auto-resolution (Issue #30)** — Consume `<GDTFType>` and `<GDTFMode>` from MVR import; look up `gdtf_cache`; auto-populate `dmx_footprint` and `mode`.
 - ~~**DMX Conflict Highlighting in Grid**~~ — Evaluated and closed. Show Health collapsible details + DMX Map visualization supersede inline grid highlighting.
 
 ### Power Management
@@ -69,7 +69,7 @@ These items are either actively deferred or waiting on a dependency. Address bef
 
 ### Short-term — Lightwright Parity
 
-1. **MVR export** — Industry-standard CAD/visualizer format for Vectorworks, Cast, Depiction, etc. (Issue #30)
+1. **MVR import (Issue #30)** — Consume `<GDTFType>` / `<GDTFMode>` for footprint auto-resolution (GDTF Phase 4). Industry-standard format for Vectorworks, Cast, Depiction, etc.
 2. **Basic console integration (ETC Eos via OSC)** — Push/pull patch data from an Eos family console. (Issue #25, 5% complete)
 
 **Refs:** `docs/features/console-integration-plan.md`
@@ -86,8 +86,9 @@ These items are either actively deferred or waiting on a dependency. Address bef
 
 - ⬜ **Multi-cable Tracking** — Track multi-cable runs and breakouts.
 - ~~**Focus Charts**~~ — Deferred indefinitely; re-open if users request.
-- 🟡 **DMX Map Visualization** — Universe grid view implemented (32×16, 4 cell states, hover tooltips, intentional sharing suppression). _Remaining: DMX footprint per fixture (see GDTF plan below)._
-- ⬜ **GDTF Personality Library** — 4-phase plan: (1) user-editable `dmx_footprint` field + full-range conflict detection, (2) bundled ~200-fixture starter set + picker UI, (3) ShowStack CDN + update notifications, (4) MVR auto-resolution via Issue #30. **Ref:** `docs/features/gdtf-personality-library-plan.md`
+- ✅ **DMX Map Visualization** — Universe grid view (32×16, 512 addresses/universe). Multi-channel fixtures shown as contiguous color blocks with thick outer borders and thin inner cell dividers. 4 cell states: empty (gray), start cell (dark blue), continuation (light blue), shared/intentional (teal), conflict (red). Hover tooltip shows channel · type · mode · footprint. Header: universe count, patched count, shared count, conflict count. Intentional sharing suppressed. Reloads fixtures on mount for fresh data.
+- ✅ **GDTF Personality Library (Phases 1–3)** — See completed section below. **Ref:** `docs/features/gdtf-personality-library-plan.md`
+- ⬜ **GDTF Phase 4** — MVR auto-resolution; see Short-term Lightwright Parity above.
 - ~~**Work Notes**~~ — Deferred indefinitely; re-open if users request.
 
 ---
@@ -110,7 +111,13 @@ These items are either actively deferred or waiting on a dependency. Address bef
 - ✅ **Filter out (hidden fixtures)** — Hide fixtures with hidden flag; "Show Hidden" toggle.
 - ✅ **Auto-complete from project data** — Inline suggestions based on existing fixture values.
 - ✅ **Point circuit notation** — Circuits like "1.2", "1.3" for power-thru / daisy chains.
-- ✅ **DMX Map** — Visualization page (`/project/:id/dmx-map`) showing all universes as 32×16 grids (512 addresses each). Cells: empty (gray), used (blue), shared/intentional (teal), conflict (red). Hover tooltip shows channel, type, position. Header shows patched count, shared count, conflict count. Intentional sharing suppressed via `isIntentionalAddressSharing()` — checks `two_fer`/`dimmer_doubles` flags, shared circuit name+number, or shared dimmer value.
+- ✅ **DMX Map** — Visualization page (`/project/:id/dmx-map`) showing all universes as 32×16 grids (512 addresses each). Multi-channel fixtures rendered as contiguous color blocks: start cell (dark blue `bg-blue-500`) shows channel label, continuation cells (light blue `bg-blue-200`) extend the block. Thick outer border (`border-2 border-blue-700`) encloses each fixture block; thin inner cell dividers. Single-channel fixtures: one dark-blue cell. Shared/intentional (teal), conflict (red). Tooltip shows `Ch · type · position · mode · footprint`. Reloads fixtures on mount. Intentional sharing suppressed via `isIntentionalAddressSharing()`.
+
+### GDTF Personality Library (Phases 1–3)
+
+- ✅ **Phase 1 — User-editable footprint** — `dmx_footprint` column added to `fixtures` table (migration, `DEFAULT 1`). Added to `FIXTURE_ALLOWED_FIELDS`. `dmx_footprint` added to `FixtureSchema` Zod validation (was missing — caused silent stripping on every save). DMX Map updated to shade full address range per fixture. Conflict detection extended to cover full ranges.
+- ✅ **Phase 2 — Bundled starter set + picker UI** — `gdtf_cache` SQLite table (`id`, `manufacturer`, `model`, `revision_id`, `source`, `cached_at`, `file_path`, `modes_json`). `GdtfService` parses `.gdtf` ZIP files, caches modes. `GdtfPickerDialog` — fuzzy search across 8,000+ fixtures, mode selection with channel count. Wired into Add Fixture and Bulk Edit dialogs. On select: auto-fills manufacturer, model, type, mode, and `dmx_footprint`. `gdtf-bundled/` directory for offline starter fixtures (not yet populated — maintainer step).
+- ✅ **Phase 3 — CDN sync + update notifications** — Supabase Storage bucket `gdtf-library` (public). Manifest format: `{ version_hash, updated_at, fixture_count, fixtures: [{id, manufacturer, model, rid, modes}] }`. `scripts/sync-gdtf-library.mjs` syncs from GDTF-Share REST API and uploads manifest; run to populate **8,033 fixtures** (hash `9bcf41fe2e17a451`, 4.5 MB). `GdtfService.applyManifestUpdate()` bulk-upserts all manifest fixtures in a single SQLite transaction. `gdtf:applyUpdate` IPC wired through preload. `GdtfLibraryUpdateBanner` shows on launch when CDN version differs from stored hash; "Update Now" button triggers bulk upsert and auto-dismisses on success. GitHub Actions workflow `sync-gdtf-library.yml` for future automated syncs.
 
 ### Smart Groups (Phases 1–4)
 
@@ -217,6 +224,8 @@ _Note: Supersedes Issue #40 (Maintenance Menu) and Issue #29 (Shop Order from Sy
 ## 📋 Known Technical Debt
 
 - `useModuleAccess.ts` may need renaming to `useEditionAccess.ts` for clarity.
+- `gdtf-bundled/` starter fixture set not yet populated — maintainer must add .gdtf files for offline Tier 1 support.
+- Supabase dashboard: `showstack://*` must be added to Auth → URL Configuration → Redirect URLs manually.
 - ESLint warning count is exactly at the CI threshold (855). Reducing to 0 is a tracked goal.
 - Issue #51 (Equipment Manager export) — Closed. All 4 formats implemented (CSV, Eos ASCII, GrandMA2 XML, GrandMA3 XML) with native save dialog via `file:saveText` IPC. CSV uses proper RFC 4180 escaping.
 - Issue #40 (Maintenance Menu) closed — superseded by Smart Groups. Per-column maintenance menu and 4-tab notes dialog not implemented; re-open if user feedback demands.

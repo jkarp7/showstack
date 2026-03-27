@@ -411,6 +411,11 @@ contextBridge.exposeInMainWorld('api', {
     },
   },
 
+  // MVR import
+  mvr: {
+    import: (projectId: string) => ipcRenderer.invoke('mvr:import', projectId),
+  },
+
   // Authentication operations
   auth: {
     signIn: (email: string, password: string) => ipcRenderer.invoke('auth:signIn', email, password),
@@ -815,6 +820,16 @@ export interface ElectronAPI {
     onUpdateAvailable: (
       callback: (info: { versionHash: string; fixtureCount: number }) => void,
     ) => () => void;
+  };
+  mvr: {
+    import: (projectId: string) => Promise<{
+      success: boolean;
+      error?: string;
+      canceled?: boolean;
+      created: number;
+      gdtfResolved: number;
+      warnings: string[];
+    }>;
   };
   auth: {
     signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;

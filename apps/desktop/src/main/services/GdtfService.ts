@@ -134,23 +134,52 @@ export class GdtfService {
   }
 
   /**
-   * Fuzzy search against manufacturer + model in gdtf_cache.
-   * Returns up to 50 results ordered by manufacturer then model.
+   * Multi-token search against manufacturer + model in gdtf_cache.
+   *
+   * Improvements over a single LIKE query:
+   * - Splits query into words; ALL words must match (AND logic)
+   * - Each word is checked against the combined "manufacturer model" string,
+   *   so "source four etc" and "etc source four" both find "ETC / Source Four"
+   * - Results scored by: exact full combined match > manufacturer-prefix match >
+   *   alphabetical fallback
+   * - Returns up to 50 results
    */
   search(query: string): GdtfSearchResult[] {
     const db = getAppDatabase();
-    const q = `%${query.replace(/%/g, '').replace(/_/g, '')}%`;
-    return db
+
+    // Sanitize and split into tokens; ignore empty tokens
+    const tokens = query
+      .toLowerCase()
+      .replace(/[%_]/g, '')
+      .split(/\s+/)
+      .filter((t) => t.length > 0);
+
+    if (tokens.length === 0) return [];
+
+    // Build a WHERE clause requiring every token to appear in the combined string
+    const conditions = tokens.map(() => `LOWER(manufacturer || ' ' || model) LIKE ?`).join(' AND ');
+    const params = tokens.map((t) => `%${t}%`);
+
+    const rows = db
       .prepare(
         `
         SELECT id, manufacturer, model, source
         FROM gdtf_cache
-        WHERE manufacturer LIKE ? OR model LIKE ?
-        ORDER BY manufacturer, model
+        WHERE ${conditions}
+        ORDER BY
+          CASE
+            WHEN LOWER(manufacturer || ' ' || model) = LOWER(?) THEN 0
+            WHEN LOWER(manufacturer) LIKE LOWER(?) THEN 1
+            ELSE 2
+          END,
+          manufacturer,
+          model
         LIMIT 50
       `,
       )
-      .all(q, q) as GdtfSearchResult[];
+      .all(...params, query.trim(), `${tokens[0]}%`) as GdtfSearchResult[];
+
+    return rows;
   }
 
   /**

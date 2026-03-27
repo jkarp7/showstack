@@ -94,6 +94,11 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
   const duplicateErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const [mvrBanner, setMvrBanner] = useState<{ type: 'success' | 'error'; message: string } | null>(
+    null,
+  );
+  const mvrBannerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Refs for keyboard-accessible focus targets used by menu Sort/Filter actions
   const sortBarRef = useRef<HTMLDivElement>(null);
   const filterBarRef = useRef<HTMLDivElement>(null);
@@ -997,6 +1002,26 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
     }
   };
 
+  const handleImportMvr = async () => {
+    const projectId = routeProjectId;
+    if (!projectId) return;
+    const result = await window.api.mvr.import(projectId);
+    if (mvrBannerTimerRef.current) clearTimeout(mvrBannerTimerRef.current);
+    if (result.canceled) return;
+    if (result.success) {
+      const resolved =
+        result.gdtfResolved > 0 ? `, ${result.gdtfResolved} with GDTF footprint` : '';
+      setMvrBanner({
+        type: 'success',
+        message: `MVR import: ${result.created} fixtures added${resolved}.`,
+      });
+      await loadFixtures(projectId);
+    } else {
+      setMvrBanner({ type: 'error', message: result.error ?? 'MVR import failed.' });
+    }
+    mvrBannerTimerRef.current = setTimeout(() => setMvrBanner(null), 6000);
+  };
+
   // Register menu handlers
   useEquipmentMenuHandlers({
     selectedRows,
@@ -1096,6 +1121,19 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
         </div>
       )}
 
+      {/* MVR import result banner — auto-dismisses after 6 s */}
+      {mvrBanner && (
+        <div
+          className={`flex-shrink-0 px-4 py-2 border-b text-sm ${
+            mvrBanner.type === 'success'
+              ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 text-green-700 dark:text-green-300'
+              : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700 text-red-700 dark:text-red-300'
+          }`}
+        >
+          {mvrBanner.message}
+        </div>
+      )}
+
       {/* Fixtures Tab */}
       {activeTab === 'fixtures' && (
         <>
@@ -1113,6 +1151,7 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
               onHideSelected={handleHideSelected}
               onUnhideSelected={handleUnhideSelected}
               onDuplicate={activeTab === 'fixtures' ? handleDuplicate : undefined}
+              onImportMvr={activeTab === 'fixtures' ? handleImportMvr : undefined}
               onExportCSV={activeTab === 'fixtures' ? handleExportCSV : undefined}
               onUserColumnSettings={() => setIsUserColumnSettingsOpen(true)}
               columnVisibility={columnVisibility}

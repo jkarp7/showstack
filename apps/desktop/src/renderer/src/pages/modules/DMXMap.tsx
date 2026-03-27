@@ -82,14 +82,27 @@ function fixtureBorderClasses(addr: number, blockStart: number, blockEnd: number
 }
 
 function UniverseGrid({ universe, addrMap }: UniverseGridProps) {
+  const usedCount = addrMap.size;
+  const pct = Math.round((usedCount / ADDRESSES_PER_UNIVERSE) * 100);
+
   return (
     <div className="mb-8">
-      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-        Universe {universe}
-        <span className="ml-2 text-xs font-normal text-gray-400 dark:text-gray-500">
-          {addrMap.size} / {ADDRESSES_PER_UNIVERSE} used
-        </span>
-      </h3>
+      <div className="flex items-center gap-3 mb-1">
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          Universe {universe}
+        </h3>
+        <div className="flex-1 flex items-center gap-2">
+          <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-blue-500 rounded-full transition-all"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <span className="text-xs text-gray-400 dark:text-gray-500 tabular-nums w-24 shrink-0">
+            {usedCount} / {ADDRESSES_PER_UNIVERSE} ({pct}%)
+          </span>
+        </div>
+      </div>
       <div
         className="grid border border-gray-200 dark:border-gray-700 rounded overflow-hidden"
         style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}
