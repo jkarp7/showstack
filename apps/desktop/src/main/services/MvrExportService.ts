@@ -11,7 +11,6 @@
 
 import AdmZip from 'adm-zip';
 import * as fs from 'fs';
-import * as path from 'path';
 import { XMLBuilder } from 'fast-xml-parser';
 import { getAllFixtures, Fixture } from '../database/queries/fixtures';
 import { getAppDatabase } from '../database';
@@ -67,8 +66,11 @@ function lookupCachedGdtfPath(manufacturer: string, model: string): string | nul
 
   try {
     if (fs.existsSync(row.file_path)) return row.file_path;
-  } catch {
-    // ignore
+  } catch (err) {
+    logger.warn('Error checking GDTF file existence', {
+      path: row.file_path,
+      error: err instanceof Error ? err.message : String(err),
+    });
   }
   return null;
 }
@@ -222,7 +224,7 @@ export class MvrExportService {
       h = (h * 0x01000193) >>> 0;
     }
     const hex = h.toString(16).padStart(8, '0');
-    return `${hex.slice(0, 8)}-${hex.slice(0, 4)}-4${hex.slice(1, 4)}-8${hex.slice(1, 4)}-${hex}${hex.slice(0, 4)}`;
+    return `${hex}-0000-4000-8000-000000000000`;
   }
 }
 
