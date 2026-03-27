@@ -32,6 +32,8 @@ const xmlBuilder = new XMLBuilder({
   suppressEmptyNode: true,
 });
 
+const MM_TO_METERS = 0.001;
+
 /**
  * Convert ShowStack manufacturer+model to GDTFSpec filename format.
  * Spaces → underscores; format: {Manufacturer}@{Model}@Rev.gdtf
@@ -44,9 +46,9 @@ function toGdtfSpec(manufacturer: string, model: string): string {
 
 /**
  * Look up the cached GDTF file path for a fixture from gdtf_cache.
- * Returns the file path if found, null otherwise.
+ * Returns the file path if found and accessible, null otherwise.
  */
-function lookupCachedGdtfPath(manufacturer: string, model: string): string | null {
+async function lookupCachedGdtfPath(manufacturer: string, model: string): Promise<string | null> {
   const db = getAppDatabase();
   const id = `${manufacturer}/${model}`;
 
@@ -65,14 +67,15 @@ function lookupCachedGdtfPath(manufacturer: string, model: string): string | nul
   if (!row?.file_path) return null;
 
   try {
-    if (fs.existsSync(row.file_path)) return row.file_path;
+    await fs.promises.access(row.file_path);
+    return row.file_path;
   } catch (err) {
     logger.warn('Error checking GDTF file existence', {
       path: row.file_path,
       error: err instanceof Error ? err.message : String(err),
     });
+    return null;
   }
-  return null;
 }
 
 export class MvrExportService {
@@ -97,15 +100,19 @@ export class MvrExportService {
     // Collect GDTF files to bundle (deduplicated by spec filename)
     const gdtfFiles = new Map<string, string>(); // specFilename → local file path
 
-    // Build Layer elements
-    const layers = Array.from(byPosition.entries()).map(([posName, posFixtures]) => {
-      const fixtures = posFixtures.map((f) => this.buildFixtureElement(f, gdtfFiles));
-      return {
-        '@_name': posName,
-        '@_uuid': this.pseudoUuid(posName),
-        ChildList: fixtures.length > 0 ? { Fixture: fixtures } : undefined,
-      };
-    });
+    // Build Layer elements (async to allow non-blocking GDTF path lookups)
+    const layers = await Promise.all(
+      Array.from(byPosition.entries()).map(async ([posName, posFixtures]) => {
+        const fixtureElements = await Promise.all(
+          posFixtures.map((f) => this.buildFixtureElement(f, gdtfFiles)),
+        );
+        return {
+          '@_name': posName,
+          '@_uuid': this.pseudoUuid(posName),
+          ChildList: fixtureElements.length > 0 ? { Fixture: fixtureElements } : undefined,
+        };
+      }),
+    );
 
     // Build the full XML document object
     const doc = {
@@ -170,7 +177,10 @@ export class MvrExportService {
     return result;
   }
 
-  private buildFixtureElement(f: Fixture, gdtfFiles: Map<string, string>): Record<string, unknown> {
+  private async buildFixtureElement(
+    f: Fixture,
+    gdtfFiles: Map<string, string>,
+  ): Promise<Record<string, unknown>> {
     const el: Record<string, unknown> = {
       '@_name': f.type ?? f.model ?? 'Fixture',
       '@_uuid': f.id,
@@ -185,7 +195,7 @@ export class MvrExportService {
       }
       // Register GDTF file for bundling if available in cache
       if (!gdtfFiles.has(specFilename)) {
-        const cachedPath = lookupCachedGdtfPath(f.manufacturer, f.model);
+        const cachedPath = await lookupCachedGdtfPath(f.manufacturer, f.model);
         if (cachedPath) {
           gdtfFiles.set(specFilename, cachedPath);
         }
@@ -193,7 +203,7 @@ export class MvrExportService {
     }
 
     // DMX address (absolute: (universe-1)*512 + dmx_address)
-    if (f.universe != null && f.dmx_address != null) {
+    if (f.universe != null && f.universe > 0 && f.dmx_address != null && f.dmx_address > 0) {
       const absoluteAddr = (f.universe - 1) * 512 + f.dmx_address;
       el.Addresses = {
         Address: {
@@ -208,12 +218,10 @@ export class MvrExportService {
 
     // Optional: 3D position from VW coordinates
     if (f.vw_x_coordinate != null && f.vw_y_coordinate != null && f.vw_z_coordinate != null) {
-      // MVR uses metres; VW coordinates are typically in mm — convert
-      const scale = 0.001;
       el.Position = {
-        '@_x': (f.vw_x_coordinate * scale).toFixed(4),
-        '@_y': (f.vw_y_coordinate * scale).toFixed(4),
-        '@_z': (f.vw_z_coordinate * scale).toFixed(4),
+        '@_x': (f.vw_x_coordinate * MM_TO_METERS).toFixed(4),
+        '@_y': (f.vw_y_coordinate * MM_TO_METERS).toFixed(4),
+        '@_z': (f.vw_z_coordinate * MM_TO_METERS).toFixed(4),
       };
     }
 
