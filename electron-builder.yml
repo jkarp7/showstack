@@ -6,6 +6,10 @@ directories:
   output: release
   buildResources: resources
 
+asarUnpack:
+  - '**/node_modules/better-sqlite3/**'
+  - '**/node_modules/@journeyapps/node-sqlite3/**'
+
 files:
   - out/**/*
   - package.json

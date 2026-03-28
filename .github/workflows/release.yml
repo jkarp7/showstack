@@ -45,6 +45,9 @@ jobs:
           NODE_ENV: production
           BUILD_DATE: ${{ env.BUILD_DATE }}
 
+      - name: Rebuild native modules for Electron
+        run: npx electron-rebuild -f -w better-sqlite3
+
       - name: Build distributables (macOS)
         if: matrix.os == 'macos-latest'
         run: npx electron-builder --mac --publish never
