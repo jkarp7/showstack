@@ -5,6 +5,7 @@ import { useProjectStore } from '../../store/projectStore';
 import { useFixtureStore } from '../../store/fixtureStore';
 import { useInfrastructureStore } from '../../store/infrastructureStore';
 import { Link, AlertCircle } from 'lucide-react';
+import { isValidVLAN } from '@showstack/shared';
 
 interface PortAssignmentEditorProps {
   equipmentId?: string; // ID of current equipment being edited
@@ -28,6 +29,7 @@ export function PortAssignmentEditor({
   const [linkValidation, setLinkValidation] = useState<
     Record<number, { valid: boolean; error?: string }>
   >({});
+  const [vlanErrors, setVlanErrors] = useState<Record<number, string>>({});
 
   // Initialize port assignments when port count changes
   const handlePortCountChange = (newCount: number) => {
@@ -361,9 +363,24 @@ export function PortAssignmentEditor({
                                 vlan: e.target.value ? parseInt(e.target.value) : undefined,
                               })
                             }
+                            onBlur={() => {
+                              if (pa.vlan !== undefined && !isValidVLAN(pa.vlan)) {
+                                setVlanErrors((prev) => ({
+                                  ...prev,
+                                  [pa.port]: 'VLAN must be between 1 and 4094',
+                                }));
+                              } else {
+                                setVlanErrors((prev) => ({ ...prev, [pa.port]: '' }));
+                              }
+                            }}
                             className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                             placeholder="e.g., 10"
                           />
+                          {vlanErrors[pa.port] && (
+                            <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                              {vlanErrors[pa.port]}
+                            </p>
+                          )}
                         </div>
                       )}
 

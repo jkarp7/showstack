@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { logger } from '../../utils/logger';
 import { VirtualDataGrid } from '../../components/fixture/VirtualDataGrid';
@@ -12,6 +12,7 @@ import { UserColumnSettingsDialog } from '../../components/fixture/UserColumnSet
 import { InfrastructureToolbar } from '../../components/infrastructure/InfrastructureToolbar';
 import { AddInfrastructureDialog } from '../../components/infrastructure/AddInfrastructureDialog';
 import { EditInfrastructureDialog } from '../../components/infrastructure/EditInfrastructureDialog';
+import { PortStatusResult } from '../../components/infrastructure/PortUsageIndicator';
 import {
   ExportHeaderDialog,
   ExportHeaderOptions,
@@ -66,6 +67,8 @@ interface EquipmentManagerProps {
 let _sessionColumnVisibility: ColumnVisibility | null = null;
 let _sessionInfrastructureColumnVisibility: InfrastructureColumnVisibility | null = null;
 
+const NETWORK_STATUS_POLL_INTERVAL_MS = 10_000;
+
 export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerProps = {}) {
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId?: string; moduleType?: string }>();
@@ -87,6 +90,12 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
 
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [selectedInfrastructure, setSelectedInfrastructure] = useState<Set<string>>(new Set());
+
+  // Network Status panel state (Issue #20)
+  const [networkStatusOpen, setNetworkStatusOpen] = useState(false);
+  const [portStatusResults, setPortStatusResults] = useState<PortStatusResult[]>([]);
+  const [networkStatusLoading, setNetworkStatusLoading] = useState(false);
+  const networkStatusIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isAddFixtureDialogOpen, setIsAddFixtureDialogOpen] = useState(false);
   const [isAddInfrastructureDialogOpen, setIsAddInfrastructureDialogOpen] = useState(false);
   const [isEditInfrastructureDialogOpen, setIsEditInfrastructureDialogOpen] = useState(false);
@@ -181,6 +190,12 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
   const visibleInfrastructureColumns = useMemo(() => {
     return INFRASTRUCTURE_COLUMN_CONFIGS.filter((col) => infrastructureColumnVisibility[col.key]);
   }, [infrastructureColumnVisibility]);
+
+  // O(1) lookup map for Network Status panel
+  const infrastructureEquipmentMap = useMemo(
+    () => new Map(infrastructureEquipment.map((e) => [e.id, e])),
+    [infrastructureEquipment],
+  );
 
   // Helper function to render infrastructure cell value
   const renderInfrastructureCellValue = (equipment: any, columnKey: InfrastructureColumnKey) => {
@@ -495,6 +510,44 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
     };
     savePreference();
   }, [infrastructureColumnVisibility, currentProjectId]);
+
+  // Network Status fetch (Issue #20)
+  const fetchPortStatus = useCallback(async () => {
+    if (!currentProjectId || infrastructureEquipment.length === 0) return;
+    setNetworkStatusLoading(true);
+    try {
+      const results = await window.api.infrastructure.getPortStatusReport(
+        currentProjectId,
+        infrastructureEquipment.map((e) => ({ id: e.id, ip_address: e.ip_address ?? null })),
+      );
+      setPortStatusResults(results as PortStatusResult[]);
+    } catch (error) {
+      logger.error('Failed to fetch port status:', error);
+    } finally {
+      setNetworkStatusLoading(false);
+    }
+  }, [currentProjectId, infrastructureEquipment]);
+
+  // Auto-refresh network status every 10s when panel is open.
+  // Uses recursive setTimeout so a slow check never overlaps the next one.
+  useEffect(() => {
+    if (!networkStatusOpen || activeTab !== 'infrastructure') return;
+    let cancelled = false;
+    const poll = async () => {
+      await fetchPortStatus();
+      if (!cancelled) {
+        networkStatusIntervalRef.current = setTimeout(poll, NETWORK_STATUS_POLL_INTERVAL_MS);
+      }
+    };
+    poll();
+    return () => {
+      cancelled = true;
+      if (networkStatusIntervalRef.current) {
+        clearTimeout(networkStatusIntervalRef.current);
+        networkStatusIntervalRef.current = null;
+      }
+    };
+  }, [networkStatusOpen, activeTab, fetchPortStatus]);
 
   // Sort handler - supports multi-column sort with Shift key
   const handleSort = (field: string, addToExisting: boolean = false) => {
@@ -1470,6 +1523,69 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
               </table>
             </div>
           </main>
+
+          {/* Network Status Panel (Issue #20) */}
+          <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => setNetworkStatusOpen((o) => !o)}
+              className="w-full px-4 py-2 flex items-center justify-between text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+            >
+              <span>Network Status</span>
+              <span>{networkStatusOpen ? '▼' : '▶'}</span>
+            </button>
+            {networkStatusOpen && (
+              <div className="px-4 pb-3 bg-gray-50 dark:bg-gray-900">
+                {networkStatusLoading && portStatusResults.length === 0 ? (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 py-2">Checking…</p>
+                ) : portStatusResults.length === 0 ? (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 py-2">
+                    No equipment with IP addresses configured
+                  </p>
+                ) : (
+                  <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {portStatusResults.map((r) => {
+                      const eq = infrastructureEquipmentMap.get(r.equipment_id);
+                      const statusStyle = {
+                        reachable: {
+                          dot: 'bg-green-500',
+                          text: 'text-green-600 dark:text-green-400',
+                        },
+                        timeout: {
+                          dot: 'bg-yellow-500',
+                          text: 'text-yellow-600 dark:text-yellow-400',
+                        },
+                        unreachable: { dot: 'bg-red-500', text: 'text-red-600 dark:text-red-400' },
+                      }[r.status];
+                      return (
+                        <div
+                          key={r.equipment_id}
+                          className="flex items-center gap-3 py-1.5 text-xs"
+                        >
+                          <span
+                            className={`w-2 h-2 rounded-full flex-shrink-0 ${statusStyle.dot}`}
+                          />
+                          <span className="font-medium text-gray-900 dark:text-white truncate min-w-0">
+                            {eq?.name ?? r.equipment_id}
+                          </span>
+                          <span className="text-gray-500 dark:text-gray-400 font-mono flex-shrink-0">
+                            {r.ip}
+                          </span>
+                          <span className={`flex-shrink-0 ${statusStyle.text}`}>
+                            {r.status === 'reachable' && r.latency_ms !== undefined
+                              ? `reachable (${r.latency_ms}ms)`
+                              : r.status}
+                          </span>
+                          <span className="text-gray-400 dark:text-gray-500 ml-auto flex-shrink-0">
+                            {new Date(r.last_checked).toLocaleTimeString()}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Status Bar */}
           <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">

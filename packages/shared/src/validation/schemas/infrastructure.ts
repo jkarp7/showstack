@@ -6,6 +6,7 @@
 
 import { z } from 'zod';
 import { extendBaseEntity, OptionalIDSchema } from '../base';
+import { isValidIPv4 } from '../../utils/networkValidation';
 
 /**
  * Port type options
@@ -75,20 +76,17 @@ export const InfrastructureEquipmentSchema = extendBaseEntity({
   // Network information (all optional)
   ip_address: z
     .string()
-    .regex(/^(?:\d{1,3}\.){3}\d{1,3}$/, 'Invalid IP address')
-    .optional()
-    .or(z.literal('')),
+    .refine((v) => v === '' || isValidIPv4(v), 'Invalid IP address')
+    .optional(),
   mac_address: z.string().optional(),
   subnet_mask: z
     .string()
-    .regex(/^(?:\d{1,3}\.){3}\d{1,3}$/, 'Invalid subnet mask')
-    .optional()
-    .or(z.literal('')),
+    .refine((v) => v === '' || isValidIPv4(v), 'Invalid subnet mask')
+    .optional(),
   gateway: z
     .string()
-    .regex(/^(?:\d{1,3}\.){3}\d{1,3}$/, 'Invalid gateway address')
-    .optional()
-    .or(z.literal('')),
+    .refine((v) => v === '' || isValidIPv4(v), 'Invalid gateway address')
+    .optional(),
   vlan_id: z.number().int().min(1).max(4094).optional(),
   hostname: z.string().optional(),
 

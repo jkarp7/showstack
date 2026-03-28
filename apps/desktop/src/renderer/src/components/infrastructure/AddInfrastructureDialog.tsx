@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { InfrastructureEquipment, PortAssignment } from '../../types/infrastructure';
 import { PortAssignmentEditor } from './PortAssignmentEditor';
 import { logger } from '../../utils/logger';
+import { isValidIPv4 } from '@showstack/shared';
 
 interface AddInfrastructureDialogProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export function AddInfrastructureDialog({ isOpen, onClose, onAdd }: AddInfrastru
     'network',
   );
   const [ipAddress, setIpAddress] = useState('');
+  const [ipAddressError, setIpAddressError] = useState('');
   const [macAddress, setMacAddress] = useState('');
   const [hostname, setHostname] = useState('');
   const [location, setLocation] = useState('');
@@ -64,6 +66,7 @@ export function AddInfrastructureDialog({ isOpen, onClose, onAdd }: AddInfrastru
       setQuantity(1);
       setCategory('network');
       setIpAddress('');
+      setIpAddressError('');
       setMacAddress('');
       setHostname('');
       setLocation('');
@@ -191,9 +194,17 @@ export function AddInfrastructureDialog({ isOpen, onClose, onAdd }: AddInfrastru
                 type="text"
                 value={ipAddress}
                 onChange={(e) => setIpAddress(e.target.value)}
+                onBlur={() =>
+                  setIpAddressError(
+                    ipAddress && !isValidIPv4(ipAddress) ? 'Invalid IP address' : '',
+                  )
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="e.g., 10.0.1.100"
               />
+              {ipAddressError && (
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1">{ipAddressError}</p>
+              )}
             </div>
 
             {/* MAC Address */}
