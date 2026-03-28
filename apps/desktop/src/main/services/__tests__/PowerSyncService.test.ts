@@ -69,7 +69,7 @@ vi.mock('../../config/env', () => ({
 const mockGetPath = vi.hoisted(() => vi.fn().mockReturnValue('/tmp/test-userdata'));
 
 vi.mock('electron', () => ({
-  app: { getPath: mockGetPath },
+  app: { getPath: mockGetPath, isPackaged: false },
 }));
 
 vi.mock('../../utils/logger', () => ({
@@ -95,6 +95,11 @@ function makeConnector(authenticated = false) {
   return {
     isAuthenticated: vi.fn().mockReturnValue(authenticated),
     onSessionChange: mockOnSessionChange,
+    getClient: vi.fn().mockReturnValue({
+      auth: {
+        getSession: vi.fn().mockResolvedValue({ data: { session: authenticated ? {} : null } }),
+      },
+    }),
   };
 }
 
@@ -180,9 +185,20 @@ describe('PowerSyncService', () => {
       });
 
       await service.initialize();
+      // initialize() already auto-connected; clear so we only count the
+      // session-change triggered call below.
+      mockDbInstance.connect.mockClear();
 
       // Simulate sign-in event
       sessionCallback!({ user: { id: 'u1' } });
+      await Promise.resolve();
+
+      expect(mockDbInstance.connect).toHaveBeenCalledTimes(1);
+    });
+
+    it('auto-connects on initialization when already authenticated', async () => {
+      mockGetConnector.mockReturnValue(makeConnector(true));
+      await service.initialize();
       await Promise.resolve();
 
       expect(mockDbInstance.connect).toHaveBeenCalledTimes(1);
@@ -225,6 +241,9 @@ describe('PowerSyncService', () => {
     it('connects when authenticated', async () => {
       mockGetConnector.mockReturnValue(makeConnector(true));
       await service.initialize();
+      // initialize() auto-connects when session exists (count = 1); explicit
+      // call below adds a second connect.
+      mockDbInstance.connect.mockClear();
 
       await service.connect();
 

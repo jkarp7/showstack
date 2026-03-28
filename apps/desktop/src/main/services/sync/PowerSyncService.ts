@@ -129,6 +129,19 @@ export class PowerSyncService {
         }
       });
 
+      // If user is already authenticated when we initialize (e.g. app restart
+      // with persisted session), the onSessionChange listener above won't fire
+      // for the existing session. Await the session directly so we don't race
+      // against the async initSession() in SupabaseConnector.
+      const {
+        data: { session: existingSession },
+      } = await this.connector.getClient().auth.getSession();
+      if (existingSession) {
+        this.connect().catch((error) => {
+          logger.warn('[PowerSyncService] Initial connect failed:', { error: String(error) });
+        });
+      }
+
       this.isInitialized = true;
 
       if (config.app.debugPowerSync) {
