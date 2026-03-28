@@ -11,7 +11,7 @@ import { WifiOff, X, RefreshCw } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
 export function OfflineBanner(): JSX.Element | null {
-  const { isAuthenticated, syncStatus, isCloudConfigured } = useAuthStore();
+  const { isAuthenticated, syncStatus, isCloudConfigured, licenseStatus } = useAuthStore();
   const [isDismissed, setIsDismissed] = useState(false);
   const [isReconnecting, setIsReconnecting] = useState(false);
   const [retryError, setRetryError] = useState<string | null>(null);
@@ -43,11 +43,13 @@ export function OfflineBanner(): JSX.Element | null {
   // Don't show if:
   // - Cloud not configured
   // - Not authenticated
+  // - License doesn't include cloud sync
   // - User dismissed the banner
   // - Not in an offline/error state
   if (
     !isCloudConfigured ||
     !isAuthenticated ||
+    !licenseStatus?.canSync ||
     isDismissed ||
     (syncStatus.state !== 'disconnected' && syncStatus.state !== 'error')
   ) {

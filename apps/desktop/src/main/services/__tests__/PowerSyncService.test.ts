@@ -95,11 +95,6 @@ function makeConnector(authenticated = false) {
   return {
     isAuthenticated: vi.fn().mockReturnValue(authenticated),
     onSessionChange: mockOnSessionChange,
-    getClient: vi.fn().mockReturnValue({
-      auth: {
-        getSession: vi.fn().mockResolvedValue({ data: { session: authenticated ? {} : null } }),
-      },
-    }),
   };
 }
 
@@ -175,7 +170,7 @@ describe('PowerSyncService', () => {
       expect(mockOnSessionChange).toHaveBeenCalledTimes(1);
     });
 
-    it('auto-connects when session change fires with a session', async () => {
+    it('does NOT auto-connect when session change fires with a session (license check is caller responsibility)', async () => {
       const connector = makeConnector(true);
       mockGetConnector.mockReturnValue(connector);
       let sessionCallback: ((session: unknown) => void) | null = null;
@@ -185,23 +180,21 @@ describe('PowerSyncService', () => {
       });
 
       await service.initialize();
-      // initialize() already auto-connected; clear so we only count the
-      // session-change triggered call below.
       mockDbInstance.connect.mockClear();
 
-      // Simulate sign-in event
+      // Simulate sign-in event — service should NOT auto-connect
       sessionCallback!({ user: { id: 'u1' } });
       await Promise.resolve();
 
-      expect(mockDbInstance.connect).toHaveBeenCalledTimes(1);
+      expect(mockDbInstance.connect).toHaveBeenCalledTimes(0);
     });
 
-    it('auto-connects on initialization when already authenticated', async () => {
+    it('does NOT auto-connect on initialization even when already authenticated', async () => {
       mockGetConnector.mockReturnValue(makeConnector(true));
       await service.initialize();
       await Promise.resolve();
 
-      expect(mockDbInstance.connect).toHaveBeenCalledTimes(1);
+      expect(mockDbInstance.connect).toHaveBeenCalledTimes(0);
     });
 
     it('auto-disconnects when session change fires with null', async () => {
@@ -214,8 +207,6 @@ describe('PowerSyncService', () => {
       });
 
       await service.initialize();
-      sessionCallback!({ user: { id: 'u1' } });
-      await Promise.resolve();
 
       sessionCallback!(null);
       await Promise.resolve();
@@ -245,9 +236,6 @@ describe('PowerSyncService', () => {
     it('connects when authenticated', async () => {
       mockGetConnector.mockReturnValue(makeConnector(true));
       await service.initialize();
-      // initialize() auto-connects when session exists (count = 1); explicit
-      // call below adds a second connect.
-      mockDbInstance.connect.mockClear();
 
       await service.connect();
 

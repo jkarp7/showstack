@@ -127,11 +127,10 @@ export function registerSyncHandlers(): void {
           });
         }
 
-        // Kick off sync after sign in — non-blocking so login IPC returns
-        // immediately. If PowerSync init is still in flight, onSessionChange
-        // or the getSession() check at the end of initialize() will connect.
+        // Connect to sync only if the license includes cloud sync.
+        // Non-blocking so login IPC returns immediately.
         const service = getPowerSyncService();
-        if (service.isReady()) {
+        if (service.isReady() && licenseService.getLicenseStatus()?.canSync) {
           service.connect().catch(() => {});
         }
 

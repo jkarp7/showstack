@@ -19,6 +19,7 @@ vi.mock('lucide-react', () => ({
 const mockAuthStore = {
   isAuthenticated: true,
   isCloudConfigured: true,
+  licenseStatus: { canSync: true },
   syncStatus: {
     state: 'disconnected' as const,
     hasPendingChanges: false,
@@ -44,6 +45,7 @@ beforeEach(() => {
   // Reset mock store to default state
   mockAuthStore.isAuthenticated = true;
   mockAuthStore.isCloudConfigured = true;
+  mockAuthStore.licenseStatus = { canSync: true };
   mockAuthStore.syncStatus = {
     state: 'disconnected',
     hasPendingChanges: false,
@@ -86,6 +88,12 @@ describe('OfflineBanner', () => {
 
     it('does not render when not authenticated', () => {
       mockAuthStore.isAuthenticated = false;
+      const { container } = render(<OfflineBanner />);
+      expect(container.firstChild).toBeNull();
+    });
+
+    it('does not render when license does not include sync', () => {
+      mockAuthStore.licenseStatus = { canSync: false };
       const { container } = render(<OfflineBanner />);
       expect(container.firstChild).toBeNull();
     });

@@ -126,29 +126,16 @@ export class PowerSyncService {
       // Set up status monitoring
       this.setupStatusMonitoring();
 
-      // Listen for auth changes
+      // Listen for auth changes.
+      // Auto-connect on sign-in is intentionally omitted here — the IPC layer
+      // checks licenseStatus.canSync before calling connect() so that users
+      // without a sync-capable license don't get connected.
+      // Auto-disconnect on sign-out is kept so sync stops immediately.
       this.connector.onSessionChange((session) => {
-        if (session) {
-          // User signed in - start syncing
-          this.connect();
-        } else {
-          // User signed out - stop syncing
+        if (!session) {
           this.disconnect();
         }
       });
-
-      // If user is already authenticated when we initialize (e.g. app restart
-      // with persisted session), the onSessionChange listener above won't fire
-      // for the existing session. Await the session directly so we don't race
-      // against the async initSession() in SupabaseConnector.
-      const {
-        data: { session: existingSession },
-      } = await this.connector.getClient().auth.getSession();
-      if (existingSession) {
-        this.connect().catch((error) => {
-          logger.warn('[PowerSyncService] Initial connect failed:', { error: String(error) });
-        });
-      }
 
       this.isInitialized = true;
 

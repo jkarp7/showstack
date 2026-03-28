@@ -411,36 +411,48 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         logger.warn('[AuthStore] Sync initialization failed:', result.error);
       }
 
-      // Refresh auth/license state from local cache first (fast)
+      // Refresh auth + license from local cache first (fast, no network needed)
       await get().refreshAuthState();
       await get().refreshLicenseStatus();
 
-      // If authenticated, kick off an online license verification in the
-      // background so the cached status is kept current against Supabase.
-      // Non-blocking: don't await, refresh local status once it completes.
-      if (get().isAuthenticated) {
-        window.api.license
-          .verifyOnline()
-          .then(() => get().refreshLicenseStatus())
-          .catch(() => {
-            // Network unavailable — local cached status is still valid
-          });
-      }
-
-      // Register the renderer-side listener BEFORE calling subscribeStatus so
-      // we catch the immediate status push that subscribeStatus fires on setup.
+      // Register the renderer-side status listener BEFORE subscribeStatus so
+      // we catch the immediate push that subscribeStatus fires on setup.
       window.api.sync.onStatusChanged((status: SyncStatus) => {
         logger.info(
           `[AuthStore] sync status: ${status.state}${status.error ? ` — ${status.error}` : ''}`,
         );
         set({ syncStatus: status });
       });
-
-      // Subscribe — this immediately fires the current status to the listener above.
       await window.api.sync.subscribeStatus();
-
-      // Also fetch status explicitly as belt-and-suspenders.
       await get().refreshSyncStatus();
+
+      // Connect only if the license includes cloud sync.
+      if (get().isAuthenticated && get().licenseStatus?.canSync) {
+        window.api.sync.connect().catch(() => {});
+      }
+
+      // Verify license against Supabase in the background.
+      // If canSync status changes (e.g. user just upgraded), connect then.
+      if (get().isAuthenticated) {
+        window.api.license
+          .verifyOnline()
+          .then(async () => {
+            await get().refreshLicenseStatus();
+            const { licenseStatus, syncStatus } = get();
+            // Connect if license now allows sync and we're not already connected
+            if (
+              licenseStatus?.canSync &&
+              syncStatus.state !== 'connected' &&
+              syncStatus.state !== 'connecting' &&
+              syncStatus.state !== 'syncing'
+            ) {
+              window.api.sync.connect().catch(() => {});
+            }
+          })
+          .catch(() => {
+            // Network unavailable — local cached status remains valid
+          });
+      }
 
       const isReady = await window.api.sync.isReady();
       logger.info(
