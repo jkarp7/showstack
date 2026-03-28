@@ -41,7 +41,9 @@ describe('PortStatusMonitorService', () => {
   });
 
   it('returns reachable when socket connects', async () => {
-    vi.mocked(net.createConnection).mockReturnValue(makeFakeSocket('connect') as any);
+    vi.mocked(net.createConnection).mockReturnValue(
+      makeFakeSocket('connect') as unknown as net.Socket,
+    );
 
     const [result] = await service.checkAll('proj-1', [{ id: 'eq-1', ip_address: '10.0.0.1' }]);
     expect(result.status).toBe('reachable');
@@ -51,7 +53,9 @@ describe('PortStatusMonitorService', () => {
 
   it('returns reachable on ECONNREFUSED (host is up, port is closed)', async () => {
     const err = Object.assign(new Error('refused'), { code: 'ECONNREFUSED' });
-    vi.mocked(net.createConnection).mockReturnValue(makeFakeSocket('error', err) as any);
+    vi.mocked(net.createConnection).mockReturnValue(
+      makeFakeSocket('error', err) as unknown as net.Socket,
+    );
 
     const [result] = await service.checkAll('proj-2', [{ id: 'eq-2', ip_address: '10.0.0.2' }]);
     expect(result.status).toBe('reachable');
@@ -59,7 +63,9 @@ describe('PortStatusMonitorService', () => {
 
   it('returns unreachable on ENETUNREACH', async () => {
     const err = Object.assign(new Error('no route'), { code: 'ENETUNREACH' });
-    vi.mocked(net.createConnection).mockReturnValue(makeFakeSocket('error', err) as any);
+    vi.mocked(net.createConnection).mockReturnValue(
+      makeFakeSocket('error', err) as unknown as net.Socket,
+    );
 
     const [result] = await service.checkAll('proj-3', [{ id: 'eq-3', ip_address: '10.0.0.3' }]);
     expect(result.status).toBe('unreachable');
@@ -89,7 +95,9 @@ describe('PortStatusMonitorService', () => {
   });
 
   it('returns cached results within TTL', async () => {
-    vi.mocked(net.createConnection).mockReturnValue(makeFakeSocket('connect') as any);
+    vi.mocked(net.createConnection).mockReturnValue(
+      makeFakeSocket('connect') as unknown as net.Socket,
+    );
 
     // First call populates cache
     await service.checkAll('proj-5', [{ id: 'eq-5', ip_address: '10.0.0.5' }]);
@@ -101,7 +109,9 @@ describe('PortStatusMonitorService', () => {
   });
 
   it('re-checks after cache is cleared', async () => {
-    vi.mocked(net.createConnection).mockReturnValue(makeFakeSocket('connect') as any);
+    vi.mocked(net.createConnection).mockReturnValue(
+      makeFakeSocket('connect') as unknown as net.Socket,
+    );
 
     await service.checkAll('proj-6', [{ id: 'eq-6', ip_address: '10.0.0.6' }]);
     service.clearCache('proj-6');
@@ -111,7 +121,9 @@ describe('PortStatusMonitorService', () => {
   });
 
   it('deduplicates concurrent checkAll calls for the same project', async () => {
-    vi.mocked(net.createConnection).mockReturnValue(makeFakeSocket('connect') as any);
+    vi.mocked(net.createConnection).mockReturnValue(
+      makeFakeSocket('connect') as unknown as net.Socket,
+    );
 
     // Fire two concurrent calls without awaiting the first
     const [r1, r2] = await Promise.all([

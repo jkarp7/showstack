@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ipcMain, dialog } from 'electron';
+import { ipcMain, dialog, IpcMainInvokeEvent } from 'electron';
 import { writeFileSync, readFileSync } from 'fs';
 import {
   getPortLinkages,
@@ -449,7 +449,7 @@ export function registerInfrastructureHandlers(): void {
   ipcMain.handle(
     'infrastructure:getPortStatusReport',
     async (
-      _event,
+      _event: IpcMainInvokeEvent,
       projectId: string,
       equipment: Array<{ id: string; ip_address?: string | null }>,
     ) => {

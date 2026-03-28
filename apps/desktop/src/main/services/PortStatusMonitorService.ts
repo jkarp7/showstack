@@ -45,23 +45,28 @@ class PortStatusMonitorServiceClass {
     projectId: string,
     equipment: Array<{ id: string; ip_address?: string | null }>,
   ): Promise<PortStatusResult[]> {
-    const cached = this.cache.get(projectId);
+    const addressable = equipment.filter((e) => e.ip_address);
+    const signature = addressable
+      .map((e) => e.ip_address!)
+      .sort()
+      .join(',');
+    const cacheKey = `${projectId}:${signature}`;
+
+    const cached = this.cache.get(cacheKey);
     if (cached && Date.now() < cached.expiresAt) {
       return cached.results;
     }
 
-    const inFlight = this.inFlightChecks.get(projectId);
+    const inFlight = this.inFlightChecks.get(cacheKey);
     if (inFlight) {
       return inFlight;
     }
 
     const checkPromise = (async (): Promise<PortStatusResult[]> => {
       try {
-        const addressable = equipment.filter((e) => e.ip_address);
-
         if (addressable.length === 0) {
           const results: PortStatusResult[] = [];
-          this.cache.set(projectId, { results, expiresAt: Date.now() + PORT_STATUS_TTL_MS });
+          this.cache.set(cacheKey, { results, expiresAt: Date.now() + PORT_STATUS_TTL_MS });
           return results;
         }
 
@@ -76,15 +81,15 @@ class PortStatusMonitorServiceClass {
           results.push(...batchResults);
         }
 
-        this.cache.set(projectId, { results, expiresAt: Date.now() + PORT_STATUS_TTL_MS });
+        this.cache.set(cacheKey, { results, expiresAt: Date.now() + PORT_STATUS_TTL_MS });
         logger.debug('Port status check complete', { projectId, count: results.length });
         return results;
       } finally {
-        this.inFlightChecks.delete(projectId);
+        this.inFlightChecks.delete(cacheKey);
       }
     })();
 
-    this.inFlightChecks.set(projectId, checkPromise);
+    this.inFlightChecks.set(cacheKey, checkPromise);
     return checkPromise;
   }
 
@@ -124,10 +129,12 @@ class PortStatusMonitorServiceClass {
     });
   }
 
-  /** Evict a project's cache entry. Exposed for testing. */
+  /** Evict all cache entries for a project (or everything). Exposed for testing. */
   clearCache(projectId?: string): void {
     if (projectId) {
-      this.cache.delete(projectId);
+      for (const key of this.cache.keys()) {
+        if (key.startsWith(`${projectId}:`)) this.cache.delete(key);
+      }
     } else {
       this.cache.clear();
     }

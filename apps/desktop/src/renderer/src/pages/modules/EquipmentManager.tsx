@@ -67,6 +67,8 @@ interface EquipmentManagerProps {
 let _sessionColumnVisibility: ColumnVisibility | null = null;
 let _sessionInfrastructureColumnVisibility: InfrastructureColumnVisibility | null = null;
 
+const NETWORK_STATUS_POLL_INTERVAL_MS = 10_000;
+
 export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerProps = {}) {
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId?: string; moduleType?: string }>();
@@ -534,7 +536,7 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
     const poll = async () => {
       await fetchPortStatus();
       if (!cancelled) {
-        networkStatusIntervalRef.current = setTimeout(poll, 10_000);
+        networkStatusIntervalRef.current = setTimeout(poll, NETWORK_STATUS_POLL_INTERVAL_MS);
       }
     };
     poll();
