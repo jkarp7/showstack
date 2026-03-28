@@ -11,6 +11,7 @@
 import { PowerSyncDatabase, SyncStatus } from '@powersync/node';
 import { app } from 'electron';
 import { join } from 'path';
+import { Worker } from 'node:worker_threads';
 import { AppSchema } from './powerSyncSchema';
 import { SupabaseConnector, getSupabaseConnector } from './SupabaseConnector';
 import { getConfig } from '../../config/env';
@@ -80,11 +81,34 @@ export class PowerSyncService {
       this.connector = getSupabaseConnector();
 
       // Create PowerSync database — use absolute userData path so the file
-      // is writable in both dev and packaged builds
+      // is writable in both dev and packaged builds.
+      //
+      // In a packaged Electron app, @powersync/node spawns its SQLite worker
+      // using import.meta.url which resolves inside app.asar. dlopen cannot
+      // load native extensions from inside an ASAR archive. We override
+      // openWorker to explicitly load the worker from app.asar.unpacked so
+      // that the dylib path it computes also lands in app.asar.unpacked.
+      const openWorker = app.isPackaged
+        ? (...[_url, opts]: ConstructorParameters<typeof Worker>) => {
+            const workerPath = join(
+              process.resourcesPath,
+              'app.asar.unpacked',
+              'node_modules',
+              '@powersync',
+              'node',
+              'lib',
+              'db',
+              'DefaultWorker.js',
+            );
+            return new Worker(workerPath, opts as object | undefined);
+          }
+        : undefined;
+
       this.db = new PowerSyncDatabase({
         schema: AppSchema,
         database: {
           dbFilename: join(app.getPath('userData'), 'showstack-sync.db'),
+          ...(openWorker && { openWorker }),
         },
       });
 
