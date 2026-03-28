@@ -71,7 +71,7 @@ class PortStatusMonitorServiceClass {
   /**
    * Check a single IP address via TCP connect.
    */
-  async checkOne(equipmentId: string, ip: string): Promise<PortStatusResult> {
+  checkOne(equipmentId: string, ip: string): Promise<PortStatusResult> {
     const start = Date.now();
 
     return new Promise((resolve) => {
