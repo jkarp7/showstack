@@ -31,6 +31,9 @@ jobs:
           npm install
           cd proof-of-concept && npm install && cd ..
 
+      - name: Set build date
+        run: node -e "const fs = require('fs'); fs.appendFileSync(process.env.GITHUB_ENV, 'BUILD_DATE=' + new Date().toISOString() + '\n');"
+
       - name: Build app
         run: npm run build
         env:
@@ -40,7 +43,7 @@ jobs:
           POWERSYNC_URL: ${{ secrets.POWERSYNC_URL }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           NODE_ENV: production
-          BUILD_DATE: ${{ github.run_started_at }}
+          BUILD_DATE: ${{ env.BUILD_DATE }}
 
       - name: Build distributables (macOS)
         if: matrix.os == 'macos-latest'
