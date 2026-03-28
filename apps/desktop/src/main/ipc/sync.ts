@@ -116,12 +116,13 @@ export function registerSyncHandlers(): void {
           });
         }
 
-        // Start syncing after successful sign in. Await initialize() so we
-        // handle the case where the non-blocking startup init is still in
-        // flight — initialize() is idempotent if already complete.
+        // Kick off sync after sign in — non-blocking so login IPC returns
+        // immediately. If PowerSync init is still in flight, onSessionChange
+        // or the getSession() check at the end of initialize() will connect.
         const service = getPowerSyncService();
-        await service.initialize();
-        await service.connect();
+        if (service.isReady()) {
+          service.connect().catch(() => {});
+        }
 
         return { ...result, licenseVerified };
       }
