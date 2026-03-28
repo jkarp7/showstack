@@ -5,6 +5,14 @@ import type {
   PresenceMember,
 } from '../shared/types/collaboration.types';
 import type { PortStatusResult } from '../shared/types/network.types';
+import type {
+  ConsoleType,
+  ConsoleConnectResult,
+  ConsoleDisconnectResult,
+  ConsolePatchImportResult,
+  ConsolePatchExportResult,
+} from '../shared/types/console.types';
+import type { FixturePatchInput } from '../main/console/eos/eosCommandBuilder';
 
 // Define the Fixture type (will match renderer types)
 interface Fixture {
@@ -420,6 +428,17 @@ contextBridge.exposeInMainWorld('api', {
   mvr: {
     import: (projectId: string) => ipcRenderer.invoke('mvr:import', projectId),
     export: (projectId: string) => ipcRenderer.invoke('mvr:export', projectId),
+  },
+
+  // Console integration (Phase 1: ETC Eos OSC)
+  console: {
+    connect: (consoleType: ConsoleType, ip: string, port?: number) =>
+      ipcRenderer.invoke('console:connect', consoleType, ip, port),
+    disconnect: (consoleType: ConsoleType) => ipcRenderer.invoke('console:disconnect', consoleType),
+    importPatch: (consoleType: ConsoleType) =>
+      ipcRenderer.invoke('console:importPatch', consoleType),
+    exportPatch: (consoleType: ConsoleType, fixtures: FixturePatchInput[]) =>
+      ipcRenderer.invoke('console:exportPatch', consoleType, fixtures),
   },
 
   // Authentication operations
@@ -848,6 +867,15 @@ export interface ElectronAPI {
       layerCount: number;
       gdtfBundled: number;
     }>;
+  };
+  console: {
+    connect: (consoleType: ConsoleType, ip: string, port?: number) => Promise<ConsoleConnectResult>;
+    disconnect: (consoleType: ConsoleType) => Promise<ConsoleDisconnectResult>;
+    importPatch: (consoleType: ConsoleType) => Promise<ConsolePatchImportResult>;
+    exportPatch: (
+      consoleType: ConsoleType,
+      fixtures: FixturePatchInput[],
+    ) => Promise<ConsolePatchExportResult>;
   };
   auth: {
     signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
