@@ -77,19 +77,16 @@ export const InfrastructureEquipmentSchema = extendBaseEntity({
   ip_address: z
     .string()
     .refine((v) => v === '' || isValidIPv4(v), 'Invalid IP address')
-    .optional()
-    .or(z.literal('')),
+    .optional(),
   mac_address: z.string().optional(),
   subnet_mask: z
     .string()
     .refine((v) => v === '' || isValidIPv4(v), 'Invalid subnet mask')
-    .optional()
-    .or(z.literal('')),
+    .optional(),
   gateway: z
     .string()
     .refine((v) => v === '' || isValidIPv4(v), 'Invalid gateway address')
-    .optional()
-    .or(z.literal('')),
+    .optional(),
   vlan_id: z.number().int().min(1).max(4094).optional(),
   hostname: z.string().optional(),
 
