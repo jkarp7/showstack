@@ -13,6 +13,9 @@ interface ToolbarProps {
   onExportCSV?: () => void;
   onImportMvr?: () => void;
   onExportMvr?: () => void;
+  onConsole?: () => void;
+  onConsoleSync?: () => void;
+  consoleSyncAvailable?: boolean;
   onUserColumnSettings: () => void;
   columnVisibility: ColumnVisibility;
   onColumnVisibilityChange: (visibility: ColumnVisibility) => void;
@@ -36,6 +39,9 @@ export function Toolbar({
   onExportCSV,
   onImportMvr,
   onExportMvr,
+  onConsole,
+  onConsoleSync,
+  consoleSyncAvailable,
   onUserColumnSettings,
   columnVisibility,
   onColumnVisibilityChange,
@@ -122,6 +128,26 @@ export function Toolbar({
           onChange={(e) => onSearchChange(e.target.value)}
           className="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded text-sm w-44 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-gray-600 transition-colors"
         />
+
+        {onConsole && (
+          <button
+            onClick={onConsole}
+            className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded text-sm font-medium transition flex-shrink-0"
+            title="Connect to lighting console"
+          >
+            Console
+          </button>
+        )}
+
+        {consoleSyncAvailable && onConsoleSync && (
+          <button
+            onClick={onConsoleSync}
+            className="px-3 py-1.5 bg-white dark:bg-gray-700 border border-green-400 dark:border-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 text-green-700 dark:text-green-400 rounded text-sm font-medium transition flex-shrink-0"
+            title="Import or export patch to/from console"
+          >
+            Sync
+          </button>
+        )}
 
         {onImportMvr && (
           <button
