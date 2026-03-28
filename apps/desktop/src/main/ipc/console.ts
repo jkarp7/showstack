@@ -156,7 +156,7 @@ export function registerConsoleHandlers(): void {
 
         for (const command of commands) {
           await client.send('/eos/newcmd', command);
-          await new Promise((resolve) => setTimeout(resolve, 20));
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
 
         logger.info('Eos patch export complete', { commandCount: commands.length });
