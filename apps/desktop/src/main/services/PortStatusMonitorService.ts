@@ -34,10 +34,12 @@ interface CacheEntry {
 
 class PortStatusMonitorServiceClass {
   private cache = new Map<string, CacheEntry>();
+  private inFlightChecks = new Map<string, Promise<PortStatusResult[]>>();
 
   /**
    * Check reachability of all equipment IPs for the given project.
    * Results are cached for PORT_STATUS_TTL_MS; a cache hit returns immediately.
+   * Concurrent callers for the same project share a single in-flight check.
    */
   async checkAll(
     projectId: string,
@@ -48,24 +50,42 @@ class PortStatusMonitorServiceClass {
       return cached.results;
     }
 
-    const addressable = equipment.filter((e) => e.ip_address);
-
-    if (addressable.length === 0) {
-      return [];
+    const inFlight = this.inFlightChecks.get(projectId);
+    if (inFlight) {
+      return inFlight;
     }
 
-    // Process in batches to avoid exhausting OS file descriptors on large rigs.
-    const BATCH_SIZE = 20;
-    const results: PortStatusResult[] = [];
-    for (let i = 0; i < addressable.length; i += BATCH_SIZE) {
-      const batch = addressable.slice(i, i + BATCH_SIZE);
-      const batchResults = await Promise.all(batch.map((e) => this.checkOne(e.id, e.ip_address!)));
-      results.push(...batchResults);
-    }
+    const checkPromise = (async (): Promise<PortStatusResult[]> => {
+      try {
+        const addressable = equipment.filter((e) => e.ip_address);
 
-    this.cache.set(projectId, { results, expiresAt: Date.now() + PORT_STATUS_TTL_MS });
-    logger.debug('Port status check complete', { projectId, count: results.length });
-    return results;
+        if (addressable.length === 0) {
+          const results: PortStatusResult[] = [];
+          this.cache.set(projectId, { results, expiresAt: Date.now() + PORT_STATUS_TTL_MS });
+          return results;
+        }
+
+        // Process in batches to avoid exhausting OS file descriptors on large rigs.
+        const BATCH_SIZE = 20;
+        const results: PortStatusResult[] = [];
+        for (let i = 0; i < addressable.length; i += BATCH_SIZE) {
+          const batch = addressable.slice(i, i + BATCH_SIZE);
+          const batchResults = await Promise.all(
+            batch.map((e) => this.checkOne(e.id, e.ip_address!)),
+          );
+          results.push(...batchResults);
+        }
+
+        this.cache.set(projectId, { results, expiresAt: Date.now() + PORT_STATUS_TTL_MS });
+        logger.debug('Port status check complete', { projectId, count: results.length });
+        return results;
+      } finally {
+        this.inFlightChecks.delete(projectId);
+      }
+    })();
+
+    this.inFlightChecks.set(projectId, checkPromise);
+    return checkPromise;
   }
 
   /**

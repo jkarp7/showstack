@@ -109,4 +109,18 @@ describe('PortStatusMonitorService', () => {
 
     expect(vi.mocked(net.createConnection).mock.calls.length).toBe(2);
   });
+
+  it('deduplicates concurrent checkAll calls for the same project', async () => {
+    vi.mocked(net.createConnection).mockReturnValue(makeFakeSocket('connect') as any);
+
+    // Fire two concurrent calls without awaiting the first
+    const [r1, r2] = await Promise.all([
+      service.checkAll('proj-7', [{ id: 'eq-7', ip_address: '10.0.0.7' }]),
+      service.checkAll('proj-7', [{ id: 'eq-7', ip_address: '10.0.0.7' }]),
+    ]);
+
+    // Only one socket connection should have been made
+    expect(vi.mocked(net.createConnection).mock.calls.length).toBe(1);
+    expect(r1).toBe(r2);
+  });
 });
