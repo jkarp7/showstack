@@ -26,6 +26,7 @@ export type { PortStatusResult };
 const PROBE_PORT = 80;
 const CONNECT_TIMEOUT_MS = 2_000;
 const PORT_STATUS_TTL_MS = 8_000;
+const BATCH_SIZE = 20; // max concurrent TCP sockets per check cycle
 
 interface CacheEntry {
   results: PortStatusResult[];
@@ -71,7 +72,6 @@ class PortStatusMonitorServiceClass {
         }
 
         // Process in batches to avoid exhausting OS file descriptors on large rigs.
-        const BATCH_SIZE = 20;
         const results: PortStatusResult[] = [];
         for (let i = 0; i < addressable.length; i += BATCH_SIZE) {
           const batch = addressable.slice(i, i + BATCH_SIZE);
