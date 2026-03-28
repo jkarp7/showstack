@@ -84,10 +84,19 @@ export class PowerSyncService {
       // is writable in both dev and packaged builds.
       //
       // In a packaged Electron app, @powersync/node spawns its SQLite worker
-      // using import.meta.url which resolves inside app.asar. dlopen cannot
-      // load native extensions from inside an ASAR archive. We override
-      // openWorker to explicitly load the worker from app.asar.unpacked so
-      // that the dylib path it computes also lands in app.asar.unpacked.
+      // using import.meta.url which resolves inside app.asar. We have two
+      // problems to solve:
+      //
+      // 1. dlopen cannot load native extensions from inside an ASAR archive —
+      //    the worker file must live in app.asar.unpacked.
+      //
+      // 2. The ESM worker (lib/db/DefaultWorker.js) uses bare `import()` for
+      //    better-sqlite3 which is NOT covered by Electron's ASAR require-patcher
+      //    in worker_threads, so the import hangs silently in packaged builds.
+      //
+      // Solution: load the CJS worker (dist/DefaultWorker.cjs) instead.
+      // The CJS build uses __dirname for the dylib path and require() for
+      // better-sqlite3 — both are correctly handled by Electron's ASAR support.
       const openWorker = app.isPackaged
         ? (...[_url, opts]: ConstructorParameters<typeof Worker>) => {
             const workerPath = join(
@@ -96,9 +105,8 @@ export class PowerSyncService {
               'node_modules',
               '@powersync',
               'node',
-              'lib',
-              'db',
-              'DefaultWorker.js',
+              'dist',
+              'DefaultWorker.cjs',
             );
             return new Worker(workerPath, opts as object | undefined);
           }
