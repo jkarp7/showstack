@@ -162,6 +162,10 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
   const [isConsoleDialogOpen, setIsConsoleDialogOpen] = useState(false);
   const [isConsoleSyncDialogOpen, setIsConsoleSyncDialogOpen] = useState(false);
   const { status: consoleStatus } = useConsoleStore();
+  const existingChannels = useMemo(
+    () => new Set(fixtures.map((f) => parseInt(f.channel ?? '', 10)).filter((n) => !isNaN(n))),
+    [fixtures],
+  );
 
   // Sort state - now supports multi-column sort
   interface SortConfig {
@@ -1850,11 +1854,10 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
       />
       <ConsoleSyncDialog
         isOpen={isConsoleSyncDialogOpen}
-        existingChannels={
-          new Set(fixtures.map((f) => parseInt(f.channel ?? '', 10)).filter((n) => !isNaN(n)))
-        }
+        existingChannels={existingChannels}
         onClose={() => setIsConsoleSyncDialogOpen(false)}
         onImportApply={(channels) => {
+          // TODO: apply imported console channels to the fixture list (Phase 3)
           logger.info(`Console import applied: ${channels.length} channels`);
         }}
       />
