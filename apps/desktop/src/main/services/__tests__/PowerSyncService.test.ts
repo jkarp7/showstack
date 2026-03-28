@@ -231,11 +231,15 @@ describe('PowerSyncService', () => {
       await expect(service.connect()).rejects.toThrow('PowerSync not initialized');
     });
 
-    it('throws if user is not authenticated', async () => {
+    it('fires db.connect() even when isAuthenticated returns false (auth delegated to fetchCredentials)', async () => {
       mockGetConnector.mockReturnValue(makeConnector(false));
       await service.initialize();
+      mockDbInstance.connect.mockClear();
 
-      await expect(service.connect()).rejects.toThrow('User must be authenticated');
+      // connect() no longer guards on isAuthenticated — fetchCredentials handles it
+      await service.connect();
+
+      expect(mockDbInstance.connect).toHaveBeenCalledTimes(1);
     });
 
     it('connects when authenticated', async () => {

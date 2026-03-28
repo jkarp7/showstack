@@ -411,16 +411,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         logger.warn('[AuthStore] Sync initialization failed:', result.error);
       }
 
-      // Refresh states
+      // Refresh auth/license state
       await get().refreshAuthState();
       await get().refreshLicenseStatus();
-      await get().refreshSyncStatus();
 
-      // Subscribe to status changes
-      await window.api.sync.subscribeStatus();
+      // Register the renderer-side listener BEFORE calling subscribeStatus so
+      // we catch the immediate status push that subscribeStatus fires on setup.
       window.api.sync.onStatusChanged((status: SyncStatus) => {
+        logger.info(
+          `[AuthStore] sync status: ${status.state}${status.error ? ` — ${status.error}` : ''}`,
+        );
         set({ syncStatus: status });
       });
+
+      // Subscribe — this immediately fires the current status to the listener above.
+      await window.api.sync.subscribeStatus();
+
+      // Also fetch status explicitly as belt-and-suspenders.
+      await get().refreshSyncStatus();
+
+      const isReady = await window.api.sync.isReady();
+      logger.info(
+        `[AuthStore] sync init complete — isReady: ${isReady}, isConfigured: ${isConfigured}`,
+      );
     } catch (error) {
       logger.error('[AuthStore] Failed to initialize sync:', error);
     }
