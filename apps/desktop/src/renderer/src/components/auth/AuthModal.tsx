@@ -21,6 +21,7 @@ export function AuthModal() {
     setAuthModalView,
     isLoading,
     isFirstLaunchPrompt,
+    isReturningUserPrompt,
     activateDemoMode,
   } = useAuthStore();
 
@@ -90,6 +91,11 @@ export function AuthModal() {
           <div className="flex items-center justify-center gap-2 text-blue-600 mb-2">
             <span className="text-xl font-bold">ShowStack</span>
           </div>
+          {isReturningUserPrompt && authModalView === 'login' && (
+            <p className="text-sm text-gray-500 mt-1">
+              Your session has expired. Sign in to re-enable cloud sync.
+            </p>
+          )}
         </div>
 
         {/* Form Content */}

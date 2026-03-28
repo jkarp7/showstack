@@ -60,6 +60,7 @@ export interface AuthState {
   showAuthModal: boolean;
   authModalView: 'login' | 'signup' | 'reset' | 'set-password';
   isFirstLaunchPrompt: boolean;
+  isReturningUserPrompt: boolean;
   pendingDeepLinkType: 'recovery' | 'invite' | null;
 
   // Actions
@@ -183,6 +184,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   showAuthModal: false,
   authModalView: 'login',
   isFirstLaunchPrompt: false,
+  isReturningUserPrompt: false,
   pendingDeepLinkType: null,
 
   // Sign in
@@ -227,7 +229,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
               'Signed in, but no license found for this account. Some features may be limited.',
           });
         } else {
-          set({ isLoading: false, showAuthModal: false, isFirstLaunchPrompt: false });
+          set({
+            isLoading: false,
+            showAuthModal: false,
+            isFirstLaunchPrompt: false,
+            isReturningUserPrompt: false,
+          });
         }
         return true;
       } else {
@@ -486,6 +493,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       showAuthModal: false,
       error: null,
       isFirstLaunchPrompt: false,
+      isReturningUserPrompt: false,
       pendingDeepLinkType: null,
     });
   },

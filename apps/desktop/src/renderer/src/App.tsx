@@ -212,15 +212,20 @@ export default function App() {
 
   const handleSplashComplete = () => {
     setShowSplash(false);
-    // Mark splash as shown for this session
     sessionStorage.setItem('splashShown', 'true');
 
-    // First-launch auth prompt: if not authenticated and never prompted
     const authPrompted = safeGetItem('showstack-auth-prompted');
-    if (!authPrompted) {
-      const authState = useAuthStore.getState();
-      if (!authState.isAuthenticated) {
+    const authState = useAuthStore.getState();
+
+    if (!authState.isAuthenticated) {
+      if (!authPrompted) {
+        // True first launch — full onboarding modal with Demo Mode option
         authState.setFirstLaunchPrompt(true);
+        authState.openAuthModal('login');
+      } else {
+        // Returning user whose session has expired — prompt to sign back in
+        // without the first-launch framing (no Demo Mode, just login)
+        useAuthStore.setState({ isReturningUserPrompt: true });
         authState.openAuthModal('login');
       }
     }
