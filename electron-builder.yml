@@ -9,6 +9,7 @@ directories:
 asarUnpack:
   - '**/node_modules/better-sqlite3/**'
   - '**/node_modules/@powersync/node/**'
+  - '**/node_modules/comlink/**'
   - '**/*.node'
   - '**/*.dylib'
   - '**/*.so'
