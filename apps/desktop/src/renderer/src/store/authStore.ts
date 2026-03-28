@@ -411,9 +411,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         logger.warn('[AuthStore] Sync initialization failed:', result.error);
       }
 
-      // Refresh auth/license state
+      // Refresh auth/license state from local cache first (fast)
       await get().refreshAuthState();
       await get().refreshLicenseStatus();
+
+      // If authenticated, kick off an online license verification in the
+      // background so the cached status is kept current against Supabase.
+      // Non-blocking: don't await, refresh local status once it completes.
+      if (get().isAuthenticated) {
+        window.api.license
+          .verifyOnline()
+          .then(() => get().refreshLicenseStatus())
+          .catch(() => {
+            // Network unavailable — local cached status is still valid
+          });
+      }
 
       // Register the renderer-side listener BEFORE calling subscribeStatus so
       // we catch the immediate status push that subscribeStatus fires on setup.

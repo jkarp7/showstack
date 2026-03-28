@@ -57,19 +57,50 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       );
     }
 
-    if (!hasLicense) {
+    const tierLabel =
+      licenseStatus.tier === 'professional'
+        ? 'Professional'
+        : licenseStatus.tier === 'institutional'
+          ? 'Institutional'
+          : licenseStatus.tier === 'student'
+            ? 'Student'
+            : licenseStatus.tier === 'demo'
+              ? 'Demo'
+              : null;
+
+    if (licenseStatus.status === 'active') {
+      return (
+        <div className="flex items-center gap-2 text-green-400">
+          <CheckCircle className="w-4 h-4" />
+          <span className="text-sm font-medium">
+            {tierLabel ? `${tierLabel} License` : 'License Active'}
+          </span>
+        </div>
+      );
+    }
+
+    if (licenseStatus.status === 'grace') {
       return (
         <div className="flex items-center gap-2 text-amber-400">
           <AlertCircle className="w-4 h-4" />
-          <span className="text-sm">No Active License</span>
+          <span className="text-sm">License — Verification Needed</span>
+        </div>
+      );
+    }
+
+    if (licenseStatus.status === 'demo') {
+      return (
+        <div className="flex items-center gap-2 text-blue-400">
+          <CheckCircle className="w-4 h-4" />
+          <span className="text-sm font-medium">Demo Mode</span>
         </div>
       );
     }
 
     return (
-      <div className="flex items-center gap-2 text-green-400">
-        <CheckCircle className="w-4 h-4" />
-        <span className="text-sm font-medium">License Active</span>
+      <div className="flex items-center gap-2 text-amber-400">
+        <AlertCircle className="w-4 h-4" />
+        <span className="text-sm">No Active License</span>
       </div>
     );
   };
