@@ -42,6 +42,8 @@ export interface EosPatchChannel {
 export interface ConsoleConnectResult {
   success: boolean;
   error?: string;
+  /** Effective connection parameters used by the main process — present on success */
+  connection?: { type: ConsoleType; ip: string; port: number };
 }
 
 export interface ConsoleDisconnectResult {

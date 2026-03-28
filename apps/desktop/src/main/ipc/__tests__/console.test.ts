@@ -100,7 +100,10 @@ describe('console IPC handlers', () => {
     it('returns success after connecting to Eos', async () => {
       const handler = getHandler('console:connect');
       const result = await handler(FAKE_EVENT, 'eos', '10.0.0.1');
-      expect(result).toEqual({ success: true });
+      expect(result).toEqual({
+        success: true,
+        connection: { type: 'eos', ip: '10.0.0.1', port: 3032 },
+      });
       expect(mocks.connect).toHaveBeenCalled();
     });
 

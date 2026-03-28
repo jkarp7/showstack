@@ -137,7 +137,13 @@ export class EosOSCClient {
 
         if (address === '/eos/out/patch/count') {
           clearTimeout(countTimer);
-          expectedCount = Number(msg[1]) || 0;
+          const rawCount = Number(msg[1]);
+          if (!Number.isFinite(rawCount)) {
+            logger.warn('Received invalid patch count from Eos; treating as 0', {
+              rawCount: msg[1],
+            });
+          }
+          expectedCount = Number.isFinite(rawCount) ? rawCount : 0;
           if (expectedCount === 0) {
             settled = true;
             cleanup();

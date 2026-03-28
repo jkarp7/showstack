@@ -21,7 +21,12 @@ import { useConsoleStore } from '../consoleStore';
 
 describe('consoleStore', () => {
   beforeEach(() => {
-    apiMock.console.connect.mockResolvedValue({ success: true });
+    apiMock.console.connect.mockImplementation((_type: string, ip: string, port?: number) =>
+      Promise.resolve({
+        success: true,
+        connection: { type: 'eos', ip, port: port ?? 3032 },
+      }),
+    );
     apiMock.console.disconnect.mockResolvedValue({ success: true });
     useConsoleStore.getState().clearConnection();
   });

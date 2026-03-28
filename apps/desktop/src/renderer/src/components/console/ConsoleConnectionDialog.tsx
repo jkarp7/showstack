@@ -67,7 +67,7 @@ export function ConsoleConnectionDialog({ isOpen, projectId, onClose }: Props) {
     try {
       // We don't have equipment IDs for a console IP — use the IP itself as a synthetic id
       const results = await window.api.infrastructure.getPortStatusReport(projectId, [
-        { id: '__console__', ip_address: parsed.ip },
+        { id: parsed.ip, ip_address: parsed.ip },
       ]);
       const result = results.find((r) => r.ip === parsed.ip);
       if (result && result.status !== 'reachable') {

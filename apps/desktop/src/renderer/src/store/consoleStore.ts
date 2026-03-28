@@ -37,12 +37,12 @@ export const useConsoleStore = create<ConsoleState>((set, get) => ({
     set({ status: 'connecting' });
     try {
       const result = await window.api.console.connect(type, ip, port);
-      if (result.success) {
+      if (result.success && result.connection) {
         set({
           status: 'connected',
-          connection: { type, ip, port: port ?? 3032, connected: true, lastSync: null },
+          connection: { ...result.connection, connected: true, lastSync: null },
         });
-        logger.info(`Console connected: ${type} @ ${ip}`);
+        logger.info(`Console connected: ${result.connection.type} @ ${result.connection.ip}`);
         return true;
       } else {
         set({ status: 'error' });

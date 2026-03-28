@@ -71,8 +71,9 @@ export function registerConsoleHandlers(): void {
         await client.connect();
         activeClients.set('eos', client);
 
-        logger.info('Console connected', { consoleType, ip, port: port ?? EOS_OSC_PORT });
-        return { success: true };
+        const effectivePort = port ?? EOS_OSC_PORT;
+        logger.info('Console connected', { consoleType, ip, port: effectivePort });
+        return { success: true, connection: { type: consoleType, ip, port: effectivePort } };
       } catch (error) {
         logger.error('console:connect failed', {
           consoleType,

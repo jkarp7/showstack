@@ -10,7 +10,11 @@ vi.mock('../../../utils/logger', () => ({
 
 // Extend the global window.api mock (set up in test/setup.ts) with the console + infrastructure methods needed
 const consoleMock = {
-  connect: vi.fn().mockResolvedValue({ success: true }),
+  connect: vi
+    .fn()
+    .mockImplementation((_type: string, ip: string, port?: number) =>
+      Promise.resolve({ success: true, connection: { type: 'eos', ip, port: port ?? 3032 } }),
+    ),
   disconnect: vi.fn().mockResolvedValue({ success: true }),
   importPatch: vi.fn(),
   exportPatch: vi.fn(),
@@ -30,7 +34,9 @@ beforeEach(() => {
       getPortStatusReport: infrastructureMock.getPortStatusReport,
     },
   };
-  consoleMock.connect.mockResolvedValue({ success: true });
+  consoleMock.connect.mockImplementation((_type: string, ip: string, port?: number) =>
+    Promise.resolve({ success: true, connection: { type: 'eos', ip, port: port ?? 3032 } }),
+  );
   consoleMock.disconnect.mockResolvedValue({ success: true });
   infrastructureMock.getPortStatusReport.mockResolvedValue([]);
   useConsoleStore.getState().clearConnection();
