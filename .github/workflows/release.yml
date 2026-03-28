@@ -33,6 +33,13 @@ jobs:
 
       - name: Build app
         run: npm run build
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          POWERSYNC_URL: ${{ secrets.POWERSYNC_URL }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          NODE_ENV: production
 
       - name: Build distributables (macOS)
         if: matrix.os == 'macos-latest'
