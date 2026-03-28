@@ -48,7 +48,6 @@ export function ConsoleSyncDialog({ isOpen, existingChannels, onImportApply, onC
         conflict: existingChannels?.has(ch.channelNumber) ?? false,
       }));
       setImportRows(rows);
-      setLastImport(result.channels);
     } catch (error) {
       logger.error('Console import failed:', {
         error: error instanceof Error ? error.message : String(error),
@@ -89,6 +88,7 @@ export function ConsoleSyncDialog({ isOpen, existingChannels, onImportApply, onC
     if (!importRows) return;
     const selected = importRows.map((r) => r.channel);
     onImportApply(selected);
+    setLastImport(selected);
     setLastSync(Date.now());
     onClose();
   };

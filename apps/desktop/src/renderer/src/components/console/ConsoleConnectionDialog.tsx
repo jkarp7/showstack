@@ -96,11 +96,6 @@ export function ConsoleConnectionDialog({ isOpen, projectId, onClose }: Props) {
 
     setErrorMessage('');
 
-    // If already connected to this console type, disconnect first
-    if (connection?.type === consoleType) {
-      await disconnect(consoleType);
-    }
-
     const ok = await connect(consoleType, parsed.ip, parsed.port);
     if (!ok) {
       setErrorMessage(
