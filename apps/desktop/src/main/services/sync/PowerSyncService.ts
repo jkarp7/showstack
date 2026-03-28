@@ -201,14 +201,16 @@ export class PowerSyncService {
       throw new Error('User must be authenticated to sync.');
     }
 
-    try {
-      this.currentError = null;
-      await this.db.connect(this.connector);
-    } catch (error) {
+    this.currentError = null;
+
+    // db.connect() resolves only once the status leaves "connecting" — if the
+    // PowerSync server is unreachable it never resolves. Fire and forget; sync
+    // status updates arrive through the registerListener callback set up in
+    // setupStatusMonitoring().
+    this.db.connect(this.connector).catch((error) => {
       this.currentError = error instanceof Error ? error.message : 'Connection failed';
       this.notifyStatusListeners();
-      throw error;
-    }
+    });
   }
 
   /**

@@ -253,9 +253,12 @@ describe('PowerSyncService', () => {
     it('sets error state on connection failure', async () => {
       mockGetConnector.mockReturnValue(makeConnector(true));
       await service.initialize();
-      mockDbInstance.connect.mockRejectedValueOnce(new Error('Network unreachable'));
+      mockDbInstance.connect.mockReset().mockRejectedValueOnce(new Error('Network unreachable'));
 
-      await expect(service.connect()).rejects.toThrow('Network unreachable');
+      // connect() is now fire-and-forget for db.connect() — it does not throw,
+      // but the error surfaces asynchronously via the .catch() handler.
+      await service.connect();
+      await Promise.resolve(); // flush microtask queue
       expect(service.getSyncStatus().error).toBe('Network unreachable');
       expect(service.getSyncStatus().state).toBe('error');
     });
