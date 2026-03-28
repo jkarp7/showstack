@@ -71,15 +71,22 @@ class PortStatusMonitorServiceClass {
           return results;
         }
 
-        // Process in batches to avoid exhausting OS file descriptors on large rigs.
-        const results: PortStatusResult[] = [];
-        for (let i = 0; i < addressable.length; i += BATCH_SIZE) {
-          const batch = addressable.slice(i, i + BATCH_SIZE);
-          const batchResults = await Promise.all(
-            batch.map((e) => this.checkOne(e.id, e.ip_address!)),
-          );
-          results.push(...batchResults);
+        // Check each unique IP once, then fan results back to all equipment.
+        const uniqueIps = [...new Set(addressable.map((e) => e.ip_address!))];
+        const ipStatusMap = new Map<string, Omit<PortStatusResult, 'equipment_id'>>();
+
+        for (let i = 0; i < uniqueIps.length; i += BATCH_SIZE) {
+          const batchIps = uniqueIps.slice(i, i + BATCH_SIZE);
+          const batchResults = await Promise.all(batchIps.map((ip) => this.checkOne(ip, ip)));
+          for (const { equipment_id: _ip, ...status } of batchResults) {
+            ipStatusMap.set(status.ip, status);
+          }
         }
+
+        const results: PortStatusResult[] = addressable.map((e) => ({
+          equipment_id: e.id,
+          ...ipStatusMap.get(e.ip_address!)!,
+        }));
 
         this.cache.set(cacheKey, { results, expiresAt: Date.now() + PORT_STATUS_TTL_MS });
         logger.debug('Port status check complete', { projectId, count: results.length });
