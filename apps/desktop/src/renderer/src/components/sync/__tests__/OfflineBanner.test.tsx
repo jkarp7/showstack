@@ -35,11 +35,11 @@ vi.mock('../../../store/authStore', () => ({
 }));
 
 // Mock window.api.sync
-const mockSyncInitialize = vi.fn();
+const mockSyncConnect = vi.fn();
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockSyncInitialize.mockResolvedValue(undefined);
+  mockSyncConnect.mockResolvedValue(undefined);
 
   // Reset mock store to default state
   mockAuthStore.isAuthenticated = true;
@@ -53,7 +53,7 @@ beforeEach(() => {
   Object.defineProperty(window, 'api', {
     value: {
       sync: {
-        initialize: mockSyncInitialize,
+        connect: mockSyncConnect,
       },
     },
     writable: true,
@@ -140,12 +140,12 @@ describe('OfflineBanner', () => {
       const retryButton = screen.getByRole('button', { name: /retry/i });
       fireEvent.click(retryButton);
 
-      expect(mockSyncInitialize).toHaveBeenCalledTimes(1);
+      expect(mockSyncConnect).toHaveBeenCalledTimes(1);
     });
 
     it('shows loading state during retry', async () => {
       // Make the sync initialize hang
-      mockSyncInitialize.mockImplementation(() => new Promise(() => {}));
+      mockSyncConnect.mockImplementation(() => new Promise(() => {}));
 
       render(<OfflineBanner />);
 
@@ -158,7 +158,7 @@ describe('OfflineBanner', () => {
     });
 
     it('disables retry button while reconnecting', async () => {
-      mockSyncInitialize.mockImplementation(() => new Promise(() => {}));
+      mockSyncConnect.mockImplementation(() => new Promise(() => {}));
 
       render(<OfflineBanner />);
 
@@ -173,7 +173,7 @@ describe('OfflineBanner', () => {
 
   describe('error handling', () => {
     it('displays network error message', async () => {
-      mockSyncInitialize.mockRejectedValue(new Error('network error'));
+      mockSyncConnect.mockRejectedValue(new Error('network error'));
 
       render(<OfflineBanner />);
 
@@ -188,7 +188,7 @@ describe('OfflineBanner', () => {
     });
 
     it('displays fetch error message', async () => {
-      mockSyncInitialize.mockRejectedValue(new Error('fetch failed'));
+      mockSyncConnect.mockRejectedValue(new Error('fetch failed'));
 
       render(<OfflineBanner />);
 
@@ -203,7 +203,7 @@ describe('OfflineBanner', () => {
     });
 
     it('displays auth error message', async () => {
-      mockSyncInitialize.mockRejectedValue(new Error('unauthorized'));
+      mockSyncConnect.mockRejectedValue(new Error('unauthorized'));
 
       render(<OfflineBanner />);
 
@@ -218,7 +218,7 @@ describe('OfflineBanner', () => {
     });
 
     it('displays generic error message for unknown errors', async () => {
-      mockSyncInitialize.mockRejectedValue(new Error('something went wrong'));
+      mockSyncConnect.mockRejectedValue(new Error('something went wrong'));
 
       render(<OfflineBanner />);
 
@@ -231,7 +231,7 @@ describe('OfflineBanner', () => {
     });
 
     it('displays fallback error for non-Error objects', async () => {
-      mockSyncInitialize.mockRejectedValue('string error');
+      mockSyncConnect.mockRejectedValue('string error');
 
       render(<OfflineBanner />);
 
@@ -244,7 +244,7 @@ describe('OfflineBanner', () => {
     });
 
     it('re-enables retry button after error', async () => {
-      mockSyncInitialize.mockRejectedValue(new Error('network error'));
+      mockSyncConnect.mockRejectedValue(new Error('network error'));
 
       render(<OfflineBanner />);
 
