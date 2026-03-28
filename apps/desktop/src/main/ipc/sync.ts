@@ -56,7 +56,18 @@ export function registerSyncHandlers(): void {
   ipcMain.handle('sync:initialize', async () => {
     try {
       const service = getPowerSyncService();
-      await service.initialize();
+      // Wrap with a timeout so a stuck worker (e.g. dylib load failure inside
+      // app.asar.unpacked) doesn't block the renderer's initializeSync() forever.
+      const INIT_TIMEOUT_MS = 10_000;
+      await Promise.race([
+        service.initialize(),
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () => reject(new Error('PowerSync initialization timed out')),
+            INIT_TIMEOUT_MS,
+          ),
+        ),
+      ]);
       return { success: true };
     } catch (error) {
       return {
@@ -167,9 +178,12 @@ export function registerSyncHandlers(): void {
    */
   ipcMain.handle('auth:signOut', async () => {
     try {
-      // Disconnect sync first
+      // Disconnect sync first — skip if not initialized to avoid hanging on a
+      // stuck db.disconnect() call (e.g. when the sync worker never came up).
       const service = getPowerSyncService();
-      await service.disconnect();
+      if (service.isReady()) {
+        await service.disconnect();
+      }
 
       // Clean up presence channels before signing out
       presenceService.cleanup();
@@ -481,8 +495,15 @@ export async function initializePowerSync(): Promise<void> {
   const service = getPowerSyncService();
 
   try {
-    // initialize() handles auto-connect for persisted sessions internally
-    await service.initialize();
+    // initialize() handles auto-connect for persisted sessions internally.
+    // Wrap with a timeout so a stuck worker never blocks app startup.
+    const INIT_TIMEOUT_MS = 10_000;
+    await Promise.race([
+      service.initialize(),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('PowerSync initialization timed out')), INIT_TIMEOUT_MS),
+      ),
+    ]);
   } catch (error) {
     // Non-fatal - app works offline without sync
     logger.info('[Sync] PowerSync initialization skipped:', {
