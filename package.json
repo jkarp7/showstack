@@ -108,6 +108,7 @@
     "fast-xml-parser": "^5.5.5",
     "file-type": "^19.6.0",
     "lucide-react": "^0.460.0",
+    "node-osc": "^11.3.0",
     "posthog-js": "^1.328.0",
     "puppeteer": "^24.34.0",
     "react": "^19.2.0",

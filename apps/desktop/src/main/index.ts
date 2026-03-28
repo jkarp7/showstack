@@ -36,6 +36,7 @@ import { registerCollaborationHandlers } from './ipc/collaboration';
 import { registerGroupHandlers } from './ipc/groups';
 import { registerGdtfHandlers, initGdtfLibrary, initGdtfUpdateCheck } from './ipc/gdtf';
 import { registerMvrHandlers } from './ipc/mvr';
+import { registerConsoleHandlers } from './ipc/console';
 import { backgroundVerifier } from './services/BackgroundVerifier';
 import { backupService } from './services/BackupService';
 import { crashRecoveryService } from './services/CrashRecoveryService';
@@ -142,6 +143,7 @@ app.on('ready', async () => {
   registerGroupHandlers();
   registerGdtfHandlers();
   registerMvrHandlers();
+  registerConsoleHandlers();
 
   // Scan bundled GDTF fixtures into cache (non-blocking)
   initGdtfLibrary();
