@@ -409,6 +409,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const result = await window.api.sync.initialize();
       if (!result.success) {
         logger.warn('[AuthStore] Sync initialization failed:', result.error);
+        // Fetch worker debug info from main process and surface it here in
+        // DevTools so we can diagnose native-addon issues in packaged builds.
+        try {
+          const debug = await window.api.sync.debugInfo();
+          logger.warn('[AuthStore] PowerSync worker debug', {
+            isPackaged: String(debug.isPackaged),
+            isInitialized: String(debug.isInitialized),
+            workerPath: debug.worker?.path ?? 'n/a',
+            workerExists: String(debug.worker?.exists ?? 'n/a'),
+            workerError: debug.worker?.error ?? 'none',
+          });
+        } catch {
+          // non-fatal
+        }
       }
 
       // Refresh auth/license state

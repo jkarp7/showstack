@@ -11,6 +11,7 @@
 import { PowerSyncDatabase, SyncStatus } from '@powersync/node';
 import { app } from 'electron';
 import { join } from 'path';
+import { existsSync } from 'fs';
 import { Worker } from 'node:worker_threads';
 import { AppSchema } from './powerSyncSchema';
 import { SupabaseConnector, getSupabaseConnector } from './SupabaseConnector';
@@ -58,6 +59,7 @@ export class PowerSyncService {
   private lastSyncedAt: Date | null = null;
   private currentError: string | null = null;
   private isInitialized = false;
+  private workerDebugInfo: { path: string; exists: boolean; error?: string } | null = null;
 
   /**
    * Initialize the PowerSync database
@@ -108,18 +110,11 @@ export class PowerSyncService {
               'dist',
               'DefaultWorker.cjs',
             );
-            logger.info('[PowerSyncService] Spawning worker', { workerPath });
+            const exists = existsSync(workerPath);
+            this.workerDebugInfo = { path: workerPath, exists };
             const w = new Worker(workerPath, opts as object | undefined);
             w.once('error', (err) => {
-              logger.error('[PowerSyncService] Worker error', {
-                error: err.message,
-                stack: err.stack,
-              });
-            });
-            w.once('exit', (code) => {
-              if (code !== 0) {
-                logger.warn('[PowerSyncService] Worker exited unexpectedly', { code });
-              }
+              this.workerDebugInfo = { ...this.workerDebugInfo!, error: err.message };
             });
             return w;
           }
@@ -462,6 +457,21 @@ export class PowerSyncService {
    */
   isCloudConfigured(): boolean {
     return getConfig().isConfigured;
+  }
+
+  /**
+   * Return debug info about the worker (for renderer-visible diagnostics)
+   */
+  getDebugInfo(): {
+    isPackaged: boolean;
+    isInitialized: boolean;
+    worker: { path: string; exists: boolean; error?: string } | null;
+  } {
+    return {
+      isPackaged: app.isPackaged,
+      isInitialized: this.isInitialized,
+      worker: this.workerDebugInfo,
+    };
   }
 
   /**

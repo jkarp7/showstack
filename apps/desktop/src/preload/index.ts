@@ -357,6 +357,7 @@ contextBridge.exposeInMainWorld('api', {
   // Sync operations (PowerSync + Supabase)
   sync: {
     initialize: () => ipcRenderer.invoke('sync:initialize'),
+    debugInfo: () => ipcRenderer.invoke('sync:debugInfo'),
     isConfigured: () => ipcRenderer.invoke('sync:isConfigured'),
     isReady: () => ipcRenderer.invoke('sync:isReady'),
     connect: () => ipcRenderer.invoke('sync:connect'),
@@ -782,6 +783,11 @@ export interface ElectronAPI {
   };
   sync: {
     initialize: () => Promise<{ success: boolean; error?: string }>;
+    debugInfo: () => Promise<{
+      isPackaged: boolean;
+      isInitialized: boolean;
+      worker: { path: string; exists: boolean; error?: string } | null;
+    }>;
     isConfigured: () => Promise<boolean>;
     isReady: () => Promise<boolean>;
     connect: () => Promise<{ success: boolean; error?: string }>;

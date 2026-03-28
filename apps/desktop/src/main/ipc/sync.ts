@@ -53,6 +53,15 @@ export function registerSyncHandlers(): void {
    * Initialize PowerSync service
    * Should be called once after app is ready
    */
+  /**
+   * Return debug info about the PowerSync worker (path, exists, error)
+   * so the renderer can log it in DevTools where it's visible.
+   */
+  ipcMain.handle('sync:debugInfo', () => {
+    const service = getPowerSyncService();
+    return service.getDebugInfo();
+  });
+
   ipcMain.handle('sync:initialize', async () => {
     try {
       const service = getPowerSyncService();
