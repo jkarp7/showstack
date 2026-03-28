@@ -20,6 +20,7 @@ const mainDefine: Record<string, string> = {
   'process.env.POWERSYNC_URL': JSON.stringify(process.env.POWERSYNC_URL ?? ''),
   'process.env.SENTRY_DSN': JSON.stringify(process.env.SENTRY_DSN ?? ''),
   'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'production'),
+  'process.env.BUILD_DATE': JSON.stringify(process.env.BUILD_DATE ?? new Date().toISOString()),
 };
 
 export default defineConfig({
