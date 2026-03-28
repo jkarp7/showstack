@@ -116,11 +116,12 @@ export function registerSyncHandlers(): void {
           });
         }
 
-        // Start syncing after successful sign in
+        // Start syncing after successful sign in. Await initialize() so we
+        // handle the case where the non-blocking startup init is still in
+        // flight — initialize() is idempotent if already complete.
         const service = getPowerSyncService();
-        if (service.isReady()) {
-          await service.connect();
-        }
+        await service.initialize();
+        await service.connect();
 
         return { ...result, licenseVerified };
       }
@@ -479,13 +480,8 @@ export async function initializePowerSync(): Promise<void> {
   const service = getPowerSyncService();
 
   try {
+    // initialize() handles auto-connect for persisted sessions internally
     await service.initialize();
-
-    // Auto-connect if user is already authenticated
-    const connector = getSupabaseConnector();
-    if (connector.isAuthenticated()) {
-      await service.connect();
-    }
   } catch (error) {
     // Non-fatal - app works offline without sync
     logger.info('[Sync] PowerSync initialization skipped:', {
