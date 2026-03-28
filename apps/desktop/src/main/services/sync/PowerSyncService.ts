@@ -108,7 +108,20 @@ export class PowerSyncService {
               'dist',
               'DefaultWorker.cjs',
             );
-            return new Worker(workerPath, opts as object | undefined);
+            logger.info('[PowerSyncService] Spawning worker', { workerPath });
+            const w = new Worker(workerPath, opts as object | undefined);
+            w.once('error', (err) => {
+              logger.error('[PowerSyncService] Worker error', {
+                error: err.message,
+                stack: err.stack,
+              });
+            });
+            w.once('exit', (code) => {
+              if (code !== 0) {
+                logger.warn('[PowerSyncService] Worker exited unexpectedly', { code });
+              }
+            });
+            return w;
           }
         : undefined;
 
