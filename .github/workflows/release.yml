@@ -40,7 +40,7 @@ jobs:
           POWERSYNC_URL: ${{ secrets.POWERSYNC_URL }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           NODE_ENV: production
-          BUILD_DATE: ${{ github.event.repository.pushed_at || github.run_started_at }}
+          BUILD_DATE: ${{ github.run_started_at }}
 
       - name: Build distributables (macOS)
         if: matrix.os == 'macos-latest'
