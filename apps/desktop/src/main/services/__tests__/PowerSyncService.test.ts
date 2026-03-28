@@ -66,6 +66,12 @@ vi.mock('../../config/env', () => ({
   getConfig: mockGetConfig,
 }));
 
+const mockGetPath = vi.hoisted(() => vi.fn().mockReturnValue('/tmp/test-userdata'));
+
+vi.mock('electron', () => ({
+  app: { getPath: mockGetPath },
+}));
+
 vi.mock('../../utils/logger', () => ({
   logger: {
     info: vi.fn(),
@@ -118,6 +124,7 @@ describe('PowerSyncService', () => {
 
   beforeEach(() => {
     resetDbInstance();
+    mockGetPath.mockReturnValue('/tmp/test-userdata');
     mockGetConfig.mockReturnValue({ isConfigured: true, app: { debugPowerSync: false } });
     mockOnSessionChange.mockReturnValue(() => {});
     mockGetConnector.mockReturnValue(makeConnector(false));

@@ -31,8 +31,8 @@ jobs:
           npm install
           cd proof-of-concept && npm install && cd ..
 
-      - name: Set build date
-        run: node -e "const fs = require('fs'); fs.appendFileSync(process.env.GITHUB_ENV, 'BUILD_DATE=' + new Date().toISOString() + '\n');"
+      - name: Set build metadata
+        run: node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json','utf8')); fs.appendFileSync(process.env.GITHUB_ENV, 'BUILD_DATE=' + new Date().toISOString() + '\n' + 'APP_VERSION=' + pkg.version + '\n');"
 
       - name: Build app
         run: npm run build
@@ -44,6 +44,7 @@ jobs:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           NODE_ENV: production
           BUILD_DATE: ${{ env.BUILD_DATE }}
+          VITE_APP_VERSION: ${{ env.APP_VERSION }}
 
       - name: Rebuild native modules for Electron
         run: npx electron-rebuild -f -w better-sqlite3

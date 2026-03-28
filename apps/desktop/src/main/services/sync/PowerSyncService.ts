@@ -9,6 +9,8 @@
  */
 
 import { PowerSyncDatabase, SyncStatus } from '@powersync/node';
+import { app } from 'electron';
+import { join } from 'path';
 import { AppSchema } from './powerSyncSchema';
 import { SupabaseConnector, getSupabaseConnector } from './SupabaseConnector';
 import { getConfig } from '../../config/env';
@@ -77,11 +79,12 @@ export class PowerSyncService {
       // Get the Supabase connector
       this.connector = getSupabaseConnector();
 
-      // Create PowerSync database
+      // Create PowerSync database — use absolute userData path so the file
+      // is writable in both dev and packaged builds
       this.db = new PowerSyncDatabase({
         schema: AppSchema,
         database: {
-          dbFilename: 'showstack-sync.db',
+          dbFilename: join(app.getPath('userData'), 'showstack-sync.db'),
         },
       });
 
