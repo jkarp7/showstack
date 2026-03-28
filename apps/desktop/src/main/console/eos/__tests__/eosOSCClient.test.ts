@@ -157,4 +157,19 @@ describe('EosOSCClient', () => {
   it('rejects if not connected', async () => {
     await expect(client.getPatch()).rejects.toThrow('Not connected');
   });
+
+  it('rejects concurrent getPatch calls immediately', async () => {
+    await client.connect();
+    const serverInstance = mocks.serverInstances[0] as EventEmitter;
+
+    // Start a query but never resolve it (no messages sent)
+    const first = client.getPatch(5_000);
+
+    // Second call should be rejected synchronously before any I/O
+    await expect(client.getPatch()).rejects.toThrow('already in progress');
+
+    // Clean up: resolve the first query
+    serverInstance.emit('message', ['/eos/out/patch/count', 0]);
+    await first;
+  });
 });

@@ -34,6 +34,7 @@ type OscMessage = [string, ...(string | number | boolean)[]];
 export class EosOSCClient {
   private client: Client;
   private server: Server | null = null;
+  private isQueryingPatch = false;
   private readonly consoleIp: string;
   private readonly consolePort: number;
   private readonly listenPort: number;
@@ -98,90 +99,96 @@ export class EosOSCClient {
    * or if all expected channel messages do not arrive in time.
    */
   async getPatch(countTimeoutMs = PATCH_COUNT_TIMEOUT_MS): Promise<OscMessage[]> {
+    if (this.isQueryingPatch) throw new Error('A patch query is already in progress');
     if (!this.server) throw new Error('Not connected — call connect() first');
 
-    return new Promise<OscMessage[]>((resolve, reject) => {
-      const channelMessages: OscMessage[] = [];
-      let expectedCount: number | null = null;
-      let settled = false;
-      let inactivityTimer: ReturnType<typeof setTimeout> | null = null;
+    this.isQueryingPatch = true;
+    try {
+      return await new Promise<OscMessage[]>((resolve, reject) => {
+        const channelMessages: OscMessage[] = [];
+        let expectedCount: number | null = null;
+        let settled = false;
+        let inactivityTimer: ReturnType<typeof setTimeout> | null = null;
 
-      // Phase 1: wait for /eos/out/patch/count
-      const countTimer = setTimeout(() => {
-        if (!settled) {
-          settled = true;
-          cleanup();
-          reject(
-            new Error(`Eos patch query timed out waiting for count after ${countTimeoutMs}ms`),
-          );
-        }
-      }, countTimeoutMs);
-
-      const resetInactivity = () => {
-        if (inactivityTimer) clearTimeout(inactivityTimer);
-        inactivityTimer = setTimeout(() => {
+        // Phase 1: wait for /eos/out/patch/count
+        const countTimer = setTimeout(() => {
           if (!settled) {
             settled = true;
             cleanup();
             reject(
-              new Error(
-                `Eos patch query timed out — received ${channelMessages.length} of ${expectedCount} channels`,
-              ),
+              new Error(`Eos patch query timed out waiting for count after ${countTimeoutMs}ms`),
             );
           }
-        }, PATCH_INACTIVITY_TIMEOUT_MS);
-      };
+        }, countTimeoutMs);
 
-      const onMessage = (msg: OscMessage) => {
-        const [address] = msg;
+        const resetInactivity = () => {
+          if (inactivityTimer) clearTimeout(inactivityTimer);
+          inactivityTimer = setTimeout(() => {
+            if (!settled) {
+              settled = true;
+              cleanup();
+              reject(
+                new Error(
+                  `Eos patch query timed out — received ${channelMessages.length} of ${expectedCount} channels`,
+                ),
+              );
+            }
+          }, PATCH_INACTIVITY_TIMEOUT_MS);
+        };
 
-        if (address === '/eos/out/patch/count') {
-          clearTimeout(countTimer);
-          const rawCount = Number(msg[1]);
-          if (!Number.isFinite(rawCount)) {
-            logger.warn('Received invalid patch count from Eos; treating as 0', {
-              rawCount: msg[1],
-            });
+        const onMessage = (msg: OscMessage) => {
+          const [address] = msg;
+
+          if (address === '/eos/out/patch/count') {
+            clearTimeout(countTimer);
+            const rawCount = Number(msg[1]);
+            if (!Number.isFinite(rawCount)) {
+              logger.warn('Received invalid patch count from Eos; treating as 0', {
+                rawCount: msg[1],
+              });
+            }
+            expectedCount = Number.isFinite(rawCount) ? rawCount : 0;
+            if (expectedCount === 0) {
+              settled = true;
+              cleanup();
+              resolve([]);
+            } else {
+              // Phase 2: switch to inactivity-based timeout
+              resetInactivity();
+            }
+            return;
           }
-          expectedCount = Number.isFinite(rawCount) ? rawCount : 0;
-          if (expectedCount === 0) {
-            settled = true;
-            cleanup();
-            resolve([]);
-          } else {
-            // Phase 2: switch to inactivity-based timeout
+
+          if (/^\/eos\/out\/patch\/\d+$/.test(address)) {
+            channelMessages.push(msg);
             resetInactivity();
+            if (expectedCount !== null && channelMessages.length >= expectedCount) {
+              settled = true;
+              cleanup();
+              resolve(channelMessages);
+            }
           }
-          return;
-        }
+        };
 
-        if (/^\/eos\/out\/patch\/\d+$/.test(address)) {
-          channelMessages.push(msg);
-          resetInactivity();
-          if (expectedCount !== null && channelMessages.length >= expectedCount) {
+        const cleanup = () => {
+          clearTimeout(countTimer);
+          if (inactivityTimer) clearTimeout(inactivityTimer);
+          this.server?.off('message', onMessage);
+        };
+
+        this.server!.on('message', onMessage);
+
+        // Fire the query after attaching the listener
+        this.send('/eos/get/patch').catch((err: unknown) => {
+          if (!settled) {
             settled = true;
             cleanup();
-            resolve(channelMessages);
+            reject(err instanceof Error ? err : new Error(String(err)));
           }
-        }
-      };
-
-      const cleanup = () => {
-        clearTimeout(countTimer);
-        if (inactivityTimer) clearTimeout(inactivityTimer);
-        this.server?.off('message', onMessage);
-      };
-
-      this.server!.on('message', onMessage);
-
-      // Fire the query after attaching the listener
-      this.send('/eos/get/patch').catch((err: unknown) => {
-        if (!settled) {
-          settled = true;
-          cleanup();
-          reject(err instanceof Error ? err : new Error(String(err)));
-        }
+        });
       });
-    });
+    } finally {
+      this.isQueryingPatch = false;
+    }
   }
 }
