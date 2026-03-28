@@ -57,6 +57,9 @@ import { getGroupMembers, computeFixtureGroupMap } from '../../utils/groupMember
 import { InspectorPanel, InspectorContent } from '../../components/inspector/InspectorPanel';
 import { GroupsInspector } from '../../components/inspector/GroupsInspector';
 import { ConditionalFormattingInspector } from '../../components/inspector/ConditionalFormattingInspector';
+import { ConsoleConnectionDialog } from '../../components/console/ConsoleConnectionDialog';
+import { ConsoleSyncDialog } from '../../components/console/ConsoleSyncDialog';
+import { useConsoleStore } from '../../store/consoleStore';
 
 interface EquipmentManagerProps {
   initialTab?: 'fixtures' | 'infrastructure' | 'power';
@@ -154,6 +157,20 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
   // Export dialog state
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [exportFormat, setExportFormat] = useState<'csv' | 'eos' | 'grandma2' | 'grandma3'>('csv');
+
+  // Console integration dialog state
+  const [isConsoleDialogOpen, setIsConsoleDialogOpen] = useState(false);
+  const [isConsoleSyncDialogOpen, setIsConsoleSyncDialogOpen] = useState(false);
+  const { status: consoleStatus } = useConsoleStore();
+  const existingChannels = useMemo(() => {
+    const channels = new Set<number>();
+    for (const f of fixtures) {
+      if (f.channel && /^\d+$/.test(f.channel)) {
+        channels.add(Number(f.channel));
+      }
+    }
+    return channels;
+  }, [fixtures]);
 
   // Sort state - now supports multi-column sort
   interface SortConfig {
@@ -1246,6 +1263,11 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
               onImportMvr={activeTab === 'fixtures' ? handleImportMvr : undefined}
               onExportMvr={activeTab === 'fixtures' ? handleExportMvr : undefined}
               onExportCSV={activeTab === 'fixtures' ? handleExportCSV : undefined}
+              onConsole={activeTab === 'fixtures' ? () => setIsConsoleDialogOpen(true) : undefined}
+              onConsoleSync={
+                activeTab === 'fixtures' ? () => setIsConsoleSyncDialogOpen(true) : undefined
+              }
+              consoleSyncAvailable={activeTab === 'fixtures' && consoleStatus === 'connected'}
               onUserColumnSettings={() => setIsUserColumnSettingsOpen(true)}
               columnVisibility={columnVisibility}
               onColumnVisibilityChange={handleColumnVisibilityChange}
@@ -1830,6 +1852,22 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
           </div>
         </div>
       )}
+
+      {/* Console Dialogs */}
+      <ConsoleConnectionDialog
+        isOpen={isConsoleDialogOpen}
+        projectId={currentProjectId}
+        onClose={() => setIsConsoleDialogOpen(false)}
+      />
+      <ConsoleSyncDialog
+        isOpen={isConsoleSyncDialogOpen}
+        existingChannels={existingChannels}
+        onClose={() => setIsConsoleSyncDialogOpen(false)}
+        onImportApply={(channels) => {
+          // TODO: apply imported console channels to the fixture list (Phase 3)
+          logger.info(`Console import applied: ${channels.length} channels`);
+        }}
+      />
 
       {/* Unsaved Changes Dialog */}
       <UnsavedChangesDialog {...unsavedChangesDialog} />
