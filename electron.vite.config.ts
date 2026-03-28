@@ -3,9 +3,28 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import { copyFileSync, mkdirSync, readdirSync, existsSync, cpSync } from 'fs';
 import { join } from 'path';
+import { config as loadDotenv } from 'dotenv';
+
+// Load .env at build time so values can be baked into the packaged binary.
+// In development, dotenvx handles this via `npm run dev`; this covers prod builds.
+loadDotenv({ path: resolve(__dirname, '.env') });
+
+// Build-time env vars for the main process. These are inlined as string literals
+// by Vite's define so the packaged app doesn't need a .env file at runtime.
+const mainDefine: Record<string, string> = {
+  'process.env.SUPABASE_URL': JSON.stringify(process.env.SUPABASE_URL ?? ''),
+  'process.env.SUPABASE_ANON_KEY': JSON.stringify(process.env.SUPABASE_ANON_KEY ?? ''),
+  'process.env.SUPABASE_SERVICE_ROLE_KEY': JSON.stringify(
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
+  ),
+  'process.env.POWERSYNC_URL': JSON.stringify(process.env.POWERSYNC_URL ?? ''),
+  'process.env.SENTRY_DSN': JSON.stringify(process.env.SENTRY_DSN ?? ''),
+  'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'production'),
+};
 
 export default defineConfig({
   main: {
+    define: mainDefine,
     watch: {
       // Also watch the shared package so the main process restarts on schema changes
       include: ['packages/shared/src/**'],
