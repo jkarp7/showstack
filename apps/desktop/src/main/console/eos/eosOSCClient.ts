@@ -23,8 +23,10 @@ export { EosPatchChannel };
 export const EOS_OSC_PORT = 3032;
 /** Local port we open to receive Eos responses */
 export const EOS_LISTEN_PORT = 3033;
-/** How long to wait for all patch responses before giving up */
-const PATCH_TIMEOUT_MS = 10_000;
+/** How long to wait for the initial /eos/out/patch/count message */
+const PATCH_COUNT_TIMEOUT_MS = 10_000;
+/** Inactivity window after count is received — resets on every channel message */
+const PATCH_INACTIVITY_TIMEOUT_MS = 2_000;
 
 /** Raw OSC message: [address, ...args] */
 type OscMessage = [string, ...(string | number | boolean)[]];
@@ -95,37 +97,61 @@ export class EosOSCClient {
    * Rejects if the count message does not arrive within PATCH_TIMEOUT_MS,
    * or if all expected channel messages do not arrive in time.
    */
-  async getPatch(timeoutMs = PATCH_TIMEOUT_MS): Promise<OscMessage[]> {
+  async getPatch(countTimeoutMs = PATCH_COUNT_TIMEOUT_MS): Promise<OscMessage[]> {
     if (!this.server) throw new Error('Not connected — call connect() first');
 
     return new Promise<OscMessage[]>((resolve, reject) => {
       const channelMessages: OscMessage[] = [];
       let expectedCount: number | null = null;
       let settled = false;
+      let inactivityTimer: ReturnType<typeof setTimeout> | null = null;
 
-      const timer = setTimeout(() => {
+      // Phase 1: wait for /eos/out/patch/count
+      const countTimer = setTimeout(() => {
         if (!settled) {
           settled = true;
           cleanup();
-          reject(new Error(`Eos patch query timed out after ${timeoutMs}ms`));
+          reject(
+            new Error(`Eos patch query timed out waiting for count after ${countTimeoutMs}ms`),
+          );
         }
-      }, timeoutMs);
+      }, countTimeoutMs);
+
+      const resetInactivity = () => {
+        if (inactivityTimer) clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+          if (!settled) {
+            settled = true;
+            cleanup();
+            reject(
+              new Error(
+                `Eos patch query timed out — received ${channelMessages.length} of ${expectedCount} channels`,
+              ),
+            );
+          }
+        }, PATCH_INACTIVITY_TIMEOUT_MS);
+      };
 
       const onMessage = (msg: OscMessage) => {
         const [address] = msg;
 
         if (address === '/eos/out/patch/count') {
+          clearTimeout(countTimer);
           expectedCount = Number(msg[1]) || 0;
           if (expectedCount === 0) {
             settled = true;
             cleanup();
             resolve([]);
+          } else {
+            // Phase 2: switch to inactivity-based timeout
+            resetInactivity();
           }
           return;
         }
 
         if (/^\/eos\/out\/patch\/\d+$/.test(address)) {
           channelMessages.push(msg);
+          resetInactivity();
           if (expectedCount !== null && channelMessages.length >= expectedCount) {
             settled = true;
             cleanup();
@@ -135,7 +161,8 @@ export class EosOSCClient {
       };
 
       const cleanup = () => {
-        clearTimeout(timer);
+        clearTimeout(countTimer);
+        if (inactivityTimer) clearTimeout(inactivityTimer);
         this.server?.off('message', onMessage);
       };
 

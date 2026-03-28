@@ -24,6 +24,9 @@ import type {
   ConsolePatchExportResult,
 } from '../../renderer/src/types/console';
 
+/** Delay between consecutive /eos/newcmd sends to avoid overwhelming the console's OSC buffer */
+const EOS_COMMAND_DELAY_MS = 20;
+
 // ─── In-process client registry ──────────────────────────────────────────────
 
 // One client per console type; reset on disconnect.
@@ -156,7 +159,7 @@ export function registerConsoleHandlers(): void {
 
         for (const command of commands) {
           await client.send('/eos/newcmd', command);
-          await new Promise((resolve) => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, EOS_COMMAND_DELAY_MS));
         }
 
         logger.info('Eos patch export complete', { commandCount: commands.length });

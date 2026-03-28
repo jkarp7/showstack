@@ -139,6 +139,21 @@ describe('EosOSCClient', () => {
     await expect(client.getPatch(50)).rejects.toThrow('timed out');
   });
 
+  it('rejects via inactivity timer if channel messages stall mid-stream', async () => {
+    await client.connect();
+    const serverInstance = mocks.serverInstances[0] as EventEmitter;
+
+    const patchPromise = client.getPatch(5_000);
+    setTimeout(() => {
+      // Send count (2 channels) but only deliver one — simulates a stall
+      serverInstance.emit('message', ['/eos/out/patch/count', 2]);
+      serverInstance.emit('message', ['/eos/out/patch/0', 1, '1/1', 'Leko', 'SR 1', '']);
+      // Second channel message never arrives → inactivity timer fires
+    }, 0);
+
+    await expect(patchPromise).rejects.toThrow('timed out');
+  });
+
   it('rejects if not connected', async () => {
     await expect(client.getPatch()).rejects.toThrow('Not connected');
   });
