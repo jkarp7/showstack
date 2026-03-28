@@ -660,7 +660,7 @@ export function ProjectPage() {
 
       {/* Footer */}
       <footer className="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-4 text-center text-sm text-gray-600 dark:text-gray-400">
-        ShowStack v0.1.0-alpha | © 2025 Lytrix
+        ShowStack v{import.meta.env.VITE_APP_VERSION || '0.2.0-alpha'} | © 2025 Lytrix
       </footer>
 
       {/* Edit Project Dialog */}

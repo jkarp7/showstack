@@ -8,7 +8,7 @@ directories:
 
 asarUnpack:
   - '**/node_modules/better-sqlite3/**'
-  - '**/node_modules/@journeyapps/node-sqlite3/**'
+  - '**/node_modules/@powersync/node/lib/**'
 
 files:
   - out/**/*

@@ -1416,7 +1416,7 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
               {processedFixtures.length} / {fixtures.length} fixtures
               {selectedRows.size > 0 && ` | ${selectedRows.size} selected`}
             </div>
-            <div>ShowStack:Lighting v0.1.0-alpha</div>
+            <div>ShowStack:Lighting v{import.meta.env.VITE_APP_VERSION || '0.2.0-alpha'}</div>
           </footer>
         </>
       )}
@@ -1614,7 +1614,7 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
             <div>
               {infrastructureEquipment.length} equipment | {selectedInfrastructure.size} selected
             </div>
-            <div>ShowStack:Lighting v0.1.0-alpha</div>
+            <div>ShowStack:Lighting v{import.meta.env.VITE_APP_VERSION || '0.2.0-alpha'}</div>
           </footer>
         </>
       )}
@@ -1757,7 +1757,7 @@ export function EquipmentManager({ initialTab = 'fixtures' }: EquipmentManagerPr
               {dimmerRacks.length} dimmer racks | {pdRacks.length} PD racks |{' '}
               {dimmerRacks.length + pdRacks.length} total
             </div>
-            <div>ShowStack:Lighting v0.1.0-alpha</div>
+            <div>ShowStack:Lighting v{import.meta.env.VITE_APP_VERSION || '0.2.0-alpha'}</div>
           </footer>
         </>
       )}

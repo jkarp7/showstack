@@ -604,7 +604,7 @@ class TelemetryService {
    * Get app version from environment
    */
   private getAppVersion(): string {
-    return import.meta.env.VITE_APP_VERSION || '0.1.0-alpha';
+    return import.meta.env.VITE_APP_VERSION || '0.2.0-alpha';
   }
 
   /**

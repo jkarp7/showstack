@@ -94,7 +94,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         {/* Version */}
         <div className="mb-8">
           <span className="px-4 py-2 bg-gray-800 text-gray-300 rounded-full text-sm font-medium">
-            Version 0.1.0-alpha
+            Version {import.meta.env.VITE_APP_VERSION || '0.2.0-alpha'}
           </span>
         </div>
 
