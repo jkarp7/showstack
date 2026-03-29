@@ -1,8 +1,8 @@
 # ShowStack Project Status
 
-**Last Updated:** March 11, 2026
-**Current Version:** 0.1.0-alpha
-**Development Phase:** Alpha — UI redesign, Smart Groups, and cloud collaboration shipped; Lighting edition ~90% complete.
+**Last Updated:** March 28, 2026
+**Current Version:** 0.2.0-alpha
+**Development Phase:** Alpha — console integration Phases 1 & 2 shipped, cloud sync packaged-build fixed, auth flow improved; Lighting edition ~97% complete.
 **Active Branch:** `develop`
 
 This is a high-level index. For detailed status, see the linked documents.
@@ -13,7 +13,7 @@ This is a high-level index. For detailed status, see the linked documents.
 
 | Edition / Domain    | Status         | Completion | Detail                                                                                                                   |
 | ------------------- | -------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Lighting            | 🚧 In Progress | ~90%       | [`docs/development/lighting_project_status.md`](docs/development/lighting_project_status.md)                             |
+| Lighting            | 🚧 In Progress | ~97%       | [`docs/development/lighting_project_status.md`](docs/development/lighting_project_status.md)                             |
 | Core Infrastructure | ✅ Complete    | 100%       | See below                                                                                                                |
 | Collaboration       | ✅ Complete    | 100%       | See below                                                                                                                |
 | Sound               | ⬜ Planned     | 0%         | [`docs/development/future-editions/sound.md`](docs/development/future-editions/sound.md)                                 |
@@ -25,18 +25,19 @@ This is a high-level index. For detailed status, see the linked documents.
 
 ## Lighting Edition — Current Priorities
 
-**Immediate (Lightwright parity):**
+**In progress:**
 
-1. MVR export support
-2. Enhanced error checking (overlapping patches, overloaded dimmers, duplicate channels)
-3. Basic console integration — ETC Eos via OSC
+1. ~~MVR export support~~ — **Done** (PR #90)
+2. ~~Enhanced error checking~~ — **Done** (Show Health, PR #90)
+3. **Console integration — ETC Eos via OSC** — Phases 1 & 2 complete; paused for hardware testing before Phase 3 (GrandMA2)
+4. ~~IP/VLAN port validation (Issue #17)~~ — **Closed** (shipped as console network prereqs)
 
-**Deferred (waiting on dependencies):**
+**Deferred:**
 
-- Auto-complete system (needs fixture database)
-- DMX conflict detection (waiting on Vectorworks integration)
 - Cable Run Visualization, Advanced Phase Balancing, Power Distribution Reports
-- Port Validation, Network Topology Visualization
+- Network Topology Visualization (Issue #19)
+- Real-time Port Status Monitoring dashboard (Issue #20 — service + IPC shipped; UI panel shipped; status dashboard complete)
+- Vectorworks XML integration (Issue #32)
 
 See [`docs/development/lighting_project_status.md`](docs/development/lighting_project_status.md) for the full pending/planned/completed breakdown.
 
@@ -44,17 +45,18 @@ See [`docs/development/lighting_project_status.md`](docs/development/lighting_pr
 
 ## Recently Completed
 
-| #   | Feature                                                             | Date              |
-| --- | ------------------------------------------------------------------- | ----------------- |
-| 16  | UI Redesign Phases 4–9, Smart Groups Phases 1–4, bug fixes (PR #88) | March 11, 2026    |
-| 15  | PowerSync write-path for projects & shop orders (PR #87)            | March 2026        |
-| 14  | Multi-user collaboration (PR #85)                                   | March 2026        |
-| 13  | Menu bar & toolbar reorganization (PR #83)                          | March 2, 2026     |
-| 12  | Cloud sync fix — PowerSync Node migration                           | February 23, 2026 |
-| 11  | Project Families / Version Stacking                                 | February 23, 2026 |
-| 10  | User Accounts, Licensing & Demo Mode (PR #80)                       | February 13, 2026 |
-| 9   | Shop Order Table Migration (PR #63)                                 | January 20, 2026  |
-| 8   | Telemetry System Hardening (PR #61)                                 | January 18, 2026  |
+| #   | Feature                                                                            | Date           |
+| --- | ---------------------------------------------------------------------------------- | -------------- |
+| 22  | Cloud sync packaged-build fix + license-gated sync + returning-user auth flow      | March 28, 2026 |
+| 21  | Console integration Phase 1 (Eos OSC backend) + Phase 2 (UI)                       | March 2026     |
+| 20  | IP/VLAN validation + PortStatusMonitorService + Network Status panel (Issue #17)   | March 2026     |
+| 19  | GDTF personality library Phases 1–4, MVR export, Show Health, DMX Map (PR #90)     | March 2026     |
+| 18  | Pre-1.0 fixes: email deep links, backup checksums, telemetry, type safety (PR #90) | March 2026     |
+| 17  | Feature flags + Admin Panel backend (Issues #35, #52, PR #90)                      | March 2026     |
+| 16  | UI Redesign Phases 4–9, Smart Groups Phases 1–4, bug fixes (PR #88)                | March 11, 2026 |
+| 15  | PowerSync write-path for projects & shop orders (PR #87)                           | March 2026     |
+| 14  | Multi-user collaboration (PR #85)                                                  | March 2026     |
+| 13  | Menu bar & toolbar reorganization (PR #83)                                         | March 2, 2026  |
 
 ---
 

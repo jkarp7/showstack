@@ -31,7 +31,7 @@ These items are either actively deferred or waiting on a dependency. Address bef
 
 ### Infrastructure
 
-- ⬜ **Port Validation** — IP address and VLAN range validation. (Issue #17) — See Planned section.
+- ✅ **Port Validation (Issue #17 — closed)** — IP/VLAN validation shipped as part of console integration network prerequisites. See Completed section.
 - ⬜ **Network Topology Visualization** — Visual network layout diagram for infrastructure. (Issue #19)
 - ⬜ **Real-time Port Status Monitoring** — Ping/connectivity checks, port up/down status, SNMP integration, status dashboard. (Issue #20)
 
@@ -65,11 +65,11 @@ Priority order reflects complexity and network access requirements.
 
 ### Short-term — Console Integration
 
-1. **Basic console integration (ETC Eos via OSC)** — Push/pull patch data from an Eos family console. (Issue #25, 5% complete) — _Requires network access; next up after MVR export._
+1. **Hardware testing checkpoint (Issue #25, ~50% complete)** — Phases 1 (Eos OSC backend) and 2 (UI) are complete and merged to `develop`. Paused pending access to a physical Eos console (or Eos offline software) to validate OSC import/export against real hardware before proceeding to Phase 3.
 
 **Refs:** `docs/features/console-integration-plan.md`
 
-2. **IP/VLAN port validation** — IP address and VLAN range validation on infrastructure port fields. (Issue #17) — _Also requires network access; tackle alongside or immediately after console integration._
+2. ~~**IP/VLAN port validation** — IP address and VLAN range validation on infrastructure port fields. (Issue #17)~~ — **Closed.** Shipped as part of console integration network prerequisites.
 
 ### Medium-term — Documentation & Integration
 
@@ -205,6 +205,13 @@ _Note: Supersedes Issue #40 (Maintenance Menu) and Issue #29 (Shop Order from Sy
 - ✅ **UI Redesign Phase 8** — Filter chips + slim toolbar: `FilterBar` dropdowns replaced with inline tag filter chips.
 - ✅ **UI Redesign Phase 9** — Design tokens: CSS custom properties across all inspector components.
 - ✅ **Menu Bar Reorganization (PR #83)** — Context-aware menu (equipment / infrastructure / power contexts), Duplicate wired, Conditional Formatting moved to View menu, Generate Paperwork in Project menu.
+
+### Console Integration (Issue #25 — Phases 1 & 2)
+
+- ✅ **Network prerequisites (Issue #17 — closed)** — `networkValidation.ts` in `@showstack/shared` (`isValidIPv4`, `parseIPWithPort`, `isValidVLAN`, 18 tests); Zod IP validation on infrastructure schema; blur-triggered inline IP errors in Add/Edit Infrastructure dialogs; VLAN range validation in `PortAssignmentEditor`; `PortStatusMonitorService` (TCP reachability via `net.createConnection()`, 8s TTL cache, 6 tests); `infrastructure:getPortStatusReport` IPC; `PortUsageIndicator` connectivity badge; Network Status panel in Infrastructure tab (per-device dot, latency, auto-refresh every 10s).
+- ✅ **Phase 1 — Eos OSC backend** — `eosOSCClient.ts` (connect/disconnect/getPatch, 12 tests), `eosCommandBuilder.ts` (patch commands + profile mapping, 16 tests), `eosPatchParser.ts` (channel parse + fixture import, 12 tests), `ipc/console.ts` (connect/disconnect/importPatch/exportPatch, 11 tests). Dependency: `node-osc@11.3.0`. 51 tests total.
+- ✅ **Phase 2 — Eos UI** — `ConsoleConnectionDialog.tsx` (IP validation via `parseIPWithPort()`, reachability pre-check via `getPortStatusReport`, 12 tests), `ConsoleSyncDialog.tsx` (import preview, conflict highlighting, export, 8 tests), `ConsoleStatusIndicator.tsx`, `consoleStore.ts` (Zustand, 12 tests). Steps 5 and 10 (deferred prereqs) closed. `infrastructure:getPortStatusReport` handler test added. 32 new tests; 2,130 total suite.
+- ⏸ **Paused — hardware testing** — awaiting access to physical/offline Eos console to validate OSC import/export before Phase 3 (GrandMA2). See `docs/features/console-integration-plan.md`.
 
 ### Cloud & Collaboration
 

@@ -1,7 +1,7 @@
 # Next Steps - ShowStack Development
 
-**Last Updated:** March 11, 2026
-**Status:** PR #88 (UI Redesign phases 4-9, Smart Groups phases 1-4, bug fixes) open → `develop`
+**Last Updated:** March 28, 2026
+**Status:** `develop` is current — console integration Phases 1 & 2 merged; cloud sync packaged-build fixed (v0.2.0-alpha released); paused on console hardware testing
 
 ---
 
@@ -36,6 +36,26 @@ npm run format:check
 ---
 
 ## Recently Completed
+
+### Cloud Sync Packaged-Build Fix + Auth Flow (March 28, 2026) — `develop`
+
+**v0.2.0-alpha release.** Cloud sync was broken in `.dmg` builds. Root cause: ESM worker (`DefaultWorker.js`) uses bare `import()` which bypasses Electron's ASAR `require()` patcher in `worker_threads`. Fixed by switching to CJS worker via `openWorker` override in `PowerSyncService`; added `comlink`, `bindings`, `file-uri-to-path` to `asarUnpack`. Added 10-second init timeout; `signOut` guard skips `disconnect()` if PowerSync never initialized.
+
+Sync connect now gated on `licenseStatus.canSync` (single source of truth). Background `verifyOnline()` on startup auto-connects if `canSync` becomes true after Supabase verification. `OfflineBanner` suppressed for non-sync tiers.
+
+Returning-user auth flow fixed: `isReturningUserPrompt` state distinguishes session-expired users from first-launch; AuthModal shows "Your session has expired" subtitle. Splash screen now shows tier name and handles grace/demo states.
+
+### Console Integration Phases 1 & 2 (March 2026) — `develop`
+
+Network prerequisites (Issue #17 — **closed**): `networkValidation.ts` in `@showstack/shared` (IPv4/VLAN validation, 18 tests); inline validation in infrastructure dialogs; `PortStatusMonitorService` (TCP reachability, 8s TTL, 6 tests); `infrastructure:getPortStatusReport` IPC; Network Status panel in Infrastructure tab.
+
+Phase 1 — Eos OSC backend: `eosOSCClient.ts`, `eosCommandBuilder.ts`, `eosPatchParser.ts`, `ipc/console.ts`. Dependency: `node-osc@11.3.0`. 51 tests.
+
+Phase 2 — Eos UI: `ConsoleConnectionDialog.tsx` (IP validation + reachability pre-check), `ConsoleSyncDialog.tsx` (import preview + conflict highlighting), `ConsoleStatusIndicator.tsx`, `consoleStore.ts`. 32 new tests. 2,130 total suite.
+
+### GDTF Personality Library Phases 1–4, MVR, Show Health, DMX Map, Feature Flags, Admin Panel (PR #90 → `develop`)
+
+See `docs/development/lighting_project_status.md` for full details.
 
 ### UI Redesign Phases 4-9, Smart Groups Phases 1-4, Bug Fixes (March 11, 2026) — PR #88 → `develop`
 
@@ -120,21 +140,27 @@ See `docs/archive/renovation/README.md` for the full renovation plan.
 
 ## Open Issues / Next Steps
 
-### Merge PR #88 → `develop`
+### Console Integration Hardware Testing (Issue #25 — ~50%)
 
-PR #88 (UI Redesign + Smart Groups + bug fixes) is open and passing CI. Merge when approved.
+Phases 1 & 2 are complete on `develop`. Next step is validating against a real Eos console:
 
-### Merge `develop` → `main`
+1. Enable OSC RX on console: Setup → System Settings → Show Control → OSC
+2. Confirm `/eos/get/patch` → `/eos/out/patch/count` + `/eos/out/patch/[n]` format matches parser
+3. Confirm `/eos/newcmd` export commands land correctly
+4. Test port override (`:3032` suffix in IP field)
+5. Full connect/sync/disconnect UX flow
+6. Check UDP vs TCP reachability discrepancy when VLAN/firewall is in play
 
-Batch `develop` → `main` after PR #88 merges. Includes: collaboration (PR #85), PowerSync write-path (PR #87), UI redesign + Smart Groups (PR #88).
+After hardware validation → proceed to **Phase 3 (GrandMA2 Telnet/XML)**.
 
 ### Next Feature Work
 
-- [ ] **Smart Groups Phase 5 (if planned)** — any remaining group features
-- [ ] **MVR export** — industry standard CAD/visualizer format (Lightwright parity)
-- [ ] **Enhanced error checking** — overlapping patches, overloaded dimmers, duplicate channels
-- [ ] **Basic console integration** — OSC protocol for ETC Eos
+- [ ] **Console integration Phase 3** — GrandMA2 Telnet + XML (after hardware testing)
+- [ ] **Console integration Phase 4** — GrandMA3 MA-Net3 + OSC
+- [ ] **Console integration Phase 5** — Auto-discovery, live sync, GDTF-backed profile mapping
 - [ ] **E-commerce webhook** → Supabase Edge Function (auto-fulfill Stripe/Shopify purchases)
+- [ ] **Vectorworks XML integration** (Issue #32) — largest remaining undertaking (~13 weeks)
+- [ ] **User documentation** (Issue #53) — Getting Started + module guides
 
 ---
 
@@ -183,4 +209,4 @@ Batch `develop` → `main` after PR #88 merges. Includes: collaboration (PR #85)
 
 ---
 
-**Current Focus:** Merge PR #88 → `develop`, then batch `develop` → `main`
+**Current Focus:** Console hardware testing (Eos) → Phase 3 (GrandMA2)
