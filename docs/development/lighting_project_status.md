@@ -1,6 +1,6 @@
 # ShowStack — Lighting Edition Status
 
-**Last Updated:** March 27, 2026
+**Last Updated:** March 28, 2026
 **Edition Price:** $249/year
 **Target Users:** Lighting Designers, Production Electricians, Master Electricians
 **Competes With:** LightWright 6 ($845 one-time)
@@ -210,6 +210,10 @@ _Note: Supersedes Issue #40 (Maintenance Menu) and Issue #29 (Shop Order from Sy
 
 - ✅ **Multi-user collaboration (PR #85)** — Invite/remove/accept/decline via Supabase RPCs; real-time presence; RLS + license gate (migrations 005–016).
 - ✅ **PowerSync write-path (PR #87)** — Projects and shop orders written to PowerSync on create/update/delete; fixes TOCTOU ownership race (Issue #86, closed). Student-tier cloud sync eligibility still TBD.
+- ✅ **PowerSync packaged-build fix (v0.2.0-alpha)** — Cloud sync was broken in `.dmg`/packaged builds. Root cause: ESM worker (`DefaultWorker.js`) uses bare `import()` which bypasses Electron's ASAR `require()` patcher in `worker_threads`, causing `better-sqlite3` to hang silently. Fix: `openWorker` override in `PowerSyncService.ts` loads `DefaultWorker.cjs` directly from `app.asar.unpacked` in packaged builds. Added `comlink`, `bindings`, and `file-uri-to-path` to `asarUnpack` in `electron-builder.yml` (CJS worker's transitive deps; `bindings` locates `.node` native addon, `file-uri-to-path` is a `bindings` dep). Added 10-second `Promise.race` timeout to `sync:initialize` IPC to prevent indefinite hangs. `auth:signOut` skips `service.disconnect()` if PowerSync never initialized (guards against sign-out stalling on cold starts).
+- ✅ **License-gated sync architecture** — `licenseStatus.canSync` is now the single gate for cloud sync connect (previously sync connected on any authenticated session regardless of tier). `PowerSyncService.onSessionChange` no longer auto-connects on sign-in; connect only happens after license is confirmed. Post-sign-in: `initializeSync()` connects only if `isAuthenticated && licenseStatus?.canSync`. Background `verifyOnline()` call runs on startup; if `canSync` becomes true after Supabase verification (e.g. user just upgraded via ecommerce), auto-connect fires without requiring an app restart. `OfflineBanner` suppressed for users whose license does not include sync.
+- ✅ **Returning-user auth flow** — Closing the app while authenticated, then relaunching after session expiry, previously showed no sign-in prompt (localStorage `showstack-auth-prompted` was set, suppressing the first-launch modal). Fixed: `handleSplashComplete` now distinguishes three states: (1) `!authPrompted` → first-launch modal with Demo Mode option; (2) `isAuthenticated` → no prompt; (3) `authPrompted && !isAuthenticated` → session-expired prompt (new `isReturningUserPrompt` state). `AuthModal` shows "Your session has expired. Sign in to re-enable cloud sync." subtitle when `isReturningUserPrompt` is active.
+- ✅ **Splash screen license display** — `getLicenseDisplay()` now shows the license tier name (Professional / Institutional / Student / Demo) instead of raw status codes. Handles `grace` status (verification needed) and `demo` tier separately with appropriate messaging.
 
 ### Pre-1.0 Fixes (branch `feature/pre-1.0-fixes`, March 12, 2026)
 
