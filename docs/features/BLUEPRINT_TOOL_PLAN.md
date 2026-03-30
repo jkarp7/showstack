@@ -2,9 +2,13 @@
 
 **OmniGraffle Parity for ShowStack:Lighting - Best-in-Class Technical Drawing Module**
 
+**Status:** Not yet started
+**Updated:** March 29, 2026
+**Covers:** Network Topology Visualization (Issue #19) — system diagram drawing type serves this use case directly
+
 ## Executive Summary
 
-Implement a professional-grade Blueprint tool for creating rack elevation drawings and system diagrams that **exceeds** OmniGraffle capabilities. This tool will leverage 80% of the existing LayoutCanvas infrastructure from the Label Designer while adding specialized technical drawing features: U-space rack calculations, smart cable routing, equipment symbol libraries with infrastructure integration, layer management, and multi-format export.
+Implement a professional-grade Blueprint tool for creating rack elevation drawings and system diagrams that **exceeds** OmniGraffle capabilities. This tool will leverage ~60% of the existing Label Designer infrastructure while adding specialized technical drawing features: U-space rack calculations, smart cable routing, equipment symbol libraries with infrastructure integration, layer management, and multi-format export. Note: BlueprintCanvas is a **new SVG-based implementation** (not an extension of LayoutCanvas, which uses an incompatible grid-cell model).
 
 **Scope**: Both rack elevations and system drawings in parallel, with best-in-class features including layer management, multiple export formats (PDF/SVG/PNG), smart guides, and advanced styling.
 
@@ -16,31 +20,123 @@ Implement a professional-grade Blueprint tool for creating rack elevation drawin
 
 ### Foundation: Reuse Existing Infrastructure
 
-**Leverage from Label Designer (~80% reuse)**:
+**Reused from Label Designer (~60% reuse)**:
 
-- Grid-based canvas system: `/Users/joshkarp/showstack/src/renderer/src/components/prep/layout/LayoutCanvas.tsx`
-- Zoom/pan controls (50-200%)
-- Snap guides and grid alignment
-- Drag-and-drop framework
-- Element inspector pattern
-- SQLite storage (page_layout_templates, page_layout_elements tables)
-- Puppeteer-based PDF export pipeline
+- `LayoutDesigner.tsx` — orchestrator UX patterns (tool state, keyboard shortcuts, zoom slider, undo/redo history stack, command palette, save/load flow)
+  - Source: `apps/desktop/src/renderer/src/components/shop-order/layout/LayoutDesigner.tsx`
+- `SnapGuides.tsx` — snap guide visualization (import directly; works with pixel coords)
+- `ColorPicker.tsx` — import directly in inspectors
+- `CommandPalette.tsx` — import directly
+- `KeyboardShortcutsHelp.tsx` — import directly
+- Inspector panel pattern (tabbed: Config / Style / Position) — replicate structure
+- Puppeteer PDF export pipeline in `apps/desktop/src/main/ipc/paperwork.ts`
+- Undo/redo history stack pattern from LayoutDesigner
 
-**New Blueprint-Specific (~20%)**:
+**BlueprintCanvas is NEW (SVG-based, not extending LayoutCanvas)**:
+
+- Uses SVG element (not CSS-positioned divs) for freeform pixel positioning
+- Supports rotation, freeform placement, true vector rendering
+- Does **not** reuse `LayoutCanvas.tsx` code — the grid-cell assumption is incompatible with blueprint's pixel-based coordinate model
+- Source reference (pattern only): `apps/desktop/src/renderer/src/components/shop-order/layout/LayoutCanvas.tsx`
+
+**New Blueprint-Specific (~40%)**:
 
 - Technical drawing elements (racks, equipment symbols, cables, ports, measurements)
+- SVG-based freeform canvas with pixel-coordinate positioning
 - Smart connection routing (orthogonal, Bezier, obstacle avoidance)
 - Equipment library with infrastructure integration
 - Layer management system
 - Multi-format export (SVG, PNG, DXF)
 - Advanced styling and measurement tools
 
+### Database Storage
+
+- **better-sqlite3 with WAL mode** (project DB via `getDatabase()` from
+  `apps/desktop/src/main/database/index.ts`)
+- Blueprints are project-specific → stored in `apps/desktop/src/main/database/projectSchema.ts`
+  (NOT appSchema.ts, which holds app-global page_layout_templates)
+- New tables: `blueprint_drawings` + `blueprint_elements`
+  - `blueprint_drawings`: id, project_id, name, description, drawing_type
+    ('rack_elevation'|'system_diagram'|'network_topology'), canvas_width, canvas_height,
+    layers_json (JSON array of LayerConfig), created_at, updated_at
+  - `blueprint_elements`: id, drawing_id, element_type (CHECK constraint), layer_id,
+    x, y (pixel-based floats), width, height, rotation, config (JSON), style (JSON),
+    created_at, updated_at; FK → blueprint_drawings ON DELETE CASCADE
+  - Indexes: blueprint_elements(drawing_id), blueprint_drawings(project_id)
+- Schema migrations via `apps/desktop/src/main/database/core/MigrationRunner.ts`
+  (CREATE TABLE IF NOT EXISTS pattern — runtime checks, not SQL migration files)
+- Query pattern: `db.prepare('SELECT * FROM blueprint_elements WHERE drawing_id = ?').all(id)`
+- JSON fields parsed on read (same pattern as infrastructure.ts port_assignments)
+
+### Equipment Symbol Libraries
+
+**Already installed (use for UI controls):**
+
+- `lucide-react@0.460.0` — toolbar icons, panel controls, generic fallback symbols
+  (Network, Server, Zap, Wifi icons available)
+
+**Add for generic equipment symbols:**
+
+- `react-icons` — bundles 50+ icon collections; relevant subsets:
+  - `fa` (Font Awesome): FaNetworkWired, FaServer, FaProjectDiagram, FaSitemap,
+    FaBolt, FaVolumeUp
+  - `md` (Material Design): MdRouter, MdDeviceHub, MdSettingsInputComponent,
+    MdCable, MdSpeaker
+  - `bs` (Bootstrap): BsHddNetwork, BsDisplay, BsSpeaker
+  - Install: `npm install react-icons`
+  - Import: `import { FaNetworkWired } from 'react-icons/fa'`
+
+**Custom SVGs required (no npm library covers AV/entertainment symbology):**
+Store in `apps/desktop/src/renderer/src/assets/symbols/` as individual .svg files
+
+- `symbolRegistry.ts` index exporting them as React components with configurable
+  fill/stroke props:
+
+* Lighting consoles (ETC Eos/Ion, MA3, Hog4 — simplified silhouette outlines)
+* DMX gateways / ArtNet nodes
+* Dimmer racks / power distribution units
+* Theatrical lighting fixtures (PAR, ellipsoidal, moving head outlines)
+* Stage cable connector types (XLR, Socapex, powerCON)
+* Network switch (simplified top-view with port row)
+
+**DXF symbol import (from manufacturer DWG/DXF packs):**
+Most equipment manufacturers publish DWG symbol libraries. DWG is a proprietary
+binary format with no reliable JS parser — but DXF (the open text-based sibling)
+is fully parseable and every major tool (AutoCAD, Vectorworks, Revit, LibreCAD)
+exports DWG → DXF for free.
+
+Library: `dxf` (npm: `dxf`, by skymakerolof, v5.3.1 — actively maintained)
+
+- Install: `npm install dxf`
+- Has built-in `helper.toSVG()` conversion
+- Supports BLOCK definitions (manufacturer symbols are typically BLOCK entities)
+- Handles: LINE, CIRCLE, ARC, LWPOLYLINE, SPLINE, INSERT (nested blocks)
+
+Architecture: parsing runs in the **main process** (CPU-intensive, file I/O),
+result sent to renderer via IPC.
+
+New IPC channel: `blueprint:importDxfSymbol`
+
+- Input: file path (from native open-file dialog)
+- Parses DXF, extracts named BLOCK definitions
+- Returns: `{ blocks: Array<{ name, svgString }> }`
+- User picks which block(s) to import as reusable symbols
+- Imported symbols stored in `blueprint_symbols` table (app DB, reusable across projects):
+  `id, name, source ('builtin'|'dxf_import'|'svg_upload'), svg_content, category,
+ created_at`
+
+User flow: Symbol Library panel → "Import from DXF…" button → native file picker
+→ block picker dialog → symbol appears in library for drag-and-drop.
+
+Note for users: If you have DWG files, open them in Vectorworks or LibreCAD and
+export as DXF (R2000/R2004 format works best with the dxf parser).
+
 ### Component Architecture
 
 ```
-src/renderer/src/components/production/blueprint/
+apps/desktop/src/renderer/src/components/blueprint/
 ├── BlueprintDesigner.tsx              # Main orchestrator (extends LayoutDesigner pattern)
-├── BlueprintCanvas.tsx                # Canvas with technical drawing features
+├── BlueprintCanvas.tsx                # SVG-based canvas with freeform pixel positioning
 ├── BlueprintToolbar.tsx               # Drawing tools (select, rack, equipment, cable, measure)
 ├── BlueprintLayerPanel.tsx            # Layer management (show/hide/lock/reorder)
 ├── SymbolLibrary.tsx                  # Equipment symbol palette with infrastructure integration
@@ -73,7 +169,7 @@ src/renderer/src/components/production/blueprint/
 
 ### Type Definitions
 
-**New file**: `/Users/joshkarp/showstack/src/renderer/src/types/blueprint.ts`
+**New file**: `apps/desktop/src/renderer/src/types/blueprint.ts`
 
 Key types to define:
 
@@ -83,11 +179,6 @@ Key types to define:
 - `CableConfig` (cableType, routingPoints[], startPort, endPort, strokeStyle)
 - `PortDefinition` (id, number, type, position, connectedTo)
 - `LayerConfig` (name, visible, locked, opacity, zIndex)
-
-**Extend existing**: `/Users/joshkarp/showstack/src/renderer/src/types/prep.ts`
-
-- Add blueprint element types to `LayoutElementType` union
-- Extend element config interfaces
 
 ---
 
@@ -127,6 +218,11 @@ Key types to define:
 - ✅ Signal flow indicators (arrows)
 - ✅ Measurement lines with dimensions
 - ✅ Text callouts with leader lines
+
+> _This drawing type directly covers Network Topology Visualization (Issue #19 — moved from
+> the Infrastructure module into the Blueprint Tool scope). A system diagram with network
+> equipment symbols, port-to-port cable routing, and IP annotations serves the same purpose
+> as a standalone network topology view._
 
 **Cable Routing Algorithms**:
 
@@ -206,7 +302,7 @@ async function loadEquipmentLibrary(projectId: string) {
 - Color modes: RGB (screen), CMYK (print), Grayscale
 - Include: Layers (all/visible only), Grid (on/off), Margins
 
-**Implementation**: `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/utils/exportFormats.ts`
+**Implementation**: `apps/desktop/src/renderer/src/components/blueprint/utils/exportFormats.ts`
 
 ### 3. Smart Guides and Snapping
 
@@ -287,43 +383,49 @@ async function loadEquipmentLibrary(projectId: string) {
 **Tasks**:
 
 1. **Create type definitions** (TDD - write types first)
-   - `/Users/joshkarp/showstack/src/renderer/src/types/blueprint.ts`
-   - Extend `/Users/joshkarp/showstack/src/renderer/src/types/prep.ts`
+   - `apps/desktop/src/renderer/src/types/blueprint.ts`
 
 2. **Implement rack calculation utilities** (TDD - test first!)
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/utils/rackCalculations.ts`
-   - Write tests: `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/utils/__tests__/rackCalculations.test.ts`
+   - `apps/desktop/src/renderer/src/components/blueprint/utils/rackCalculations.ts`
+   - Write tests: `apps/desktop/src/renderer/src/components/blueprint/utils/__tests__/rackCalculations.test.ts`
    - Functions: `uSpaceToPixels()`, `pixelsToUSpace()`, `calculateRackCapacity()`, `detectUSpaceCollision()`
    - **Target**: 80%+ test coverage
 
 3. **Create BlueprintDesigner component**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/BlueprintDesigner.tsx`
-   - Pattern: Copy from `/Users/joshkarp/showstack/src/renderer/src/components/prep/layout/LayoutDesigner.tsx`
+   - `apps/desktop/src/renderer/src/components/blueprint/BlueprintDesigner.tsx`
+   - Pattern: UX orchestrator structure from `apps/desktop/src/renderer/src/components/shop-order/layout/LayoutDesigner.tsx`
    - Add tool selection state (select, rack, equipment, cable, measure)
    - Add keyboard shortcuts (R=rack, E=equipment, C=cable, M=measure, Escape=select)
 
 4. **Create BlueprintCanvas component**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/BlueprintCanvas.tsx`
-   - Extend `/Users/joshkarp/showstack/src/renderer/src/components/prep/layout/LayoutCanvas.tsx`
+   - `apps/desktop/src/renderer/src/components/blueprint/BlueprintCanvas.tsx`
+   - **New SVG-based implementation** — does not extend LayoutCanvas (grid model incompatible)
+   - Freeform pixel-based positioning (x, y as floats)
    - Add snap-to-U-space for rack elements
    - Add port highlighting on hover
 
 5. **Implement RackElevation element**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/elements/RackElevation.tsx`
+   - `apps/desktop/src/renderer/src/components/blueprint/elements/RackElevation.tsx`
    - Visual U-space ruler (1-42U typical)
    - Equipment mounting zones
    - Collision detection visualization
    - Write component tests
 
 6. **Implement RackInspector**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/inspectors/RackInspector.tsx`
+   - `apps/desktop/src/renderer/src/components/blueprint/inspectors/RackInspector.tsx`
    - U-count configuration
    - Rack type (19", custom)
    - Show/hide ruler option
 
 7. **Set up routing**
-   - Update `/Users/joshkarp/showstack/src/renderer/src/pages/ModuleLanding.tsx` (set `isLocked: false` for Blueprint)
-   - Create route: `/module/production/blueprint`
+   - Create page wrapper: `apps/desktop/src/renderer/src/pages/modules/BlueprintsPage.tsx`
+     (same thin-wrapper pattern as ShowHealth.tsx or DMXMap.tsx)
+   - Add nested route in `apps/desktop/src/renderer/src/App.tsx` inside the
+     `/project/:projectId` ProjectWorkspace block:
+     `<Route path="blueprints" element={<BlueprintsPage />} />`
+   - Add sidebar entry in `apps/desktop/src/renderer/src/components/ProjectSidebar.tsx`
+     (likely under a "Visualization" or "Production" section)
+   - Route URL: `/project/:projectId/blueprints`
 
 **Deliverable**: Functional rack elevation drawing with U-space measurements, equipment mounting, and collision detection.
 
@@ -336,26 +438,26 @@ async function loadEquipmentLibrary(projectId: string) {
 **Tasks**:
 
 1. **Create symbol library utility** (TDD for data fetching)
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/utils/symbolLibrary.ts`
+   - `apps/desktop/src/renderer/src/components/blueprint/utils/symbolLibrary.ts`
    - Functions: `loadEquipmentFromInfrastructure()`, `categorizeEquipment()`, `generateSymbolFromEquipment()`
    - Test infrastructure integration
 
 2. **Implement SymbolLibrary component**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/SymbolLibrary.tsx`
+   - `apps/desktop/src/renderer/src/components/blueprint/SymbolLibrary.tsx`
    - Categories: Network, Lighting, Audio, Power, Video, Custom
    - Search and filter functionality
    - Drag-to-canvas functionality
    - Show equipment from infrastructure table
 
 3. **Implement EquipmentSymbol element**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/elements/EquipmentSymbol.tsx`
+   - `apps/desktop/src/renderer/src/components/blueprint/elements/EquipmentSymbol.tsx`
    - SVG-based symbols (vector, scalable)
    - Port representations
    - Equipment labels
    - Custom symbol upload support
 
 4. **Implement EquipmentInspector**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/inspectors/EquipmentInspector.tsx`
+   - `apps/desktop/src/renderer/src/components/blueprint/inspectors/EquipmentInspector.tsx`
    - Equipment selection from library
    - Port configuration
    - Dimensions (width, height)
@@ -363,7 +465,7 @@ async function loadEquipmentLibrary(projectId: string) {
 
 5. **Create pre-built symbol library**
    - Design 20+ SVG symbols for common equipment
-   - Store in `/Users/joshkarp/showstack/src/renderer/src/assets/symbols/`
+   - Store in `apps/desktop/src/renderer/src/assets/symbols/`
    - Network switches (8/16/24/48 port)
    - Lighting consoles, processors
    - Audio equipment
@@ -380,13 +482,13 @@ async function loadEquipmentLibrary(projectId: string) {
 **Tasks**:
 
 1. **Implement port mapping utilities** (TDD)
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/utils/portMapping.ts`
+   - `apps/desktop/src/renderer/src/components/blueprint/utils/portMapping.ts`
    - Functions: `findPort()`, `calculatePortPosition()`, `validateConnection()`, `getCompatiblePorts()`
    - Test port type compatibility (Ethernet-to-Ethernet, DMX-to-DMX)
    - **Target**: 80%+ coverage
 
 2. **Implement cable routing algorithms** (TDD)
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/utils/cableRouting.ts`
+   - `apps/desktop/src/renderer/src/components/blueprint/utils/cableRouting.ts`
    - Functions: `orthogonalRoute()`, `bezierRoute()`, `avoidObstacles()`, `optimizeWaypoints()`
    - Orthogonal routing (elbow connections)
    - Bezier curve routing (smooth)
@@ -395,7 +497,7 @@ async function loadEquipmentLibrary(projectId: string) {
    - **Target**: 80%+ coverage
 
 3. **Implement Cable element**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/elements/Cable.tsx`
+   - `apps/desktop/src/renderer/src/components/blueprint/elements/Cable.tsx`
    - SVG path rendering
    - Cable type styling (Ethernet=blue, DMX=purple, Power=red, Audio=green)
    - Waypoint handles for manual adjustment
@@ -403,20 +505,20 @@ async function loadEquipmentLibrary(projectId: string) {
    - Write component tests
 
 4. **Implement Connector element**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/elements/Connector.tsx`
+   - `apps/desktop/src/renderer/src/components/blueprint/elements/Connector.tsx`
    - Port visualization on equipment
    - Hover highlighting
    - Connection indicators
 
 5. **Implement CableRoutingTool**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/tools/CableRoutingTool.tsx`
+   - `apps/desktop/src/renderer/src/components/blueprint/tools/CableRoutingTool.tsx`
    - Click port to start connection
    - Click second port to complete
    - Show valid connection targets
    - Real-time routing preview
 
 6. **Implement CableInspector**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/inspectors/CableInspector.tsx`
+   - `apps/desktop/src/renderer/src/components/blueprint/inspectors/CableInspector.tsx`
    - Cable type selection
    - Routing style (orthogonal/Bezier/manual)
    - Stroke width and style
@@ -439,11 +541,11 @@ async function loadEquipmentLibrary(projectId: string) {
    - Default layers: Background, Equipment, Cables, Annotations, Measurements
 
 2. **Implement layer management utilities**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/utils/layerManagement.ts`
+   - `apps/desktop/src/renderer/src/components/blueprint/utils/layerManagement.ts`
    - Functions: `createLayer()`, `deleteLayer()`, `reorderLayers()`, `toggleLayerVisibility()`, `toggleLayerLock()`
 
 3. **Implement BlueprintLayerPanel component**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/BlueprintLayerPanel.tsx`
+   - `apps/desktop/src/renderer/src/components/blueprint/BlueprintLayerPanel.tsx`
    - Layer list with drag-to-reorder
    - Visibility toggle (eye icon)
    - Lock toggle (lock icon)
@@ -457,7 +559,7 @@ async function loadEquipmentLibrary(projectId: string) {
    - Apply layer opacity to elements
 
 5. **Implement LayerInspector**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/inspectors/LayerInspector.tsx`
+   - `apps/desktop/src/renderer/src/components/blueprint/inspectors/LayerInspector.tsx`
    - Layer name input
    - Color coding
    - Visibility, lock, opacity controls
@@ -481,21 +583,21 @@ async function loadEquipmentLibrary(projectId: string) {
 **Tasks**:
 
 1. **Implement MeasurementLine element**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/elements/MeasurementLine.tsx`
+   - `apps/desktop/src/renderer/src/components/blueprint/elements/MeasurementLine.tsx`
    - Dimension line rendering (extension lines, arrows, label)
    - Auto-calculation of distance
    - Unit conversion (px, in, cm, U)
    - Engineering-style formatting
 
 2. **Implement Callout element**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/elements/Callout.tsx`
+   - `apps/desktop/src/renderer/src/components/blueprint/elements/Callout.tsx`
    - Text annotation with leader line
    - Leader styles: straight, elbow, curved
    - Arrow/dot/none termination
    - Auto-positioning to avoid overlaps
 
 3. **Implement MeasurementTool**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/tools/MeasurementTool.tsx`
+   - `apps/desktop/src/renderer/src/components/blueprint/tools/MeasurementTool.tsx`
    - Click-drag to create measurement
    - Snap to element edges
    - Show real-time distance preview
@@ -523,7 +625,7 @@ async function loadEquipmentLibrary(projectId: string) {
 **Tasks**:
 
 1. **Implement export format utilities**
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/utils/exportFormats.ts`
+   - `apps/desktop/src/renderer/src/components/blueprint/utils/exportFormats.ts`
    - `exportToPDF()` - Leverage existing Puppeteer pipeline
    - `exportToSVG()` - Native SVG generation
    - `exportToPNG()` - Canvas rendering at high resolution
@@ -581,7 +683,7 @@ async function loadEquipmentLibrary(projectId: string) {
 **Testing Structure**:
 
 ```
-src/renderer/src/components/production/blueprint/
+apps/desktop/src/renderer/src/components/blueprint/
 ├── utils/__tests__/
 │   ├── rackCalculations.test.ts      (80%+ coverage)
 │   ├── cableRouting.test.ts          (80%+ coverage)
@@ -595,7 +697,7 @@ src/renderer/src/components/production/blueprint/
     ├── BlueprintDesigner.test.tsx    (50-60% coverage)
     └── BlueprintCanvas.test.tsx      (50-60% coverage)
 
-src/main/ipc/__tests__/
+apps/desktop/src/main/ipc/__tests__/
 └── blueprints.test.ts                (70%+ coverage)
     └── blueprints.security.test.ts   (Security tests)
 ```
@@ -626,26 +728,27 @@ src/main/ipc/__tests__/
    - **Target**: 50-60% coverage
 
 4. **Integration Tests - IPC Handlers**
-   - Create `/Users/joshkarp/showstack/src/main/ipc/blueprints.ts` IPC handler
-   - Test file: `/Users/joshkarp/showstack/src/main/ipc/__tests__/blueprints.test.ts`
+   - Create `apps/desktop/src/main/ipc/blueprints.ts` IPC handler
+   - Test file: `apps/desktop/src/main/ipc/__tests__/blueprints.test.ts`
    - Tests:
-     - `blueprint:save` - Save blueprint to database
-     - `blueprint:load` - Load blueprint from database
+     - `blueprint:getAll` / `blueprint:getById` — fetch drawings
+     - `blueprint:create` / `blueprint:update` / `blueprint:delete`
      - `blueprint:exportPDF` - Generate PDF
      - `blueprint:exportSVG` - Generate SVG
      - `blueprint:exportPNG` - Generate PNG
+     - `blueprint:importDxfSymbol` — parse DXF, return block SVGs
    - Mock Node.js modules (fs, path, puppeteer)
    - **Target**: 70%+ coverage
 
 5. **Security Tests**
-   - Test file: `/Users/joshkarp/showstack/src/main/ipc/__tests__/blueprints.security.test.ts`
+   - Test file: `apps/desktop/src/main/ipc/__tests__/blueprints.security.test.ts`
    - Tests:
      - Path traversal prevention (reject `../../../etc/passwd`)
      - Input sanitization (XSS in text content)
      - SVG upload validation (reject `<script>` tags)
      - File size limits
      - Export path validation
-   - Follow patterns from `/Users/joshkarp/showstack/src/main/utils/__tests__/errorSanitizer.test.ts`
+   - Follow patterns from `apps/desktop/src/main/utils/__tests__/errorSanitizer.test.ts`
 
 6. **Performance Tests**
    - Test with 100+ elements on canvas
@@ -669,16 +772,16 @@ src/main/ipc/__tests__/
 
 ```bash
 # Run all tests
-npm test
+npm run test:run
 
 # Run with coverage
 npm run test:coverage
 
 # Run specific test suite
-npm test -- rackCalculations
+npm run test:run -- rackCalculations
 
 # Run in watch mode (development)
-npm test -- --watch
+npm run test:run -- --watch
 
 # Run UI mode (visual)
 npm run test:ui
@@ -727,7 +830,7 @@ describe('uSpaceToPixels', () => {
 });
 
 // Step 2: Run test (fails - function doesn't exist)
-// npm test -- rackCalculations
+// npm run test:run -- rackCalculations
 
 // Step 3: Implement function
 // utils/rackCalculations.ts
@@ -813,58 +916,65 @@ describe('RackElevation', () => {
 ### Must Create (New Files)
 
 1. **Type Definitions**:
-   - `/Users/joshkarp/showstack/src/renderer/src/types/blueprint.ts` (NEW)
+   - `apps/desktop/src/renderer/src/types/blueprint.ts` (NEW)
    - Purpose: All blueprint-specific types (RackElevationConfig, EquipmentSymbolConfig, CableConfig, etc.)
 
 2. **Main Components**:
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/BlueprintDesigner.tsx` (NEW)
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/BlueprintCanvas.tsx` (NEW)
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/BlueprintLayerPanel.tsx` (NEW)
+   - `apps/desktop/src/renderer/src/components/blueprint/BlueprintDesigner.tsx` (NEW)
+   - `apps/desktop/src/renderer/src/components/blueprint/BlueprintCanvas.tsx` (NEW — SVG-based, not extending LayoutCanvas)
+   - `apps/desktop/src/renderer/src/components/blueprint/BlueprintLayerPanel.tsx` (NEW)
+   - `apps/desktop/src/renderer/src/pages/modules/BlueprintsPage.tsx` (NEW — thin page wrapper)
 
 3. **Core Utilities** (TDD - Critical for accuracy):
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/utils/rackCalculations.ts` (NEW)
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/utils/cableRouting.ts` (NEW)
-   - `/Users/joshkarp/showstack/src/renderer/src/components/production/blueprint/utils/portMapping.ts` (NEW)
+   - `apps/desktop/src/renderer/src/components/blueprint/utils/rackCalculations.ts` (NEW)
+   - `apps/desktop/src/renderer/src/components/blueprint/utils/cableRouting.ts` (NEW)
+   - `apps/desktop/src/renderer/src/components/blueprint/utils/portMapping.ts` (NEW)
 
 4. **IPC Handler**:
-   - `/Users/joshkarp/showstack/src/main/ipc/blueprints.ts` (NEW)
-   - Purpose: Save/load blueprints, export PDF/SVG/PNG
+   - `apps/desktop/src/main/ipc/blueprints.ts` (NEW)
+   - Channels: blueprint:getAll, blueprint:getById, blueprint:create, blueprint:update,
+     blueprint:delete, blueprint:exportPDF, blueprint:exportSVG, blueprint:exportPNG,
+     blueprint:importDxfSymbol (parse DXF → extract BLOCK definitions → return SVG strings),
+     blueprint:saveSymbol, blueprint:getSymbols
+   - Follow `apps/desktop/src/main/ipc/infrastructure.ts` pattern:
+     Zod validation at IPC boundary, structured logger calls, DatabaseError handling
+   - DXF parsing uses `dxf` npm package in main process (install: `npm install dxf`)
 
 ### Must Modify (Existing Files)
 
-1. **Type Extensions**:
-   - `/Users/joshkarp/showstack/src/renderer/src/types/prep.ts` (MODIFY)
-   - Add blueprint element types to `LayoutElementType` union
-   - Line ~607: Extend element type definitions
+1. **Database Schema — Project DB**:
+   - `apps/desktop/src/main/database/projectSchema.ts` (ADD tables)
+   - Add `blueprint_drawings` + `blueprint_elements` tables (see Architecture section)
+   - Use CREATE TABLE IF NOT EXISTS via MigrationRunner.ts
 
-2. **Database Schema**:
-   - `/Users/joshkarp/showstack/src/main/database/appSchema.ts` (MODIFY)
-   - Line ~72: Update `element_type` CHECK constraint to include blueprint types
-   - Add: `'rack_elevation', 'equipment_symbol', 'cable', 'connector', 'measurement_line', 'callout', 'equipment_group'`
+2. **Database Schema — App DB**:
+   - `apps/desktop/src/main/database/appSchema.ts` (ADD table)
+   - Add `blueprint_symbols` table: id, name, source ('builtin'|'dxf_import'|'svg_upload'),
+     svg_content (TEXT), category, created_at
+   - App-level (reusable across projects), stored in app DB alongside page_layout_templates
 
-3. **Module Landing**:
-   - `/Users/joshkarp/showstack/src/renderer/src/pages/ModuleLanding.tsx` (MODIFY)
-   - Line 32: Change `isLocked: true` to `isLocked: false` for Blueprint tool
-   - Enable routing to `/module/production/blueprint`
+3. **Routing**:
+   - `apps/desktop/src/renderer/src/App.tsx` (ADD route inside ProjectWorkspace block)
+   - `apps/desktop/src/renderer/src/components/ProjectSidebar.tsx` (ADD sidebar entry)
 
 ### Patterns to Follow
 
-1. **LayoutCanvas Pattern**:
-   - Source: `/Users/joshkarp/showstack/src/renderer/src/components/prep/layout/LayoutCanvas.tsx`
-   - Reuse: Grid system, drag-and-drop, zoom, snap guides, element rendering
+1. **BlueprintDesigner Orchestrator Pattern**:
+   - Reference: `apps/desktop/src/renderer/src/components/shop-order/layout/LayoutDesigner.tsx`
+   - Reuse: tool state management, keyboard shortcuts, zoom slider, undo/redo, command palette
 
 2. **Element Inspector Pattern**:
-   - Source: `/Users/joshkarp/showstack/src/renderer/src/components/prep/layout/ElementInspector.tsx`
-   - Pattern: Property panel with type-specific controls
+   - Reference: `apps/desktop/src/renderer/src/components/shop-order/layout/ElementInspector.tsx`
+   - Pattern: Tabbed property panel (Config / Style / Position)
 
 3. **Export Pattern**:
-   - Source: `/Users/joshkarp/showstack/src/main/ipc/paperwork.ts` (Puppeteer PDF export)
+   - Reference: `apps/desktop/src/main/ipc/paperwork.ts` (Puppeteer PDF export)
    - Pattern: HTML → Puppeteer → PDF with page settings
 
 4. **Testing Patterns**:
-   - Utility tests: `/Users/joshkarp/showstack/src/renderer/src/utils/__tests__/powerCalculations.test.ts`
-   - Component tests: `/Users/joshkarp/showstack/src/renderer/src/components/prep/layout/__tests__/ElementInspector.test.tsx`
-   - Security tests: `/Users/joshkarp/showstack/src/main/utils/__tests__/errorSanitizer.test.ts`
+   - Utility tests: `apps/desktop/src/renderer/src/utils/__tests__/powerCalculations.test.ts`
+   - Component tests: `apps/desktop/src/renderer/src/components/shop-order/layout/__tests__/ElementInspector.test.tsx`
+   - Security tests: `apps/desktop/src/main/utils/__tests__/errorSanitizer.test.ts`
 
 ---
 
@@ -884,6 +994,7 @@ describe('RackElevation', () => {
 - ✅ Keyboard shortcuts and tool efficiency
 - ✅ Save/load blueprints from database
 - ✅ Responsive performance (<100ms interaction latency with 100+ elements)
+- ✅ Network topology visualization (Issue #19 — via system_diagram drawing type)
 
 ### Best-in-Class Features:
 
@@ -977,4 +1088,4 @@ describe('RackElevation', () => {
 
 **END OF IMPLEMENTATION PLAN**
 
-This comprehensive plan delivers a best-in-class Blueprint tool that exceeds OmniGraffle capabilities while leveraging 80% of ShowStack's existing infrastructure. The TDD approach for critical utilities ensures accuracy, and the phased implementation allows for incremental delivery of value.
+This comprehensive plan delivers a best-in-class Blueprint tool that exceeds OmniGraffle capabilities while leveraging ~60% of ShowStack's existing Label Designer infrastructure. BlueprintCanvas is a new SVG-based implementation supporting freeform pixel positioning and rotation. The TDD approach for critical utilities ensures accuracy, and the phased implementation allows for incremental delivery of value.
